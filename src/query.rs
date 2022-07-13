@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
-use trustfall_core::ir::{TransparentValue};
+use trustfall_core::ir::TransparentValue;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub(crate) enum RequiredSemverUpdate {
@@ -41,9 +41,7 @@ impl SemverQuery {
     pub(crate) fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
 
-        let query_text_contents = [
-            include_str!("./queries/struct_missing.ron"),
-        ];
+        let query_text_contents = [include_str!("./queries/struct_missing.ron")];
         for query_text in query_text_contents {
             let query: SemverQuery = ron::from_str(query_text).expect("query failed to parse");
             let id_conflict = queries.insert(query.id.clone(), query);
@@ -56,10 +54,17 @@ impl SemverQuery {
 
 #[cfg(test)]
 mod tests {
+    use trustfall_core::frontend::parse;
+
+    use crate::adapter::RustdocAdapter;
+
     use super::SemverQuery;
 
     #[test]
     fn all_queries_parse_correctly() {
-        SemverQuery::all_queries();
+        let schema = RustdocAdapter::schema();
+        for semver_query in SemverQuery::all_queries().into_values() {
+            let _ = parse(&schema, &semver_query.query).expect("not a valid query");
+        }
     }
 }

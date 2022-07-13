@@ -6,8 +6,8 @@ use anyhow::Context;
 use clap::{crate_version, AppSettings, Arg, Command};
 use query::SemverQuery;
 use rustdoc_types::Crate;
+use std::{cell::RefCell, collections::BTreeMap, env, fs::File, io::Read, rc::Rc, sync::Arc};
 use trustfall_core::{frontend::parse, interpreter::execution::interpret_ir, ir::TransparentValue};
-use std::{env, fs::File, io::Read, cell::RefCell, rc::Rc, sync::Arc, collections::BTreeMap};
 
 use crate::query::RequiredSemverUpdate;
 
@@ -70,11 +70,21 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
     let queries = SemverQuery::all_queries();
 
     let schema = RustdocAdapter::schema();
-    let adapter = Rc::new(RefCell::new(RustdocAdapter::new(&current_crate, Some(&baseline_crate))));
+    let adapter = Rc::new(RefCell::new(RustdocAdapter::new(
+        &current_crate,
+        Some(&baseline_crate),
+    )));
 
     for (query_id, semver_query) in &queries {
-        let parsed_query = parse(&schema, &semver_query.query).expect("not a valid query, should have been caught in tests");
-        let args = Arc::new(semver_query.arguments.iter().map(|(k, v)| (Arc::from(k.clone()), v.clone().into())).collect());
+        let parsed_query = parse(&schema, &semver_query.query)
+            .expect("not a valid query, should have been caught in tests");
+        let args = Arc::new(
+            semver_query
+                .arguments
+                .iter()
+                .map(|(k, v)| (Arc::from(k.clone()), v.clone().into()))
+                .collect(),
+        );
         let mut results_iter = interpret_ir(adapter.clone(), parsed_query, args)
             .with_context(|| "Query execution error.")?
             .peekable();
@@ -91,8 +101,10 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
             };
             println!("NOT OK: needs new {} version\n", version_bump_needed);
             for semver_violation_result in results_iter.take(5) {
-                let pretty_result: BTreeMap<Arc<str>, TransparentValue> =
-                    semver_violation_result.into_iter().map(|(k, v)| (k, v.into())).collect();
+                let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
+                    .into_iter()
+                    .map(|(k, v)| (k, v.into()))
+                    .collect();
                 println!("{}", serde_json::to_string_pretty(&pretty_result)?);
             }
         }
