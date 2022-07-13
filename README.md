@@ -1,4 +1,4 @@
-# cargo-semver-check
+# cargo_semver_check
 Scan your Rust crate for semver violations.
 
 Queries `rustdoc`-generated crate documentation using the `trustfall`
@@ -14,7 +14,7 @@ Its queries and adapter implementation have not been optimized for runtime,
 and will currently exhibit `O(n^2)` runtime growth on large codebases.
 See the notes in the section below for details.
 
-## Using `cargo-semver-check` to check your crate
+## Using `cargo_semver_check` to check your crate
 
 Steps:
 - Choose a crate you'd like to scan for semver violations, and `cd` into its source directory
@@ -29,8 +29,8 @@ Steps:
 - Perform a `git checkout` of the crate source code you'd like to check for semver violations.
 - Repeat the `cargo rustdoc` command above, and note
   the newly-generated `doc/<your-crate-name>.json` file.
-- `cd` back to the `cargo-semver-check` directory (temporary, should be removed shortly).
-- From the `cargo-semver-check` directory,
+- `cd` back to the `cargo_semver_check` directory (temporary, should be removed shortly).
+- From the `cargo_semver_check` directory,
   run `cargo run diff <path-to-new-rustdoc-json> <path-to-baseline-rustdoc-json>`.
   This step will run multiple queries that look for particular kinds of semver violations,
   and report violations they find.
