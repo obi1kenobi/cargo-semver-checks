@@ -134,7 +134,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "ron 0.7.1",
  "rustdoc-types",
+ "serde",
  "serde_json",
  "trustfall_core",
 ]
@@ -478,6 +480,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ron"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88073939a61e5b7680558e6be56b419e208420c2adb92be54921fa6b72283f1a"
+dependencies = [
+ "base64",
+ "bitflags",
+ "serde",
+]
+
+[[package]]
 name = "rustdoc-types"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -630,7 +643,7 @@ dependencies = [
  "lazy_static",
  "maplit",
  "regex",
- "ron",
+ "ron 0.6.6",
  "serde",
  "serde_json",
  "smallvec",

@@ -15,7 +15,7 @@ type RootSchemaQuery {
 
 type CrateDiff {
     current: Crate!
-    previous: Crate
+    baseline: Crate
 }
 
 """

@@ -402,7 +402,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
 
                     (ctx, neighbors)
                 })),
-                "previous" => Box::new(data_contexts.map(move |ctx| {
+                "baseline" => Box::new(data_contexts.map(move |ctx| {
                     let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
                         .current_token
                     {

@@ -1,0 +1,39 @@
+SemverQuery(
+    id: "struct_missing",
+    human_readable_name: "pub struct was removed or renamed",
+    description: "A publicly-visible struct is no longer available under its prior name, which is a major breaking change for code that depends on it.",
+    required_update: Major,
+    query: r#"
+    {
+        CrateDiff {
+            previous {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+                        struct_type @output @tag
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+                        struct_type @filter(op: "=", value: ["%struct_type"])
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A publicly-visible struct is no longer available under its prior name, and may have been renamed or removed entirely. This change requires a new major version.",
+)
