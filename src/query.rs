@@ -40,6 +40,9 @@ pub(crate) struct SemverQuery {
 
     pub(crate) required_update: RequiredSemverUpdate,
 
+    #[serde(default)]
+    pub(crate) reference_link: Option<String>,
+
     pub(crate) query: String,
 
     #[serde(default)]

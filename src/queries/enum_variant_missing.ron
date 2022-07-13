@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub enum variant removed or renamed",
     description: "A publicly-visible enum has at least one variant that is no longer available under its prior name, which is a major breaking change for code that depends on it.",
     required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
     {
         CrateDiff {
