@@ -42,10 +42,10 @@ fn main() -> anyhow::Result<()> {
                 )
         ).get_matches();
 
-    // Descend one level: from `cargo semver-check` to just `semver-check`.
+    // Descend one level: from `cargo semver-checks` to just `semver-checks`.
     let semver_check = matches
-        .subcommand_matches("semver-check")
-        .expect("semver-check is missing");
+        .subcommand_matches("semver-checks")
+        .expect("semver-checks is missing");
 
     if let Some(diff_files) = semver_check.subcommand_matches("diff-files") {
         let current_rustdoc_path: &str = diff_files
