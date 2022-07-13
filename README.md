@@ -1,4 +1,4 @@
-# cargo_semver_check
+# cargo-semver-checks
 Scan your Rust crate for semver violations.
 
 Queries `rustdoc`-generated crate documentation using the `trustfall`
@@ -9,29 +9,34 @@ Each query looks for a particular kind of semver violation, such as:
 - public enum was removed
 - public enum's variant was removed
 
+```
+cargo install cargo-semver-checks
+
+cargo semver-checks diff-files --current <new-rustdoc-json> --baseline <previous-rustdoc-json>
+
+# To have rustdoc generate JSON output, use:
+cargo +nightly rustdoc -- -Zunstable-options --output-format json
+```
+
 This crate is a work-in-progress. It can catch some semver violations, and will miss many more.
 Its queries and adapter implementation have not been optimized for runtime,
 and will currently exhibit `O(n^2)` runtime growth on large codebases.
 See the notes in the section below for details.
 
-## Using `cargo_semver_check` to check your crate
+## Using `cargo-semver-checks` to check your crate
 
 Steps:
-- Choose a crate you'd like to scan for semver violations, and `cd` into its source directory
-  in preparation for some `cargo rustdoc` commands.
 - Perform a `git checkout` of your crate's last published version,
   which will represent your semver baseline.
 - Generate `rustdoc` documentation in JSON format for the crate's last published version
   by running `cargo +nightly rustdoc -- -Zunstable-options --output-format json`.
 - The above command will generate a file named `doc/<your-crate-name>.json` in your crate's
   build target directory. Copy this file somewhere else -- otherwise it will be overwritten
-  by the next step.
-- Perform a `git checkout` of the crate source code you'd like to check for semver violations.
+  by the next steps.
+- Switch to the version of your crate that you'd like to check.
 - Repeat the `cargo rustdoc` command above, and note
-  the newly-generated `doc/<your-crate-name>.json` file.
-- `cd` back to the `cargo_semver_check` directory (temporary, should be removed shortly).
-- From the `cargo_semver_check` directory,
-  run `cargo run diff <path-to-new-rustdoc-json> <path-to-baseline-rustdoc-json>`.
+  the newly-generated `doc/<your-crate-name>.json` file in your build target directory.
+- Run `cargo semver-checks diff-files --current <new-rustdoc> --baseline <previous-rustdoc>`.
   This step will run multiple queries that look for particular kinds of semver violations,
   and report violations they find.
 
@@ -47,3 +52,10 @@ Notes:
 - **There are false negatives**: This tool is a work-in-progress, and cannot check all kinds of
   semver violations yet. Just because it doesn't find any semver issues doesn't mean
   they don't exist.
+
+## Naming note
+
+This crate was intended to be published under the name `cargo-semver-check`, and may indeed one
+day be published under that name. Due to
+[an unfortunate mishap](https://github.com/rust-lang/crates.io/issues/728#issuecomment-118276095),
+it remains `cargo-semver-checks` for the time being.

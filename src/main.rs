@@ -12,11 +12,11 @@ use trustfall_core::{frontend::parse, interpreter::execution::interpret_ir, ir::
 use crate::query::RequiredSemverUpdate;
 
 fn main() -> anyhow::Result<()> {
-    let matches = Command::new("cargo_semver_check")
+    let matches = Command::new("cargo-semver-checks")
         .bin_name("cargo")
         .version(crate_version!())
         .subcommand(
-            Command::new("semver-check")
+            Command::new("semver-checks")
                 .version(crate_version!())
                 .about("Check your crate for semver violations.")
                 .subcommand(
