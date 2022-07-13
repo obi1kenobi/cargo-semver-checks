@@ -6,7 +6,7 @@ SemverQuery(
     query: r#"
     {
         CrateDiff {
-            previous {
+            baseline {
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
