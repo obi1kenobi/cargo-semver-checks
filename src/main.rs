@@ -4,7 +4,7 @@ mod query;
 use adapter::RustdocAdapter;
 use anyhow::Context;
 use clap::{crate_version, AppSettings, Arg, Command};
-use query::SemverQuery;
+use query::{SemverQuery, ActualSemverUpdate};
 use rustdoc_types::Crate;
 use std::{cell::RefCell, collections::BTreeMap, env, fs::File, io::Read, rc::Rc, sync::Arc};
 use trustfall_core::{frontend::parse, interpreter::execution::interpret_ir, ir::TransparentValue};
@@ -66,7 +66,62 @@ fn main() -> anyhow::Result<()> {
     unreachable!("no commands matched")
 }
 
+fn get_semver_version_change(current_version: Option<&str>, baseline_version: Option<&str>) -> Option<ActualSemverUpdate> {
+    if let (Some(baseline), Some(current)) = (baseline_version, current_version) {
+        let baseline_version = semver::Version::parse(baseline).expect("baseline not a valid version");
+        let current_version = semver::Version::parse(current).expect("current not a valid version");
+
+        // From the cargo reference:
+        // > Initial development releases starting with "0.y.z" can treat changes
+        // > in "y" as a major release, and "z" as a minor release.
+        // > "0.0.z" releases are always major changes. This is because Cargo uses
+        // > the convention that only changes in the left-most non-zero component
+        // > are considered incompatible.
+        // https://doc.rust-lang.org/cargo/reference/semver.html
+        let update_kind = if baseline_version.major != current_version.major {
+            ActualSemverUpdate::Major
+        } else if baseline_version.minor != current_version.minor {
+            if current_version.major == 0 {
+                ActualSemverUpdate::Major
+            } else {
+                ActualSemverUpdate::Minor
+            }
+        } else if baseline_version.patch != current_version.patch {
+            if current_version.major == 0 {
+                if current_version.minor == 0 {
+                    ActualSemverUpdate::Major
+                } else {
+                    ActualSemverUpdate::Minor
+                }
+            } else {
+                ActualSemverUpdate::Patch
+            }
+        } else {
+            ActualSemverUpdate::NotChanged
+        };
+
+        Some(update_kind)
+    } else {
+        None
+    }
+}
+
 fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Result<()> {
+    let current_version = current_crate.crate_version.as_deref();
+    let baseline_version = baseline_crate.crate_version.as_deref();
+
+    let version_change = get_semver_version_change(current_version, baseline_version).unwrap_or_else(|| {
+        println!("> Could not determine whether crate version changed. Assuming no change.");
+        ActualSemverUpdate::NotChanged
+    });
+    let change = match version_change {
+        ActualSemverUpdate::Major => "major",
+        ActualSemverUpdate::Minor => "minor",
+        ActualSemverUpdate::Patch => "patch",
+        ActualSemverUpdate::NotChanged => "no",
+    };
+    println!("> Crate version {} -> {} ({} change)", baseline_version.unwrap_or("unknown"), current_version.unwrap_or("unknown"), change);
+
     let queries = SemverQuery::all_queries();
 
     let schema = RustdocAdapter::schema();
@@ -77,6 +132,11 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
     let mut found_errors = false;
 
     for semver_query in queries.values() {
+        if version_change.supports_requirement(semver_query.required_update) {
+            println!("> Skipping allowed change: {}", &semver_query.human_readable_name);
+            continue;
+        }
+
         let parsed_query = parse(&schema, &semver_query.query)
             .expect("not a valid query, should have been caught in tests");
         let args = Arc::new(
@@ -113,9 +173,11 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
     }
 
     if found_errors {
+        println!("> Done, found errors.");
         std::process::exit(1);
     }
 
+    println!("> Done, no errors.");
     Ok(())
 }
 

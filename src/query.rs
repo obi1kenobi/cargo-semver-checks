@@ -9,6 +9,25 @@ pub(crate) enum RequiredSemverUpdate {
     Minor,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum ActualSemverUpdate {
+    Major,
+    Minor,
+    Patch,
+    NotChanged,
+}
+
+impl ActualSemverUpdate {
+    pub(crate) fn supports_requirement(&self, required: RequiredSemverUpdate) -> bool {
+        match (*self, required) {
+            (ActualSemverUpdate::Major, _) => true,
+            (ActualSemverUpdate::Minor, RequiredSemverUpdate::Major) => false,
+            (ActualSemverUpdate::Minor, _) => true,
+            (_, _) => false,
+        }
+    }
+}
+
 /// A query that can be executed on a pair of rustdoc output files,
 /// returning instances of a particular kind of semver violation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
