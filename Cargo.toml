@@ -1,5 +1,5 @@
 [package]
-name = "cargo-semver-check"
+name = "cargo-semver-checks"
 version = "0.2.1"
 edition = "2021"
 authors = ["Predrag Gruevski <obi1kenobi82@gmail.com>"]
