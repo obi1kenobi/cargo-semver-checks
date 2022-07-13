@@ -43,6 +43,7 @@ impl SemverQuery {
 
         let query_text_contents = [
             include_str!("./queries/struct_missing.ron"),
+            include_str!("./queries/struct_kind_changed.ron"),
             include_str!("./queries/struct_pub_field_missing.ron"),
             include_str!("./queries/enum_missing.ron"),
             include_str!("./queries/enum_variant_missing.ron"),
