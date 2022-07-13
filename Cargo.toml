@@ -1,7 +1,12 @@
 [package]
 name = "cargo_semver_check"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
+authors = ["Predrag Gruevski <obi1kenobi82@gmail.com>"]
+license = "Apache-2.0"
+description = "Scan your Rust crate for semver violations."
+repository = "https://github.com/obi1kenobi/cargo-semver-check"
+readme = "./README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
