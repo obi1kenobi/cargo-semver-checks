@@ -20,14 +20,14 @@ SemverQuery(
                     }
                 }
             }
-            current @fold @transform(op: "count") @filter(op: "!=", value: ["$zero"]) {
+            current {
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%struct_name"])
-                        found_kinds: struct_type @filter(op: "!=", value: ["%prior_kind"]) @output
+                        found_kind: struct_type @filter(op: "!=", value: ["%prior_kind"]) @output
 
-                        found_spans_: span @optional {
+                        found_span_: span @optional {
                             filename @output
                             begin_line @output
                         }
@@ -38,7 +38,6 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
-        "zero": 0,
     },
     error_message: "A publicly-visible struct has changed from one kind (plain / tuple / unit) to another.",
 )
