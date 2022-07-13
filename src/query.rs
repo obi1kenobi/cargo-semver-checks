@@ -41,7 +41,12 @@ impl SemverQuery {
     pub(crate) fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
 
-        let query_text_contents = [include_str!("./queries/struct_missing.ron")];
+        let query_text_contents = [
+            include_str!("./queries/struct_missing.ron"),
+            include_str!("./queries/struct_pub_field_missing.ron"),
+            include_str!("./queries/enum_missing.ron"),
+            include_str!("./queries/enum_variant_missing.ron"),
+        ];
         for query_text in query_text_contents {
             let query: SemverQuery = ron::from_str(query_text).expect("query failed to parse");
             let id_conflict = queries.insert(query.id.clone(), query);

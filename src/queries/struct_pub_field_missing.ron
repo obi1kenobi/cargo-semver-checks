@@ -1,0 +1,49 @@
+SemverQuery(
+    id: "struct_pub_field_missing",
+    human_readable_name: "pub struct's pub field removed or renamed",
+    description: "A publicly-visible struct has at least one public field that is no longer available under its prior name, which is a major breaking change for code that depends on it.",
+    required_update: Major,
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        struct_name: name @output @tag
+                        struct_type @output @tag
+
+                        field {
+                            field_name: name @output @tag
+                            visibility_limit @filter(op: "=", value: ["$public"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%struct_name"])
+                        struct_type @filter(op: "=", value: ["%struct_type"])
+
+                        field {
+                            name @filter(op: "=", value: ["%field_name"])
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A publicly-visible struct has at least one public field that is no longer available under its prior name. It may have been renamed or removed entirely.",
+)

@@ -74,8 +74,9 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
         &current_crate,
         Some(&baseline_crate),
     )));
+    let mut found_errors = false;
 
-    for (query_id, semver_query) in &queries {
+    for semver_query in queries.values() {
         let parsed_query = parse(&schema, &semver_query.query)
             .expect("not a valid query, should have been caught in tests");
         let args = Arc::new(
@@ -90,24 +91,29 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
             .peekable();
 
         let start_instant = std::time::Instant::now();
-        print!("> Running semver check: {} ... ", query_id);
+        print!("> Checking: {} ... ", &semver_query.human_readable_name);
         if results_iter.peek().is_none() {
             let end_instant = std::time::Instant::now();
             println!("OK ({:.3}s)", (end_instant - start_instant).as_secs_f32());
         } else {
+            found_errors = true;
             let version_bump_needed = match semver_query.required_update {
                 RequiredSemverUpdate::Major => "major",
                 RequiredSemverUpdate::Minor => "minor",
             };
-            println!("NOT OK: needs new {} version\n", version_bump_needed);
+            println!("NOT OK: needs {} version\n", version_bump_needed);
             for semver_violation_result in results_iter.take(5) {
                 let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
                     .into_iter()
                     .map(|(k, v)| (k, v.into()))
                     .collect();
-                println!("{}", serde_json::to_string_pretty(&pretty_result)?);
+                println!("{}\n", serde_json::to_string_pretty(&pretty_result)?);
             }
         }
+    }
+
+    if found_errors {
+        std::process::exit(1);
     }
 
     Ok(())

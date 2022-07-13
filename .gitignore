@@ -7,3 +7,6 @@
 
 # Cargo-specific configuration
 .cargo/
+
+# local-only data
+localdata/

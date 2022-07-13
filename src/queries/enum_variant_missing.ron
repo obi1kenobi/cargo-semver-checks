@@ -1,0 +1,45 @@
+SemverQuery(
+    id: "enum_variant_missing",
+    human_readable_name: "pub enum variant removed or renamed",
+    description: "A publicly-visible enum has at least one variant that is no longer available under its prior name, which is a major breaking change for code that depends on it.",
+    required_update: Major,
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        enum_name: name @output @tag
+
+                        variant {
+                            variant_name: name @output @tag
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%enum_name"])
+
+                        variant {
+                            name @filter(op: "=", value: ["%variant_name"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A publicly-visible enum has at least one variant that is no longer available under its prior name. It may have been renamed or removed entirely.",
+)
