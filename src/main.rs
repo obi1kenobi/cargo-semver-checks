@@ -277,6 +277,37 @@ fn handle_diff_files(
             })
             .expect("print failed");
 
+            if let Some(ref_link) = semver_query.reference_link.as_deref() {
+                colored_ln(&mut config.output_writer, |w| {
+                    colored!(
+                        w,
+                        "{}{}{:>12}{} {}",
+                        fg!(Some(Color::Cyan)),
+                        bold!(true),
+                        "Reference",
+                        reset!(),
+                        ref_link,
+                    )
+                })
+                .expect("print failed");
+            }
+            colored_ln(&mut config.output_writer, |w| {
+                colored!(
+                    w,
+                    "{}{}{:>12}{} {}",
+                    fg!(Some(Color::Cyan)),
+                    bold!(true),
+                    "Implemented",
+                    reset!(),
+                    format!(
+                        "https://github.com/obi1kenobi/cargo-semver-check/tree/v{}/src/queries/{}.ron",
+                        crate_version!(),
+                        semver_query.id,
+                    ),
+                )
+            })
+            .expect("print failed");
+
             let reg = Handlebars::new();
             for semver_violation_result in results_iter.take(5) {
                 let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
@@ -289,9 +320,9 @@ fn handle_diff_files(
                         colored!(
                             w,
                             "{}{}{:>12}{} {}",
-                            fg!(Some(Color::Cyan)),
+                            fg!(Some(Color::Blue)),
                             bold!(true),
-                            "Instance",
+                            "Err Instance",
                             reset!(),
                             reg.render_template(template, &pretty_result)
                                 .with_context(|| "Error instantiating semver query template.")
