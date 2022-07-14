@@ -6,7 +6,8 @@ mod query;
 use adapter::RustdocAdapter;
 use anyhow::Context;
 use clap::{crate_version, AppSettings, Arg, Command};
-use query::{SemverQuery, ActualSemverUpdate};
+use handlebars::Handlebars;
+use query::{ActualSemverUpdate, SemverQuery};
 use rustdoc_types::Crate;
 use std::{cell::RefCell, collections::BTreeMap, env, fs::File, io::Read, rc::Rc, sync::Arc};
 use trustfall_core::{frontend::parse, interpreter::execution::interpret_ir, ir::TransparentValue};
@@ -68,9 +69,13 @@ fn main() -> anyhow::Result<()> {
     unreachable!("no commands matched")
 }
 
-fn get_semver_version_change(current_version: Option<&str>, baseline_version: Option<&str>) -> Option<ActualSemverUpdate> {
+fn get_semver_version_change(
+    current_version: Option<&str>,
+    baseline_version: Option<&str>,
+) -> Option<ActualSemverUpdate> {
     if let (Some(baseline), Some(current)) = (baseline_version, current_version) {
-        let baseline_version = semver::Version::parse(baseline).expect("baseline not a valid version");
+        let baseline_version =
+            semver::Version::parse(baseline).expect("baseline not a valid version");
         let current_version = semver::Version::parse(current).expect("current not a valid version");
 
         // From the cargo reference:
@@ -112,17 +117,23 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
     let current_version = current_crate.crate_version.as_deref();
     let baseline_version = baseline_crate.crate_version.as_deref();
 
-    let version_change = get_semver_version_change(current_version, baseline_version).unwrap_or_else(|| {
-        println!("> Could not determine whether crate version changed. Assuming no change.");
-        ActualSemverUpdate::NotChanged
-    });
+    let version_change = get_semver_version_change(current_version, baseline_version)
+        .unwrap_or_else(|| {
+            println!("> Could not determine whether crate version changed. Assuming no change.");
+            ActualSemverUpdate::NotChanged
+        });
     let change = match version_change {
         ActualSemverUpdate::Major => "major",
         ActualSemverUpdate::Minor => "minor",
         ActualSemverUpdate::Patch => "patch",
         ActualSemverUpdate::NotChanged => "no",
     };
-    println!("> Crate version {} -> {} ({} change)", baseline_version.unwrap_or("unknown"), current_version.unwrap_or("unknown"), change);
+    println!(
+        "> Crate version {} -> {} ({} change)",
+        baseline_version.unwrap_or("unknown"),
+        current_version.unwrap_or("unknown"),
+        change
+    );
 
     let queries = SemverQuery::all_queries();
 
@@ -135,7 +146,10 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
 
     for semver_query in queries.values() {
         if version_change.supports_requirement(semver_query.required_update) {
-            println!("> Skipping allowed change: {}", &semver_query.human_readable_name);
+            println!(
+                "> Skipping allowed change: {}",
+                &semver_query.human_readable_name
+            );
             continue;
         }
 
@@ -164,13 +178,32 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
                 RequiredSemverUpdate::Minor => "minor",
             };
             println!("NOT OK: needs {} version\n", version_bump_needed);
+            println!("Error description:\n{}\n", semver_query.error_message);
+            println!("Error instances:");
+
+            let reg = Handlebars::new();
             for semver_violation_result in results_iter.take(5) {
                 let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
                     .into_iter()
                     .map(|(k, v)| (k, v.into()))
                     .collect();
-                println!("{}\n", serde_json::to_string_pretty(&pretty_result)?);
+
+                if let Some(template) = semver_query.per_result_error_template.as_deref() {
+                    println!(
+                        "- {}",
+                        reg.render_template(template, &pretty_result)
+                            .with_context(|| "Error instantiating semver query template.")
+                            .expect("could not materialize template")
+                    )
+                } else {
+                    println!(
+                        "semver violation data: {}",
+                        serde_json::to_string_pretty(&pretty_result)?
+                    );
+                }
             }
+
+            println!();
         }
     }
 

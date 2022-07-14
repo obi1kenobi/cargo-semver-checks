@@ -35,4 +35,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A publicly-visible enum is no longer available under its prior name. It may have been renamed or removed entirely.",
+    per_result_error_template: Some("enum {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
 )

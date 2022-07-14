@@ -47,4 +47,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A publicly-visible struct has at least one public field that is no longer available under its prior name. It may have been renamed or removed entirely.",
+    per_result_error_template: Some("field {{field_name}} of struct {{struct_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
 )

@@ -43,4 +43,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A publicly-visible enum has at least one variant that is no longer available under its prior name. It may have been renamed or removed entirely.",
+    per_result_error_template: Some("variant {{variant_name}} of enum {{enum_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
 )
