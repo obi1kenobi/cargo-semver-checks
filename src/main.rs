@@ -3,16 +3,42 @@
 pub mod adapter;
 mod query;
 
-use adapter::RustdocAdapter;
+use std::{cell::RefCell, collections::BTreeMap, env, fs::File, io::Read, rc::Rc, sync::Arc};
+
 use anyhow::Context;
 use clap::{crate_version, AppSettings, Arg, Command};
 use handlebars::Handlebars;
-use query::{ActualSemverUpdate, SemverQuery};
 use rustdoc_types::Crate;
-use std::{cell::RefCell, collections::BTreeMap, env, fs::File, io::Read, rc::Rc, sync::Arc};
+use termcolor::{Color, ColorChoice, StandardStream};
+use termcolor_output::{colored, colored_ln};
 use trustfall_core::{frontend::parse, interpreter::execution::interpret_ir, ir::TransparentValue};
 
-use crate::query::RequiredSemverUpdate;
+use crate::{
+    adapter::RustdocAdapter,
+    query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
+};
+
+#[allow(dead_code)]
+pub(crate) struct GlobalConfig {
+    printing_to_terminal: bool,
+    output_writer: StandardStream,
+}
+
+impl GlobalConfig {
+    fn new() -> Self {
+        let printing_to_terminal = atty::is(atty::Stream::Stdout);
+        let color_choice = if printing_to_terminal {
+            ColorChoice::Auto
+        } else {
+            ColorChoice::Never
+        };
+
+        Self {
+            printing_to_terminal,
+            output_writer: StandardStream::stdout(color_choice),
+        }
+    }
+}
 
 fn main() -> anyhow::Result<()> {
     let matches = Command::new("cargo-semver-checks")
@@ -50,6 +76,8 @@ fn main() -> anyhow::Result<()> {
         .subcommand_matches("semver-checks")
         .expect("semver-checks is missing");
 
+    let config = GlobalConfig::new();
+
     if let Some(diff_files) = semver_check.subcommand_matches("diff-files") {
         let current_rustdoc_path: &str = diff_files
             .get_one::<String>("current_rustdoc_path")
@@ -63,7 +91,7 @@ fn main() -> anyhow::Result<()> {
         let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
         let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
 
-        return handle_diff_files(current_crate, baseline_crate);
+        return handle_diff_files(config, current_crate, baseline_crate);
     }
 
     unreachable!("no commands matched")
@@ -113,13 +141,26 @@ fn get_semver_version_change(
     }
 }
 
-fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Result<()> {
+fn handle_diff_files(
+    mut config: GlobalConfig,
+    current_crate: Crate,
+    baseline_crate: Crate,
+) -> anyhow::Result<()> {
     let current_version = current_crate.crate_version.as_deref();
     let baseline_version = baseline_crate.crate_version.as_deref();
 
     let version_change = get_semver_version_change(current_version, baseline_version)
         .unwrap_or_else(|| {
-            println!("> Could not determine whether crate version changed. Assuming no change.");
+            colored_ln(&mut config.output_writer, |w| {
+                colored!(
+                    w,
+                    "{}{}{:>12}{} Could not determine whether crate version changed. Assuming no change.",
+                    fg!(Some(Color::Yellow)),
+                    bold!(true),
+                    "Warning",
+                    reset!(),
+                )
+            }).expect("print failed");
             ActualSemverUpdate::NotChanged
         });
     let change = match version_change {
@@ -128,12 +169,21 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
         ActualSemverUpdate::Patch => "patch",
         ActualSemverUpdate::NotChanged => "no",
     };
-    println!(
-        "> Crate version {} -> {} ({} change)",
-        baseline_version.unwrap_or("unknown"),
-        current_version.unwrap_or("unknown"),
-        change
-    );
+
+    colored_ln(&mut config.output_writer, |w| {
+        colored!(
+            w,
+            "{}{}{:>12}{} Crate version {} -> {} ({} change)",
+            fg!(Some(Color::Cyan)),
+            bold!(true),
+            "Info",
+            reset!(),
+            baseline_version.unwrap_or("unknown"),
+            current_version.unwrap_or("unknown"),
+            change,
+        )
+    })
+    .expect("print failed");
 
     let queries = SemverQuery::all_queries();
 
@@ -146,10 +196,18 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
 
     for semver_query in queries.values() {
         if version_change.supports_requirement(semver_query.required_update) {
-            println!(
-                "> Skipping allowed change: {}",
-                &semver_query.human_readable_name
-            );
+            colored_ln(&mut config.output_writer, |w| {
+                colored!(
+                    w,
+                    "{}{}{:>12}{} Allowed change: {}",
+                    fg!(Some(Color::Green)),
+                    bold!(true),
+                    "Skipping",
+                    reset!(),
+                    &semver_query.human_readable_name,
+                )
+            })
+            .expect("print failed");
             continue;
         }
 
@@ -166,20 +224,58 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
             .with_context(|| "Query execution error.")?
             .peekable();
 
+        colored!(
+            config.output_writer,
+            "{}{}{:>12}{} {} ... ",
+            fg!(Some(Color::Green)),
+            bold!(true),
+            "Checking",
+            reset!(),
+            &semver_query.human_readable_name,
+        )
+        .expect("print failed");
+
         let start_instant = std::time::Instant::now();
-        print!("> Checking: {} ... ", &semver_query.human_readable_name);
         if results_iter.peek().is_none() {
             let end_instant = std::time::Instant::now();
-            println!("OK ({:.3}s)", (end_instant - start_instant).as_secs_f32());
+            colored!(
+                config.output_writer,
+                "{}{}{}{} ({:.3}s)\n",
+                fg!(Some(Color::Green)),
+                bold!(true),
+                "OK",
+                reset!(),
+                (end_instant - start_instant).as_secs_f32(),
+            )
+            .expect("print failed");
         } else {
             found_errors = true;
             let version_bump_needed = match semver_query.required_update {
                 RequiredSemverUpdate::Major => "major",
                 RequiredSemverUpdate::Minor => "minor",
             };
-            println!("NOT OK: needs {} version\n", version_bump_needed);
-            println!("Error description:\n{}\n", semver_query.error_message);
-            println!("Error instances:");
+            colored!(
+                config.output_writer,
+                "{}{}{}{}\n",
+                fg!(Some(Color::Red)),
+                bold!(true),
+                "NOT OK:",
+                reset!(),
+            )
+            .expect("print failed");
+
+            colored_ln(&mut config.output_writer, |w| {
+                colored!(
+                    w,
+                    "{}{}{:>12}{} {}",
+                    fg!(Some(Color::Cyan)),
+                    bold!(true),
+                    "Description",
+                    reset!(),
+                    semver_query.error_message,
+                )
+            })
+            .expect("print failed");
 
             let reg = Handlebars::new();
             for semver_violation_result in results_iter.take(5) {
@@ -189,30 +285,80 @@ fn handle_diff_files(current_crate: Crate, baseline_crate: Crate) -> anyhow::Res
                     .collect();
 
                 if let Some(template) = semver_query.per_result_error_template.as_deref() {
-                    println!(
-                        "- {}",
-                        reg.render_template(template, &pretty_result)
-                            .with_context(|| "Error instantiating semver query template.")
-                            .expect("could not materialize template")
-                    )
+                    colored_ln(&mut config.output_writer, |w| {
+                        colored!(
+                            w,
+                            "{}{}{:>12}{} {}",
+                            fg!(Some(Color::Cyan)),
+                            bold!(true),
+                            "Instance",
+                            reset!(),
+                            reg.render_template(template, &pretty_result)
+                                .with_context(|| "Error instantiating semver query template.")
+                                .expect("could not materialize template"),
+                        )
+                    })
+                    .expect("print failed");
                 } else {
-                    println!(
-                        "semver violation data: {}",
-                        serde_json::to_string_pretty(&pretty_result)?
-                    );
+                    colored_ln(&mut config.output_writer, |w| {
+                        colored!(
+                            w,
+                            "{}{}{:>12}{} raw violation data: {}",
+                            fg!(Some(Color::Cyan)),
+                            bold!(true),
+                            "Instance",
+                            reset!(),
+                            serde_json::to_string_pretty(&pretty_result).expect("serde failed"),
+                        )
+                    })
+                    .expect("print failed");
                 }
             }
 
-            println!();
+            colored_ln(&mut config.output_writer, |w| {
+                colored!(
+                    w,
+                    "{}{}{:>12}{} {}: requires {} version",
+                    fg!(Some(Color::Red)),
+                    bold!(true),
+                    "Failed",
+                    reset!(),
+                    &semver_query.human_readable_name,
+                    version_bump_needed,
+                )
+            })
+            .expect("print failed");
         }
     }
 
     if found_errors {
-        println!("> Done, found errors.");
+        colored_ln(&mut config.output_writer, |w| {
+            colored!(
+                w,
+                "{}{}{:>12}{} Found errors.",
+                fg!(Some(Color::Red)),
+                bold!(true),
+                "Done",
+                reset!(),
+            )
+        })
+        .expect("print failed");
+
         std::process::exit(1);
     }
 
-    println!("> Done, no errors.");
+    colored_ln(&mut config.output_writer, |w| {
+        colored!(
+            w,
+            "{}{}{:>12}{} No errors.",
+            fg!(Some(Color::Green)),
+            bold!(true),
+            "Done",
+            reset!(),
+        )
+    })
+    .expect("print failed");
+
     Ok(())
 }
 

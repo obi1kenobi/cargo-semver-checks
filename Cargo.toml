@@ -1,6 +1,6 @@
 [package]
 name = "cargo-semver-checks"
-version = "0.2.5"
+version = "0.3.0"
 edition = "2021"
 authors = ["Predrag Gruevski <obi1kenobi82@gmail.com>"]
 license = "Apache-2.0"
@@ -22,3 +22,6 @@ ron = "0.7.1"
 serde = { version = "1.0.139", features = ["derive"] }
 semver = "1.0.12"
 handlebars = "4.3.1"
+atty = "0.2.14"
+termcolor = "1.1.3"
+termcolor_output = "1.0.1"
