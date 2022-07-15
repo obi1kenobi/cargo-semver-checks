@@ -14,6 +14,10 @@ SemverQuery(
                         struct_name: name @output @tag
                         struct_type @output @tag
 
+                        path {
+                            path @output @tag
+                        }
+
                         field {
                             field_name: name @output @tag
                             visibility_limit @filter(op: "=", value: ["$public"])
@@ -32,6 +36,10 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%struct_name"])
                         struct_type @filter(op: "=", value: ["%struct_type"])
+
+                        path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
 
                         field {
                             name @filter(op: "=", value: ["%field_name"])

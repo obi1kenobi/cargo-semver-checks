@@ -45,6 +45,13 @@ impl Origin {
             kind: span.into(),
         }
     }
+
+    fn make_path_token<'a>(&self, path: &'a [String]) -> Token<'a> {
+        Token {
+            origin: *self,
+            kind: TokenKind::Path(path),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -68,6 +75,7 @@ pub enum TokenKind<'a> {
     Crate(&'a Crate),
     Item(&'a Item),
     Span(&'a Span),
+    Path(&'a [String]),
 }
 
 #[allow(dead_code)]
@@ -126,6 +134,13 @@ impl<'a> Token<'a> {
             rustdoc_types::ItemEnum::Variant(v) => Some(v),
             _ => None,
         })
+    }
+
+    fn as_path(&self) -> Option<&'a [String]> {
+        match &self.kind {
+            TokenKind::Path(path) => Some(*path),
+            _ => None,
+        }
     }
 }
 
@@ -213,6 +228,14 @@ fn get_enum_property(item_token: &Token, field_name: &str) -> FieldValue {
     match field_name {
         "variants_stripped" => enum_item.variants_stripped.into(),
         _ => unreachable!("Enum property {field_name}"),
+    }
+}
+
+fn get_path_property(token: &Token, field_name: &str) -> FieldValue {
+    let path_token = token.as_path().expect("token was not a Path");
+    match field_name {
+        "path" => path_token.into(),
+        _ => unreachable!("Path property {field_name}"),
     }
 }
 
@@ -363,6 +386,11 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                         property_mapper(ctx, field_name.as_ref(), get_span_property)
                     }))
                 }
+                "Path" => {
+                    Box::new(data_contexts.map(move |ctx| {
+                        property_mapper(ctx, field_name.as_ref(), get_path_property)
+                    }))
+                }
                 _ => unreachable!("project_property {current_type_name} {field_name}"),
             }
         }
@@ -455,6 +483,31 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                         "project_neighbors {current_type_name} {edge_name} {parameters:?}"
                     ),
                 }
+            }
+            "Importable" | "Struct" | "Enum" if edge_name.as_ref() == "path" => {
+                let current_crate = self.current_crate;
+                let previous_crate = self.previous_crate;
+
+                Box::new(data_contexts.map(move |ctx| {
+                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
+                        match &ctx.current_token {
+                            None => Box::new(std::iter::empty()),
+                            Some(token) => {
+                                let origin = token.origin;
+                                let item = token.as_item().expect("token was not an Item");
+                                let item_id = &item.id;
+
+                                let path = match origin {
+                                    Origin::CurrentCrate => &current_crate.paths[item_id].path,
+                                    Origin::PreviousCrate => &previous_crate.expect("no baseline provided").paths[item_id].path,
+                                };
+
+                                Box::new(std::iter::once(origin.make_path_token(path)))
+                            }
+                        };
+
+                    (ctx, neighbors)
+                }))
             }
             "Item" | "Struct" | "StructField" | "Enum" | "Variant" | "PlainVariant"
             | "TupleVariant" | "StructVariant"
@@ -640,8 +693,7 @@ mod tests {
             std::fs::read_to_string(&format!("./src/test_data/{}.output.ron", query_name))
             .with_context(|| format!("Could not load src/test_data/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
             .expect("failed to load expected outputs");
-        let expected_result: BTreeMap<String, FieldValue> =
-            ron::from_str(&expected_result_text)
+        let expected_result: BTreeMap<String, FieldValue> = ron::from_str(&expected_result_text)
             .expect("could not parse expected outputs as ron format");
 
         let schema = RustdocAdapter::schema();

@@ -52,7 +52,7 @@ https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Item.html
 https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/enum.ItemEnum.html
 https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Struct.html
 """
-type Struct implements Item {
+type Struct implements Item & Importable {
     # properties from Item
     id: String!
     crate_id: Int!
@@ -67,6 +67,9 @@ type Struct implements Item {
 
     # edges from Item
     span: Span
+
+    # edges from Importable
+    path: [Path!]
 
     # own edges
     field: StructField
@@ -96,7 +99,7 @@ https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Item.html
 https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/enum.ItemEnum.html
 https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Enum.html
 """
-type Enum implements Item {
+type Enum implements Item & Importable {
     # properties from Item
     id: String!
     crate_id: Int!
@@ -110,6 +113,9 @@ type Enum implements Item {
 
     # edges from Item
     span: Span
+
+    # edges from Importable
+    path: [Path!]
 
     # own edges
     variant: [Variant!]
@@ -196,4 +202,21 @@ type Span {
     begin_column: Int!
     end_line: Int!
     end_column: Int!
+}
+
+"""
+An item that can be imported, through one or more paths.
+"""
+interface Importable {
+    path: [Path!]
+}
+
+"""
+A possible way that an item could be imported.
+"""
+type Path {
+    """
+    The path from which the item can be imported.
+    """
+    path: [String!]!
 }

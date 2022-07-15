@@ -1,6 +1,7 @@
 {
     "struct_name": String("FieldWillBeRemoved"),
     "struct_type": String("plain"),
+    "path": List([String("semver_tests"), String("test_cases"), String("FieldWillBeRemoved")]),
     "field_name": String("bar"),
     "span_filename": String("src/test_cases.rs"),
     "span_begin_line": Uint64(10),

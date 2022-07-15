@@ -13,6 +13,10 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         enum_name: name @output @tag
 
+                        path {
+                            path @output @tag
+                        }
+
                         variant {
                             variant_name: name @output @tag
 
@@ -29,6 +33,10 @@ SemverQuery(
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%enum_name"])
+
+                        path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
 
                         variant {
                             name @filter(op: "=", value: ["%variant_name"])
