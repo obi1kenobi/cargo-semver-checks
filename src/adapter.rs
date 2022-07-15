@@ -610,3 +610,82 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{cell::RefCell, collections::BTreeMap, rc::Rc, sync::Arc};
+
+    use anyhow::Context;
+    use trustfall_core::{frontend::parse, interpreter::execution::interpret_ir, ir::FieldValue};
+
+    use crate::{query::SemverQuery, util::load_rustdoc_from_file};
+
+    use super::RustdocAdapter;
+
+    fn check_query_execution(query_name: &str) {
+        // Ensure the rustdocs JSON outputs have been regenerated.
+        let baseline = load_rustdoc_from_file("./localdata/test_data/baseline.json")
+            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
+            .expect("failed to load baseline rustdoc");
+        let current =
+            load_rustdoc_from_file(&format!("./localdata/test_data/{}.json", query_name))
+            .with_context(|| format!("Could not load localdata/test_data/{}.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?", query_name))
+            .expect("failed to load rustdoc under test");
+
+        let query_text =
+            std::fs::read_to_string(&format!("./src/queries/{}.ron", query_name)).unwrap();
+        let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
+
+        let expected_result_text =
+            std::fs::read_to_string(&format!("./src/test_data/{}.output.ron", query_name))
+            .with_context(|| format!("Could not load src/test_data/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
+            .expect("failed to load expected outputs");
+        let expected_result: BTreeMap<String, FieldValue> =
+            ron::from_str(&expected_result_text)
+            .expect("could not parse expected outputs as ron format");
+
+        let schema = RustdocAdapter::schema();
+        let adapter = Rc::new(RefCell::new(RustdocAdapter::new(&current, Some(&baseline))));
+
+        let parsed_query = parse(&schema, &semver_query.query).unwrap();
+        let args = Arc::new(
+            semver_query
+                .arguments
+                .iter()
+                .map(|(k, v)| (Arc::from(k.clone()), v.clone().into()))
+                .collect(),
+        );
+        let mut results_iter = interpret_ir(adapter.clone(), parsed_query, args).unwrap();
+
+        match results_iter.next() {
+            None => unreachable!("expected the query to find a semver violation but it did not"),
+            Some(result) => {
+                let converted_result = result
+                    .iter()
+                    .map(|(k, v)| (k.to_string(), v.clone()))
+                    .collect();
+                assert_eq!(expected_result, converted_result);
+            }
+        }
+
+        assert!(results_iter.next().is_none());
+    }
+
+    macro_rules! query_execution_tests {
+        ($($name:ident,)*) => {
+            $(
+                #[test]
+                fn $name() {
+                    check_query_execution(stringify!($name))
+                }
+            )*
+        }
+    }
+
+    query_execution_tests!(
+        enum_missing,
+        enum_variant_missing,
+        struct_missing,
+        struct_pub_field_missing,
+    );
+}

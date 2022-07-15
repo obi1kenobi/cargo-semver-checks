@@ -59,3 +59,32 @@ This crate was intended to be published under the name `cargo-semver-check`, and
 day be published under that name. Due to
 [an unfortunate mishap](https://github.com/rust-lang/crates.io/issues/728#issuecomment-118276095),
 it remains `cargo-semver-checks` for the time being.
+
+The `cargo_semver_check` name is reserved on crates.io but all its versions
+are intentionally yanked. Please use the `cargo-semver-checks` crate instead.
+
+## Running `cargo test` for the first time
+
+Testing this crate requires rustdoc JSON output data, which is too large and variable
+to check into git. It has to be generated locally before `cargo test` will succeed,
+and will be saved in a `localdata` gitignored directory in the repo root.
+
+To generate this data, please run `./scripts/regenerate_test_rustdocs.sh`.
+
+## Adding a new semver query
+Checklist:
+- Choose an appropriate name for your query. We'll refer to it as `<query_name>`.
+- Add the query file: `src/queries/<query_name>.ron`.
+- Add a `<query-name>` feature to `semver_tests/Cargo.toml`.
+- Add code that demonstrates that semver issue: write the "baseline" first, and then
+  use `#[cfg(feature = <query_name>)]` and `#[cfg(not(feature = <query_name>))]` as
+  necessary to alter that baseline into a shape that causes the semver issue
+  your query looks for.
+- Add `<query_name>` to the list of features that need rustdoc data
+  in `scripts/regenerate_test_rustdocs.sh`.
+- Add the outputs you expect your query to produce over your test case in a new file: `src/test_data/<query_name>.output.run`.
+- Add `<query_name>` to the list of queries tested by the `query_execution_tests!()` macro near the bottom of `src/adapter.rs`.
+- Re-run `./scripts/regenerate_test_rustdocs.sh` to generate the new rustdoc JSON file.
+- Run `cargo test` and ensure your new test appears in the test list and runs correctly.
+- Whew! You're done. Thanks for your contribution.
+- If you have the energy, please try to simplify this process by removing and automating some of these steps.

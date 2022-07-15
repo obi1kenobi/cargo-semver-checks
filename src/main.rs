@@ -3,7 +3,9 @@
 pub mod adapter;
 mod query;
 
-use std::{cell::RefCell, collections::BTreeMap, env, fs::File, io::Read, rc::Rc, sync::Arc};
+mod util;
+
+use std::{cell::RefCell, collections::BTreeMap, env, rc::Rc, sync::Arc};
 
 use anyhow::Context;
 use clap::{crate_version, AppSettings, Arg, Command};
@@ -12,6 +14,7 @@ use rustdoc_types::Crate;
 use termcolor::{Color, ColorChoice, StandardStream};
 use termcolor_output::{colored, colored_ln};
 use trustfall_core::{frontend::parse, interpreter::execution::interpret_ir, ir::TransparentValue};
+use util::load_rustdoc_from_file;
 
 use crate::{
     adapter::RustdocAdapter,
@@ -391,18 +394,4 @@ fn handle_diff_files(
     .expect("print failed");
 
     Ok(())
-}
-
-fn load_rustdoc_from_file(path: &str) -> anyhow::Result<Crate> {
-    // Parsing JSON after fully reading a file into memory is much faster than
-    // parsing directly from a file, even if buffered:
-    // https://github.com/serde-rs/json/issues/160
-    let mut s = String::new();
-    File::open(path)
-        .with_context(|| format!("Failed to open rustdoc JSON output file {:?}", path))?
-        .read_to_string(&mut s)
-        .with_context(|| format!("Failed to read rustdoc JSON output file {:?}", path))?;
-
-    serde_json::from_str(&s)
-        .with_context(|| format!("Failed to parse rustdoc JSON output file {:?}", path))
 }
