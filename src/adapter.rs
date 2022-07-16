@@ -724,7 +724,8 @@ mod tests {
             }
         }
 
-        assert!(results_iter.next().is_none());
+        let next_result = results_iter.next();
+        assert!(next_result.is_none(), "{:?}", next_result);
     }
 
     macro_rules! query_execution_tests {

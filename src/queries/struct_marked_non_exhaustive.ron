@@ -18,7 +18,7 @@ SemverQuery(
                         # Ensure the struct could previously be constructed outside of its crate
                         # using a struct literal: it did not have any private fields.
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            visibility_limit @filter(op: "=", value: ["$private"])
+                            visibility_limit @filter(op: "!=", value: ["$public"])
                         }
 
                         path {
@@ -53,7 +53,6 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
-        "private": "private",
         "unit": "unit",
         "non_exhaustive": "#[non_exhaustive]",
         "zero": 0,

@@ -48,3 +48,25 @@ pub struct ExternallyConstructibleStruct {
 pub struct ExternallyConstructibleStruct {
     pub foo: u64,
 }
+
+#[cfg(not(feature = "struct_marked_non_exhaustive"))]
+pub struct NonExternallyConstructibleStruct {
+    pub foo: u64,
+
+    // This private field means this struct cannot be constructed with a struct literal
+    // from outside of this crate.
+    bar: u64,
+}
+
+/// This should not be flagged as a semver violation of any kind.
+/// This struct was not previously constructible externally using a struct literal
+/// due to its private field, so the addition of non_exhaustive could not have broken that use.
+#[cfg(feature = "struct_marked_non_exhaustive")]
+#[non_exhaustive]
+pub struct NonExternallyConstructibleStruct {
+    pub foo: u64,
+
+    // This private field means this struct cannot be constructed with a struct literal
+    // from outside of this crate.
+    bar: u64,
+}
