@@ -1,0 +1,51 @@
+SemverQuery(
+    id: "unit_struct_changed_kind",
+    human_readable_name: "unit struct changed kind",
+    description: "A public struct that was previously a unit struct is now a plain struct. Plain structs cannot be constructed using the syntax allowed for unit structs, so this is a major breaking change for code that depends on it.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#struct-unit-to-normal"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+                        struct_type @filter(op: "=", value: ["$unit"])
+
+                        path {
+                            path @output @tag
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: ">=", value: ["$one"]) {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+                        struct_type @filter(op: "=", value: ["$plain"])
+
+                        path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "unit": "unit",
+        "plain": "plain",
+        "one": 1,
+    },
+    error_message: "A public unit struct has been changed to a normal (curly-braces) struct, which cannot be constructed using the same struct literal syntax.",
+    per_result_error_template: Some("struct {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+)
