@@ -1,0 +1,63 @@
+SemverQuery(
+    id: "struct_marked_non_exhaustive",
+    human_readable_name: "struct marked #[non_exhaustive]",
+    description: "A publicly-visible struct has been marked #[non_exhaustive], but it was previously constructible using a struct literal outside its crate. The #[non_exhaustive] attribute disables that, so this is a major breaking change for code that depends on it.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+                        struct_type @filter(op: "!=", value: ["$unit"]) @output @tag
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        # Ensure the struct could previously be constructed outside of its crate
+                        # using a struct literal: it did not have any private fields.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            visibility_limit @filter(op: "=", value: ["$private"])
+                        }
+
+                        path {
+                            path @output @tag
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+                        struct_type @filter(op: "=", value: ["%struct_type"])
+
+                        # The struct is now marked #[non_exhaustive] so it can't be constructed
+                        # using a struct literal outside of its crate. This is the breaking change.
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
+
+                        path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "private": "private",
+        "unit": "unit",
+        "non_exhaustive": "#[non_exhaustive]",
+        "zero": 0,
+    },
+    error_message: "A public struct has been marked #[non_exhaustive], which will prevent it from being constructed using a struct literal outside of its crate. It previously had no private fields, so a struct literal could be used to construct it outside its crate.",
+    per_result_error_template: Some("struct {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+)

@@ -21,3 +21,30 @@ pub enum VariantWillBeRemoved {
     #[cfg(not(feature = "enum_variant_missing"))]
     Bar,
 }
+
+/// Breaking change because of:
+///
+/// """
+/// Non-exhaustive types cannot be constructed outside of the defining crate:
+/// - Non-exhaustive variants (struct or enum variant) cannot be constructed with
+///   a StructExpression (including with functional update syntax).
+/// """
+/// From: <https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute>
+#[cfg(not(feature = "struct_marked_non_exhaustive"))]
+pub struct ExternallyConstructibleStruct {
+    pub foo: u64,
+}
+
+/// Breaking change because of:
+///
+/// """
+/// Non-exhaustive types cannot be constructed outside of the defining crate:
+/// - Non-exhaustive variants (struct or enum variant) cannot be constructed with
+///   a StructExpression (including with functional update syntax).
+/// """
+/// From: <https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute>
+#[cfg(feature = "struct_marked_non_exhaustive")]
+#[non_exhaustive]
+pub struct ExternallyConstructibleStruct {
+    pub foo: u64,
+}

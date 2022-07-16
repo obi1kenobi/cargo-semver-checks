@@ -489,22 +489,26 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                 let previous_crate = self.previous_crate;
 
                 Box::new(data_contexts.map(move |ctx| {
-                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
-                        match &ctx.current_token {
-                            None => Box::new(std::iter::empty()),
-                            Some(token) => {
-                                let origin = token.origin;
-                                let item = token.as_item().expect("token was not an Item");
-                                let item_id = &item.id;
+                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
+                        .current_token
+                    {
+                        None => Box::new(std::iter::empty()),
+                        Some(token) => {
+                            let origin = token.origin;
+                            let item = token.as_item().expect("token was not an Item");
+                            let item_id = &item.id;
 
-                                let path = match origin {
-                                    Origin::CurrentCrate => &current_crate.paths[item_id].path,
-                                    Origin::PreviousCrate => &previous_crate.expect("no baseline provided").paths[item_id].path,
-                                };
+                            let path = match origin {
+                                Origin::CurrentCrate => &current_crate.paths[item_id].path,
+                                Origin::PreviousCrate => {
+                                    &previous_crate.expect("no baseline provided").paths[item_id]
+                                        .path
+                                }
+                            };
 
-                                Box::new(std::iter::once(origin.make_path_token(path)))
-                            }
-                        };
+                            Box::new(std::iter::once(origin.make_path_token(path)))
+                        }
+                    };
 
                     (ctx, neighbors)
                 }))
@@ -739,5 +743,6 @@ mod tests {
         enum_variant_missing,
         struct_missing,
         struct_pub_field_missing,
+        struct_marked_non_exhaustive,
     );
 }
