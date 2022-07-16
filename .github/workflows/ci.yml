@@ -67,7 +67,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
-          components: rustdoc
           profile: minimal
 
       - name: Regenerate test data
