@@ -489,22 +489,26 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                 let previous_crate = self.previous_crate;
 
                 Box::new(data_contexts.map(move |ctx| {
-                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
-                        match &ctx.current_token {
-                            None => Box::new(std::iter::empty()),
-                            Some(token) => {
-                                let origin = token.origin;
-                                let item = token.as_item().expect("token was not an Item");
-                                let item_id = &item.id;
+                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
+                        .current_token
+                    {
+                        None => Box::new(std::iter::empty()),
+                        Some(token) => {
+                            let origin = token.origin;
+                            let item = token.as_item().expect("token was not an Item");
+                            let item_id = &item.id;
 
-                                let path = match origin {
-                                    Origin::CurrentCrate => &current_crate.paths[item_id].path,
-                                    Origin::PreviousCrate => &previous_crate.expect("no baseline provided").paths[item_id].path,
-                                };
+                            let path = match origin {
+                                Origin::CurrentCrate => &current_crate.paths[item_id].path,
+                                Origin::PreviousCrate => {
+                                    &previous_crate.expect("no baseline provided").paths[item_id]
+                                        .path
+                                }
+                            };
 
-                                Box::new(std::iter::once(origin.make_path_token(path)))
-                            }
-                        };
+                            Box::new(std::iter::once(origin.make_path_token(path)))
+                        }
+                    };
 
                     (ctx, neighbors)
                 }))
@@ -693,8 +697,9 @@ mod tests {
             std::fs::read_to_string(&format!("./src/test_data/{}.output.ron", query_name))
             .with_context(|| format!("Could not load src/test_data/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
             .expect("failed to load expected outputs");
-        let expected_result: BTreeMap<String, FieldValue> = ron::from_str(&expected_result_text)
-            .expect("could not parse expected outputs as ron format");
+        let expected_results: Vec<BTreeMap<String, FieldValue>> =
+            ron::from_str(&expected_result_text)
+                .expect("could not parse expected outputs as ron format");
 
         let schema = RustdocAdapter::schema();
         let adapter = Rc::new(RefCell::new(RustdocAdapter::new(&current, Some(&baseline))));
@@ -707,20 +712,13 @@ mod tests {
                 .map(|(k, v)| (Arc::from(k.clone()), v.clone().into()))
                 .collect(),
         );
-        let mut results_iter = interpret_ir(adapter.clone(), parsed_query, args).unwrap();
+        let results_iter = interpret_ir(adapter.clone(), parsed_query, args).unwrap();
 
-        match results_iter.next() {
-            None => unreachable!("expected the query to find a semver violation but it did not"),
-            Some(result) => {
-                let converted_result = result
-                    .iter()
-                    .map(|(k, v)| (k.to_string(), v.clone()))
-                    .collect();
-                assert_eq!(expected_result, converted_result);
-            }
-        }
+        let actual_results: Vec<BTreeMap<_, _>> = results_iter
+            .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+            .collect();
 
-        assert!(results_iter.next().is_none());
+        assert_eq!(expected_results, actual_results);
     }
 
     macro_rules! query_execution_tests {
