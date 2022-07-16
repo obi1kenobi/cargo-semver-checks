@@ -63,7 +63,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Install rust
+      - name: Install nightly rust to run rustdoc
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          components: rustdoc
+          profile: minimal
+
+      - name: Regenerate test data
+        run: ./scripts/regenerate_test_rustdocs.sh
+
+      - name: Install stable rust for tests
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -79,9 +89,6 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Regenerate test data
-        run: ./scripts/regenerate_test_rustdocs.sh
 
       - name: cargo test
         run: cargo test
