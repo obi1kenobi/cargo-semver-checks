@@ -72,7 +72,7 @@ type Struct implements Item & Importable {
     path: [Path!]
 
     # own edges
-    field: StructField
+    field: [StructField!]
 }
 
 
