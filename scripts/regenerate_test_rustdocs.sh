@@ -19,6 +19,7 @@ mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/baseline.json"
 
 # For each feature, re-run rustdoc with it enabled.
 features=(
+    'struct_marked_non_exhaustive'
     'struct_missing'
     'struct_pub_field_missing'
     'enum_missing'

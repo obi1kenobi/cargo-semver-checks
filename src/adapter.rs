@@ -737,5 +737,6 @@ mod tests {
         enum_variant_missing,
         struct_missing,
         struct_pub_field_missing,
+        struct_marked_non_exhaustive,
     );
 }
