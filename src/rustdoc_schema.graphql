@@ -34,7 +34,7 @@ type Crate {
 https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Item.html
 https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/enum.ItemEnum.html
 """
-interface Item {
+interface Item implements Importable {
     id: String!
     crate_id: Int!
     name: String
@@ -45,6 +45,9 @@ interface Item {
     visibility_limit: String!
 
     span: Span
+
+    # edges from Importable
+    path: [Path!]
 }
 
 """
@@ -92,6 +95,9 @@ type StructField implements Item {
 
     # edges from Item
     span: Span
+
+    # edges from Importable
+    path: [Path!]
 }
 
 """
@@ -137,6 +143,9 @@ interface Variant implements Item {
 
     # edges from Item
     span: Span
+
+    # edges from Importable
+    path: [Path!]
 }
 
 """
@@ -155,6 +164,9 @@ type PlainVariant implements Item & Variant {
 
     # edges from Item
     span: Span
+
+    # edges from Importable
+    path: [Path!]
 }
 
 """
@@ -173,6 +185,9 @@ type TupleVariant implements Item & Variant {
 
     # edges from Item
     span: Span
+
+    # edges from Importable
+    path: [Path!]
 }
 
 """
@@ -191,6 +206,9 @@ type StructVariant implements Item & Variant {
 
     # edges from Item
     span: Span
+
+    # edges from Importable
+    path: [Path!]
 }
 
 """

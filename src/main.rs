@@ -4,10 +4,12 @@ pub mod adapter;
 mod query;
 
 mod util;
+mod cannot_be_built;
 
 use std::{cell::RefCell, collections::BTreeMap, env, rc::Rc, sync::Arc};
 
 use anyhow::Context;
+use cannot_be_built::handle_cannot_be_built;
 use clap::{crate_version, AppSettings, Arg, Command};
 use handlebars::Handlebars;
 use rustdoc_types::Crate;
@@ -72,6 +74,35 @@ fn main() -> anyhow::Result<()> {
                                 .required(true)
                         )
                 )
+                .subcommand(
+                    Command::new("cannot-be-built")
+                    .version(crate_version!())
+                    .setting(AppSettings::ArgRequiredElseHelp)
+                    .arg(
+                        Arg::with_name("current_rustdoc_path")
+                            .long("current")
+                            .value_name("CURRENT")
+                            .help("The current rustdoc json output to test for semver violations.")
+                            .takes_value(true)
+                            .required(true)
+                    )
+                    .arg(
+                        Arg::new("cannot_be_built_path")
+                            .long("check-path")
+                            .value_name("PATH")
+                            .help("The path of the struct or enum that should be impossible to construct.")
+                            .takes_value(true)
+                            .required(true)
+                    )
+                    .arg(
+                        Arg::new("boundary_module")
+                            .long("boundary")
+                            .value_name("MODULE")
+                            .help("The module path outside of which the struct or enum should be impossible to construct.")
+                            .takes_value(true)
+                            .required(true)
+                    )
+                )
         ).get_matches();
 
     // Descend one level: from `cargo semver-checks` to just `semver-checks`.
@@ -95,6 +126,23 @@ fn main() -> anyhow::Result<()> {
         let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
 
         return handle_diff_files(config, current_crate, baseline_crate);
+    } else if let Some(cannot_be_built) = semver_check.subcommand_matches("cannot-be-built") {
+        let current_rustdoc_path: &str = cannot_be_built
+            .get_one::<String>("current_rustdoc_path")
+            .expect("current_rustdoc_path is required but was not present")
+            .as_str();
+        let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
+
+        let check_path = cannot_be_built
+            .get_one::<String>("cannot_be_built_path")
+            .expect("cannot_be_built_path is required but was not present")
+            .as_str();
+        let boundary_module = cannot_be_built
+            .get_one::<String>("boundary_module")
+            .expect("boundary_module is required but was not present")
+            .as_str();
+
+        return handle_cannot_be_built(config, current_crate, check_path, boundary_module);
     }
 
     unreachable!("no commands matched")

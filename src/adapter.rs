@@ -484,7 +484,10 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     ),
                 }
             }
-            "Importable" | "Struct" | "Enum" if edge_name.as_ref() == "path" => {
+            "Importable" | "Item" | "Struct" | "StructField" | "Enum" | "Variant"
+            | "PlainVariant" | "TupleVariant" | "StructVariant"
+                if edge_name.as_ref() == "path" =>
+            {
                 let current_crate = self.current_crate;
                 let previous_crate = self.previous_crate;
 

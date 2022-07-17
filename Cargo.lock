@@ -136,6 +136,7 @@ dependencies = [
  "atty",
  "clap",
  "handlebars",
+ "itertools",
  "ron 0.7.1",
  "rustdoc-types",
  "semver",
