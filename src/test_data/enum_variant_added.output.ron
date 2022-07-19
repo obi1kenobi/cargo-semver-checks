@@ -2,9 +2,14 @@
     {
         "enum_name": String("EnumWithNewVariant"),
         "variant_name": String("NewVariant"),
-        "path": List([String("semver_tests"), String("test_cases"), String("EnumWithNewVariant")]),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("enum_variant_added"),
+            String("EnumWithNewVariant"),
+        ]),
         "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/mod.rs"),
-        "span_begin_line": Uint64(31),
+        "span_filename": String("src/test_cases/enum_variant_added.rs"),
+        "span_begin_line": Uint64(5),
     }
 ]
