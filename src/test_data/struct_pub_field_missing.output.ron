@@ -2,9 +2,14 @@
     {
         "struct_name": String("FieldWillBeRemoved"),
         "struct_type": String("plain"),
-        "path": List([String("semver_tests"), String("test_cases"), String("FieldWillBeRemoved")]),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("struct_pub_field_missing"),
+            String("FieldWillBeRemoved"),
+        ]),
         "field_name": String("bar"),
-        "span_filename": String("src/test_cases/mod.rs"),
-        "span_begin_line": Uint64(12),
+        "span_filename": String("src/test_cases/struct_pub_field_missing.rs"),
+        "span_begin_line": Uint64(6),
     }
 ]

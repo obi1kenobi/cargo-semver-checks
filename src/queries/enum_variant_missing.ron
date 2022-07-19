@@ -28,7 +28,7 @@ SemverQuery(
                     }
                 }
             }
-            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+            current {
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
@@ -38,7 +38,7 @@ SemverQuery(
                             path @filter(op: "=", value: ["%path"])
                         }
 
-                        variant {
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             name @filter(op: "=", value: ["%variant_name"])
                         }
                     }
