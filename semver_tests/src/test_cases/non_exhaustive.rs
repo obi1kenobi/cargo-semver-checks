@@ -60,3 +60,22 @@ pub struct NonExternallyConstructibleStruct {
     // from outside of this crate.
     bar: u64,
 }
+
+#[cfg(not(feature = "variant_marked_non_exhaustive"))]
+pub enum MyEnum {
+    UnitVariant,
+    TupleVariant(u64),
+    StructVariant { a: u64 },
+}
+
+#[cfg(feature = "variant_marked_non_exhaustive")]
+pub enum MyEnum {
+    #[non_exhaustive]
+    UnitVariant,
+
+    #[non_exhaustive]
+    TupleVariant(u64),
+
+    #[non_exhaustive]
+    StructVariant { a: u64 },
+}

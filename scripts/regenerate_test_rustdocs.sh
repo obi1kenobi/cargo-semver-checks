@@ -25,6 +25,7 @@ features=(
     'enum_missing'
     'enum_variant_missing'
     'unit_struct_changed_kind'
+    'variant_marked_non_exhaustive'
 )
 for feat in "${features[@]}"
 do
