@@ -13,12 +13,33 @@ SemverQuery(
     query: r#"
     {
         CrateDiff {
-            baseline {
+            current {
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @output @tag
                         struct_type @output
+
+                        # The struct is now marked #[non_exhaustive] so it can't be constructed
+                        # using a struct literal outside of its crate. This is the breaking change.
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
+
+                        path {
+                            path @output @tag
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         # Ensure the struct could previously be constructed outside of its crate
@@ -28,28 +49,7 @@ SemverQuery(
                         }
 
                         path {
-                            path @output @tag
-                        }
-                    }
-                }
-            }
-            current {
-                item {
-                    ... on Struct {
-                        visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
-
-                        # The struct is now marked #[non_exhaustive] so it can't be constructed
-                        # using a struct literal outside of its crate. This is the breaking change.
-                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
-
-                        path {
                             path @filter(op: "=", value: ["%path"])
-                        }
-
-                        span_: span @optional {
-                            filename @output
-                            begin_line @output
                         }
                     }
                 }
