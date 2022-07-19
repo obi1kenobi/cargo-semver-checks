@@ -24,15 +24,10 @@ SemverQuery(
                         path {
                             path @output @tag
                         }
-
-                        span_: span @optional {
-                            filename @output
-                            begin_line @output
-                        }
                     }
                 }
             }
-            current @fold @transform(op: "count") @filter(op: ">=", value: ["$one"]) {
+            current {
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
@@ -41,6 +36,11 @@ SemverQuery(
 
                         path {
                             path @filter(op: "=", value: ["%path"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
                         }
                     }
                 }
@@ -51,9 +51,8 @@ SemverQuery(
         "public": "public",
         "unit": "unit",
         "plain": "plain",
-        "one": 1,
         "non_exhaustive": "#[non_exhaustive]",
     },
     error_message: "A public unit struct has been changed to a normal (curly-braces) struct, which cannot be constructed using the same struct literal syntax.",
-    per_result_error_template: Some("struct {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("struct {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )

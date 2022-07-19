@@ -26,16 +26,11 @@ SemverQuery(
                         variant {
                             variant_name: name @output @tag
                             attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
-
-                            span_: span @optional {
-                                filename @output
-                                begin_line @output
-                            }
                         }
                     }
                 }
             }
-            current @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+            current {
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
@@ -48,6 +43,11 @@ SemverQuery(
                         variant {
                             name @filter(op: "=", value: ["%variant_name"])
                             attrs @filter(op: "contains", value: ["$non_exhaustive"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
                         }
                     }
                 }
@@ -57,7 +57,6 @@ SemverQuery(
     arguments: {
         "public": "public",
         "non_exhaustive": "#[non_exhaustive]",
-        "zero": 0,
     },
     error_message: "A public enum's variant has been marked #[non_exhaustive], which will prevent it from being constructed using a literal outside of its crate.",
     per_result_error_template: Some("variant {{name}}:{{variant_name}}, previously in {{span_filename}}:{{span_begin_line}}"),
