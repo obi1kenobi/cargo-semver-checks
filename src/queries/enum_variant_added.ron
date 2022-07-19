@@ -1,17 +1,18 @@
 SemverQuery(
-    id: "enum_variant_missing",
-    human_readable_name: "pub enum variant removed or renamed",
-    description: "A publicly-visible enum has at least one variant that is no longer available under its prior name, which is a major breaking change for code that depends on it.",
+    id: "enum_variant_added",
+    human_readable_name: "enum variant added on exhaustive enum",
+    description: "A publicly-visible enum has a new variant. The enum is not marked #[non_exhaustive], so this is a major breaking change for code that depends on it.",
     required_update: Major,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#enum-variant-new"),
     query: r#"
     {
         CrateDiff {
-            baseline {
+            current {
                 item {
                     ... on Enum {
-                        visibility_limit @filter(op: "=", value: ["$public"]) @output
                         enum_name: name @output @tag
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         path {
                             path @output @tag
@@ -28,17 +29,18 @@ SemverQuery(
                     }
                 }
             }
-            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+            baseline {
                 item {
                     ... on Enum {
-                        visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%enum_name"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         path {
                             path @filter(op: "=", value: ["%path"])
                         }
 
-                        variant {
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             name @filter(op: "=", value: ["%variant_name"])
                         }
                     }
@@ -49,7 +51,8 @@ SemverQuery(
     arguments: {
         "public": "public",
         "zero": 0,
+        "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A publicly-visible enum has at least one variant that is no longer available under its prior name. It may have been renamed or removed entirely.",
-    per_result_error_template: Some("variant {{enum_name}}::{{variant_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A publicly-visible enum without #[non_exhaustive] has a new variant.",
+    per_result_error_template: Some("variant {{enum_name}}:{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
