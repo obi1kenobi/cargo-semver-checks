@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, collections::BTreeMap};
 
 use rustdoc_types::{Crate, Enum, Item, Span, Struct, Type, Variant};
 use trustfall_core::{
@@ -7,16 +7,35 @@ use trustfall_core::{
     schema::Schema,
 };
 
+pub struct IndexedCrate<'a> {
+    underlying: &'a Crate,
+    name_item_index: BTreeMap<&'a str, Vec<&'a Item>>,
+}
+
+impl<'a> IndexedCrate<'a> {
+    fn new(underlying: &'a Crate) -> Self {
+        let mut name_item_index: BTreeMap<&'a str, Vec<&'a Item>> = Default::default();
+
+        for item in underlying.index.values() {
+            if let Some(name) = item.name.as_deref() {
+                name_item_index.entry(name).or_default().push(item);
+            }
+        }
+
+        Self { underlying, name_item_index }
+    }
+}
+
 pub struct RustdocAdapter<'a> {
-    current_crate: &'a Crate,
-    previous_crate: Option<&'a Crate>,
+    current_crate: IndexedCrate<'a>,
+    previous_crate: Option<IndexedCrate<'a>>,
 }
 
 impl<'a> RustdocAdapter<'a> {
     pub fn new(current_crate: &'a Crate, previous_crate: Option<&'a Crate>) -> Self {
         Self {
-            current_crate,
-            previous_crate,
+            current_crate: IndexedCrate::new(current_crate),
+            previous_crate: previous_crate.map(IndexedCrate::new),
         }
     }
 
@@ -264,13 +283,13 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
         match edge.as_ref() {
             "Crate" => Box::new(std::iter::once(Token::new_crate(
                 Origin::CurrentCrate,
-                self.current_crate,
+                self.current_crate.underlying,
             ))),
             "CrateDiff" => {
-                let previous_crate = self.previous_crate.expect("no previous crate provided");
+                let previous_crate = self.previous_crate.as_ref().expect("no previous crate provided");
                 Box::new(std::iter::once(Token {
                     origin: Origin::CurrentCrate,
-                    kind: TokenKind::CrateDiff((self.current_crate, previous_crate)),
+                    kind: TokenKind::CrateDiff((self.current_crate.underlying, previous_crate.underlying)),
                 }))
             }
             _ => unreachable!("{edge}"),
@@ -485,8 +504,8 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                 }
             }
             "Importable" | "Struct" | "Enum" if edge_name.as_ref() == "path" => {
-                let current_crate = self.current_crate;
-                let previous_crate = self.previous_crate;
+                let current_crate = self.current_crate.underlying;
+                let previous_crate = self.previous_crate.as_ref().map(|x| x.underlying);
 
                 Box::new(data_contexts.map(move |ctx| {
                     let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
@@ -537,8 +556,8 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
             }
             "Struct" => match edge_name.as_ref() {
                 "field" => {
-                    let current_crate = self.current_crate;
-                    let previous_crate = self.previous_crate;
+                    let current_crate = self.current_crate.underlying;
+                    let previous_crate = self.previous_crate.as_ref().map(|x| x.underlying);
                     Box::new(data_contexts.map(move |ctx| {
                         let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
                             .current_token
@@ -574,8 +593,8 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
             },
             "Enum" => match edge_name.as_ref() {
                 "variant" => {
-                    let current_crate = self.current_crate;
-                    let previous_crate = self.previous_crate;
+                    let current_crate = self.current_crate.underlying;
+                    let previous_crate = self.previous_crate.as_ref().map(|x| x.underlying);
                     Box::new(data_contexts.map(move |ctx| {
                         let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
                             .current_token
