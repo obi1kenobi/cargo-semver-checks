@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 
 [features]
+struct_marked_non_exhaustive = []
 struct_missing = []
 struct_pub_field_missing = []
 enum_missing = []

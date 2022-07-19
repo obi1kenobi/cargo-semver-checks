@@ -697,7 +697,7 @@ mod tests {
             std::fs::read_to_string(&format!("./src/test_data/{}.output.ron", query_name))
             .with_context(|| format!("Could not load src/test_data/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
             .expect("failed to load expected outputs");
-        let expected_results: Vec<BTreeMap<String, FieldValue>> =
+        let mut expected_results: Vec<BTreeMap<String, FieldValue>> =
             ron::from_str(&expected_result_text)
                 .expect("could not parse expected outputs as ron format");
 
@@ -714,9 +714,20 @@ mod tests {
         );
         let results_iter = interpret_ir(adapter.clone(), parsed_query, args).unwrap();
 
-        let actual_results: Vec<BTreeMap<_, _>> = results_iter
+        let mut actual_results: Vec<BTreeMap<_, _>> = results_iter
             .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
             .collect();
+
+        // Reorder both vectors of results into a deterministic order that will compensate for
+        // nondeterminism in how the results are ordered.
+        let key_func = |elem: &BTreeMap<String, FieldValue>| {
+            (
+                elem["span_filename"].as_str().unwrap().to_owned(),
+                elem["span_begin_line"].as_usize().unwrap(),
+            )
+        };
+        expected_results.sort_unstable_by_key(key_func);
+        actual_results.sort_unstable_by_key(key_func);
 
         assert_eq!(expected_results, actual_results);
     }
@@ -738,5 +749,6 @@ mod tests {
         struct_missing,
         struct_pub_field_missing,
         unit_struct_changed_kind,
+        struct_marked_non_exhaustive,
     );
 }

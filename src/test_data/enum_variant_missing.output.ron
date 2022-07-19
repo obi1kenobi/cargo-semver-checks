@@ -4,7 +4,7 @@
         "variant_name": String("Bar"),
         "path": List([String("semver_tests"), String("test_cases"), String("VariantWillBeRemoved")]),
         "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases.rs"),
-        "span_begin_line": Uint64(22),
+        "span_filename": String("src/test_cases/mod.rs"),
+        "span_begin_line": Uint64(24),
     }
 ]

@@ -3,7 +3,7 @@
         "name": String("UnitStructToPlain"),
         "path": List([String("semver_tests"), String("test_cases"), String("UnitStructToPlain")]),
         "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases.rs"),
-        "span_begin_line": Uint64(26),
+        "span_filename": String("src/test_cases/mod.rs"),
+        "span_begin_line": Uint64(28),
     }
 ]
