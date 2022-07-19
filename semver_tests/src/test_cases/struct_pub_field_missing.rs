@@ -10,4 +10,6 @@ pub struct FieldWillBeRemoved {
 /// it will be removed altogether, so the correct rule to catch it is
 /// the `struct_missing` rule and not the rule for missing fields.
 #[cfg(not(feature = "struct_pub_field_missing"))]
-pub struct StructRemoved {}
+pub struct StructRemoved {
+    pub foo: usize,
+}
