@@ -3,7 +3,13 @@ SemverQuery(
     human_readable_name: "struct marked #[non_exhaustive]",
     description: "A publicly-visible struct has been marked #[non_exhaustive], but it was previously constructible using a struct literal outside its crate. The #[non_exhaustive] attribute disables that, so this is a major breaking change for code that depends on it.",
     required_update: Major,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#attr-adding-non-exhaustive"),
+
+    // TODO: Change the reference link once this cargo docs PR merges:
+    // https://github.com/rust-lang/cargo/pull/10877
+    //
+    // Change to this link:
+    // https://doc.rust-lang.org/cargo/reference/semver.html#attr-adding-non-exhaustive
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
     query: r#"
     {
         CrateDiff {
@@ -12,7 +18,7 @@ SemverQuery(
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @output @tag
-                        struct_type @filter(op: "!=", value: ["$unit"]) @output @tag
+                        struct_type @output
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         # Ensure the struct could previously be constructed outside of its crate
@@ -37,7 +43,6 @@ SemverQuery(
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%name"])
-                        struct_type @filter(op: "=", value: ["%struct_type"])
 
                         # The struct is now marked #[non_exhaustive] so it can't be constructed
                         # using a struct literal outside of its crate. This is the breaking change.
@@ -53,7 +58,6 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
-        "unit": "unit",
         "non_exhaustive": "#[non_exhaustive]",
         "zero": 0,
     },

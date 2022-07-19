@@ -4,7 +4,7 @@
         "struct_type": String("unit"),
         "path": List([String("semver_tests"), String("test_cases"), String("WillBeRemovedStruct")]),
         "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases.rs"),
-        "span_begin_line": Uint64(3),
+        "span_filename": String("src/test_cases/mod.rs"),
+        "span_begin_line": Uint64(5),
     }
 ]

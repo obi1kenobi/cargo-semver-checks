@@ -1,10 +1,41 @@
 [
     {
+        "name": String("UnitStruct"),
+        "struct_type": String("unit"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("non_exhaustive"),
+            String("UnitStruct"),
+        ]),
+        "span_filename": String("src/test_cases/non_exhaustive.rs"),
+        "span_begin_line": Uint64(12),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("TupleStruct"),
+        "struct_type": String("tuple"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("non_exhaustive"),
+            String("TupleStruct"),
+        ]),
+        "span_filename": String("src/test_cases/non_exhaustive.rs"),
+        "span_begin_line": Uint64(19),
+        "visibility_limit": String("public"),
+    },
+    {
         "name": String("ExternallyConstructibleStruct"),
         "struct_type": String("plain"),
-        "path": List([String("semver_tests"), String("test_cases"), String("ExternallyConstructibleStruct")]),
-        "span_filename": String("src/test_cases.rs"),
-        "span_begin_line": Uint64(34),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("non_exhaustive"),
+            String("ExternallyConstructibleStruct"),
+        ]),
+        "span_filename": String("src/test_cases/non_exhaustive.rs"),
+        "span_begin_line": Uint64(26),
         "visibility_limit": String("public"),
     }
 ]
