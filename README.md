@@ -94,6 +94,8 @@ Checklist:
   macro near the bottom of `src/adapter.rs`.
 - Re-run `./scripts/regenerate_test_rustdocs.sh` to generate the new rustdoc JSON file.
 - Run `cargo test` and ensure your new test appears in the test list and runs correctly.
+- Add an `include_str!("queries/<query_name>.ron"),` line to `SemverQuery::all_queries()`
+  in the `src/query.rs` file, to ensure your query is enabled for use in query runs.
 - Whew! You're done. Thanks for your contribution.
 - If you have the energy, please try to simplify this process by removing and
   automating some of these steps.

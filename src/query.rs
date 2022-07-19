@@ -64,10 +64,14 @@ impl SemverQuery {
         let mut queries = BTreeMap::default();
 
         let query_text_contents = [
+            include_str!("./queries/enum_missing.ron"),
+            include_str!("./queries/enum_variant_added.ron"),
+            include_str!("./queries/enum_variant_missing.ron"),
+            include_str!("./queries/struct_marked_non_exhaustive.ron"),
             include_str!("./queries/struct_missing.ron"),
             include_str!("./queries/struct_pub_field_missing.ron"),
-            include_str!("./queries/enum_missing.ron"),
-            include_str!("./queries/enum_variant_missing.ron"),
+            include_str!("./queries/unit_struct_changed_kind.ron"),
+            include_str!("./queries/variant_marked_non_exhaustive.ron"),
         ];
         for query_text in query_text_contents {
             let query: SemverQuery = ron::from_str(query_text).expect("query failed to parse");
