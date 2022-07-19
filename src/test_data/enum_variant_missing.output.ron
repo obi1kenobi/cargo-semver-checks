@@ -2,9 +2,9 @@
     {
         "enum_name": String("VariantWillBeRemoved"),
         "variant_name": String("Bar"),
-        "path": List([String("semver_tests"), String("test_cases"), String("VariantWillBeRemoved")]),
+        "path": List([String("semver_tests"), String("test_cases"), String("enum_variant_missing"), String("VariantWillBeRemoved")]),
         "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/mod.rs"),
-        "span_begin_line": Uint64(24),
+        "span_filename": String("src/test_cases/enum_variant_missing.rs"),
+        "span_begin_line": Uint64(6),
     }
 ]

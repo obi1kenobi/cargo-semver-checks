@@ -5,6 +5,6 @@
         "path": List([String("semver_tests"), String("test_cases"), String("EnumWithNewVariant")]),
         "visibility_limit": String("public"),
         "span_filename": String("src/test_cases/mod.rs"),
-        "span_begin_line": Uint64(45),
+        "span_begin_line": Uint64(31),
     }
 ]
