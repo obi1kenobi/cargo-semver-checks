@@ -41,7 +41,7 @@ SemverQuery(
                             path @filter(op: "=", value: ["%path"])
                         }
 
-                        field  @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             name @filter(op: "=", value: ["%field_name"])
                             visibility_limit @filter(op: "=", value: ["$public"])
                         }
