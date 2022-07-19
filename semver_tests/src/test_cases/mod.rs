@@ -1,3 +1,5 @@
+pub mod non_exhaustive;
+
 /// Testing: <https://doc.rust-lang.org/cargo/reference/semver.html#item-remove>
 #[cfg(not(feature = "struct_missing"))]
 pub struct WillBeRemovedStruct;
