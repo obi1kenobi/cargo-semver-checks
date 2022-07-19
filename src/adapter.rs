@@ -745,6 +745,7 @@ mod tests {
 
     query_execution_tests!(
         enum_missing,
+        enum_variant_added,
         enum_variant_missing,
         struct_missing,
         struct_pub_field_missing,

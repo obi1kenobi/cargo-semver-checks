@@ -24,6 +24,7 @@ features=(
     'struct_pub_field_missing'
     'enum_missing'
     'enum_variant_missing'
+    'enum_variant_added'
     'unit_struct_changed_kind'
     'variant_marked_non_exhaustive'
 )
