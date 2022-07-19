@@ -1,0 +1,64 @@
+SemverQuery(
+    id: "variant_marked_non_exhaustive",
+    human_readable_name: "enum variant marked #[non_exhaustive]",
+    description: "An enum variant has been marked #[non_exhaustive] for the first time, preventing it from being constructed using a literal from outside its own crate. This is a major breaking change for code that depends on it.",
+    required_update: Major,
+
+    // TODO: Change the reference link once this cargo docs PR merges:
+    // https://github.com/rust-lang/cargo/pull/10877
+    //
+    // Change to this link:
+    // https://doc.rust-lang.org/cargo/reference/semver.html#attr-adding-non-exhaustive
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+
+                        path {
+                            path @output @tag
+                        }
+
+                        variant {
+                            variant_name: name @output @tag
+                            attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        variant {
+                            name @filter(op: "=", value: ["%variant_name"])
+                            attrs @filter(op: "contains", value: ["$non_exhaustive"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "non_exhaustive": "#[non_exhaustive]",
+        "zero": 0,
+    },
+    error_message: "A public enum's variant has been marked #[non_exhaustive], which will prevent it from being constructed using a literal outside of its crate.",
+    per_result_error_template: Some("variant {{name}}:{{variant_name}}, previously in {{span_filename}}:{{span_begin_line}}"),
+)

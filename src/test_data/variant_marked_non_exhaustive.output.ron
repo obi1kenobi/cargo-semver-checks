@@ -1,0 +1,41 @@
+[
+    {
+        "name": String("MyEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("non_exhaustive"),
+            String("MyEnum"),
+        ]),
+        "variant_name": String("UnitVariant"),
+        "span_filename": String("src/test_cases/non_exhaustive.rs"),
+        "span_begin_line": Uint64(66),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("MyEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("non_exhaustive"),
+            String("MyEnum"),
+        ]),
+        "variant_name": String("TupleVariant"),
+        "span_filename": String("src/test_cases/non_exhaustive.rs"),
+        "span_begin_line": Uint64(67),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("MyEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("non_exhaustive"),
+            String("MyEnum"),
+        ]),
+        "variant_name": String("StructVariant"),
+        "span_filename": String("src/test_cases/non_exhaustive.rs"),
+        "span_begin_line": Uint64(68),
+        "visibility_limit": String("public"),
+    }
+]
