@@ -498,15 +498,16 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                             let item = token.as_item().expect("token was not an Item");
                             let item_id = &item.id;
 
-                            let path = match origin {
-                                Origin::CurrentCrate => &current_crate.paths[item_id].path,
+                            if let Some(path) = match origin {
+                                Origin::CurrentCrate => current_crate.paths.get(item_id).map(|x| &x.path),
                                 Origin::PreviousCrate => {
-                                    &previous_crate.expect("no baseline provided").paths[item_id]
-                                        .path
+                                    previous_crate.expect("no baseline provided").paths.get(item_id).map(|x| &x.path)
                                 }
-                            };
-
-                            Box::new(std::iter::once(origin.make_path_token(path)))
+                            } {
+                                Box::new(std::iter::once(origin.make_path_token(path)))
+                            } else {
+                                Box::new(std::iter::empty())
+                            }
                         }
                     };
 
