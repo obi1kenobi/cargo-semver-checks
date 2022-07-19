@@ -30,15 +30,10 @@ SemverQuery(
                         path {
                             path @output @tag
                         }
-
-                        span_: span @optional {
-                            filename @output
-                            begin_line @output
-                        }
                     }
                 }
             }
-            current @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+            current {
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
@@ -51,6 +46,11 @@ SemverQuery(
                         path {
                             path @filter(op: "=", value: ["%path"])
                         }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
                     }
                 }
             }
@@ -62,5 +62,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A public struct has been marked #[non_exhaustive], which will prevent it from being constructed using a struct literal outside of its crate. It previously had no private fields, so a struct literal could be used to construct it outside its crate.",
-    per_result_error_template: Some("struct {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("struct {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )

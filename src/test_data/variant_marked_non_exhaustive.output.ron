@@ -9,7 +9,7 @@
         ]),
         "variant_name": String("UnitVariant"),
         "span_filename": String("src/test_cases/non_exhaustive.rs"),
-        "span_begin_line": Uint64(66),
+        "span_begin_line": Uint64(74),
         "visibility_limit": String("public"),
     },
     {
@@ -22,7 +22,7 @@
         ]),
         "variant_name": String("TupleVariant"),
         "span_filename": String("src/test_cases/non_exhaustive.rs"),
-        "span_begin_line": Uint64(67),
+        "span_begin_line": Uint64(77),
         "visibility_limit": String("public"),
     },
     {
@@ -35,7 +35,7 @@
         ]),
         "variant_name": String("StructVariant"),
         "span_filename": String("src/test_cases/non_exhaustive.rs"),
-        "span_begin_line": Uint64(68),
+        "span_begin_line": Uint64(80),
         "visibility_limit": String("public"),
     }
 ]

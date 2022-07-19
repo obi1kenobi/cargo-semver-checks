@@ -9,7 +9,7 @@
             String("UnitStruct"),
         ]),
         "span_filename": String("src/test_cases/non_exhaustive.rs"),
-        "span_begin_line": Uint64(12),
+        "span_begin_line": Uint64(16),
         "visibility_limit": String("public"),
     },
     {
@@ -22,7 +22,7 @@
             String("TupleStruct"),
         ]),
         "span_filename": String("src/test_cases/non_exhaustive.rs"),
-        "span_begin_line": Uint64(19),
+        "span_begin_line": Uint64(23),
         "visibility_limit": String("public"),
     },
     {
@@ -35,7 +35,7 @@
             String("ExternallyConstructibleStruct"),
         ]),
         "span_filename": String("src/test_cases/non_exhaustive.rs"),
-        "span_begin_line": Uint64(26),
+        "span_begin_line": Uint64(32),
         "visibility_limit": String("public"),
     }
 ]
