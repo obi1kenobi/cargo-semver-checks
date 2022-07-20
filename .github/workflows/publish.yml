@@ -37,6 +37,11 @@ jobs:
           cargo rustdoc -- -Zunstable-options --output-format json
           mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo_semver_checks.json" /tmp/current.json
 
+          pwd
+          ls -alh .
+          cd "$(git rev-parse --show-toplevel)"
+          ls -alh ./scripts
+
           # Debugging.
           ./scripts/find_comparison_version.sh cargo-semver-checks
 
