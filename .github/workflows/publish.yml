@@ -1,0 +1,47 @@
+name: Publish new version to crates.io
+
+on:
+  push:
+
+env:
+  RUST_BACKTRACE: 1
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish-pipeline:
+    name: Test and publish new version to crates.io
+    runs-on: ubuntu-latest
+    needs:
+      - pre-publish-crate
+    steps:
+      - run: exit 0
+
+  pre-publish-crate:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+
+      - name: Check for semver violations
+        run: |
+          # Build rustdoc JSON for the current version, and move it to /tmp/
+          # so it doesn't get overwritten by the baseline build.
+          cargo rustdoc -- -Zunstable-options --output-format json
+          mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo-semver-checks.json" /tmp/current.json
+
+          # Switch to the tag for the correct baseline version,
+          # then build rustdoc JSON again.
+          git checkout "v$(./scripts/find_comparison_version.sh cargo-semver-checks)"
+          cargo rustdoc -- -Zunstable-options --output-format json
+          mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo-semver-checks.json" /tmp/baseline.json
+
+          # Check for semver violations.
+          cargo run --release check-release --current /tmp/current.json --baseline /tmp/baseline.json
