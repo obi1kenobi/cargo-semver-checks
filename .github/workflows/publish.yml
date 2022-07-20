@@ -57,4 +57,4 @@ jobs:
           mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo_semver_checks.json" /tmp/current.json
 
           # Check for semver violations.
-          cargo run --release check-release --current /tmp/current.json --baseline /tmp/baseline.json
+          cargo run --release -- semver-checks check-release --current /tmp/current.json --baseline /tmp/baseline.json
