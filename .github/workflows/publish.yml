@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - check-semver-pre-publish
-  pull_request:
 
 env:
   RUST_BACKTRACE: 1
@@ -26,35 +25,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          profile: minimal
-          override: true
+      - name: Check semver
+        uses: obi1kenobi/cargo-semver-checks-action
 
-      - name: Check for semver violations
-        run: |
-          # Record the current git sha, so we can come back to it after generating the baseline.
-          export CURRENT_GIT_SHA="$(git rev-parse HEAD)"
+      # - name: Install rust
+      #   uses: actions-rs/toolchain@v1
+      #   with:
+      #     toolchain: nightly
+      #     profile: minimal
+      #     override: true
 
-          # Switch to the tag for the correct baseline version,
-          # then build rustdoc JSON.
-          #
-          # We *do not* want to record and reuse the target directory path
-          # across different git commits, since it may be at a different location
-          # in different commits.
-          git checkout "v$(./scripts/find_comparison_version.sh cargo-semver-checks)"
-          cargo rustdoc -- -Zunstable-options --output-format json
-          mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo_semver_checks.json" /tmp/baseline.json
+      # - name: Check for semver violations
+      #   run: |
+      #     # Record the current git sha, so we can come back to it after generating the baseline.
+      #     export CURRENT_GIT_SHA="$(git rev-parse HEAD)"
 
-          # Return to the original git sha.
-          git checkout "$CURRENT_GIT_SHA"
+      #     # Switch to the tag for the correct baseline version,
+      #     # then build rustdoc JSON.
+      #     #
+      #     # We *do not* want to record and reuse the target directory path
+      #     # across different git commits, since it may be at a different location
+      #     # in different commits.
+      #     git checkout "v$(./scripts/find_comparison_version.sh cargo-semver-checks)"
+      #     cargo rustdoc -- -Zunstable-options --output-format json
+      #     mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo_semver_checks.json" /tmp/baseline.json
 
-          # Build rustdoc JSON for the current version, and move it to /tmp/
-          # so it doesn't get overwritten by the baseline build.
-          cargo rustdoc -- -Zunstable-options --output-format json
-          mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo_semver_checks.json" /tmp/current.json
+      #     # Return to the original git sha.
+      #     git checkout "$CURRENT_GIT_SHA"
 
-          # Check for semver violations.
-          cargo run --release -- semver-checks check-release --current /tmp/current.json --baseline /tmp/baseline.json
+      #     # Build rustdoc JSON for the current version, and move it to /tmp/
+      #     # so it doesn't get overwritten by the baseline build.
+      #     cargo rustdoc -- -Zunstable-options --output-format json
+      #     mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo_semver_checks.json" /tmp/current.json
+
+      #     # Check for semver violations.
+      #     cargo run --release -- semver-checks check-release --current /tmp/current.json --baseline /tmp/baseline.json
