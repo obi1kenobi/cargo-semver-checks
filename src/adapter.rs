@@ -489,27 +489,30 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                 let previous_crate = self.previous_crate;
 
                 Box::new(data_contexts.map(move |ctx| {
-                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
-                        .current_token
-                    {
-                        None => Box::new(std::iter::empty()),
-                        Some(token) => {
-                            let origin = token.origin;
-                            let item = token.as_item().expect("token was not an Item");
-                            let item_id = &item.id;
+                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
+                        match &ctx.current_token {
+                            None => Box::new(std::iter::empty()),
+                            Some(token) => {
+                                let origin = token.origin;
+                                let item = token.as_item().expect("token was not an Item");
+                                let item_id = &item.id;
 
-                            if let Some(path) = match origin {
-                                Origin::CurrentCrate => current_crate.paths.get(item_id).map(|x| &x.path),
-                                Origin::PreviousCrate => {
-                                    previous_crate.expect("no baseline provided").paths.get(item_id).map(|x| &x.path)
+                                if let Some(path) = match origin {
+                                    Origin::CurrentCrate => {
+                                        current_crate.paths.get(item_id).map(|x| &x.path)
+                                    }
+                                    Origin::PreviousCrate => previous_crate
+                                        .expect("no baseline provided")
+                                        .paths
+                                        .get(item_id)
+                                        .map(|x| &x.path),
+                                } {
+                                    Box::new(std::iter::once(origin.make_path_token(path)))
+                                } else {
+                                    Box::new(std::iter::empty())
                                 }
-                            } {
-                                Box::new(std::iter::once(origin.make_path_token(path)))
-                            } else {
-                                Box::new(std::iter::empty())
                             }
-                        }
-                    };
+                        };
 
                     (ctx, neighbors)
                 }))
