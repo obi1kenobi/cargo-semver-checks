@@ -22,8 +22,6 @@ CURRENT_VERSION="$( \
 )" || (echo >&2 "No crate named $CRATE_NAME found in workspace."; exit 1)
 echo >&2 "Crate $CRATE_NAME current version: $CURRENT_VERSION"
 
-CURRENT_VERSION="0.1.0"
-
 # The leading whitespace is important! With it, we know that every version is both
 # preceded by and followed by whitespace. We use this fact to avoid matching
 # on substrings of versions.
