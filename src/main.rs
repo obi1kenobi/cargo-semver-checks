@@ -57,17 +57,42 @@ fn main() -> anyhow::Result<()> {
                         .setting(AppSettings::ArgRequiredElseHelp)
                         .arg(
                             Arg::with_name("current_rustdoc_path")
+                                .short('c')
                                 .long("current")
-                                .value_name("CURRENT")
-                                .help("The current rustdoc json output to test for semver violations.")
+                                .value_name("CURRENT_RUSTDOC_JSON")
+                                .help("The current rustdoc json output to test for semver violations. Required.")
                                 .takes_value(true)
                                 .required(true)
                         )
                         .arg(
                             Arg::with_name("baseline_rustdoc_path")
+                                .short('b')
                                 .long("baseline")
-                                .value_name("BASELINE")
-                                .help("The rustdoc json file to use as a semver baseline.")
+                                .value_name("BASELINE_RUSTDOC_JSON")
+                                .help("The rustdoc json file to use as a semver baseline. Required.")
+                                .takes_value(true)
+                                .required(true)
+                        )
+                )
+                .subcommand(
+                    Command::new("check-release")
+                        .version(crate_version!())
+                        .setting(AppSettings::ArgRequiredElseHelp)
+                        .arg(
+                            Arg::with_name("current_rustdoc_path")
+                                .short('c')
+                                .long("current")
+                                .value_name("CURRENT_RUSTDOC_JSON")
+                                .help("The current rustdoc json output to test for semver violations. Required.")
+                                .takes_value(true)
+                                .required(true)
+                        )
+                        .arg(
+                            Arg::with_name("baseline_rustdoc_path")
+                                .short('b')
+                                .long("baseline")
+                                .value_name("BASELINE_RUSTDOC_JSON")
+                                .help("The rustdoc json file to use as a semver baseline. Required.")
                                 .takes_value(true)
                                 .required(true)
                         )
@@ -87,6 +112,20 @@ fn main() -> anyhow::Result<()> {
             .expect("current_rustdoc_path is required but was not present")
             .as_str();
         let baseline_rustdoc_path: &str = diff_files
+            .get_one::<String>("baseline_rustdoc_path")
+            .expect("baseline_rustdoc_path is required but was not present")
+            .as_str();
+
+        let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
+        let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
+
+        return handle_diff_files(config, current_crate, baseline_crate);
+    } else if let Some(check_release) = semver_check.subcommand_matches("check-release") {
+        let current_rustdoc_path: &str = check_release
+            .get_one::<String>("current_rustdoc_path")
+            .expect("current_rustdoc_path is required but was not present")
+            .as_str();
+        let baseline_rustdoc_path: &str = check_release
             .get_one::<String>("baseline_rustdoc_path")
             .expect("baseline_rustdoc_path is required but was not present")
             .as_str();
