@@ -35,13 +35,13 @@ jobs:
           # Build rustdoc JSON for the current version, and move it to /tmp/
           # so it doesn't get overwritten by the baseline build.
           cargo rustdoc -- -Zunstable-options --output-format json
-          mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo-semver-checks.json" /tmp/current.json
+          mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo_semver_checks.json" /tmp/current.json
 
           # Switch to the tag for the correct baseline version,
           # then build rustdoc JSON again.
           git checkout "v$(./scripts/find_comparison_version.sh cargo-semver-checks)"
           cargo rustdoc -- -Zunstable-options --output-format json
-          mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo-semver-checks.json" /tmp/baseline.json
+          mv "$(cargo metadata --format-version 1 | jq -r .target_directory)/doc/cargo_semver_checks.json" /tmp/baseline.json
 
           # Check for semver violations.
           cargo run --release check-release --current /tmp/current.json --baseline /tmp/baseline.json
