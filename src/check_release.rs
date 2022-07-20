@@ -1,4 +1,7 @@
-use std::{cell::RefCell, collections::BTreeMap, env, rc::Rc, sync::Arc, iter::Peekable};
+use std::{
+    cell::RefCell, collections::BTreeMap, env, io::Write, iter::Peekable, rc::Rc, sync::Arc,
+    time::Duration,
+};
 
 use anyhow::Context;
 use clap::crate_version;
@@ -10,6 +13,7 @@ use trustfall_core::{
     frontend::parse,
     interpreter::execution::interpret_ir,
     ir::{FieldValue, TransparentValue},
+    schema::Schema,
 };
 
 use crate::{
@@ -26,7 +30,10 @@ struct QueryWithResults<'a> {
 }
 
 impl<'a> QueryWithResults<'a> {
-    fn new(name: &'a str, results: Peekable<Box<dyn Iterator<Item = QueryResultItem> + 'a>>) -> Self {
+    fn new(
+        name: &'a str,
+        results: Peekable<Box<dyn Iterator<Item = QueryResultItem> + 'a>>,
+    ) -> Self {
         Self { name, results }
     }
 }
@@ -75,6 +82,27 @@ fn get_semver_version_change(
     }
 }
 
+fn make_result_iter<'a>(
+    schema: &Schema,
+    adapter: Rc<RefCell<RustdocAdapter<'a>>>,
+    semver_query: &SemverQuery,
+) -> anyhow::Result<Peekable<Box<dyn Iterator<Item = QueryResultItem> + 'a>>> {
+    let parsed_query = parse(schema, &semver_query.query)
+        .expect("not a valid query, should have been caught in tests");
+    let args = Arc::new(
+        semver_query
+            .arguments
+            .iter()
+            .map(|(k, v)| (Arc::from(k.clone()), v.clone().into()))
+            .collect(),
+    );
+    let results_iter = interpret_ir(adapter.clone(), parsed_query, args)
+        .with_context(|| "Query execution error.")?
+        .peekable();
+
+    Ok(results_iter)
+}
+
 pub(super) fn run_check_release(
     mut config: GlobalConfig,
     current_crate: Crate,
@@ -104,21 +132,6 @@ pub(super) fn run_check_release(
         ActualSemverUpdate::NotChanged => "no",
     };
 
-    colored_ln(&mut config.output_writer, |w| {
-        colored!(
-            w,
-            "{}{}{:>12}{} Crate version {} -> {} ({} change)",
-            fg!(Some(Color::Cyan)),
-            bold!(true),
-            "Info",
-            reset!(),
-            baseline_version.unwrap_or("unknown"),
-            current_version.unwrap_or("unknown"),
-            change,
-        )
-    })
-    .expect("print failed");
-
     let queries = SemverQuery::all_queries();
 
     let schema = RustdocAdapter::schema();
@@ -128,169 +141,115 @@ pub(super) fn run_check_release(
     )));
     let mut queries_with_errors: Vec<QueryWithResults> = vec![];
 
-    for (query_id, semver_query) in queries.iter() {
-        if version_change.supports_requirement(semver_query.required_update) {
+    let queries_to_run: Vec<_> = queries
+        .iter()
+        .filter(|(_, query)| !version_change.supports_requirement(query.required_update))
+        .collect();
+    let skipped_queries = queries.len().saturating_sub(queries_to_run.len());
+
+    if skipped_queries > 0 {
+        colored_ln(&mut config.output_writer, |w| {
+            colored!(
+                w,
+                "{}{}{:>12}{} {}{}{} checks ({} checks skipped), version {} -> {} ({} change)",
+                fg!(Some(Color::Green)),
+                bold!(true),
+                "Starting",
+                reset!(),
+                bold!(true),
+                queries_to_run.len(),
+                reset!(),
+                skipped_queries,
+                baseline_version.unwrap_or("unknown"),
+                current_version.unwrap_or("unknown"),
+                change
+            )
+        })
+        .expect("print failed");
+    } else {
+        colored_ln(&mut config.output_writer, |w| {
+            colored!(
+                w,
+                "{}{}{:>12}{} {}{}{} checks, version {} -> {} ({} change)",
+                fg!(Some(Color::Green)),
+                bold!(true),
+                "Starting",
+                reset!(),
+                bold!(true),
+                queries_to_run.len(),
+                reset!(),
+                baseline_version.unwrap_or("unknown"),
+                current_version.unwrap_or("unknown"),
+                change,
+            )
+        })
+        .expect("print failed");
+    }
+    let mut total_duration = Duration::default();
+
+    for (query_id, semver_query) in queries_to_run.iter().copied() {
+        let category = match semver_query.required_update {
+            RequiredSemverUpdate::Major => "major",
+            RequiredSemverUpdate::Minor => "minor",
+        };
+        if config.printing_to_terminal {
+            colored!(
+                config.output_writer,
+                "{}{}{:>12}{} [{:9}] {:^18} {}",
+                fg!(Some(Color::Cyan)),
+                bold!(true),
+                "Running",
+                reset!(),
+                "",
+                category,
+                query_id,
+            )
+            .expect("print failed");
+            config.output_writer.flush().expect("flush failed");
+        }
+
+        let start_instant = std::time::Instant::now();
+        let mut results_iter = make_result_iter(&schema, adapter.clone(), semver_query)?;
+        let peeked = results_iter.peek();
+        let end_instant = std::time::Instant::now();
+        let time_to_decide = end_instant - start_instant;
+        total_duration += time_to_decide;
+
+        if peeked.is_none() {
+            if config.printing_to_terminal {
+                write!(config.output_writer, "\r").expect("print failed");
+            }
             colored_ln(&mut config.output_writer, |w| {
                 colored!(
                     w,
-                    "{}{}{:>12}{} Allowed change: {}",
+                    "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
                     fg!(Some(Color::Green)),
                     bold!(true),
-                    "Skipping",
+                    "PASS",
                     reset!(),
-                    &semver_query.human_readable_name,
+                    time_to_decide.as_secs_f32(),
+                    category,
+                    query_id,
                 )
             })
-            .expect("print failed");
-            continue;
-        }
-
-        let parsed_query = parse(&schema, &semver_query.query)
-            .expect("not a valid query, should have been caught in tests");
-        let args = Arc::new(
-            semver_query
-                .arguments
-                .iter()
-                .map(|(k, v)| (Arc::from(k.clone()), v.clone().into()))
-                .collect(),
-        );
-        let mut results_iter = interpret_ir(adapter.clone(), parsed_query, args)
-            .with_context(|| "Query execution error.")?
-            .peekable();
-
-        colored!(
-            config.output_writer,
-            "{}{}{:>12}{} {} ... ",
-            fg!(Some(Color::Green)),
-            bold!(true),
-            "Checking",
-            reset!(),
-            &semver_query.human_readable_name,
-        )
-        .expect("print failed");
-
-        let start_instant = std::time::Instant::now();
-        if results_iter.peek().is_none() {
-            let end_instant = std::time::Instant::now();
-            colored!(
-                config.output_writer,
-                "{}{}{}{} ({:.3}s)\n",
-                fg!(Some(Color::Green)),
-                bold!(true),
-                "OK",
-                reset!(),
-                (end_instant - start_instant).as_secs_f32(),
-            )
             .expect("print failed");
         } else {
             queries_with_errors.push(QueryWithResults::new(query_id.as_str(), results_iter));
 
-            let version_bump_needed = match semver_query.required_update {
-                RequiredSemverUpdate::Major => "major",
-                RequiredSemverUpdate::Minor => "minor",
-            };
-            colored!(
-                config.output_writer,
-                "{}{}{}{}\n",
-                fg!(Some(Color::Red)),
-                bold!(true),
-                "NOT OK:",
-                reset!(),
-            )
-            .expect("print failed");
-
-            colored_ln(&mut config.output_writer, |w| {
-                colored!(
-                    w,
-                    "{}{}{:>12}{} {}",
-                    fg!(Some(Color::Cyan)),
-                    bold!(true),
-                    "Description",
-                    reset!(),
-                    semver_query.error_message,
-                )
-            })
-            .expect("print failed");
-
-            if let Some(ref_link) = semver_query.reference_link.as_deref() {
-                colored_ln(&mut config.output_writer, |w| {
-                    colored!(
-                        w,
-                        "{}{}{:>12}{} {}",
-                        fg!(Some(Color::Cyan)),
-                        bold!(true),
-                        "Reference",
-                        reset!(),
-                        ref_link,
-                    )
-                })
-                .expect("print failed");
+            if config.printing_to_terminal {
+                write!(config.output_writer, "\r").expect("print failed");
             }
             colored_ln(&mut config.output_writer, |w| {
                 colored!(
                     w,
-                    "{}{}{:>12}{} {}",
-                    fg!(Some(Color::Cyan)),
-                    bold!(true),
-                    "Implemented",
-                    reset!(),
-                    format!(
-                        "https://github.com/obi1kenobi/cargo-semver-check/tree/v{}/src/queries/{}.ron",
-                        crate_version!(),
-                        semver_query.id,
-                    ),
-                )
-            })
-            .expect("print failed");
-
-            let reg = Handlebars::new();
-            for semver_violation_result in results_iter.take(5) {
-                let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
-                    .into_iter()
-                    .map(|(k, v)| (k, v.into()))
-                    .collect();
-
-                if let Some(template) = semver_query.per_result_error_template.as_deref() {
-                    colored_ln(&mut config.output_writer, |w| {
-                        colored!(
-                            w,
-                            "{}{}{:>12}{} {}",
-                            fg!(Some(Color::Blue)),
-                            bold!(true),
-                            "Err Instance",
-                            reset!(),
-                            reg.render_template(template, &pretty_result)
-                                .with_context(|| "Error instantiating semver query template.")
-                                .expect("could not materialize template"),
-                        )
-                    })
-                    .expect("print failed");
-                } else {
-                    colored_ln(&mut config.output_writer, |w| {
-                        colored!(
-                            w,
-                            "{}{}{:>12}{} raw violation data: {}",
-                            fg!(Some(Color::Cyan)),
-                            bold!(true),
-                            "Instance",
-                            reset!(),
-                            serde_json::to_string_pretty(&pretty_result).expect("serde failed"),
-                        )
-                    })
-                    .expect("print failed");
-                }
-            }
-
-            colored_ln(&mut config.output_writer, |w| {
-                colored!(
-                    w,
-                    "{}{}{:>12}{} {}: requires {} version",
+                    "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
                     fg!(Some(Color::Red)),
                     bold!(true),
-                    "Failed",
+                    "FAIL",
                     reset!(),
-                    &semver_query.human_readable_name,
-                    version_bump_needed,
+                    time_to_decide.as_secs_f32(),
+                    category,
+                    query_id,
                 )
             })
             .expect("print failed");
@@ -301,11 +260,132 @@ pub(super) fn run_check_release(
         colored_ln(&mut config.output_writer, |w| {
             colored!(
                 w,
-                "{}{}{:>12}{} Found errors.",
+                "{}{}{:>12}{} [{:>8.3}s] {} checks run: {} passed, {} failed, {} skipped",
                 fg!(Some(Color::Red)),
                 bold!(true),
-                "Done",
+                "Summary",
                 reset!(),
+                total_duration.as_secs_f32(),
+                queries_to_run.len(),
+                queries_to_run.len() - queries_with_errors.len(),
+                queries_with_errors.len(),
+                skipped_queries,
+            )
+        })
+        .expect("print failed");
+
+        let mut required_versions = vec![];
+
+        for query_with_results in queries_with_errors {
+            let semver_query = &queries[query_with_results.name];
+            required_versions.push(semver_query.required_update);
+            colored_ln(&mut config.output_writer, |w| {
+                colored!(
+                    w,
+                    "\n--- failure {}: {} ---\n",
+                    &semver_query.id,
+                    &semver_query.human_readable_name,
+                )
+            })
+            .expect("print failed");
+
+            if let Some(ref_link) = semver_query.reference_link.as_deref() {
+                colored_ln(&mut config.output_writer, |w| {
+                    colored!(
+                        w,
+                        "{}Description:{}\n{}\n{:>12} {}\n{:>12} {}\n",
+                        bold!(true),
+                        reset!(),
+                        &semver_query.error_message,
+                        "ref:",
+                        ref_link,
+                        "impl:",
+                        format!(
+                            "https://github.com/obi1kenobi/cargo-semver-check/tree/v{}/src/queries/{}.ron",
+                            crate_version!(),
+                            semver_query.id,
+                        )
+                    )
+                })
+                .expect("print failed");
+            } else {
+                colored_ln(&mut config.output_writer, |w| {
+                    colored!(
+                        w,
+                        "{}Description:{}\n{}\n{:>12} {}\n",
+                        bold!(true),
+                        reset!(),
+                        &semver_query.error_message,
+                        "impl:",
+                        format!(
+                            "https://github.com/obi1kenobi/cargo-semver-check/tree/v{}/src/queries/{}.ron",
+                            crate_version!(),
+                            semver_query.id,
+                        )
+                    )
+                })
+                .expect("print failed");
+            }
+
+            colored_ln(&mut config.output_writer, |w| {
+                colored!(w, "{}Failed in:{}", bold!(true), reset!(),)
+            })
+            .expect("print failed");
+
+            let reg = Handlebars::new();
+            let start_instant = std::time::Instant::now();
+            for semver_violation_result in query_with_results.results {
+                let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
+                    .into_iter()
+                    .map(|(k, v)| (k, v.into()))
+                    .collect();
+
+                if let Some(template) = semver_query.per_result_error_template.as_deref() {
+                    colored_ln(&mut config.output_writer, |w| {
+                        colored!(
+                            w,
+                            "  {}",
+                            reg.render_template(template, &pretty_result)
+                                .with_context(|| "Error instantiating semver query template.")
+                                .expect("could not materialize template"),
+                        )
+                    })
+                    .expect("print failed");
+                } else {
+                    colored_ln(&mut config.output_writer, |w| {
+                        colored!(
+                            w,
+                            "{}\n",
+                            serde_json::to_string_pretty(&pretty_result).expect("serde failed"),
+                        )
+                    })
+                    .expect("print failed");
+                }
+            }
+            let end_instant = std::time::Instant::now();
+            total_duration += end_instant - start_instant;
+        }
+
+        let required_bump = if required_versions.contains(&RequiredSemverUpdate::Major) {
+            "major"
+        } else if required_versions.contains(&RequiredSemverUpdate::Minor) {
+            "minor"
+        } else {
+            unreachable!("{:?}", required_versions)
+        };
+
+        colored_ln(&mut config.output_writer, |w| {
+            colored!(
+                w,
+                "\n{}{}{:>12}{} [{:>8.3}s] semver requires new {} version: {} major and {} minor checks failed",
+                fg!(Some(Color::Red)),
+                bold!(true),
+                "Final",
+                reset!(),
+                total_duration.as_secs_f32(),
+                required_bump,
+                required_versions.iter().filter(|x| *x == &RequiredSemverUpdate::Major).count(),
+                required_versions.iter().filter(|x| *x == &RequiredSemverUpdate::Minor).count(),
             )
         })
         .expect("print failed");
@@ -316,11 +396,15 @@ pub(super) fn run_check_release(
     colored_ln(&mut config.output_writer, |w| {
         colored!(
             w,
-            "{}{}{:>12}{} No errors.",
+            "{}{}{:>12}{} [{:>8.3}s] {} checks run: {} passed, {} skipped",
             fg!(Some(Color::Green)),
             bold!(true),
-            "Done",
+            "Summary",
             reset!(),
+            total_duration.as_secs_f32(),
+            queries_to_run.len(),
+            queries_to_run.len(),
+            skipped_queries,
         )
     })
     .expect("print failed");
