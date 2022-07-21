@@ -15,11 +15,8 @@ cd "$(git rev-parse --show-toplevel)"
 # The first argument should be the name of a crate.
 CRATE_NAME="$1"
 
-CURRENT_VERSION="$( \
-    cargo metadata --format-version 1 | \
-    jq --arg crate_name "$CRATE_NAME" --exit-status -r \
-        '.packages[] | select(.name == $crate_name) | .version' \
-)" || (echo >&2 "No crate named $CRATE_NAME found in workspace."; exit 1)
+CURRENT_VERSION="$(./scripts/get_current_version.sh "$CRATE_NAME")" || \
+    (echo >&2 "No crate named $CRATE_NAME found in workspace."; exit 1)
 echo >&2 "Crate $CRATE_NAME current version: $CURRENT_VERSION"
 
 # The leading whitespace is important! With it, we know that every version is both

@@ -102,7 +102,20 @@ jobs:
       - pre-publish-checks
     if: needs.should-publish.outputs.is_new_version == 'yes' && github.ref == 'refs/heads/main'
     steps:
-      - run: exit 0
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Tag the version
+        run: |
+          set -euxo pipefail
+          export CURRENT_VERSION="$(./scripts/get_current_version.sh cargo-semver-checks)"
+          git tag "v$CURRENT_VERSION"
+          git push origin main --tags
+
+      - name: Publish
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
   should-publish:
     name: Check if version changed
