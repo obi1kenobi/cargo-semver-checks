@@ -38,7 +38,7 @@ echo >&2 -e "Versions on crates.io:$EXISTING_VERSIONS\n"
 OUTPUT="$( \
     echo -e "$EXISTING_VERSIONS" | \
     sort -V | \
-    grep --line-regexp --max-count=1 "$CURRENT_VERSION"
+    grep --line-regexp --max-count=1 "$CURRENT_VERSION" || true
 )"
 
 if [[ "$OUTPUT" == "$CURRENT_VERSION" ]]; then
