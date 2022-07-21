@@ -5,20 +5,33 @@ Queries `rustdoc`-generated crate documentation using the `trustfall`
 ["query everything" engine](https://github.com/obi1kenobi/trustfall).
 Each query looks for a particular kind of semver violation, such as:
 - public struct was removed
-- public plain struct's public field was removed
-- public enum was removed
 - public enum's variant was removed
+- public struct became non-exhaustive
+- public enum has a new variant, but wasn't non-exhaustive in the last version
 
 ```
 cargo install cargo-semver-checks
 
-cargo semver-checks diff-files --current <new-rustdoc-json> --baseline <previous-rustdoc-json>
+# Check whether it's safe to release the new version:
+cargo semver-checks check-release --current <new-rustdoc-json> --baseline <previous-rustdoc-json>
+
+# Or, via a GitHub Action (from .github/workflows/ci.yml in this repo):
+steps:
+- uses: actions/checkout@v3
+  with:
+    fetch-depth: 0
+
+- name: Check semver
+  uses: obi1kenobi/cargo-semver-checks-action@v1
 
 # To have rustdoc generate JSON output, use:
 cargo +nightly rustdoc -- -Zunstable-options --output-format json
 ```
 
-This crate is a work-in-progress. It can catch some semver violations, and will miss many more.
+Here is example output:
+
+
+This crate is a work-in-progress. It can catch many semver violations, and will miss many more.
 Its queries and adapter implementation have not been optimized for runtime,
 and will currently exhibit `O(n^2)` runtime growth on large codebases.
 See the notes in the section below for details.
