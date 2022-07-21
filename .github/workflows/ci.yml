@@ -105,7 +105,7 @@ jobs:
       - run: exit 0
 
   should-publish:
-    name: Check if the version changed and we need to publish
+    name: Check if version changed
     runs-on: ubuntu-latest
     outputs:
       is_new_version: ${{ steps.check.outputs.is_new_version }}
@@ -115,7 +115,7 @@ jobs:
 
       - id: check
         run: |
-          ./scripts/is_version_already_uploaded.sh
+          ./scripts/is_version_already_uploaded.sh cargo-semver-checks
           export EXIT_CODE="$?"
           if [[ "$EXIT_CODE" == "7" ]]; then
             echo '::set-output name=is_new_version::no'
@@ -127,7 +127,7 @@ jobs:
           fi
 
   pre-publish-checks:
-    name: Make sure the crate is ready for publishing
+    name: Check for semver compliance
     runs-on: ubuntu-latest
     needs:
       - ci-everything
