@@ -102,7 +102,7 @@ jobs:
       - pre-publish-checks
     if: needs.should-publish.outputs.is_new_version == 'yes' && github.ref == 'refs/heads/main'
     steps:
-      run: exit 0
+      - run: exit 0
 
   should-publish:
     name: Check if the version changed and we need to publish
