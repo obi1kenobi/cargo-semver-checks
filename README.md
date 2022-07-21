@@ -15,31 +15,38 @@ cargo install cargo-semver-checks
 # Check whether it's safe to release the new version:
 cargo semver-checks check-release --current <new-rustdoc-json> --baseline <previous-rustdoc-json>
 
-# Or, via a GitHub Action (from .github/workflows/ci.yml in this repo):
+# Or, via a GitHub Action (see .github/workflows/ci.yml in this repo):
 steps:
 - uses: actions/checkout@v3
   with:
     fetch-depth: 0
-
 - name: Check semver
   uses: obi1kenobi/cargo-semver-checks-action@v1
+- name: Publish to crates.io
+  run: # your `cargo publish` code here
 
-# To have rustdoc generate JSON output, use:
+# To generate rustdoc JSON data for your crate, use:
 cargo +nightly rustdoc -- -Zunstable-options --output-format json
 ```
 
-Here is example output:
+Each failing check references specific items in the Cargo SemVer reference
+or other reference pages, as appropriate. It also includes the item name
+and file location that are the cause of the problem, as well as a link
+to the implementation of that query in the current version of the tool:
+![image](https://user-images.githubusercontent.com/2348618/180127698-240e4bed-5581-4cbd-9f47-038affbc4a3e.png)
 
-
-This crate is a work-in-progress. It can catch many semver violations, and will miss many more.
-Its queries and adapter implementation have not been optimized for runtime,
-and will currently exhibit `O(n^2)` runtime growth on large codebases.
-See the notes in the section below for details.
+This crate is functional and capable of catching many semver violations.
+However, it won't catch every kind of semver issue, and its performance on massive crates
+(X00,000 lines+) has not been optimized. If you run into any problems, please open an issue!
 
 ## Using `cargo-semver-checks` to check your crate
 
-Steps:
-- Perform a `git checkout` of your crate's last published version,
+The easiest way to use this crate is via 
+[the corresponding GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action)
+that will automatically do all the steps for you.
+
+If you'd like to perform those steps manually, here they are:
+- Perform a `git checkout` of your crate's last published version*,
   which will represent your semver baseline.
 - Generate `rustdoc` documentation in JSON format for the crate's last published version
   by running `cargo +nightly rustdoc -- -Zunstable-options --output-format json`.
@@ -49,12 +56,16 @@ Steps:
 - Switch to the version of your crate that you'd like to check.
 - Repeat the `cargo rustdoc` command above, and note
   the newly-generated `doc/<your-crate-name>.json` file in your build target directory.
-- Run `cargo semver-checks diff-files --current <new-rustdoc> --baseline <previous-rustdoc>`.
+- Run `cargo semver-checks check-release --current <new-rustdoc> --baseline <previous-rustdoc>`.
   This step will run multiple queries that look for particular kinds of semver violations,
   and report violations they find.
 
+*: Specifically, we want the largest published version number that is smaller than the
+   version that we are preparing to publish. The distinction matters if, say, you've already
+   published v1.2.2 and v1.3.0, and you need to backport some fixes and release v1.2.3:
+   1.2.2 would be your baseline, and you'd compare 1.2.3 -> 1.2.2 and not 1.2.3 -> 1.3.0.
+
 Notes:
-- Only 5 violations per category are reported for now.
 - If using it on a massive codebase (multiple hundreds of thousands of lines of Rust),
   the queries may be a bit slow: there is some `O(n^2)` scaling for `n` items in a few places that
   I haven't had time to optimize down to `O(n)` yet. Apologies! I have temporarily prioritized
@@ -76,7 +87,7 @@ it remains `cargo-semver-checks` for the time being.
 The `cargo_semver_check` name is reserved on crates.io but all its versions
 are intentionally yanked. Please use the `cargo-semver-checks` crate instead.
 
-## Running `cargo test` for the first time
+## Running `cargo test` in this crate for the first time
 
 Testing this crate requires rustdoc JSON output data, which is too large and variable
 to check into git. It has to be generated locally before `cargo test` will succeed,
