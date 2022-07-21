@@ -128,8 +128,10 @@ jobs:
 
       - id: check
         run: |
+          set +e
           ./scripts/is_version_already_uploaded.sh cargo-semver-checks
           export EXIT_CODE="$?"
+          set -e
           if [[ "$EXIT_CODE" == "7" ]]; then
             echo '::set-output name=is_new_version::no'
           elif [[ "$EXIT_CODE" == "0" ]]; then
