@@ -21,10 +21,19 @@ pub(crate) struct GlobalConfig {
 impl GlobalConfig {
     fn new() -> Self {
         let printing_to_terminal = atty::is(atty::Stream::Stdout);
-        let color_choice = if printing_to_terminal {
-            ColorChoice::Auto
-        } else {
-            ColorChoice::Never
+
+        let color_choice = match std::env::var("CARGO_TERM_COLOR").as_deref() {
+            Ok("always") => ColorChoice::Always,
+            Ok("alwaysansi") => ColorChoice::AlwaysAnsi,
+            Ok("auto") => ColorChoice::Auto,
+            Ok("never") => ColorChoice::Never,
+            Ok(_) | Err(..) => {
+                if printing_to_terminal {
+                    ColorChoice::Auto
+                } else {
+                    ColorChoice::Never
+                }
+            }
         };
 
         Self {
