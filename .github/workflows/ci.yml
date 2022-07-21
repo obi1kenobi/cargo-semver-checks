@@ -106,6 +106,7 @@ jobs:
 
   should-publish:
     name: Check if the version changed and we need to publish
+    runs-on: ubuntu-latest
     outputs:
       is_new_version: ${{ steps.check.outputs.is_new_version }}
     steps:
