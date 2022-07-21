@@ -27,10 +27,12 @@ impl GlobalConfig {
             Ok("alwaysansi") => ColorChoice::AlwaysAnsi,
             Ok("auto") => ColorChoice::Auto,
             Ok("never") => ColorChoice::Never,
-            Ok(_) | Err(..) => if printing_to_terminal {
-                ColorChoice::Auto
-            } else {
-                ColorChoice::Never
+            Ok(_) | Err(..) => {
+                if printing_to_terminal {
+                    ColorChoice::Auto
+                } else {
+                    ColorChoice::Never
+                }
             }
         };
 
