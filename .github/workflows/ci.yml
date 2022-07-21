@@ -110,6 +110,9 @@ jobs:
     outputs:
       is_new_version: ${{ steps.check.outputs.is_new_version }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
       - id: check
         run: |
           ./scripts/is_version_already_uploaded.sh
