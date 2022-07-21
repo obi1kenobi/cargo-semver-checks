@@ -110,7 +110,7 @@ jobs:
           set -euxo pipefail
           export CURRENT_VERSION="$(./scripts/get_current_version.sh cargo-semver-checks)"
           git tag "v$CURRENT_VERSION"
-          git push origin main --tags
+          git push origin "v$CURRENT_VERSION"
 
       - name: Publish
         run: cargo publish
