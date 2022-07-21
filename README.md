@@ -15,7 +15,7 @@ cargo install cargo-semver-checks
 # Check whether it's safe to release the new version:
 cargo semver-checks check-release --current <new-rustdoc-json> --baseline <previous-rustdoc-json>
 
-# Or, via a GitHub Action (see .github/workflows/ci.yml in this repo):
+# Use as a GitHub Action (used in .github/workflows/ci.yml in this repo):
 steps:
 - uses: actions/checkout@v3
   with:
