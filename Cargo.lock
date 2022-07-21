@@ -130,7 +130,7 @@ checksum = "869119e97797867fd90f5e22af7d0bd274bd4635ebb9eb68c04f3f513ae6c412"
 
 [[package]]
 name = "cargo-semver-checks"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "anyhow",
  "atty",
