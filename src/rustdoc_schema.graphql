@@ -220,3 +220,65 @@ type Path {
     """
     path: [String!]!
 }
+
+"""
+A function-like entity, like a function, function pointer, or method.
+
+Combines:
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Header.html
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.FnDecl.html
+"""
+interface FunctionLike {
+    const: Boolean!
+    unsafe: Boolean!
+    async: Boolean!
+}
+
+"""
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Item.html
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/enum.ItemEnum.html
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Function.html
+"""
+type Function implements Item & FunctionLike & Importable {
+    # properties from Item
+    id: String!
+    crate_id: Int!
+    name: String
+    docs: String
+    attrs: [String!]!
+    visibility_limit: String!
+
+    # properties from FunctionLike
+    const: Boolean!
+    unsafe: Boolean!
+    async: Boolean!
+
+    # edges from Item
+    span: Span
+
+    # edges from Importable
+    path: [Path!]
+}
+
+"""
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Item.html
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/enum.ItemEnum.html
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Method.html
+"""
+type Method implements Item & FunctionLike {
+    # properties from Item
+    id: String!
+    crate_id: Int!
+    name: String
+    docs: String
+    attrs: [String!]!
+    visibility_limit: String!
+
+    # properties from FunctionLike
+    const: Boolean!
+    unsafe: Boolean!
+    async: Boolean!
+
+    # edge from Item
+    span: Span
+}

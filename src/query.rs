@@ -72,6 +72,7 @@ impl SemverQuery {
             include_str!("./queries/struct_pub_field_missing.ron"),
             include_str!("./queries/unit_struct_changed_kind.ron"),
             include_str!("./queries/variant_marked_non_exhaustive.ron"),
+            include_str!("./queries/function_missing.ron"),
         ];
         for query_text in query_text_contents {
             let query: SemverQuery = ron::from_str(query_text).expect("query failed to parse");
