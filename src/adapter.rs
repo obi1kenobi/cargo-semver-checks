@@ -743,10 +743,11 @@ mod tests {
         enum_missing,
         enum_variant_added,
         enum_variant_missing,
+        function_missing,
+        struct_marked_non_exhaustive,
         struct_missing,
         struct_pub_field_missing,
         unit_struct_changed_kind,
-        struct_marked_non_exhaustive,
         variant_marked_non_exhaustive,
     );
 }
