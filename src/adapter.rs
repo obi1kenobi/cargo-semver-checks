@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rustdoc_types::{Crate, Enum, Item, Span, Struct, Type, Variant};
+use rustdoc_types::{Crate, Enum, Function, Item, Method, Span, Struct, Type, Variant};
 use trustfall_core::{
     interpreter::{Adapter, DataContext, InterpretedQuery},
     ir::{EdgeParameters, Eid, FieldValue, Vid},
@@ -80,6 +80,29 @@ pub enum TokenKind<'a> {
 
 #[allow(dead_code)]
 impl<'a> Token<'a> {
+    /// The name of the actual runtime type of this token,
+    /// intended to fulfill resolution requests for the __typename property.
+    #[inline]
+    fn typename(&self) -> &'static str {
+        match self.kind {
+            TokenKind::Item(item) => match &item.inner {
+                rustdoc_types::ItemEnum::Struct(..) => "Struct",
+                rustdoc_types::ItemEnum::Enum(..) => "Enum",
+                rustdoc_types::ItemEnum::Function(..) => "Function",
+                rustdoc_types::ItemEnum::Method(..) => "Method",
+                rustdoc_types::ItemEnum::Variant(Variant::Plain) => "PlainVariant",
+                rustdoc_types::ItemEnum::Variant(Variant::Tuple(..)) => "TupleVariant",
+                rustdoc_types::ItemEnum::Variant(Variant::Struct(..)) => "StructVariant",
+                rustdoc_types::ItemEnum::StructField(..) => "StructField",
+                _ => unreachable!("unexpected item.inner for item: {item:?}"),
+            },
+            TokenKind::Span(..) => "Span",
+            TokenKind::Path(..) => "Path",
+            TokenKind::Crate(..) => "Crate",
+            TokenKind::CrateDiff(..) => "CrateDiff",
+        }
+    }
+
     fn as_crate_diff(&self) -> Option<(&'a Crate, &'a Crate)> {
         match &self.kind {
             TokenKind::CrateDiff(tuple) => Some(*tuple),
@@ -141,6 +164,20 @@ impl<'a> Token<'a> {
             TokenKind::Path(path) => Some(*path),
             _ => None,
         }
+    }
+
+    fn as_function(&self) -> Option<&'a Function> {
+        self.as_item().and_then(|item| match &item.inner {
+            rustdoc_types::ItemEnum::Function(func) => Some(func),
+            _ => None,
+        })
+    }
+
+    fn as_method(&self) -> Option<&'a Method> {
+        self.as_item().and_then(|item| match &item.inner {
+            rustdoc_types::ItemEnum::Method(func) => Some(func),
+            _ => None,
+        })
     }
 }
 
@@ -239,6 +276,27 @@ fn get_path_property(token: &Token, field_name: &str) -> FieldValue {
     }
 }
 
+fn get_function_like_property(token: &Token, field_name: &str) -> FieldValue {
+    let maybe_function = token.as_function();
+    let maybe_method = token.as_method();
+
+    let (header, _decl) = maybe_function
+        .map(|func| (&func.header, &func.decl))
+        .unwrap_or_else(|| {
+            let method = maybe_method.unwrap_or_else(|| {
+                unreachable!("token was neither a function nor a method: {token:?}")
+            });
+            (&method.header, &method.decl)
+        });
+
+    match field_name {
+        "const" => header.const_.into(),
+        "async" => header.async_.into(),
+        "unsafe" => header.unsafe_.into(),
+        _ => unreachable!("FunctionLike property {field_name}"),
+    }
+}
+
 fn property_mapper<'a>(
     ctx: DataContext<Token<'a>>,
     field_name: &str,
@@ -286,69 +344,13 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
         _vertex_hint: Vid,
     ) -> Box<dyn Iterator<Item = (DataContext<Self::DataToken>, FieldValue)> + 'a> {
         if field_name.as_ref() == "__typename" {
-            match current_type_name.as_ref() {
-                "Crate" | "Struct" | "StructField" | "Span" | "Enum" | "PlainVariant"
-                | "TupleVariant" | "StructVariant" => {
-                    // These types have no subtypes, so their __typename
-                    // is always equal to their statically-determined type.
-                    let typename: FieldValue = current_type_name.as_ref().into();
-                    Box::new(data_contexts.map(move |ctx| {
-                        if ctx.current_token.is_some() {
-                            (ctx, typename.clone())
-                        } else {
-                            (ctx, FieldValue::Null)
-                        }
-                    }))
+            Box::new(data_contexts.map(|ctx| match &ctx.current_token {
+                Some(token) => {
+                    let value = token.typename().into();
+                    (ctx, value)
                 }
-                "Variant" => {
-                    // Inspect the inner type of the token and
-                    // output the appropriate __typename value.
-                    Box::new(data_contexts.map(|ctx| {
-                        let value = match &ctx.current_token {
-                            None => FieldValue::Null,
-                            Some(token) => match token.as_item() {
-                                Some(item) => match &item.inner {
-                                    rustdoc_types::ItemEnum::Variant(Variant::Plain) => {
-                                        "PlainVariant".into()
-                                    }
-                                    rustdoc_types::ItemEnum::Variant(Variant::Tuple(..)) => {
-                                        "TupleVariant".into()
-                                    }
-                                    rustdoc_types::ItemEnum::Variant(Variant::Struct(..)) => {
-                                        "StructVariant".into()
-                                    }
-                                    _ => {
-                                        unreachable!("unexpected item.inner type: {:?}", item.inner)
-                                    }
-                                },
-                                _ => unreachable!("unexpected token type: {token:?}"),
-                            },
-                        };
-                        (ctx, value)
-                    }))
-                }
-                "Item" => {
-                    // Inspect the inner type of the token and
-                    // output the appropriate __typename value.
-                    Box::new(data_contexts.map(|ctx| {
-                        let value = match &ctx.current_token {
-                            None => FieldValue::Null,
-                            Some(token) => match token.as_item() {
-                                Some(item) => match &item.inner {
-                                    rustdoc_types::ItemEnum::Struct(_) => "Struct".into(),
-                                    rustdoc_types::ItemEnum::StructField(_) => "StructField".into(),
-                                    _ => {
-                                        unreachable!("unexpected item.inner type: {:?}", item.inner)
-                                    }
-                                },
-                                _ => unreachable!("unexpected token type: {token:?}"),
-                            },
-                        };
-                        (ctx, value)
-                    }))
-                }
-                _ => unreachable!("project_property for __typename on {current_type_name}"),
-            }
+                None => (ctx, FieldValue::Null),
+            }))
         } else {
             match current_type_name.as_ref() {
                 "Crate" => {
@@ -362,7 +364,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     }))
                 }
                 "Struct" | "StructField" | "Enum" | "Variant" | "PlainVariant" | "TupleVariant"
-                | "StructVariant"
+                | "StructVariant" | "Function" | "Method"
                     if matches!(
                         field_name.as_ref(),
                         "id" | "crate_id" | "name" | "docs" | "attrs" | "visibility_limit"
@@ -389,6 +391,13 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                 "Path" => {
                     Box::new(data_contexts.map(move |ctx| {
                         property_mapper(ctx, field_name.as_ref(), get_path_property)
+                    }))
+                }
+                "FunctionLike" | "Function" | "Method"
+                    if matches!(field_name.as_ref(), "const" | "unsafe" | "async") =>
+                {
+                    Box::new(data_contexts.map(move |ctx| {
+                        property_mapper(ctx, field_name.as_ref(), get_function_like_property)
                     }))
                 }
                 _ => unreachable!("project_property {current_type_name} {field_name}"),
@@ -470,6 +479,8 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                                 | rustdoc_types::ItemEnum::StructField(..)
                                                 | rustdoc_types::ItemEnum::Enum(..)
                                                 | rustdoc_types::ItemEnum::Variant(..)
+                                                | rustdoc_types::ItemEnum::Function(..)
+                                                | rustdoc_types::ItemEnum::Method(..)
                                         )
                                     })
                                     .map(move |value| origin.make_item_token(value));
@@ -484,7 +495,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     ),
                 }
             }
-            "Importable" | "Struct" | "Enum" if edge_name.as_ref() == "path" => {
+            "Importable" | "Struct" | "Enum" | "Function" if edge_name.as_ref() == "path" => {
                 let current_crate = self.current_crate;
                 let previous_crate = self.previous_crate;
 
@@ -518,7 +529,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                 }))
             }
             "Item" | "Struct" | "StructField" | "Enum" | "Variant" | "PlainVariant"
-            | "TupleVariant" | "StructVariant"
+            | "TupleVariant" | "StructVariant" | "Function" | "Method"
                 if edge_name.as_ref() == "span" =>
             {
                 Box::new(data_contexts.map(move |ctx| {
@@ -623,31 +634,12 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
         _vertex_hint: Vid,
     ) -> Box<dyn Iterator<Item = (DataContext<Self::DataToken>, bool)> + 'a> {
         match current_type_name.as_ref() {
-            "Item" | "Variant" => {
+            "Item" | "Variant" | "FunctionLike" => {
                 Box::new(data_contexts.map(move |ctx| {
                     let can_coerce = match &ctx.current_token {
                         None => false,
                         Some(token) => {
-                            let actual_type_name = match token.as_item() {
-                                Some(item) => match &item.inner {
-                                    rustdoc_types::ItemEnum::Struct(..) => "Struct",
-                                    rustdoc_types::ItemEnum::StructField(..) => "StructField",
-                                    rustdoc_types::ItemEnum::Enum(..) => "Enum",
-                                    rustdoc_types::ItemEnum::Variant(Variant::Plain) => {
-                                        "PlainVariant"
-                                    }
-                                    rustdoc_types::ItemEnum::Variant(Variant::Tuple(..)) => {
-                                        "TupleVariant"
-                                    }
-                                    rustdoc_types::ItemEnum::Variant(Variant::Struct(..)) => {
-                                        "StructVariant"
-                                    }
-                                    _ => {
-                                        unreachable!("unexpected item.inner type: {:?}", item.inner)
-                                    }
-                                },
-                                _ => unreachable!("unexpected token type: {token:?}"),
-                            };
+                            let actual_type_name = token.typename();
 
                             match coerce_to_type_name.as_ref() {
                                 "Variant" => matches!(
