@@ -21,4 +21,24 @@ impl Foo {
 
     #[cfg(not(feature = "inherent_method_missing"))]
     pub fn will_be_removed_method(&self) {}
+
+    #[cfg(not(feature = "inherent_method_missing"))]
+    pub fn moved_trait_provided_method(&self) {}
+
+    #[cfg(not(feature = "inherent_method_missing"))]
+    pub fn moved_method(&self) {}
+}
+
+// Moving an inherent method to an implemented trait should not be a breaking change,
+// both when the method is defined inside the trait and when it's implemented externally.
+#[cfg(feature = "inherent_method_missing")]
+pub trait Bar {
+    fn moved_trait_provided_method(&self) {}
+
+    fn moved_method(&self);
+}
+
+#[cfg(feature = "inherent_method_missing")]
+impl Bar for Foo {
+    fn moved_method(&self) {}
 }

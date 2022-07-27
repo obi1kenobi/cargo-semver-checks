@@ -1,6 +1,8 @@
-use std::sync::Arc;
+use std::{collections::BTreeSet, sync::Arc};
 
-use rustdoc_types::{Crate, Enum, Function, Impl, Item, Method, Span, Struct, Type, Variant};
+use rustdoc_types::{
+    Crate, Enum, Function, Id, Impl, Item, ItemEnum, Method, Span, Struct, Type, Variant,
+};
 use trustfall_core::{
     interpreter::{Adapter, DataContext, InterpretedQuery},
     ir::{EdgeParameters, Eid, FieldValue, Vid},
@@ -714,7 +716,33 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                 };
 
                                 let impl_token = token.as_impl().expect("not an Impl token");
-                                Box::new(impl_token.items.iter().filter_map(move |item_id| {
+                                let provided_methods: Box<dyn Iterator<Item = &Id>> = if impl_token.provided_trait_methods.is_empty() {
+                                    Box::new(std::iter::empty())
+                                } else {
+                                    let method_names: BTreeSet<&str> = impl_token.provided_trait_methods.iter().map(|x| x.as_str()).collect();
+
+                                    let trait_type = impl_token.trait_.as_ref().expect("no trait but provided_trait_methods was non-empty");
+                                    let trait_item = match trait_type {
+                                        Type::ResolvedPath { name: _, id, args: _, param_names: _ } => {
+                                            &item_index[id]
+                                        }
+                                        _ => unimplemented!("found provided_trait_methods when the trait was not a ResolvedPath: {trait_type:?}"),
+                                    };
+
+                                    if let ItemEnum::Trait(trait_item) = &trait_item.inner {
+                                        Box::new(trait_item.items.iter().filter(move |item_id| {
+                                            let next_item = &item_index[*item_id];
+                                            if let Some(name) = &next_item.name {
+                                                method_names.contains(name.as_str())
+                                            } else {
+                                                false
+                                            }
+                                        }))
+                                    } else {
+                                        unreachable!("found a non-trait type {trait_item:?}");
+                                    }
+                                };
+                                Box::new(provided_methods.chain(impl_token.items.iter()).filter_map(move |item_id| {
                                     let next_item = &item_index[item_id];
                                     match &next_item.inner {
                                         rustdoc_types::ItemEnum::Method(..) => {

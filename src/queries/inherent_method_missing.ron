@@ -41,9 +41,12 @@ SemverQuery(
                             path @filter(op: "=", value: ["%path"])
                         }
 
-                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                        # We use "impl" instead of "inherent_impl" here because moving
+                        # an inherently-implemented method to a trait is not necessarily
+                        # a breaking change, so we don't want to report it.
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             method {
-                                visibility_limit @filter(op: "=", value: ["$public"])
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                             }
                         }
@@ -54,6 +57,7 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
+        "public_or_default": ["public", "default"],
         "zero": 0,
     },
     error_message: "A publicly-visible method or associated fn is no longer available under its prior name. It may have been renamed or removed entirely.",
