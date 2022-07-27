@@ -1,0 +1,30 @@
+[
+    {
+        "name": String("Foo"),
+        "method_name": String("will_be_removed_associated_fn"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("item_missing"),
+            String("Foo"),
+        ]),
+        "visibility_limit": String("public"),
+        "method_visibility": String("public"),
+        "span_filename": String("src/test_cases/item_missing.rs"),
+        "span_begin_line": Uint64(20),
+    },
+    {
+        "name": String("Foo"),
+        "method_name": String("will_be_removed_method"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("item_missing"),
+            String("Foo"),
+        ]),
+        "visibility_limit": String("public"),
+        "method_visibility": String("public"),
+        "span_filename": String("src/test_cases/item_missing.rs"),
+        "span_begin_line": Uint64(23),
+    }
+]
