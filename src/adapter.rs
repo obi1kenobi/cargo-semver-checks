@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rustdoc_types::{Crate, Enum, Function, Item, Method, Span, Struct, Type, Variant};
+use rustdoc_types::{Crate, Enum, Function, Impl, Item, Method, Span, Struct, Type, Variant};
 use trustfall_core::{
     interpreter::{Adapter, DataContext, InterpretedQuery},
     ir::{EdgeParameters, Eid, FieldValue, Vid},
@@ -94,6 +94,7 @@ impl<'a> Token<'a> {
                 rustdoc_types::ItemEnum::Variant(Variant::Tuple(..)) => "TupleVariant",
                 rustdoc_types::ItemEnum::Variant(Variant::Struct(..)) => "StructVariant",
                 rustdoc_types::ItemEnum::StructField(..) => "StructField",
+                rustdoc_types::ItemEnum::Impl(..) => "Impl",
                 _ => unreachable!("unexpected item.inner for item: {item:?}"),
             },
             TokenKind::Span(..) => "Span",
@@ -176,6 +177,13 @@ impl<'a> Token<'a> {
     fn as_method(&self) -> Option<&'a Method> {
         self.as_item().and_then(|item| match &item.inner {
             rustdoc_types::ItemEnum::Method(func) => Some(func),
+            _ => None,
+        })
+    }
+
+    fn as_impl(&self) -> Option<&'a Impl> {
+        self.as_item().and_then(|item| match &item.inner {
+            rustdoc_types::ItemEnum::Impl(x) => Some(x),
             _ => None,
         })
     }
@@ -297,6 +305,16 @@ fn get_function_like_property(token: &Token, field_name: &str) -> FieldValue {
     }
 }
 
+fn get_impl_property(token: &Token, field_name: &str) -> FieldValue {
+    let impl_token = token.as_impl().expect("token was not an Impl");
+    match field_name {
+        "unsafe" => impl_token.is_unsafe.into(),
+        "negative" => impl_token.negative.into(),
+        "synthetic" => impl_token.synthetic.into(),
+        _ => unreachable!("Impl property {field_name}"),
+    }
+}
+
 fn property_mapper<'a>(
     ctx: DataContext<Token<'a>>,
     field_name: &str,
@@ -363,8 +381,8 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                         property_mapper(ctx, field_name.as_ref(), get_item_property)
                     }))
                 }
-                "Struct" | "StructField" | "Enum" | "Variant" | "PlainVariant" | "TupleVariant"
-                | "StructVariant" | "Function" | "Method"
+                "ImplOwner" | "Struct" | "StructField" | "Enum" | "Variant" | "PlainVariant"
+                | "TupleVariant" | "StructVariant" | "Function" | "Method" | "Impl"
                     if matches!(
                         field_name.as_ref(),
                         "id" | "crate_id" | "name" | "docs" | "attrs" | "visibility_limit"
@@ -398,6 +416,11 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                 {
                     Box::new(data_contexts.map(move |ctx| {
                         property_mapper(ctx, field_name.as_ref(), get_function_like_property)
+                    }))
+                }
+                "Impl" => {
+                    Box::new(data_contexts.map(move |ctx| {
+                        property_mapper(ctx, field_name.as_ref(), get_impl_property)
                     }))
                 }
                 _ => unreachable!("project_property {current_type_name} {field_name}"),
@@ -481,6 +504,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                                 | rustdoc_types::ItemEnum::Variant(..)
                                                 | rustdoc_types::ItemEnum::Function(..)
                                                 | rustdoc_types::ItemEnum::Method(..)
+                                                | rustdoc_types::ItemEnum::Impl(..)
                                         )
                                     })
                                     .map(move |value| origin.make_item_token(value));
@@ -495,7 +519,9 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     ),
                 }
             }
-            "Importable" | "Struct" | "Enum" | "Function" if edge_name.as_ref() == "path" => {
+            "Importable" | "ImplOwner" | "Struct" | "Enum" | "Function"
+                if edge_name.as_ref() == "path" =>
+            {
                 let current_crate = self.current_crate;
                 let previous_crate = self.previous_crate;
 
@@ -528,8 +554,9 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     (ctx, neighbors)
                 }))
             }
-            "Item" | "Struct" | "StructField" | "Enum" | "Variant" | "PlainVariant"
-            | "TupleVariant" | "StructVariant" | "Function" | "Method"
+            "Item" | "ImplOwner" | "Struct" | "StructField" | "Enum" | "Variant"
+            | "PlainVariant" | "TupleVariant" | "StructVariant" | "Function" | "Method"
+            | "Impl"
                 if edge_name.as_ref() == "span" =>
             {
                 Box::new(data_contexts.map(move |ctx| {
@@ -544,6 +571,53 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                 } else {
                                     Box::new(std::iter::empty())
                                 }
+                            }
+                        };
+
+                    (ctx, neighbors)
+                }))
+            }
+            "ImplOwner" | "Struct" | "Enum"
+                if matches!(edge_name.as_ref(), "impl" | "inherent_impl") =>
+            {
+                let current_crate = self.current_crate;
+                let previous_crate = self.previous_crate;
+                let inherent_impls_only = edge_name.as_ref() == "inherent_impl";
+                Box::new(data_contexts.map(move |ctx| {
+                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
+                        match &ctx.current_token {
+                            None => Box::new(std::iter::empty()),
+                            Some(token) => {
+                                let origin = token.origin;
+                                let item_index = match origin {
+                                    Origin::CurrentCrate => &current_crate.index,
+                                    Origin::PreviousCrate => {
+                                        &previous_crate.expect("no previous crate provided").index
+                                    }
+                                };
+
+                                // Get the IDs of all the impl blocks.
+                                // Relies on the fact that only structs and enums can have impls,
+                                // so we know that the token must represent either a struct or an enum.
+                                let impl_ids = token
+                                    .as_struct_item()
+                                    .map(|(_, s)| &s.impls)
+                                    .or_else(|| token.as_enum().map(|e| &e.impls))
+                                    .expect("token was neither a struct nor an enum");
+
+                                Box::new(impl_ids.iter().filter_map(move |item_id| {
+                                    let next_item = item_index.get(item_id);
+                                    next_item.and_then(|next_item| match &next_item.inner {
+                                        rustdoc_types::ItemEnum::Impl(imp) => {
+                                            if !inherent_impls_only || imp.trait_.is_none() {
+                                                Some(origin.make_item_token(next_item))
+                                            } else {
+                                                None
+                                            }
+                                        }
+                                        _ => None,
+                                    })
+                                }))
                             }
                         };
 
@@ -621,6 +695,44 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     unreachable!("project_neighbors {current_type_name} {edge_name} {parameters:?}")
                 }
             },
+            "Impl" => match edge_name.as_ref() {
+                "method" => {
+                    let current_crate = self.current_crate;
+                    let previous_crate = self.previous_crate;
+                    Box::new(data_contexts.map(move |ctx| {
+                        let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
+                            .current_token
+                        {
+                            None => Box::new(std::iter::empty()),
+                            Some(token) => {
+                                let origin = token.origin;
+                                let item_index = match origin {
+                                    Origin::CurrentCrate => &current_crate.index,
+                                    Origin::PreviousCrate => {
+                                        &previous_crate.expect("no previous crate provided").index
+                                    }
+                                };
+
+                                let impl_token = token.as_impl().expect("not an Impl token");
+                                Box::new(impl_token.items.iter().filter_map(move |item_id| {
+                                    let next_item = &item_index[item_id];
+                                    match &next_item.inner {
+                                        rustdoc_types::ItemEnum::Method(..) => {
+                                            Some(origin.make_item_token(next_item))
+                                        }
+                                        _ => None,
+                                    }
+                                }))
+                            }
+                        };
+
+                        (ctx, neighbors)
+                    }))
+                }
+                _ => {
+                    unreachable!("project_neighbors {current_type_name} {edge_name} {parameters:?}")
+                }
+            },
             _ => unreachable!("project_neighbors {current_type_name} {edge_name} {parameters:?}"),
         }
     }
@@ -634,7 +746,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
         _vertex_hint: Vid,
     ) -> Box<dyn Iterator<Item = (DataContext<Self::DataToken>, bool)> + 'a> {
         match current_type_name.as_ref() {
-            "Item" | "Variant" | "FunctionLike" => {
+            "Item" | "Variant" | "FunctionLike" | "Importable" | "ImplOwner" => {
                 Box::new(data_contexts.map(move |ctx| {
                     let can_coerce = match &ctx.current_token {
                         None => false,
@@ -646,6 +758,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                     actual_type_name,
                                     "PlainVariant" | "TupleVariant" | "StructVariant"
                                 ),
+                                "ImplOwner" => matches!(actual_type_name, "Struct" | "Enum"),
                                 _ => {
                                     // The remaining types are final (don't have any subtypes)
                                     // so we can just compare the actual type name to
@@ -744,6 +857,7 @@ mod tests {
         enum_variant_added,
         enum_variant_missing,
         function_missing,
+        inherent_method_missing,
         struct_marked_non_exhaustive,
         struct_missing,
         struct_pub_field_missing,

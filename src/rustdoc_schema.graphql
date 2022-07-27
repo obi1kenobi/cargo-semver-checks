@@ -52,7 +52,7 @@ https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Item.html
 https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/enum.ItemEnum.html
 https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Struct.html
 """
-type Struct implements Item & Importable {
+type Struct implements Item & Importable & ImplOwner {
     # properties from Item
     id: String!
     crate_id: Int!
@@ -70,6 +70,30 @@ type Struct implements Item & Importable {
 
     # edges from Importable
     path: [Path!]
+
+    # edges from ImplOwner
+    """
+    Any impl for this type.
+
+    All impl kinds are included:
+    - inherent impls: `impl Foo`
+    - explicit trait implementations: `impl Bar for Foo`
+    - blanket implementations: `impl<T> Bar for T`
+    """
+    impl: [Impl!]
+
+    """
+    Only inherent impls: implementations of the type itself (`impl Foo`).
+
+    The impls pointed to here are guaranteed to have no `trait` and no `blanket` edges.
+
+    This edge is just a convenience to simplify query-writing,
+    so we don't have to keep writing "@fold @transform(...) @filter(...)" chains
+    over the `trait` and `blanket` edges.
+
+    When Trustfall supports macro edges, this should just become a macro edge.
+    """
+    inherent_impl: [Impl!]
 
     # own edges
     field: [StructField!]
@@ -99,7 +123,7 @@ https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Item.html
 https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/enum.ItemEnum.html
 https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Enum.html
 """
-type Enum implements Item & Importable {
+type Enum implements Item & Importable & ImplOwner {
     # properties from Item
     id: String!
     crate_id: Int!
@@ -116,6 +140,30 @@ type Enum implements Item & Importable {
 
     # edges from Importable
     path: [Path!]
+
+    # edges from ImplOwner
+    """
+    Any impl for this type.
+
+    All impl kinds are included:
+    - inherent impls: `impl Foo`
+    - explicit trait implementations: `impl Bar for Foo`
+    - blanket implementations: `impl<T> Bar for T`
+    """
+    impl: [Impl!]
+
+    """
+    Only inherent impls: implementations of the type itself (`impl Foo`).
+
+    The impls pointed to here are guaranteed to have no `trait` and no `blanket` edges.
+
+    This edge is just a convenience to simplify query-writing,
+    so we don't have to keep writing "@fold @transform(...) @filter(...)" chains
+    over the `trait` and `blanket` edges.
+
+    When Trustfall supports macro edges, this should just become a macro edge.
+    """
+    inherent_impl: [Impl!]
 
     # own edges
     variant: [Variant!]
@@ -209,6 +257,95 @@ An item that can be imported, through one or more paths.
 """
 interface Importable {
     path: [Path!]
+}
+
+"""
+An item that can have impl blocks, like a struct or enum.
+"""
+interface ImplOwner implements Item & Importable {
+    # properties from Item
+    id: String!
+    crate_id: Int!
+    name: String
+    docs: String
+    attrs: [String!]!
+    visibility_limit: String!
+
+    # edges from Item
+    span: Span
+
+    # edges from Importable
+    path: [Path!]
+
+    # own edges
+    """
+    Any impl for this type.
+
+    All impl kinds are included:
+    - inherent impls: `impl Foo`
+    - explicit trait implementations: `impl Bar for Foo`
+    - blanket implementations: `impl<T> Bar for T`
+    """
+    impl: [Impl!]
+
+    """
+    Only inherent impls: implementations of the type itself (`impl Foo`).
+
+    The impls pointed to here are guaranteed to have no `trait` and no `blanket` edges.
+
+    This edge is just a convenience to simplify query-writing,
+    so we don't have to keep writing "@fold @transform(...) @filter(...)" chains
+    over the `trait` and `blanket` edges.
+
+    When Trustfall supports macro edges, this should just become a macro edge.
+    """
+    inherent_impl: [Impl!]
+}
+
+"""
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Item.html
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/enum.ItemEnum.html
+https://docs.rs/rustdoc-types/latest/rustdoc_types/struct.Impl.html
+"""
+type Impl implements Item {
+    # properties from Item
+    id: String!
+    crate_id: Int!
+    name: String
+    docs: String
+    attrs: [String!]!
+
+    # stringified version of the visibility struct field
+    visibility_limit: String!
+
+    # own properties
+    unsafe: Boolean!
+    negative: Boolean!
+    synthetic: Boolean!
+
+    # edges from Item
+    span: Span
+
+    # own edges
+
+    # """
+    # The trait being implemented. Inherent impls don't have a trait.
+
+    # TODO: implement me
+    # """
+    # trait: Trait
+
+    # """
+    # The generic type across which the blanket trait implementation is made.
+
+    # TODO: implement me
+    # """
+    # blanket: GenericType
+
+    """
+    Methods defined in this impl.
+    """
+    method: [Method!]
 }
 
 """
