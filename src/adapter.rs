@@ -882,6 +882,7 @@ mod tests {
 
     query_execution_tests!(
         enum_missing,
+        enum_repr_c_removed,
         enum_variant_added,
         enum_variant_missing,
         function_missing,
@@ -889,6 +890,7 @@ mod tests {
         struct_marked_non_exhaustive,
         struct_missing,
         struct_pub_field_missing,
+        struct_repr_c_removed,
         unit_struct_changed_kind,
         variant_marked_non_exhaustive,
     );
