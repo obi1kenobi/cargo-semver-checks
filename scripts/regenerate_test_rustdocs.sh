@@ -14,12 +14,14 @@ TARGET_DIR="$(git rev-parse --show-toplevel)/localdata/test_data"
 mkdir -p "$TARGET_DIR"
 
 # Make the baseline configuration file.
+echo "Generating: baseline"
 cargo +nightly rustdoc -- -Zunstable-options --output-format json
 mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/baseline.json"
 
 # For each feature, re-run rustdoc with it enabled.
 features=(
     'enum_missing'
+    'enum_repr_c_removed'
     'enum_variant_added'
     'enum_variant_missing'
     'function_missing'
@@ -27,11 +29,13 @@ features=(
     'struct_marked_non_exhaustive'
     'struct_missing'
     'struct_pub_field_missing'
+    'struct_repr_c_removed'
     'unit_struct_changed_kind'
     'variant_marked_non_exhaustive'
 )
 for feat in "${features[@]}"
 do
+    echo "Generating: $feat"
     cargo +nightly rustdoc --features "$feat" -- -Zunstable-options --output-format json
     mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/$feat.json"
 done
