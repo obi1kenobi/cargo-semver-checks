@@ -1,0 +1,91 @@
+SemverQuery(
+    id: "struct_repr_transparent_removed",
+    human_readable_name: "struct repr(transparent) removed",
+    description: r#"
+repr(transparent) was removed from a struct. This can cause its memory layout to change,
+breaking FFI use cases.
+
+repr(transparent) is only sometimes part of the ABI. Per the Rustonomicon:
+> This can only be used on structs with a single non-zero-sized field
+> (there may be additional zero-sized fields). [...]
+> This repr is only considered part of the public ABI of a type if either the single field is pub,
+> or if its layout is documented in prose. Otherwise, the layout should not be relied upon
+> by other crates.
+https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent
+
+cargo-semver-checks currently can't check whether a field is zero-sized or not,
+and it can't check whether the layout is documented in prose.
+
+To avoid false-positives, this query is restricted to checking only structs that in the baseline:
+- are repr(transparent);
+- have exactly one field, and
+- that one field is public.
+"#,
+    required_update: Major,
+
+    // TODO: Change the reference link to point to the cargo semver reference
+    //       once it has a section on repr(transparent).
+    reference_link: Some("https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @tag @output
+                        attrs @filter(op: "contains", value: ["$repr_transparent"])
+
+                        # To avoid false-positives (as described above), we need to check two things:
+                        # - this struct has a total of one field
+                        # - that one field happens to be public
+                        #
+                        # One of the ways to check this is by checking that:
+                        # (1) this struct has exactly one public field
+                        # (2) this struct has no fields that are not public
+                        #
+                        # Here's (1):
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                        }
+                        #
+                        # and here's (2):
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            visibility_limit @filter(op: "!=", value: ["$public"])
+                        }
+
+                        path {
+                            path @tag @output
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+                        attrs @filter(op: "not_contains", value: ["$repr_transparent"])
+
+                        path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "repr_transparent": "#[repr(transparent)]",
+        "one": 1,
+        "zero": 0,
+    },
+    error_message: "repr(transparent) was removed from a struct whose layout was part of the public ABI. This can cause its memory layout to change, breaking FFI use cases.",
+    per_result_error_template: Some("struct {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)

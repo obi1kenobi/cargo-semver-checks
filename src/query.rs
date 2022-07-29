@@ -74,6 +74,7 @@ impl SemverQuery {
             include_str!("./queries/struct_missing.ron"),
             include_str!("./queries/struct_pub_field_missing.ron"),
             include_str!("./queries/struct_repr_c_removed.ron"),
+            include_str!("./queries/struct_repr_transparent_removed.ron"),
             include_str!("./queries/unit_struct_changed_kind.ron"),
             include_str!("./queries/variant_marked_non_exhaustive.ron"),
         ];

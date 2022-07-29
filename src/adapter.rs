@@ -891,6 +891,7 @@ mod tests {
         struct_missing,
         struct_pub_field_missing,
         struct_repr_c_removed,
+        struct_repr_transparent_removed,
         unit_struct_changed_kind,
         variant_marked_non_exhaustive,
     );
