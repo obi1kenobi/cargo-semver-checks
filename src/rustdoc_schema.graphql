@@ -116,6 +116,9 @@ type StructField implements Item {
 
     # edges from Item
     span: Span
+
+    # own edges
+    raw_type: RawType
 }
 
 """
@@ -418,4 +421,27 @@ type Method implements Item & FunctionLike {
 
     # edge from Item
     span: Span
+}
+
+"""
+A type represented in the "raw" rustdoc JSON representation.
+
+Copiously detailed, but not the easiest to use due to its complexity.
+
+https://docs.rs/rustdoc-types/latest/rustdoc_types/enum.Type.html
+"""
+interface RawType {}
+
+"""
+Represents a struct, enum, or trait.
+
+https://docs.rs/rustdoc-types/latest/rustdoc_types/enum.Type.html#variant.ResolvedPath
+"""
+type ResolvedPathType implements RawType {
+    """
+    The fully-qualified canonical name of the type.
+
+    For example: "core::marker::PhantomData", even when imported as std::marker::PhantomData
+    """
+    name: String!
 }
