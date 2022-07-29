@@ -1,0 +1,26 @@
+[
+    {
+        "name": String("Foo"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("struct_repr_transparent_removed"),
+            String("Foo"),
+        ]),
+        "span_filename": String("src/test_cases/struct_repr_transparent_removed.rs"),
+        "span_begin_line": Uint64(8),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("Bar"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("struct_repr_transparent_removed"),
+            String("Bar"),
+        ]),
+        "span_filename": String("src/test_cases/struct_repr_transparent_removed.rs"),
+        "span_begin_line": Uint64(17),
+        "visibility_limit": String("public"),
+    }
+]
