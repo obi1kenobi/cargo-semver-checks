@@ -44,9 +44,9 @@ To avoid false-positives, this query is restricted to checking only structs that
                         # - that one field happens to be public
 
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
-                            raw_type {
+                            raw_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                 ... on ResolvedPathType {
-                                    name @filter(op: "!=", value: ["$phantom_data"])
+                                    name @filter(op: "=", value: ["$phantom_data"])
                                 }
                             }
                         }
@@ -64,10 +64,9 @@ To avoid false-positives, this query is restricted to checking only structs that
                             field_name: name @output
                             visibility_limit @filter(op: "=", value: ["$public"])
 
-                            raw_type {
+                            raw_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                 ... on ResolvedPathType {
-                                    name @filter(op: "!=", value: ["$phantom_data"])
-                                         @output(name: "field_type")
+                                    name @filter(op: "=", value: ["$phantom_data"])
                                 }
                             }
                         }

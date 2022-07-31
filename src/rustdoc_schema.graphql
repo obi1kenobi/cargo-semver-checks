@@ -445,3 +445,18 @@ type ResolvedPathType implements RawType {
     """
     name: String!
 }
+
+"""
+Represents a primitive type:
+fixed-size numeric types (plus int/usize/float), char, arrays, slices, and tuples.
+
+https://docs.rs/rustdoc-types/latest/rustdoc_types/enum.Type.html#variant.Primitive
+"""
+type PrimitiveType implements RawType {
+    """
+    The name of the primitive type.
+
+    For example: "usize"
+    """
+    name: String!
+}

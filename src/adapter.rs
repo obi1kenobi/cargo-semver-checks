@@ -78,6 +78,7 @@ pub enum TokenKind<'a> {
     Item(&'a Item),
     Span(&'a Span),
     Path(&'a [String]),
+    RawType(&'a Type),
 }
 
 #[allow(dead_code)]
@@ -103,6 +104,10 @@ impl<'a> Token<'a> {
             TokenKind::Path(..) => "Path",
             TokenKind::Crate(..) => "Crate",
             TokenKind::CrateDiff(..) => "CrateDiff",
+            TokenKind::RawType(ty) => match ty {
+                rustdoc_types::Type::ResolvedPath { .. } => "ResolvedPathType",
+                _ => unimplemented!(),
+            },
         }
     }
 
