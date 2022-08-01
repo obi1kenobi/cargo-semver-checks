@@ -1,0 +1,59 @@
+SemverQuery(
+    id: "enum_repr_int_removed",
+    human_readable_name: "enum repr(u*)/repr(i*) removed",
+    description: "The repr(u*) or repr(i*) attribute was removed from an enum. This can cause its memory representation to change, breaking FFI use cases.",
+    required_update: Major,
+
+    // TODO: Change the reference link to point to the cargo semver reference
+    //       once it has a section on repr(u*)/repr(i*).
+    reference_link: Some("https://doc.rust-lang.org/nomicon/other-reprs.html#repru-repri"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @tag @output
+
+                        attribute {
+                            value @filter(op: "regex", value: ["$repr_regex"])
+                        }
+
+                        path {
+                            path @tag @output
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            value @filter(op: "regex", value: ["$repr_regex"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "repr_regex": "#\\[repr\\([ui]\\d+\\)\\]",
+        "zero": 0,
+    },
+    error_message: "repr(u*) or repr(i*) was removed from an enum. This can cause its memory representation to change, breaking FFI use cases.",
+    per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)
