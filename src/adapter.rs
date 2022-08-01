@@ -998,6 +998,7 @@ mod tests {
     query_execution_tests!(
         enum_missing,
         enum_repr_c_removed,
+        enum_repr_int_changed,
         enum_repr_int_removed,
         enum_variant_added,
         enum_variant_missing,

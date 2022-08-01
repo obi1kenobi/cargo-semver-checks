@@ -66,6 +66,7 @@ impl SemverQuery {
         let query_text_contents = [
             include_str!("./queries/enum_missing.ron"),
             include_str!("./queries/enum_repr_c_removed.ron"),
+            include_str!("./queries/enum_repr_int_changed.ron"),
             include_str!("./queries/enum_repr_int_removed.ron"),
             include_str!("./queries/enum_variant_added.ron"),
             include_str!("./queries/enum_variant_missing.ron"),
