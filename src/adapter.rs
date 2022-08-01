@@ -61,21 +61,19 @@ impl Origin {
             kind: TokenKind::RawType(raw_type),
         }
     }
+
+    fn make_attribute_token<'a>(&self, attr: &'a str) -> Token<'a> {
+        Token {
+            origin: *self,
+            kind: TokenKind::Attribute(attr),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct Token<'a> {
     origin: Origin,
     kind: TokenKind<'a>,
-}
-
-impl<'a> Token<'a> {
-    fn new_crate(origin: Origin, crate_: &'a Crate) -> Self {
-        Self {
-            origin,
-            kind: TokenKind::Crate(crate_),
-        }
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -86,10 +84,18 @@ pub enum TokenKind<'a> {
     Span(&'a Span),
     Path(&'a [String]),
     RawType(&'a Type),
+    Attribute(&'a str),
 }
 
 #[allow(dead_code)]
 impl<'a> Token<'a> {
+    fn new_crate(origin: Origin, crate_: &'a Crate) -> Self {
+        Self {
+            origin,
+            kind: TokenKind::Crate(crate_),
+        }
+    }
+
     /// The name of the actual runtime type of this token,
     /// intended to fulfill resolution requests for the __typename property.
     #[inline]
@@ -111,6 +117,7 @@ impl<'a> Token<'a> {
             TokenKind::Path(..) => "Path",
             TokenKind::Crate(..) => "Crate",
             TokenKind::CrateDiff(..) => "CrateDiff",
+            TokenKind::Attribute(..) => "Attribute",
             TokenKind::RawType(ty) => match ty {
                 rustdoc_types::Type::ResolvedPath { .. } => "ResolvedPathType",
                 rustdoc_types::Type::Primitive(..) => "PrimitiveType",
@@ -201,6 +208,13 @@ impl<'a> Token<'a> {
             rustdoc_types::ItemEnum::Impl(x) => Some(x),
             _ => None,
         })
+    }
+
+    fn as_attribute(&self) -> Option<&'a str> {
+        match &self.kind {
+            TokenKind::Attribute(attr) => Some(*attr),
+            _ => None,
+        }
     }
 
     fn as_raw_type(&self) -> Option<&'a rustdoc_types::Type> {
@@ -337,6 +351,14 @@ fn get_impl_property(token: &Token, field_name: &str) -> FieldValue {
     }
 }
 
+fn get_attribute_property(token: &Token, field_name: &str) -> FieldValue {
+    let attribute_token = token.as_attribute().expect("token was not an Attribute");
+    match field_name {
+        "value" => attribute_token.into(),
+        _ => unreachable!("Attribute property {field_name}"),
+    }
+}
+
 fn get_resolved_path_type_property(token: &Token, field_name: &str) -> FieldValue {
     let type_token = token.as_raw_type().expect("token was not a RawType");
     match type_token {
@@ -467,6 +489,9 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                         property_mapper(ctx, field_name.as_ref(), get_impl_property)
                     }))
                 }
+                "Attribute" => Box::new(data_contexts.map(move |ctx| {
+                    property_mapper(ctx, field_name.as_ref(), get_attribute_property)
+                })),
                 "ResolvedPathType" => Box::new(data_contexts.map(move |ctx| {
                     property_mapper(ctx, field_name.as_ref(), get_resolved_path_type_property)
                 })),
@@ -607,25 +632,47 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
             "Item" | "ImplOwner" | "Struct" | "StructField" | "Enum" | "Variant"
             | "PlainVariant" | "TupleVariant" | "StructVariant" | "Function" | "Method"
             | "Impl"
-                if edge_name.as_ref() == "span" =>
+                if matches!(edge_name.as_ref(), "span" | "attribute") =>
             {
-                Box::new(data_contexts.map(move |ctx| {
-                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
-                        match &ctx.current_token {
-                            None => Box::new(std::iter::empty()),
-                            Some(token) => {
-                                let origin = token.origin;
-                                let item = token.as_item().expect("token was not an Item");
-                                if let Some(span) = &item.span {
-                                    Box::new(std::iter::once(origin.make_span_token(span)))
-                                } else {
-                                    Box::new(std::iter::empty())
+                match edge_name.as_ref() {
+                    "span" => Box::new(data_contexts.map(move |ctx| {
+                        let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
+                            match &ctx.current_token {
+                                None => Box::new(std::iter::empty()),
+                                Some(token) => {
+                                    let origin = token.origin;
+                                    let item = token.as_item().expect("token was not an Item");
+                                    if let Some(span) = &item.span {
+                                        Box::new(std::iter::once(origin.make_span_token(span)))
+                                    } else {
+                                        Box::new(std::iter::empty())
+                                    }
                                 }
-                            }
-                        };
+                            };
 
-                    (ctx, neighbors)
-                }))
+                        (ctx, neighbors)
+                    })),
+                    "attribute" => Box::new(data_contexts.map(move |ctx| {
+                        let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
+                            match &ctx.current_token {
+                                None => Box::new(std::iter::empty()),
+                                Some(token) => {
+                                    let origin = token.origin;
+                                    let item = token.as_item().expect("token was not an Item");
+                                    Box::new(
+                                        item.attrs
+                                            .iter()
+                                            .map(move |attr| origin.make_attribute_token(attr)),
+                                    )
+                                }
+                            };
+
+                        (ctx, neighbors)
+                    })),
+                    _ => unreachable!(
+                        "project_neighbors {current_type_name} {edge_name} {parameters:?}"
+                    ),
+                }
             }
             "ImplOwner" | "Struct" | "Enum"
                 if matches!(edge_name.as_ref(), "impl" | "inherent_impl") =>
@@ -951,6 +998,7 @@ mod tests {
     query_execution_tests!(
         enum_missing,
         enum_repr_c_removed,
+        enum_repr_int_removed,
         enum_variant_added,
         enum_variant_missing,
         function_missing,

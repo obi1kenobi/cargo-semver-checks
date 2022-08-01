@@ -1,4 +1,5 @@
 pub mod enum_repr_c_removed;
+pub mod enum_repr_int_removed;
 pub mod enum_variant_added;
 pub mod enum_variant_missing;
 pub mod item_missing;

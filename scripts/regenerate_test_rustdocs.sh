@@ -22,6 +22,7 @@ mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/baseline.json"
 features=(
     'enum_missing'
     'enum_repr_c_removed'
+    'enum_repr_int_removed'
     'enum_variant_added'
     'enum_variant_missing'
     'function_missing'
