@@ -116,6 +116,9 @@ type StructField implements Item {
 
     # edges from Item
     span: Span
+
+    # own edges
+    raw_type: RawType
 }
 
 """
@@ -418,4 +421,60 @@ type Method implements Item & FunctionLike {
 
     # edge from Item
     span: Span
+}
+
+"""
+A type represented in the "raw" rustdoc JSON representation.
+
+Copiously detailed, but not the easiest to use due to its complexity.
+
+https://docs.rs/rustdoc-types/latest/rustdoc_types/enum.Type.html
+"""
+interface RawType {
+  name: String!
+}
+
+"""
+Represents a struct, enum, or trait.
+
+https://docs.rs/rustdoc-types/latest/rustdoc_types/enum.Type.html#variant.ResolvedPath
+"""
+type ResolvedPathType implements RawType {
+  """
+  The fully-qualified canonical name of the type.
+
+  For example: "core::marker::PhantomData" or "std::marker::PhantomData"
+  """
+  name: String!
+}
+
+"""
+Represents a primitive type:
+fixed-size numeric types (plus int/usize/float), char, arrays, slices, and tuples.
+
+https://docs.rs/rustdoc-types/latest/rustdoc_types/enum.Type.html#variant.Primitive
+"""
+type PrimitiveType implements RawType {
+  """
+  The name of the primitive type.
+
+  For example: "usize"
+  """
+  name: String!
+}
+
+"""
+Any other type that isn't currently captured by another kind of RawType.
+
+This type is a hack, so I can get useful queries running before implementing
+the entire spectrum of possible types.
+
+No query should write "... on OtherType" because there's nothing you can do with it.
+It will eventually be removed without a major version bump.
+"""
+type OtherType implements RawType {
+  """
+  As best we can define the name of this type.
+  """
+  name: String!
 }

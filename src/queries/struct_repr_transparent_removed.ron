@@ -16,9 +16,12 @@ https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent
 cargo-semver-checks currently can't check whether a field is zero-sized or not,
 and it can't check whether the layout is documented in prose.
 
+However, the most commonly-used kind of zero-sized field is core::marker::PhantomData,
+and we can hardcode its detection and proper handling.
+
 To avoid false-positives, this query is restricted to checking only structs that in the baseline:
 - are repr(transparent);
-- have exactly one field, and
+- have exactly one field that isn't PhantomData, and
 - that one field is public.
 "#,
     required_update: Major,
@@ -36,22 +39,36 @@ To avoid false-positives, this query is restricted to checking only structs that
                         name @tag @output
                         attrs @filter(op: "contains", value: ["$repr_transparent"])
 
-                        # To avoid false-positives (as described above), we need to check two things:
-                        # - this struct has a total of one field
+                        # To avoid false-positives (as described above), we check two things:
+                        # - this struct has a total of one field that isn't PhantomData
                         # - that one field happens to be public
-                        #
-                        # One of the ways to check this is by checking that:
-                        # (1) this struct has exactly one public field
-                        # (2) this struct has no fields that are not public
-                        #
-                        # Here's (1):
+
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
-                            visibility_limit @filter(op: "=", value: ["$public"])
+                            raw_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                ... on ResolvedPathType {
+                                    name @filter(op: "one_of", value: ["$phantom_data"])
+                                }
+                            }
                         }
+
+                        # This @fold has an extra predicate checking that the field is public,
+                        # and is otherwise identical to the @fold above it.
                         #
-                        # and here's (2):
-                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            visibility_limit @filter(op: "!=", value: ["$public"])
+                        # We already know the @fold above it has only one element.
+                        # By construction, every element in this @fold must also
+                        # be in the one above.
+                        #
+                        # Ergo, if this fold *also* has only one element, then the struct
+                        # has exactly one non-PhantomData field, and that field is public.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
+                            transparent_field_name: name @output
+                            visibility_limit @filter(op: "=", value: ["$public"])
+
+                            raw_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                ... on ResolvedPathType {
+                                    name @filter(op: "one_of", value: ["$phantom_data"])
+                                }
+                            }
                         }
 
                         path {
@@ -83,6 +100,7 @@ To avoid false-positives, this query is restricted to checking only structs that
     arguments: {
         "public": "public",
         "repr_transparent": "#[repr(transparent)]",
+        "phantom_data": ["core::marker::PhantomData", "std::marker::PhantomData"],
         "one": 1,
         "zero": 0,
     },
