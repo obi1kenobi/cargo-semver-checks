@@ -46,7 +46,7 @@ To avoid false-positives, this query is restricted to checking only structs that
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
                             raw_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                 ... on ResolvedPathType {
-                                    name @filter(op: "=", value: ["$phantom_data"])
+                                    name @filter(op: "one_of", value: ["$phantom_data"])
                                 }
                             }
                         }
@@ -61,12 +61,12 @@ To avoid false-positives, this query is restricted to checking only structs that
                         # Ergo, if this fold *also* has only one element, then the struct
                         # has exactly one non-PhantomData field, and that field is public.
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
-                            field_name: name @output
+                            transparent_field_name: name @output
                             visibility_limit @filter(op: "=", value: ["$public"])
 
                             raw_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                 ... on ResolvedPathType {
-                                    name @filter(op: "=", value: ["$phantom_data"])
+                                    name @filter(op: "one_of", value: ["$phantom_data"])
                                 }
                             }
                         }
@@ -100,8 +100,9 @@ To avoid false-positives, this query is restricted to checking only structs that
     arguments: {
         "public": "public",
         "repr_transparent": "#[repr(transparent)]",
-        "phantom_data": "core::marker::PhantomData",
+        "phantom_data": ["core::marker::PhantomData", "std::marker::PhantomData"],
         "one": 1,
+        "zero": 0,
     },
     error_message: "repr(transparent) was removed from a struct whose layout was part of the public ABI. This can cause its memory layout to change, breaking FFI use cases.",
     per_result_error_template: Some("struct {{name}} in {{span_filename}}:{{span_begin_line}}"),

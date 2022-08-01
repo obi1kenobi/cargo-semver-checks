@@ -54,6 +54,13 @@ impl Origin {
             kind: TokenKind::Path(path),
         }
     }
+
+    fn make_raw_type_token<'a>(&self, raw_type: &'a rustdoc_types::Type) -> Token<'a> {
+        Token {
+            origin: *self,
+            kind: TokenKind::RawType(raw_type),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -106,7 +113,8 @@ impl<'a> Token<'a> {
             TokenKind::CrateDiff(..) => "CrateDiff",
             TokenKind::RawType(ty) => match ty {
                 rustdoc_types::Type::ResolvedPath { .. } => "ResolvedPathType",
-                _ => unimplemented!(),
+                rustdoc_types::Type::Primitive(..) => "PrimitiveType",
+                _ => "OtherType",
             },
         }
     }
@@ -193,6 +201,13 @@ impl<'a> Token<'a> {
             rustdoc_types::ItemEnum::Impl(x) => Some(x),
             _ => None,
         })
+    }
+
+    fn as_raw_type(&self) -> Option<&'a rustdoc_types::Type> {
+        match &self.kind {
+            TokenKind::RawType(ty) => Some(*ty),
+            _ => None,
+        }
     }
 }
 
@@ -322,6 +337,28 @@ fn get_impl_property(token: &Token, field_name: &str) -> FieldValue {
     }
 }
 
+fn get_resolved_path_type_property(token: &Token, field_name: &str) -> FieldValue {
+    let type_token = token.as_raw_type().expect("token was not a RawType");
+    match type_token {
+        rustdoc_types::Type::ResolvedPath { name, .. } => match field_name {
+            "name" => name.into(),
+            _ => unreachable!("ResolvedPathType property {field_name}"),
+        },
+        _ => unreachable!("token was not a ResolvedPathType but was {type_token:?}"),
+    }
+}
+
+fn get_primitive_type_property(token: &Token, field_name: &str) -> FieldValue {
+    let type_token = token.as_raw_type().expect("token was not a RawType");
+    match type_token {
+        rustdoc_types::Type::Primitive(name) => match field_name {
+            "name" => name.into(),
+            _ => unreachable!("PrimitiveType property {field_name}"),
+        },
+        _ => unreachable!("token was not a PrimitiveType but was {type_token:?}"),
+    }
+}
+
 fn property_mapper<'a>(
     ctx: DataContext<Token<'a>>,
     field_name: &str,
@@ -430,6 +467,12 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                         property_mapper(ctx, field_name.as_ref(), get_impl_property)
                     }))
                 }
+                "ResolvedPathType" => Box::new(data_contexts.map(move |ctx| {
+                    property_mapper(ctx, field_name.as_ref(), get_resolved_path_type_property)
+                })),
+                "PrimitiveType" => Box::new(data_contexts.map(move |ctx| {
+                    property_mapper(ctx, field_name.as_ref(), get_primitive_type_property)
+                })),
                 _ => unreachable!("project_property {current_type_name} {field_name}"),
             }
         }
@@ -702,6 +745,26 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     unreachable!("project_neighbors {current_type_name} {edge_name} {parameters:?}")
                 }
             },
+            "StructField" => match edge_name.as_ref() {
+                "raw_type" => Box::new(data_contexts.map(move |ctx| {
+                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
+                        match &ctx.current_token {
+                            None => Box::new(std::iter::empty()),
+                            Some(token) => {
+                                let origin = token.origin;
+                                let (_, field_type) = token
+                                    .as_struct_field_item()
+                                    .expect("not a StructField token");
+                                Box::new(std::iter::once(origin.make_raw_type_token(field_type)))
+                            }
+                        };
+
+                    (ctx, neighbors)
+                })),
+                _ => {
+                    unreachable!("project_neighbors {current_type_name} {edge_name} {parameters:?}")
+                }
+            },
             "Impl" => match edge_name.as_ref() {
                 "method" => {
                     let current_crate = self.current_crate;
@@ -779,7 +842,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
         _vertex_hint: Vid,
     ) -> Box<dyn Iterator<Item = (DataContext<Self::DataToken>, bool)> + 'a> {
         match current_type_name.as_ref() {
-            "Item" | "Variant" | "FunctionLike" | "Importable" | "ImplOwner" => {
+            "Item" | "Variant" | "FunctionLike" | "Importable" | "ImplOwner" | "RawType" => {
                 Box::new(data_contexts.map(move |ctx| {
                     let can_coerce = match &ctx.current_token {
                         None => false,

@@ -38,6 +38,19 @@ pub struct TupleWithZeroSizedData<T>(pub usize, core::marker::PhantomData<T>);
 
 #[cfg(not(feature = "struct_repr_transparent_removed"))]
 #[repr(transparent)]
+pub struct WithPubZeroSizedData<T> {
+    pub bar: usize,
+    pub _marker: std::marker::PhantomData<T>,
+}
+
+#[cfg(feature = "struct_repr_transparent_removed")]
+pub struct WithPubZeroSizedData<T> {
+    pub bar: usize,
+    pub _marker: std::marker::PhantomData<T>,
+}
+
+#[cfg(not(feature = "struct_repr_transparent_removed"))]
+#[repr(transparent)]
 pub struct WithSpecificZeroSizedData {
     pub bar: usize,
     _marker: std::marker::PhantomData<&'static usize>,
