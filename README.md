@@ -16,10 +16,6 @@ cargo install cargo-semver-checks
 cargo semver-checks check-release --current <new-rustdoc-json> --baseline <previous-rustdoc-json>
 
 # Use as a GitHub Action (used in .github/workflows/ci.yml in this repo):
-steps:
-- uses: actions/checkout@v3
-  with:
-    fetch-depth: 0
 - name: Check semver
   uses: obi1kenobi/cargo-semver-checks-action@v1
 - name: Publish to crates.io
@@ -41,7 +37,7 @@ However, it won't catch every kind of semver issue, and its performance on massi
 
 ## Using `cargo-semver-checks` to check your crate
 
-The easiest way to use this crate is via 
+The easiest way to use this crate is via
 [the corresponding GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action)
 that will automatically do all the steps for you.
 
