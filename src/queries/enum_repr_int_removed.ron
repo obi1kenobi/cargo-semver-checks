@@ -51,7 +51,7 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
-        "repr_regex": "#\\[repr\\([ui]\\d+\\)\\]",
+        "repr_regex": "#\\[repr\\([ui]\\d+|size\\)\\]",
         "zero": 0,
     },
     error_message: "repr(u*) or repr(i*) was removed from an enum. This can cause its memory representation to change, breaking FFI use cases.",

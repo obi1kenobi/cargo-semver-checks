@@ -22,5 +22,29 @@
         "span_filename": String("src/test_cases/enum_repr_int_removed.rs"),
         "span_begin_line": Uint64(22),
         "visibility_limit": String("public"),
+    },
+    {
+        "name": String("IsizeEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("enum_repr_int_removed"),
+            String("IsizeEnum"),
+        ]),
+        "span_filename": String("src/test_cases/enum_repr_int_removed.rs"),
+        "span_begin_line": Uint64(35),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("UsizeEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("enum_repr_int_removed"),
+            String("UsizeEnum"),
+        ]),
+        "span_filename": String("src/test_cases/enum_repr_int_removed.rs"),
+        "span_begin_line": Uint64(48),
+        "visibility_limit": String("public"),
     }
 ]
