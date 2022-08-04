@@ -40,6 +40,20 @@ pub enum I32ToU32Enum {
     Baz,
 }
 
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(isize)]
+pub enum IsizeToUsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(usize)]
+pub enum IsizeToUsizeEnum {
+    Bar,
+    Baz,
+}
+
 // The following enums have *removals* of repr(i*) and repr(u*),
 // not changes to another repr(i*) or repr(u*).
 // They should not be reported by this rule, because they have their own rule.
@@ -66,6 +80,32 @@ pub enum I32Enum {
 
 #[cfg(feature = "enum_repr_int_changed")]
 pub enum I32Enum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(isize)]
+pub enum IsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+pub enum IsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(usize)]
+pub enum UsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+pub enum UsizeEnum {
     Bar,
     Baz,
 }

@@ -46,5 +46,21 @@
             String("#[repr(u32)]"),
         ]),
         "visibility_limit": String("public"),
+    },
+    {
+        "name": String("IsizeToUsizeEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("enum_repr_int_changed"),
+            String("IsizeToUsizeEnum"),
+        ]),
+        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
+        "span_begin_line": Uint64(52),
+        "old_attr": String("#[repr(isize)]"),
+        "new_attr": List([
+            String("#[repr(usize)]"),
+        ]),
+        "visibility_limit": String("public"),
     }
 ]
