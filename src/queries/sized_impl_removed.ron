@@ -75,5 +75,5 @@ SemverQuery(
         "sized_path": ["core", "marker", "Sized"],
     },
     error_message: "A public type is no longer Sized.",
-    per_result_error_template: Some("type {{name}} in {{span_filename}}:{{span_begin_line}}"),,
+    per_result_error_template: Some("type {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )
