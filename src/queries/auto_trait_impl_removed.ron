@@ -1,0 +1,85 @@
+SemverQuery(
+    id: "auto_trait_impl_removed",
+    human_readable_name: "auto trait no longer implemented",
+    description: "A public type has stopped implementing one or more auto traits.",
+    required_update: Major,
+    // TODO: Add a better reference link once the cargo semver reference has a section on auto traits.
+    reference_link: Some("https://doc.rust-lang.org/reference/special-types-and-traits.html#auto-traits"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+
+                        path {
+                            path @output @tag
+                        }
+
+                        impl {
+                            negative @filter(op: "=", value: ["$false"])
+
+                            implemented_trait {
+                                trait {
+                                    auto_trait: name @output
+
+                                    path {
+                                        auto_trait_path: path
+                                            @filter(op: "one_of", value: ["$auto_traits"])
+                                            @output
+                                            @tag
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            negative @filter(op: "=", value: ["$false"])
+
+                            implemented_trait {
+                                trait {
+                                    path {
+                                        path @filter(op: "=", value: ["%auto_trait_path"])
+                                    }
+                                }
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+        "false": false,
+        "auto_traits": [
+            ["core", "marker", "Send"],
+            ["core", "marker", "Sync"],
+            ["core", "marker", "Unpin"],
+            ["core", "panic", "unwind_safe", "RefUnwindSafe"],
+            ["core", "panic", "unwind_safe", "UnwindSafe"],
+        ],
+    },
+    error_message: "A public type has stopped implementing one or more auto traits.",
+    per_result_error_template: Some("type {{name}} is no longer {{auto_trait}}, in {{span_filename}}:{{span_begin_line}}"),
+)

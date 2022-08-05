@@ -1,0 +1,94 @@
+[
+    {
+        "name": String("SyncStruct"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("auto_trait_impl_removed"),
+            String("SyncStruct"),
+        ]),
+        "span_filename": String("src/test_cases/auto_trait_impl_removed.rs"),
+        "span_begin_line": Uint64(15),
+        "auto_trait": String("Sync"),
+        "auto_trait_path": List([
+            String("core"),
+            String("marker"),
+            String("Sync"),
+        ]),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("SendStruct"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("auto_trait_impl_removed"),
+            String("SendStruct"),
+        ]),
+        "span_filename": String("src/test_cases/auto_trait_impl_removed.rs"),
+        "span_begin_line": Uint64(29),
+        "auto_trait": String("Send"),
+        "auto_trait_path": List([
+            String("core"),
+            String("marker"),
+            String("Send"),
+        ]),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("UnwindSafeStruct"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("auto_trait_impl_removed"),
+            String("UnwindSafeStruct"),
+        ]),
+        "span_filename": String("src/test_cases/auto_trait_impl_removed.rs"),
+        "span_begin_line": Uint64(41),
+        "auto_trait": String("UnwindSafe"),
+        "auto_trait_path": List([
+            String("core"),
+            String("panic"),
+            String("unwind_safe"),
+            String("UnwindSafe"),
+        ]),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("RefUnwindSafeStruct"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("auto_trait_impl_removed"),
+            String("RefUnwindSafeStruct"),
+        ]),
+        "span_filename": String("src/test_cases/auto_trait_impl_removed.rs"),
+        "span_begin_line": Uint64(52),
+        "auto_trait": String("RefUnwindSafe"),
+        "auto_trait_path": List([
+            String("core"),
+            String("panic"),
+            String("unwind_safe"),
+            String("RefUnwindSafe"),
+        ]),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("UnpinStruct"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("auto_trait_impl_removed"),
+            String("UnpinStruct"),
+        ]),
+        "span_filename": String("src/test_cases/auto_trait_impl_removed.rs"),
+        "span_begin_line": Uint64(72),
+        "auto_trait": String("Unpin"),
+        "auto_trait_path": List([
+            String("core"),
+            String("marker"),
+            String("Unpin"),
+        ]),
+        "visibility_limit": String("public"),
+    }
+]

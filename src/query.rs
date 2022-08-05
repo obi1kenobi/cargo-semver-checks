@@ -64,6 +64,7 @@ impl SemverQuery {
         let mut queries = BTreeMap::default();
 
         let query_text_contents = [
+            include_str!("./queries/auto_trait_impl_removed.ron"),
             include_str!("./queries/enum_missing.ron"),
             include_str!("./queries/enum_repr_c_removed.ron"),
             include_str!("./queries/enum_repr_int_changed.ron"),
@@ -72,6 +73,7 @@ impl SemverQuery {
             include_str!("./queries/enum_variant_missing.ron"),
             include_str!("./queries/function_missing.ron"),
             include_str!("./queries/inherent_method_missing.ron"),
+            include_str!("./queries/sized_impl_removed.ron"),
             include_str!("./queries/struct_marked_non_exhaustive.ron"),
             include_str!("./queries/struct_missing.ron"),
             include_str!("./queries/struct_pub_field_missing.ron"),

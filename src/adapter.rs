@@ -1,7 +1,7 @@
 use std::{collections::BTreeSet, sync::Arc};
 
 use rustdoc_types::{
-    Crate, Enum, Function, Id, Impl, Item, ItemEnum, Method, Span, Struct, Type, Variant,
+    Crate, Enum, Function, Id, Impl, Item, ItemEnum, Method, Span, Struct, Trait, Type, Variant,
 };
 use trustfall_core::{
     interpreter::{Adapter, DataContext, InterpretedQuery},
@@ -68,6 +68,17 @@ impl Origin {
             kind: TokenKind::Attribute(attr),
         }
     }
+
+    fn make_implemented_trait_token<'a>(
+        &self,
+        resolved_type: &'a rustdoc_types::Type,
+        trait_def: &'a Item,
+    ) -> Token<'a> {
+        Token {
+            origin: *self,
+            kind: TokenKind::ImplementedTrait(resolved_type, trait_def),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -85,6 +96,7 @@ pub enum TokenKind<'a> {
     Path(&'a [String]),
     RawType(&'a Type),
     Attribute(&'a str),
+    ImplementedTrait(&'a Type, &'a Item),
 }
 
 #[allow(dead_code)]
@@ -111,6 +123,7 @@ impl<'a> Token<'a> {
                 rustdoc_types::ItemEnum::Variant(Variant::Struct(..)) => "StructVariant",
                 rustdoc_types::ItemEnum::StructField(..) => "StructField",
                 rustdoc_types::ItemEnum::Impl(..) => "Impl",
+                rustdoc_types::ItemEnum::Trait(..) => "Trait",
                 _ => unreachable!("unexpected item.inner for item: {item:?}"),
             },
             TokenKind::Span(..) => "Span",
@@ -118,6 +131,7 @@ impl<'a> Token<'a> {
             TokenKind::Crate(..) => "Crate",
             TokenKind::CrateDiff(..) => "CrateDiff",
             TokenKind::Attribute(..) => "Attribute",
+            TokenKind::ImplementedTrait(..) => "ImplementedTrait",
             TokenKind::RawType(ty) => match ty {
                 rustdoc_types::Type::ResolvedPath { .. } => "ResolvedPathType",
                 rustdoc_types::Type::Primitive(..) => "PrimitiveType",
@@ -175,6 +189,13 @@ impl<'a> Token<'a> {
         })
     }
 
+    fn as_trait(&self) -> Option<&'a Trait> {
+        self.as_item().and_then(|item| match &item.inner {
+            rustdoc_types::ItemEnum::Trait(t) => Some(t),
+            _ => None,
+        })
+    }
+
     fn as_variant(&self) -> Option<&'a Variant> {
         self.as_item().and_then(|item| match &item.inner {
             rustdoc_types::ItemEnum::Variant(v) => Some(v),
@@ -220,6 +241,14 @@ impl<'a> Token<'a> {
     fn as_raw_type(&self) -> Option<&'a rustdoc_types::Type> {
         match &self.kind {
             TokenKind::RawType(ty) => Some(*ty),
+            TokenKind::ImplementedTrait(ty, _) => Some(*ty),
+            _ => None,
+        }
+    }
+
+    fn as_implemented_trait(&self) -> Option<(&'a rustdoc_types::Type, &'a Item)> {
+        match &self.kind {
+            TokenKind::ImplementedTrait(ty, trait_item) => Some((*ty, *trait_item)),
             _ => None,
         }
     }
@@ -359,25 +388,15 @@ fn get_attribute_property(token: &Token, field_name: &str) -> FieldValue {
     }
 }
 
-fn get_resolved_path_type_property(token: &Token, field_name: &str) -> FieldValue {
+fn get_raw_type_property(token: &Token, field_name: &str) -> FieldValue {
     let type_token = token.as_raw_type().expect("token was not a RawType");
-    match type_token {
-        rustdoc_types::Type::ResolvedPath { name, .. } => match field_name {
-            "name" => name.into(),
-            _ => unreachable!("ResolvedPathType property {field_name}"),
+    match field_name {
+        "name" => match type_token {
+            rustdoc_types::Type::ResolvedPath { name, .. } => name.into(),
+            rustdoc_types::Type::Primitive(name) => name.into(),
+            _ => unreachable!("unexpected RawType token content: {type_token:?}"),
         },
-        _ => unreachable!("token was not a ResolvedPathType but was {type_token:?}"),
-    }
-}
-
-fn get_primitive_type_property(token: &Token, field_name: &str) -> FieldValue {
-    let type_token = token.as_raw_type().expect("token was not a RawType");
-    match type_token {
-        rustdoc_types::Type::Primitive(name) => match field_name {
-            "name" => name.into(),
-            _ => unreachable!("PrimitiveType property {field_name}"),
-        },
-        _ => unreachable!("token was not a PrimitiveType but was {type_token:?}"),
+        _ => unreachable!("PrimitiveType property {field_name}"),
     }
 }
 
@@ -448,7 +467,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     }))
                 }
                 "ImplOwner" | "Struct" | "StructField" | "Enum" | "Variant" | "PlainVariant"
-                | "TupleVariant" | "StructVariant" | "Function" | "Method" | "Impl"
+                | "TupleVariant" | "StructVariant" | "Trait" | "Function" | "Method" | "Impl"
                     if matches!(
                         field_name.as_ref(),
                         "id" | "crate_id" | "name" | "docs" | "attrs" | "visibility_limit"
@@ -492,12 +511,14 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                 "Attribute" => Box::new(data_contexts.map(move |ctx| {
                     property_mapper(ctx, field_name.as_ref(), get_attribute_property)
                 })),
-                "ResolvedPathType" => Box::new(data_contexts.map(move |ctx| {
-                    property_mapper(ctx, field_name.as_ref(), get_resolved_path_type_property)
-                })),
-                "PrimitiveType" => Box::new(data_contexts.map(move |ctx| {
-                    property_mapper(ctx, field_name.as_ref(), get_primitive_type_property)
-                })),
+                "RawType" | "ResolvedPathType" | "ImplementedTrait" | "PrimitiveType"
+                    if matches!(field_name.as_ref(), "name") =>
+                {
+                    Box::new(data_contexts.map(move |ctx| {
+                        // fields from "RawType"
+                        property_mapper(ctx, field_name.as_ref(), get_raw_type_property)
+                    }))
+                }
                 _ => unreachable!("project_property {current_type_name} {field_name}"),
             }
         }
@@ -594,7 +615,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     ),
                 }
             }
-            "Importable" | "ImplOwner" | "Struct" | "Enum" | "Function"
+            "Importable" | "ImplOwner" | "Struct" | "Enum" | "Trait" | "Function"
                 if edge_name.as_ref() == "path" =>
             {
                 let current_crate = self.current_crate;
@@ -630,8 +651,8 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                 }))
             }
             "Item" | "ImplOwner" | "Struct" | "StructField" | "Enum" | "Variant"
-            | "PlainVariant" | "TupleVariant" | "StructVariant" | "Function" | "Method"
-            | "Impl"
+            | "PlainVariant" | "TupleVariant" | "StructVariant" | "Trait" | "Function"
+            | "Method" | "Impl"
                 if matches!(edge_name.as_ref(), "span" | "attribute") =>
             {
                 match edge_name.as_ref() {
@@ -880,6 +901,67 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                         (ctx, neighbors)
                     }))
                 }
+                "implemented_trait" => {
+                    let current_crate = self.current_crate;
+                    let previous_crate = self.previous_crate;
+                    Box::new(data_contexts.map(move |ctx| {
+                        let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
+                            .current_token
+                        {
+                            None => Box::new(std::iter::empty()),
+                            Some(token) => {
+                                let origin = token.origin;
+                                let item_index = match origin {
+                                    Origin::CurrentCrate => &current_crate.index,
+                                    Origin::PreviousCrate => {
+                                        &previous_crate.expect("no previous crate provided").index
+                                    }
+                                };
+
+                                let impl_token = token.as_impl().expect("not an Impl token");
+                                if let Some(ty) = &impl_token.trait_ {
+                                    match ty {
+                                        Type::ResolvedPath { name: _, id, .. } => {
+                                            if let Some(item) = item_index.get(id) {
+                                                Box::new(std::iter::once(
+                                                    origin.make_implemented_trait_token(ty, item),
+                                                ))
+                                            } else {
+                                                Box::new(std::iter::empty())
+                                            }
+                                        }
+                                        _ => Box::new(std::iter::empty()),
+                                    }
+                                } else {
+                                    Box::new(std::iter::empty())
+                                }
+                            }
+                        };
+
+                        (ctx, neighbors)
+                    }))
+                }
+                _ => {
+                    unreachable!("project_neighbors {current_type_name} {edge_name} {parameters:?}")
+                }
+            },
+            "ImplementedTrait" => match edge_name.as_ref() {
+                "trait" => Box::new(data_contexts.map(move |ctx| {
+                    let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
+                        match &ctx.current_token {
+                            None => Box::new(std::iter::empty()),
+                            Some(token) => {
+                                let origin = token.origin;
+
+                                let (_, trait_item) = token
+                                    .as_implemented_trait()
+                                    .expect("token was not an ImplementedTrait");
+                                Box::new(std::iter::once(origin.make_item_token(trait_item)))
+                            }
+                        };
+
+                    (ctx, neighbors)
+                })),
                 _ => {
                     unreachable!("project_neighbors {current_type_name} {edge_name} {parameters:?}")
                 }
@@ -897,7 +979,8 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
         _vertex_hint: Vid,
     ) -> Box<dyn Iterator<Item = (DataContext<Self::DataToken>, bool)> + 'a> {
         match current_type_name.as_ref() {
-            "Item" | "Variant" | "FunctionLike" | "Importable" | "ImplOwner" | "RawType" => {
+            "Item" | "Variant" | "FunctionLike" | "Importable" | "ImplOwner" | "RawType"
+            | "ResolvedPathType" => {
                 Box::new(data_contexts.map(move |ctx| {
                     let can_coerce = match &ctx.current_token {
                         None => false,
@@ -910,6 +993,10 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                     "PlainVariant" | "TupleVariant" | "StructVariant"
                                 ),
                                 "ImplOwner" => matches!(actual_type_name, "Struct" | "Enum"),
+                                "ResolvedPathType" => matches!(
+                                    actual_type_name,
+                                    "ResolvedPathType" | "ImplementedTrait"
+                                ),
                                 _ => {
                                     // The remaining types are final (don't have any subtypes)
                                     // so we can just compare the actual type name to
@@ -1004,6 +1091,7 @@ mod tests {
     }
 
     query_execution_tests!(
+        auto_trait_impl_removed,
         enum_missing,
         enum_repr_c_removed,
         enum_repr_int_changed,
@@ -1012,6 +1100,7 @@ mod tests {
         enum_variant_missing,
         function_missing,
         inherent_method_missing,
+        sized_impl_removed,
         struct_marked_non_exhaustive,
         struct_missing,
         struct_pub_field_missing,

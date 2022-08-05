@@ -20,6 +20,7 @@ mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/baseline.json"
 
 # For each feature, re-run rustdoc with it enabled.
 features=(
+    'auto_trait_impl_removed'
     'enum_missing'
     'enum_repr_c_removed'
     'enum_repr_int_changed'
@@ -28,6 +29,7 @@ features=(
     'enum_variant_missing'
     'function_missing'
     'inherent_method_missing'
+    'sized_impl_removed'
     'struct_marked_non_exhaustive'
     'struct_missing'
     'struct_pub_field_missing'

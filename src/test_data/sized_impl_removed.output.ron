@@ -1,0 +1,14 @@
+[
+    {
+        "name": String("SizedStruct"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("sized_impl_removed"),
+            String("SizedStruct"),
+        ]),
+        "span_filename": String("src/test_cases/sized_impl_removed.rs"),
+        "span_begin_line": Uint64(7),
+        "visibility_limit": String("public"),
+    }
+]

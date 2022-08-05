@@ -1,0 +1,79 @@
+SemverQuery(
+    id: "sized_impl_removed",
+    human_readable_name: "Sized no longer implemented",
+    description: "A public type is no longer Sized.",
+    required_update: Major,
+    // TODO: Add a better reference link once the cargo semver reference has a section on Sized.
+    reference_link: Some("https://doc.rust-lang.org/reference/special-types-and-traits.html#sized"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+
+                        path {
+                            path @output @tag
+                        }
+
+                        # rustdoc JSON currently *does not* explicitly state that Sized
+                        # is implemented for a type. Therefore, a lack of a negative impl (!Sized)
+                        # means the type is Sized.
+                        #
+                        # The following block says "there is no impl !Sized for our type."
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            negative @filter(op: "=", value: ["$true"])
+
+                            implemented_trait {
+                                trait {
+                                    path {
+                                        path @filter(op: "=", value: ["$sized_path"])
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        impl {
+                            negative @filter(op: "=", value: ["$true"])
+
+                            implemented_trait {
+                                trait {
+                                    path {
+                                        path @filter(op: "=", value: ["$sized_path"])
+                                    }
+                                }
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+        "true": true,
+        "sized_path": ["core", "marker", "Sized"],
+    },
+    error_message: "A public type is no longer Sized.",
+    per_result_error_template: Some("type {{name}} in {{span_filename}}:{{span_begin_line}}"),,
+)

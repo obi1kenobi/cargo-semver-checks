@@ -347,12 +347,12 @@ type Impl implements Item {
 
   # own edges
 
-  # """
-  # The trait being implemented. Inherent impls don't have a trait.
+  """
+  The trait being implemented. Inherent impls don't have a trait.
 
-  # TODO: implement me
-  # """
-  # trait: Trait
+  TODO: implement me
+  """
+  implemented_trait: ImplementedTrait
 
   # """
   # The generic type across which the blanket trait implementation is made.
@@ -365,6 +365,31 @@ type Impl implements Item {
   Methods defined in this impl.
   """
   method: [Method!]
+}
+
+"""
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/struct.Item.html
+https://docs.rs/rustdoc-types/0.11.0/rustdoc_types/enum.ItemEnum.html
+https://docs.rs/rustdoc-types/latest/rustdoc_types/struct.Trait.html
+"""
+type Trait implements Item & Importable {
+  # properties from Item
+  id: String!
+  crate_id: Int!
+  name: String
+  docs: String
+  attrs: [String!]!
+  visibility_limit: String!
+
+  # own properties
+  variants_stripped: Boolean!
+
+  # edges from Item
+  span: Span
+  attribute: [Attribute!]!
+
+  # edges from Importable
+  path: [Path!]
 }
 
 """
@@ -469,13 +494,29 @@ Represents a struct, enum, or trait.
 
 https://docs.rs/rustdoc-types/latest/rustdoc_types/enum.Type.html#variant.ResolvedPath
 """
-type ResolvedPathType implements RawType {
+interface ResolvedPathType implements RawType {
   """
   The fully-qualified canonical name of the type.
 
   For example: "core::marker::PhantomData" or "std::marker::PhantomData"
   """
   name: String!
+}
+
+"""
+The trait that is being implemented in an impl block.
+
+In `impl Foo<u64> for Bar`, this is the `Foo<u64>` part.
+"""
+type ImplementedTrait implements RawType & ResolvedPathType {
+  # properties from RawType
+  name: String!
+
+  # own edges
+  """
+  In `impl Foo<u64> for Bar`, this refers to `trait Foo<T>`.
+  """
+  trait: Trait!
 }
 
 """
