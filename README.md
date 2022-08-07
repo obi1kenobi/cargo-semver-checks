@@ -22,7 +22,7 @@ cargo semver-checks check-release --current <new-rustdoc-json> --baseline <previ
   run: # your `cargo publish` code here
 
 # To generate rustdoc JSON data for your crate, use:
-cargo +nightly rustdoc -- -Zunstable-options --output-format json
+cargo +nightly rustdoc --all-features -- --document-private-items -Zunstable-options --output-format json
 ```
 
 Each failing check references specific items in the Cargo SemVer reference
@@ -45,7 +45,7 @@ If you'd like to perform those steps manually, here they are:
 - Perform a `git checkout` of your crate's last published version*,
   which will represent your semver baseline.
 - Generate `rustdoc` documentation in JSON format for the crate's last published version
-  by running `cargo +nightly rustdoc -- -Zunstable-options --output-format json`.
+  by running `cargo +nightly rustdoc --all-features -- --document-private-items -Zunstable-options --output-format json`.
 - The above command will generate a file named `doc/<your-crate-name>.json` in your crate's
   build target directory. Copy this file somewhere else -- otherwise it will be overwritten
   by the next steps.
