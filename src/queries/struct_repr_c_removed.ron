@@ -17,7 +17,7 @@ SemverQuery(
                         name @tag @output
                         attrs @filter(op: "contains", value: ["$repr_c"])
 
-                        path {
+                        importable_path {
                             path @tag @output
                         }
                     }
@@ -30,7 +30,7 @@ SemverQuery(
                         name @filter(op: "=", value: ["%name"])
                         attrs @filter(op: "not_contains", value: ["$repr_c"])
 
-                        path {
+                        importable_path {
                             path @filter(op: "=", value: ["%path"])
                         }
 

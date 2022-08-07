@@ -14,7 +14,7 @@ SemverQuery(
                         name @output @tag
                         struct_type @output @tag
 
-                        path {
+                        importable_path {
                             path @output @tag
                         }
 
@@ -32,7 +32,7 @@ SemverQuery(
                         name @filter(op: "=", value: ["%name"])
                         struct_type @filter(op: "=", value: ["%struct_type"])
 
-                        path {
+                        importable_path {
                             path @filter(op: "=", value: ["%path"])
                         }
                     }

@@ -18,6 +18,7 @@ use trustfall_core::{
 
 use crate::{
     adapter::RustdocAdapter,
+    indexed_crate::IndexedCrate,
     query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
     GlobalConfig,
 };
@@ -135,10 +136,9 @@ pub(super) fn run_check_release(
     let queries = SemverQuery::all_queries();
 
     let schema = RustdocAdapter::schema();
-    let adapter = Rc::new(RefCell::new(RustdocAdapter::new(
-        &current_crate,
-        Some(&baseline_crate),
-    )));
+    let current = IndexedCrate::new(&current_crate);
+    let previous = IndexedCrate::new(&baseline_crate);
+    let adapter = Rc::new(RefCell::new(RustdocAdapter::new(&current, Some(&previous))));
     let mut queries_with_errors: Vec<QueryWithResults> = vec![];
 
     let queries_to_run: Vec<_> = queries

@@ -24,7 +24,7 @@ SemverQuery(
                         # using a struct literal outside of its crate. This is the breaking change.
                         attrs @filter(op: "contains", value: ["$non_exhaustive"])
 
-                        path {
+                        importable_path {
                             path @output @tag
                         }
 
@@ -48,7 +48,7 @@ SemverQuery(
                             visibility_limit @filter(op: "!=", value: ["$public"])
                         }
 
-                        path {
+                        importable_path {
                             path @filter(op: "=", value: ["%path"])
                         }
                     }

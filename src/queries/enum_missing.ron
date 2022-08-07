@@ -13,7 +13,7 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @output @tag
 
-                        path {
+                        importable_path {
                             path @output @tag
                         }
 
@@ -30,7 +30,7 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%name"])
 
-                        path {
+                        importable_path {
                             path @filter(op: "=", value: ["%path"])
                         }
                     }

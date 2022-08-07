@@ -2,6 +2,7 @@
 
 pub mod adapter;
 mod check_release;
+pub mod indexed_crate;
 mod query;
 mod util;
 

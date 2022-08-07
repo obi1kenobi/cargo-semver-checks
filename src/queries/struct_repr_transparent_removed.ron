@@ -71,7 +71,7 @@ To avoid false-positives, this query is restricted to checking only structs that
                             }
                         }
 
-                        path {
+                        importable_path {
                             path @tag @output
                         }
                     }
@@ -84,7 +84,7 @@ To avoid false-positives, this query is restricted to checking only structs that
                         name @filter(op: "=", value: ["%name"])
                         attrs @filter(op: "not_contains", value: ["$repr_transparent"])
 
-                        path {
+                        importable_path {
                             path @filter(op: "=", value: ["%path"])
                         }
 
