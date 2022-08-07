@@ -11,6 +11,7 @@ use trustfall_core::{
 
 use crate::indexed_crate::IndexedCrate;
 
+#[non_exhaustive]
 pub struct RustdocAdapter<'a> {
     current_crate: &'a IndexedCrate<'a>,
     previous_crate: Option<&'a IndexedCrate<'a>>,
@@ -32,6 +33,7 @@ impl<'a> RustdocAdapter<'a> {
     }
 }
 
+#[non_exhaustive]
 #[derive(Debug, Clone, Copy)]
 pub enum Origin {
     CurrentCrate,
@@ -93,12 +95,14 @@ impl Origin {
     }
 }
 
+#[non_exhaustive]
 #[derive(Debug, Clone)]
 pub struct Token<'a> {
     origin: Origin,
     kind: TokenKind<'a>,
 }
 
+#[non_exhaustive]
 #[derive(Debug, Clone)]
 pub enum TokenKind<'a> {
     CrateDiff((&'a IndexedCrate<'a>, &'a IndexedCrate<'a>)),
