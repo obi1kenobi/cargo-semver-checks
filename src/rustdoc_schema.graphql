@@ -51,7 +51,7 @@ interface Item {
   # stringified version of the visibility struct field
   visibility_limit: String!
 
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
   span: Span
 }
 
@@ -75,10 +75,11 @@ type Struct implements Item & Importable & ImplOwner {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 
   # edges from Importable
-  path: [Path!]
+  importable_path: [ImportablePath!]
+  canonical_path: Path
 
   # edges from ImplOwner
   """
@@ -124,7 +125,7 @@ type StructField implements Item {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 
   # own edges
   raw_type: RawType
@@ -149,10 +150,11 @@ type Enum implements Item & Importable & ImplOwner {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 
   # edges from Importable
-  path: [Path!]
+  importable_path: [ImportablePath!]
+  canonical_path: Path
 
   # edges from ImplOwner
   """
@@ -198,7 +200,7 @@ interface Variant implements Item {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 }
 
 """
@@ -217,7 +219,7 @@ type PlainVariant implements Item & Variant {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 }
 
 """
@@ -236,7 +238,7 @@ type TupleVariant implements Item & Variant {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 }
 
 """
@@ -255,7 +257,7 @@ type StructVariant implements Item & Variant {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 }
 
 """
@@ -273,7 +275,8 @@ type Span {
 An item that can be imported, through one or more paths.
 """
 interface Importable {
-  path: [Path!]
+  importable_path: [ImportablePath!]
+  canonical_path: Path
 }
 
 """
@@ -290,10 +293,11 @@ interface ImplOwner implements Item & Importable {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 
   # edges from Importable
-  path: [Path!]
+  importable_path: [ImportablePath!]
+  canonical_path: Path
 
   # own edges
   """
@@ -343,7 +347,7 @@ type Impl implements Item {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 
   # own edges
 
@@ -386,19 +390,40 @@ type Trait implements Item & Importable {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 
   # edges from Importable
-  path: [Path!]
+  importable_path: [ImportablePath!]
+  canonical_path: Path
 }
 
 """
 A possible way that an item could be imported.
 """
-type Path {
+type ImportablePath {
+  """
+  The visibility restriction on this importable path.
+
+  For example: "public"
+  """
+  visibility_limit: String!
+
   """
   The path from which the item can be imported.
+
+  For example: ["foo", "bar", "Baz"] for a type importable as foo::bar::Baz
   """
+  path: [String!]!
+}
+
+"""
+The fully-qualified path of an item including the full sequence of modules in which it is found.
+
+For example, consider a struct `Quux` in `foo/bar/mod.rs`. Its canonical path is `"foo::bar::Quux"`,
+even if `foo/mod.rs` might have a line like `pub use bar::Quux;`. The re-export is visible through
+the struct's ImportablePath neighbors.
+"""
+type Path {
   path: [String!]!
 }
 
@@ -436,10 +461,11 @@ type Function implements Item & FunctionLike & Importable {
 
   # edges from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 
   # edges from Importable
-  path: [Path!]
+  importable_path: [ImportablePath!]
+  canonical_path: Path
 }
 
 """
@@ -463,7 +489,7 @@ type Method implements Item & FunctionLike {
 
   # edge from Item
   span: Span
-  attribute: [Attribute!]!
+  attribute: [Attribute!]
 }
 
 """

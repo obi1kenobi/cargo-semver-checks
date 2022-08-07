@@ -21,7 +21,7 @@ SemverQuery(
                         struct_type @filter(op: "=", value: ["$unit"])
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
-                        path {
+                        importable_path {
                             path @output @tag
                         }
                     }
@@ -34,7 +34,7 @@ SemverQuery(
                         name @filter(op: "=", value: ["%name"])
                         struct_type @filter(op: "=", value: ["$plain"])
 
-                        path {
+                        importable_path {
                             path @filter(op: "=", value: ["%path"])
                         }
 
