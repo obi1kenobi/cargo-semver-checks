@@ -153,7 +153,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Check semver
-        uses: obi1kenobi/cargo-semver-checks-action
+        uses: obi1kenobi/cargo-semver-checks-action@v1
         with:
           # cargo-semver-checks currently doesn't have a --lib target,
           # so we explicitly ask for the binary target to be checked instead.
