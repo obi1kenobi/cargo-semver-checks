@@ -80,6 +80,6 @@ SemverQuery(
             ["core", "panic", "unwind_safe", "UnwindSafe"],
         ],
     },
-    error_message: "A public type has stopped implementing one or more auto traits.",
+    error_message: "A public type has stopped implementing one or more auto traits. This can break downstream code that depends on the traits being implemented.",
     per_result_error_template: Some("type {{name}} is no longer {{auto_trait}}, in {{span_filename}}:{{span_begin_line}}"),
 )

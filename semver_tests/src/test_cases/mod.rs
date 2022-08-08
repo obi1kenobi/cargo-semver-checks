@@ -1,4 +1,5 @@
 pub mod auto_trait_impl_removed;
+pub mod derive_trait_impl_removed;
 pub mod enum_repr_c_removed;
 pub mod enum_repr_int_changed;
 pub mod enum_repr_int_removed;
