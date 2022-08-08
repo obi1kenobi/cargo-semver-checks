@@ -1,0 +1,91 @@
+SemverQuery(
+    id: "derive_trait_impl_removed",
+    human_readable_name: "built-in derived trait no longer implemented",
+    description: "A public type has stopped implementing one or more built-in traits that used to be derived.",
+    required_update: Major,
+    // TODO: Find a better reference than the definition of #[derive(...)].
+    //       The cargo semver reference doesn't say that no longer deriving a pub trait is breaking.
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/derive.html#derive"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        impl {
+                            negative @filter(op: "=", value: ["$false"])
+
+                            # This is how we know the trait is built-in and used to be derived.
+                            # https://doc.rust-lang.org/reference/attributes/derive.html#the-automatically_derived-attribute
+                            attrs @filter(op: "contains", value: ["$derived"])
+
+                            # TODO: check for matching generics as well
+
+                            implemented_trait {
+                                trait {
+                                    trait_name: name @output
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+
+                                    canonical_path {
+                                        trait_path: path @output @tag
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        importable_path @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            # We don't check for `#[automatically_derived]` here because
+                            # it's not breaking to replace a derived impl with a hand-impl.
+
+                            negative @filter(op: "=", value: ["$false"])
+
+                            # TODO: check for matching generics as well
+
+                            implemented_trait {
+                                trait {
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["%trait_path"])
+                                    }
+                                }
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "derived": "#[automatically_derived]",
+        "public": "public",
+        "zero": 0,
+        "false": false,
+    },
+    error_message: "A public type has stopped deriving one or more traits. This can break downstream code that depends on those types implementing those traits.",
+    per_result_error_template: Some("type {{name}} no longer derives {{trait_name}}, in {{span_filename}}:{{span_begin_line}}"),
+)
