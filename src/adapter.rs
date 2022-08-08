@@ -1206,16 +1206,9 @@ mod tests {
             "{actual_results:?}"
         );
 
-        let mut actual_paths: Vec<Vec<&str>> = match &actual_results[0]["path"] {
-            FieldValue::List(l) => l
-                .iter()
-                .map(|components| match components {
-                    FieldValue::List(l) => l.iter().map(|x| x.as_str().unwrap()).collect(),
-                    _ => unreachable!("{components:?}"),
-                })
-                .collect(),
-            _ => unreachable!("{actual_results:?}"),
-        };
+        let mut actual_paths = actual_results[0]["path"]
+            .as_vec(|val| val.as_vec(FieldValue::as_str))
+            .expect("not a Vec<Vec<&str>>");
         actual_paths.sort_unstable();
 
         let expected_paths = vec![
