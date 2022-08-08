@@ -1,7 +1,7 @@
 SemverQuery(
     id: "struct_missing",
     human_readable_name: "pub struct removed or renamed",
-    description: "A publicly-visible struct is no longer available under its prior name, which is a major breaking change for code that depends on it.",
+    description: "A publicly-visible struct can no longer be imported by its prior path, which is a major breaking change for code that depends on it.",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
@@ -44,6 +44,6 @@ SemverQuery(
         "public": "public",
         "zero": 0,
     },
-    error_message: "A publicly-visible struct is no longer available under its prior name. It may have been renamed or removed entirely.",
-    per_result_error_template: Some("struct {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A publicly-visible struct cannot be imported by its prior path. A `pub use` may have been removed, or the struct itself may have been renamed or removed entirely.",
+    per_result_error_template: Some("struct {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
 )

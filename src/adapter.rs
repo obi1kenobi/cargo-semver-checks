@@ -1189,15 +1189,16 @@ mod tests {
             .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
             .collect();
 
-        assert_eq!(actual_results.len(), 1, "{actual_results:?}");
+        let expected_result: FieldValue = vec![
+            "semver_tests",
+            "import_handling",
+            "inner",
+            "CheckPubUseHandling",
+        ]
+        .into();
+        assert_eq!(1, actual_results.len(), "{actual_results:?}");
         assert_eq!(
-            actual_results[0]["canonical_path"],
-            FieldValue::List(vec![
-                "semver_tests".into(),
-                "import_handling".into(),
-                "inner".into(),
-                "CheckPubUseHandling".into(),
-            ]),
+            expected_result, actual_results[0]["canonical_path"],
             "{actual_results:?}"
         );
 

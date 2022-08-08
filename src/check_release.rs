@@ -5,7 +5,6 @@ use std::{
 
 use anyhow::Context;
 use clap::crate_version;
-use handlebars::Handlebars;
 use rustdoc_types::Crate;
 use termcolor::Color;
 use termcolor_output::{colored, colored_ln};
@@ -332,7 +331,6 @@ pub(super) fn run_check_release(
             })
             .expect("print failed");
 
-            let reg = Handlebars::new();
             let start_instant = std::time::Instant::now();
             for semver_violation_result in query_with_results.results {
                 let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
@@ -345,7 +343,9 @@ pub(super) fn run_check_release(
                         colored!(
                             w,
                             "  {}",
-                            reg.render_template(template, &pretty_result)
+                            config
+                                .handlebars
+                                .render_template(template, &pretty_result)
                                 .with_context(|| "Error instantiating semver query template.")
                                 .expect("could not materialize template"),
                         )

@@ -4,6 +4,7 @@ pub mod adapter;
 mod check_release;
 pub mod indexed_crate;
 mod query;
+mod templating;
 mod util;
 
 use std::env;
@@ -11,12 +12,16 @@ use std::env;
 use clap::{crate_version, AppSettings, Arg, Command};
 use termcolor::{ColorChoice, StandardStream};
 
-use crate::{check_release::run_check_release, util::load_rustdoc_from_file};
+use crate::{
+    check_release::run_check_release, templating::make_handlebars_registry,
+    util::load_rustdoc_from_file,
+};
 
 #[allow(dead_code)]
 pub(crate) struct GlobalConfig {
     printing_to_terminal: bool,
     output_writer: StandardStream,
+    handlebars: handlebars::Handlebars<'static>,
 }
 
 impl GlobalConfig {
@@ -40,6 +45,7 @@ impl GlobalConfig {
         Self {
             printing_to_terminal,
             output_writer: StandardStream::stdout(color_choice),
+            handlebars: make_handlebars_registry(),
         }
     }
 }
