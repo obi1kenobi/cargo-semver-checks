@@ -6,7 +6,7 @@ Queries `rustdoc`-generated crate documentation using the `trustfall`
 Each query looks for a particular kind of semver violation, such as:
 - public struct was removed
 - public enum's variant was removed
-- public struct became non-exhaustive
+- public struct is no longer `Send/Sync/Debug/Clone` etc.
 - public enum has a new variant, but wasn't non-exhaustive in the last version
 
 ```
