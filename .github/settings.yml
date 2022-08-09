@@ -1,0 +1,48 @@
+# These settings are synced to GitHub by https://probot.github.io/apps/settings/
+
+repository:
+  description: Scan your Rust crate for semver violations.
+  topics: rust cargo semver
+  has_issues: true
+  has_projects: true
+  has_wiki: true
+  has_downloads: true
+  default_branch: main
+
+  allow_squash_merge: true
+  allow_merge_commit: true
+  allow_rebase_merge: true
+
+  allow_auto_merge: true
+  delete_branch_on_merge: true
+
+labels:
+  - name: A-lint
+    color: '#f7e101'
+    description: "Area: new or existing lint"
+  - name: A-cli
+    color: '#f7e101'
+    description: "Area: engine around the lints"
+  - name: A-docs
+    color: '#f7e101'
+    description: "Area: documentation for the command and lints"
+  - name: C-bug
+    color: '#b60205'
+    description: "Category: doesn't meet expectations"
+  - name: C-enhancement
+    color: '#1d76db'
+    description: "Category: raise the bar on expectations"
+  - name: M-breaking-change
+    color: "#E10C02"
+    description: "Meta: Implementing or merging this will introduce a breaking change."
+  - name: E-help-wanted
+    color: '#02E10C'
+    description: "Call for participation: Help is requested to fix this issue."
+
+branches:
+  - name: main
+    protection:
+      required_pull_request_reviews: null
+      required_conversation_resolution: true
+      enforce_admins: false
+      restrictions: null
