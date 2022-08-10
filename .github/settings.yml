@@ -42,7 +42,8 @@ labels:
 branches:
   - name: main
     protection:
-      required_pull_request_reviews: null
+      required_pull_request_reviews:
+        require_code_owner_reviews: true
       required_conversation_resolution: true
       enforce_admins: false
       restrictions: null
