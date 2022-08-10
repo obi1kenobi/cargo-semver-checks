@@ -38,6 +38,9 @@ labels:
   - name: E-help-wanted
     color: '#02E10C'
     description: "Call for participation: Help is requested to fix this issue."
+  - name: E-mentor
+    color: '#02E10C'
+    description: "Call for participation: Mentorship is available for this issue."
 
 branches:
   - name: main
