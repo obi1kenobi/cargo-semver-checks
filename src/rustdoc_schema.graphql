@@ -509,6 +509,11 @@ A type represented in the "raw" rustdoc JSON representation.
 
 Copiously detailed, but not the easiest to use due to its complexity.
 
+This interface is a temporary, perma-unstable type intended to be used
+only until the rustdoc JSON format is stabilized and until subsequently
+we are able to design a better, more permanent representation for
+Rust types in this schema.
+
 https://docs.rs/rustdoc-types/latest/rustdoc_types/enum.Type.html
 """
 interface RawType {
@@ -534,8 +539,7 @@ The trait that is being implemented in an impl block.
 
 In `impl Foo<u64> for Bar`, this is the `Foo<u64>` part.
 """
-type ImplementedTrait implements RawType & ResolvedPathType {
-  # properties from RawType
+type ImplementedTrait {
   name: String!
 
   # own edges
