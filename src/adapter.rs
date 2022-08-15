@@ -1,7 +1,8 @@
 use std::{collections::BTreeSet, sync::Arc};
 
 use rustdoc_types::{
-    Crate, Enum, Function, Id, Impl, Item, ItemEnum, Method, Span, Struct, Trait, Type, Variant,
+    Crate, Enum, Function, Id, Impl, Item, ItemEnum, Method, Path, Span, Struct, Trait, Type,
+    Variant,
 };
 use trustfall_core::{
     interpreter::{Adapter, DataContext, InterpretedQuery},
@@ -85,12 +86,12 @@ impl Origin {
 
     fn make_implemented_trait_token<'a>(
         &self,
-        resolved_type: &'a rustdoc_types::Type,
+        path: &'a rustdoc_types::Path,
         trait_def: &'a Item,
     ) -> Token<'a> {
         Token {
             origin: *self,
-            kind: TokenKind::ImplementedTrait(resolved_type, trait_def),
+            kind: TokenKind::ImplementedTrait(path, trait_def),
         }
     }
 }
@@ -113,7 +114,7 @@ pub enum TokenKind<'a> {
     ImportablePath(Vec<&'a str>),
     RawType(&'a Type),
     Attribute(&'a str),
-    ImplementedTrait(&'a Type, &'a Item),
+    ImplementedTrait(&'a Path, &'a Item),
 }
 
 #[allow(dead_code)]
@@ -270,14 +271,13 @@ impl<'a> Token<'a> {
     fn as_raw_type(&self) -> Option<&'a rustdoc_types::Type> {
         match &self.kind {
             TokenKind::RawType(ty) => Some(*ty),
-            TokenKind::ImplementedTrait(ty, _) => Some(*ty),
             _ => None,
         }
     }
 
-    fn as_implemented_trait(&self) -> Option<(&'a rustdoc_types::Type, &'a Item)> {
+    fn as_implemented_trait(&self) -> Option<(&'a rustdoc_types::Path, &'a Item)> {
         match &self.kind {
-            TokenKind::ImplementedTrait(ty, trait_item) => Some((*ty, *trait_item)),
+            TokenKind::ImplementedTrait(path, trait_item) => Some((*path, *trait_item)),
             _ => None,
         }
     }
@@ -436,11 +436,21 @@ fn get_raw_type_property(token: &Token, field_name: &str) -> FieldValue {
     let type_token = token.as_raw_type().expect("token was not a RawType");
     match field_name {
         "name" => match type_token {
-            rustdoc_types::Type::ResolvedPath { name, .. } => name.into(),
+            rustdoc_types::Type::ResolvedPath(path) => (&path.name).into(),
             rustdoc_types::Type::Primitive(name) => name.into(),
             _ => unreachable!("unexpected RawType token content: {type_token:?}"),
         },
-        _ => unreachable!("PrimitiveType property {field_name}"),
+        _ => unreachable!("RawType property {field_name}"),
+    }
+}
+
+fn get_implemented_trait_property(token: &Token, field_name: &str) -> FieldValue {
+    let (path, _) = token
+        .as_implemented_trait()
+        .expect("token was not a ImplementedTrait");
+    match field_name {
+        "name" => (&path.name).into(),
+        _ => unreachable!("ImplementedTrait property {field_name}"),
     }
 }
 
@@ -558,7 +568,10 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                 "Attribute" => Box::new(data_contexts.map(move |ctx| {
                     property_mapper(ctx, field_name.as_ref(), get_attribute_property)
                 })),
-                "RawType" | "ResolvedPathType" | "ImplementedTrait" | "PrimitiveType"
+                "ImplementedTrait" => Box::new(data_contexts.map(move |ctx| {
+                    property_mapper(ctx, field_name.as_ref(), get_implemented_trait_property)
+                })),
+                "RawType" | "ResolvedPathType" | "PrimitiveType"
                     if matches!(field_name.as_ref(), "name") =>
                 {
                     Box::new(data_contexts.map(move |ctx| {
@@ -952,11 +965,12 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     unreachable!("project_neighbors {current_type_name} {edge_name} {parameters:?}")
                 }
             },
-            "Impl" => match edge_name.as_ref() {
-                "method" => {
-                    let current_crate = self.current_crate;
-                    let previous_crate = self.previous_crate;
-                    Box::new(data_contexts.map(move |ctx| {
+            "Impl" => {
+                match edge_name.as_ref() {
+                    "method" => {
+                        let current_crate = self.current_crate;
+                        let previous_crate = self.previous_crate;
+                        Box::new(data_contexts.map(move |ctx| {
                         let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
                             .current_token
                         {
@@ -976,13 +990,8 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                 } else {
                                     let method_names: BTreeSet<&str> = impl_token.provided_trait_methods.iter().map(|x| x.as_str()).collect();
 
-                                    let trait_type = impl_token.trait_.as_ref().expect("no trait but provided_trait_methods was non-empty");
-                                    let trait_item = match trait_type {
-                                        Type::ResolvedPath { name: _, id, args: _, param_names: _ } => {
-                                            item_index.get(id)
-                                        }
-                                        _ => unimplemented!("found provided_trait_methods when the trait was not a ResolvedPath: {trait_type:?}"),
-                                    };
+                                    let trait_path = impl_token.trait_.as_ref().expect("no trait but provided_trait_methods was non-empty");
+                                    let trait_item = item_index.get(&trait_path.id);
 
                                     if let Some(trait_item) = trait_item {
                                         if let ItemEnum::Trait(trait_item) = &trait_item.inner {
@@ -1019,54 +1028,53 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
 
                         (ctx, neighbors)
                     }))
-                }
-                "implemented_trait" => {
-                    let current_crate = self.current_crate;
-                    let previous_crate = self.previous_crate;
-                    Box::new(data_contexts.map(move |ctx| {
-                        let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
-                            .current_token
-                        {
-                            None => Box::new(std::iter::empty()),
-                            Some(token) => {
-                                let origin = token.origin;
-                                let item_index = match origin {
-                                    Origin::CurrentCrate => &current_crate.inner.index,
-                                    Origin::PreviousCrate => {
-                                        &previous_crate
-                                            .expect("no previous crate provided")
-                                            .inner
-                                            .index
-                                    }
-                                };
+                    }
+                    "implemented_trait" => {
+                        let current_crate = self.current_crate;
+                        let previous_crate = self.previous_crate;
+                        Box::new(data_contexts.map(move |ctx| {
+                            let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
+                                match &ctx.current_token {
+                                    None => Box::new(std::iter::empty()),
+                                    Some(token) => {
+                                        let origin = token.origin;
+                                        let item_index = match origin {
+                                            Origin::CurrentCrate => &current_crate.inner.index,
+                                            Origin::PreviousCrate => {
+                                                &previous_crate
+                                                    .expect("no previous crate provided")
+                                                    .inner
+                                                    .index
+                                            }
+                                        };
 
-                                let impl_token = token.as_impl().expect("not an Impl token");
-                                if let Some(ty) = &impl_token.trait_ {
-                                    match ty {
-                                        Type::ResolvedPath { name: _, id, .. } => {
-                                            if let Some(item) = item_index.get(id) {
+                                        let impl_token =
+                                            token.as_impl().expect("not an Impl token");
+
+                                        if let Some(path) = &impl_token.trait_ {
+                                            if let Some(item) = item_index.get(&path.id) {
                                                 Box::new(std::iter::once(
-                                                    origin.make_implemented_trait_token(ty, item),
+                                                    origin.make_implemented_trait_token(path, item),
                                                 ))
                                             } else {
                                                 Box::new(std::iter::empty())
                                             }
+                                        } else {
+                                            Box::new(std::iter::empty())
                                         }
-                                        _ => Box::new(std::iter::empty()),
                                     }
-                                } else {
-                                    Box::new(std::iter::empty())
-                                }
-                            }
-                        };
+                                };
 
-                        (ctx, neighbors)
-                    }))
+                            (ctx, neighbors)
+                        }))
+                    }
+                    _ => {
+                        unreachable!(
+                            "project_neighbors {current_type_name} {edge_name} {parameters:?}"
+                        )
+                    }
                 }
-                _ => {
-                    unreachable!("project_neighbors {current_type_name} {edge_name} {parameters:?}")
-                }
-            },
+            }
             "ImplementedTrait" => match edge_name.as_ref() {
                 "trait" => Box::new(data_contexts.map(move |ctx| {
                     let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
