@@ -86,8 +86,6 @@ Checklist:
   removal of public fields were to report that a struct was removed. This is unintended
   since it would overwhelm the user with errors, instead of having a separate query that
   specifically reports the removal of the struct rather than all its fields separately.
-- Add `<query_name>` to the list of features that need rustdoc data
-  in `scripts/regenerate_test_rustdocs.sh`.
 - Add the outputs you expect your query to produce over your test case in
   a new file: `src/test_data/<query_name>.output.run`.
 - Add `<query_name>` to the list of queries tested by the `query_execution_tests!()`
