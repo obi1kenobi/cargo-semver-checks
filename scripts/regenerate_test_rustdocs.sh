@@ -19,31 +19,12 @@ cargo +nightly rustdoc -- -Zunstable-options --output-format json
 mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/baseline.json"
 
 # For each feature, re-run rustdoc with it enabled.
-features=(
-    'auto_trait_impl_removed'
-    'derive_trait_impl_removed'
-    'enum_missing'
-    'enum_repr_c_removed'
-    'enum_repr_int_changed'
-    'enum_repr_int_removed'
-    'enum_variant_added'
-    'enum_variant_missing'
-    'function_missing'
-    'inherent_method_missing'
-    'sized_impl_removed'
-    'struct_marked_non_exhaustive'
-    'struct_missing'
-    'struct_pub_field_missing'
-    'struct_repr_c_removed'
-    'struct_repr_transparent_removed'
-    'unit_struct_changed_kind'
-    'variant_marked_non_exhaustive'
-)
-for feat in "${features[@]}"
-do
+features="$(cargo metadata --format-version 1 | \
+    jq --exit-status -r '.packages[] | select(.name = "semver_tests") | .features | keys[]')"
+while IFS= read -r feat; do
     echo "Generating: $feat"
     cargo +nightly rustdoc --features "$feat" -- -Zunstable-options --output-format json
     mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/$feat.json"
-done
+done <<< "$features"
 
 unset CARGO_TARGET_DIR
