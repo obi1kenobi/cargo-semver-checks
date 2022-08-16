@@ -1,5 +1,42 @@
 # Contributing
 
+- [Making your first contribution](#making-your-first-contribution)
+- [Design goals](#design-goals)
+- [Running `cargo test` for the first time](#running-cargo-test-for-the-first-time)
+- [Adding a new lint](#adding-a-new-lint)
+
+## Making your first contribution
+
+Thanks for taking the time to contribute!
+The best starting point is adding a new lint.
+[Here is a list](https://github.com/obi1kenobi/cargo-semver-check/issues?q=is%3Aopen+label%3AE-mentor+label%3AA-lint)
+of lints that have all their prerequisites met and are ready to be added,
+and which have mentorship available.
+Please make use of the mentorship opportunity by asking questions in the relevant GitHub issue!
+
+After choosing a lint to implement, try to identify a related lint that is already implemented
+and relies on similar information.
+For example, if implementing a lint that uses information about attributes,
+find other lints that check attribute information and use them as guides as you write your lint.
+
+The ["Adding a new lint"](#adding-a-new-lint) section of this document has a checklist of steps
+you can follow to ensure your new lint is tested and included in the lints that
+`cargo-semver-checks` runs.
+
+Please see the ["Running `cargo test` for the first time"](#running-cargo-test-for-the-first-time)
+section to generate the test rustdoc JSON data the tests require. Failing to run this step
+will cause `cargo test` failures.
+
+The design of `cargo-semver-checks` is documented in the [Design goals](#design-goals) section.
+`cargo-semver-checks` uses the [Trustfall](https://github.com/obi1kenobi/trustfall) query engine,
+which in turn uses GraphQL syntax with non-standard semantics.
+These extensions were originally developed for a previous project ("GraphQL compiler"),
+and have been streamlined and further developed in Trustfall.
+Trustfall documentation is unfortunately still minimal and still consists largely of examples,
+but most Trustfall query functionality is nearly identical
+(down to trivial parameter naming differences) to the query functionality documented in
+[the GraphQL compiler query reference](https://graphql-compiler.readthedocs.io/en/latest/language_specification/query_directives.html).
+
 ## Design goals
 
 In short:
@@ -60,7 +97,7 @@ with a literal. If this change were published accidentally, undoing the change w
 and would require a new major version. More examples of such useful-but-not-semver checks are
 [here](https://github.com/obi1kenobi/cargo-semver-check/issues/5).
 
-## Running `cargo test` in this crate for the first time
+## Running `cargo test` for the first time
 
 Testing this crate requires rustdoc JSON output data, which is too large and variable
 to check into git. It has to be generated locally before `cargo test` will succeed,
