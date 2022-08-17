@@ -51,7 +51,50 @@ impl GlobalConfig {
 }
 
 fn main() -> anyhow::Result<()> {
-    let matches = Command::new("cargo-semver-checks")
+    let matches = cmd().get_matches();
+
+    // Descend one level: from `cargo semver-checks` to just `semver-checks`.
+    let semver_check = matches
+        .subcommand_matches("semver-checks")
+        .expect("semver-checks is missing");
+
+    let config = GlobalConfig::new();
+
+    if let Some(diff_files) = semver_check.subcommand_matches("diff-files") {
+        let current_rustdoc_path: &str = diff_files
+            .get_one::<String>("current_rustdoc_path")
+            .expect("current_rustdoc_path is required but was not present")
+            .as_str();
+        let baseline_rustdoc_path: &str = diff_files
+            .get_one::<String>("baseline_rustdoc_path")
+            .expect("baseline_rustdoc_path is required but was not present")
+            .as_str();
+
+        let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
+        let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
+
+        return run_check_release(config, current_crate, baseline_crate);
+    } else if let Some(check_release) = semver_check.subcommand_matches("check-release") {
+        let current_rustdoc_path: &str = check_release
+            .get_one::<String>("current_rustdoc_path")
+            .expect("current_rustdoc_path is required but was not present")
+            .as_str();
+        let baseline_rustdoc_path: &str = check_release
+            .get_one::<String>("baseline_rustdoc_path")
+            .expect("baseline_rustdoc_path is required but was not present")
+            .as_str();
+
+        let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
+        let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
+
+        return run_check_release(config, current_crate, baseline_crate);
+    }
+
+    unreachable!("no commands matched")
+}
+
+fn cmd() -> Command<'static> {
+    Command::new("cargo-semver-checks")
         .bin_name("cargo")
         .version(crate_version!())
         .subcommand(
@@ -104,44 +147,10 @@ fn main() -> anyhow::Result<()> {
                                 .required(true)
                         )
                 )
-        ).get_matches();
+        )
+}
 
-    // Descend one level: from `cargo semver-checks` to just `semver-checks`.
-    let semver_check = matches
-        .subcommand_matches("semver-checks")
-        .expect("semver-checks is missing");
-
-    let config = GlobalConfig::new();
-
-    if let Some(diff_files) = semver_check.subcommand_matches("diff-files") {
-        let current_rustdoc_path: &str = diff_files
-            .get_one::<String>("current_rustdoc_path")
-            .expect("current_rustdoc_path is required but was not present")
-            .as_str();
-        let baseline_rustdoc_path: &str = diff_files
-            .get_one::<String>("baseline_rustdoc_path")
-            .expect("baseline_rustdoc_path is required but was not present")
-            .as_str();
-
-        let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
-        let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
-
-        return run_check_release(config, current_crate, baseline_crate);
-    } else if let Some(check_release) = semver_check.subcommand_matches("check-release") {
-        let current_rustdoc_path: &str = check_release
-            .get_one::<String>("current_rustdoc_path")
-            .expect("current_rustdoc_path is required but was not present")
-            .as_str();
-        let baseline_rustdoc_path: &str = check_release
-            .get_one::<String>("baseline_rustdoc_path")
-            .expect("baseline_rustdoc_path is required but was not present")
-            .as_str();
-
-        let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
-        let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
-
-        return run_check_release(config, current_crate, baseline_crate);
-    }
-
-    unreachable!("no commands matched")
+#[test]
+fn verify_cmd() {
+    cmd().debug_assert();
 }
