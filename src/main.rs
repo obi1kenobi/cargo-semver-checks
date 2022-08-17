@@ -56,12 +56,6 @@ fn main() -> anyhow::Result<()> {
     let config = GlobalConfig::new();
 
     match args {
-        SemverChecks::DiffFiles(args) => {
-            let current_crate = load_rustdoc_from_file(&args.current_rustdoc_path)?;
-            let baseline_crate = load_rustdoc_from_file(&args.baseline_rustdoc_path)?;
-
-            return run_check_release(config, current_crate, baseline_crate);
-        }
         SemverChecks::CheckRelease(args) => {
             let current_crate = load_rustdoc_from_file(&args.current_rustdoc_path)?;
             let baseline_crate = load_rustdoc_from_file(&args.baseline_rustdoc_path)?;
@@ -83,19 +77,8 @@ enum Cargo {
 /// Check your crate for semver violations.
 #[derive(Subcommand)]
 enum SemverChecks {
-    DiffFiles(DiffFiles),
+    #[clap(alias = "diff-files")]
     CheckRelease(CheckRelease),
-}
-
-#[derive(Args)]
-struct DiffFiles {
-    /// The current rustdoc json output to test for semver violations. Required.
-    #[clap(short, long = "current", value_name = "CURRENT_RUSTDOC_JSON")]
-    current_rustdoc_path: PathBuf,
-
-    /// The rustdoc json file to use as a semver baseline. Required.
-    #[clap(short, long = "baseline", value_name = "BASELINE_RUSTDOC_JSON")]
-    baseline_rustdoc_path: PathBuf,
 }
 
 #[derive(Args)]
