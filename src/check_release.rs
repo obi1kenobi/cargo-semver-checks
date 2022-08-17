@@ -104,7 +104,7 @@ fn make_result_iter<'a>(
 }
 
 pub(super) fn run_check_release(
-    mut config: GlobalConfig,
+    config: &mut GlobalConfig,
     current_crate: Crate,
     baseline_crate: Crate,
 ) -> anyhow::Result<bool> {
