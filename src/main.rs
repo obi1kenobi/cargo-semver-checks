@@ -60,7 +60,11 @@ fn main() -> anyhow::Result<()> {
             let current_crate = load_rustdoc_from_file(&args.current_rustdoc_path)?;
             let baseline_crate = load_rustdoc_from_file(&args.baseline_rustdoc_path)?;
 
-            return run_check_release(config, current_crate, baseline_crate);
+            if run_check_release(config, current_crate, baseline_crate)? {
+                std::process::exit(0);
+            } else {
+                std::process::exit(1);
+            }
         }
     }
 }

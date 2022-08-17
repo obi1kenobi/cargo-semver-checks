@@ -107,7 +107,7 @@ pub(super) fn run_check_release(
     mut config: GlobalConfig,
     current_crate: Crate,
     baseline_crate: Crate,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<bool> {
     let current_version = current_crate.crate_version.as_deref();
     let baseline_version = baseline_crate.crate_version.as_deref();
 
@@ -390,7 +390,7 @@ pub(super) fn run_check_release(
         })
         .expect("print failed");
 
-        std::process::exit(1);
+        Ok(false)
     } else {
         colored_ln(&mut config.output_writer, |w| {
             colored!(
@@ -407,7 +407,6 @@ pub(super) fn run_check_release(
             )
         })
         .expect("print failed");
+        Ok(true)
     }
-
-    Ok(())
 }
