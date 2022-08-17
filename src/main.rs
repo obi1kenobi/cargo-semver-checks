@@ -7,10 +7,9 @@ mod query;
 mod templating;
 mod util;
 
-use std::env;
 use std::path::PathBuf;
 
-use clap::{crate_version, value_parser, Arg, ArgAction, Command};
+use clap::{Args, Parser, Subcommand};
 use termcolor::{ColorChoice, StandardStream};
 
 use crate::{
@@ -52,117 +51,66 @@ impl GlobalConfig {
 }
 
 fn main() -> anyhow::Result<()> {
-    let matches = cmd().get_matches();
-
-    // Descend one level: from `cargo semver-checks` to just `semver-checks`.
-    let semver_check = matches
-        .subcommand_matches("semver-checks")
-        .expect("semver-checks is missing");
+    let Cargo::SemverChecks(args) = Cargo::parse();
 
     let config = GlobalConfig::new();
 
-    match semver_check.subcommand() {
-        Some(("diff-files", diff_files)) => {
-            let current_rustdoc_path = diff_files
-                .get_one::<PathBuf>("current_rustdoc_path")
-                .expect("current_rustdoc_path is required but was not present")
-                .as_path();
-            let baseline_rustdoc_path = diff_files
-                .get_one::<PathBuf>("baseline_rustdoc_path")
-                .expect("baseline_rustdoc_path is required but was not present")
-                .as_path();
-
-            let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
-            let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
+    match args {
+        SemverChecks::DiffFiles(args) => {
+            let current_crate = load_rustdoc_from_file(&args.current_rustdoc_path)?;
+            let baseline_crate = load_rustdoc_from_file(&args.baseline_rustdoc_path)?;
 
             return run_check_release(config, current_crate, baseline_crate);
         }
-        Some(("check-release", check_release)) => {
-            let current_rustdoc_path = check_release
-                .get_one::<PathBuf>("current_rustdoc_path")
-                .expect("current_rustdoc_path is required but was not present")
-                .as_path();
-            let baseline_rustdoc_path = check_release
-                .get_one::<PathBuf>("baseline_rustdoc_path")
-                .expect("baseline_rustdoc_path is required but was not present")
-                .as_path();
-
-            let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
-            let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
+        SemverChecks::CheckRelease(args) => {
+            let current_crate = load_rustdoc_from_file(&args.current_rustdoc_path)?;
+            let baseline_crate = load_rustdoc_from_file(&args.baseline_rustdoc_path)?;
 
             return run_check_release(config, current_crate, baseline_crate);
-        }
-        Some(_) => {
-            unreachable!("external subcommands were not enabled with clap")
-        }
-        None => {
-            unreachable!("arg_required_else_help is set with clap")
         }
     }
 }
 
-fn cmd() -> Command<'static> {
-    Command::new("cargo-semver-checks")
-        .bin_name("cargo")
-        .version(crate_version!())
-        .propagate_version(true)
-        .subcommand(
-            Command::new("semver-checks")
-                .about("Check your crate for semver violations.")
-                .subcommand_required(true)
-                .arg_required_else_help(true)
-                .subcommand(
-                    Command::new("diff-files")
-                        .arg_required_else_help(true)
-                        .arg(
-                            Arg::new("current_rustdoc_path")
-                                .short('c')
-                                .long("current")
-                                .value_name("CURRENT_RUSTDOC_JSON")
-                                .help("The current rustdoc json output to test for semver violations. Required.")
-                                .action(ArgAction::Set)
-                                .value_parser(value_parser!(PathBuf))
-                                .required(true)
-                        )
-                        .arg(
-                            Arg::new("baseline_rustdoc_path")
-                                .short('b')
-                                .long("baseline")
-                                .value_name("BASELINE_RUSTDOC_JSON")
-                                .help("The rustdoc json file to use as a semver baseline. Required.")
-                                .action(ArgAction::Set)
-                                .value_parser(value_parser!(PathBuf))
-                                .required(true)
-                        )
-                )
-                .subcommand(
-                    Command::new("check-release")
-                        .arg_required_else_help(true)
-                        .arg(
-                            Arg::new("current_rustdoc_path")
-                                .short('c')
-                                .long("current")
-                                .value_name("CURRENT_RUSTDOC_JSON")
-                                .help("The current rustdoc json output to test for semver violations. Required.")
-                                .action(ArgAction::Set)
-                                .value_parser(value_parser!(PathBuf))
-                                .required(true)
-                        )
-                        .arg(
-                            Arg::new("baseline_rustdoc_path")
-                                .short('b')
-                                .long("baseline")
-                                .value_name("BASELINE_RUSTDOC_JSON")
-                                .help("The rustdoc json file to use as a semver baseline. Required.")
-                                .action(ArgAction::Set)
-                                .value_parser(value_parser!(PathBuf))
-                                .required(true)
-                        )
-                )
-        )
+#[derive(Parser)]
+#[clap(name = "cargo")]
+#[clap(bin_name = "cargo")]
+#[clap(version, propagate_version = true)]
+enum Cargo {
+    #[clap(subcommand)]
+    SemverChecks(SemverChecks),
+}
+
+/// Check your crate for semver violations.
+#[derive(Subcommand)]
+enum SemverChecks {
+    DiffFiles(DiffFiles),
+    CheckRelease(CheckRelease),
+}
+
+#[derive(Args)]
+struct DiffFiles {
+    /// The current rustdoc json output to test for semver violations. Required.
+    #[clap(short, long = "current", value_name = "CURRENT_RUSTDOC_JSON")]
+    current_rustdoc_path: PathBuf,
+
+    /// The rustdoc json file to use as a semver baseline. Required.
+    #[clap(short, long = "baseline", value_name = "BASELINE_RUSTDOC_JSON")]
+    baseline_rustdoc_path: PathBuf,
+}
+
+#[derive(Args)]
+struct CheckRelease {
+    /// The current rustdoc json output to test for semver violations. Required.
+    #[clap(short, long = "current", value_name = "CURRENT_RUSTDOC_JSON")]
+    current_rustdoc_path: PathBuf,
+
+    /// The rustdoc json file to use as a semver baseline. Required.
+    #[clap(short, long = "baseline", value_name = "BASELINE_RUSTDOC_JSON")]
+    baseline_rustdoc_path: PathBuf,
 }
 
 #[test]
-fn verify_cmd() {
-    cmd().debug_assert();
+fn verify_cli() {
+    use clap::CommandFactory;
+    Cargo::command().debug_assert()
 }
