@@ -61,37 +61,44 @@ fn main() -> anyhow::Result<()> {
 
     let config = GlobalConfig::new();
 
-    if let Some(diff_files) = semver_check.subcommand_matches("diff-files") {
-        let current_rustdoc_path = diff_files
-            .get_one::<PathBuf>("current_rustdoc_path")
-            .expect("current_rustdoc_path is required but was not present")
-            .as_path();
-        let baseline_rustdoc_path = diff_files
-            .get_one::<PathBuf>("baseline_rustdoc_path")
-            .expect("baseline_rustdoc_path is required but was not present")
-            .as_path();
+    match semver_check.subcommand() {
+        Some(("diff-files", diff_files)) => {
+            let current_rustdoc_path = diff_files
+                .get_one::<PathBuf>("current_rustdoc_path")
+                .expect("current_rustdoc_path is required but was not present")
+                .as_path();
+            let baseline_rustdoc_path = diff_files
+                .get_one::<PathBuf>("baseline_rustdoc_path")
+                .expect("baseline_rustdoc_path is required but was not present")
+                .as_path();
 
-        let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
-        let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
+            let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
+            let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
 
-        return run_check_release(config, current_crate, baseline_crate);
-    } else if let Some(check_release) = semver_check.subcommand_matches("check-release") {
-        let current_rustdoc_path = check_release
-            .get_one::<PathBuf>("current_rustdoc_path")
-            .expect("current_rustdoc_path is required but was not present")
-            .as_path();
-        let baseline_rustdoc_path = check_release
-            .get_one::<PathBuf>("baseline_rustdoc_path")
-            .expect("baseline_rustdoc_path is required but was not present")
-            .as_path();
+            return run_check_release(config, current_crate, baseline_crate);
+        }
+        Some(("check-release", check_release)) => {
+            let current_rustdoc_path = check_release
+                .get_one::<PathBuf>("current_rustdoc_path")
+                .expect("current_rustdoc_path is required but was not present")
+                .as_path();
+            let baseline_rustdoc_path = check_release
+                .get_one::<PathBuf>("baseline_rustdoc_path")
+                .expect("baseline_rustdoc_path is required but was not present")
+                .as_path();
 
-        let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
-        let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
+            let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
+            let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
 
-        return run_check_release(config, current_crate, baseline_crate);
+            return run_check_release(config, current_crate, baseline_crate);
+        }
+        Some(_) => {
+            unreachable!("external subcommands were not enabled with clap")
+        }
+        None => {
+            unreachable!("arg_required_else_help is set with clap")
+        }
     }
-
-    unreachable!("no commands matched")
 }
 
 fn cmd() -> Command<'static> {
