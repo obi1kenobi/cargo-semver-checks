@@ -28,3 +28,4 @@ termcolor_output = "1.0.1"
 toml_edit = "0.14.4"
 cargo_metadata = "0.15.0"
 clap-cargo = { version = "0.9.1", features = ["cargo_metadata"] }
+ignore = "0.4.18"

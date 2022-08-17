@@ -12,10 +12,9 @@ mod util;
 
 use std::path::PathBuf;
 
-use clap::{Args, Parser, Subcommand};
+use clap::{ArgGroup, Args, Parser, Subcommand};
 use termcolor::{ColorChoice, StandardStream};
 
-use crate::baseline::BaselineLoader;
 use crate::{
     check_release::run_check_release, templating::make_handlebars_registry,
     util::load_rustdoc_from_file,
@@ -61,15 +60,20 @@ fn main() -> anyhow::Result<()> {
 
     match args {
         SemverChecks::CheckRelease(args) => {
-            let loader = Box::new(baseline::RustdocBaseline::new(
-                args.baseline_rustdoc_path.clone(),
-            ));
+            let loader: Box<dyn baseline::BaselineLoader> =
+                if let Some(path) = args.baseline_rustdoc_path.as_deref() {
+                    Box::new(baseline::RustdocBaseline::new(path.to_owned()))
+                } else if let Some(root) = args.baseline_root.as_deref() {
+                    Box::new(baseline::PathBaseline::new(root.to_owned())?)
+                } else {
+                    unreachable!("a member of the `baseline` group must be present");
+                };
             let rustdoc = dump::RustDoc::new().deps(false).silence(false);
 
             let rustdoc_paths =
                 if let Some(current_rustdoc_path) = args.current_rustdoc_path.as_deref() {
                     vec![(
-                        loader.load_rustdoc("<unknown>")?,
+                        loader.load_rustdoc(&rustdoc, "<unknown>")?,
                         current_rustdoc_path.to_owned(),
                     )]
                 } else {
@@ -90,7 +94,7 @@ fn main() -> anyhow::Result<()> {
                         let manifest_path = selected.manifest_path.as_std_path();
                         let rustdoc_path = rustdoc.dump(manifest_path)?;
                         let crate_name = manifest::get_package_name(manifest_path)?;
-                        let baseline_path = loader.load_rustdoc(&crate_name)?;
+                        let baseline_path = loader.load_rustdoc(&rustdoc, &crate_name)?;
                         rustdoc_paths.push((baseline_path, rustdoc_path));
                     }
                     rustdoc_paths
@@ -130,6 +134,7 @@ enum SemverChecks {
 }
 
 #[derive(Args)]
+#[clap(group = ArgGroup::new("baseline").required(true))]
 struct CheckRelease {
     #[clap(flatten)]
     pub manifest: clap_cargo::Manifest,
@@ -146,9 +151,18 @@ struct CheckRelease {
     )]
     current_rustdoc_path: Option<PathBuf>,
 
+    /// Directory containing baseline crate source
+    #[clap(long, value_name = "MANIFEST_ROOT", group = "baseline")]
+    baseline_root: Option<PathBuf>,
+
     /// The rustdoc json file to use as a semver baseline.
-    #[clap(short, long = "baseline", value_name = "BASELINE_RUSTDOC_JSON")]
-    baseline_rustdoc_path: PathBuf,
+    #[clap(
+        short,
+        long = "baseline",
+        value_name = "BASELINE_RUSTDOC_JSON",
+        group = "baseline"
+    )]
+    baseline_rustdoc_path: Option<PathBuf>,
 }
 
 #[test]
