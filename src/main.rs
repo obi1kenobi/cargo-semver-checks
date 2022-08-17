@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 pub mod adapter;
+mod baseline;
 mod check_release;
 pub mod indexed_crate;
 mod query;
@@ -12,6 +13,7 @@ use std::path::PathBuf;
 use clap::{Args, Parser, Subcommand};
 use termcolor::{ColorChoice, StandardStream};
 
+use crate::baseline::BaselineLoader;
 use crate::{
     check_release::run_check_release, templating::make_handlebars_registry,
     util::load_rustdoc_from_file,
@@ -57,10 +59,10 @@ fn main() -> anyhow::Result<()> {
 
     match args {
         SemverChecks::CheckRelease(args) => {
-            let rustdoc_paths = vec![(
+            let loader = Box::new(baseline::RustdocBaseline::new(
                 args.baseline_rustdoc_path.clone(),
-                args.current_rustdoc_path.clone(),
-            )];
+            ));
+            let rustdoc_paths = vec![(loader.load_rustdoc("")?, args.current_rustdoc_path.clone())];
             let mut success = true;
             for (baseline_path, current_path) in rustdoc_paths {
                 let baseline_crate = load_rustdoc_from_file(&baseline_path)?;
