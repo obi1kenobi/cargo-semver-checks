@@ -8,8 +8,9 @@ mod templating;
 mod util;
 
 use std::env;
+use std::path::PathBuf;
 
-use clap::{crate_version, Arg, ArgAction, Command};
+use clap::{crate_version, value_parser, Arg, ArgAction, Command};
 use termcolor::{ColorChoice, StandardStream};
 
 use crate::{
@@ -61,28 +62,28 @@ fn main() -> anyhow::Result<()> {
     let config = GlobalConfig::new();
 
     if let Some(diff_files) = semver_check.subcommand_matches("diff-files") {
-        let current_rustdoc_path: &str = diff_files
-            .get_one::<String>("current_rustdoc_path")
+        let current_rustdoc_path = diff_files
+            .get_one::<PathBuf>("current_rustdoc_path")
             .expect("current_rustdoc_path is required but was not present")
-            .as_str();
-        let baseline_rustdoc_path: &str = diff_files
-            .get_one::<String>("baseline_rustdoc_path")
+            .as_path();
+        let baseline_rustdoc_path = diff_files
+            .get_one::<PathBuf>("baseline_rustdoc_path")
             .expect("baseline_rustdoc_path is required but was not present")
-            .as_str();
+            .as_path();
 
         let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
         let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
 
         return run_check_release(config, current_crate, baseline_crate);
     } else if let Some(check_release) = semver_check.subcommand_matches("check-release") {
-        let current_rustdoc_path: &str = check_release
-            .get_one::<String>("current_rustdoc_path")
+        let current_rustdoc_path = check_release
+            .get_one::<PathBuf>("current_rustdoc_path")
             .expect("current_rustdoc_path is required but was not present")
-            .as_str();
-        let baseline_rustdoc_path: &str = check_release
-            .get_one::<String>("baseline_rustdoc_path")
+            .as_path();
+        let baseline_rustdoc_path = check_release
+            .get_one::<PathBuf>("baseline_rustdoc_path")
             .expect("baseline_rustdoc_path is required but was not present")
-            .as_str();
+            .as_path();
 
         let current_crate = load_rustdoc_from_file(current_rustdoc_path)?;
         let baseline_crate = load_rustdoc_from_file(baseline_rustdoc_path)?;
@@ -111,6 +112,7 @@ fn cmd() -> Command<'static> {
                                 .value_name("CURRENT_RUSTDOC_JSON")
                                 .help("The current rustdoc json output to test for semver violations. Required.")
                                 .action(ArgAction::Set)
+                                .value_parser(value_parser!(PathBuf))
                                 .required(true)
                         )
                         .arg(
@@ -120,6 +122,7 @@ fn cmd() -> Command<'static> {
                                 .value_name("BASELINE_RUSTDOC_JSON")
                                 .help("The rustdoc json file to use as a semver baseline. Required.")
                                 .action(ArgAction::Set)
+                                .value_parser(value_parser!(PathBuf))
                                 .required(true)
                         )
                 )
@@ -133,6 +136,7 @@ fn cmd() -> Command<'static> {
                                 .value_name("CURRENT_RUSTDOC_JSON")
                                 .help("The current rustdoc json output to test for semver violations. Required.")
                                 .action(ArgAction::Set)
+                                .value_parser(value_parser!(PathBuf))
                                 .required(true)
                         )
                         .arg(
@@ -142,6 +146,7 @@ fn cmd() -> Command<'static> {
                                 .value_name("BASELINE_RUSTDOC_JSON")
                                 .help("The rustdoc json file to use as a semver baseline. Required.")
                                 .action(ArgAction::Set)
+                                .value_parser(value_parser!(PathBuf))
                                 .required(true)
                         )
                 )

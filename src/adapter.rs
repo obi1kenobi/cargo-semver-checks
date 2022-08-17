@@ -1147,6 +1147,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
 
 #[cfg(test)]
 mod tests {
+    use std::path::Path;
     use std::{cell::RefCell, collections::BTreeMap, rc::Rc, sync::Arc};
 
     use anyhow::Context;
@@ -1158,7 +1159,7 @@ mod tests {
 
     #[test]
     fn pub_use_handling() {
-        let current_crate = load_rustdoc_from_file("./localdata/test_data/baseline.json")
+        let current_crate = load_rustdoc_from_file(Path::new("./localdata/test_data/baseline.json"))
             .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
             .expect("failed to load baseline rustdoc");
 
@@ -1234,11 +1235,11 @@ mod tests {
 
     fn check_query_execution(query_name: &str) {
         // Ensure the rustdocs JSON outputs have been regenerated.
-        let baseline_crate = load_rustdoc_from_file("./localdata/test_data/baseline.json")
+        let baseline_crate = load_rustdoc_from_file(Path::new("./localdata/test_data/baseline.json"))
             .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
             .expect("failed to load baseline rustdoc");
         let current_crate =
-            load_rustdoc_from_file(&format!("./localdata/test_data/{}.json", query_name))
+            load_rustdoc_from_file(Path::new(&format!("./localdata/test_data/{}.json", query_name)))
             .with_context(|| format!("Could not load localdata/test_data/{}.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?", query_name))
             .expect("failed to load rustdoc under test");
 
