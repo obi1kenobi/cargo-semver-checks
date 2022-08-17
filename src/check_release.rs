@@ -391,23 +391,23 @@ pub(super) fn run_check_release(
         .expect("print failed");
 
         std::process::exit(1);
+    } else {
+        colored_ln(&mut config.output_writer, |w| {
+            colored!(
+                w,
+                "{}{}{:>12}{} [{:>8.3}s] {} checks run: {} passed, {} skipped",
+                fg!(Some(Color::Green)),
+                bold!(true),
+                "Summary",
+                reset!(),
+                total_duration.as_secs_f32(),
+                queries_to_run.len(),
+                queries_to_run.len(),
+                skipped_queries,
+            )
+        })
+        .expect("print failed");
     }
-
-    colored_ln(&mut config.output_writer, |w| {
-        colored!(
-            w,
-            "{}{}{:>12}{} [{:>8.3}s] {} checks run: {} passed, {} skipped",
-            fg!(Some(Color::Green)),
-            bold!(true),
-            "Summary",
-            reset!(),
-            total_duration.as_secs_f32(),
-            queries_to_run.len(),
-            queries_to_run.len(),
-            skipped_queries,
-        )
-    })
-    .expect("print failed");
 
     Ok(())
 }
