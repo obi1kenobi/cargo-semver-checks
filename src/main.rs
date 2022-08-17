@@ -109,6 +109,8 @@ fn cmd() -> Command<'static> {
         .subcommand(
             Command::new("semver-checks")
                 .about("Check your crate for semver violations.")
+                .subcommand_required(true)
+                .arg_required_else_help(true)
                 .subcommand(
                     Command::new("diff-files")
                         .arg_required_else_help(true)
