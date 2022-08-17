@@ -9,7 +9,7 @@ mod util;
 
 use std::env;
 
-use clap::{crate_version, AppSettings, Arg, Command};
+use clap::{crate_version, Arg, Command};
 use termcolor::{ColorChoice, StandardStream};
 
 use crate::{
@@ -103,9 +103,9 @@ fn cmd() -> Command<'static> {
                 .about("Check your crate for semver violations.")
                 .subcommand(
                     Command::new("diff-files")
-                        .setting(AppSettings::ArgRequiredElseHelp)
+                        .arg_required_else_help(true)
                         .arg(
-                            Arg::with_name("current_rustdoc_path")
+                            Arg::new("current_rustdoc_path")
                                 .short('c')
                                 .long("current")
                                 .value_name("CURRENT_RUSTDOC_JSON")
@@ -114,7 +114,7 @@ fn cmd() -> Command<'static> {
                                 .required(true)
                         )
                         .arg(
-                            Arg::with_name("baseline_rustdoc_path")
+                            Arg::new("baseline_rustdoc_path")
                                 .short('b')
                                 .long("baseline")
                                 .value_name("BASELINE_RUSTDOC_JSON")
@@ -125,9 +125,9 @@ fn cmd() -> Command<'static> {
                 )
                 .subcommand(
                     Command::new("check-release")
-                        .setting(AppSettings::ArgRequiredElseHelp)
+                        .arg_required_else_help(true)
                         .arg(
-                            Arg::with_name("current_rustdoc_path")
+                            Arg::new("current_rustdoc_path")
                                 .short('c')
                                 .long("current")
                                 .value_name("CURRENT_RUSTDOC_JSON")
@@ -136,7 +136,7 @@ fn cmd() -> Command<'static> {
                                 .required(true)
                         )
                         .arg(
-                            Arg::with_name("baseline_rustdoc_path")
+                            Arg::new("baseline_rustdoc_path")
                                 .short('b')
                                 .long("baseline")
                                 .value_name("BASELINE_RUSTDOC_JSON")
