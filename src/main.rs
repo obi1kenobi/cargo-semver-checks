@@ -97,13 +97,12 @@ fn cmd() -> Command<'static> {
     Command::new("cargo-semver-checks")
         .bin_name("cargo")
         .version(crate_version!())
+        .propagate_version(true)
         .subcommand(
             Command::new("semver-checks")
-                .version(crate_version!())
                 .about("Check your crate for semver violations.")
                 .subcommand(
                     Command::new("diff-files")
-                        .version(crate_version!())
                         .setting(AppSettings::ArgRequiredElseHelp)
                         .arg(
                             Arg::with_name("current_rustdoc_path")
@@ -126,7 +125,6 @@ fn cmd() -> Command<'static> {
                 )
                 .subcommand(
                     Command::new("check-release")
-                        .version(crate_version!())
                         .setting(AppSettings::ArgRequiredElseHelp)
                         .arg(
                             Arg::with_name("current_rustdoc_path")
