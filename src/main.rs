@@ -3,7 +3,9 @@
 pub mod adapter;
 mod baseline;
 mod check_release;
+mod dump;
 pub mod indexed_crate;
+mod manifest;
 mod query;
 mod templating;
 mod util;
@@ -62,7 +64,37 @@ fn main() -> anyhow::Result<()> {
             let loader = Box::new(baseline::RustdocBaseline::new(
                 args.baseline_rustdoc_path.clone(),
             ));
-            let rustdoc_paths = vec![(loader.load_rustdoc("")?, args.current_rustdoc_path.clone())];
+            let rustdoc = dump::RustDoc::new().deps(false).silence(false);
+
+            let rustdoc_paths =
+                if let Some(current_rustdoc_path) = args.current_rustdoc_path.as_deref() {
+                    vec![(
+                        loader.load_rustdoc("<unknown>")?,
+                        current_rustdoc_path.to_owned(),
+                    )]
+                } else {
+                    let metadata = args.manifest.metadata().exec()?;
+                    let (selected, _) = args.workspace.partition_packages(&metadata);
+                    if selected.len() != 1 {
+                        anyhow::bail!(
+                            "only one package can be processed at a time: {}",
+                            selected
+                                .into_iter()
+                                .map(|s| s.name.clone())
+                                .collect::<Vec<_>>()
+                                .join(", ")
+                        );
+                    }
+                    let mut rustdoc_paths = Vec::with_capacity(selected.len());
+                    for selected in selected {
+                        let manifest_path = selected.manifest_path.as_std_path();
+                        let rustdoc_path = rustdoc.dump(manifest_path)?;
+                        let crate_name = manifest::get_package_name(manifest_path)?;
+                        let baseline_path = loader.load_rustdoc(&crate_name)?;
+                        rustdoc_paths.push((baseline_path, rustdoc_path));
+                    }
+                    rustdoc_paths
+                };
             let mut success = true;
             for (baseline_path, current_path) in rustdoc_paths {
                 let baseline_crate = load_rustdoc_from_file(&baseline_path)?;
@@ -99,11 +131,22 @@ enum SemverChecks {
 
 #[derive(Args)]
 struct CheckRelease {
-    /// The current rustdoc json output to test for semver violations. Required.
-    #[clap(short, long = "current", value_name = "CURRENT_RUSTDOC_JSON")]
-    current_rustdoc_path: PathBuf,
+    #[clap(flatten)]
+    pub manifest: clap_cargo::Manifest,
 
-    /// The rustdoc json file to use as a semver baseline. Required.
+    #[clap(flatten)]
+    pub workspace: clap_cargo::Workspace,
+
+    /// The current rustdoc json output to test for semver violations.
+    #[clap(
+        short,
+        long = "current",
+        value_name = "CURRENT_RUSTDOC_JSON",
+        requires = "baseline-rustdoc-path"
+    )]
+    current_rustdoc_path: Option<PathBuf>,
+
+    /// The rustdoc json file to use as a semver baseline.
     #[clap(short, long = "baseline", value_name = "BASELINE_RUSTDOC_JSON")]
     baseline_rustdoc_path: PathBuf,
 }
