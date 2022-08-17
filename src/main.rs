@@ -9,7 +9,7 @@ mod util;
 
 use std::env;
 
-use clap::{crate_version, Arg, Command};
+use clap::{crate_version, Arg, ArgAction, Command};
 use termcolor::{ColorChoice, StandardStream};
 
 use crate::{
@@ -110,7 +110,7 @@ fn cmd() -> Command<'static> {
                                 .long("current")
                                 .value_name("CURRENT_RUSTDOC_JSON")
                                 .help("The current rustdoc json output to test for semver violations. Required.")
-                                .takes_value(true)
+                                .action(ArgAction::Set)
                                 .required(true)
                         )
                         .arg(
@@ -119,7 +119,7 @@ fn cmd() -> Command<'static> {
                                 .long("baseline")
                                 .value_name("BASELINE_RUSTDOC_JSON")
                                 .help("The rustdoc json file to use as a semver baseline. Required.")
-                                .takes_value(true)
+                                .action(ArgAction::Set)
                                 .required(true)
                         )
                 )
@@ -132,7 +132,7 @@ fn cmd() -> Command<'static> {
                                 .long("current")
                                 .value_name("CURRENT_RUSTDOC_JSON")
                                 .help("The current rustdoc json output to test for semver violations. Required.")
-                                .takes_value(true)
+                                .action(ArgAction::Set)
                                 .required(true)
                         )
                         .arg(
@@ -141,7 +141,7 @@ fn cmd() -> Command<'static> {
                                 .long("baseline")
                                 .value_name("BASELINE_RUSTDOC_JSON")
                                 .help("The rustdoc json file to use as a semver baseline. Required.")
-                                .takes_value(true)
+                                .action(ArgAction::Set)
                                 .required(true)
                         )
                 )
