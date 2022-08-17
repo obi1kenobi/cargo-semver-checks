@@ -57,10 +57,20 @@ fn main() -> anyhow::Result<()> {
 
     match args {
         SemverChecks::CheckRelease(args) => {
-            let current_crate = load_rustdoc_from_file(&args.current_rustdoc_path)?;
-            let baseline_crate = load_rustdoc_from_file(&args.baseline_rustdoc_path)?;
+            let rustdoc_paths = vec![(
+                args.baseline_rustdoc_path.clone(),
+                args.current_rustdoc_path.clone(),
+            )];
+            let mut success = true;
+            for (baseline_path, current_path) in rustdoc_paths {
+                let baseline_crate = load_rustdoc_from_file(&baseline_path)?;
+                let current_crate = load_rustdoc_from_file(&current_path)?;
 
-            if run_check_release(&mut config, current_crate, baseline_crate)? {
+                if !run_check_release(&mut config, current_crate, baseline_crate)? {
+                    success = false;
+                }
+            }
+            if success {
                 std::process::exit(0);
             } else {
                 std::process::exit(1);
