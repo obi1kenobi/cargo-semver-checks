@@ -5,7 +5,7 @@ use crate::templating::make_handlebars_registry;
 #[allow(dead_code)]
 pub(crate) struct GlobalConfig {
     printing_to_terminal: bool,
-    output_writer: StandardStream,
+    stdout: StandardStream,
     handlebars: handlebars::Handlebars<'static>,
 }
 
@@ -29,7 +29,7 @@ impl GlobalConfig {
 
         Self {
             printing_to_terminal,
-            output_writer: StandardStream::stdout(color_choice),
+            stdout: StandardStream::stdout(color_choice),
             handlebars: make_handlebars_registry(),
         }
     }
@@ -38,8 +38,8 @@ impl GlobalConfig {
         self.printing_to_terminal
     }
 
-    pub fn output_writer(&mut self) -> &mut StandardStream {
-        &mut self.output_writer
+    pub fn stdout(&mut self) -> &mut StandardStream {
+        &mut self.stdout
     }
 
     pub fn handlebars(&self) -> &handlebars::Handlebars<'static> {
