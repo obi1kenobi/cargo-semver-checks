@@ -135,11 +135,12 @@ enum SemverChecks {
 
 #[derive(Args)]
 #[clap(group = ArgGroup::new("baseline").required(true))]
+#[clap(setting = clap::AppSettings::DeriveDisplayOrder)]
 struct CheckRelease {
-    #[clap(flatten)]
+    #[clap(flatten, next_help_heading = "CURRENT")]
     pub manifest: clap_cargo::Manifest,
 
-    #[clap(flatten)]
+    #[clap(flatten, next_help_heading = "CURRENT")]
     pub workspace: clap_cargo::Workspace,
 
     /// The current rustdoc json output to test for semver violations.
@@ -147,12 +148,18 @@ struct CheckRelease {
         short,
         long = "current",
         value_name = "CURRENT_RUSTDOC_JSON",
+        help_heading = "CURRENT",
         requires = "baseline-rustdoc-path"
     )]
     current_rustdoc_path: Option<PathBuf>,
 
     /// Directory containing baseline crate source
-    #[clap(long, value_name = "MANIFEST_ROOT", group = "baseline")]
+    #[clap(
+        long,
+        value_name = "MANIFEST_ROOT",
+        help_heading = "BASELINE",
+        group = "baseline"
+    )]
     baseline_root: Option<PathBuf>,
 
     /// The rustdoc json file to use as a semver baseline.
@@ -160,6 +167,7 @@ struct CheckRelease {
         short,
         long = "baseline",
         value_name = "BASELINE_RUSTDOC_JSON",
+        help_heading = "BASELINE",
         group = "baseline"
     )]
     baseline_rustdoc_path: Option<PathBuf>,
