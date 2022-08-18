@@ -64,7 +64,7 @@ impl BaselineLoader for PathBaseline {
             .lookup
             .get(name)
             .with_context(|| format!("package `{}` not found in {}", name, self.root.display()))?;
-        config.shell_status("Parsing", name)?;
+        config.shell_status("Parsing", format_args!("{} (baseline)", name))?;
         let rustdoc_path = rustdoc.dump(manifest_path.as_path())?;
         Ok(rustdoc_path)
     }
