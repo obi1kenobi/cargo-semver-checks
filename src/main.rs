@@ -145,7 +145,7 @@ struct CheckRelease {
 
     /// The current rustdoc json output to test for semver violations.
     #[clap(
-        short,
+        short_alias = 'c',
         long = "current",
         value_name = "JSON_PATH",
         help_heading = "CURRENT",
@@ -164,7 +164,7 @@ struct CheckRelease {
 
     /// The rustdoc json file to use as a semver baseline.
     #[clap(
-        short,
+        short_alias = 'b',
         long = "baseline",
         value_name = "JSON_PATH",
         help_heading = "BASELINE",
