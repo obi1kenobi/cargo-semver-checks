@@ -113,7 +113,7 @@ pub(super) fn run_check_release(
 
     let version_change = get_semver_version_change(current_version, baseline_version)
         .unwrap_or_else(|| {
-            colored_ln(config.output_writer(), |w| {
+            colored_ln(config.stdout(), |w| {
                 colored!(
                     w,
                     "{}{}{:>12}{} Could not determine whether crate version changed. Assuming no change.",
@@ -147,7 +147,7 @@ pub(super) fn run_check_release(
     let skipped_queries = queries.len().saturating_sub(queries_to_run.len());
 
     if skipped_queries > 0 {
-        colored_ln(config.output_writer(), |w| {
+        colored_ln(config.stdout(), |w| {
             colored!(
                 w,
                 "{}{}{:>12}{} {}{}{} checks ({} checks skipped), version {} -> {} ({} change)",
@@ -166,7 +166,7 @@ pub(super) fn run_check_release(
         })
         .expect("print failed");
     } else {
-        colored_ln(config.output_writer(), |w| {
+        colored_ln(config.stdout(), |w| {
             colored!(
                 w,
                 "{}{}{:>12}{} {}{}{} checks, version {} -> {} ({} change)",
@@ -193,7 +193,7 @@ pub(super) fn run_check_release(
         };
         if config.printing_to_terminal() {
             colored!(
-                config.output_writer(),
+                config.stdout(),
                 "{}{}{:>12}{} [{:9}] {:^18} {}",
                 fg!(Some(Color::Cyan)),
                 bold!(true),
@@ -204,7 +204,7 @@ pub(super) fn run_check_release(
                 query_id,
             )
             .expect("print failed");
-            config.output_writer().flush().expect("flush failed");
+            config.stdout().flush().expect("flush failed");
         }
 
         let start_instant = std::time::Instant::now();
@@ -216,9 +216,9 @@ pub(super) fn run_check_release(
 
         if peeked.is_none() {
             if config.printing_to_terminal() {
-                write!(config.output_writer(), "\r").expect("print failed");
+                write!(config.stdout(), "\r").expect("print failed");
             }
-            colored_ln(config.output_writer(), |w| {
+            colored_ln(config.stdout(), |w| {
                 colored!(
                     w,
                     "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
@@ -236,9 +236,9 @@ pub(super) fn run_check_release(
             queries_with_errors.push(QueryWithResults::new(query_id.as_str(), results_iter));
 
             if config.printing_to_terminal() {
-                write!(config.output_writer(), "\r").expect("print failed");
+                write!(config.stdout(), "\r").expect("print failed");
             }
-            colored_ln(config.output_writer(), |w| {
+            colored_ln(config.stdout(), |w| {
                 colored!(
                     w,
                     "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
@@ -256,7 +256,7 @@ pub(super) fn run_check_release(
     }
 
     if !queries_with_errors.is_empty() {
-        colored_ln(config.output_writer(), |w| {
+        colored_ln(config.stdout(), |w| {
             colored!(
                 w,
                 "{}{}{:>12}{} [{:>8.3}s] {} checks run: {} passed, {} failed, {} skipped",
@@ -278,7 +278,7 @@ pub(super) fn run_check_release(
         for query_with_results in queries_with_errors {
             let semver_query = &queries[query_with_results.name];
             required_versions.push(semver_query.required_update);
-            colored_ln(config.output_writer(), |w| {
+            colored_ln(config.stdout(), |w| {
                 colored!(
                     w,
                     "\n--- failure {}: {} ---\n",
@@ -289,7 +289,7 @@ pub(super) fn run_check_release(
             .expect("print failed");
 
             if let Some(ref_link) = semver_query.reference_link.as_deref() {
-                colored_ln(config.output_writer(), |w| {
+                colored_ln(config.stdout(), |w| {
                     colored!(
                         w,
                         "{}Description:{}\n{}\n{:>12} {}\n{:>12} {}\n",
@@ -308,7 +308,7 @@ pub(super) fn run_check_release(
                 })
                 .expect("print failed");
             } else {
-                colored_ln(config.output_writer(), |w| {
+                colored_ln(config.stdout(), |w| {
                     colored!(
                         w,
                         "{}Description:{}\n{}\n{:>12} {}\n",
@@ -326,7 +326,7 @@ pub(super) fn run_check_release(
                 .expect("print failed");
             }
 
-            colored_ln(config.output_writer(), |w| {
+            colored_ln(config.stdout(), |w| {
                 colored!(w, "{}Failed in:{}", bold!(true), reset!(),)
             })
             .expect("print failed");
@@ -344,10 +344,10 @@ pub(super) fn run_check_release(
                         .render_template(template, &pretty_result)
                         .with_context(|| "Error instantiating semver query template.")
                         .expect("could not materialize template");
-                    colored_ln(config.output_writer(), |w| colored!(w, "  {}", message,))
+                    colored_ln(config.stdout(), |w| colored!(w, "  {}", message,))
                         .expect("print failed");
                 } else {
-                    colored_ln(config.output_writer(), |w| {
+                    colored_ln(config.stdout(), |w| {
                         colored!(
                             w,
                             "{}\n",
@@ -369,7 +369,7 @@ pub(super) fn run_check_release(
             unreachable!("{:?}", required_versions)
         };
 
-        colored_ln(config.output_writer(), |w| {
+        colored_ln(config.stdout(), |w| {
             colored!(
                 w,
                 "\n{}{}{:>12}{} [{:>8.3}s] semver requires new {} version: {} major and {} minor checks failed",
@@ -387,7 +387,7 @@ pub(super) fn run_check_release(
 
         Ok(false)
     } else {
-        colored_ln(config.output_writer(), |w| {
+        colored_ln(config.stdout(), |w| {
             colored!(
                 w,
                 "{}{}{:>12}{} [{:>8.3}s] {} checks run: {} passed, {} skipped",
