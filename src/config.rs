@@ -58,6 +58,16 @@ impl GlobalConfig {
         log::Level::Debug <= self.level.unwrap_or(log::Level::Error)
     }
 
+    pub fn verbose(
+        &mut self,
+        callback: impl Fn(&mut Self) -> anyhow::Result<()>,
+    ) -> anyhow::Result<()> {
+        if self.is_verbose() {
+            callback(self)?;
+        }
+        Ok(())
+    }
+
     pub fn is_stderr_tty(&self) -> bool {
         self.is_stderr_tty
     }
@@ -108,5 +118,9 @@ impl GlobalConfig {
         message: impl std::fmt::Display,
     ) -> anyhow::Result<()> {
         self.shell_print(action, message, termcolor::Color::Green, true)
+    }
+
+    pub fn shell_warn(&mut self, message: impl std::fmt::Display) -> anyhow::Result<()> {
+        self.shell_print("warning", message, termcolor::Color::Yellow, false)
     }
 }
