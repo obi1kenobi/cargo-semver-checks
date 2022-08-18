@@ -4,6 +4,7 @@ use crate::templating::make_handlebars_registry;
 
 #[allow(dead_code)]
 pub(crate) struct GlobalConfig {
+    level: Option<log::Level>,
     is_stderr_tty: bool,
     stdout: StandardStream,
     stderr: StandardStream,
@@ -24,6 +25,7 @@ impl GlobalConfig {
         };
 
         Self {
+            level: None,
             is_stderr_tty,
             stdout: StandardStream::stdout(color_choice.unwrap_or_else(|| {
                 if is_stdout_tty {
@@ -45,6 +47,15 @@ impl GlobalConfig {
 
     pub fn handlebars(&self) -> &handlebars::Handlebars<'static> {
         &self.handlebars
+    }
+
+    pub fn set_level(mut self, level: Option<log::Level>) -> Self {
+        self.level = level;
+        self
+    }
+
+    pub fn is_verbose(&self) -> bool {
+        log::Level::Debug <= self.level.unwrap_or(log::Level::Error)
     }
 
     pub fn is_stderr_tty(&self) -> bool {
