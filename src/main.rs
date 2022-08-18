@@ -21,10 +21,10 @@ use config::GlobalConfig;
 fn main() -> anyhow::Result<()> {
     let Cargo::SemverChecks(args) = Cargo::parse();
 
-    let mut config = GlobalConfig::new();
-
     match args {
         SemverChecks::CheckRelease(args) => {
+            let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
+
             let loader: Box<dyn baseline::BaselineLoader> =
                 if let Some(path) = args.baseline_rustdoc.as_deref() {
                     Box::new(baseline::RustdocBaseline::new(path.to_owned()))
@@ -33,7 +33,9 @@ fn main() -> anyhow::Result<()> {
                 } else {
                     unreachable!("a member of the `baseline` group must be present");
                 };
-            let rustdoc_cmd = dump::RustDocCommand::new().deps(false).silence(false);
+            let rustdoc_cmd = dump::RustDocCommand::new()
+                .deps(false)
+                .silence(!config.is_verbose());
 
             let rustdoc_paths = if let Some(current_rustdoc_path) = args.current_rustdoc.as_deref()
             {
@@ -141,6 +143,9 @@ struct CheckRelease {
         group = "baseline"
     )]
     baseline_rustdoc: Option<PathBuf>,
+
+    #[clap(flatten)]
+    verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 }
 
 #[test]
