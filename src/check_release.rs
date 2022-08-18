@@ -109,22 +109,16 @@ pub(super) fn run_check_release(
     current_crate: Crate,
     baseline_crate: Crate,
 ) -> anyhow::Result<bool> {
-    config.shell_status("Checking", crate_name)?;
     let current_version = current_crate.crate_version.as_deref();
     let baseline_version = baseline_crate.crate_version.as_deref();
 
     let version_change = get_semver_version_change(current_version, baseline_version)
         .unwrap_or_else(|| {
-            colored_ln(config.stderr(), |w| {
-                colored!(
-                    w,
-                    "{}{}{:>12}{} Could not determine whether crate version changed. Assuming no change.",
-                    fg!(Some(Color::Yellow)),
-                    bold!(true),
-                    "Warning",
-                    reset!(),
+            config
+                .shell_warn(
+                    "Could not determine whether crate version changed. Assuming no change.",
                 )
-            }).expect("print failed");
+                .expect("print failed");
             ActualSemverUpdate::NotChanged
         });
     let change = match version_change {
@@ -148,44 +142,27 @@ pub(super) fn run_check_release(
         .collect();
     let skipped_queries = queries.len().saturating_sub(queries_to_run.len());
 
-    if skipped_queries > 0 {
-        colored_ln(config.stderr(), |w| {
-            colored!(
-                w,
-                "{}{}{:>12}{} {}{}{} checks ({} checks skipped), version {} -> {} ({} change)",
-                fg!(Some(Color::Green)),
-                bold!(true),
+    config.shell_status(
+        "Checking",
+        format_args!(
+            "{crate_name} v{} -> v{} ({} change)",
+            baseline_version.unwrap_or("unknown"),
+            current_version.unwrap_or("unknown"),
+            change
+        ),
+    )?;
+    config
+        .verbose(|config| {
+            config.shell_status(
                 "Starting",
-                reset!(),
-                bold!(true),
-                queries_to_run.len(),
-                reset!(),
-                skipped_queries,
-                baseline_version.unwrap_or("unknown"),
-                current_version.unwrap_or("unknown"),
-                change
+                format_args!(
+                    "{} checks, {} skipped",
+                    queries_to_run.len(),
+                    skipped_queries
+                ),
             )
         })
         .expect("print failed");
-    } else {
-        colored_ln(config.stderr(), |w| {
-            colored!(
-                w,
-                "{}{}{:>12}{} {}{}{} checks, version {} -> {} ({} change)",
-                fg!(Some(Color::Green)),
-                bold!(true),
-                "Starting",
-                reset!(),
-                bold!(true),
-                queries_to_run.len(),
-                reset!(),
-                baseline_version.unwrap_or("unknown"),
-                current_version.unwrap_or("unknown"),
-                change,
-            )
-        })
-        .expect("print failed");
-    }
     let mut total_duration = Duration::default();
 
     for (query_id, semver_query) in queries_to_run.iter().copied() {
@@ -258,22 +235,21 @@ pub(super) fn run_check_release(
     }
 
     if !queries_with_errors.is_empty() {
-        colored_ln(config.stderr(), |w| {
-            colored!(
-                w,
-                "{}{}{:>12}{} [{:>8.3}s] {} checks run: {} passed, {} failed, {} skipped",
-                fg!(Some(Color::Red)),
-                bold!(true),
-                "Summary",
-                reset!(),
-                total_duration.as_secs_f32(),
-                queries_to_run.len(),
-                queries_to_run.len() - queries_with_errors.len(),
-                queries_with_errors.len(),
-                skipped_queries,
+        config
+            .shell_print(
+                "Completed",
+                format_args!(
+                    "[{:>8.3}s] {} checks; {} passed, {} failed, {} skipped",
+                    total_duration.as_secs_f32(),
+                    queries_to_run.len(),
+                    queries_to_run.len() - queries_with_errors.len(),
+                    queries_with_errors.len(),
+                    skipped_queries,
+                ),
+                Color::Red,
+                true,
             )
-        })
-        .expect("print failed");
+            .expect("print failed");
 
         let mut required_versions = vec![];
 
@@ -371,39 +347,37 @@ pub(super) fn run_check_release(
             unreachable!("{:?}", required_versions)
         };
 
-        colored_ln(config.stderr(), |w| {
-            colored!(
-                w,
-                "\n{}{}{:>12}{} [{:>8.3}s] semver requires new {} version: {} major and {} minor checks failed",
-                fg!(Some(Color::Red)),
-                bold!(true),
+        config
+            .shell_print(
                 "Final",
-                reset!(),
-                total_duration.as_secs_f32(),
-                required_bump,
-                required_versions.iter().filter(|x| *x == &RequiredSemverUpdate::Major).count(),
-                required_versions.iter().filter(|x| *x == &RequiredSemverUpdate::Minor).count(),
+                format_args!(
+                    "[{:>8.3}s] semver requires new {} version: {} major and {} minor checks failed",
+                    total_duration.as_secs_f32(),
+                    required_bump,
+                    required_versions.iter().filter(|x| *x == &RequiredSemverUpdate::Major).count(),
+                    required_versions.iter().filter(|x| *x == &RequiredSemverUpdate::Minor).count(),
+                ),
+                Color::Red,
+                true,
             )
-        })
-        .expect("print failed");
+            .expect("print failed");
 
         Ok(false)
     } else {
-        colored_ln(config.stderr(), |w| {
-            colored!(
-                w,
-                "{}{}{:>12}{} [{:>8.3}s] {} checks run: {} passed, {} skipped",
-                fg!(Some(Color::Green)),
-                bold!(true),
-                "Summary",
-                reset!(),
-                total_duration.as_secs_f32(),
-                queries_to_run.len(),
-                queries_to_run.len(),
-                skipped_queries,
+        config
+            .shell_print(
+                "Completed",
+                format_args!(
+                    "[{:>8.3}s] {} checks; {} passed, {} skipped",
+                    total_duration.as_secs_f32(),
+                    queries_to_run.len(),
+                    queries_to_run.len(),
+                    skipped_queries,
+                ),
+                Color::Green,
+                true,
             )
-        })
-        .expect("print failed");
+            .expect("print failed");
         Ok(true)
     }
 }
