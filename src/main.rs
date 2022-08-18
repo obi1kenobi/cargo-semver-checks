@@ -68,7 +68,7 @@ fn main() -> anyhow::Result<()> {
                 } else {
                     unreachable!("a member of the `baseline` group must be present");
                 };
-            let rustdoc = dump::RustDoc::new().deps(false).silence(false);
+            let rustdoc = dump::RustDocCommand::new().deps(false).silence(false);
 
             let rustdoc_paths =
                 if let Some(current_rustdoc_path) = args.current_rustdoc_path.as_deref() {
