@@ -87,7 +87,7 @@ impl RustDocCommand {
             }
         }
 
-        let json_path = target_dir.join(format!("doc/{}.json", crate_name));
+        let json_path = target_dir.join(format!("doc/{}.json", crate_name.replace('-', "_")));
         if !json_path.exists() {
             anyhow::bail!(
                 "Could not find expected rustdoc output: {}",
