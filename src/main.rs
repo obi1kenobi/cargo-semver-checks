@@ -147,7 +147,7 @@ struct CheckRelease {
     #[clap(
         short,
         long = "current",
-        value_name = "CURRENT_RUSTDOC_JSON",
+        value_name = "JSON_PATH",
         help_heading = "CURRENT",
         requires = "baseline-rustdoc-path"
     )]
@@ -166,7 +166,7 @@ struct CheckRelease {
     #[clap(
         short,
         long = "baseline",
-        value_name = "BASELINE_RUSTDOC_JSON",
+        value_name = "JSON_PATH",
         help_heading = "BASELINE",
         group = "baseline"
     )]
