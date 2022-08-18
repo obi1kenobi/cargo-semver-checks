@@ -30,6 +30,23 @@ fn main() -> anyhow::Result<()> {
                     Box::new(baseline::RustdocBaseline::new(path.to_owned()))
                 } else if let Some(root) = args.baseline_root.as_deref() {
                     Box::new(baseline::PathBaseline::new(root)?)
+                } else if let Some(rev) = args.baseline_rev.as_deref() {
+                    let metadata = args.manifest.metadata().no_deps().exec()?;
+                    let source = metadata.workspace_root.as_std_path();
+                    let slug = rev
+                        .chars()
+                        .filter(|c| c.is_alphanumeric())
+                        .collect::<String>();
+                    let target = metadata
+                        .target_directory
+                        .as_std_path()
+                        .join(format!("semver-checks/git-{}", slug));
+                    Box::new(baseline::GitBaseline::with_rev(
+                        source,
+                        &target,
+                        rev,
+                        &mut config,
+                    )?)
                 } else {
                     unreachable!("a member of the `baseline` group must be present");
                 };
@@ -133,6 +150,15 @@ struct CheckRelease {
         group = "baseline"
     )]
     baseline_root: Option<PathBuf>,
+
+    /// Git revision to lookup for a baseline
+    #[clap(
+        long,
+        value_name = "REV",
+        help_heading = "BASELINE",
+        group = "baseline"
+    )]
+    baseline_rev: Option<String>,
 
     /// The rustdoc json file to use as a semver baseline.
     #[clap(
