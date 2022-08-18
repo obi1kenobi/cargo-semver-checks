@@ -13,25 +13,32 @@ pub(crate) struct GlobalConfig {
 impl GlobalConfig {
     pub fn new() -> Self {
         let is_stdout_tty = atty::is(atty::Stream::Stdout);
+        let is_stderr_tty = atty::is(atty::Stream::Stderr);
 
         let color_choice = match std::env::var("CARGO_TERM_COLOR").as_deref() {
-            Ok("always") => ColorChoice::Always,
-            Ok("alwaysansi") => ColorChoice::AlwaysAnsi,
-            Ok("auto") => ColorChoice::Auto,
-            Ok("never") => ColorChoice::Never,
-            Ok(_) | Err(..) => {
+            Ok("always") => Some(ColorChoice::Always),
+            Ok("alwaysansi") => Some(ColorChoice::AlwaysAnsi),
+            Ok("auto") => Some(ColorChoice::Auto),
+            Ok("never") => Some(ColorChoice::Never),
+            Ok(_) | Err(..) => None,
+        };
+
+        Self {
+            is_stdout_tty,
+            stdout: StandardStream::stdout(color_choice.unwrap_or_else(|| {
                 if is_stdout_tty {
                     ColorChoice::Auto
                 } else {
                     ColorChoice::Never
                 }
-            }
-        };
-
-        Self {
-            is_stdout_tty,
-            stdout: StandardStream::stdout(color_choice),
-            stderr: StandardStream::stderr(color_choice),
+            })),
+            stderr: StandardStream::stderr(color_choice.unwrap_or_else(|| {
+                if is_stderr_tty {
+                    ColorChoice::Auto
+                } else {
+                    ColorChoice::Never
+                }
+            })),
             handlebars: make_handlebars_registry(),
         }
     }
