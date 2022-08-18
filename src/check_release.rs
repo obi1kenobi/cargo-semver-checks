@@ -170,21 +170,25 @@ pub(super) fn run_check_release(
             RequiredSemverUpdate::Major => "major",
             RequiredSemverUpdate::Minor => "minor",
         };
-        if config.is_stderr_tty() {
-            colored!(
-                config.stderr(),
-                "{}{}{:>12}{} [{:9}] {:^18} {}",
-                fg!(Some(Color::Cyan)),
-                bold!(true),
-                "Running",
-                reset!(),
-                "",
-                category,
-                query_id,
-            )
+        config
+            .verbose(|config| {
+                if config.is_stderr_tty() {
+                    colored!(
+                        config.stderr(),
+                        "{}{}{:>12}{} [{:9}] {:^18} {}",
+                        fg!(Some(Color::Cyan)),
+                        bold!(true),
+                        "Running",
+                        reset!(),
+                        "",
+                        category,
+                        query_id,
+                    )?;
+                    config.stderr().flush()?;
+                }
+                Ok(())
+            })
             .expect("print failed");
-            config.stderr().flush().expect("flush failed");
-        }
 
         let start_instant = std::time::Instant::now();
         let mut results_iter = make_result_iter(&schema, adapter.clone(), semver_query)?;
@@ -194,43 +198,51 @@ pub(super) fn run_check_release(
         total_duration += time_to_decide;
 
         if peeked.is_none() {
-            if config.is_stderr_tty() {
-                write!(config.stderr(), "\r").expect("print failed");
-            }
-            colored_ln(config.stderr(), |w| {
-                colored!(
-                    w,
-                    "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
-                    fg!(Some(Color::Green)),
-                    bold!(true),
-                    "PASS",
-                    reset!(),
-                    time_to_decide.as_secs_f32(),
-                    category,
-                    query_id,
-                )
-            })
-            .expect("print failed");
+            config
+                .verbose(|config| {
+                    if config.is_stderr_tty() {
+                        write!(config.stderr(), "\r")?;
+                    }
+                    colored_ln(config.stderr(), |w| {
+                        colored!(
+                            w,
+                            "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
+                            fg!(Some(Color::Green)),
+                            bold!(true),
+                            "PASS",
+                            reset!(),
+                            time_to_decide.as_secs_f32(),
+                            category,
+                            query_id,
+                        )
+                    })?;
+                    Ok(())
+                })
+                .expect("print failed");
         } else {
             queries_with_errors.push(QueryWithResults::new(query_id.as_str(), results_iter));
 
-            if config.is_stderr_tty() {
-                write!(config.stderr(), "\r").expect("print failed");
-            }
-            colored_ln(config.stderr(), |w| {
-                colored!(
-                    w,
-                    "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
-                    fg!(Some(Color::Red)),
-                    bold!(true),
-                    "FAIL",
-                    reset!(),
-                    time_to_decide.as_secs_f32(),
-                    category,
-                    query_id,
-                )
-            })
-            .expect("print failed");
+            config
+                .verbose(|config| {
+                    if config.is_stderr_tty() {
+                        write!(config.stderr(), "\r")?;
+                    }
+                    colored_ln(config.stderr(), |w| {
+                        colored!(
+                            w,
+                            "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
+                            fg!(Some(Color::Red)),
+                            bold!(true),
+                            "FAIL",
+                            reset!(),
+                            time_to_decide.as_secs_f32(),
+                            category,
+                            query_id,
+                        )
+                    })?;
+                    Ok(())
+                })
+                .expect("print failed");
         }
     }
 
