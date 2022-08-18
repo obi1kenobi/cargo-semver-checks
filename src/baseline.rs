@@ -72,3 +72,44 @@ impl BaselineLoader for PathBaseline {
         Ok(rustdoc_path)
     }
 }
+
+pub(crate) struct GitBaseline {
+    path: PathBaseline,
+}
+
+impl GitBaseline {
+    pub fn with_rev(
+        source: &std::path::Path,
+        target: &std::path::Path,
+        rev: &str,
+        config: &mut GlobalConfig,
+    ) -> anyhow::Result<Self> {
+        config.shell_status("Cloning", rev)?;
+        let repo = git2::Repository::discover(source)?;
+
+        let rev = repo.revparse_single(rev)?;
+
+        std::fs::create_dir_all(target)?;
+        let mut co = git2::build::CheckoutBuilder::new();
+        co.target_dir(target)
+            .remove_untracked(true)
+            .remove_ignored(true)
+            .use_ours(true)
+            .force();
+        repo.checkout_tree(&rev, Some(&mut co))?;
+
+        let path = PathBaseline::new(target)?;
+        Ok(Self { path })
+    }
+}
+
+impl BaselineLoader for GitBaseline {
+    fn load_rustdoc(
+        &self,
+        config: &mut GlobalConfig,
+        rustdoc: &RustDocCommand,
+        name: &str,
+    ) -> anyhow::Result<std::path::PathBuf> {
+        self.path.load_rustdoc(config, rustdoc, name)
+    }
+}
