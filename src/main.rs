@@ -142,15 +142,6 @@ struct CheckRelease {
     )]
     current_rustdoc: Option<PathBuf>,
 
-    /// Directory containing baseline crate source
-    #[clap(
-        long,
-        value_name = "MANIFEST_ROOT",
-        help_heading = "BASELINE",
-        group = "baseline"
-    )]
-    baseline_root: Option<PathBuf>,
-
     /// Git revision to lookup for a baseline
     #[clap(
         long,
@@ -159,6 +150,15 @@ struct CheckRelease {
         group = "baseline"
     )]
     baseline_rev: Option<String>,
+
+    /// Directory containing baseline crate source
+    #[clap(
+        long,
+        value_name = "MANIFEST_ROOT",
+        help_heading = "BASELINE",
+        group = "baseline"
+    )]
+    baseline_root: Option<PathBuf>,
 
     /// The rustdoc json file to use as a semver baseline.
     #[clap(
