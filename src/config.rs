@@ -4,7 +4,7 @@ use crate::templating::make_handlebars_registry;
 
 #[allow(dead_code)]
 pub(crate) struct GlobalConfig {
-    printing_to_terminal: bool,
+    is_stdout_tty: bool,
     stdout: StandardStream,
     stderr: StandardStream,
     handlebars: handlebars::Handlebars<'static>,
@@ -12,7 +12,7 @@ pub(crate) struct GlobalConfig {
 
 impl GlobalConfig {
     pub fn new() -> Self {
-        let printing_to_terminal = atty::is(atty::Stream::Stdout);
+        let is_stdout_tty = atty::is(atty::Stream::Stdout);
 
         let color_choice = match std::env::var("CARGO_TERM_COLOR").as_deref() {
             Ok("always") => ColorChoice::Always,
@@ -20,7 +20,7 @@ impl GlobalConfig {
             Ok("auto") => ColorChoice::Auto,
             Ok("never") => ColorChoice::Never,
             Ok(_) | Err(..) => {
-                if printing_to_terminal {
+                if is_stdout_tty {
                     ColorChoice::Auto
                 } else {
                     ColorChoice::Never
@@ -29,7 +29,7 @@ impl GlobalConfig {
         };
 
         Self {
-            printing_to_terminal,
+            is_stdout_tty,
             stdout: StandardStream::stdout(color_choice),
             stderr: StandardStream::stderr(color_choice),
             handlebars: make_handlebars_registry(),
@@ -40,8 +40,8 @@ impl GlobalConfig {
         &self.handlebars
     }
 
-    pub fn printing_to_terminal(&self) -> bool {
-        self.printing_to_terminal
+    pub fn is_stdout_tty(&self) -> bool {
+        self.is_stdout_tty
     }
 
     pub fn stdout(&mut self) -> &mut StandardStream {

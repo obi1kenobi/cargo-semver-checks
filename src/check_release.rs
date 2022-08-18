@@ -193,7 +193,7 @@ pub(super) fn run_check_release(
             RequiredSemverUpdate::Major => "major",
             RequiredSemverUpdate::Minor => "minor",
         };
-        if config.printing_to_terminal() {
+        if config.is_stdout_tty() {
             colored!(
                 config.stdout(),
                 "{}{}{:>12}{} [{:9}] {:^18} {}",
@@ -217,7 +217,7 @@ pub(super) fn run_check_release(
         total_duration += time_to_decide;
 
         if peeked.is_none() {
-            if config.printing_to_terminal() {
+            if config.is_stdout_tty() {
                 write!(config.stdout(), "\r").expect("print failed");
             }
             colored_ln(config.stdout(), |w| {
@@ -237,7 +237,7 @@ pub(super) fn run_check_release(
         } else {
             queries_with_errors.push(QueryWithResults::new(query_id.as_str(), results_iter));
 
-            if config.printing_to_terminal() {
+            if config.is_stdout_tty() {
                 write!(config.stdout(), "\r").expect("print failed");
             }
             colored_ln(config.stdout(), |w| {
