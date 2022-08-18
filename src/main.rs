@@ -61,8 +61,9 @@ fn main() -> anyhow::Result<()> {
                 let mut rustdoc_paths = Vec::with_capacity(selected.len());
                 for selected in selected {
                     let manifest_path = selected.manifest_path.as_std_path();
-                    let rustdoc_path = rustdoc_cmd.dump(manifest_path)?;
                     let crate_name = manifest::get_package_name(manifest_path)?;
+                    config.shell_status("Parsing", format_args!("{} (current)", crate_name))?;
+                    let rustdoc_path = rustdoc_cmd.dump(manifest_path)?;
                     let baseline_path =
                         loader.load_rustdoc(&mut config, &rustdoc_cmd, &crate_name)?;
                     rustdoc_paths.push((crate_name, baseline_path, rustdoc_path));
