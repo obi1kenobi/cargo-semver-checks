@@ -39,9 +39,9 @@ pub(crate) struct PathBaseline {
 }
 
 impl PathBaseline {
-    pub(crate) fn new(root: std::path::PathBuf) -> anyhow::Result<Self> {
+    pub(crate) fn new(root: &std::path::Path) -> anyhow::Result<Self> {
         let mut lookup = std::collections::HashMap::new();
-        for result in ignore::Walk::new(&root) {
+        for result in ignore::Walk::new(root) {
             let entry = result?;
             if entry.file_name() == "Cargo.toml" {
                 if let Ok(name) = crate::manifest::get_package_name(entry.path()) {
@@ -49,7 +49,10 @@ impl PathBaseline {
                 }
             }
         }
-        Ok(Self { root, lookup })
+        Ok(Self {
+            root: root.to_owned(),
+            lookup,
+        })
     }
 }
 

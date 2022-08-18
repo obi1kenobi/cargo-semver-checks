@@ -29,7 +29,7 @@ fn main() -> anyhow::Result<()> {
                 if let Some(path) = args.baseline_rustdoc.as_deref() {
                     Box::new(baseline::RustdocBaseline::new(path.to_owned()))
                 } else if let Some(root) = args.baseline_root.as_deref() {
-                    Box::new(baseline::PathBaseline::new(root.to_owned())?)
+                    Box::new(baseline::PathBaseline::new(root)?)
                 } else {
                     unreachable!("a member of the `baseline` group must be present");
                 };
