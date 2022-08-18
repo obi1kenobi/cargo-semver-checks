@@ -1,9 +1,13 @@
 use anyhow::Context as _;
 
-use crate::dump::RustDoc;
+use crate::dump::RustDocCommand;
 
 pub trait BaselineLoader {
-    fn load_rustdoc(&self, rustdoc: &RustDoc, name: &str) -> anyhow::Result<std::path::PathBuf>;
+    fn load_rustdoc(
+        &self,
+        rustdoc: &RustDocCommand,
+        name: &str,
+    ) -> anyhow::Result<std::path::PathBuf>;
 }
 
 pub struct RustdocBaseline {
@@ -17,7 +21,11 @@ impl RustdocBaseline {
 }
 
 impl BaselineLoader for RustdocBaseline {
-    fn load_rustdoc(&self, _rustdoc: &RustDoc, _name: &str) -> anyhow::Result<std::path::PathBuf> {
+    fn load_rustdoc(
+        &self,
+        _rustdoc: &RustDocCommand,
+        _name: &str,
+    ) -> anyhow::Result<std::path::PathBuf> {
         Ok(self.path.clone())
     }
 }
@@ -43,7 +51,11 @@ impl PathBaseline {
 }
 
 impl BaselineLoader for PathBaseline {
-    fn load_rustdoc(&self, rustdoc: &RustDoc, name: &str) -> anyhow::Result<std::path::PathBuf> {
+    fn load_rustdoc(
+        &self,
+        rustdoc: &RustDocCommand,
+        name: &str,
+    ) -> anyhow::Result<std::path::PathBuf> {
         let manifest_path = self
             .lookup
             .get(name)

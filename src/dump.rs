@@ -1,10 +1,10 @@
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RustDoc {
+pub struct RustDocCommand {
     deps: bool,
     silence: bool,
 }
 
-impl RustDoc {
+impl RustDocCommand {
     pub fn new() -> Self {
         Self {
             deps: false,
@@ -98,7 +98,7 @@ impl RustDoc {
     }
 }
 
-impl Default for RustDoc {
+impl Default for RustDocCommand {
     fn default() -> Self {
         Self::new()
     }
