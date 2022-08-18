@@ -68,12 +68,12 @@ fn main() -> anyhow::Result<()> {
                 } else {
                     unreachable!("a member of the `baseline` group must be present");
                 };
-            let rustdoc = dump::RustDocCommand::new().deps(false).silence(false);
+            let rustdoc_cmd = dump::RustDocCommand::new().deps(false).silence(false);
 
             let rustdoc_paths =
                 if let Some(current_rustdoc_path) = args.current_rustdoc_path.as_deref() {
                     vec![(
-                        loader.load_rustdoc(&rustdoc, "<unknown>")?,
+                        loader.load_rustdoc(&rustdoc_cmd, "<unknown>")?,
                         current_rustdoc_path.to_owned(),
                     )]
                 } else {
@@ -92,9 +92,9 @@ fn main() -> anyhow::Result<()> {
                     let mut rustdoc_paths = Vec::with_capacity(selected.len());
                     for selected in selected {
                         let manifest_path = selected.manifest_path.as_std_path();
-                        let rustdoc_path = rustdoc.dump(manifest_path)?;
+                        let rustdoc_path = rustdoc_cmd.dump(manifest_path)?;
                         let crate_name = manifest::get_package_name(manifest_path)?;
-                        let baseline_path = loader.load_rustdoc(&rustdoc, &crate_name)?;
+                        let baseline_path = loader.load_rustdoc(&rustdoc_cmd, &crate_name)?;
                         rustdoc_paths.push((baseline_path, rustdoc_path));
                     }
                     rustdoc_paths
