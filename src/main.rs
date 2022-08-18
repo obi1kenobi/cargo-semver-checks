@@ -3,6 +3,7 @@
 pub mod adapter;
 mod baseline;
 mod check_release;
+mod config;
 mod dump;
 pub mod indexed_crate;
 mod manifest;
@@ -13,45 +14,9 @@ mod util;
 use std::path::PathBuf;
 
 use clap::{ArgGroup, Args, Parser, Subcommand};
-use termcolor::{ColorChoice, StandardStream};
 
-use crate::{
-    check_release::run_check_release, templating::make_handlebars_registry,
-    util::load_rustdoc_from_file,
-};
-
-#[allow(dead_code)]
-pub(crate) struct GlobalConfig {
-    printing_to_terminal: bool,
-    output_writer: StandardStream,
-    handlebars: handlebars::Handlebars<'static>,
-}
-
-impl GlobalConfig {
-    fn new() -> Self {
-        let printing_to_terminal = atty::is(atty::Stream::Stdout);
-
-        let color_choice = match std::env::var("CARGO_TERM_COLOR").as_deref() {
-            Ok("always") => ColorChoice::Always,
-            Ok("alwaysansi") => ColorChoice::AlwaysAnsi,
-            Ok("auto") => ColorChoice::Auto,
-            Ok("never") => ColorChoice::Never,
-            Ok(_) | Err(..) => {
-                if printing_to_terminal {
-                    ColorChoice::Auto
-                } else {
-                    ColorChoice::Never
-                }
-            }
-        };
-
-        Self {
-            printing_to_terminal,
-            output_writer: StandardStream::stdout(color_choice),
-            handlebars: make_handlebars_registry(),
-        }
-    }
-}
+use crate::{check_release::run_check_release, util::load_rustdoc_from_file};
+use config::GlobalConfig;
 
 fn main() -> anyhow::Result<()> {
     let Cargo::SemverChecks(args) = Cargo::parse();
