@@ -37,8 +37,10 @@ fn main() -> anyhow::Result<()> {
 
             let rustdoc_paths = if let Some(current_rustdoc_path) = args.current_rustdoc.as_deref()
             {
+                let name = "<unknown>";
                 vec![(
-                    loader.load_rustdoc(&rustdoc_cmd, "<unknown>")?,
+                    name.to_owned(),
+                    loader.load_rustdoc(&mut config, &rustdoc_cmd, name)?,
                     current_rustdoc_path.to_owned(),
                 )]
             } else {
@@ -59,17 +61,18 @@ fn main() -> anyhow::Result<()> {
                     let manifest_path = selected.manifest_path.as_std_path();
                     let rustdoc_path = rustdoc_cmd.dump(manifest_path)?;
                     let crate_name = manifest::get_package_name(manifest_path)?;
-                    let baseline_path = loader.load_rustdoc(&rustdoc_cmd, &crate_name)?;
-                    rustdoc_paths.push((baseline_path, rustdoc_path));
+                    let baseline_path =
+                        loader.load_rustdoc(&mut config, &rustdoc_cmd, &crate_name)?;
+                    rustdoc_paths.push((crate_name, baseline_path, rustdoc_path));
                 }
                 rustdoc_paths
             };
             let mut success = true;
-            for (baseline_path, current_path) in rustdoc_paths {
+            for (crate_name, baseline_path, current_path) in rustdoc_paths {
                 let baseline_crate = load_rustdoc_from_file(&baseline_path)?;
                 let current_crate = load_rustdoc_from_file(&current_path)?;
 
-                if !run_check_release(&mut config, current_crate, baseline_crate)? {
+                if !run_check_release(&mut config, &crate_name, current_crate, baseline_crate)? {
                     success = false;
                 }
             }

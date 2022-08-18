@@ -105,9 +105,11 @@ fn make_result_iter<'a>(
 
 pub(super) fn run_check_release(
     config: &mut GlobalConfig,
+    crate_name: &str,
     current_crate: Crate,
     baseline_crate: Crate,
 ) -> anyhow::Result<bool> {
+    config.shell_status("Checking", crate_name)?;
     let current_version = current_crate.crate_version.as_deref();
     let baseline_version = baseline_crate.crate_version.as_deref();
 
