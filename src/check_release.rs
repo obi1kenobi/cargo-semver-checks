@@ -115,7 +115,7 @@ pub(super) fn run_check_release(
 
     let version_change = get_semver_version_change(current_version, baseline_version)
         .unwrap_or_else(|| {
-            colored_ln(config.stdout(), |w| {
+            colored_ln(config.stderr(), |w| {
                 colored!(
                     w,
                     "{}{}{:>12}{} Could not determine whether crate version changed. Assuming no change.",
@@ -149,7 +149,7 @@ pub(super) fn run_check_release(
     let skipped_queries = queries.len().saturating_sub(queries_to_run.len());
 
     if skipped_queries > 0 {
-        colored_ln(config.stdout(), |w| {
+        colored_ln(config.stderr(), |w| {
             colored!(
                 w,
                 "{}{}{:>12}{} {}{}{} checks ({} checks skipped), version {} -> {} ({} change)",
@@ -168,7 +168,7 @@ pub(super) fn run_check_release(
         })
         .expect("print failed");
     } else {
-        colored_ln(config.stdout(), |w| {
+        colored_ln(config.stderr(), |w| {
             colored!(
                 w,
                 "{}{}{:>12}{} {}{}{} checks, version {} -> {} ({} change)",
@@ -193,9 +193,9 @@ pub(super) fn run_check_release(
             RequiredSemverUpdate::Major => "major",
             RequiredSemverUpdate::Minor => "minor",
         };
-        if config.is_stdout_tty() {
+        if config.is_stderr_tty() {
             colored!(
-                config.stdout(),
+                config.stderr(),
                 "{}{}{:>12}{} [{:9}] {:^18} {}",
                 fg!(Some(Color::Cyan)),
                 bold!(true),
@@ -206,7 +206,7 @@ pub(super) fn run_check_release(
                 query_id,
             )
             .expect("print failed");
-            config.stdout().flush().expect("flush failed");
+            config.stderr().flush().expect("flush failed");
         }
 
         let start_instant = std::time::Instant::now();
@@ -217,10 +217,10 @@ pub(super) fn run_check_release(
         total_duration += time_to_decide;
 
         if peeked.is_none() {
-            if config.is_stdout_tty() {
-                write!(config.stdout(), "\r").expect("print failed");
+            if config.is_stderr_tty() {
+                write!(config.stderr(), "\r").expect("print failed");
             }
-            colored_ln(config.stdout(), |w| {
+            colored_ln(config.stderr(), |w| {
                 colored!(
                     w,
                     "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
@@ -237,10 +237,10 @@ pub(super) fn run_check_release(
         } else {
             queries_with_errors.push(QueryWithResults::new(query_id.as_str(), results_iter));
 
-            if config.is_stdout_tty() {
-                write!(config.stdout(), "\r").expect("print failed");
+            if config.is_stderr_tty() {
+                write!(config.stderr(), "\r").expect("print failed");
             }
-            colored_ln(config.stdout(), |w| {
+            colored_ln(config.stderr(), |w| {
                 colored!(
                     w,
                     "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
@@ -258,7 +258,7 @@ pub(super) fn run_check_release(
     }
 
     if !queries_with_errors.is_empty() {
-        colored_ln(config.stdout(), |w| {
+        colored_ln(config.stderr(), |w| {
             colored!(
                 w,
                 "{}{}{:>12}{} [{:>8.3}s] {} checks run: {} passed, {} failed, {} skipped",
@@ -371,7 +371,7 @@ pub(super) fn run_check_release(
             unreachable!("{:?}", required_versions)
         };
 
-        colored_ln(config.stdout(), |w| {
+        colored_ln(config.stderr(), |w| {
             colored!(
                 w,
                 "\n{}{}{:>12}{} [{:>8.3}s] semver requires new {} version: {} major and {} minor checks failed",
@@ -389,7 +389,7 @@ pub(super) fn run_check_release(
 
         Ok(false)
     } else {
-        colored_ln(config.stdout(), |w| {
+        colored_ln(config.stderr(), |w| {
             colored!(
                 w,
                 "{}{}{:>12}{} [{:>8.3}s] {} checks run: {} passed, {} skipped",

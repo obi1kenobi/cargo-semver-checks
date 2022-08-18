@@ -4,7 +4,7 @@ use crate::templating::make_handlebars_registry;
 
 #[allow(dead_code)]
 pub(crate) struct GlobalConfig {
-    is_stdout_tty: bool,
+    is_stderr_tty: bool,
     stdout: StandardStream,
     stderr: StandardStream,
     handlebars: handlebars::Handlebars<'static>,
@@ -24,7 +24,7 @@ impl GlobalConfig {
         };
 
         Self {
-            is_stdout_tty,
+            is_stderr_tty,
             stdout: StandardStream::stdout(color_choice.unwrap_or_else(|| {
                 if is_stdout_tty {
                     ColorChoice::Auto
@@ -47,8 +47,8 @@ impl GlobalConfig {
         &self.handlebars
     }
 
-    pub fn is_stdout_tty(&self) -> bool {
-        self.is_stdout_tty
+    pub fn is_stderr_tty(&self) -> bool {
+        self.is_stderr_tty
     }
 
     pub fn stdout(&mut self) -> &mut StandardStream {
