@@ -77,6 +77,18 @@ fn main() -> anyhow::Result<()> {
                     let manifest_path = selected.manifest_path.as_std_path();
                     let crate_name = &selected.name;
                     let version = &selected.version;
+
+                    let is_implied = args.workspace.all || args.workspace.workspace;
+                    if is_implied && selected.publish == Some(vec![]) {
+                        config.verbose(|config| {
+                            config.shell_status(
+                                "Skipping",
+                                format_args!("{} v{} (current)", crate_name, version),
+                            )
+                        })?;
+                        continue;
+                    }
+
                     config.shell_status(
                         "Parsing",
                         format_args!("{} v{} (current)", crate_name, version),
