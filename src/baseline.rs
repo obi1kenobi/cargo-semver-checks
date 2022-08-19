@@ -88,19 +88,49 @@ impl GitBaseline {
         let repo = git2::Repository::discover(source)?;
 
         let rev = repo.revparse_single(rev)?;
+        let target = target.join(rev.id().to_string());
 
-        std::fs::create_dir_all(target)?;
-        let mut co = git2::build::CheckoutBuilder::new();
-        co.target_dir(target)
-            .remove_untracked(true)
-            .remove_ignored(true)
-            .use_ours(true)
-            .force();
-        repo.checkout_tree(&rev, Some(&mut co))?;
+        std::fs::create_dir_all(&target)?;
+        let tree = rev.peel_to_tree()?;
+        extract_tree(&repo, tree, &target)?;
 
-        let path = PathBaseline::new(target)?;
+        let path = PathBaseline::new(&target)?;
         Ok(Self { path })
     }
+}
+
+fn extract_tree(
+    repo: &git2::Repository,
+    tree: git2::Tree<'_>,
+    target: &std::path::Path,
+) -> anyhow::Result<()> {
+    for entry in tree.iter() {
+        match entry.kind() {
+            Some(git2::ObjectType::Tree) => {
+                let object = entry.to_object(repo);
+                let tree = object.and_then(|o| o.peel_to_tree());
+                if let Ok(tree) = tree {
+                    let path = target.join(bytes2str(entry.name_bytes()));
+                    std::fs::create_dir_all(&path)?;
+                    extract_tree(repo, tree, &path)?;
+                }
+            }
+            Some(git2::ObjectType::Blob) => {
+                let object = entry.to_object(repo);
+                let blob = object.and_then(|o| o.peel_to_blob());
+                if let Ok(blob) = blob {
+                    let path = target.join(bytes2str(entry.name_bytes()));
+                    let existing = std::fs::read(&path).ok();
+                    if existing.as_ref().map(|v| v.as_slice()) != Some(blob.content()) {
+                        std::fs::write(&path, blob.content())?;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    Ok(())
 }
 
 impl BaselineLoader for GitBaseline {
@@ -112,4 +142,18 @@ impl BaselineLoader for GitBaseline {
     ) -> anyhow::Result<std::path::PathBuf> {
         self.path.load_rustdoc(config, rustdoc, name)
     }
+}
+
+// From git2 crate
+#[cfg(unix)]
+fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
+    use std::os::unix::prelude::*;
+    std::ffi::OsStr::from_bytes(b)
+}
+
+// From git2 crate
+#[cfg(windows)]
+fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
+    use std::str;
+    std::ffi::OsStr::new(str::from_utf8(b).unwrap())
 }
