@@ -46,7 +46,7 @@ impl RustDocCommand {
             .as_path()
             .as_std_path()
             // HACK: Avoid potential errors when mixing toolchains
-            .join("semver-check/target");
+            .join("semver-checks/target");
         let target_dir = manifest_target_directory.as_path();
 
         let stderr = if self.silence {
