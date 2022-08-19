@@ -17,3 +17,10 @@ pub(crate) fn load_rustdoc_from_file(path: &Path) -> anyhow::Result<Crate> {
     serde_json::from_str(&s)
         .with_context(|| format!("Failed to parse rustdoc JSON output file {:?}", path))
 }
+
+pub(crate) fn slugify(value: &str) -> String {
+    value
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '_' })
+        .collect::<String>()
+}

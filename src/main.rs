@@ -17,6 +17,7 @@ use clap::{ArgGroup, Args, Parser, Subcommand};
 
 use crate::{check_release::run_check_release, util::load_rustdoc_from_file};
 use config::GlobalConfig;
+use util::slugify;
 
 fn main() -> anyhow::Result<()> {
     let Cargo::SemverChecks(args) = Cargo::parse();
@@ -33,10 +34,7 @@ fn main() -> anyhow::Result<()> {
                 } else if let Some(rev) = args.baseline_rev.as_deref() {
                     let metadata = args.manifest.metadata().no_deps().exec()?;
                     let source = metadata.workspace_root.as_std_path();
-                    let slug = rev
-                        .chars()
-                        .filter(|c| c.is_alphanumeric())
-                        .collect::<String>();
+                    let slug = slugify(rev);
                     let target = metadata
                         .target_directory
                         .as_std_path()
