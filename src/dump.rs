@@ -34,8 +34,20 @@ impl RustDocCommand {
         self
     }
 
-    pub fn dump(&self, manifest_path: &std::path::Path) -> anyhow::Result<std::path::PathBuf> {
-        let crate_name = crate::manifest::get_package_name(manifest_path)?;
+    pub fn dump(
+        &self,
+        manifest_path: &std::path::Path,
+        pkg_spec: Option<&str>,
+    ) -> anyhow::Result<std::path::PathBuf> {
+        let crate_name = if let Some(pkg_spec) = pkg_spec {
+            pkg_spec
+                .split_once('@')
+                .map(|s| s.0)
+                .unwrap_or(pkg_spec)
+                .to_owned()
+        } else {
+            crate::manifest::get_package_name(manifest_path)?
+        };
 
         let metadata = cargo_metadata::MetadataCommand::new()
             .manifest_path(manifest_path)
@@ -69,6 +81,9 @@ impl RustDocCommand {
         .arg(manifest_path)
         .arg("--target-dir")
         .arg(target_dir);
+        if let Some(pkg_spec) = pkg_spec {
+            cmd.arg("--package").arg(pkg_spec);
+        }
         if !self.deps {
             cmd.arg("--no-deps");
         }

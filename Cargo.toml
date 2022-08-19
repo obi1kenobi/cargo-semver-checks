@@ -32,3 +32,4 @@ ignore = "0.4.18"
 clap-verbosity-flag = "1.0.1"
 log = "0.4.17"
 git2 = { version = "0.15.0", default-features = false }
+crates-index = "0.18.9"

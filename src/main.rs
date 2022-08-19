@@ -13,7 +13,7 @@ mod util;
 
 use std::path::PathBuf;
 
-use clap::{ArgGroup, Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 use crate::{check_release::run_check_release, util::load_rustdoc_from_file};
 use config::GlobalConfig;
@@ -47,7 +47,14 @@ fn main() -> anyhow::Result<()> {
                         &mut config,
                     )?)
                 } else {
-                    unreachable!("a member of the `baseline` group must be present");
+                    let metadata = args.manifest.metadata().no_deps().exec()?;
+                    let target = metadata.target_directory.as_std_path().join(util::SCOPE);
+                    let mut registry = baseline::RegistryBaseline::new(&target, &mut config)?;
+                    if let Some(version) = args.baseline_version.as_deref() {
+                        let version = semver::Version::parse(version)?;
+                        registry.set_version(version);
+                    }
+                    Box::new(registry)
                 };
             let rustdoc_cmd = dump::RustDocCommand::new()
                 .deps(false)
@@ -56,9 +63,10 @@ fn main() -> anyhow::Result<()> {
             let rustdoc_paths = if let Some(current_rustdoc_path) = args.current_rustdoc.as_deref()
             {
                 let name = "<unknown>";
+                let version = None;
                 vec![(
                     name.to_owned(),
-                    loader.load_rustdoc(&mut config, &rustdoc_cmd, name)?,
+                    loader.load_rustdoc(&mut config, &rustdoc_cmd, name, version)?,
                     current_rustdoc_path.to_owned(),
                 )]
             } else {
@@ -77,12 +85,20 @@ fn main() -> anyhow::Result<()> {
                 let mut rustdoc_paths = Vec::with_capacity(selected.len());
                 for selected in selected {
                     let manifest_path = selected.manifest_path.as_std_path();
-                    let crate_name = manifest::get_package_name(manifest_path)?;
-                    config.shell_status("Parsing", format_args!("{} (current)", crate_name))?;
-                    let rustdoc_path = rustdoc_cmd.dump(manifest_path)?;
-                    let baseline_path =
-                        loader.load_rustdoc(&mut config, &rustdoc_cmd, &crate_name)?;
-                    rustdoc_paths.push((crate_name, baseline_path, rustdoc_path));
+                    let crate_name = &selected.name;
+                    let version = &selected.version;
+                    config.shell_status(
+                        "Parsing",
+                        format_args!("{} v{} (current)", crate_name, version),
+                    )?;
+                    let rustdoc_path = rustdoc_cmd.dump(manifest_path, None)?;
+                    let baseline_path = loader.load_rustdoc(
+                        &mut config,
+                        &rustdoc_cmd,
+                        &crate_name,
+                        Some(&version),
+                    )?;
+                    rustdoc_paths.push((crate_name.clone(), baseline_path, rustdoc_path));
                 }
                 rustdoc_paths
             };
@@ -121,7 +137,6 @@ enum SemverChecks {
 }
 
 #[derive(Args)]
-#[clap(group = ArgGroup::new("baseline").required(true))]
 #[clap(setting = clap::AppSettings::DeriveDisplayOrder)]
 struct CheckRelease {
     #[clap(flatten, next_help_heading = "CURRENT")]
@@ -140,6 +155,15 @@ struct CheckRelease {
         requires = "baseline-rustdoc"
     )]
     current_rustdoc: Option<PathBuf>,
+
+    /// Git revision to lookup for a baseline
+    #[clap(
+        long,
+        value_name = "X.Y.Z",
+        help_heading = "BASELINE",
+        group = "baseline"
+    )]
+    baseline_version: Option<String>,
 
     /// Git revision to lookup for a baseline
     #[clap(
