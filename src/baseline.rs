@@ -1,6 +1,7 @@
 use anyhow::Context as _;
 
 use crate::dump::RustDocCommand;
+use crate::util::slugify;
 use crate::GlobalConfig;
 
 pub(crate) trait BaselineLoader {
@@ -9,6 +10,7 @@ pub(crate) trait BaselineLoader {
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
         name: &str,
+        version: Option<&semver::Version>,
     ) -> anyhow::Result<std::path::PathBuf>;
 }
 
@@ -28,6 +30,7 @@ impl BaselineLoader for RustdocBaseline {
         _config: &mut GlobalConfig,
         _rustdoc: &RustDocCommand,
         _name: &str,
+        _version: Option<&semver::Version>,
     ) -> anyhow::Result<std::path::PathBuf> {
         Ok(self.path.clone())
     }
@@ -62,13 +65,15 @@ impl BaselineLoader for PathBaseline {
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
         name: &str,
+        version: Option<&semver::Version>,
     ) -> anyhow::Result<std::path::PathBuf> {
         let manifest_path = self
             .lookup
             .get(name)
             .with_context(|| format!("package `{}` not found in {}", name, self.root.display()))?;
-        config.shell_status("Parsing", format_args!("{} (baseline)", name))?;
-        let rustdoc_path = rustdoc.dump(manifest_path.as_path())?;
+        let version = version.map(|v| format!(" v{}", v)).unwrap_or_default();
+        config.shell_status("Parsing", format_args!("{}{} (baseline)", name, version))?;
+        let rustdoc_path = rustdoc.dump(manifest_path.as_path(), None)?;
         Ok(rustdoc_path)
     }
 }
@@ -139,8 +144,9 @@ impl BaselineLoader for GitBaseline {
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
         name: &str,
+        version: Option<&semver::Version>,
     ) -> anyhow::Result<std::path::PathBuf> {
-        self.path.load_rustdoc(config, rustdoc, name)
+        self.path.load_rustdoc(config, rustdoc, name, version)
     }
 }
 
@@ -156,4 +162,129 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
 fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
     use std::str;
     std::ffi::OsStr::new(str::from_utf8(b).unwrap())
+}
+
+pub(crate) struct RegistryBaseline {
+    target_root: std::path::PathBuf,
+    version: Option<semver::Version>,
+    index: crates_index::Index,
+}
+
+impl RegistryBaseline {
+    pub fn new(target_root: &std::path::Path, config: &mut GlobalConfig) -> anyhow::Result<Self> {
+        let mut index = crates_index::Index::new_cargo_default()?;
+
+        config.shell_status("Updating", "index")?;
+        while need_retry(index.update())? {
+            config.shell_status("Blocking", "waiting for lock on registry index")?;
+            std::thread::sleep(REGISTRY_BACKOFF);
+        }
+
+        Ok(Self {
+            target_root: target_root.to_owned(),
+            version: None,
+            index,
+        })
+    }
+
+    pub fn set_version(&mut self, version: semver::Version) {
+        self.version = Some(version);
+    }
+}
+
+impl BaselineLoader for RegistryBaseline {
+    fn load_rustdoc(
+        &self,
+        config: &mut GlobalConfig,
+        rustdoc: &RustDocCommand,
+        name: &str,
+        version: Option<&semver::Version>,
+    ) -> anyhow::Result<std::path::PathBuf> {
+        let crate_ = self
+            .index
+            .crate_(name)
+            .with_context(|| anyhow::format_err!("{} not found in registry", name))?;
+        // Try to avoid pre-releases
+        // - Breaking changes are allowed between them
+        // - Most likely the user cares about the last official release
+        let base_version = if let Some(base) = self.version.as_ref() {
+            base.to_string()
+        } else if let Some(current) = version {
+            let mut instances = crate_
+                .versions()
+                .iter()
+                .filter_map(|i| semver::Version::parse(i.version()).ok())
+                .filter(|v| v < current)
+                .collect::<Vec<_>>();
+            instances.sort();
+            let instance = instances
+                .iter()
+                .rev()
+                .find(|v| v.pre.is_empty())
+                .or_else(|| instances.last())
+                .with_context(|| anyhow::format_err!("No published versions for {}", name))?;
+            instance.to_string()
+        } else {
+            let instance = crate_
+                .highest_normal_version()
+                .unwrap_or_else(|| crate_.highest_version());
+            instance.version().to_owned()
+        };
+
+        let base_root = self.target_root.join(format!(
+            "registry-{}-{}",
+            slugify(name),
+            slugify(&base_version)
+        ));
+        std::fs::create_dir_all(&base_root)?;
+        let manifest_path = base_root.join("Cargo.toml");
+        std::fs::write(
+            &manifest_path,
+            format!(
+                "
+[workspace]
+
+[package]
+name = 'rustdoc'
+version = '0.0.0'
+publish = false
+
+[lib]
+path = 'lib.rs'
+
+[dependencies]
+{} = '={}'
+",
+                name, base_version
+            ),
+        )?;
+        std::fs::write(base_root.join("lib.rs"), "")?;
+
+        config.shell_status(
+            "Parsing",
+            format_args!("{} {} (baseline)", name, base_version),
+        )?;
+        let rustdoc_path = rustdoc.dump(
+            manifest_path.as_path(),
+            Some(&format!("{}@{}", name, base_version)),
+        )?;
+        Ok(rustdoc_path)
+    }
+}
+
+const REGISTRY_BACKOFF: std::time::Duration = std::time::Duration::from_secs(1);
+
+/// Check if we need to retry retrieving the Index.
+fn need_retry(res: Result<(), crates_index::Error>) -> anyhow::Result<bool> {
+    match res {
+        Ok(()) => Ok(false),
+        Err(crates_index::Error::Git(err)) => {
+            if err.class() == git2::ErrorClass::Index && err.code() == git2::ErrorCode::Locked {
+                Ok(true)
+            } else {
+                Err(crates_index::Error::Git(err).into())
+            }
+        }
+        Err(err) => Err(err.into()),
+    }
 }
