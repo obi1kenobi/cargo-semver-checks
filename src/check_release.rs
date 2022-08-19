@@ -72,6 +72,11 @@ fn classify_semver_version_change(
             } else {
                 ActualSemverUpdate::Patch
             }
+        } else if baseline_version.pre != current_version.pre {
+            // > A pre-release version indicates that the version is unstable and might not satisfy
+            // > the intended compatibility requirements as denoted by its associated normal version
+            // https://semver.org/#spec-item-9
+            ActualSemverUpdate::Major
         } else {
             ActualSemverUpdate::NotChanged
         };
@@ -475,6 +480,33 @@ mod test {
         let baseline = Some("1.0.0-alpha.0");
         let current = Some("1.0.0-alpha.0");
         let expected = Some(ActualSemverUpdate::NotChanged);
+        let actual = classify_semver_version_change(baseline, current);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn classify_pre() {
+        let baseline = Some("1.0.0-alpha.0");
+        let current = Some("1.0.0-alpha.1");
+        let expected = Some(ActualSemverUpdate::Major);
+        let actual = classify_semver_version_change(baseline, current);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn classify_same_version_with_pre() {
+        let baseline = Some("1.0.0-alpha.1");
+        let current = Some("1.0.0");
+        let expected = Some(ActualSemverUpdate::Major);
+        let actual = classify_semver_version_change(baseline, current);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn classify_minor_changed_with_pre() {
+        let baseline = Some("1.0.0");
+        let current = Some("1.1.0-alpha.1");
+        let expected = Some(ActualSemverUpdate::Minor);
         let actual = classify_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
