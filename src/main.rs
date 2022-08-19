@@ -38,7 +38,8 @@ fn main() -> anyhow::Result<()> {
                     let target = metadata
                         .target_directory
                         .as_std_path()
-                        .join(format!("semver-checks/git-{}", slug));
+                        .join(util::SCOPE)
+                        .join(format!("git-{}", slug));
                     Box::new(baseline::GitBaseline::with_rev(
                         source,
                         &target,
