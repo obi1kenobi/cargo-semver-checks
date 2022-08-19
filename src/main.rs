@@ -72,16 +72,6 @@ fn main() -> anyhow::Result<()> {
             } else {
                 let metadata = args.manifest.metadata().exec()?;
                 let (selected, _) = args.workspace.partition_packages(&metadata);
-                if selected.len() != 1 {
-                    anyhow::bail!(
-                        "only one package can be processed at a time: {}",
-                        selected
-                            .into_iter()
-                            .map(|s| s.name.clone())
-                            .collect::<Vec<_>>()
-                            .join(", ")
-                    );
-                }
                 let mut rustdoc_paths = Vec::with_capacity(selected.len());
                 for selected in selected {
                     let manifest_path = selected.manifest_path.as_std_path();
