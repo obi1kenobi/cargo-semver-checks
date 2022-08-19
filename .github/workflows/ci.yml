@@ -92,7 +92,10 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: cargo test
+      - name: compile
+        run: cargo test --no-run
+
+      - name: test
         run: cargo test
 
   publish:
