@@ -4,6 +4,8 @@ use std::{fs::File, io::Read};
 use anyhow::Context;
 use rustdoc_types::Crate;
 
+pub(crate) const SCOPE: &str = "semver-checks";
+
 pub(crate) fn load_rustdoc_from_file(path: &Path) -> anyhow::Result<Crate> {
     // Parsing JSON after fully reading a file into memory is much faster than
     // parsing directly from a file, even if buffered:
