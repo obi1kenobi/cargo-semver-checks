@@ -158,7 +158,7 @@ struct CheckRelease {
     )]
     current_rustdoc: Option<PathBuf>,
 
-    /// Git revision to lookup for a baseline
+    /// Version from registry to lookup for a baseline
     #[clap(
         long,
         value_name = "X.Y.Z",
