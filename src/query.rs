@@ -9,7 +9,7 @@ pub(crate) enum RequiredSemverUpdate {
     Minor,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum ActualSemverUpdate {
     Major,
     Minor,
