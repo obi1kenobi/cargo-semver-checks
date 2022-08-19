@@ -12,10 +12,7 @@ Lint your crate API changes for semver violations.
 $ cargo install cargo-semver-checks
 
 # Check whether it's safe to release the new version:
-$ cargo semver-checks check-release --current <new-rustdoc-json> --baseline <previous-rustdoc-json>
-
-# To generate rustdoc JSON data for your crate, use:
-$ cargo +nightly rustdoc --all-features -- --document-private-items -Zunstable-options --output-format json
+$ cargo semver-checks check-release
 ```
 
 Or use as a [GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action) (used in .github/workflows/ci.yml in this repo):
