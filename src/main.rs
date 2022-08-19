@@ -97,8 +97,8 @@ fn main() -> anyhow::Result<()> {
                     let baseline_path = loader.load_rustdoc(
                         &mut config,
                         &rustdoc_cmd,
-                        &crate_name,
-                        Some(&version),
+                        crate_name,
+                        Some(version),
                     )?;
                     rustdoc_paths.push((crate_name.clone(), baseline_path, rustdoc_path));
                 }

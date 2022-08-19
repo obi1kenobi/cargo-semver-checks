@@ -27,14 +27,14 @@ impl GlobalConfig {
         Self {
             level: None,
             is_stderr_tty,
-            stdout: StandardStream::stdout(color_choice.unwrap_or_else(|| {
+            stdout: StandardStream::stdout(color_choice.unwrap_or({
                 if is_stdout_tty {
                     ColorChoice::Auto
                 } else {
                     ColorChoice::Never
                 }
             })),
-            stderr: StandardStream::stderr(color_choice.unwrap_or_else(|| {
+            stderr: StandardStream::stderr(color_choice.unwrap_or({
                 if is_stderr_tty {
                     ColorChoice::Auto
                 } else {

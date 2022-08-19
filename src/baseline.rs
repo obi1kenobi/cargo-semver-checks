@@ -126,7 +126,7 @@ fn extract_tree(
                 if let Ok(blob) = blob {
                     let path = target.join(bytes2str(entry.name_bytes()));
                     let existing = std::fs::read(&path).ok();
-                    if existing.as_ref().map(|v| v.as_slice()) != Some(blob.content()) {
+                    if existing.as_deref() != Some(blob.content()) {
                         std::fs::write(&path, blob.content())?;
                     }
                 }
