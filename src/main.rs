@@ -20,6 +20,8 @@ use config::GlobalConfig;
 use util::slugify;
 
 fn main() -> anyhow::Result<()> {
+    human_panic::setup_panic!();
+
     let Cargo::SemverChecks(args) = Cargo::parse();
 
     match args {
