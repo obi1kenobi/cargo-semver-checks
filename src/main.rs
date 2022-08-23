@@ -23,9 +23,24 @@ fn main() -> anyhow::Result<()> {
     human_panic::setup_panic!();
 
     let Cargo::SemverChecks(args) = Cargo::parse();
+    if args.bugreport {
+        use bugreport::{bugreport, collector::*, format::Markdown};
+        bugreport!()
+            .info(SoftwareVersion::default())
+            .info(OperatingSystem::default())
+            .info(CommandLine::default())
+            .info(CommandOutput::new(
+                "cargo nightly version",
+                "cargo",
+                &["+nightly", "-V"],
+            ))
+            .info(CompileTimeInformation::default())
+            .print::<Markdown>();
+        std::process::exit(0);
+    }
 
-    match args {
-        SemverChecks::CheckRelease(args) => {
+    match args.command {
+        Some(SemverChecksCommands::CheckRelease(args)) => {
             let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
 
             let loader: Box<dyn baseline::BaselineLoader> =
@@ -121,6 +136,9 @@ fn main() -> anyhow::Result<()> {
                 std::process::exit(1);
             }
         }
+        None => {
+            anyhow::bail!("subcommand required");
+        }
     }
 }
 
@@ -129,13 +147,24 @@ fn main() -> anyhow::Result<()> {
 #[clap(bin_name = "cargo")]
 #[clap(version, propagate_version = true)]
 enum Cargo {
-    #[clap(subcommand)]
     SemverChecks(SemverChecks),
+}
+
+#[derive(Args)]
+#[clap(setting = clap::AppSettings::DeriveDisplayOrder)]
+#[clap(arg_required_else_help = true)]
+#[clap(args_conflicts_with_subcommands = true)]
+struct SemverChecks {
+    #[clap(long, global = true)]
+    bugreport: bool,
+
+    #[clap(subcommand)]
+    command: Option<SemverChecksCommands>,
 }
 
 /// Check your crate for semver violations.
 #[derive(Subcommand)]
-enum SemverChecks {
+enum SemverChecksCommands {
     #[clap(alias = "diff-files")]
     CheckRelease(CheckRelease),
 }

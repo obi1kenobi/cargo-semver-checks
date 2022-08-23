@@ -34,3 +34,4 @@ log = "0.4.17"
 git2 = { version = "0.15.0", default-features = false }
 crates-index = "0.18.9"
 human-panic = "1.0.3"
+bugreport = "0.5.0"
