@@ -36,23 +36,17 @@ pub(crate) fn load_rustdoc_from_file(path: &Path) -> anyhow::Result<Crate> {
 
             // The error on this line is case (1).
             let version = serde_json::from_str::<RustdocFormatVersion>(&s).with_context(|| {
-                format!(
-                    "parsing rustdoc JSON failed, and could not determine rustdoc format version \
-                    for file {}",
-                    path.display(),
-                )
+                format!("unrecognized rustdoc format for file {}", path.display(),)
             })?;
 
             match version.format_version.cmp(&rustdoc_types::FORMAT_VERSION) {
                 std::cmp::Ordering::Less => {
                     // The error here is case (2).
                     bail!(
-                        "rustdoc output format is too old (v{1}, need v{0}) for file \
-                        {2}\n\n\
-                        \
-                        note: Using a newer Rust nightly version should help. \
-                        The latest cargo-semver-checks and Rust nightly should always be \
-                        compatible with each other.",
+                        "\
+rustdoc output format is too old (v{1}, need v{0}) for file {2}
+
+note: using a newer Rust nightly version should help",
                         rustdoc_types::FORMAT_VERSION,
                         version.format_version,
                         path.display(),
@@ -61,12 +55,10 @@ pub(crate) fn load_rustdoc_from_file(path: &Path) -> anyhow::Result<Crate> {
                 std::cmp::Ordering::Greater => {
                     // The error here is case (3).
                     bail!(
-                        "rustdoc output format is too new (v{1}, need v{0}) for this \
-                        cargo-semver-checks when parsing {2}\n\n\
-                        \
-                        note: A newer version of cargo-semver-checks is likely available. \
-                        The latest cargo-semver-checks and Rust nightly should always be \
-                        compatible with each other.",
+                        "\
+rustdoc output format is too new (v{1}, need v{0}) when parsing {2}
+
+note: a newer version of cargo-semver-checks is likely available",
                         rustdoc_types::FORMAT_VERSION,
                         version.format_version,
                         path.display(),
@@ -74,11 +66,11 @@ pub(crate) fn load_rustdoc_from_file(path: &Path) -> anyhow::Result<Crate> {
                 }
                 std::cmp::Ordering::Equal => Err(e).with_context(|| {
                     format!(
-                        "parsing rustdoc failed even though the format was the expected \
-                            version (v{}) for file {}\n\n\
-                            \
-                            note: This is a bug. Please report it on the cargo-semver-checks \
-                            GitHub together with the output of `cargo-semver-checks --bugreport`.",
+                        "\
+unexpected parse error for v{} rustdoc for file {}
+
+note: this is a bug, please report it on the tool's GitHub together with \
+the output of `cargo-semver-checks --bugreport`",
                         rustdoc_types::FORMAT_VERSION,
                         path.display(),
                     )
