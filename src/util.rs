@@ -18,13 +18,13 @@ pub(crate) fn load_rustdoc_from_file(path: &Path) -> anyhow::Result<Crate> {
     // https://github.com/serde-rs/json/issues/160
     let mut s = String::new();
     File::open(path)
-        .with_context(|| format!("Failed to open rustdoc JSON output file {:?}", path))?
+        .with_context(|| format!("failed to open rustdoc JSON file {}", path.display()))?
         .read_to_string(&mut s)
-        .with_context(|| format!("Failed to read rustdoc JSON output file {:?}", path))?;
+        .with_context(|| format!("failed to read rustdoc JSON file {}", path.display()))?;
 
     match serde_json::from_str(&s) {
         Ok(value) => Ok(value),
-        Err(_) => {
+        Err(e) => {
             // Attempt to figure out the more precise reason the deserialization failed.
             // Several possible options and their resolutions:
             // (1) The file isn't actually a rustdoc JSON file. The user should supply a valid file.
@@ -37,10 +37,9 @@ pub(crate) fn load_rustdoc_from_file(path: &Path) -> anyhow::Result<Crate> {
             // The error on this line is case (1).
             let version = serde_json::from_str::<RustdocFormatVersion>(&s).with_context(|| {
                 format!(
-                    "Failed to parse the rustdoc JSON file, and could not determine its \
-                    format version. Are you sure this is a valid rustdoc JSON file? \
-                    File path: {:?}",
-                    path
+                    "parsing rustdoc JSON failed, and could not determine rustdoc format version \
+                    for file {}",
+                    path.display(),
                 )
             })?;
 
@@ -48,40 +47,42 @@ pub(crate) fn load_rustdoc_from_file(path: &Path) -> anyhow::Result<Crate> {
                 std::cmp::Ordering::Less => {
                     // The error here is case (2).
                     bail!(
-                        "Failed to parse rustdoc JSON file: {path:?}\n\n\
-                        This version of cargo-semver-checks requires rustdoc JSON version {0}, \
-                        but the JSON file uses the older version {1}.\n\n\
-                        Please upgrade to a Rust nightly version where rustdoc outputs \
-                        JSON format version {0}.\n\n\
-                        It's usually easiest to upgrade to the latest versions of \
-                        both cargo-semver-checks and Rust nightly, \
-                        which should always be compatible with each other.",
+                        "rustdoc output format is too old (v{1}, need v{0}) for file \
+                        {2}\n\n\
+                        \
+                        note: Using a newer Rust nightly version should help. \
+                        The latest cargo-semver-checks and Rust nightly should always be \
+                        compatible with each other.",
                         rustdoc_types::FORMAT_VERSION,
                         version.format_version,
+                        path.display(),
                     )
                 }
                 std::cmp::Ordering::Greater => {
                     // The error here is case (3).
                     bail!(
-                        "Failed to parse rustdoc JSON file: {path:?}\n\n\
-                        This version of cargo-semver-checks requires rustdoc JSON version {0}, \
-                        but the JSON file uses the newer version {1}.\n\n\
-                        Please upgrade to a newer version of cargo-semver-checks \
-                        which supports rustdoc JSON format version {1}.\n\n\
-                        It's usually easiest to upgrade to the latest versions of \
-                        both cargo-semver-checks and Rust nightly, \
-                        which should always be compatible with each other.",
+                        "rustdoc output format is too new (v{1}, need v{0}) for this \
+                        cargo-semver-checks when parsing {2}\n\n\
+                        \
+                        note: A newer version of cargo-semver-checks is likely available. \
+                        The latest cargo-semver-checks and Rust nightly should always be \
+                        compatible with each other.",
                         rustdoc_types::FORMAT_VERSION,
                         version.format_version,
+                        path.display(),
                     )
                 }
-                std::cmp::Ordering::Equal => {
-                    unreachable!(
-                        "The rustdoc JSON versions matched but rustdoc_types serde \
-                        deserialization failed for file: {:?}",
-                        path,
+                std::cmp::Ordering::Equal => Err(e).with_context(|| {
+                    format!(
+                        "parsing rustdoc failed even though the format was the expected \
+                            version (v{}) for file {}\n\n\
+                            \
+                            note: This is a bug. Please report it on the cargo-semver-checks \
+                            GitHub together with the output of `cargo-semver-checks --bugreport`.",
+                        rustdoc_types::FORMAT_VERSION,
+                        path.display(),
                     )
-                }
+                }),
             }
         }
     }
