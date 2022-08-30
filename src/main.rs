@@ -63,6 +63,9 @@ fn main() -> anyhow::Result<()> {
                 row[0], widths[0], row[1], widths[1], row[2], widths[2]
             )?;
         }
+
+        let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
+        config.shell_note("Use `--explain <id>` to see more details")?;
         std::process::exit(0);
     } else if let Some(id) = args.explain.as_deref() {
         let queries = query::SemverQuery::all_queries();
@@ -212,6 +215,9 @@ struct SemverChecks {
 
     #[clap(long, global = true, exclusive = true)]
     list: bool,
+
+    #[clap(flatten)]
+    verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 
     #[clap(subcommand)]
     command: Option<SemverChecksCommands>,
