@@ -37,6 +37,22 @@ fn main() -> anyhow::Result<()> {
             .info(CompileTimeInformation::default())
             .print::<Markdown>();
         std::process::exit(0);
+    } else if let Some(id) = args.explain.as_deref() {
+        let queries = query::SemverQuery::all_queries();
+        let query = queries.get(id).ok_or_else(|| {
+            let ids = queries.keys().cloned().collect::<Vec<_>>();
+            anyhow::format_err!(
+                "Unknown id `{}`, available id's:\n  {}",
+                id,
+                ids.join("\n  ")
+            )
+        })?;
+        println!("{}", query.description);
+        if let Some(link) = &query.reference_link {
+            println!();
+            println!("See also {}", link);
+        }
+        std::process::exit(0);
     }
 
     match args.command {
@@ -157,6 +173,9 @@ enum Cargo {
 struct SemverChecks {
     #[clap(long, global = true)]
     bugreport: bool,
+
+    #[clap(long, global = true)]
+    explain: Option<String>,
 
     #[clap(subcommand)]
     command: Option<SemverChecksCommands>,
