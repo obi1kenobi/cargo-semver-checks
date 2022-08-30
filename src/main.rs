@@ -37,6 +37,28 @@ fn main() -> anyhow::Result<()> {
             .info(CompileTimeInformation::default())
             .print::<Markdown>();
         std::process::exit(0);
+    } else if args.list {
+        let queries = query::SemverQuery::all_queries();
+        let mut rows = vec![["id", "type"], ["==", "===="]];
+        for query in queries.values() {
+            rows.push([query.id.as_str(), query.required_update.as_str()]);
+        }
+        let mut widths = [0; 2];
+        for row in &rows {
+            widths[0] = widths[0].max(row[0].len());
+            widths[1] = widths[1].max(row[1].len());
+        }
+        let stdout = std::io::stdout();
+        let mut stdout = stdout.lock();
+        for row in rows {
+            use std::io::Write;
+            writeln!(
+                stdout,
+                "{0:<1$} {2:<3$}",
+                row[0], widths[0], row[1], widths[1],
+            )?;
+        }
+        std::process::exit(0);
     } else if let Some(id) = args.explain.as_deref() {
         let queries = query::SemverQuery::all_queries();
         let query = queries.get(id).ok_or_else(|| {
@@ -176,6 +198,9 @@ struct SemverChecks {
 
     #[clap(long, global = true)]
     explain: Option<String>,
+
+    #[clap(long, global = true)]
+    list: bool,
 
     #[clap(subcommand)]
     command: Option<SemverChecksCommands>,

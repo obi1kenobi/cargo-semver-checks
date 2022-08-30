@@ -9,6 +9,15 @@ pub(crate) enum RequiredSemverUpdate {
     Minor,
 }
 
+impl RequiredSemverUpdate {
+    pub(crate) fn as_str(&self) -> &'static str {
+        match self {
+            Self::Major => "major",
+            Self::Minor => "minor",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum ActualSemverUpdate {
     Major,
