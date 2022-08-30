@@ -1,7 +1,8 @@
 SemverQuery(
     id: "enum_repr_int_removed",
     human_readable_name: "enum repr(u*)/repr(i*) removed",
-    description: "The repr(u*) or repr(i*) attribute was removed from an enum. This can cause its memory representation to change, breaking FFI use cases.",
+    description: "An enum's repr attribute was removed.",
+    reference: Some("The repr(u*) or repr(i*) attribute was removed from an enum. This can cause its memory representation to change, breaking FFI use cases."),
     required_update: Major,
 
     // TODO: Change the reference link to point to the cargo semver reference

@@ -1,7 +1,7 @@
 SemverQuery(
     id: "inherent_method_missing",
     human_readable_name: "pub method removed or renamed",
-    description: "A publicly-visible method or associated fn is no longer available under its prior name, which is a major breaking change for code that depends on it.",
+    description: "A method or associated fn is no longer available under its prior name.",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"

@@ -1,7 +1,7 @@
 SemverQuery(
     id: "struct_pub_field_missing",
     human_readable_name: "pub struct's pub field removed or renamed",
-    description: "A publicly-visible struct has at least one public field that is no longer available under its prior name, which is a major breaking change for code that depends on it.",
+    description: "A struct field is no longer available under its prior name.",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
