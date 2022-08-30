@@ -39,14 +39,19 @@ fn main() -> anyhow::Result<()> {
         std::process::exit(0);
     } else if args.list {
         let queries = query::SemverQuery::all_queries();
-        let mut rows = vec![["id", "type"], ["==", "===="]];
+        let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
         for query in queries.values() {
-            rows.push([query.id.as_str(), query.required_update.as_str()]);
+            rows.push([
+                query.id.as_str(),
+                query.required_update.as_str(),
+                query.description.as_str(),
+            ]);
         }
-        let mut widths = [0; 2];
+        let mut widths = [0; 3];
         for row in &rows {
             widths[0] = widths[0].max(row[0].len());
             widths[1] = widths[1].max(row[1].len());
+            widths[2] = widths[2].max(row[2].len());
         }
         let stdout = std::io::stdout();
         let mut stdout = stdout.lock();
@@ -54,8 +59,8 @@ fn main() -> anyhow::Result<()> {
             use std::io::Write;
             writeln!(
                 stdout,
-                "{0:<1$} {2:<3$}",
-                row[0], widths[0], row[1], widths[1],
+                "{0:<1$} {2:<3$} {4:<5$}",
+                row[0], widths[0], row[1], widths[1], row[2], widths[2]
             )?;
         }
         std::process::exit(0);
@@ -69,7 +74,13 @@ fn main() -> anyhow::Result<()> {
                 ids.join("\n  ")
             )
         })?;
-        println!("{}", query.description);
+        println!(
+            "{}",
+            query
+                .reference
+                .as_deref()
+                .unwrap_or_else(|| query.description.as_str())
+        );
         if let Some(link) = &query.reference_link {
             println!();
             println!("See also {}", link);

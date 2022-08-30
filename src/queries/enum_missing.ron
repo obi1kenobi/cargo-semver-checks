@@ -1,7 +1,7 @@
 SemverQuery(
     id: "enum_missing",
     human_readable_name: "pub enum removed or renamed",
-    description: "A publicly-visible enum can no longer be imported by its prior path, which is a major breaking change for code that depends on it.",
+    description: "An enum can no longer be imported by its prior path.",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"

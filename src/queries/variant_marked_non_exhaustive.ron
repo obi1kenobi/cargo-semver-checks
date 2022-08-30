@@ -1,7 +1,8 @@
 SemverQuery(
     id: "variant_marked_non_exhaustive",
     human_readable_name: "enum variant marked #[non_exhaustive]",
-    description: "An enum variant has been marked #[non_exhaustive] for the first time, preventing it from being constructed using a literal from outside its own crate. This is a major breaking change for code that depends on it.",
+    description: "An exhaustive enum variant has been marked #[non_exhaustive].",
+    reference: Some("An exhaustive enum variant has been marked #[non_exhaustive], preventing it from being constructed using a literal from outside its own crate."),
     required_update: Major,
 
     // TODO: Change the reference link once this cargo docs PR merges:

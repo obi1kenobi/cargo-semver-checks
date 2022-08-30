@@ -1,7 +1,8 @@
 SemverQuery(
     id: "enum_repr_c_removed",
     human_readable_name: "enum repr(C) removed",
-    description: "A enum that used to be repr(C) is no longer repr(C). This can cause its memory layout to change, breaking FFI use cases.",
+    description: "An enum that used to be repr(C) is no longer repr(C).",
+    reference: Some("An enum that used to be repr(C) is no longer repr(C). This can cause its memory layout to change, breaking FFI use cases."),
     required_update: Major,
 
     // TODO: Change the reference link to point to the cargo semver reference
