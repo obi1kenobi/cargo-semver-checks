@@ -82,7 +82,7 @@ fn main() -> anyhow::Result<()> {
             query
                 .reference
                 .as_deref()
-                .unwrap_or_else(|| query.description.as_str())
+                .unwrap_or(query.description.as_str())
         );
         if let Some(link) = &query.reference_link {
             println!();
