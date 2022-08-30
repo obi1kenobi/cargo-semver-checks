@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -65,6 +67,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Install nightly rust to run rustdoc
         uses: actions-rs/toolchain@v1
@@ -109,6 +113,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Tag the version
         run: |
@@ -130,6 +136,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - id: check
         run: |
@@ -156,6 +164,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Check semver
         uses: obi1kenobi/cargo-semver-checks-action@v1
