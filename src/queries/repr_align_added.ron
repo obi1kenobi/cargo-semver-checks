@@ -1,0 +1,59 @@
+SemverQuery(
+    id: "repc_align_added",
+    human_readable_name: "repr(align(n)) added",
+    description: "TODO",
+    required_update: Major,
+
+    // TODO: Change the reference link to point to the cargo semver reference
+    //       once it has a section on align(n).
+    reference_link: Some("https://doc.rust-lang.org/nomicon/other-reprs.html#repralignn"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @tag @output
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            value @filter(op: "regex", value: ["$repr_regex"])
+                        }
+
+                        importable_path {
+                            path @tag @output
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        attribute {
+                            value @filter(op: "regex", value: ["$repr_regex"])
+                        }
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "repr_regex": "#\\[repr\\(align\\(\\d+\\)\\)\\]",
+        "zero": 0,
+    },
+    error_message: "TODO",
+    per_result_error_template: Some("type {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)
