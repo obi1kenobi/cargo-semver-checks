@@ -37,6 +37,58 @@ fn main() -> anyhow::Result<()> {
             .info(CompileTimeInformation::default())
             .print::<Markdown>();
         std::process::exit(0);
+    } else if args.list {
+        let queries = query::SemverQuery::all_queries();
+        let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
+        for query in queries.values() {
+            rows.push([
+                query.id.as_str(),
+                query.required_update.as_str(),
+                query.description.as_str(),
+            ]);
+        }
+        let mut widths = [0; 3];
+        for row in &rows {
+            widths[0] = widths[0].max(row[0].len());
+            widths[1] = widths[1].max(row[1].len());
+            widths[2] = widths[2].max(row[2].len());
+        }
+        let stdout = std::io::stdout();
+        let mut stdout = stdout.lock();
+        for row in rows {
+            use std::io::Write;
+            writeln!(
+                stdout,
+                "{0:<1$} {2:<3$} {4:<5$}",
+                row[0], widths[0], row[1], widths[1], row[2], widths[2]
+            )?;
+        }
+
+        let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
+        config.shell_note("Use `--explain <id>` to see more details")?;
+        std::process::exit(0);
+    } else if let Some(id) = args.explain.as_deref() {
+        let queries = query::SemverQuery::all_queries();
+        let query = queries.get(id).ok_or_else(|| {
+            let ids = queries.keys().cloned().collect::<Vec<_>>();
+            anyhow::format_err!(
+                "Unknown id `{}`, available id's:\n  {}",
+                id,
+                ids.join("\n  ")
+            )
+        })?;
+        println!(
+            "{}",
+            query
+                .reference
+                .as_deref()
+                .unwrap_or(query.description.as_str())
+        );
+        if let Some(link) = &query.reference_link {
+            println!();
+            println!("See also {}", link);
+        }
+        std::process::exit(0);
     }
 
     match args.command {
@@ -155,8 +207,17 @@ enum Cargo {
 #[clap(arg_required_else_help = true)]
 #[clap(args_conflicts_with_subcommands = true)]
 struct SemverChecks {
-    #[clap(long, global = true)]
+    #[clap(long, global = true, exclusive = true)]
     bugreport: bool,
+
+    #[clap(long, global = true, exclusive = true)]
+    explain: Option<String>,
+
+    #[clap(long, global = true, exclusive = true)]
+    list: bool,
+
+    #[clap(flatten)]
+    verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 
     #[clap(subcommand)]
     command: Option<SemverChecksCommands>,

@@ -1,7 +1,7 @@
 SemverQuery(
     id: "enum_variant_added",
     human_readable_name: "enum variant added on exhaustive enum",
-    description: "A publicly-visible enum has a new variant. The enum is not marked #[non_exhaustive], so this is a major breaking change for code that depends on it.",
+    description: "An exhaustive enum has a new variant.",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#enum-variant-new"),
     query: r#"

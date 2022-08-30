@@ -9,6 +9,15 @@ pub(crate) enum RequiredSemverUpdate {
     Minor,
 }
 
+impl RequiredSemverUpdate {
+    pub(crate) fn as_str(&self) -> &'static str {
+        match self {
+            Self::Major => "major",
+            Self::Minor => "minor",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum ActualSemverUpdate {
     Major,
@@ -39,6 +48,9 @@ pub(crate) struct SemverQuery {
     pub(crate) description: String,
 
     pub(crate) required_update: RequiredSemverUpdate,
+
+    #[serde(default)]
+    pub(crate) reference: Option<String>,
 
     #[serde(default)]
     pub(crate) reference_link: Option<String>,
@@ -84,7 +96,16 @@ impl SemverQuery {
             include_str!("./queries/variant_marked_non_exhaustive.ron"),
         ];
         for query_text in query_text_contents {
-            let query: SemverQuery = ron::from_str(query_text).expect("query failed to parse");
+            let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
+                panic!(
+                    "\
+Failed to parse a query: {}
+```ron
+{}
+```",
+                    e, query_text
+                );
+            });
             let id_conflict = queries.insert(query.id.clone(), query);
             assert!(id_conflict.is_none(), "{:?}", id_conflict);
         }

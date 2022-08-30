@@ -120,6 +120,10 @@ impl GlobalConfig {
         self.shell_print(action, message, termcolor::Color::Green, true)
     }
 
+    pub fn shell_note(&mut self, message: impl std::fmt::Display) -> anyhow::Result<()> {
+        self.shell_print("note", message, termcolor::Color::Cyan, false)
+    }
+
     pub fn shell_warn(&mut self, message: impl std::fmt::Display) -> anyhow::Result<()> {
         self.shell_print("warning", message, termcolor::Color::Yellow, false)
     }
