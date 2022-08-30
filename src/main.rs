@@ -193,13 +193,13 @@ enum Cargo {
 #[clap(arg_required_else_help = true)]
 #[clap(args_conflicts_with_subcommands = true)]
 struct SemverChecks {
-    #[clap(long, global = true)]
+    #[clap(long, global = true, exclusive = true)]
     bugreport: bool,
 
-    #[clap(long, global = true)]
+    #[clap(long, global = true, exclusive = true)]
     explain: Option<String>,
 
-    #[clap(long, global = true)]
+    #[clap(long, global = true, exclusive = true)]
     list: bool,
 
     #[clap(subcommand)]
