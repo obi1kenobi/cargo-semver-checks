@@ -10,7 +10,7 @@ SemverQuery(
             baseline {
                 item {
                     ... on Trait {
-                        visibility_limit @filter(op: "=", vlaue: ["$public"]) @output
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @output @tag
 
                         importable_path {
@@ -24,7 +24,7 @@ SemverQuery(
                     }
                 }
             }
-            current @folkd @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"])
