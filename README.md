@@ -84,3 +84,11 @@ it remains `cargo-semver-checks` for the time being.
 
 The `cargo_semver_check` name is reserved on crates.io but all its versions
 are intentionally yanked. Please use the `cargo-semver-checks` crate instead.
+
+### License
+
+Available under the Apache License (Version 2.0) or the MIT license, at your option.
+
+Copyright 2022-present Predrag Gruevski and Project Contributors.
+The present date is determined by the timestamp of the most recent commit in the repository.
+Project Contributors are all authors and committers of commits in the repository.
