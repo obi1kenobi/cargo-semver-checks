@@ -648,27 +648,6 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                     let crate_token =
                                         token.as_indexed_crate().expect("token was not a Crate");
 
-                                    // let iter = crate_token
-                                    //     .public_items
-                                    //     .iter()
-                                    //     .copied()
-                                    //     .filter_map(|id| crate_token.inner.index.get(id))
-                                    //     .filter(|item| {
-                                    //         matches!(
-                                    //             item.inner,
-                                    //             rustdoc_types::ItemEnum::Struct(..)
-                                    //                 | rustdoc_types::ItemEnum::StructField(..)
-                                    //                 | rustdoc_types::ItemEnum::Enum(..)
-                                    //                 | rustdoc_types::ItemEnum::Variant(..)
-                                    //                 | rustdoc_types::ItemEnum::Function(..)
-                                    //                 | rustdoc_types::ItemEnum::Method(..)
-                                    //                 | rustdoc_types::ItemEnum::Impl(..)
-                                    //         )
-                                    //     })
-                                    //     .map(move |value| origin.make_item_token(value));
-                                    // Box::new(iter)
-                                    // TODO: temporarily only return public items for testing
-                                    //
                                     let iter = crate_token
                                         .inner
                                         .index
@@ -684,6 +663,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                                     | rustdoc_types::ItemEnum::Function(..)
                                                     | rustdoc_types::ItemEnum::Method(..)
                                                     | rustdoc_types::ItemEnum::Impl(..)
+                                                    | rustdoc_types::ItemEnum::Trait(..)
                                             )
                                         })
                                         .map(move |value| origin.make_item_token(value));
