@@ -1,0 +1,47 @@
+SemverQuery(
+    id: "trait_missing",
+    human_readable_name: "pub trait removed or renamed",
+    description: "A trait can no longer be imported by its prior path",
+    required_update: Major,
+    reference_link: Some(""),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", vlaue: ["$public"]) @output
+                        name @output @tag
+
+                        importable_path {
+                            path @output @path
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current @folkd @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "",
+    per_result_error_template: Some(""),
+)
