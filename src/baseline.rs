@@ -214,7 +214,9 @@ impl BaselineLoader for RegistryBaseline {
                 .versions()
                 .iter()
                 .filter_map(|i| semver::Version::parse(i.version()).ok())
-                .filter(|v| v < current)
+                // For unpublished changes when the user doesn't increment the version
+                // post-release, allow using the current version as a baseline.
+                .filter(|v| v <= current)
                 .collect::<Vec<_>>();
             instances.sort();
             let instance = instances
