@@ -222,7 +222,9 @@ impl BaselineLoader for RegistryBaseline {
                 .rev()
                 .find(|v| v.pre.is_empty())
                 .or_else(|| instances.last())
-                .with_context(|| anyhow::format_err!("No published versions for {}", name))?;
+                .with_context(|| {
+                    anyhow::format_err!("No available baseline versions for {}@{}", name, current)
+                })?;
             instance.to_string()
         } else {
             let instance = crate_
