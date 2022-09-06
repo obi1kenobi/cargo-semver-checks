@@ -183,7 +183,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-semver-checks"
-version = "0.9.2"
+version = "0.10.0"
 dependencies = [
  "anyhow",
  "atty",
@@ -983,9 +983,9 @@ checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustdoc-types"
-version = "0.14.0"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb8ae6df9a4006b7968781abb9a2ea2983b5f3cad2ca9294d195781618194c28"
+checksum = "43d1ecdf1172107d4fc7001f47259299641298a67347c59a0e4216af7b6618c8"
 dependencies = [
  "serde",
 ]
