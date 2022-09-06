@@ -136,7 +136,7 @@ impl<'a> Token<'a> {
                 rustdoc_types::ItemEnum::Enum(..) => "Enum",
                 rustdoc_types::ItemEnum::Function(..) => "Function",
                 rustdoc_types::ItemEnum::Method(..) => "Method",
-                rustdoc_types::ItemEnum::Variant(Variant::Plain) => "PlainVariant",
+                rustdoc_types::ItemEnum::Variant(Variant::Plain(..)) => "PlainVariant",
                 rustdoc_types::ItemEnum::Variant(Variant::Tuple(..)) => "TupleVariant",
                 rustdoc_types::ItemEnum::Variant(Variant::Struct(..)) => "StructVariant",
                 rustdoc_types::ItemEnum::StructField(..) => "StructField",
@@ -1136,6 +1136,15 @@ mod tests {
     use crate::{indexed_crate::IndexedCrate, query::SemverQuery, util::load_rustdoc_from_file};
 
     use super::RustdocAdapter;
+
+    #[test]
+    fn rustdoc_json_format_version() {
+        let current_crate = load_rustdoc_from_file(Path::new("./localdata/test_data/baseline.json"))
+            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
+            .expect("failed to load baseline rustdoc");
+
+        assert_eq!(current_crate.format_version, rustdoc_types::FORMAT_VERSION);
+    }
 
     #[test]
     fn pub_use_handling() {
