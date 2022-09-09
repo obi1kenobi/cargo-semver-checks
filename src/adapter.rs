@@ -138,7 +138,7 @@ impl<'a> Token<'a> {
                 rustdoc_types::ItemEnum::Method(..) => "Method",
                 rustdoc_types::ItemEnum::Variant(Variant::Plain(..)) => "PlainVariant",
                 rustdoc_types::ItemEnum::Variant(Variant::Tuple(..)) => "TupleVariant",
-                rustdoc_types::ItemEnum::Variant(Variant::Struct(..)) => "StructVariant",
+                rustdoc_types::ItemEnum::Variant(Variant::Struct { .. }) => "StructVariant",
                 rustdoc_types::ItemEnum::StructField(..) => "StructField",
                 rustdoc_types::ItemEnum::Impl(..) => "Impl",
                 rustdoc_types::ItemEnum::Trait(..) => "Trait",
@@ -335,13 +335,18 @@ fn get_item_property(item_token: &Token, field_name: &str) -> FieldValue {
 fn get_struct_property(item_token: &Token, field_name: &str) -> FieldValue {
     let (_, struct_item) = item_token.as_struct_item().expect("token was not a Struct");
     match field_name {
-        "struct_type" => match struct_item.struct_type {
-            rustdoc_types::StructType::Plain => "plain",
-            rustdoc_types::StructType::Tuple => "tuple",
-            rustdoc_types::StructType::Unit => "unit",
+        "struct_type" => match struct_item.kind {
+            rustdoc_types::StructKind::Plain { .. } => "plain",
+            rustdoc_types::StructKind::Tuple(..) => "tuple",
+            rustdoc_types::StructKind::Unit => "unit",
         }
         .into(),
-        "fields_stripped" => struct_item.fields_stripped.into(),
+        "fields_stripped" => match struct_item.kind {
+            rustdoc_types::StructKind::Plain {
+                fields_stripped, ..
+            } => fields_stripped.into(),
+            _ => FieldValue::Null,
+        },
         _ => unreachable!("Struct property {field_name}"),
     }
 }
@@ -855,32 +860,45 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     let current_crate = self.current_crate;
                     let previous_crate = self.previous_crate;
                     Box::new(data_contexts.map(move |ctx| {
-                        let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
-                            match &ctx.current_token {
-                                None => Box::new(std::iter::empty()),
-                                Some(token) => {
-                                    let origin = token.origin;
-                                    let (_, struct_item) =
-                                        token.as_struct_item().expect("token was not a Struct");
+                        let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
+                            .current_token
+                        {
+                            None => Box::new(std::iter::empty()),
+                            Some(token) => {
+                                let origin = token.origin;
+                                let (_, struct_item) =
+                                    token.as_struct_item().expect("token was not a Struct");
 
-                                    let item_index = match origin {
-                                        Origin::CurrentCrate => &current_crate.inner.index,
-                                        Origin::PreviousCrate => {
-                                            &previous_crate
-                                                .expect("no previous crate provided")
-                                                .inner
-                                                .index
+                                let item_index = match origin {
+                                    Origin::CurrentCrate => &current_crate.inner.index,
+                                    Origin::PreviousCrate => {
+                                        &previous_crate
+                                            .expect("no previous crate provided")
+                                            .inner
+                                            .index
+                                    }
+                                };
+
+                                let field_ids_iter: Box<dyn Iterator<Item = &Id>> =
+                                    match &struct_item.kind {
+                                        rustdoc_types::StructKind::Unit => {
+                                            Box::new(std::iter::empty())
+                                        }
+                                        rustdoc_types::StructKind::Tuple(field_ids) => {
+                                            Box::new(field_ids.iter().filter_map(|x| x.as_ref()))
+                                        }
+                                        rustdoc_types::StructKind::Plain { fields, .. } => {
+                                            Box::new(fields.iter())
                                         }
                                     };
-                                    Box::new(struct_item.fields.clone().into_iter().map(
-                                        move |field_id| {
-                                            origin.make_item_token(
-                                                item_index.get(&field_id).expect("missing item"),
-                                            )
-                                        },
-                                    ))
-                                }
-                            };
+
+                                Box::new(field_ids_iter.map(move |field_id| {
+                                    origin.make_item_token(
+                                        item_index.get(field_id).expect("missing item"),
+                                    )
+                                }))
+                            }
+                        };
 
                         (ctx, neighbors)
                     }))
