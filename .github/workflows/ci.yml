@@ -114,7 +114,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Tag the version
         run: |
