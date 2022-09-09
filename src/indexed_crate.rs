@@ -105,9 +105,15 @@ fn collect_public_items<'a>(
                     }
                 }
                 rustdoc_types::ItemEnum::Struct(struct_) => {
-                    for inner in struct_
-                        .fields
-                        .iter()
+                    let field_ids_iter: Box<dyn Iterator<Item = &Id>> = match &struct_.kind {
+                        rustdoc_types::StructKind::Unit => Box::new(std::iter::empty()),
+                        rustdoc_types::StructKind::Tuple(field_ids) => {
+                            Box::new(field_ids.iter().filter_map(|x| x.as_ref()))
+                        }
+                        rustdoc_types::StructKind::Plain { fields, .. } => Box::new(fields.iter()),
+                    };
+
+                    for inner in field_ids_iter
                         .chain(struct_.impls.iter())
                         .filter_map(|id| crate_.index.get(id))
                     {
