@@ -199,7 +199,8 @@ dependencies = [
  "ignore",
  "log",
  "ron 0.7.1",
- "rustdoc-types",
+ "rustdoc-types 0.14.0",
+ "rustdoc-types 0.17.0",
  "semver",
  "serde",
  "serde_json",
@@ -980,6 +981,15 @@ name = "rustc-hash"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
+
+[[package]]
+name = "rustdoc-types"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb8ae6df9a4006b7968781abb9a2ea2983b5f3cad2ca9294d195781618194c28"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "rustdoc-types"

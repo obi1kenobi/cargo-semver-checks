@@ -1,6 +1,6 @@
 use std::{collections::BTreeSet, sync::Arc};
 
-use rustdoc_types::{
+use rustdoc_types_14::{
     Crate, Enum, Function, Id, Impl, Item, ItemEnum, Method, Path, Span, Struct, Trait, Type,
     Variant,
 };
@@ -10,7 +10,7 @@ use trustfall_core::{
     schema::Schema,
 };
 
-use crate::indexed_crate::IndexedCrate;
+use super::indexed_crate::IndexedCrate;
 
 #[non_exhaustive]
 pub struct RustdocAdapter<'a> {
@@ -30,7 +30,7 @@ impl<'a> RustdocAdapter<'a> {
     }
 
     pub fn schema() -> Schema {
-        Schema::parse(include_str!("rustdoc_schema.graphql")).expect("schema not valid")
+        Schema::parse(include_str!("../rustdoc_schema.graphql")).expect("schema not valid")
     }
 }
 
@@ -70,7 +70,7 @@ impl Origin {
         }
     }
 
-    fn make_raw_type_token<'a>(&self, raw_type: &'a rustdoc_types::Type) -> Token<'a> {
+    fn make_raw_type_token<'a>(&self, raw_type: &'a rustdoc_types_14::Type) -> Token<'a> {
         Token {
             origin: *self,
             kind: TokenKind::RawType(raw_type),
@@ -86,7 +86,7 @@ impl Origin {
 
     fn make_implemented_trait_token<'a>(
         &self,
-        path: &'a rustdoc_types::Path,
+        path: &'a rustdoc_types_14::Path,
         trait_def: &'a Item,
     ) -> Token<'a> {
         Token {
@@ -132,16 +132,16 @@ impl<'a> Token<'a> {
     fn typename(&self) -> &'static str {
         match self.kind {
             TokenKind::Item(item) => match &item.inner {
-                rustdoc_types::ItemEnum::Struct(..) => "Struct",
-                rustdoc_types::ItemEnum::Enum(..) => "Enum",
-                rustdoc_types::ItemEnum::Function(..) => "Function",
-                rustdoc_types::ItemEnum::Method(..) => "Method",
-                rustdoc_types::ItemEnum::Variant(Variant::Plain(..)) => "PlainVariant",
-                rustdoc_types::ItemEnum::Variant(Variant::Tuple(..)) => "TupleVariant",
-                rustdoc_types::ItemEnum::Variant(Variant::Struct { .. }) => "StructVariant",
-                rustdoc_types::ItemEnum::StructField(..) => "StructField",
-                rustdoc_types::ItemEnum::Impl(..) => "Impl",
-                rustdoc_types::ItemEnum::Trait(..) => "Trait",
+                rustdoc_types_14::ItemEnum::Struct(..) => "Struct",
+                rustdoc_types_14::ItemEnum::Enum(..) => "Enum",
+                rustdoc_types_14::ItemEnum::Function(..) => "Function",
+                rustdoc_types_14::ItemEnum::Method(..) => "Method",
+                rustdoc_types_14::ItemEnum::Variant(Variant::Plain) => "PlainVariant",
+                rustdoc_types_14::ItemEnum::Variant(Variant::Tuple(..)) => "TupleVariant",
+                rustdoc_types_14::ItemEnum::Variant(Variant::Struct(..)) => "StructVariant",
+                rustdoc_types_14::ItemEnum::StructField(..) => "StructField",
+                rustdoc_types_14::ItemEnum::Impl(..) => "Impl",
+                rustdoc_types_14::ItemEnum::Trait(..) => "Trait",
                 _ => unreachable!("unexpected item.inner for item: {item:?}"),
             },
             TokenKind::Span(..) => "Span",
@@ -152,8 +152,8 @@ impl<'a> Token<'a> {
             TokenKind::Attribute(..) => "Attribute",
             TokenKind::ImplementedTrait(..) => "ImplementedTrait",
             TokenKind::RawType(ty) => match ty {
-                rustdoc_types::Type::ResolvedPath { .. } => "ResolvedPathType",
-                rustdoc_types::Type::Primitive(..) => "PrimitiveType",
+                rustdoc_types_14::Type::ResolvedPath { .. } => "ResolvedPathType",
+                rustdoc_types_14::Type::Primitive(..) => "PrimitiveType",
                 _ => "OtherType",
             },
         }
@@ -186,14 +186,14 @@ impl<'a> Token<'a> {
 
     fn as_struct_item(&self) -> Option<(&'a Item, &'a Struct)> {
         self.as_item().and_then(|item| match &item.inner {
-            rustdoc_types::ItemEnum::Struct(s) => Some((item, s)),
+            rustdoc_types_14::ItemEnum::Struct(s) => Some((item, s)),
             _ => None,
         })
     }
 
     fn as_struct_field_item(&self) -> Option<(&'a Item, &'a Type)> {
         self.as_item().and_then(|item| match &item.inner {
-            rustdoc_types::ItemEnum::StructField(s) => Some((item, s)),
+            rustdoc_types_14::ItemEnum::StructField(s) => Some((item, s)),
             _ => None,
         })
     }
@@ -207,21 +207,21 @@ impl<'a> Token<'a> {
 
     fn as_enum(&self) -> Option<&'a Enum> {
         self.as_item().and_then(|item| match &item.inner {
-            rustdoc_types::ItemEnum::Enum(e) => Some(e),
+            rustdoc_types_14::ItemEnum::Enum(e) => Some(e),
             _ => None,
         })
     }
 
     fn as_trait(&self) -> Option<&'a Trait> {
         self.as_item().and_then(|item| match &item.inner {
-            rustdoc_types::ItemEnum::Trait(t) => Some(t),
+            rustdoc_types_14::ItemEnum::Trait(t) => Some(t),
             _ => None,
         })
     }
 
     fn as_variant(&self) -> Option<&'a Variant> {
         self.as_item().and_then(|item| match &item.inner {
-            rustdoc_types::ItemEnum::Variant(v) => Some(v),
+            rustdoc_types_14::ItemEnum::Variant(v) => Some(v),
             _ => None,
         })
     }
@@ -242,21 +242,21 @@ impl<'a> Token<'a> {
 
     fn as_function(&self) -> Option<&'a Function> {
         self.as_item().and_then(|item| match &item.inner {
-            rustdoc_types::ItemEnum::Function(func) => Some(func),
+            rustdoc_types_14::ItemEnum::Function(func) => Some(func),
             _ => None,
         })
     }
 
     fn as_method(&self) -> Option<&'a Method> {
         self.as_item().and_then(|item| match &item.inner {
-            rustdoc_types::ItemEnum::Method(func) => Some(func),
+            rustdoc_types_14::ItemEnum::Method(func) => Some(func),
             _ => None,
         })
     }
 
     fn as_impl(&self) -> Option<&'a Impl> {
         self.as_item().and_then(|item| match &item.inner {
-            rustdoc_types::ItemEnum::Impl(x) => Some(x),
+            rustdoc_types_14::ItemEnum::Impl(x) => Some(x),
             _ => None,
         })
     }
@@ -268,14 +268,14 @@ impl<'a> Token<'a> {
         }
     }
 
-    fn as_raw_type(&self) -> Option<&'a rustdoc_types::Type> {
+    fn as_raw_type(&self) -> Option<&'a rustdoc_types_14::Type> {
         match &self.kind {
             TokenKind::RawType(ty) => Some(*ty),
             _ => None,
         }
     }
 
-    fn as_implemented_trait(&self) -> Option<(&'a rustdoc_types::Path, &'a Item)> {
+    fn as_implemented_trait(&self) -> Option<(&'a rustdoc_types_14::Path, &'a Item)> {
         match &self.kind {
             TokenKind::ImplementedTrait(path, trait_item) => Some((*path, *trait_item)),
             _ => None,
@@ -321,10 +321,10 @@ fn get_item_property(item_token: &Token, field_name: &str) -> FieldValue {
         "docs" => (&item.docs).into(),
         "attrs" => item.attrs.clone().into(),
         "visibility_limit" => match &item.visibility {
-            rustdoc_types::Visibility::Public => "public".into(),
-            rustdoc_types::Visibility::Default => "default".into(),
-            rustdoc_types::Visibility::Crate => "crate".into(),
-            rustdoc_types::Visibility::Restricted { parent: _, path } => {
+            rustdoc_types_14::Visibility::Public => "public".into(),
+            rustdoc_types_14::Visibility::Default => "default".into(),
+            rustdoc_types_14::Visibility::Crate => "crate".into(),
+            rustdoc_types_14::Visibility::Restricted { parent: _, path } => {
                 format!("restricted ({path})").into()
             }
         },
@@ -335,18 +335,13 @@ fn get_item_property(item_token: &Token, field_name: &str) -> FieldValue {
 fn get_struct_property(item_token: &Token, field_name: &str) -> FieldValue {
     let (_, struct_item) = item_token.as_struct_item().expect("token was not a Struct");
     match field_name {
-        "struct_type" => match struct_item.kind {
-            rustdoc_types::StructKind::Plain { .. } => "plain",
-            rustdoc_types::StructKind::Tuple(..) => "tuple",
-            rustdoc_types::StructKind::Unit => "unit",
+        "struct_type" => match struct_item.struct_type {
+            rustdoc_types_14::StructType::Plain => "plain",
+            rustdoc_types_14::StructType::Tuple => "tuple",
+            rustdoc_types_14::StructType::Unit => "unit",
         }
         .into(),
-        "fields_stripped" => match struct_item.kind {
-            rustdoc_types::StructKind::Plain {
-                fields_stripped, ..
-            } => fields_stripped.into(),
-            _ => FieldValue::Null,
-        },
+        "fields_stripped" => struct_item.fields_stripped.into(),
         _ => unreachable!("Struct property {field_name}"),
     }
 }
@@ -441,8 +436,8 @@ fn get_raw_type_property(token: &Token, field_name: &str) -> FieldValue {
     let type_token = token.as_raw_type().expect("token was not a RawType");
     match field_name {
         "name" => match type_token {
-            rustdoc_types::Type::ResolvedPath(path) => (&path.name).into(),
-            rustdoc_types::Type::Primitive(name) => name.into(),
+            rustdoc_types_14::Type::ResolvedPath(path) => (&path.name).into(),
+            rustdoc_types_14::Type::Primitive(name) => name.into(),
             _ => unreachable!("unexpected RawType token content: {type_token:?}"),
         },
         _ => unreachable!("RawType property {field_name}"),
@@ -653,6 +648,27 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                     let crate_token =
                                         token.as_indexed_crate().expect("token was not a Crate");
 
+                                    // let iter = crate_token
+                                    //     .public_items
+                                    //     .iter()
+                                    //     .copied()
+                                    //     .filter_map(|id| crate_token.inner.index.get(id))
+                                    //     .filter(|item| {
+                                    //         matches!(
+                                    //             item.inner,
+                                    //             rustdoc_types_14::ItemEnum::Struct(..)
+                                    //                 | rustdoc_types_14::ItemEnum::StructField(..)
+                                    //                 | rustdoc_types_14::ItemEnum::Enum(..)
+                                    //                 | rustdoc_types_14::ItemEnum::Variant(..)
+                                    //                 | rustdoc_types_14::ItemEnum::Function(..)
+                                    //                 | rustdoc_types_14::ItemEnum::Method(..)
+                                    //                 | rustdoc_types_14::ItemEnum::Impl(..)
+                                    //         )
+                                    //     })
+                                    //     .map(move |value| origin.make_item_token(value));
+                                    // Box::new(iter)
+                                    // TODO: temporarily only return public items for testing
+                                    //
                                     let iter = crate_token
                                         .inner
                                         .index
@@ -661,14 +677,13 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                             // Filter out item types that are not currently supported.
                                             matches!(
                                                 item.inner,
-                                                rustdoc_types::ItemEnum::Struct(..)
-                                                    | rustdoc_types::ItemEnum::StructField(..)
-                                                    | rustdoc_types::ItemEnum::Enum(..)
-                                                    | rustdoc_types::ItemEnum::Variant(..)
-                                                    | rustdoc_types::ItemEnum::Function(..)
-                                                    | rustdoc_types::ItemEnum::Method(..)
-                                                    | rustdoc_types::ItemEnum::Impl(..)
-                                                    | rustdoc_types::ItemEnum::Trait(..)
+                                                rustdoc_types_14::ItemEnum::Struct(..)
+                                                    | rustdoc_types_14::ItemEnum::StructField(..)
+                                                    | rustdoc_types_14::ItemEnum::Enum(..)
+                                                    | rustdoc_types_14::ItemEnum::Variant(..)
+                                                    | rustdoc_types_14::ItemEnum::Function(..)
+                                                    | rustdoc_types_14::ItemEnum::Method(..)
+                                                    | rustdoc_types_14::ItemEnum::Impl(..)
                                             )
                                         })
                                         .map(move |value| origin.make_item_token(value));
@@ -839,7 +854,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                 Box::new(impl_ids.iter().filter_map(move |item_id| {
                                     let next_item = item_index.get(item_id);
                                     next_item.and_then(|next_item| match &next_item.inner {
-                                        rustdoc_types::ItemEnum::Impl(imp) => {
+                                        rustdoc_types_14::ItemEnum::Impl(imp) => {
                                             if !inherent_impls_only || imp.trait_.is_none() {
                                                 Some(origin.make_item_token(next_item))
                                             } else {
@@ -860,45 +875,32 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                     let current_crate = self.current_crate;
                     let previous_crate = self.previous_crate;
                     Box::new(data_contexts.map(move |ctx| {
-                        let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> = match &ctx
-                            .current_token
-                        {
-                            None => Box::new(std::iter::empty()),
-                            Some(token) => {
-                                let origin = token.origin;
-                                let (_, struct_item) =
-                                    token.as_struct_item().expect("token was not a Struct");
+                        let neighbors: Box<dyn Iterator<Item = Self::DataToken> + 'a> =
+                            match &ctx.current_token {
+                                None => Box::new(std::iter::empty()),
+                                Some(token) => {
+                                    let origin = token.origin;
+                                    let (_, struct_item) =
+                                        token.as_struct_item().expect("token was not a Struct");
 
-                                let item_index = match origin {
-                                    Origin::CurrentCrate => &current_crate.inner.index,
-                                    Origin::PreviousCrate => {
-                                        &previous_crate
-                                            .expect("no previous crate provided")
-                                            .inner
-                                            .index
-                                    }
-                                };
-
-                                let field_ids_iter: Box<dyn Iterator<Item = &Id>> =
-                                    match &struct_item.kind {
-                                        rustdoc_types::StructKind::Unit => {
-                                            Box::new(std::iter::empty())
-                                        }
-                                        rustdoc_types::StructKind::Tuple(field_ids) => {
-                                            Box::new(field_ids.iter().filter_map(|x| x.as_ref()))
-                                        }
-                                        rustdoc_types::StructKind::Plain { fields, .. } => {
-                                            Box::new(fields.iter())
+                                    let item_index = match origin {
+                                        Origin::CurrentCrate => &current_crate.inner.index,
+                                        Origin::PreviousCrate => {
+                                            &previous_crate
+                                                .expect("no previous crate provided")
+                                                .inner
+                                                .index
                                         }
                                     };
-
-                                Box::new(field_ids_iter.map(move |field_id| {
-                                    origin.make_item_token(
-                                        item_index.get(field_id).expect("missing item"),
-                                    )
-                                }))
-                            }
-                        };
+                                    Box::new(struct_item.fields.clone().into_iter().map(
+                                        move |field_id| {
+                                            origin.make_item_token(
+                                                item_index.get(&field_id).expect("missing item"),
+                                            )
+                                        },
+                                    ))
+                                }
+                            };
 
                         (ctx, neighbors)
                     }))
@@ -1012,7 +1014,7 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
                                     let next_item = &item_index.get(item_id);
                                     if let Some(next_item) = next_item {
                                         match &next_item.inner {
-                                            rustdoc_types::ItemEnum::Method(..) => {
+                                            rustdoc_types_14::ItemEnum::Method(..) => {
                                                 Some(origin.make_item_token(next_item))
                                             }
                                             _ => None,
@@ -1141,190 +1143,4 @@ impl<'a> Adapter<'a> for RustdocAdapter<'a> {
             _ => unreachable!("can_coerce_to_type {current_type_name} {coerce_to_type_name}"),
         }
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::path::Path;
-    use std::{cell::RefCell, collections::BTreeMap, rc::Rc, sync::Arc};
-
-    use anyhow::Context;
-    use trustfall_core::{frontend::parse, interpreter::execution::interpret_ir, ir::FieldValue};
-
-    use crate::{indexed_crate::IndexedCrate, query::SemverQuery, util::load_rustdoc_from_file};
-
-    use super::RustdocAdapter;
-
-    #[test]
-    fn rustdoc_json_format_version() {
-        let current_crate = load_rustdoc_from_file(Path::new("./localdata/test_data/baseline.json"))
-            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
-            .expect("failed to load baseline rustdoc");
-
-        assert_eq!(current_crate.format_version, rustdoc_types::FORMAT_VERSION);
-    }
-
-    #[test]
-    fn pub_use_handling() {
-        let current_crate = load_rustdoc_from_file(Path::new("./localdata/test_data/baseline.json"))
-            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
-            .expect("failed to load baseline rustdoc");
-
-        let current = IndexedCrate::new(&current_crate);
-
-        let query = r#"
-            {
-                Crate {
-                    item {
-                        ... on Struct {
-                            name @filter(op: "=", value: ["$struct"])
-
-                            canonical_path {
-                                canonical_path: path @output
-                            }
-
-                            importable_path @fold {
-                                path @output
-                            }
-                        }
-                    }
-                }
-            }"#;
-        let mut arguments = BTreeMap::new();
-        arguments.insert("struct", "CheckPubUseHandling");
-
-        let schema = RustdocAdapter::schema();
-        let adapter = Rc::new(RefCell::new(RustdocAdapter::new(&current, None)));
-
-        let parsed_query = parse(&schema, query).unwrap();
-        let args = Arc::new(
-            arguments
-                .iter()
-                .map(|(k, v)| (Arc::from(k.to_string()), (*v).into()))
-                .collect(),
-        );
-        let results_iter = interpret_ir(adapter.clone(), parsed_query, args).unwrap();
-
-        let actual_results: Vec<BTreeMap<_, _>> = results_iter
-            .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
-            .collect();
-
-        let expected_result: FieldValue = vec![
-            "semver_tests",
-            "import_handling",
-            "inner",
-            "CheckPubUseHandling",
-        ]
-        .into();
-        assert_eq!(1, actual_results.len(), "{actual_results:?}");
-        assert_eq!(
-            expected_result, actual_results[0]["canonical_path"],
-            "{actual_results:?}"
-        );
-
-        let mut actual_paths = actual_results[0]["path"]
-            .as_vec(|val| val.as_vec(FieldValue::as_str))
-            .expect("not a Vec<Vec<&str>>");
-        actual_paths.sort_unstable();
-
-        let expected_paths = vec![
-            vec!["semver_tests", "CheckPubUseHandling"],
-            vec!["semver_tests", "import_handling", "CheckPubUseHandling"],
-            vec![
-                "semver_tests",
-                "import_handling",
-                "inner",
-                "CheckPubUseHandling",
-            ],
-        ];
-        assert_eq!(expected_paths, actual_paths);
-    }
-
-    fn check_query_execution(query_name: &str) {
-        // Ensure the rustdocs JSON outputs have been regenerated.
-        let baseline_crate = load_rustdoc_from_file(Path::new("./localdata/test_data/baseline.json"))
-            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
-            .expect("failed to load baseline rustdoc");
-        let current_crate =
-            load_rustdoc_from_file(Path::new(&format!("./localdata/test_data/{}.json", query_name)))
-            .with_context(|| format!("Could not load localdata/test_data/{}.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?", query_name))
-            .expect("failed to load rustdoc under test");
-
-        let baseline = IndexedCrate::new(&baseline_crate);
-        let current = IndexedCrate::new(&current_crate);
-
-        let query_text =
-            std::fs::read_to_string(&format!("./src/queries/{}.ron", query_name)).unwrap();
-        let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
-
-        let expected_result_text =
-            std::fs::read_to_string(&format!("./src/test_data/{}.output.ron", query_name))
-            .with_context(|| format!("Could not load src/test_data/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
-            .expect("failed to load expected outputs");
-        let mut expected_results: Vec<BTreeMap<String, FieldValue>> =
-            ron::from_str(&expected_result_text)
-                .expect("could not parse expected outputs as ron format");
-
-        let schema = RustdocAdapter::schema();
-        let adapter = Rc::new(RefCell::new(RustdocAdapter::new(&current, Some(&baseline))));
-
-        let parsed_query = parse(&schema, &semver_query.query).unwrap();
-        let args = Arc::new(
-            semver_query
-                .arguments
-                .iter()
-                .map(|(k, v)| (Arc::from(k.clone()), v.clone().into()))
-                .collect(),
-        );
-        let results_iter = interpret_ir(adapter.clone(), parsed_query, args).unwrap();
-
-        let mut actual_results: Vec<BTreeMap<_, _>> = results_iter
-            .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
-            .collect();
-
-        // Reorder both vectors of results into a deterministic order that will compensate for
-        // nondeterminism in how the results are ordered.
-        let key_func = |elem: &BTreeMap<String, FieldValue>| {
-            (
-                elem["span_filename"].as_str().unwrap().to_owned(),
-                elem["span_begin_line"].as_usize().unwrap(),
-            )
-        };
-        expected_results.sort_unstable_by_key(key_func);
-        actual_results.sort_unstable_by_key(key_func);
-
-        assert_eq!(expected_results, actual_results);
-    }
-
-    macro_rules! query_execution_tests {
-        ($($name:ident,)*) => {
-            $(
-                #[test]
-                fn $name() {
-                    check_query_execution(stringify!($name))
-                }
-            )*
-        }
-    }
-
-    query_execution_tests!(
-        auto_trait_impl_removed,
-        derive_trait_impl_removed,
-        enum_missing,
-        enum_repr_c_removed,
-        enum_repr_int_changed,
-        enum_repr_int_removed,
-        enum_variant_added,
-        enum_variant_missing,
-        function_missing,
-        inherent_method_missing,
-        sized_impl_removed,
-        struct_marked_non_exhaustive,
-        struct_missing,
-        struct_pub_field_missing,
-        struct_repr_c_removed,
-        struct_repr_transparent_removed,
-        unit_struct_changed_kind,
-        variant_marked_non_exhaustive,
-    );
 }

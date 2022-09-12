@@ -1,15 +1,16 @@
 #![forbid(unsafe_code)]
 
-pub mod adapter;
+mod rustdoc_v18;
 mod baseline;
 mod check_release;
 mod config;
 mod dump;
-pub mod indexed_crate;
 mod manifest;
 mod query;
 mod templating;
 mod util;
+mod rustdoc_v21;
+mod execution;
 
 use std::path::PathBuf;
 

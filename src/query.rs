@@ -118,7 +118,7 @@ Failed to parse a query: {}
 mod tests {
     use trustfall_core::frontend::parse;
 
-    use crate::adapter::RustdocAdapter;
+    use crate::rustdoc_v18::adapter::RustdocAdapter;
 
     use super::SemverQuery;
 

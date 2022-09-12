@@ -3,23 +3,18 @@ use std::{
     time::Duration,
 };
 
-use anyhow::Context;
+use anyhow::{Context, bail};
 use clap::crate_version;
-use rustdoc_types::Crate;
 use termcolor::Color;
 use termcolor_output::{colored, colored_ln};
 use trustfall_core::{
-    frontend::parse,
-    interpreter::execution::interpret_ir,
     ir::{FieldValue, TransparentValue},
-    schema::Schema,
 };
 
 use crate::{
-    adapter::RustdocAdapter,
-    indexed_crate::IndexedCrate,
+    rustdoc_v18, rustdoc_v21,
     query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
-    GlobalConfig,
+    GlobalConfig, util::{CrateFormat, Index}, execution::{Queriable, QueriableRustdocV18, QueriableRustdocV21},
 };
 
 type QueryResultItem = BTreeMap<Arc<str>, FieldValue>;
@@ -87,35 +82,38 @@ fn classify_semver_version_change(
     }
 }
 
-fn make_result_iter<'a>(
-    schema: &Schema,
-    adapter: Rc<RefCell<RustdocAdapter<'a>>>,
-    semver_query: &SemverQuery,
-) -> anyhow::Result<Peekable<Box<dyn Iterator<Item = QueryResultItem> + 'a>>> {
-    let parsed_query = parse(schema, &semver_query.query)
-        .expect("not a valid query, should have been caught in tests");
-    let args = Arc::new(
-        semver_query
-            .arguments
-            .iter()
-            .map(|(k, v)| (Arc::from(k.clone()), v.clone().into()))
-            .collect(),
-    );
-    let results_iter = interpret_ir(adapter.clone(), parsed_query, args)
-        .with_context(|| "Query execution error.")?
-        .peekable();
-
-    Ok(results_iter)
+fn make_queriable<'a>(current: &'a Index<'a>, baseline: &'a Index<'a>) -> anyhow::Result<Box<dyn Queriable<'a> + 'a>> {
+    match (current, baseline) {
+        (Index::V18(current), Index::V18(baseline)) => {
+            let adapter = Rc::new(RefCell::new(rustdoc_v18::adapter::RustdocAdapter::new(current, Some(baseline))));
+            let schema = rustdoc_v18::adapter::RustdocAdapter::schema();
+            Ok(Box::new(QueriableRustdocV18::new(
+                schema,
+                adapter,
+            )))
+        }
+        (Index::V21(current), Index::V21(baseline)) => {
+            let adapter = Rc::new(RefCell::new(rustdoc_v21::adapter::RustdocAdapter::new(current, Some(baseline))));
+            let schema = rustdoc_v21::adapter::RustdocAdapter::schema();
+            Ok(Box::new(QueriableRustdocV21::new(
+                schema,
+                adapter,
+            )))
+        }
+        _ => {
+            bail!("Rustdoc JSON format mismatch, please generate both rustdoc JSONs with the same compiler version.")
+        }
+    }
 }
 
 pub(super) fn run_check_release(
     config: &mut GlobalConfig,
     crate_name: &str,
-    current_crate: Crate,
-    baseline_crate: Crate,
+    current_crate: CrateFormat,
+    baseline_crate: CrateFormat,
 ) -> anyhow::Result<bool> {
-    let current_version = current_crate.crate_version.as_deref();
-    let baseline_version = baseline_crate.crate_version.as_deref();
+    let current_version = current_crate.crate_version();
+    let baseline_version = baseline_crate.crate_version();
 
     let version_change = classify_semver_version_change(current_version, baseline_version)
         .unwrap_or_else(|| {
@@ -135,10 +133,10 @@ pub(super) fn run_check_release(
 
     let queries = SemverQuery::all_queries();
 
-    let schema = RustdocAdapter::schema();
-    let current = IndexedCrate::new(&current_crate);
-    let previous = IndexedCrate::new(&baseline_crate);
-    let adapter = Rc::new(RefCell::new(RustdocAdapter::new(&current, Some(&previous))));
+    let current = current_crate.make_index();
+    let baseline = baseline_crate.make_index();
+    let queriable = make_queriable(&current, &baseline)?;
+
     let mut queries_with_errors: Vec<QueryWithResults> = vec![];
 
     let queries_to_run: Vec<_> = queries
@@ -196,7 +194,7 @@ pub(super) fn run_check_release(
             .expect("print failed");
 
         let start_instant = std::time::Instant::now();
-        let mut results_iter = make_result_iter(&schema, adapter.clone(), semver_query)?;
+        let mut results_iter = queriable.run_query(semver_query)?;
         let peeked = results_iter.peek();
         let end_instant = std::time::Instant::now();
         let time_to_decide = end_instant - start_instant;

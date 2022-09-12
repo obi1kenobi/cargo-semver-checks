@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use rustdoc_types::{Crate, Id, Item, Visibility};
+use rustdoc_types_14::{Crate, Id, Item, Visibility};
 
 #[derive(Debug, Clone)]
 pub struct IndexedCrate<'a> {
@@ -41,7 +41,7 @@ impl<'a> IndexedCrate<'a> {
             stack.push(item_name);
         } else {
             assert!(
-                matches!(item.inner, rustdoc_types::ItemEnum::Import(..)),
+                matches!(item.inner, rustdoc_types_14::ItemEnum::Import(..)),
                 "{item:?}"
             );
         }
@@ -93,34 +93,28 @@ fn collect_public_items<'a>(
 
             let next_parent_id = Some(&item.id);
             match &item.inner {
-                rustdoc_types::ItemEnum::Module(m) => {
+                rustdoc_types_14::ItemEnum::Module(m) => {
                     for inner in m.items.iter().filter_map(|id| crate_.index.get(id)) {
                         collect_public_items(crate_, pub_items, inner, next_parent_id);
                     }
                 }
-                rustdoc_types::ItemEnum::Import(imp) => {
+                rustdoc_types_14::ItemEnum::Import(imp) => {
                     // TODO: handle glob imports (`pub use foo::bar::*`) here.
                     if let Some(item) = imp.id.as_ref().and_then(|id| crate_.index.get(id)) {
                         collect_public_items(crate_, pub_items, item, next_parent_id);
                     }
                 }
-                rustdoc_types::ItemEnum::Struct(struct_) => {
-                    let field_ids_iter: Box<dyn Iterator<Item = &Id>> = match &struct_.kind {
-                        rustdoc_types::StructKind::Unit => Box::new(std::iter::empty()),
-                        rustdoc_types::StructKind::Tuple(field_ids) => {
-                            Box::new(field_ids.iter().filter_map(|x| x.as_ref()))
-                        }
-                        rustdoc_types::StructKind::Plain { fields, .. } => Box::new(fields.iter()),
-                    };
-
-                    for inner in field_ids_iter
+                rustdoc_types_14::ItemEnum::Struct(struct_) => {
+                    for inner in struct_
+                        .fields
+                        .iter()
                         .chain(struct_.impls.iter())
                         .filter_map(|id| crate_.index.get(id))
                     {
                         collect_public_items(crate_, pub_items, inner, next_parent_id);
                     }
                 }
-                rustdoc_types::ItemEnum::Enum(enum_) => {
+                rustdoc_types_14::ItemEnum::Enum(enum_) => {
                     for inner in enum_
                         .variants
                         .iter()
@@ -130,12 +124,12 @@ fn collect_public_items<'a>(
                         collect_public_items(crate_, pub_items, inner, next_parent_id);
                     }
                 }
-                rustdoc_types::ItemEnum::Trait(trait_) => {
+                rustdoc_types_14::ItemEnum::Trait(trait_) => {
                     for inner in trait_.items.iter().filter_map(|id| crate_.index.get(id)) {
                         collect_public_items(crate_, pub_items, inner, next_parent_id);
                     }
                 }
-                rustdoc_types::ItemEnum::Impl(impl_) => {
+                rustdoc_types_14::ItemEnum::Impl(impl_) => {
                     for inner in impl_.items.iter().filter_map(|id| crate_.index.get(id)) {
                         collect_public_items(crate_, pub_items, inner, next_parent_id);
                     }
