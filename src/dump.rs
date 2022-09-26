@@ -70,13 +70,14 @@ impl RustDocCommand {
         };
 
         let mut cmd = std::process::Command::new("cargo");
-        cmd.env(
+        cmd.env("RUSTC_BOOTSTRAP", "1")
+        .env(
             "RUSTDOCFLAGS",
             "-Z unstable-options --document-hidden-items --output-format=json",
         )
         .stdout(std::process::Stdio::null()) // Don't pollute output
         .stderr(stderr)
-        .args(["+nightly", "doc", "--all-features"])
+        .args(["doc", "--all-features"])
         .arg("--manifest-path")
         .arg(manifest_path)
         .arg("--target-dir")
