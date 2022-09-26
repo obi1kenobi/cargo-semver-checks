@@ -15,7 +15,7 @@ mkdir -p "$TARGET_DIR"
 
 # Make the baseline configuration file.
 echo "Generating: baseline"
-cargo +nightly rustdoc -- -Zunstable-options --output-format json
+RUSTC_BOOTSTRAP=1 cargo rustdoc -- -Zunstable-options --output-format json
 mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/baseline.json"
 
 # For each feature, re-run rustdoc with it enabled.
@@ -23,7 +23,7 @@ features="$(cargo metadata --format-version 1 | \
     jq --exit-status -r '.packages[] | select(.name = "semver_tests") | .features | keys[]')"
 while IFS= read -r feat; do
     echo "Generating: $feat"
-    cargo +nightly rustdoc --features "$feat" -- -Zunstable-options --output-format json
+    RUSTC_BOOTSTRAP=1 cargo rustdoc --features "$feat" -- -Zunstable-options --output-format json
     mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/$feat.json"
 done <<< "$features"
 
