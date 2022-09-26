@@ -70,21 +70,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install nightly rust to run rustdoc
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          profile: minimal
-
-      - name: Regenerate test data
-        run: ./scripts/regenerate_test_rustdocs.sh
-
-      - name: Install stable rust for tests
+      - name: Install rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           profile: minimal
-          override: true
+
+      - name: Regenerate test data
+        run: ./scripts/regenerate_test_rustdocs.sh
 
       - uses: actions/cache@v2
         with:
