@@ -152,18 +152,18 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - ci-everything
-      - should-publish
-    if: needs.should-publish.outputs.is_new_version == 'yes'
+      # - should-publish
+    # if: needs.should-publish.outputs.is_new_version == 'yes'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           persist-credentials: false
 
-      # - name: Check semver
-      #   uses: obi1kenobi/cargo-semver-checks-action@v1
-      #   with:
-      #     # cargo-semver-checks currently doesn't have a --lib target,
-      #     # so we explicitly ask for the binary target to be checked instead.
-      #     # For library crates, you almost always want the default `--lib` value here.
-      #     crate-target: --bin cargo-semver-checks
+      - name: Check semver
+        uses: obi1kenobi/cargo-semver-checks-action@73379218f4e2dbcdeafa2d87659010be6b9ce2ab
+        with:
+          # cargo-semver-checks currently doesn't have a --lib target,
+          # so we explicitly ask for the binary target to be checked instead.
+          # For library crates, you almost always want the default `--lib` value here.
+          crate-target: --bin cargo-semver-checks
