@@ -192,100 +192,97 @@ fn main() -> anyhow::Result<()> {
 }
 
 #[derive(Parser)]
-#[clap(name = "cargo")]
-#[clap(bin_name = "cargo")]
-#[clap(version, propagate_version = true)]
+#[command(name = "cargo")]
+#[command(bin_name = "cargo")]
+#[command(version, propagate_version = true)]
 enum Cargo {
     SemverChecks(SemverChecks),
 }
 
 #[derive(Args)]
-#[clap(setting = clap::AppSettings::DeriveDisplayOrder)]
-#[clap(arg_required_else_help = true)]
-#[clap(args_conflicts_with_subcommands = true)]
+#[command(args_conflicts_with_subcommands = true)]
 struct SemverChecks {
-    #[clap(long, global = true, exclusive = true)]
+    #[arg(long, global = true, exclusive = true)]
     bugreport: bool,
 
-    #[clap(long, global = true, exclusive = true)]
+    #[arg(long, global = true, exclusive = true)]
     explain: Option<String>,
 
-    #[clap(long, global = true, exclusive = true)]
+    #[arg(long, global = true, exclusive = true)]
     list: bool,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 
-    #[clap(subcommand)]
+    #[command(subcommand)]
     command: Option<SemverChecksCommands>,
 }
 
 /// Check your crate for semver violations.
 #[derive(Subcommand)]
 enum SemverChecksCommands {
-    #[clap(alias = "diff-files")]
+    #[command(alias = "diff-files")]
     CheckRelease(CheckRelease),
 }
 
 #[derive(Args)]
-#[clap(setting = clap::AppSettings::DeriveDisplayOrder)]
 struct CheckRelease {
-    #[clap(flatten, next_help_heading = "CURRENT")]
+    #[command(flatten, next_help_heading = "Current")]
     pub manifest: clap_cargo::Manifest,
 
-    #[clap(flatten, next_help_heading = "CURRENT")]
+    #[command(flatten, next_help_heading = "Current")]
     pub workspace: clap_cargo::Workspace,
 
     /// The current rustdoc json output to test for semver violations.
-    #[clap(
+    #[arg(
         long,
         short_alias = 'c',
         alias = "current",
         value_name = "JSON_PATH",
-        help_heading = "CURRENT",
-        requires = "baseline-rustdoc"
+        help_heading = "Current",
+        requires = "baseline_rustdoc"
     )]
     current_rustdoc: Option<PathBuf>,
 
     /// Version from registry to lookup for a baseline
-    #[clap(
+    #[arg(
         long,
         value_name = "X.Y.Z",
-        help_heading = "BASELINE",
+        help_heading = "Baseline",
         group = "baseline"
     )]
     baseline_version: Option<String>,
 
     /// Git revision to lookup for a baseline
-    #[clap(
+    #[arg(
         long,
         value_name = "REV",
-        help_heading = "BASELINE",
+        help_heading = "Baseline",
         group = "baseline"
     )]
     baseline_rev: Option<String>,
 
     /// Directory containing baseline crate source
-    #[clap(
+    #[arg(
         long,
         value_name = "MANIFEST_ROOT",
-        help_heading = "BASELINE",
+        help_heading = "Baseline",
         group = "baseline"
     )]
     baseline_root: Option<PathBuf>,
 
     /// The rustdoc json file to use as a semver baseline.
-    #[clap(
+    #[arg(
         long,
         short_alias = 'b',
         alias = "baseline",
         value_name = "JSON_PATH",
-        help_heading = "BASELINE",
+        help_heading = "Baseline",
         group = "baseline"
     )]
     baseline_rustdoc: Option<PathBuf>,
 
-    #[clap(flatten)]
+    #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 }
 
