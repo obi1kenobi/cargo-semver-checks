@@ -30,16 +30,20 @@ and file location that are the cause of the problem, as well as a link
 to the implementation of that query in the current version of the tool.
 
 Notes:
-- If using it on a massive codebase (multiple hundreds of thousands of lines of Rust),
-  the queries may be a bit slow: there is some `O(n^2)` scaling for `n` items in a few places that
-  I haven't had time to optimize down to `O(n)` yet. Apologies! I have temporarily prioritized
-  features over speed, and the runtime will improve significantly with a small amount of extra work.
 - **No false positives**: Currently, all queries report constructive proof of semver violations:
   there are no false positives. They always list a file name and line number for the baseline item
   that could not be found in the new code.
 - **There are false negatives**: This tool is a work-in-progress, and cannot check all kinds of
   semver violations yet. Just because it doesn't find any semver issues doesn't mean
   they don't exist.
+- **Support for most recent stable and beta Rust**: Different Rust compiler versions
+  produce different rustdoc format versions. The most recent `cargo-semver-checks` always
+  supports the most recent Rust stable and beta versions. It *may* also support some nightly
+  versions, without guarantees and on a *best effort* basis.
+- If running on a massive codebase (hundreds of thousands of lines of Rust),
+  the queries may be a bit slow: there is some `O(n^2)` scaling for `n` items in a few places that
+  I haven't had time to optimize down to `O(n)` yet. Apologies! I have temporarily prioritized
+  features over speed, and the runtime will improve significantly with a small amount of extra work.
 
 ## FAQ
 
