@@ -70,17 +70,18 @@ impl RustDocCommand {
         };
 
         let mut cmd = std::process::Command::new("cargo");
-        cmd.env(
-            "RUSTDOCFLAGS",
-            "-Z unstable-options --document-hidden-items --output-format=json",
-        )
-        .stdout(std::process::Stdio::null()) // Don't pollute output
-        .stderr(stderr)
-        .args(["+nightly", "doc", "--all-features"])
-        .arg("--manifest-path")
-        .arg(manifest_path)
-        .arg("--target-dir")
-        .arg(target_dir);
+        cmd.env("RUSTC_BOOTSTRAP", "1")
+            .env(
+                "RUSTDOCFLAGS",
+                "-Z unstable-options --document-hidden-items --output-format=json",
+            )
+            .stdout(std::process::Stdio::null()) // Don't pollute output
+            .stderr(stderr)
+            .args(["doc", "--all-features"])
+            .arg("--manifest-path")
+            .arg(manifest_path)
+            .arg("--target-dir")
+            .arg(target_dir);
         if let Some(pkg_spec) = pkg_spec {
             cmd.arg("--package").arg(pkg_spec);
         }
