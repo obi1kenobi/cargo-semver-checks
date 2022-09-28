@@ -1,11 +1,9 @@
 #![forbid(unsafe_code)]
 
-pub mod adapter;
 mod baseline;
 mod check_release;
 mod config;
 mod dump;
-pub mod indexed_crate;
 mod manifest;
 mod query;
 mod templating;
@@ -14,10 +12,9 @@ mod util;
 use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
+use trustfall_rustdoc::load_rustdoc;
 
-use crate::{check_release::run_check_release, util::load_rustdoc_from_file};
-use config::GlobalConfig;
-use util::slugify;
+use crate::{check_release::run_check_release, config::GlobalConfig, util::slugify};
 
 fn main() -> anyhow::Result<()> {
     human_panic::setup_panic!();
@@ -175,8 +172,8 @@ fn main() -> anyhow::Result<()> {
             };
             let mut success = true;
             for (crate_name, baseline_path, current_path) in rustdoc_paths {
-                let baseline_crate = load_rustdoc_from_file(&baseline_path)?;
-                let current_crate = load_rustdoc_from_file(&current_path)?;
+                let baseline_crate = load_rustdoc(&baseline_path)?;
+                let current_crate = load_rustdoc(&current_path)?;
 
                 if !run_check_release(&mut config, &crate_name, current_crate, baseline_crate)? {
                     success = false;
