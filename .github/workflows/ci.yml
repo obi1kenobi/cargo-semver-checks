@@ -64,6 +64,14 @@ jobs:
   rust-tests:
     name: Run tests
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      matrix:
+        toolchain: ["stable", "beta"]
+        experimental: [false]
+        include:
+          - toolchain: "nightly"
+            experimental: true
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -73,7 +81,7 @@ jobs:
       - name: Install rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: ${{ matrix.toolchain }}
           profile: minimal
 
       - name: Regenerate test data
@@ -160,10 +168,10 @@ jobs:
         with:
           persist-credentials: false
 
-      # - name: Check semver
-      #   uses: obi1kenobi/cargo-semver-checks-action@v1
-      #   with:
-      #     # cargo-semver-checks currently doesn't have a --lib target,
-      #     # so we explicitly ask for the binary target to be checked instead.
-      #     # For library crates, you almost always want the default `--lib` value here.
-      #     crate-target: --bin cargo-semver-checks
+      - name: Check semver
+        uses: obi1kenobi/cargo-semver-checks-action@v1
+        with:
+          # cargo-semver-checks currently doesn't have a --lib target,
+          # so we explicitly ask for the binary target to be checked instead.
+          # For library crates, you almost always want the default `--lib` value here.
+          crate-target: --bin cargo-semver-checks
