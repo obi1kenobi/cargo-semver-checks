@@ -65,7 +65,9 @@ It uses a datasource-agnostic query engine called
 [Trustfall](https://github.com/obi1kenobi/trustfall) to allow writing semver checks as
 [declarative strongly-typed queries](https://twitter.com/PredragGruevski/status/1550135974499438592)
 over a
-[schema](https://github.com/obi1kenobi/cargo-semver-check/blob/main/src/rustdoc_schema.graphql).
+[schema](https://github.com/obi1kenobi/trustfall-rustdoc-adapter/blob/main/src/rustdoc_schema.graphql).
+A query playground, including example queries, [is available here](https://play.predr.ag/rustdoc).
+
 Adding a new semver check is as simple as adding a new file that specifies the query to run and
 metadata like the error message to display in case the query finds any results (errors).
 
@@ -104,6 +106,8 @@ to check into git. It has to be generated locally before `cargo test` will succe
 and will be saved in a `localdata` gitignored directory in the repo root.
 
 To generate this data, please run `./scripts/regenerate_test_rustdocs.sh`.
+To use a specific toolchain, like beta or nightly, pass it as
+an argument: `./scripts/regenerate_test_rustdocs.sh +nightly`.
 
 ## Adding a new lint
 
@@ -126,7 +130,7 @@ Checklist:
 - Add the outputs you expect your query to produce over your test case in
   a new file: `src/test_data/<query_name>.output.run`.
 - Add `<query_name>` to the list of queries tested by the `query_execution_tests!()`
-  macro near the bottom of `src/adapter.rs`.
+  macro near the bottom of `src/query.rs`.
 - Re-run `./scripts/regenerate_test_rustdocs.sh` to generate the new rustdoc JSON file.
 - Run `cargo test` and ensure your new test appears in the test list and runs correctly.
 - Add an `include_str!("queries/<query_name>.ron"),` line to `SemverQuery::all_queries()`
