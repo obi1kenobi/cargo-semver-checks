@@ -29,23 +29,36 @@ or other reference pages, as appropriate. It also includes the item name
 and file location that are the cause of the problem, as well as a link
 to the implementation of that query in the current version of the tool.
 
-Notes:
-- **No false positives**: Currently, all queries report constructive proof of semver violations:
-  there are no false positives. They always list a file name and line number for the baseline item
-  that could not be found in the new code.
-- **There are false negatives**: This tool is a work-in-progress, and cannot check all kinds of
-  semver violations yet. Just because it doesn't find any semver issues doesn't mean
-  they don't exist.
-- **Support for most recent stable and beta Rust**: Different Rust compiler versions
-  produce different rustdoc format versions. The most recent `cargo-semver-checks` always
-  supports the most recent Rust stable and beta versions. It *may* also support some nightly
-  versions, without guarantees and on a *best effort* basis.
-- If running on a massive codebase (hundreds of thousands of lines of Rust),
-  the queries may be a bit slow: there is some `O(n^2)` scaling for `n` items in a few places that
-  I haven't had time to optimize down to `O(n)` yet. Apologies! I have temporarily prioritized
-  features over speed, and the runtime will improve significantly with a small amount of extra work.
-
 ## FAQ
+
+### What Rust versions does `cargo-semver-checks` support?
+
+`cargo-semver-checks` uses the rustdoc tool to analyze the crate's API.
+Rustdoc's JSON output format isn't stable, and can have breaking changes in new Rust versions.
+
+When each `cargo-semver-checks` version is released, it will at minimum include support
+for the then-current stable and beta Rust versions. It may, but is not guaranteed to,
+additionally support some nightly Rust versions.
+
+[The GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action) uses
+the most recent versions of both `cargo-semver-checks` and stable Rust,
+so it should be unaffected. Users using `cargo-semver-checks` in other ways
+are encouraged to update `cargo-semver-checks` when updating Rust versions
+to ensure continued compatibility.
+
+### Does `cargo-semver-checks` have false positives or false negatives?
+
+"False positive" means that `cargo-semver-checks` reported a semver violation incorrectly.
+This should never happen, and is considered a bug.
+
+"False negative" means that `cargo-semver-checks` failed to report a semver violation.
+There are many ways to break semver, and `cargo-semver-checks`
+[doesn't yet have lints for all of them](https://github.com/obi1kenobi/cargo-semver-check/issues/5).
+We offer mentorship for
+[contributing new lints](https://github.com/obi1kenobi/cargo-semver-check/issues?q=is%3Aopen+is%3Aissue+label%3AA-lint+label%3AE-help-wanted).
+Please check out
+[Contributing](https://github.com/obi1kenobi/cargo-semver-check/blob/main/CONTRIBUTING.md)
+for details.
 
 ### Why `cargo-semver-checks` instead of ...?
 
@@ -78,6 +91,16 @@ Also, generally speaking, inspecting JSON data is likely going to be faster than
 like `cargo-semver-checks`, but focuses more on API diffing (showing which
 items has changed) and not API linting (explaining why they have changed and
 providing control over what counts).
+
+### Why is scanning massive crates slow?
+
+Crates that are ~100,000+ lines of Rust may currently experience scan times
+of a several minutes due to some missing optimizations.
+
+For implementation convenience, there's some `O(n^2)` scaling for `n` items in a few places.
+If your crate is negatively affected by this,
+[please let us know](https://github.com/obi1kenobi/cargo-semver-check/issues/new?assignees=&labels=C-bug&template=bug_report.yml)
+so we can best prioritize optimization versus feature work.
 
 ### Why is it sometimes `cargo-semver-check` and `cargo-semver-checks`?
 
