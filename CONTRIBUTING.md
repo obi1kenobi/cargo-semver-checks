@@ -65,7 +65,8 @@ It uses a datasource-agnostic query engine called
 [Trustfall](https://github.com/obi1kenobi/trustfall) to allow writing semver checks as
 [declarative strongly-typed queries](https://twitter.com/PredragGruevski/status/1550135974499438592)
 over a
-[schema](https://github.com/obi1kenobi/trustfall-rustdoc-adapter/blob/main/src/rustdoc_schema.graphql). A query playground, including example queries, [is available here](https://play.predr.ag/rustdoc).
+[schema](https://github.com/obi1kenobi/trustfall-rustdoc-adapter/blob/main/src/rustdoc_schema.graphql).
+A query playground, including example queries, [is available here](https://play.predr.ag/rustdoc).
 
 Adding a new semver check is as simple as adding a new file that specifies the query to run and
 metadata like the error message to display in case the query finds any results (errors).
@@ -104,7 +105,9 @@ Testing this crate requires rustdoc JSON output data, which is too large and var
 to check into git. It has to be generated locally before `cargo test` will succeed,
 and will be saved in a `localdata` gitignored directory in the repo root.
 
-To generate this data, please run `./scripts/regenerate_test_rustdocs.sh`. To use a specific toolchain, like beta or nightly, pass it as an argument: `./scripts/regenerate_test_rustdocs.sh +nightly`.
+To generate this data, please run `./scripts/regenerate_test_rustdocs.sh`.
+To use a specific toolchain, like beta or nightly, pass it as
+an argument: `./scripts/regenerate_test_rustdocs.sh +nightly`.
 
 ## Adding a new lint
 
