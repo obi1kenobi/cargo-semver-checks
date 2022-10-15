@@ -266,7 +266,7 @@ path = 'lib.rs'
 
         config.shell_status(
             "Parsing",
-            format_args!("{} {} (baseline)", name, base_version),
+            format_args!("{} v{} (baseline)", name, base_version),
         )?;
         let rustdoc_path = rustdoc.dump(
             manifest_path.as_path(),
