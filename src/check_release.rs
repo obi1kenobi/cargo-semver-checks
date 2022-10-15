@@ -129,7 +129,7 @@ pub(super) fn run_check_release(
             config.shell_status(
                 "Starting",
                 format_args!(
-                    "{} checks, {} skipped",
+                    "{} checks, {} skipped (allowed by version change)",
                     queries_to_run.len(),
                     skipped_queries
                 ),
