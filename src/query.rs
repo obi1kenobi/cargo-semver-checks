@@ -272,6 +272,7 @@ mod tests {
     query_execution_tests!(
         auto_trait_impl_removed,
         derive_trait_impl_removed,
+        enum_marked_non_exhaustive,
         enum_missing,
         enum_repr_c_removed,
         enum_repr_int_changed,

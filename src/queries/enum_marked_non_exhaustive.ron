@@ -1,0 +1,57 @@
+SemverQuery(
+    id: "enum_marked_non_exhaustive",
+    human_readable_name: "enum marked #[non_exhaustive]",
+    description: "An exhaustive enum has been marked #[non_exhaustive].",
+    reference: Some("An exhaustive enum has been marked #[non_exhaustive], making any pattern-matching on it outside of its crate impossible until it includes a wildcard pattern like `_`."),
+    required_update: Major,
+
+    // TODO: Change the reference link once this cargo docs PR merges:
+    // https://github.com/rust-lang/cargo/pull/10877
+    //
+    // Change to this link:
+    // https://doc.rust-lang.org/cargo/reference/semver.html#attr-adding-non-exhaustive
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
+
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "non_exhaustive": "#[non_exhaustive]",
+    },
+    error_message: "A public enum has been marked #[non_exhaustive], which will make any pattern-matching on it outside of its crate impossible until it includes a wildcard pattern like `_`.",
+    per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)

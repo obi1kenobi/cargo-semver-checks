@@ -1,5 +1,5 @@
-//! Adding `non_exhaustive` to a struct or enum variant is breaking because those items
-//! cannot be constructed outside of their defining crate:
+//! Adding `non_exhaustive` to a struct, enum or enum variant is breaking because
+//! those items cannot be constructed outside of their defining crate:
 //!
 //! """
 /// Non-exhaustive types cannot be constructed outside of the defining crate:
@@ -78,4 +78,17 @@ pub enum MyEnum {
 
     #[non_exhaustive]
     StructVariant { a: u64 },
+}
+
+#[cfg(not(feature = "enum_marked_non_exhaustive"))]
+pub enum SimpleEnum {
+    Foo,
+    Bar,
+}
+
+#[cfg(feature = "enum_marked_non_exhaustive")]
+#[non_exhaustive]
+pub enum SimpleEnum {
+    Foo,
+    Bar,
 }
