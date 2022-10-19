@@ -1,6 +1,6 @@
 SemverQuery(
     id: "enum_structvariant_field_missing",
-    human_readable_name: "pub enum structvariant's field removed or renamed" 
+    human_readable_name: "pub enum structvariant's field removed or renamed" ,
     description: "An enum variant that is a struct has a field that is no longer available under its prior name.",
     required_update: Major,
     reference_link: None,
