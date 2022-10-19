@@ -78,6 +78,7 @@ impl SemverQuery {
         let query_text_contents = [
             include_str!("./queries/auto_trait_impl_removed.ron"),
             include_str!("./queries/derive_trait_impl_removed.ron"),
+            include_str!("./queries/enum_marked_non_exhaustive.ron"),
             include_str!("./queries/enum_missing.ron"),
             include_str!("./queries/enum_repr_c_removed.ron"),
             include_str!("./queries/enum_repr_int_changed.ron"),
