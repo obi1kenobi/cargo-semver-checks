@@ -6,7 +6,7 @@
             String("semver_tests"),
             String("test_cases"),
             String("enum_structvariant_field_missing"),
-            String("FieldWillBeRemoved"),
+            String("Enum"),
         ]),
         "field_name": String("bar"),
         "span_filename": String("src/test_cases/enum_structvariant_field_missing.rs"),
