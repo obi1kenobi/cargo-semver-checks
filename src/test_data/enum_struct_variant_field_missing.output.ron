@@ -5,11 +5,11 @@
         "path": List([
             String("semver_tests"),
             String("test_cases"),
-            String("enum_structvariant_field_missing"),
+            String("enum_struct_variant_field_missing"),
             String("Enum"),
         ]),
         "field_name": String("bar"),
-        "span_filename": String("src/test_cases/enum_structvariant_field_missing.rs"),
+        "span_filename": String("src/test_cases/enum_struct_variant_field_missing.rs"),
         "span_begin_line": Uint64(7),
     }
 ]

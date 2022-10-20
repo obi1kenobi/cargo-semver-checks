@@ -5,7 +5,7 @@ pub mod enum_repr_int_changed;
 pub mod enum_repr_int_removed;
 pub mod enum_variant_added;
 pub mod enum_variant_missing;
-pub mod enum_structvariant_field_missing;
+pub mod enum_struct_variant_field_missing;
 pub mod item_missing;
 pub mod non_exhaustive;
 pub mod sized_impl_removed;
