@@ -1,9 +1,9 @@
 SemverQuery(
     id: "enum_struct_variant_field_missing",
     human_readable_name: "pub enum struct variant's field removed or renamed" ,
-    description: "An enum variant that is a struct has a field that is no longer available under its prior name.",
+    description: "An enum's struct variant has a field that is no longer available under its prior name.",
     required_update: Major,
-    reference_link: None,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
     {
         CrateDiff {
@@ -61,6 +61,6 @@ SemverQuery(
         "public": "public",
         "zero": 0,
     },
-    error_message: "A publicly-visible enum has at least one variant that has a field that is no longer available under its prior name. It may have been renamed or removed entirely.",
+    error_message: "A publicly-visible enum has a struct variant whose field is no longer available under its prior name. It may have been renamed or removed entirely.",
     per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
 )
