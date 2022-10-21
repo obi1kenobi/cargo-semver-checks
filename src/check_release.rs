@@ -129,7 +129,7 @@ pub(super) fn run_check_release(
             config.shell_status(
                 "Starting",
                 format_args!(
-                    "{} checks, {} skipped",
+                    "{} checks, {} unnecessary",
                     queries_to_run.len(),
                     skipped_queries
                 ),
@@ -226,7 +226,7 @@ pub(super) fn run_check_release(
             .shell_print(
                 "Completed",
                 format_args!(
-                    "[{:>8.3}s] {} checks; {} passed, {} failed, {} skipped",
+                    "[{:>8.3}s] {} checks; {} passed, {} failed, {} unnecessary",
                     total_duration.as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len() - queries_with_errors.len(),
@@ -355,7 +355,7 @@ pub(super) fn run_check_release(
             .shell_print(
                 "Completed",
                 format_args!(
-                    "[{:>8.3}s] {} checks; {} passed, {} skipped",
+                    "[{:>8.3}s] {} checks; {} passed, {} unnecessary",
                     total_duration.as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len(),
