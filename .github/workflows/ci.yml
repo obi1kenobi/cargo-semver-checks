@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -62,25 +64,28 @@ jobs:
   rust-tests:
     name: Run tests
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      matrix:
+        toolchain: ["stable", "beta"]
+        experimental: [false]
+        include:
+          - toolchain: "nightly"
+            experimental: true
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
-      - name: Install nightly rust to run rustdoc
+      - name: Install rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: ${{ matrix.toolchain }}
           profile: minimal
 
       - name: Regenerate test data
         run: ./scripts/regenerate_test_rustdocs.sh
-
-      - name: Install stable rust for tests
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
 
       - uses: actions/cache@v2
         with:
@@ -109,6 +114,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: true
 
       - name: Tag the version
         run: |
@@ -130,6 +137,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - id: check
         run: |
@@ -156,6 +165,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Check semver
         uses: obi1kenobi/cargo-semver-checks-action@v1

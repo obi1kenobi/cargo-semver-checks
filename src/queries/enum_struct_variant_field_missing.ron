@@ -1,0 +1,66 @@
+SemverQuery(
+    id: "enum_struct_variant_field_missing",
+    human_readable_name: "pub enum struct variant's field removed or renamed" ,
+    description: "An enum's struct variant has a field that is no longer available under its prior name.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        enum_name: name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        variant {
+                            ... on StructVariant {
+                                variant_name: name @output @tag
+
+                                field {
+                                    field_name: name @output @tag
+                                    span_: span @optional {
+                                        filename @output
+                                        begin_line @output
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%enum_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        variant {
+                            ... on StructVariant {
+                                name @filter(op: "=", value: ["%variant_name"])
+                                
+                                field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                    name @filter(op: "=", value: ["%field_name"])
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A publicly-visible enum has a struct variant whose field is no longer available under its prior name. It may have been renamed or removed entirely.",
+    per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+)

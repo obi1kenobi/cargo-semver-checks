@@ -39,16 +39,6 @@ impl RustDocCommand {
         manifest_path: &std::path::Path,
         pkg_spec: Option<&str>,
     ) -> anyhow::Result<std::path::PathBuf> {
-        let crate_name = if let Some(pkg_spec) = pkg_spec {
-            pkg_spec
-                .split_once('@')
-                .map(|s| s.0)
-                .unwrap_or(pkg_spec)
-                .to_owned()
-        } else {
-            crate::manifest::get_package_name(manifest_path)?
-        };
-
         let metadata = cargo_metadata::MetadataCommand::new()
             .manifest_path(manifest_path)
             .no_deps()
@@ -70,17 +60,18 @@ impl RustDocCommand {
         };
 
         let mut cmd = std::process::Command::new("cargo");
-        cmd.env(
-            "RUSTDOCFLAGS",
-            "-Z unstable-options --document-hidden-items --output-format=json",
-        )
-        .stdout(std::process::Stdio::null()) // Don't pollute output
-        .stderr(stderr)
-        .args(["+nightly", "doc", "--all-features"])
-        .arg("--manifest-path")
-        .arg(manifest_path)
-        .arg("--target-dir")
-        .arg(target_dir);
+        cmd.env("RUSTC_BOOTSTRAP", "1")
+            .env(
+                "RUSTDOCFLAGS",
+                "-Z unstable-options --document-hidden-items --output-format=json",
+            )
+            .stdout(std::process::Stdio::null()) // Don't pollute output
+            .stderr(stderr)
+            .args(["doc", "--all-features"])
+            .arg("--manifest-path")
+            .arg(manifest_path)
+            .arg("--target-dir")
+            .arg(target_dir);
         if let Some(pkg_spec) = pkg_spec {
             cmd.arg("--package").arg(pkg_spec);
         }
@@ -103,14 +94,34 @@ impl RustDocCommand {
             }
         }
 
-        let json_path = target_dir.join(format!("doc/{}.json", crate_name.replace('-', "_")));
+        let manifest = crate::manifest::Manifest::parse(manifest_path)?;
+
+        let lib_target_name = crate::manifest::get_lib_target_name(&manifest)?;
+        let json_path = target_dir.join(format!("doc/{}.json", lib_target_name));
+        if json_path.exists() {
+            return Ok(json_path);
+        }
+
+        let first_bin_target_name = crate::manifest::get_first_bin_target_name(&manifest)?;
+        let json_path = target_dir.join(format!("doc/{}.json", first_bin_target_name));
         if !json_path.exists() {
+            let crate_name = if let Some(pkg_spec) = pkg_spec {
+                pkg_spec
+                    .split_once('@')
+                    .map(|s| s.0)
+                    .unwrap_or(pkg_spec)
+                    .to_owned()
+            } else {
+                crate::manifest::get_package_name(&manifest)?
+            };
+
             anyhow::bail!(
                 "Could not find expected rustdoc output for `{}`: {}",
                 crate_name,
                 json_path.display()
             );
         }
+
         Ok(json_path)
     }
 }
@@ -118,5 +129,40 @@ impl RustDocCommand {
 impl Default for RustDocCommand {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+
+    use super::RustDocCommand;
+
+    #[test]
+    fn rustdoc_for_lib_crate_without_lib_section() {
+        RustDocCommand::default()
+            .dump(Path::new("./rustdoc_tests/implicit_lib/Cargo.toml"), None)
+            .expect("no errors");
+    }
+
+    #[test]
+    fn rustdoc_for_lib_crate_with_lib_section() {
+        RustDocCommand::default()
+            .dump(Path::new("./rustdoc_tests/renamed_lib/Cargo.toml"), None)
+            .expect("no errors");
+    }
+
+    #[test]
+    fn rustdoc_for_bin_crate_without_bin_section() {
+        RustDocCommand::default()
+            .dump(Path::new("./rustdoc_tests/implicit_bin/Cargo.toml"), None)
+            .expect("no errors");
+    }
+
+    #[test]
+    fn rustdoc_for_bin_crate_with_bin_section() {
+        RustDocCommand::default()
+            .dump(Path::new("./rustdoc_tests/renamed_bin/Cargo.toml"), None)
+            .expect("no errors");
     }
 }

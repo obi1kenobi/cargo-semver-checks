@@ -1,8 +1,8 @@
 SemverQuery(
-    id: "variant_marked_non_exhaustive",
-    human_readable_name: "enum variant marked #[non_exhaustive]",
-    description: "An exhaustive enum variant has been marked #[non_exhaustive].",
-    reference: Some("An exhaustive enum variant has been marked #[non_exhaustive], preventing it from being constructed using a literal from outside its own crate."),
+    id: "enum_marked_non_exhaustive",
+    human_readable_name: "enum marked #[non_exhaustive]",
+    description: "An exhaustive enum has been marked #[non_exhaustive].",
+    reference: Some("An exhaustive enum has been marked #[non_exhaustive]. Pattern-matching on it outside of its crate must now include a wildcard pattern like `_`, or it will fail to compile."),
     required_update: Major,
 
     // TODO: Change the reference link once this cargo docs PR merges:
@@ -14,41 +14,34 @@ SemverQuery(
     query: r#"
     {
         CrateDiff {
-            baseline {
+            current {
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @output @tag
 
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
+
                         importable_path {
                             path @output @tag
                         }
 
-                        variant {
-                            variant_name: name @output @tag
-                            attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
                         }
                     }
                 }
             }
-            current {
+            baseline {
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%name"])
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
-                        }
-
-                        variant {
-                            name @filter(op: "=", value: ["%variant_name"])
-                            attrs @filter(op: "contains", value: ["$non_exhaustive"])
-
-                            span_: span @optional {
-                                filename @output
-                                begin_line @output
-                            }
                         }
                     }
                 }
@@ -59,6 +52,6 @@ SemverQuery(
         "public": "public",
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A public enum's variant has been marked #[non_exhaustive], which will prevent it from being constructed using a literal outside of its crate.",
-    per_result_error_template: Some("variant {{name}}:{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A public enum has been marked #[non_exhaustive]. Pattern-matching on it outside of its crate must now include a wildcard pattern like `_`, or it will fail to compile.",
+    per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )

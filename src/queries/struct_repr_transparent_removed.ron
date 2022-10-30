@@ -1,7 +1,8 @@
 SemverQuery(
     id: "struct_repr_transparent_removed",
     human_readable_name: "struct repr(transparent) removed",
-    description: r#"
+    description: "A struct is no longer repr(transparent).",
+    reference: Some(r#"
 repr(transparent) was removed from a struct. This can cause its memory layout to change,
 breaking FFI use cases.
 
@@ -23,7 +24,7 @@ To avoid false-positives, this query is restricted to checking only structs that
 - are repr(transparent);
 - have exactly one field that isn't PhantomData, and
 - that one field is public.
-"#,
+"#),
     required_update: Major,
 
     // TODO: Change the reference link to point to the cargo semver reference

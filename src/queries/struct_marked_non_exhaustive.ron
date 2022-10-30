@@ -1,7 +1,8 @@
 SemverQuery(
     id: "struct_marked_non_exhaustive",
     human_readable_name: "struct marked #[non_exhaustive]",
-    description: "A publicly-visible struct has been marked #[non_exhaustive], but it was previously constructible using a struct literal outside its crate. The #[non_exhaustive] attribute disables that, so this is a major breaking change for code that depends on it.",
+    description: "An exhaustive struct has been marked #[non_exhaustive].",
+    reference: Some("An exhaustive struct has been marked #[non_exhaustive] making it no longer constructible using a struct literal outside its crate."),
     required_update: Major,
 
     // TODO: Change the reference link once this cargo docs PR merges:
