@@ -60,6 +60,31 @@ Please check out
 [Contributing](https://github.com/obi1kenobi/cargo-semver-check/blob/main/CONTRIBUTING.md)
 for details.
 
+### Does the crate I'm checking have to be published on crates.io?
+
+When checking semver, `cargo-semver-checks` by default looks up the previous version of the crate
+on crates.io and uses it to generate the baseline against which it will compare the current version.
+
+`cargo-semver-checks` has flags specifying other ways to generate a baseline as well:
+```
+--baseline-version <X.Y.Z>
+    Version from registry to lookup for a baseline
+
+--baseline-rev <REV>
+    Git revision to lookup for a baseline
+
+--baseline-root <MANIFEST_ROOT>
+    Directory containing baseline crate source
+
+--baseline-rustdoc <JSON_PATH>
+    The rustdoc json file to use as a semver baseline
+```
+
+If your crate is not published on crates.io, you can still use `cargo-semver-checks`!
+Looking up the baseline version from the registry won't work (custom registries are not
+currently supported: [#160](https://github.com/obi1kenobi/cargo-semver-check/issues/160)),
+but you can still use any other other ways of generating the semver baseline.
+
 ### Why `cargo-semver-checks` instead of ...?
 
 [rust semverver](https://github.com/rust-lang/rust-semverver) builds on top of
