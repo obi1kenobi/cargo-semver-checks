@@ -47,7 +47,9 @@ impl PathBaseline {
         for result in ignore::Walk::new(root) {
             let entry = result?;
             if entry.file_name() == "Cargo.toml" {
-                if let Ok(name) = crate::manifest::get_package_name(entry.path()) {
+                if let Ok(name) = crate::manifest::Manifest::parse(entry.path())
+                    .and_then(|manifest| crate::manifest::get_package_name(&manifest))
+                {
                     lookup.insert(name, entry.into_path());
                 }
             }
