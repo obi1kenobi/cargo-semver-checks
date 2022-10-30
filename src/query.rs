@@ -9,6 +9,15 @@ pub(crate) enum RequiredSemverUpdate {
     Minor,
 }
 
+impl RequiredSemverUpdate {
+    pub(crate) fn as_str(&self) -> &'static str {
+        match self {
+            Self::Major => "major",
+            Self::Minor => "minor",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum ActualSemverUpdate {
     Major,
@@ -41,6 +50,9 @@ pub(crate) struct SemverQuery {
     pub(crate) required_update: RequiredSemverUpdate,
 
     #[serde(default)]
+    pub(crate) reference: Option<String>,
+
+    #[serde(default)]
     pub(crate) reference_link: Option<String>,
 
     pub(crate) query: String,
@@ -66,12 +78,14 @@ impl SemverQuery {
         let query_text_contents = [
             include_str!("./queries/auto_trait_impl_removed.ron"),
             include_str!("./queries/derive_trait_impl_removed.ron"),
+            include_str!("./queries/enum_marked_non_exhaustive.ron"),
             include_str!("./queries/enum_missing.ron"),
             include_str!("./queries/enum_repr_c_removed.ron"),
             include_str!("./queries/enum_repr_int_changed.ron"),
             include_str!("./queries/enum_repr_int_removed.ron"),
             include_str!("./queries/enum_variant_added.ron"),
             include_str!("./queries/enum_variant_missing.ron"),
+            include_str!("./queries/enum_struct_variant_field_missing.ron"),
             include_str!("./queries/function_missing.ron"),
             include_str!("./queries/inherent_method_missing.ron"),
             include_str!("./queries/sized_impl_removed.ron"),
@@ -84,7 +98,16 @@ impl SemverQuery {
             include_str!("./queries/variant_marked_non_exhaustive.ron"),
         ];
         for query_text in query_text_contents {
-            let query: SemverQuery = ron::from_str(query_text).expect("query failed to parse");
+            let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
+                panic!(
+                    "\
+Failed to parse a query: {}
+```ron
+{}
+```",
+                    e, query_text
+                );
+            });
             let id_conflict = queries.insert(query.id.clone(), query);
             assert!(id_conflict.is_none(), "{:?}", id_conflict);
         }
@@ -95,17 +118,179 @@ impl SemverQuery {
 
 #[cfg(test)]
 mod tests {
-    use trustfall_core::frontend::parse;
+    use std::{collections::BTreeMap, path::Path};
 
-    use crate::adapter::RustdocAdapter;
+    use anyhow::Context;
+    use trustfall_core::{frontend::parse, ir::FieldValue};
+    use trustfall_rustdoc::{load_rustdoc, VersionedIndexedCrate, VersionedRustdocAdapter};
 
-    use super::SemverQuery;
+    use crate::query::SemverQuery;
 
     #[test]
     fn all_queries_parse_correctly() {
-        let schema = RustdocAdapter::schema();
+        let current_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
+            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
+            .expect("failed to load baseline rustdoc");
+        let indexed_crate = VersionedIndexedCrate::new(&current_crate);
+        let adapter =
+            VersionedRustdocAdapter::new(&indexed_crate, None).expect("failed to create adapter");
+
+        let schema = adapter.schema();
         for semver_query in SemverQuery::all_queries().into_values() {
-            let _ = parse(&schema, &semver_query.query).expect("not a valid query");
+            let _ = parse(schema, &semver_query.query).expect("not a valid query");
         }
     }
+
+    #[test]
+    fn pub_use_handling() {
+        let current_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
+            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
+            .expect("failed to load baseline rustdoc");
+
+        let current = VersionedIndexedCrate::new(&current_crate);
+
+        let query = r#"
+            {
+                Crate {
+                    item {
+                        ... on Struct {
+                            name @filter(op: "=", value: ["$struct"])
+
+                            canonical_path {
+                                canonical_path: path @output
+                            }
+
+                            importable_path @fold {
+                                path @output
+                            }
+                        }
+                    }
+                }
+            }"#;
+        let mut arguments = BTreeMap::new();
+        arguments.insert("struct", "CheckPubUseHandling");
+
+        let adapter =
+            VersionedRustdocAdapter::new(&current, None).expect("could not create adapter");
+
+        let results_iter = adapter
+            .run_query(query, arguments)
+            .expect("failed to run query");
+        let actual_results: Vec<BTreeMap<_, _>> = results_iter
+            .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+            .collect();
+
+        let expected_result: FieldValue = vec![
+            "semver_tests",
+            "import_handling",
+            "inner",
+            "CheckPubUseHandling",
+        ]
+        .into();
+        assert_eq!(1, actual_results.len(), "{actual_results:?}");
+        assert_eq!(
+            expected_result, actual_results[0]["canonical_path"],
+            "{actual_results:?}"
+        );
+
+        let mut actual_paths = actual_results[0]["path"]
+            .as_vec(|val| val.as_vec(FieldValue::as_str))
+            .expect("not a Vec<Vec<&str>>");
+        actual_paths.sort_unstable();
+
+        let expected_paths = vec![
+            vec!["semver_tests", "CheckPubUseHandling"],
+            vec!["semver_tests", "import_handling", "CheckPubUseHandling"],
+            vec![
+                "semver_tests",
+                "import_handling",
+                "inner",
+                "CheckPubUseHandling",
+            ],
+        ];
+        assert_eq!(expected_paths, actual_paths);
+    }
+
+    fn check_query_execution(query_name: &str) {
+        // Ensure the rustdocs JSON outputs have been regenerated.
+        let baseline_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
+            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
+            .expect("failed to load baseline rustdoc");
+        let current_crate =
+            load_rustdoc(Path::new(&format!("./localdata/test_data/{}.json", query_name)))
+            .with_context(|| format!("Could not load localdata/test_data/{}.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?", query_name))
+            .expect("failed to load rustdoc under test");
+
+        let baseline = VersionedIndexedCrate::new(&baseline_crate);
+        let current = VersionedIndexedCrate::new(&current_crate);
+
+        let query_text =
+            std::fs::read_to_string(&format!("./src/queries/{}.ron", query_name)).unwrap();
+        let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
+
+        let expected_result_text =
+            std::fs::read_to_string(&format!("./src/test_data/{}.output.ron", query_name))
+            .with_context(|| format!("Could not load src/test_data/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
+            .expect("failed to load expected outputs");
+        let mut expected_results: Vec<BTreeMap<String, FieldValue>> =
+            ron::from_str(&expected_result_text)
+                .expect("could not parse expected outputs as ron format");
+
+        let adapter = VersionedRustdocAdapter::new(&current, Some(&baseline))
+            .expect("could not create adapter");
+        let results_iter = adapter
+            .run_query(&semver_query.query, semver_query.arguments.clone())
+            .unwrap();
+
+        let mut actual_results: Vec<BTreeMap<_, _>> = results_iter
+            .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+            .collect();
+
+        // Reorder both vectors of results into a deterministic order that will compensate for
+        // nondeterminism in how the results are ordered.
+        let key_func = |elem: &BTreeMap<String, FieldValue>| {
+            (
+                elem["span_filename"].as_str().unwrap().to_owned(),
+                elem["span_begin_line"].as_usize().unwrap(),
+            )
+        };
+        expected_results.sort_unstable_by_key(key_func);
+        actual_results.sort_unstable_by_key(key_func);
+
+        assert_eq!(expected_results, actual_results);
+    }
+
+    macro_rules! query_execution_tests {
+        ($($name:ident,)*) => {
+            $(
+                #[test]
+                fn $name() {
+                    check_query_execution(stringify!($name))
+                }
+            )*
+        }
+    }
+
+    query_execution_tests!(
+        auto_trait_impl_removed,
+        derive_trait_impl_removed,
+        enum_marked_non_exhaustive,
+        enum_missing,
+        enum_repr_c_removed,
+        enum_repr_int_changed,
+        enum_repr_int_removed,
+        enum_variant_added,
+        enum_variant_missing,
+        enum_struct_variant_field_missing,
+        function_missing,
+        inherent_method_missing,
+        sized_impl_removed,
+        struct_marked_non_exhaustive,
+        struct_missing,
+        struct_pub_field_missing,
+        struct_repr_c_removed,
+        struct_repr_transparent_removed,
+        unit_struct_changed_kind,
+        variant_marked_non_exhaustive,
+    );
 }

@@ -1,7 +1,7 @@
 SemverQuery(
     id: "struct_missing",
     human_readable_name: "pub struct removed or renamed",
-    description: "A publicly-visible struct can no longer be imported by its prior path, which is a major breaking change for code that depends on it.",
+    description: "A struct can no longer be imported by its prior path.",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"

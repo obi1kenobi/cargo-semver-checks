@@ -47,7 +47,9 @@ impl PathBaseline {
         for result in ignore::Walk::new(root) {
             let entry = result?;
             if entry.file_name() == "Cargo.toml" {
-                if let Ok(name) = crate::manifest::get_package_name(entry.path()) {
+                if let Ok(name) = crate::manifest::Manifest::parse(entry.path())
+                    .and_then(|manifest| crate::manifest::get_package_name(&manifest))
+                {
                     lookup.insert(name, entry.into_path());
                 }
             }
@@ -214,7 +216,9 @@ impl BaselineLoader for RegistryBaseline {
                 .versions()
                 .iter()
                 .filter_map(|i| semver::Version::parse(i.version()).ok())
-                .filter(|v| v < current)
+                // For unpublished changes when the user doesn't increment the version
+                // post-release, allow using the current version as a baseline.
+                .filter(|v| v <= current)
                 .collect::<Vec<_>>();
             instances.sort();
             let instance = instances
@@ -222,7 +226,9 @@ impl BaselineLoader for RegistryBaseline {
                 .rev()
                 .find(|v| v.pre.is_empty())
                 .or_else(|| instances.last())
-                .with_context(|| anyhow::format_err!("No published versions for {}", name))?;
+                .with_context(|| {
+                    anyhow::format_err!("No available baseline versions for {}@{}", name, current)
+                })?;
             instance.to_string()
         } else {
             let instance = crate_
@@ -262,7 +268,7 @@ path = 'lib.rs'
 
         config.shell_status(
             "Parsing",
-            format_args!("{} {} (baseline)", name, base_version),
+            format_args!("{} v{} (baseline)", name, base_version),
         )?;
         let rustdoc_path = rustdoc.dump(
             manifest_path.as_path(),

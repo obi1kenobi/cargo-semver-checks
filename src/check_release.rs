@@ -1,23 +1,13 @@
-use std::{
-    cell::RefCell, collections::BTreeMap, env, io::Write, iter::Peekable, rc::Rc, sync::Arc,
-    time::Duration,
-};
+use std::{collections::BTreeMap, env, io::Write, iter::Peekable, sync::Arc, time::Duration};
 
 use anyhow::Context;
 use clap::crate_version;
-use rustdoc_types::Crate;
 use termcolor::Color;
 use termcolor_output::{colored, colored_ln};
-use trustfall_core::{
-    frontend::parse,
-    interpreter::execution::interpret_ir,
-    ir::{FieldValue, TransparentValue},
-    schema::Schema,
-};
+use trustfall_core::ir::{FieldValue, TransparentValue};
+use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
 use crate::{
-    adapter::RustdocAdapter,
-    indexed_crate::IndexedCrate,
     query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
     GlobalConfig,
 };
@@ -87,35 +77,14 @@ fn classify_semver_version_change(
     }
 }
 
-fn make_result_iter<'a>(
-    schema: &Schema,
-    adapter: Rc<RefCell<RustdocAdapter<'a>>>,
-    semver_query: &SemverQuery,
-) -> anyhow::Result<Peekable<Box<dyn Iterator<Item = QueryResultItem> + 'a>>> {
-    let parsed_query = parse(schema, &semver_query.query)
-        .expect("not a valid query, should have been caught in tests");
-    let args = Arc::new(
-        semver_query
-            .arguments
-            .iter()
-            .map(|(k, v)| (Arc::from(k.clone()), v.clone().into()))
-            .collect(),
-    );
-    let results_iter = interpret_ir(adapter.clone(), parsed_query, args)
-        .with_context(|| "Query execution error.")?
-        .peekable();
-
-    Ok(results_iter)
-}
-
 pub(super) fn run_check_release(
     config: &mut GlobalConfig,
     crate_name: &str,
-    current_crate: Crate,
-    baseline_crate: Crate,
+    current_crate: VersionedCrate,
+    baseline_crate: VersionedCrate,
 ) -> anyhow::Result<bool> {
-    let current_version = current_crate.crate_version.as_deref();
-    let baseline_version = baseline_crate.crate_version.as_deref();
+    let current_version = current_crate.crate_version();
+    let baseline_version = baseline_crate.crate_version();
 
     let version_change = classify_semver_version_change(current_version, baseline_version)
         .unwrap_or_else(|| {
@@ -135,10 +104,9 @@ pub(super) fn run_check_release(
 
     let queries = SemverQuery::all_queries();
 
-    let schema = RustdocAdapter::schema();
-    let current = IndexedCrate::new(&current_crate);
-    let previous = IndexedCrate::new(&baseline_crate);
-    let adapter = Rc::new(RefCell::new(RustdocAdapter::new(&current, Some(&previous))));
+    let current = VersionedIndexedCrate::new(&current_crate);
+    let previous = VersionedIndexedCrate::new(&baseline_crate);
+    let adapter = VersionedRustdocAdapter::new(&current, Some(&previous))?;
     let mut queries_with_errors: Vec<QueryWithResults> = vec![];
 
     let queries_to_run: Vec<_> = queries
@@ -161,7 +129,7 @@ pub(super) fn run_check_release(
             config.shell_status(
                 "Starting",
                 format_args!(
-                    "{} checks, {} skipped",
+                    "{} checks, {} unnecessary",
                     queries_to_run.len(),
                     skipped_queries
                 ),
@@ -196,7 +164,9 @@ pub(super) fn run_check_release(
             .expect("print failed");
 
         let start_instant = std::time::Instant::now();
-        let mut results_iter = make_result_iter(&schema, adapter.clone(), semver_query)?;
+        let mut results_iter = adapter
+            .run_query(&semver_query.query, semver_query.arguments.clone())?
+            .peekable();
         let peeked = results_iter.peek();
         let end_instant = std::time::Instant::now();
         let time_to_decide = end_instant - start_instant;
@@ -256,7 +226,7 @@ pub(super) fn run_check_release(
             .shell_print(
                 "Completed",
                 format_args!(
-                    "[{:>8.3}s] {} checks; {} passed, {} failed, {} skipped",
+                    "[{:>8.3}s] {} checks; {} passed, {} failed, {} unnecessary",
                     total_duration.as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len() - queries_with_errors.len(),
@@ -385,7 +355,7 @@ pub(super) fn run_check_release(
             .shell_print(
                 "Completed",
                 format_args!(
-                    "[{:>8.3}s] {} checks; {} passed, {} skipped",
+                    "[{:>8.3}s] {} checks; {} passed, {} unnecessary",
                     total_duration.as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len(),
