@@ -62,10 +62,12 @@ for details.
 
 ### Does the crate I'm checking have to be published on crates.io?
 
-When checking semver, `cargo-semver-checks` by default looks up the previous version of the crate
-on crates.io and uses it to generate the baseline against which it will compare the current version.
+No, it does not have to be published anywhere. You'll just need to use a flag to help
+`cargo-semver-checks` locate the version to use as a baseline for semver-checking.
 
-`cargo-semver-checks` has flags specifying other ways to generate a baseline as well:
+By default, `cargo-semver-checks` uses crates.io to look up the previous version of the crate,
+which is used as the baseline for semver-checking the current version of the crate.
+The following flags can be used to explicitly specify a baseline instead:
 ```
 --baseline-version <X.Y.Z>
     Version from registry to lookup for a baseline
@@ -80,10 +82,9 @@ on crates.io and uses it to generate the baseline against which it will compare 
     The rustdoc json file to use as a semver baseline
 ```
 
-If your crate is not published on crates.io, you can still use `cargo-semver-checks`!
-Looking up the baseline version from the registry won't work (custom registries are not
-currently supported: [#160](https://github.com/obi1kenobi/cargo-semver-check/issues/160)),
-but you can still use any other other ways of generating the semver baseline.
+Custom registries are not currently supported
+([#160](https://github.com/obi1kenobi/cargo-semver-check/issues/160)), so crates published on
+registries other than crates.io should use one of the other approaches of generating the baseline.
 
 ### Why `cargo-semver-checks` instead of ...?
 
