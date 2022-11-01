@@ -26,11 +26,7 @@ fn main() -> anyhow::Result<()> {
             .info(SoftwareVersion::default())
             .info(OperatingSystem::default())
             .info(CommandLine::default())
-            .info(CommandOutput::new(
-                "cargo nightly version",
-                "cargo",
-                &["+nightly", "-V"],
-            ))
+            .info(CommandOutput::new("cargo version", "cargo", &["-V"]))
             .info(CompileTimeInformation::default())
             .print::<Markdown>();
         std::process::exit(0);
