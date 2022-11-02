@@ -1,0 +1,25 @@
+SemverQuery(
+    id: "function_parameter_count_changed",
+    human_readable_name: "TODO",
+    description: "TODO",
+    required_update: Major,
+    reference_link: Some("TODO"),
+    query: r#"
+    {
+        Crate {
+            item {
+                ... on Function {
+                    name @output
+
+                    parameters @fold {
+                        parameter_name: name @output
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+    },
+    error_message: "TODO",
+    per_result_error_template: Some("TODO"),
+)
