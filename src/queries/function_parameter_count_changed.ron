@@ -6,19 +6,44 @@ SemverQuery(
     reference_link: Some("TODO"),
     query: r#"
     {
-        Crate {
-            item {
-                ... on Function {
-                    name @output
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
 
-                    parameters @fold {
-                        parameter_name: name @output
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        parameters @fold @transform(op: "count") @output @tag
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        parameters @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
                     }
                 }
             }
         }
     }"#,
     arguments: {
+        "public": "public",
     },
     error_message: "TODO",
     per_result_error_template: Some("TODO"),
