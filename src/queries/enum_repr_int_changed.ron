@@ -18,7 +18,7 @@ SemverQuery(
                         name @tag @output
 
                         attribute {
-                            # as_string @output(name: "old_attr")
+                            as_string @output(name: "old_attr")
                             content {
                                 base @filter(op: "=", value: ["$repr"])
                                 argument {
@@ -49,7 +49,7 @@ SemverQuery(
                         # - but is not the same repr(i*) or repr(u*) that we had before.
                         # This is the breaking change.
                         attribute @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
-                            # as_string @output(name: "new_attr")
+                            as_string @output(name: "new_attr")
                             content {
                                 base @filter(op: "=", value: ["$repr"])
                                 argument {
