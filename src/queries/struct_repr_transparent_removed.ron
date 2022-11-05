@@ -38,7 +38,15 @@ To avoid false-positives, this query is restricted to checking only structs that
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @tag @output
-                        attrs @filter(op: "contains", value: ["$repr_transparent"])
+                        
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$transparent"])
+                                }
+                            }
+                        }
 
                         # To avoid false-positives (as described above), we check two things:
                         # - this struct has a total of one field that isn't PhantomData
@@ -83,7 +91,15 @@ To avoid false-positives, this query is restricted to checking only structs that
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%name"])
-                        attrs @filter(op: "not_contains", value: ["$repr_transparent"])
+                        
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$transparent"])
+                                }
+                            }
+                        }
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -100,7 +116,8 @@ To avoid false-positives, this query is restricted to checking only structs that
     }"#,
     arguments: {
         "public": "public",
-        "repr_transparent": "#[repr(transparent)]",
+        "repr": "repr",
+        "transparent": "transparent",
         "phantom_data": ["core::marker::PhantomData", "std::marker::PhantomData"],
         "one": 1,
         "zero": 0,
