@@ -10,5 +10,17 @@
         "span_filename": String("src/test_cases/enum_repr_c_removed.rs"),
         "span_begin_line": Uint64(8),
         "visibility_limit": String("public"),
+    },
+    {
+        "name": String("ComplexRemovedReprEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("enum_repr_c_removed"),
+            String("ComplexRemovedReprEnum"),
+        ]),
+        "span_filename": String("src/test_cases/enum_repr_c_removed.rs"),
+        "span_begin_line": Uint64(33),
+        "visibility_limit": String("public"),
     }
 ]

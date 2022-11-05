@@ -62,5 +62,37 @@
             String("#[repr(usize)]"),
         ]),
         "visibility_limit": String("public"),
+    },
+    {
+        "name": String("U8ToU16CEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("enum_repr_int_changed"),
+            String("U8ToU16CEnum"),
+        ]),
+        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
+        "span_begin_line": Uint64(66),
+        "old_attr": String("#[repr(u8, C)]"),
+        "new_attr": List([
+            String("#[repr(u16, C)]"),
+        ]),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("SeparateU8ToU16CEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("enum_repr_int_changed"),
+            String("SeparateU8ToU16CEnum"),
+        ]),
+        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
+        "span_begin_line": Uint64(81),
+        "old_attr": String("#[repr(u8, C)]"),
+        "new_attr": List([
+            String("#[repr(u16)]"),
+        ]),
+        "visibility_limit": String("public"),
     }
 ]

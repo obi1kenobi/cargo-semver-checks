@@ -54,6 +54,50 @@ pub enum IsizeToUsizeEnum {
     Baz,
 }
 
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(u8, C)]
+pub enum U8ToU16CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(u16, C)]
+pub enum U8ToU16CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(u8, C)]
+pub enum SeparateU8ToU16CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(u16)]
+#[repr(C)]
+pub enum SeparateU8ToU16CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(u8)]
+#[repr(C)]
+pub enum SeparateU8ToU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(u8, C)]
+pub enum SeparateU8ToU8CEnum {
+    Bar,
+    Baz,
+}
+
 // The following enums have *removals* of repr(i*) and repr(u*),
 // not changes to another repr(i*) or repr(u*).
 // They should not be reported by this rule, because they have their own rule.
@@ -106,6 +150,21 @@ pub enum UsizeEnum {
 
 #[cfg(feature = "enum_repr_int_changed")]
 pub enum UsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(u8)]
+#[repr(C)]
+pub enum SeparateU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(C)]
+pub enum SeparateU8CEnum {
     Bar,
     Baz,
 }

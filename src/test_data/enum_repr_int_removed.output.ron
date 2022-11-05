@@ -46,5 +46,29 @@
         "span_filename": String("src/test_cases/enum_repr_int_removed.rs"),
         "span_begin_line": Uint64(48),
         "visibility_limit": String("public"),
+    },
+    {
+        "name": String("U8CEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("enum_repr_int_removed"),
+            String("U8CEnum"),
+        ]),
+        "span_filename": String("src/test_cases/enum_repr_int_removed.rs"),
+        "span_begin_line": Uint64(62),
+        "visibility_limit": String("public"),
+    },
+    {
+        "name": String("SeparateU8CEnum"),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("enum_repr_int_removed"),
+            String("SeparateU8CEnum"),
+        ]),
+        "span_filename": String("src/test_cases/enum_repr_int_removed.rs"),
+        "span_begin_line": Uint64(77),
+        "visibility_limit": String("public"),
     }
 ]

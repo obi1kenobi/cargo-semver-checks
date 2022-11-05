@@ -49,3 +49,47 @@ pub enum UsizeEnum {
     Bar,
     Baz,
 }
+
+#[cfg(not(feature = "enum_repr_int_removed"))]
+#[repr(u8, C)]
+pub enum U8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_removed")]
+#[repr(C)]
+pub enum U8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_removed"))]
+#[repr(u8)]
+#[repr(C)]
+pub enum SeparateU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_removed")]
+#[repr(C)]
+pub enum SeparateU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_removed"))]
+#[repr(u8)]
+#[repr(C)]
+pub enum SeparateU8ToU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_removed")]
+#[repr(u8, C)]
+pub enum SeparateU8ToU8CEnum {
+    Bar,
+    Baz,
+}
