@@ -114,6 +114,18 @@ pub struct WithGeneric {
     _marker: std::marker::PhantomData<&'static usize>,
 }
 
+#[cfg(not(feature = "struct_repr_transparent_removed"))]
+#[repr(transparent)]
+pub struct BothTransparent {
+    pub bar: usize,
+}
+
+#[cfg(feature = "struct_repr_transparent_removed")]
+#[repr(transparent, )]
+pub struct BothTransparent {
+    pub bar: usize,
+}
+
 // Per https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent
 // `repr(transparent)` is only part of the public ABI if the single non-zero-sized field
 // within the struct is public. In the following structs, the field is not public,
