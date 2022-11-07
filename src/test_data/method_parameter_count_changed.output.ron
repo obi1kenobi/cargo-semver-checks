@@ -1,0 +1,32 @@
+[
+    {
+        "method_name": String("method_with_a_parameter_added"),
+        "method_visibility": String("public"),
+        "name": String("StructWithMethods"), 
+        "parameterscount": Uint64(0), 
+        "path": List([
+            String("semver_tests"), 
+            String("test_cases"), 
+            String("parameter_count_changed"), 
+            String("StructWithMethods")
+        ]), 
+        "span_begin_line": Uint64(17), 
+        "span_filename": String("src/test_cases/parameter_count_changed.rs"), 
+        "visibility_limit": String("public")
+    },
+    {
+        "method_name": String("method_with_a_parameter_removed"),
+        "method_visibility": String("public"),
+        "name": String("StructWithMethods"),
+        "parameterscount": Uint64(3),
+        "path": List(
+            String("semver_tests"),
+            String("test_cases"),
+            String("parameter_count_changed"),
+            String("StructWithMethods"
+        ]),
+        "span_begin_line": Uint64(23),
+        "span_filename": String("src/test_cases/parameter_count_changed.rs"),
+        "visibility_limit": String("public")
+    }
+]

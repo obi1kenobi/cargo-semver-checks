@@ -1,0 +1,68 @@
+SemverQuery(
+    id: "method_parameter_count_changed",
+    human_readable_name: "pub method parameter count changed",
+    description: "Parameter count of a method has changed.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#fn-change-arity"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        inherent_impl {
+                            method {
+                                method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
+                                method_name: name @output @tag
+
+                                parameters @fold @transform(op: "count") @output @tag(name: "parameters")
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        # We use "impl" instead of "inherent_impl" here because moving
+                        # an inherently-implemented method to a trait is not necessarily
+                        # a breaking change, so we don't want to report it.
+                        impl {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                
+                                parameters @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "public_or_default": ["public", "default"],
+    },
+    error_message: "Parameter count of a publicly-visible method has changed.",
+    per_result_error_template: Some("method {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+)

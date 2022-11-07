@@ -1,9 +1,9 @@
 SemverQuery(
     id: "function_parameter_count_changed",
-    human_readable_name: "TODO",
-    description: "TODO",
+    human_readable_name: "pub fn parameter count changed",
+    description: "Parameter count of a function has changed.",
     required_update: Major,
-    reference_link: Some("TODO"),
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#fn-change-arity"),
     query: r#"
     {
         CrateDiff {
@@ -45,6 +45,6 @@ SemverQuery(
     arguments: {
         "public": "public",
     },
-    error_message: "TODO",
-    per_result_error_template: Some("TODO"),
+    error_message: "Parameter count of a publicly-visible function has changed.",
+    per_result_error_template: Some("function {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
 )

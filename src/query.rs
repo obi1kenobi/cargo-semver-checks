@@ -89,6 +89,7 @@ impl SemverQuery {
             include_str!("./queries/function_missing.ron"),
             include_str!("./queries/function_parameter_count_changed.ron"),
             include_str!("./queries/inherent_method_missing.ron"),
+            include_str!("./queries/method_parameter_count_changed.ron"),
             include_str!("./queries/sized_impl_removed.ron"),
             include_str!("./queries/struct_marked_non_exhaustive.ron"),
             include_str!("./queries/struct_missing.ron"),
@@ -247,6 +248,8 @@ mod tests {
             .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
             .collect();
 
+        println!("results: {:?}", actual_results);
+
         // Reorder both vectors of results into a deterministic order that will compensate for
         // nondeterminism in how the results are ordered.
         let key_func = |elem: &BTreeMap<String, FieldValue>| {
@@ -286,6 +289,7 @@ mod tests {
         function_missing,
         function_parameter_count_changed,
         inherent_method_missing,
+        method_parameter_count_changed,
         sized_impl_removed,
         struct_marked_non_exhaustive,
         struct_missing,
