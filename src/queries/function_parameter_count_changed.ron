@@ -17,7 +17,7 @@ SemverQuery(
                             path @output @tag
                         }
 
-                        parameters @fold @transform(op: "count") @output @tag
+                        parameters @fold @transform(op: "count") @output @tag(name: "parameters")
 
                         span_: span @optional {
                             filename @output
