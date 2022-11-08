@@ -248,8 +248,6 @@ mod tests {
             .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
             .collect();
 
-        println!("results: {:?}", actual_results);
-
         // Reorder both vectors of results into a deterministic order that will compensate for
         // nondeterminism in how the results are ordered.
         let key_func = |elem: &BTreeMap<String, FieldValue>| {
