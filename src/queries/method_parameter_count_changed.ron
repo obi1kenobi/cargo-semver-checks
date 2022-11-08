@@ -22,12 +22,7 @@ SemverQuery(
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @output @tag
 
-                                parameters @fold @transform(op: "count") @output @tag(name: "parameters")
-
-                                span_: span @optional {
-                                    filename @output
-                                    begin_line @output
-                                }
+                                old_parameter_: parameters @fold @transform(op: "count") @output @tag(name: "parameters")
                             }
                         }
                     }
@@ -45,13 +40,18 @@ SemverQuery(
 
                         # We use "impl" instead of "inherent_impl" here because moving
                         # an inherently-implemented method to a trait is not necessarily
-                        # a breaking change, so we don't want to report it.
+                        # a breaking change, but changing the parameter count is
                         impl {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 
-                                parameters @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"])
+                                current_parameter_: parameters @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"])
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
                             }
                         }
                     }
@@ -64,5 +64,5 @@ SemverQuery(
         "public_or_default": ["public", "default"],
     },
     error_message: "Parameter count of a publicly-visible method has changed.",
-    per_result_error_template: Some("method {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("parameter count of method {{join \"::\" path}} changed from {{old_parameter_count}} to {{current_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
 )

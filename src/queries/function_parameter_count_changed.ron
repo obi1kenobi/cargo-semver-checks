@@ -17,12 +17,7 @@ SemverQuery(
                             path @output @tag
                         }
 
-                        parameters @fold @transform(op: "count") @output @tag(name: "parameters")
-
-                        span_: span @optional {
-                            filename @output
-                            begin_line @output
-                        }
+                        old_parameter_: parameters @fold @transform(op: "count") @output @tag(name: "parameters")
                     }
                 }
             }
@@ -32,10 +27,15 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%name"])
 
-                        parameters @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"])
+                        current_parameter_: parameters @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"]) @output
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
                         }
                     }
                 }
@@ -46,5 +46,5 @@ SemverQuery(
         "public": "public",
     },
     error_message: "Parameter count of a publicly-visible function has changed.",
-    per_result_error_template: Some("function {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("parameter count of function {{join \"::\" path}} changed from {{old_parameter_count}} to {{current_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
 )
