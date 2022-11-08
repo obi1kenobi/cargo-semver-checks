@@ -236,6 +236,17 @@ impl BaselineLoader for RegistryBaseline {
                 .unwrap_or_else(|| crate_.highest_version());
             instance.version().to_owned()
         };
+        let crate_baseline = crate_
+            .versions()
+            .iter()
+            .find(|v| v.version() == base_version)
+            .with_context(|| {
+                anyhow::format_err!(
+                    "Version {} of crate {} not found in registry",
+                    name,
+                    base_version
+                )
+            })?;
 
         let base_root = self.target_root.join(format!(
             "registry-{}-{}",
@@ -244,25 +255,54 @@ impl BaselineLoader for RegistryBaseline {
         ));
         std::fs::create_dir_all(&base_root)?;
         let manifest_path = base_root.join("Cargo.toml");
+
+        let manifest = {
+            use cargo_toml::*;
+            // tonowak to obi1kenobi: is there an easy way of using cargo_toml::*, but without
+            // bringing it to the scope of the whole function? With those nested let I've managed
+            // to not pollute the scope, but it seems stupid.
+
+            let manifest = Manifest::<()> {
+                package: {
+                    let mut package = Package::new("rustdoc", "0.0.0");
+                    package.publish = Inheritable::Set(Publish::Flag(false));
+                    Some(package)
+                },
+                workspace: Some(Workspace::<()>::default()),
+                lib: {
+                    let product = Product {
+                        path: Some("lib.rs".to_string()),
+                        ..Product::default()
+                    };
+                    Some(product)
+                },
+                dependencies: {
+                    let project_with_features = DependencyDetail {
+                        version: Some(base_version.clone()),
+                        // adding features fixes:
+                        // https://github.com/obi1kenobi/cargo-semver-check/issues/147
+                        features: crate_baseline
+                            .features()
+                            .iter()
+                            .map(|(key, _values)| key.clone())
+                            .collect(),
+                        ..DependencyDetail::default()
+                    };
+                    let mut deps = DepsSet::new();
+                    deps.insert(
+                        name.to_string(),
+                        Dependency::Detailed(project_with_features),
+                    );
+                    deps
+                },
+                ..Default::default()
+            };
+            manifest
+        };
         std::fs::write(
             &manifest_path,
-            format!(
-                "
-[workspace]
-
-[package]
-name = 'rustdoc'
-version = '0.0.0'
-publish = false
-
-[lib]
-path = 'lib.rs'
-
-[dependencies]
-{} = '={}'
-",
-                name, base_version
-            ),
+            toml::to_string(&manifest)?.replace("edition = \"2021\"", ""),
+            // tonowak to obi1kenobi: do you know why this replace is necessary?
         )?;
         std::fs::write(base_root.join("lib.rs"), "")?;
 
