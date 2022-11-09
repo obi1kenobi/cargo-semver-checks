@@ -125,7 +125,9 @@ impl RustDocCommand {
                 .unwrap_or(pkg_spec)
                 .to_owned();
 
-            let json_path = target_dir.join(format!("doc/{}.json", crate_name));
+            // N.B.: Crates named like `foo-bar` have rustdoc JSON named like `foo_bar.json`.
+            let crate_name_with_underscores = crate_name.replace('-', "_");
+            let json_path = target_dir.join(format!("doc/{}.json", crate_name_with_underscores));
             if json_path.exists() {
                 Ok(json_path)
             } else {
