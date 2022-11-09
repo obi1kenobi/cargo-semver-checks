@@ -10,3 +10,6 @@
 
 # local-only data
 localdata/
+
+# Editor-local configuration
+.vscode/
