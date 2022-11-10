@@ -22,7 +22,7 @@ SemverQuery(
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @output @tag
 
-                                old_parameter_: parameters @fold @transform(op: "count") @output @tag(name: "parameters")
+                                old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters")
                             }
                         }
                     }
@@ -46,7 +46,7 @@ SemverQuery(
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 
-                                current_parameter_: parameters @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"])
+                                current_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"])
 
                                 span_: span @optional {
                                     filename @output
