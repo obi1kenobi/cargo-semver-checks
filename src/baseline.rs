@@ -306,8 +306,7 @@ impl BaselineLoader for RegistryBaseline {
 
         std::fs::write(
             &manifest_path,
-            toml::to_string(&create_rustdoc_manifest_for_crate_version(crate_baseline))?
-                // .replace("edition = \"2021\"", ""),
+            toml::to_string(&create_rustdoc_manifest_for_crate_version(crate_baseline))?,
         )?;
         std::fs::write(base_root.join("lib.rs"), "")?;
 

@@ -190,28 +190,44 @@ mod tests {
     #[test]
     fn rustdoc_for_lib_crate_without_lib_section() {
         RustDocCommand::default()
-            .dump(Path::new("./rustdoc_tests/implicit_lib/Cargo.toml"), None, true)
+            .dump(
+                Path::new("./rustdoc_tests/implicit_lib/Cargo.toml"),
+                None,
+                true,
+            )
             .expect("no errors");
     }
 
     #[test]
     fn rustdoc_for_lib_crate_with_lib_section() {
         RustDocCommand::default()
-            .dump(Path::new("./rustdoc_tests/renamed_lib/Cargo.toml"), None, true)
+            .dump(
+                Path::new("./rustdoc_tests/renamed_lib/Cargo.toml"),
+                None,
+                true,
+            )
             .expect("no errors");
     }
 
     #[test]
     fn rustdoc_for_bin_crate_without_bin_section() {
         RustDocCommand::default()
-            .dump(Path::new("./rustdoc_tests/implicit_bin/Cargo.toml"), None, true)
+            .dump(
+                Path::new("./rustdoc_tests/implicit_bin/Cargo.toml"),
+                None,
+                true,
+            )
             .expect("no errors");
     }
 
     #[test]
     fn rustdoc_for_bin_crate_with_bin_section() {
         RustDocCommand::default()
-            .dump(Path::new("./rustdoc_tests/renamed_bin/Cargo.toml"), None, true)
+            .dump(
+                Path::new("./rustdoc_tests/renamed_bin/Cargo.toml"),
+                None,
+                true,
+            )
             .expect("no errors");
     }
 }
