@@ -193,8 +193,8 @@ impl RegistryBaseline {
         self.version = Some(version);
     }
 
-    // To get the rustdoc of the baseline, we first somewhere create a dummy project
-    // with the baseline as a dependency and on in we launch `cargo rustdoc`.
+    /// To get the rustdoc of the baseline, we first create a placeholder project somewhere
+    /// with the baseline as a dependency, and run `cargo rustdoc` on it.
     fn create_manifest_for_rustdoc(
         &self,
         crate_baseline: &crates_index::Version,
