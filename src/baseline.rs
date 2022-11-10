@@ -301,6 +301,9 @@ impl BaselineLoader for RegistryBaseline {
                 )
             })?;
 
+        // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
+        let _: std::io::Result<()> = std::fs::remove_file(base_root.join("Cargo.lock"));
+
         std::fs::write(
             &manifest_path,
             toml::to_string(&create_rustdoc_manifest_for_crate_version(crate_baseline))?
