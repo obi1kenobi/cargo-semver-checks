@@ -192,50 +192,49 @@ impl RegistryBaseline {
     pub fn set_version(&mut self, version: semver::Version) {
         self.version = Some(version);
     }
+}
 
-    /// To get the rustdoc of the baseline, we first create a placeholder project somewhere
-    /// with the baseline as a dependency, and run `cargo rustdoc` on it.
-    fn create_manifest_for_rustdoc(
-        &self,
-        crate_baseline: &crates_index::Version,
-    ) -> cargo_toml::Manifest<()> {
-        use cargo_toml::*;
+/// To get the rustdoc of the baseline, we first create a placeholder project somewhere
+/// with the baseline as a dependency, and run `cargo rustdoc` on it.
+fn create_rustdoc_manifest_for_crate_version(
+    crate_baseline: &crates_index::Version,
+) -> cargo_toml::Manifest<()> {
+    use cargo_toml::*;
 
-        Manifest::<()> {
-            package: {
-                let mut package = Package::new("rustdoc", "0.0.0");
-                package.publish = Inheritable::Set(Publish::Flag(false));
-                Some(package)
-            },
-            workspace: Some(Workspace::<()>::default()),
-            lib: {
-                let product = Product {
-                    path: Some("lib.rs".to_string()),
-                    ..Product::default()
-                };
-                Some(product)
-            },
-            dependencies: {
-                let project_with_features = DependencyDetail {
-                    version: Some(crate_baseline.version().to_string()),
-                    // adding features fixes:
-                    // https://github.com/obi1kenobi/cargo-semver-check/issues/147
-                    features: crate_baseline
-                        .features()
-                        .iter()
-                        .map(|(key, _values)| key.clone())
-                        .collect(),
-                    ..DependencyDetail::default()
-                };
-                let mut deps = DepsSet::new();
-                deps.insert(
-                    crate_baseline.name().to_string(),
-                    Dependency::Detailed(project_with_features),
-                );
-                deps
-            },
-            ..Default::default()
-        }
+    Manifest::<()> {
+        package: {
+            let mut package = Package::new("rustdoc", "0.0.0");
+            package.publish = Inheritable::Set(Publish::Flag(false));
+            Some(package)
+        },
+        workspace: Some(Workspace::<()>::default()),
+        lib: {
+            let product = Product {
+                path: Some("lib.rs".to_string()),
+                ..Product::default()
+            };
+            Some(product)
+        },
+        dependencies: {
+            let project_with_features = DependencyDetail {
+                version: Some(crate_baseline.version().to_string()),
+                // adding features fixes:
+                // https://github.com/obi1kenobi/cargo-semver-check/issues/147
+                features: crate_baseline
+                    .features()
+                    .iter()
+                    .map(|(key, _values)| key.clone())
+                    .collect(),
+                ..DependencyDetail::default()
+            };
+            let mut deps = DepsSet::new();
+            deps.insert(
+                crate_baseline.name().to_string(),
+                Dependency::Detailed(project_with_features),
+            );
+            deps
+        },
+        ..Default::default()
     }
 }
 
