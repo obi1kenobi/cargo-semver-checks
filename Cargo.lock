@@ -180,6 +180,7 @@ dependencies = [
  "atty",
  "bugreport",
  "cargo_metadata",
+ "cargo_toml",
  "clap",
  "clap-cargo",
  "clap-verbosity-flag",
@@ -196,7 +197,7 @@ dependencies = [
  "serde_json",
  "termcolor",
  "termcolor_output",
- "toml_edit",
+ "toml",
  "trustfall_core",
  "trustfall_rustdoc",
 ]
@@ -212,6 +213,16 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "cargo_toml"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aa0e3586af56b3bfa51fca452bd56e8dbbbd5d8d81cbf0b7e4e35b695b537eb8"
+dependencies = [
+ "serde",
+ "toml",
 ]
 
 [[package]]
@@ -301,16 +312,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d4198f73e42b4936b35b5bb248d81d2b595ecb170da0bac7655c54eedfa8da8"
 dependencies = [
  "os_str_bytes",
-]
-
-[[package]]
-name = "combine"
-version = "4.6.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35ed6e9d84f0b51a7f52daf1c7d71dd136fd7a3f41a8462b8cdb8c78d920fad4"
-dependencies = [
- "bytes",
- "memchr",
 ]
 
 [[package]]
@@ -1249,17 +1250,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8d82e1a7758622a465f8cee077614c73484dac5b836c02ff6a40d5d1010324d7"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "toml_edit"
-version = "0.14.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5376256e44f2443f8896ac012507c19a012df0fe8758b55246ae51a2279db51f"
-dependencies = [
- "combine",
- "indexmap",
- "itertools",
 ]
 
 [[package]]

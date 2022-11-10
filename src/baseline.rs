@@ -75,7 +75,7 @@ impl BaselineLoader for PathBaseline {
             .with_context(|| format!("package `{}` not found in {}", name, self.root.display()))?;
         let version = version.map(|v| format!(" v{}", v)).unwrap_or_default();
         config.shell_status("Parsing", format_args!("{}{} (baseline)", name, version))?;
-        let rustdoc_path = rustdoc.dump(manifest_path.as_path(), None)?;
+        let rustdoc_path = rustdoc.dump(manifest_path.as_path(), None, true)?;
         Ok(rustdoc_path)
     }
 }
@@ -194,6 +194,50 @@ impl RegistryBaseline {
     }
 }
 
+/// To get the rustdoc of the baseline, we first create a placeholder project somewhere
+/// with the baseline as a dependency, and run `cargo rustdoc` on it.
+fn create_rustdoc_manifest_for_crate_version(
+    crate_baseline: &crates_index::Version,
+) -> cargo_toml::Manifest<()> {
+    use cargo_toml::*;
+
+    Manifest::<()> {
+        package: {
+            let mut package = Package::new("rustdoc", "0.0.0");
+            package.publish = Inheritable::Set(Publish::Flag(false));
+            Some(package)
+        },
+        workspace: Some(Workspace::<()>::default()),
+        lib: {
+            let product = Product {
+                path: Some("lib.rs".to_string()),
+                ..Product::default()
+            };
+            Some(product)
+        },
+        dependencies: {
+            let project_with_features = DependencyDetail {
+                version: Some(crate_baseline.version().to_string()),
+                // adding features fixes:
+                // https://github.com/obi1kenobi/cargo-semver-check/issues/147
+                features: crate_baseline
+                    .features()
+                    .iter()
+                    .map(|(key, _values)| key.clone())
+                    .collect(),
+                ..DependencyDetail::default()
+            };
+            let mut deps = DepsSet::new();
+            deps.insert(
+                crate_baseline.name().to_string(),
+                Dependency::Detailed(project_with_features),
+            );
+            deps
+        },
+        ..Default::default()
+    }
+}
+
 impl BaselineLoader for RegistryBaseline {
     fn load_rustdoc(
         &self,
@@ -244,25 +288,25 @@ impl BaselineLoader for RegistryBaseline {
         ));
         std::fs::create_dir_all(&base_root)?;
         let manifest_path = base_root.join("Cargo.toml");
+
+        let crate_baseline = crate_
+            .versions()
+            .iter()
+            .find(|v| v.version() == base_version)
+            .with_context(|| {
+                anyhow::format_err!(
+                    "Version {} of crate {} not found in registry",
+                    name,
+                    base_version
+                )
+            })?;
+
+        // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
+        let _: std::io::Result<()> = std::fs::remove_file(base_root.join("Cargo.lock"));
+
         std::fs::write(
             &manifest_path,
-            format!(
-                "
-[workspace]
-
-[package]
-name = 'rustdoc'
-version = '0.0.0'
-publish = false
-
-[lib]
-path = 'lib.rs'
-
-[dependencies]
-{} = '={}'
-",
-                name, base_version
-            ),
+            toml::to_string(&create_rustdoc_manifest_for_crate_version(crate_baseline))?,
         )?;
         std::fs::write(base_root.join("lib.rs"), "")?;
 
@@ -273,6 +317,7 @@ path = 'lib.rs'
         let rustdoc_path = rustdoc.dump(
             manifest_path.as_path(),
             Some(&format!("{}@{}", name, base_version)),
+            false,
         )?;
         Ok(rustdoc_path)
     }

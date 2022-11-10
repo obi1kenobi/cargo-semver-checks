@@ -155,7 +155,7 @@ fn main() -> anyhow::Result<()> {
                         "Parsing",
                         format_args!("{} v{} (current)", crate_name, version),
                     )?;
-                    let rustdoc_path = rustdoc_cmd.dump(manifest_path, None)?;
+                    let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
                     let baseline_path = loader.load_rustdoc(
                         &mut config,
                         &rustdoc_cmd,

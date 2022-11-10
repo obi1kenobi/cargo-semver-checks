@@ -58,6 +58,7 @@ impl RustDocCommand {
         &self,
         manifest_path: &std::path::Path,
         pkg_spec: Option<&str>,
+        all_features: bool,
     ) -> anyhow::Result<std::path::PathBuf> {
         let metadata = cargo_metadata::MetadataCommand::new()
             .manifest_path(manifest_path)
@@ -87,7 +88,7 @@ impl RustDocCommand {
             )
             .stdout(std::process::Stdio::null()) // Don't pollute output
             .stderr(stderr)
-            .args(["doc", "--all-features"])
+            .arg("doc")
             .arg("--manifest-path")
             .arg(manifest_path)
             .arg("--target-dir")
@@ -97,6 +98,9 @@ impl RustDocCommand {
         }
         if !self.deps {
             cmd.arg("--no-deps");
+        }
+        if all_features {
+            cmd.arg("--all-features");
         }
         let output = cmd.output()?;
         if !output.status.success() {
@@ -186,28 +190,44 @@ mod tests {
     #[test]
     fn rustdoc_for_lib_crate_without_lib_section() {
         RustDocCommand::default()
-            .dump(Path::new("./rustdoc_tests/implicit_lib/Cargo.toml"), None)
+            .dump(
+                Path::new("./rustdoc_tests/implicit_lib/Cargo.toml"),
+                None,
+                true,
+            )
             .expect("no errors");
     }
 
     #[test]
     fn rustdoc_for_lib_crate_with_lib_section() {
         RustDocCommand::default()
-            .dump(Path::new("./rustdoc_tests/renamed_lib/Cargo.toml"), None)
+            .dump(
+                Path::new("./rustdoc_tests/renamed_lib/Cargo.toml"),
+                None,
+                true,
+            )
             .expect("no errors");
     }
 
     #[test]
     fn rustdoc_for_bin_crate_without_bin_section() {
         RustDocCommand::default()
-            .dump(Path::new("./rustdoc_tests/implicit_bin/Cargo.toml"), None)
+            .dump(
+                Path::new("./rustdoc_tests/implicit_bin/Cargo.toml"),
+                None,
+                true,
+            )
             .expect("no errors");
     }
 
     #[test]
     fn rustdoc_for_bin_crate_with_bin_section() {
         RustDocCommand::default()
-            .dump(Path::new("./rustdoc_tests/renamed_bin/Cargo.toml"), None)
+            .dump(
+                Path::new("./rustdoc_tests/renamed_bin/Cargo.toml"),
+                None,
+                true,
+            )
             .expect("no errors");
     }
 }
