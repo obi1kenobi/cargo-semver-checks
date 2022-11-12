@@ -13,3 +13,6 @@ localdata/
 
 # Editor-local configuration
 .vscode/
+
+# Cargo.lock, for easier development process
+Cargo.lock
