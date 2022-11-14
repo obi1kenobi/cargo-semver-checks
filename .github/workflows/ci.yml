@@ -102,6 +102,34 @@ jobs:
 
       - name: test
         run: cargo test
+  
+  run-on-crate:
+    name: Run cargo-semver-checks on rust-libp2p 0.49.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-check
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout rust-libp2p
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'libp2p/rust-libp2p'
+          ref: 'bcff814b92c76706a2df46098e3c8a61f29ef9fc'
+          path: 'crate'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          profile: minimal
+          override: true
+
+      - name: Run semver-checks
+        run: cargo run semver-checks check-release --manifest-path="crate/core/Cargo.toml"
 
   publish:
     name: Publish to crates.io
