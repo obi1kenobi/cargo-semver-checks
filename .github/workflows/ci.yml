@@ -128,6 +128,9 @@ jobs:
           profile: minimal
           override: true
 
+      - name: Install protobuf-compiler
+        run: sudo apt install protobuf-compiler
+
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="crate/core/Cargo.toml"
 
