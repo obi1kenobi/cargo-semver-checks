@@ -117,7 +117,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
-          ref: '3371d7ce'
+          ref: '3371d7ceab242440216ae9ab99829631fa418f3b'
           path: 'crate'
 
       - name: Install rust
