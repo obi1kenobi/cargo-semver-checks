@@ -1254,9 +1254,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "16.1.0"
+version = "16.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53354b9c0487150f1d145d35c2b3294a59979ee00b0f22b323c409caeeb98b77"
+checksum = "6f3767f430ac9d6256d8a6e99e050652b07be515d2e0c9b83835a03217a182c5"
 dependencies = [
  "rustdoc-types 0.12.0",
  "trustfall_core",
@@ -1264,9 +1264,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "21.1.0"
+version = "21.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed217444b9da56cd4d96b5327f43f9bc481fc9a595f946f395e63559469717de"
+checksum = "b889e784ac38ad441f7fea1c959093442e6ddbb343dfc61a0d3dbd11b0a56dca"
 dependencies = [
  "rustdoc-types 0.17.0",
  "trustfall_core",
@@ -1274,9 +1274,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "22.1.0"
+version = "22.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "380fd754bb31a6312cfc38c2e9be1a6491cee6dea56b0fda3ba620d48a579644"
+checksum = "eb06bb3f66f576dcbbcc389bbcf0982bb3f0da4eb330a0dcb086ce39ecb7f17e"
 dependencies = [
  "rustdoc-types 0.18.0",
  "trustfall_core",
@@ -1284,9 +1284,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall_core"
-version = "0.0.4"
+version = "0.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9cd142498d675fdc85c48c9f008a6774d6c50cba14c4b45fc2aa3bf83976e31a"
+checksum = "d7c60dc46ba3399b3a6a82fc3258989a8d906e2c8974e9b20e2c293c7616ac2f"
 dependencies = [
  "async-graphql-parser",
  "async-graphql-value",
@@ -1319,16 +1319,16 @@ dependencies = [
 
 [[package]]
 name = "trustfall_rustdoc"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "463bf9e5480639aa8824f5cf27474e2da94ac68eec8fcdc5007ebe1101eef56b"
+checksum = "f808309f2ae5a5e9d48dd1e0cfb95e8607dbd04810c06efd5424441e93f89017"
 dependencies = [
  "anyhow",
  "serde",
  "serde_json",
- "trustfall-rustdoc-adapter 16.1.0",
- "trustfall-rustdoc-adapter 21.1.0",
- "trustfall-rustdoc-adapter 22.1.0",
+ "trustfall-rustdoc-adapter 16.2.0",
+ "trustfall-rustdoc-adapter 21.2.0",
+ "trustfall-rustdoc-adapter 22.2.0",
  "trustfall_core",
 ]
 
