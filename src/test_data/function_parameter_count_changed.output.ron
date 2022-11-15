@@ -1,0 +1,30 @@
+[
+    {
+        "current_parameter_count": Uint64(2),
+        "name": String("function_with_a_parameter_added"),
+        "old_parameter_count": Uint64(1),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("parameter_count_changed"),
+            String("function_with_a_parameter_added")
+        ]),
+        "span_begin_line": Uint64(5),
+        "span_filename": String("src/test_cases/parameter_count_changed.rs"),
+        "visibility_limit": String("public")
+    },
+    {
+        "current_parameter_count": Uint64(0),
+        "name": String("function_with_parameters_removed"),
+        "old_parameter_count": Uint64(2),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("parameter_count_changed"),
+            String("function_with_parameters_removed")
+        ]),
+        "span_begin_line": Uint64(11),
+        "span_filename": String("src/test_cases/parameter_count_changed.rs"),
+        "visibility_limit": String("public")
+    }
+]

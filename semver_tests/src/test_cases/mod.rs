@@ -8,6 +8,7 @@ pub mod enum_variant_missing;
 pub mod enum_struct_variant_field_missing;
 pub mod item_missing;
 pub mod non_exhaustive;
+pub mod parameter_count_changed;
 pub mod sized_impl_removed;
 pub mod struct_pub_field_missing;
 pub mod struct_repr_c_removed;

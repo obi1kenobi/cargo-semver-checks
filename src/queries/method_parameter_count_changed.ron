@@ -1,0 +1,68 @@
+SemverQuery(
+    id: "method_parameter_count_changed",
+    human_readable_name: "pub method parameter count changed",
+    description: "Parameter count of a method has changed.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#fn-change-arity"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        inherent_impl {
+                            method {
+                                method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
+                                method_name: name @output @tag
+
+                                old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters")
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        # We use "impl" instead of "inherent_impl" here because moving
+                        # an inherently-implemented method to a trait is not necessarily
+                        # a breaking change, but changing the parameter count is
+                        impl {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                
+                                current_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"]) @output
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "public_or_default": ["public", "default"],
+    },
+    error_message: "A publicly-visible method now takes a different number of parameters.",
+    per_result_error_template: Some("{{join \"::\" path}} now takes {{current_parameter_count}} parameters instead of {{old_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
+)
