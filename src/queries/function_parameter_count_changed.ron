@@ -45,6 +45,6 @@ SemverQuery(
     arguments: {
         "public": "public",
     },
-    error_message: "Parameter count of a publicly-visible function has changed.",
-    per_result_error_template: Some("parameter count of function {{join \"::\" path}} changed from {{old_parameter_count}} to {{current_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A publicly-visible function now takes a different number of parameters.",
+    per_result_error_template: Some("{{join \"::\" path}} now takes {{current_parameter_count}} parameters instead of {{old_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
 )

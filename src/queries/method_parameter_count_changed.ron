@@ -46,7 +46,7 @@ SemverQuery(
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 
-                                current_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"])
+                                current_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"]) @output
 
                                 span_: span @optional {
                                     filename @output
@@ -63,6 +63,6 @@ SemverQuery(
         "public": "public",
         "public_or_default": ["public", "default"],
     },
-    error_message: "Parameter count of a publicly-visible method has changed.",
-    per_result_error_template: Some("parameter count of method {{join \"::\" path}} changed from {{old_parameter_count}} to {{current_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A publicly-visible method now takes a ddifferent number of parameters.",
+    per_result_error_template: Some("{{join \"::\" path}} now takes {{current_parameter_count}} parameters instead of {{old_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
 )
