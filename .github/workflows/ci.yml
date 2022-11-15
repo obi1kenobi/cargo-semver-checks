@@ -102,6 +102,42 @@ jobs:
 
       - name: test
         run: cargo test
+  
+  # Run cargo-semver-checks on a crate with no semver violations,
+  # to make sure there are no false-positives.
+  run-on-crate:
+    name: Run cargo-semver-checks on rust-libp2p 0.47.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      # In this particular version, a feature adds an enum variant.
+      # Reference: https://github.com/obi1kenobi/cargo-semver-check/issues/147
+      - name: Checkout rust-libp2p
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'libp2p/rust-libp2p'
+          ref: '3371d7ceab242440216ae9ab99829631fa418f3b'
+          path: 'crate'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          profile: minimal
+          override: true
+
+      # rust-libp2p requires protobuf-compiler.
+      - name: Install protobuf-compiler
+        run: sudo apt install protobuf-compiler
+
+      - name: Run semver-checks
+        run: cargo run semver-checks check-release --manifest-path="crate/core/Cargo.toml"
 
   publish:
     name: Publish to crates.io
