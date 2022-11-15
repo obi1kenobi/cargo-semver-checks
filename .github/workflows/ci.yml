@@ -19,6 +19,7 @@ jobs:
     needs:
       - lint
       - rust-tests
+      - run-on-crate
     steps:
       - run: exit 0
 
@@ -102,7 +103,7 @@ jobs:
 
       - name: test
         run: cargo test
-  
+
   # Run cargo-semver-checks on a crate with no semver violations,
   # to make sure there are no false-positives.
   run-on-crate:
