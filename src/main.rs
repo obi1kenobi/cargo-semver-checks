@@ -26,11 +26,7 @@ fn main() -> anyhow::Result<()> {
             .info(SoftwareVersion::default())
             .info(OperatingSystem::default())
             .info(CommandLine::default())
-            .info(CommandOutput::new(
-                "cargo nightly version",
-                "cargo",
-                &["+nightly", "-V"],
-            ))
+            .info(CommandOutput::new("cargo version", "cargo", &["-V"]))
             .info(CompileTimeInformation::default())
             .print::<Markdown>();
         std::process::exit(0);
@@ -159,7 +155,7 @@ fn main() -> anyhow::Result<()> {
                         "Parsing",
                         format_args!("{} v{} (current)", crate_name, version),
                     )?;
-                    let rustdoc_path = rustdoc_cmd.dump(manifest_path, None)?;
+                    let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
                     let baseline_path = loader.load_rustdoc(
                         &mut config,
                         &rustdoc_cmd,

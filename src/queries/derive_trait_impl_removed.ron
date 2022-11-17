@@ -34,7 +34,10 @@ SemverQuery(
                                     visibility_limit @filter(op: "=", value: ["$public"])
 
                                     canonical_path {
-                                        trait_path: path @output @tag
+                                        # Filtering fixes https://github.com/obi1kenobi/cargo-semver-checks/issues/175
+                                        # In short, StructuralEq is a rustc internal use only unstable trait, so it's safe to skip it.
+
+                                        trait_path: path @filter(op: "!=", value: ["$structural_eq"]) @output @tag
                                     }
                                 }
                             }
@@ -85,6 +88,7 @@ SemverQuery(
         "public": "public",
         "zero": 0,
         "false": false,
+        "structural_eq": ["core", "marker", "StructuralEq"],
     },
     error_message: "A public type has stopped deriving one or more traits. This can break downstream code that depends on those types implementing those traits.",
     per_result_error_template: Some("type {{name}} no longer derives {{trait_name}}, in {{span_filename}}:{{span_begin_line}}"),

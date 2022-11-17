@@ -46,19 +46,63 @@ so it should be unaffected. Users using `cargo-semver-checks` in other ways
 are encouraged to update `cargo-semver-checks` when updating Rust versions
 to ensure continued compatibility.
 
-### Does `cargo-semver-checks` have false positives or false negatives?
+### Does the crate I'm checking have to be published on crates.io?
+
+No, it does not have to be published anywhere. You'll just need to use a flag to help
+`cargo-semver-checks` locate the version to use as a baseline for semver-checking.
+
+By default, `cargo-semver-checks` uses crates.io to look up the previous version of the crate,
+which is used as the baseline for semver-checking the current version of the crate.
+The following flags can be used to explicitly specify a baseline instead:
+```
+--baseline-version <X.Y.Z>
+    Version from registry to lookup for a baseline
+
+--baseline-rev <REV>
+    Git revision to lookup for a baseline
+
+--baseline-root <MANIFEST_ROOT>
+    Directory containing baseline crate source
+
+--baseline-rustdoc <JSON_PATH>
+    The rustdoc json file to use as a semver baseline
+```
+
+Custom registries are not currently supported
+([#160](https://github.com/obi1kenobi/cargo-semver-check/issues/160)), so crates published on
+registries other than crates.io should use one of the other approaches of generating the baseline.
+
+### Does `cargo-semver-checks` have false positives?
 
 "False positive" means that `cargo-semver-checks` reported a semver violation incorrectly.
-This should never happen, and is considered a bug.
+A design goal of `cargo-semver-checks` is to not have false positives.
+If they do occur, they are considered bugs.
 
-"False negative" means that `cargo-semver-checks` failed to report a semver violation.
+When `cargo-semver-checks` reports a semver violation, it should always point to a specific
+file and approximate line number where the specified issue occurs; failure to specify
+a file and line number is also considered a bug.
+
+If you think `cargo-semver-checks` might have a false-positive but you aren't sure, please
+[open an issue](https://github.com/obi1kenobi/cargo-semver-checks/issues/new?assignees=&labels=C-bug&template=bug_report.yml).
+Semver in Rust has [many non-obvious and tricky edge cases](https://predr.ag/blog/toward-fearless-cargo-update/),
+especially [in the presence of macros](https://github.com/obi1kenobi/cargo-semver-checks/issues/167).
+We'd be happy to look into it together with you to determine if it's a false positive or not.
+
+### Will `cargo-semver-checks` catch every semver violation?
+
+No, it will not — not yet!
 There are many ways to break semver, and `cargo-semver-checks`
 [doesn't yet have lints for all of them](https://github.com/obi1kenobi/cargo-semver-check/issues/5).
-We offer mentorship for
-[contributing new lints](https://github.com/obi1kenobi/cargo-semver-check/issues?q=is%3Aopen+is%3Aissue+label%3AA-lint+label%3AE-help-wanted).
-Please check out
-[Contributing](https://github.com/obi1kenobi/cargo-semver-check/blob/main/CONTRIBUTING.md)
-for details.
+New lints are added frequently, and
+[we'd be happy to mentor you](https://github.com/obi1kenobi/cargo-semver-check/blob/main/CONTRIBUTING.md)
+if you'd like to contribute new lints!
+
+Append `--verbose` when semver-checking your crate to see the full list of performed semver checks.
+
+Here are some example areas where `cargo-semver-checks` currently will not catch semver violations:
+- breaking type changes, for example in the type of a field or function parameter
+- breaking changes in generics or lifetimes
+- breaking changes that exist when only a subset of all crate features are activated
 
 ### Why `cargo-semver-checks` instead of ...?
 

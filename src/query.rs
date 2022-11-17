@@ -87,7 +87,9 @@ impl SemverQuery {
             include_str!("./queries/enum_variant_missing.ron"),
             include_str!("./queries/enum_struct_variant_field_missing.ron"),
             include_str!("./queries/function_missing.ron"),
+            include_str!("./queries/function_parameter_count_changed.ron"),
             include_str!("./queries/inherent_method_missing.ron"),
+            include_str!("./queries/method_parameter_count_changed.ron"),
             include_str!("./queries/sized_impl_removed.ron"),
             include_str!("./queries/struct_marked_non_exhaustive.ron"),
             include_str!("./queries/struct_missing.ron"),
@@ -121,10 +123,12 @@ mod tests {
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
+    use trustfall_core::ir::TransparentValue;
     use trustfall_core::{frontend::parse, ir::FieldValue};
     use trustfall_rustdoc::{load_rustdoc, VersionedIndexedCrate, VersionedRustdocAdapter};
 
     use crate::query::SemverQuery;
+    use crate::templating::make_handlebars_registry;
 
     #[test]
     fn all_queries_parse_correctly() {
@@ -258,6 +262,23 @@ mod tests {
         actual_results.sort_unstable_by_key(key_func);
 
         assert_eq!(expected_results, actual_results);
+
+        let registry = make_handlebars_registry();
+        if let Some(template) = semver_query.per_result_error_template {
+            assert!(!actual_results.is_empty());
+
+            for semver_violation_result in actual_results {
+                let pretty_result: BTreeMap<String, TransparentValue> = semver_violation_result
+                    .into_iter()
+                    .map(|(k, v)| (k, v.into()))
+                    .collect();
+
+                registry
+                    .render_template(&template, &pretty_result)
+                    .with_context(|| "Error instantiating semver query template.")
+                    .expect("could not materialize template");
+            }
+        }
     }
 
     macro_rules! query_execution_tests {
@@ -283,7 +304,9 @@ mod tests {
         enum_variant_missing,
         enum_struct_variant_field_missing,
         function_missing,
+        function_parameter_count_changed,
         inherent_method_missing,
+        method_parameter_count_changed,
         sized_impl_removed,
         struct_marked_non_exhaustive,
         struct_missing,

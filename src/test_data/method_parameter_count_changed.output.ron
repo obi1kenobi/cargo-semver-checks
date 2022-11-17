@@ -1,0 +1,82 @@
+[
+    {
+        "current_parameter_count": Uint64(1),
+        "method_name": String("associated_function_with_a_parameter_added"),
+        "method_visibility": String("public"),
+        "name": String("StructWithMethods"),
+        "old_parameter_count": Uint64(0),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("parameter_count_changed"),
+            String("StructWithMethods")
+        ]),
+        "span_begin_line": Uint64(26),
+        "span_filename": String("src/test_cases/parameter_count_changed.rs"),
+        "visibility_limit": String("public")
+    },
+    {
+        "current_parameter_count": Uint64(2),
+        "method_name": String("method_with_a_parameter_added"),
+        "method_visibility": String("public"),
+        "name": String("StructWithMethods"),
+        "old_parameter_count": Uint64(1),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("parameter_count_changed"),
+            String("StructWithMethods")
+        ]),
+        "span_begin_line": Uint64(32),
+        "span_filename": String("src/test_cases/parameter_count_changed.rs"),
+        "visibility_limit": String("public")
+    },
+    {
+        "current_parameter_count": Uint64(3),
+        "method_name": String("method_with_a_parameter_removed"),
+        "method_visibility": String("public"),
+        "name": String("StructWithMethods"),
+        "old_parameter_count": Uint64(4),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("parameter_count_changed"),
+            String("StructWithMethods")
+        ]),
+        "span_begin_line": Uint64(38),
+        "span_filename": String("src/test_cases/parameter_count_changed.rs"),
+        "visibility_limit": String("public")
+    },
+    {
+        "current_parameter_count": Uint64(3),
+        "method_name": String("moved_trait_provided_method"),
+        "method_visibility": String("public"),
+        "name": String("StructWithMethods"),
+        "old_parameter_count": Uint64(2),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("parameter_count_changed"),
+            String("StructWithMethods")
+        ]),
+        "span_begin_line": Uint64(49),
+        "span_filename": String("src/test_cases/parameter_count_changed.rs"),
+        "visibility_limit": String("public")
+    },
+    {
+        "current_parameter_count": Uint64(1),
+        "method_name": String("moved_method"),
+        "method_visibility": String("public"),
+        "name": String("StructWithMethods"),
+        "old_parameter_count": Uint64(2),
+        "path": List([
+            String("semver_tests"),
+            String("test_cases"),
+            String("parameter_count_changed"),
+            String("StructWithMethods")
+        ]),
+        "span_begin_line": Uint64(56),
+        "span_filename": String("src/test_cases/parameter_count_changed.rs"),
+        "visibility_limit": String("public")
+    }
+]
