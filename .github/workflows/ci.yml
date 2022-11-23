@@ -140,6 +140,11 @@ jobs:
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="crate/core/Cargo.toml"
 
+      # Test passing package name explicitly
+      # Reference: https://github.com/obi1kenobi/cargo-semver-checks/issues/174
+      - name: Run semver-checks (alternative command)
+        run: cargo run semver-checks check-release --manifest-path="crate/core/Cargo.toml" --package="libp2p-core"
+
   publish:
     name: Publish to crates.io
     runs-on: ubuntu-latest
