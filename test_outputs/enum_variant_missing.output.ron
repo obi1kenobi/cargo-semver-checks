@@ -3,7 +3,7 @@
         "enum_name": String("VariantWillBeRemoved"),
         "variant_name": String("Bar"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_variant_missing"),
             String("VariantWillBeRemoved"),

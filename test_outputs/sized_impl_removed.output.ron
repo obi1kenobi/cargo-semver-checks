@@ -2,7 +2,7 @@
     {
         "name": String("SizedStruct"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("sized_impl_removed"),
             String("SizedStruct"),

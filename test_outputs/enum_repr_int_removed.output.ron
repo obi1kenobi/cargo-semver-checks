@@ -2,7 +2,7 @@
     {
         "name": String("U8Enum"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_repr_int_removed"),
             String("U8Enum"),
@@ -14,7 +14,7 @@
     {
         "name": String("I32Enum"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_repr_int_removed"),
             String("I32Enum"),
@@ -26,7 +26,7 @@
     {
         "name": String("IsizeEnum"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_repr_int_removed"),
             String("IsizeEnum"),
@@ -38,7 +38,7 @@
     {
         "name": String("UsizeEnum"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_repr_int_removed"),
             String("UsizeEnum"),

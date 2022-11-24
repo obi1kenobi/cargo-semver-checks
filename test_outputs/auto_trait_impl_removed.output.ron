@@ -2,7 +2,7 @@
     {
         "name": String("SyncStruct"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("auto_trait_impl_removed"),
             String("SyncStruct"),
@@ -20,7 +20,7 @@
     {
         "name": String("SendStruct"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("auto_trait_impl_removed"),
             String("SendStruct"),
@@ -38,7 +38,7 @@
     {
         "name": String("UnwindSafeStruct"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("auto_trait_impl_removed"),
             String("UnwindSafeStruct"),
@@ -57,7 +57,7 @@
     {
         "name": String("RefUnwindSafeStruct"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("auto_trait_impl_removed"),
             String("RefUnwindSafeStruct"),
@@ -76,7 +76,7 @@
     {
         "name": String("UnpinStruct"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("auto_trait_impl_removed"),
             String("UnpinStruct"),

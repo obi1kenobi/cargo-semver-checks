@@ -6,7 +6,7 @@
         "name": String("StructWithMethods"),
         "old_parameter_count": Uint64(0),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("parameter_count_changed"),
             String("StructWithMethods")
@@ -22,7 +22,7 @@
         "name": String("StructWithMethods"),
         "old_parameter_count": Uint64(1),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("parameter_count_changed"),
             String("StructWithMethods")
@@ -38,7 +38,7 @@
         "name": String("StructWithMethods"),
         "old_parameter_count": Uint64(4),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("parameter_count_changed"),
             String("StructWithMethods")
@@ -54,7 +54,7 @@
         "name": String("StructWithMethods"),
         "old_parameter_count": Uint64(2),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("parameter_count_changed"),
             String("StructWithMethods")
@@ -70,7 +70,7 @@
         "name": String("StructWithMethods"),
         "old_parameter_count": Uint64(2),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("parameter_count_changed"),
             String("StructWithMethods")

@@ -76,28 +76,28 @@ impl SemverQuery {
         let mut queries = BTreeMap::default();
 
         let query_text_contents = [
-            include_str!("./queries/auto_trait_impl_removed.ron"),
-            include_str!("./queries/derive_trait_impl_removed.ron"),
-            include_str!("./queries/enum_marked_non_exhaustive.ron"),
-            include_str!("./queries/enum_missing.ron"),
-            include_str!("./queries/enum_repr_c_removed.ron"),
-            include_str!("./queries/enum_repr_int_changed.ron"),
-            include_str!("./queries/enum_repr_int_removed.ron"),
-            include_str!("./queries/enum_variant_added.ron"),
-            include_str!("./queries/enum_variant_missing.ron"),
-            include_str!("./queries/enum_struct_variant_field_missing.ron"),
-            include_str!("./queries/function_missing.ron"),
-            include_str!("./queries/function_parameter_count_changed.ron"),
-            include_str!("./queries/inherent_method_missing.ron"),
-            include_str!("./queries/method_parameter_count_changed.ron"),
-            include_str!("./queries/sized_impl_removed.ron"),
-            include_str!("./queries/struct_marked_non_exhaustive.ron"),
-            include_str!("./queries/struct_missing.ron"),
-            include_str!("./queries/struct_pub_field_missing.ron"),
-            include_str!("./queries/struct_repr_c_removed.ron"),
-            include_str!("./queries/struct_repr_transparent_removed.ron"),
-            include_str!("./queries/unit_struct_changed_kind.ron"),
-            include_str!("./queries/variant_marked_non_exhaustive.ron"),
+            include_str!("./lints/auto_trait_impl_removed.ron"),
+            include_str!("./lints/derive_trait_impl_removed.ron"),
+            include_str!("./lints/enum_marked_non_exhaustive.ron"),
+            include_str!("./lints/enum_missing.ron"),
+            include_str!("./lints/enum_repr_c_removed.ron"),
+            include_str!("./lints/enum_repr_int_changed.ron"),
+            include_str!("./lints/enum_repr_int_removed.ron"),
+            include_str!("./lints/enum_variant_added.ron"),
+            include_str!("./lints/enum_variant_missing.ron"),
+            include_str!("./lints/enum_struct_variant_field_missing.ron"),
+            include_str!("./lints/function_missing.ron"),
+            include_str!("./lints/function_parameter_count_changed.ron"),
+            include_str!("./lints/inherent_method_missing.ron"),
+            include_str!("./lints/method_parameter_count_changed.ron"),
+            include_str!("./lints/sized_impl_removed.ron"),
+            include_str!("./lints/struct_marked_non_exhaustive.ron"),
+            include_str!("./lints/struct_missing.ron"),
+            include_str!("./lints/struct_pub_field_missing.ron"),
+            include_str!("./lints/struct_repr_c_removed.ron"),
+            include_str!("./lints/struct_repr_transparent_removed.ron"),
+            include_str!("./lints/unit_struct_changed_kind.ron"),
+            include_str!("./lints/variant_marked_non_exhaustive.ron"),
         ];
         for query_text in query_text_contents {
             let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
@@ -185,7 +185,7 @@ mod tests {
             .collect();
 
         let expected_result: FieldValue = vec![
-            "semver_tests",
+            "test_crates",
             "import_handling",
             "inner",
             "CheckPubUseHandling",
@@ -203,10 +203,10 @@ mod tests {
         actual_paths.sort_unstable();
 
         let expected_paths = vec![
-            vec!["semver_tests", "CheckPubUseHandling"],
-            vec!["semver_tests", "import_handling", "CheckPubUseHandling"],
+            vec!["test_crates", "CheckPubUseHandling"],
+            vec!["test_crates", "import_handling", "CheckPubUseHandling"],
             vec![
-                "semver_tests",
+                "test_crates",
                 "import_handling",
                 "inner",
                 "CheckPubUseHandling",
@@ -229,12 +229,12 @@ mod tests {
         let current = VersionedIndexedCrate::new(&current_crate);
 
         let query_text =
-            std::fs::read_to_string(&format!("./src/queries/{}.ron", query_name)).unwrap();
+            std::fs::read_to_string(&format!("./src/lints/{}.ron", query_name)).unwrap();
         let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
 
         let expected_result_text =
-            std::fs::read_to_string(&format!("./src/test_data/{}.output.ron", query_name))
-            .with_context(|| format!("Could not load src/test_data/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
+            std::fs::read_to_string(&format!("./test_outputs/{}.output.ron", query_name))
+            .with_context(|| format!("Could not load test_outputs/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
             .expect("failed to load expected outputs");
         let mut expected_results: Vec<BTreeMap<String, FieldValue>> =
             ron::from_str(&expected_result_text)

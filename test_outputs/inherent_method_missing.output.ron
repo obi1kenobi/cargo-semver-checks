@@ -3,7 +3,7 @@
         "name": String("Foo"),
         "method_name": String("will_be_removed_associated_fn"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("item_missing"),
             String("Foo"),
@@ -17,7 +17,7 @@
         "name": String("Foo"),
         "method_name": String("will_be_removed_method"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("item_missing"),
             String("Foo"),

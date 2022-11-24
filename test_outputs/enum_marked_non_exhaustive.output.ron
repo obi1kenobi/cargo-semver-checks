@@ -2,7 +2,7 @@
     {
         "name": String("SimpleEnum"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("non_exhaustive"),
             String("SimpleEnum"),
