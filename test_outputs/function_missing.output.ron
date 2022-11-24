@@ -2,7 +2,7 @@
     {
         "name": String("will_be_removed_fn"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("item_missing"),
             String("will_be_removed_fn"),
@@ -14,7 +14,7 @@
     {
         "name": String("pub_use_removed_fn"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("item_missing"),
             String("pub_use_removed_fn"),
