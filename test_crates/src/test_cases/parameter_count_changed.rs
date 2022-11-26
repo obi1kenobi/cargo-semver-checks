@@ -41,19 +41,31 @@ impl StructWithMethods {
     pub fn moved_trait_provided_method(&self, _: ()) {}
 
     #[cfg(not(feature = "method_parameter_count_changed"))]
+    pub fn moved_trait_provided_method_with_unchanged_signature(&self, _: ()) {}
+
+    #[cfg(not(feature = "method_parameter_count_changed"))]
     pub fn moved_method(&self, _: ()) {}
+
+    #[cfg(not(feature = "method_parameter_count_changed"))]
+    pub fn moved_method_with_unchanged_signature(&self, _: ()) {}
 }
 
 #[cfg(feature = "method_parameter_count_changed")]
 pub trait Bar {
     fn moved_trait_provided_method(&self, _: (), _: ()) {}
 
+    fn moved_trait_provided_method_with_unchanged_signature(&self, _: ()) {}
+
     fn moved_method(&self);
+
+    fn moved_method_with_unchanged_signature(&self, _: ());
 }
 
 #[cfg(feature = "method_parameter_count_changed")]
 impl Bar for StructWithMethods {
     fn moved_method(&self) {}
+
+    fn moved_method_with_unchanged_signature(&self, _: ()) {}
 }
 
 struct PrivateStruct {}

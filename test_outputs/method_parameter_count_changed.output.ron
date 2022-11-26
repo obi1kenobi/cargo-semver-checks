@@ -58,7 +58,7 @@
         "method_name": String("moved_trait_provided_method"),
         "method_visibility": String("public"),
         "name": String("StructWithMethods"),
-        "non_matching_span_begin_line": List([Uint64(49)]),
+        "non_matching_span_begin_line": List([Uint64(55)]),
         "non_matching_span_filename": List([String("src/test_cases/parameter_count_changed.rs")]),
         "old_parameter_count": Uint64(2),
         "path": List([
@@ -76,7 +76,7 @@
         "method_name": String("moved_method"),
         "method_visibility": String("public"),
         "name": String("StructWithMethods"),
-        "non_matching_span_begin_line": List([Uint64(56)]),
+        "non_matching_span_begin_line": List([Uint64(66)]),
         "non_matching_span_filename": List([String("src/test_cases/parameter_count_changed.rs")]),
         "old_parameter_count": Uint64(2),
         "path": List([
@@ -85,7 +85,7 @@
             String("parameter_count_changed"),
             String("StructWithMethods")
         ]),
-        "span_begin_line": Uint64(44),
+        "span_begin_line": Uint64(47),
         "span_filename": String("src/test_cases/parameter_count_changed.rs"),
         "visibility_limit": String("public")
     }
