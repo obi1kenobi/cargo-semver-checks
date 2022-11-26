@@ -104,9 +104,13 @@ jobs:
       - name: test
         run: cargo test
 
-  # Run cargo-semver-checks on a crate with no semver violations,
-  # to make sure there are no false-positives.
-  run-on-crate:
+  run-on-rust-libp2p:
+    # Run cargo-semver-checks on a crate with no semver violations,
+    # to make sure there are no false-positives.
+    #
+    # cargo-semver-checks previously reported a false-positive here,
+    # since an enum variant in the crate was included by a feature:
+    # https://github.com/obi1kenobi/cargo-semver-check/issues/147
     name: Run cargo-semver-checks on rust-libp2p 0.47.0
     runs-on: ubuntu-latest
     steps:
@@ -115,8 +119,6 @@ jobs:
         with:
           persist-credentials: false
 
-      # In this particular version, a feature adds an enum variant.
-      # Reference: https://github.com/obi1kenobi/cargo-semver-check/issues/147
       - name: Checkout rust-libp2p
         uses: actions/checkout@v3
         with:
@@ -129,7 +131,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          components: rustfmt, clippy
           profile: minimal
           override: true
 
@@ -140,10 +141,44 @@ jobs:
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="crate/core/Cargo.toml"
 
-      # Test passing package name explicitly
+      # Test passing package name explicitly.
+      # It was previously possible to make the command above work while the one here failed.
       # Reference: https://github.com/obi1kenobi/cargo-semver-checks/issues/174
       - name: Run semver-checks (alternative command)
         run: cargo run semver-checks check-release --manifest-path="crate/core/Cargo.toml" --package="libp2p-core"
+
+  run-on-core-graphics:
+    # Run cargo-semver-checks on a crate with no semver violations,
+    # to make sure there are no false-positives.
+    #
+    # cargo-semver-checks previously reported a false-positive here,
+    # due to multiple methods by the same name being defined on the same type.
+    # https://github.com/obi1kenobi/cargo-semver-checks/issues/193
+    name: Run cargo-semver-checks on core-graphics
+    runs-on: macos-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout rust-libp2p
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'servo/core-foundation-rs'
+          ref: '786895643140fa0ee4f913d7b4aeb0c4626b2085'
+          path: 'crate'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - name: Run semver-checks
+        run: cargo run semver-checks check-release --manifest-path="crate/core-graphics/Cargo.toml"
 
   publish:
     name: Publish to crates.io
