@@ -311,6 +311,12 @@ pub(super) fn run_check_release(
                         .expect("could not materialize template");
                     colored_ln(config.stdout(), |w| colored!(w, "  {}", message,))
                         .expect("print failed");
+
+                    config.verbose(|config| {
+                        colored_ln(config.stdout(), |w| {
+                            colored!(w, "    lint rule output values: {:?}", &pretty_result)
+                        }).map_err(|e| e.into())
+                    }).expect("print failed");
                 } else {
                     colored_ln(config.stdout(), |w| {
                         colored!(
