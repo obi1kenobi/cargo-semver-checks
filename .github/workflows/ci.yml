@@ -19,7 +19,8 @@ jobs:
     needs:
       - lint
       - rust-tests
-      - run-on-crate
+      - run-on-rust-libp2p
+      - run-on-core-graphics
     steps:
       - run: exit 0
 
