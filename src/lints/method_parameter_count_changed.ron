@@ -23,6 +23,11 @@ SemverQuery(
                                 method_name: name @output @tag
 
                                 old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters")
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
                             }
                         }
                     }
@@ -40,15 +45,36 @@ SemverQuery(
 
                         # We use "impl" instead of "inherent_impl" here because moving
                         # an inherently-implemented method to a trait is not necessarily
-                        # a breaking change, but changing the parameter count is
-                        impl {
+                        # a breaking change, but changing the parameter count is.
+                        #
+                        # Method names are not unique on an ImplOwner! It's perfectly valid to have
+                        # both an inherent method `foo()` as well as a trait-provided method
+                        # `<Self as Bar>::foo()` at the same time. Whenever possible, rustc
+                        # attempts to "do the right thing" and dispatch to the correct one.
+                        #
+                        # Because of the above, this check has to be written as
+                        # "there is no method with the correct name and number of arguments"
+                        # rather than the (incorrect!) alternative
+                        # "the named method does not have the correct number of arguments."
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
-                                
-                                current_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"]) @output
 
-                                span_: span @optional {
+                                parameter @fold @transform(op: "count") @filter(op: "=", value: ["%parameters"])
+                            }
+                        }
+
+                        # Get the non-matching methods by that name so we can report them
+                        # in the lint error message.
+                        impl @fold {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+
+                                current_parameter_: parameter @fold @transform(op: "count") @output
+
+                                non_matching_span_: span @optional {
                                     filename @output
                                     begin_line @output
                                 }
@@ -62,7 +88,8 @@ SemverQuery(
     arguments: {
         "public": "public",
         "public_or_default": ["public", "default"],
+        "zero": 0,
     },
     error_message: "A publicly-visible method now takes a different number of parameters.",
-    per_result_error_template: Some("{{join \"::\" path}} now takes {{current_parameter_count}} parameters instead of {{old_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes {{unpack_if_singleton current_parameter_count}} parameters instead of {{old_parameter_count}}, in {{multiple_spans non_matching_span_filename non_matching_span_begin_line}}"),
 )
