@@ -314,7 +314,7 @@ pub(super) fn run_check_release(
                         .expect("print failed");
 
                     config
-                        .verbose(|config| {
+                        .extra_verbose(|config| {
                             colored_ln(config.stdout(), |w| {
                                 let serde_pretty = serde_json::to_string_pretty(&pretty_result)
                                     .expect("serde failed");
