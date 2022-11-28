@@ -68,6 +68,20 @@ impl GlobalConfig {
         Ok(())
     }
 
+    pub fn is_extra_verbose(&self) -> bool {
+        log::Level::Trace <= self.level.unwrap_or(log::Level::Error)
+    }
+
+    pub fn extra_verbose(
+        &mut self,
+        callback: impl Fn(&mut Self) -> anyhow::Result<()>,
+    ) -> anyhow::Result<()> {
+        if self.is_extra_verbose() {
+            callback(self)?;
+        }
+        Ok(())
+    }
+
     pub fn is_stderr_tty(&self) -> bool {
         self.is_stderr_tty
     }

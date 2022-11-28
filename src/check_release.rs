@@ -2,6 +2,7 @@ use std::{collections::BTreeMap, env, io::Write, iter::Peekable, sync::Arc, time
 
 use anyhow::Context;
 use clap::crate_version;
+use itertools::Itertools;
 use termcolor::Color;
 use termcolor_output::{colored, colored_ln};
 use trustfall_core::ir::{FieldValue, TransparentValue};
@@ -310,6 +311,21 @@ pub(super) fn run_check_release(
                         .with_context(|| "Error instantiating semver query template.")
                         .expect("could not materialize template");
                     colored_ln(config.stdout(), |w| colored!(w, "  {}", message,))
+                        .expect("print failed");
+
+                    config
+                        .extra_verbose(|config| {
+                            colored_ln(config.stdout(), |w| {
+                                let serde_pretty = serde_json::to_string_pretty(&pretty_result)
+                                    .expect("serde failed");
+                                let indented_serde = serde_pretty
+                                    .split('\n')
+                                    .map(|line| format!("    {}", line))
+                                    .join("\n");
+                                colored!(w, "    lint rule output values:\n{}", indented_serde)
+                            })
+                            .map_err(|e| e.into())
+                        })
                         .expect("print failed");
                 } else {
                     colored_ln(config.stdout(), |w| {
