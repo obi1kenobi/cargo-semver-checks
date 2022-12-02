@@ -125,16 +125,23 @@ mod tests {
     use anyhow::Context;
     use trustfall_core::ir::TransparentValue;
     use trustfall_core::{frontend::parse, ir::FieldValue};
-    use trustfall_rustdoc::{load_rustdoc, VersionedIndexedCrate, VersionedRustdocAdapter};
+    use trustfall_rustdoc::{
+        load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
+    };
 
     use crate::query::SemverQuery;
     use crate::templating::make_handlebars_registry;
 
+    fn load_pregenerated_rustdoc<'a>(path: &'a str) -> VersionedCrate {
+        load_rustdoc(Path::new(path))
+            .with_context(|| format!("Could not load {} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?", path))
+            .expect("failed to load baseline rustdoc")
+    }
+
     #[test]
     fn all_queries_parse_correctly() {
-        let current_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
-            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
-            .expect("failed to load baseline rustdoc");
+        let path_sample_generated_rustdoc = "./localdata/test_data/template/new/rustdoc.json";
+        let current_crate = load_pregenerated_rustdoc(path_sample_generated_rustdoc);
         let indexed_crate = VersionedIndexedCrate::new(&current_crate);
         let adapter =
             VersionedRustdocAdapter::new(&indexed_crate, None).expect("failed to create adapter");
@@ -147,10 +154,8 @@ mod tests {
 
     #[test]
     fn pub_use_handling() {
-        let current_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
-            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
-            .expect("failed to load baseline rustdoc");
-
+        let current_crate =
+            load_pregenerated_rustdoc("./localdata/test_data/pub_use_handling/new/rustdoc.json");
         let current = VersionedIndexedCrate::new(&current_crate);
 
         let query = r#"
@@ -184,13 +189,7 @@ mod tests {
             .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
             .collect();
 
-        let expected_result: FieldValue = vec![
-            "test_crates",
-            "import_handling",
-            "inner",
-            "CheckPubUseHandling",
-        ]
-        .into();
+        let expected_result: FieldValue = vec!["pub_use_handling", "CheckPubUseHandling"].into();
         assert_eq!(1, actual_results.len(), "{actual_results:?}");
         assert_eq!(
             expected_result, actual_results[0]["canonical_path"],
@@ -202,32 +201,26 @@ mod tests {
             .expect("not a Vec<Vec<&str>>");
         actual_paths.sort_unstable();
 
-        let expected_paths = vec![
-            vec!["test_crates", "CheckPubUseHandling"],
-            vec!["test_crates", "import_handling", "CheckPubUseHandling"],
-            vec![
-                "test_crates",
-                "import_handling",
-                "inner",
-                "CheckPubUseHandling",
-            ],
-        ];
+        let expected_paths = vec![vec!["pub_use_handling", "CheckPubUseHandling"]];
         assert_eq!(expected_paths, actual_paths);
     }
 
+    fn get_test_crate_names<'a>() -> Vec<String> {
+        std::fs::read_dir("./test_crates/")
+            .unwrap()
+            .map(|dir_entry| dir_entry.unwrap())
+            .filter(|dir_entry| dir_entry.metadata().unwrap().is_dir())
+            .map(|dir_entry| {
+                String::from(
+                    String::from(dir_entry.path().to_str().unwrap())
+                        .strip_prefix("./test_crates/")
+                        .unwrap(),
+                )
+            })
+            .collect()
+    }
+
     fn check_query_execution(query_name: &str) {
-        // Ensure the rustdocs JSON outputs have been regenerated.
-        let baseline_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
-            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
-            .expect("failed to load baseline rustdoc");
-        let current_crate =
-            load_rustdoc(Path::new(&format!("./localdata/test_data/{}.json", query_name)))
-            .with_context(|| format!("Could not load localdata/test_data/{}.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?", query_name))
-            .expect("failed to load rustdoc under test");
-
-        let baseline = VersionedIndexedCrate::new(&baseline_crate);
-        let current = VersionedIndexedCrate::new(&current_crate);
-
         let query_text =
             std::fs::read_to_string(&format!("./src/lints/{}.ron", query_name)).unwrap();
         let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
@@ -238,16 +231,34 @@ mod tests {
             .expect("failed to load expected outputs");
         let mut expected_results: Vec<BTreeMap<String, FieldValue>> =
             ron::from_str(&expected_result_text)
-                .expect("could not parse expected outputs as ron format");
+                .expect("Could not parse expected outputs as ron format.");
 
-        let adapter = VersionedRustdocAdapter::new(&current, Some(&baseline))
-            .expect("could not create adapter");
-        let results_iter = adapter
-            .run_query(&semver_query.query, semver_query.arguments.clone())
-            .unwrap();
+        let mut actual_results: Vec<BTreeMap<_, _>> = get_test_crate_names()
+            .into_iter()
+            .map(|crate_pair| {
+                let load_generated_rustdoc = |crate_version: &str| {
+                    let path = format!(
+                        "./localdata/test_data/{}/{}/rustdoc.json",
+                        &crate_pair, crate_version
+                    );
+                    load_pregenerated_rustdoc(&path)
+                };
+                let crate_new = load_generated_rustdoc("new");
+                let crate_old = load_generated_rustdoc("old");
+                let indexed_crate_new = VersionedIndexedCrate::new(&crate_new);
+                let indexed_crate_old = VersionedIndexedCrate::new(&crate_old);
 
-        let mut actual_results: Vec<BTreeMap<_, _>> = results_iter
-            .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+                let adapter =
+                    VersionedRustdocAdapter::new(&indexed_crate_new, Some(&indexed_crate_old))
+                        .expect("Could not create adapter.");
+                let results_iter = adapter
+                    .run_query(&semver_query.query, semver_query.arguments.clone())
+                    .unwrap();
+                results_iter
+                    .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+                    .collect::<Vec<BTreeMap<_, _>>>()
+            })
+            .flatten()
             .collect();
 
         // Reorder both vectors of results into a deterministic order that will compensate for
@@ -276,7 +287,7 @@ mod tests {
                 registry
                     .render_template(&template, &pretty_result)
                     .with_context(|| "Error instantiating semver query template.")
-                    .expect("could not materialize template");
+                    .expect("Could not materialize template.");
             }
         }
     }

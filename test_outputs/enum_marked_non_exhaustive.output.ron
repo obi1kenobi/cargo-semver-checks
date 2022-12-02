@@ -2,13 +2,11 @@
     {
         "name": String("SimpleEnum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("non_exhaustive"),
             String("SimpleEnum"),
         ]),
-        "span_filename": String("src/test_cases/non_exhaustive.rs"),
-        "span_begin_line": Uint64(91),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(48),
         "visibility_limit": String("public"),
     },
 ]

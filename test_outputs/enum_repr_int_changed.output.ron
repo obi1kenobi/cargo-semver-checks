@@ -2,13 +2,11 @@
     {
         "name": String("U8ToU16Enum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("enum_repr_int_changed"),
             String("U8ToU16Enum"),
         ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(10),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(2),
         "old_attr": String("#[repr(u8)]"),
         "new_attr": List([
             String("#[repr(u16)]"),
@@ -18,13 +16,11 @@
     {
         "name": String("I32ToI8Enum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("enum_repr_int_changed"),
             String("I32ToI8Enum"),
         ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(24),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(8),
         "old_attr": String("#[repr(i32)]"),
         "new_attr": List([
             String("#[repr(i8)]"),
@@ -34,13 +30,11 @@
     {
         "name": String("I32ToU32Enum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("enum_repr_int_changed"),
             String("I32ToU32Enum"),
         ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(38),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(14),
         "old_attr": String("#[repr(i32)]"),
         "new_attr": List([
             String("#[repr(u32)]"),
@@ -50,13 +44,11 @@
     {
         "name": String("IsizeToUsizeEnum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("enum_repr_int_changed"),
             String("IsizeToUsizeEnum"),
         ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(52),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(20),
         "old_attr": String("#[repr(isize)]"),
         "new_attr": List([
             String("#[repr(usize)]"),

@@ -2,25 +2,56 @@
     {
         "name": String("WillBeRemovedEnum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("item_missing"),
             String("WillBeRemovedEnum"),
         ]),
         "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(7),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(5),
     },
     {
         "name": String("PubUseRemovedEnum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("item_missing"),
             String("PubUseRemovedEnum"),
         ]),
         "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(35),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(27),
+    },
+    {
+        "name": String("ShouldNotMatch"), 
+        "path": List([String("enum_variant_missing"), String("ShouldNotMatch")]), 
+        "span_begin_line": Uint64(11), 
+        "span_filename": String("src/main.rs"), 
+        "visibility_limit": String("public")
+    },
+    {
+        "name": String("U8Enum"), 
+        "path": List([String("enum_repr_int_changed"), String("U8Enum")]), 
+        "span_begin_line": Uint64(30), 
+        "span_filename": String("src/main.rs"), 
+        "visibility_limit": String("public")
+    }, 
+    {
+        "name": String("I32Enum"), 
+        "path": List([String("enum_repr_int_changed"), String("I32Enum")]), 
+        "span_begin_line": Uint64(36), 
+        "span_filename": String("src/main.rs"), 
+        "visibility_limit": String("public")
+    }, 
+    {
+        "name": String("IsizeEnum"), 
+        "path": List([String("enum_repr_int_changed"), String("IsizeEnum")]), 
+        "span_begin_line": Uint64(42), 
+        "span_filename": String("src/main.rs"), 
+        "visibility_limit": String("public")
+    }, 
+    {
+        "name": String("UsizeEnum"), 
+        "path": List([String("enum_repr_int_changed"), String("UsizeEnum")]), 
+        "span_begin_line": Uint64(48), 
+        "span_filename": String("src/main.rs"), 
+        "visibility_limit": String("public")
     }
 ]

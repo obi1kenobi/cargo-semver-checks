@@ -2,49 +2,41 @@
     {
         "name": String("U8Enum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("enum_repr_int_removed"),
             String("U8Enum"),
         ]),
-        "span_filename": String("src/test_cases/enum_repr_int_removed.rs"),
-        "span_begin_line": Uint64(9),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(1),
         "visibility_limit": String("public"),
     },
     {
         "name": String("I32Enum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("enum_repr_int_removed"),
             String("I32Enum"),
         ]),
-        "span_filename": String("src/test_cases/enum_repr_int_removed.rs"),
-        "span_begin_line": Uint64(22),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(6),
         "visibility_limit": String("public"),
     },
     {
         "name": String("IsizeEnum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("enum_repr_int_removed"),
             String("IsizeEnum"),
         ]),
-        "span_filename": String("src/test_cases/enum_repr_int_removed.rs"),
-        "span_begin_line": Uint64(35),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(11),
         "visibility_limit": String("public"),
     },
     {
         "name": String("UsizeEnum"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("enum_repr_int_removed"),
             String("UsizeEnum"),
         ]),
-        "span_filename": String("src/test_cases/enum_repr_int_removed.rs"),
-        "span_begin_line": Uint64(48),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(16),
         "visibility_limit": String("public"),
     }
 ]

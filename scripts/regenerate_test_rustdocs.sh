@@ -3,12 +3,10 @@
 # Fail on first error, on undefined variables, and on failures in pipelines.
 set -euo pipefail
 
-# Go to the test_crates directory.
-cd "$(git rev-parse --show-toplevel)/test_crates"
-
 export CARGO_TARGET_DIR=/tmp/test_crates
-RUSTDOC_OUTPUT="$CARGO_TARGET_DIR/doc/test_crates.json"
-TARGET_DIR="$(git rev-parse --show-toplevel)/localdata/test_data"
+RUSTDOC_OUTPUT_DIR="$CARGO_TARGET_DIR/doc"
+TOPLEVEL="$(git rev-parse --show-toplevel)"
+TARGET_DIR="$TOPLEVEL/localdata/test_data"
 
 # Allow setting an explicit toolchain, like +nightly or +beta.
 set +u
@@ -16,21 +14,17 @@ TOOLCHAIN="$1"
 set -u
 RUSTDOC_CMD="cargo $TOOLCHAIN rustdoc"
 
-# Ensure the target test data directory exists.
-mkdir -p "$TARGET_DIR"
+# Run rustdoc on test_crates/*/{new,old}/
+for crate_pair in $(ls "$TOPLEVEL/test_crates"); do
+	for crate_version in "new" "old"; do
+		crate="$crate_pair/$crate_version"
+		echo "Generating: $crate"
 
-# Make the baseline configuration file.
-echo "Generating: baseline"
-RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --output-format json
-mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/baseline.json"
-
-# For each feature, re-run rustdoc with it enabled.
-features="$(cargo metadata --format-version 1 | \
-    jq --exit-status -r '.packages[] | select(.name = "test_crates") | .features | keys[]')"
-while IFS= read -r feat; do
-    echo "Generating: $feat"
-    RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD --features "$feat" -- -Zunstable-options --output-format json
-    mv "$RUSTDOC_OUTPUT" "$TARGET_DIR/$feat.json"
-done <<< "$features"
+		cd "$TOPLEVEL/test_crates/$crate"
+		RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --output-format json
+		mkdir -p "$TARGET_DIR/$crate"
+		mv "$RUSTDOC_OUTPUT_DIR/$crate_pair.json" "$TARGET_DIR/$crate/rustdoc.json"
+	done
+done
 
 unset CARGO_TARGET_DIR

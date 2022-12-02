@@ -3,13 +3,11 @@
         "enum_name": String("Enum"),
         "variant_name": String("FieldWillBeMissing"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("enum_struct_variant_field_missing"),
             String("Enum"),
         ]),
         "field_name": String("bar"),
-        "span_filename": String("src/test_cases/enum_struct_variant_field_missing.rs"),
-        "span_begin_line": Uint64(7),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(6),
     }
 ]

@@ -3,26 +3,46 @@
         "name": String("WillBeRemovedStruct"),
         "struct_type": String("unit"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("item_missing"),
             String("WillBeRemovedStruct"),
         ]),
         "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(4),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(3),
     },
     {
         "name": String("PubUseRemovedStruct"),
         "struct_type": String("unit"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("item_missing"),
             String("PubUseRemovedStruct"),
         ]),
         "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(33),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(25),
+    },
+    {
+        "name": String("UnitStructToPlain"), 
+        "path": List([String("unit_struct_changed_kind"), String("UnitStructToPlain")]), 
+        "span_begin_line": Uint64(1), 
+        "span_filename": String("src/main.rs"), 
+        "struct_type": String("unit"), 
+        "visibility_limit": String("public")
+    },
+    {
+        "name": String("NonExhaustiveUnitStructToPlain"), 
+        "path": List([String("unit_struct_changed_kind"), String("NonExhaustiveUnitStructToPlain")]), 
+        "span_begin_line": Uint64(4), 
+        "span_filename": String("src/main.rs"), 
+        "struct_type": String("unit"), 
+        "visibility_limit": String("public")
+    },
+    {
+        "name": String("StructRemoved"), 
+        "path": List([String("struct_pub_field_missing"), String("StructRemoved")]), 
+        "span_begin_line": Uint64(11), 
+        "span_filename": String("src/main.rs"), 
+        "struct_type": String("plain"), 
+        "visibility_limit": String("public")
     }
 ]

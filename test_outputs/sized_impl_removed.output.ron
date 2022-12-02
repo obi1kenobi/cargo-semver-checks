@@ -2,13 +2,11 @@
     {
         "name": String("SizedStruct"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("sized_impl_removed"),
             String("SizedStruct"),
         ]),
-        "span_filename": String("src/test_cases/sized_impl_removed.rs"),
-        "span_begin_line": Uint64(7),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(1),
         "visibility_limit": String("public"),
     }
 ]

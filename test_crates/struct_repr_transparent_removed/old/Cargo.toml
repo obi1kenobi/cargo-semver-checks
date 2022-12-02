@@ -1,0 +1,6 @@
+[package]
+name = "struct_repr_transparent_removed"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

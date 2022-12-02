@@ -2,13 +2,11 @@
     {
         "name": String("SyncStruct"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("auto_trait_impl_removed"),
             String("SyncStruct"),
         ]),
-        "span_filename": String("src/test_cases/auto_trait_impl_removed.rs"),
-        "span_begin_line": Uint64(15),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(9),
         "auto_trait": String("Sync"),
         "auto_trait_path": List([
             String("core"),
@@ -20,13 +18,11 @@
     {
         "name": String("SendStruct"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("auto_trait_impl_removed"),
             String("SendStruct"),
         ]),
-        "span_filename": String("src/test_cases/auto_trait_impl_removed.rs"),
-        "span_begin_line": Uint64(29),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(16),
         "auto_trait": String("Send"),
         "auto_trait_path": List([
             String("core"),
@@ -38,13 +34,11 @@
     {
         "name": String("UnwindSafeStruct"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("auto_trait_impl_removed"),
             String("UnwindSafeStruct"),
         ]),
-        "span_filename": String("src/test_cases/auto_trait_impl_removed.rs"),
-        "span_begin_line": Uint64(41),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(22),
         "auto_trait": String("UnwindSafe"),
         "auto_trait_path": List([
             String("core"),
@@ -57,13 +51,11 @@
     {
         "name": String("RefUnwindSafeStruct"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("auto_trait_impl_removed"),
             String("RefUnwindSafeStruct"),
         ]),
-        "span_filename": String("src/test_cases/auto_trait_impl_removed.rs"),
-        "span_begin_line": Uint64(52),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(27),
         "auto_trait": String("RefUnwindSafe"),
         "auto_trait_path": List([
             String("core"),
@@ -76,13 +68,11 @@
     {
         "name": String("UnpinStruct"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("auto_trait_impl_removed"),
             String("UnpinStruct"),
         ]),
-        "span_filename": String("src/test_cases/auto_trait_impl_removed.rs"),
-        "span_begin_line": Uint64(72),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(40),
         "auto_trait": String("Unpin"),
         "auto_trait_path": List([
             String("core"),

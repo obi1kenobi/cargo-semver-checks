@@ -2,13 +2,11 @@
     {
         "name": String("DebugFoo"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("derive_trait_impl_removed"),
             String("DebugFoo"),
         ]),
-        "span_filename": String("src/test_cases/derive_trait_impl_removed.rs"),
-        "span_begin_line": Uint64(7),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(2),
         "trait_name": String("Debug"),
         "trait_path": List([
             String("core"),
@@ -20,13 +18,11 @@
     {
         "name": String("CopyBar"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("derive_trait_impl_removed"),
             String("CopyBar"),
         ]),
-        "span_filename": String("src/test_cases/derive_trait_impl_removed.rs"),
-        "span_begin_line": Uint64(17),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(5),
         "trait_name": String("Copy"),
         "trait_path": List([
             String("core"),
@@ -38,13 +34,11 @@
     {
         "name": String("EqFoo"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("derive_trait_impl_removed"),
             String("EqFoo"),
         ]),
-        "span_filename": String("src/test_cases/derive_trait_impl_removed.rs"),
-        "span_begin_line": Uint64(27),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(10),
         "trait_name": String("Eq"),
         "trait_path": List([
             String("core"),

@@ -3,13 +3,11 @@
         "struct_name": String("FieldWillBeRemoved"),
         "struct_type": String("plain"),
         "path": List([
-            String("test_crates"),
-            String("test_cases"),
             String("struct_pub_field_missing"),
             String("FieldWillBeRemoved"),
         ]),
         "field_name": String("bar"),
-        "span_filename": String("src/test_cases/struct_pub_field_missing.rs"),
-        "span_begin_line": Uint64(6),
+        "span_filename": String("src/main.rs"),
+        "span_begin_line": Uint64(5),
     }
 ]
