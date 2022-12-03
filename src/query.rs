@@ -248,15 +248,31 @@ mod tests {
                 let indexed_crate_new = VersionedIndexedCrate::new(&crate_new);
                 let indexed_crate_old = VersionedIndexedCrate::new(&crate_old);
 
-                let adapter =
-                    VersionedRustdocAdapter::new(&indexed_crate_new, Some(&indexed_crate_old))
-                        .expect("Could not create adapter.");
-                let results_iter = adapter
-                    .run_query(&semver_query.query, semver_query.arguments.clone())
-                    .unwrap();
-                results_iter
-                    .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
-                    .collect::<Vec<BTreeMap<_, _>>>()
+                let run_query_on =
+                    |indexed_crate_1: &VersionedIndexedCrate,
+                     indexed_crate_2: &VersionedIndexedCrate| {
+                        let adapter =
+                            VersionedRustdocAdapter::new(&indexed_crate_1, Some(&indexed_crate_2))
+                                .expect("Could not create adapter.");
+                        let results_iter = adapter
+                            .run_query(&semver_query.query, semver_query.arguments.clone())
+                            .unwrap();
+                        results_iter
+                            .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+                            .collect::<Vec<BTreeMap<_, _>>>()
+                    };
+
+                assert!(
+                    run_query_on(&indexed_crate_new, &indexed_crate_new).is_empty(),
+                    "{}",
+                    crate_pair
+                );
+                assert!(
+                    run_query_on(&indexed_crate_old, &indexed_crate_old).is_empty(),
+                    "{}",
+                    crate_pair
+                );
+                run_query_on(&indexed_crate_new, &indexed_crate_old)
             })
             .flatten()
             .collect();
