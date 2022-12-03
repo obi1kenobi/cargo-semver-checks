@@ -132,16 +132,19 @@ mod tests {
     use crate::query::SemverQuery;
     use crate::templating::make_handlebars_registry;
 
-    fn load_pregenerated_rustdoc<'a>(path: &'a str) -> VersionedCrate {
-        load_rustdoc(Path::new(path))
+    fn load_pregenerated_rustdoc(crate_pair: &str, crate_version: &str) -> VersionedCrate {
+        let path = format!(
+            "./localdata/test_data/{}/{}/rustdoc.json",
+            crate_pair, crate_version
+        );
+        load_rustdoc(Path::new(&path))
             .with_context(|| format!("Could not load {} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?", path))
             .expect("failed to load baseline rustdoc")
     }
 
     #[test]
     fn all_queries_parse_correctly() {
-        let path_sample_generated_rustdoc = "./localdata/test_data/template/new/rustdoc.json";
-        let current_crate = load_pregenerated_rustdoc(path_sample_generated_rustdoc);
+        let current_crate = load_pregenerated_rustdoc("template", "new");
         let indexed_crate = VersionedIndexedCrate::new(&current_crate);
         let adapter =
             VersionedRustdocAdapter::new(&indexed_crate, None).expect("failed to create adapter");
@@ -154,8 +157,7 @@ mod tests {
 
     #[test]
     fn pub_use_handling() {
-        let current_crate =
-            load_pregenerated_rustdoc("./localdata/test_data/pub_use_handling/new/rustdoc.json");
+        let current_crate = load_pregenerated_rustdoc("pub_use_handling", "new");
         let current = VersionedIndexedCrate::new(&current_crate);
 
         let query = r#"
@@ -205,11 +207,16 @@ mod tests {
         assert_eq!(expected_paths, actual_paths);
     }
 
-    fn get_test_crate_names<'a>() -> Vec<String> {
+    fn get_test_crate_names() -> Vec<String> {
         std::fs::read_dir("./test_crates/")
-            .unwrap()
-            .map(|dir_entry| dir_entry.unwrap())
-            .filter(|dir_entry| dir_entry.metadata().unwrap().is_dir())
+            .expect("directory test_crates/ not found")
+            .map(|dir_entry| dir_entry.expect("failed to list test_crates/"))
+            .filter(|dir_entry| {
+                dir_entry
+                    .metadata()
+                    .expect("failed to retrieve test_crates/* metadata")
+                    .is_dir()
+            })
             .map(|dir_entry| {
                 String::from(
                     String::from(dir_entry.path().to_str().unwrap())
@@ -235,16 +242,9 @@ mod tests {
 
         let mut actual_results: Vec<BTreeMap<_, _>> = get_test_crate_names()
             .into_iter()
-            .map(|crate_pair| {
-                let load_generated_rustdoc = |crate_version: &str| {
-                    let path = format!(
-                        "./localdata/test_data/{}/{}/rustdoc.json",
-                        &crate_pair, crate_version
-                    );
-                    load_pregenerated_rustdoc(&path)
-                };
-                let crate_new = load_generated_rustdoc("new");
-                let crate_old = load_generated_rustdoc("old");
+            .flat_map(|crate_pair| {
+                let crate_new = load_pregenerated_rustdoc(&crate_pair, "new");
+                let crate_old = load_pregenerated_rustdoc(&crate_pair, "old");
                 let indexed_crate_new = VersionedIndexedCrate::new(&crate_new);
                 let indexed_crate_old = VersionedIndexedCrate::new(&crate_old);
 
@@ -258,7 +258,6 @@ mod tests {
                     .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
                     .collect::<Vec<BTreeMap<_, _>>>()
             })
-            .flatten()
             .collect();
 
         // Reorder both vectors of results into a deterministic order that will compensate for

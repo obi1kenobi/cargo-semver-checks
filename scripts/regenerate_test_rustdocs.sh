@@ -16,15 +16,16 @@ RUSTDOC_CMD="cargo $TOOLCHAIN rustdoc"
 
 # Run rustdoc on test_crates/*/{new,old}/
 for crate_pair in $(ls "$TOPLEVEL/test_crates"); do
-	for crate_version in "new" "old"; do
-		crate="$crate_pair/$crate_version"
-		echo "Generating: $crate"
+    for crate_version in "new" "old"; do
+        crate="$crate_pair/$crate_version"
+        echo "Generating: $crate"
 
-		cd "$TOPLEVEL/test_crates/$crate"
-		RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --output-format json
-		mkdir -p "$TARGET_DIR/$crate"
-		mv "$RUSTDOC_OUTPUT_DIR/$crate_pair.json" "$TARGET_DIR/$crate/rustdoc.json"
-	done
+        pushd "$TOPLEVEL/test_crates/$crate"
+        RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --output-format json
+        mkdir -p "$TARGET_DIR/$crate"
+        mv "$RUSTDOC_OUTPUT_DIR/$crate_pair.json" "$TARGET_DIR/$crate/rustdoc.json"
+        popd
+    done
 done
 
 unset CARGO_TARGET_DIR
