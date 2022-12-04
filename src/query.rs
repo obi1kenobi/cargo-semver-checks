@@ -250,7 +250,7 @@ mod tests {
 
                 let adapter =
                     VersionedRustdocAdapter::new(&indexed_crate_new, Some(&indexed_crate_old))
-                        .expect("Could not create adapter.");
+                        .expect("could not create adapter");
                 let results_iter = adapter
                     .run_query(&semver_query.query, semver_query.arguments.clone())
                     .unwrap();
