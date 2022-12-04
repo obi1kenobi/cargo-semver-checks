@@ -238,7 +238,7 @@ mod tests {
             .expect("failed to load expected outputs");
         let mut expected_results: Vec<BTreeMap<String, FieldValue>> =
             ron::from_str(&expected_result_text)
-                .expect("Could not parse expected outputs as ron format.");
+                .expect("could not parse expected outputs as ron format");
 
         let mut actual_results: Vec<BTreeMap<_, _>> = get_test_crate_names()
             .into_iter()
