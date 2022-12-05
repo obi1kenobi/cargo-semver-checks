@@ -22,23 +22,5 @@
         "method_visibility": String("public"),
         "span_filename": String("src/main.rs"),
         "span_begin_line": Uint64(17),
-    },
-    {
-        "method_name": String("moved_trait_provided_method"), 
-        "method_visibility": String("public"), 
-        "name": String("Foo"), 
-        "path": List([String("item_missing"), String("Foo")]), 
-        "span_begin_line": Uint64(19), 
-        "span_filename": String("src/main.rs"), 
-        "visibility_limit": String("public")
-    },
-    {
-        "method_name": String("moved_method"), 
-        "method_visibility": String("public"), 
-        "name": String("Foo"), 
-        "path": List([String("item_missing"), String("Foo")]), 
-        "span_begin_line": Uint64(21), 
-        "span_filename": String("src/main.rs"), 
-        "visibility_limit": String("public")
     }
 ]
