@@ -259,12 +259,15 @@ mod tests {
 
 macro_rules! add_lints {
     ($($name:ident,)*) => {
-        $(
-            #[test]
-            fn $name() {
-                tests::check_query_execution(stringify!($name))
-            }
-        )*
+        #[cfg(test)]
+        mod tests_lints {
+            $(
+                #[test]
+                fn $name() {
+                    super::tests::check_query_execution(stringify!($name))
+                }
+            )*
+        }
 
         fn get_query_text_contents() -> Vec<String> {
             let mut temp_vec = Vec::new();
