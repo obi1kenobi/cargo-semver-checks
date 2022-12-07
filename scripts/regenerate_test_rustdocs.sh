@@ -15,7 +15,10 @@ set -u
 RUSTDOC_CMD="cargo $TOOLCHAIN rustdoc"
 
 # Run rustdoc on test_crates/*/{new,old}/
-for crate_pair in $(ls "$TOPLEVEL/test_crates"); do
+for crate_pair in $(find "$TOPLEVEL/test_crates/" -maxdepth 1 -mindepth 1 -type d); do
+	# Removing path prefix, leaving only the directory name without forward slashes
+	crate_pair=${crate_pair#"$TOPLEVEL/test_crates/"}
+
     for crate_version in "new" "old"; do
         crate="$crate_pair/$crate_version"
         echo "Generating: $crate"
