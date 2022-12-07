@@ -78,5 +78,31 @@
         "span_begin_line": Uint64(20),
         "span_filename": String("src/main.rs"),
         "visibility_limit": String("public")
+    },
+    {
+        "current_parameter_count": List([]), 
+        "method_name": String("will_be_removed_associated_fn"), 
+        "method_visibility": String("public"), 
+        "name": String("Foo"), 
+        "non_matching_span_begin_line": List([]), 
+        "non_matching_span_filename": List([]), 
+        "old_parameter_count": Uint64(0), 
+        "path": List([String("item_missing"), String("Foo")]), 
+        "span_begin_line": Uint64(15), 
+        "span_filename": String("src/main.rs"), 
+        "visibility_limit": String("public")
+    },
+    {
+        "current_parameter_count": List([]), 
+        "method_name": String("will_be_removed_method"), 
+        "method_visibility": String("public"), 
+        "name": String("Foo"), 
+        "non_matching_span_begin_line": List([]), 
+        "non_matching_span_filename": List([]), 
+        "old_parameter_count": Uint64(1), 
+        "path": List([String("item_missing"), String("Foo")]), 
+        "span_begin_line": Uint64(17), 
+        "span_filename": String("src/main.rs"), 
+        "visibility_limit": String("public")
     }
 ]
