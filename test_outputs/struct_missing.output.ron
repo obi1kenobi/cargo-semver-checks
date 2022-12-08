@@ -1,26 +1,28 @@
 [
     {
-        "name": String("WillBeRemovedEnum"),
+        "name": String("WillBeRemovedStruct"),
+        "struct_type": String("unit"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("item_missing"),
-            String("WillBeRemovedEnum"),
+            String("WillBeRemovedStruct"),
         ]),
         "visibility_limit": String("public"),
         "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(7),
+        "span_begin_line": Uint64(4),
     },
     {
-        "name": String("PubUseRemovedEnum"),
+        "name": String("PubUseRemovedStruct"),
+        "struct_type": String("unit"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("item_missing"),
-            String("PubUseRemovedEnum"),
+            String("PubUseRemovedStruct"),
         ]),
         "visibility_limit": String("public"),
         "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(35),
+        "span_begin_line": Uint64(33),
     }
 ]

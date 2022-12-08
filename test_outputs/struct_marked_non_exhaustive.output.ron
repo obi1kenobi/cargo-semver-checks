@@ -3,7 +3,7 @@
         "name": String("UnitStruct"),
         "struct_type": String("unit"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("non_exhaustive"),
             String("UnitStruct"),
@@ -16,7 +16,7 @@
         "name": String("TupleStruct"),
         "struct_type": String("tuple"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("non_exhaustive"),
             String("TupleStruct"),
@@ -29,7 +29,7 @@
         "name": String("ExternallyConstructibleStruct"),
         "struct_type": String("plain"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("non_exhaustive"),
             String("ExternallyConstructibleStruct"),

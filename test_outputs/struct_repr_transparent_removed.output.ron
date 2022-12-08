@@ -2,7 +2,7 @@
     {
         "name": String("Foo"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_transparent_removed"),
             String("Foo"),
@@ -15,7 +15,7 @@
     {
         "name": String("Bar"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_transparent_removed"),
             String("Bar"),
@@ -28,7 +28,7 @@
     {
         "name": String("WithZeroSizedData"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_transparent_removed"),
             String("WithZeroSizedData"),
@@ -41,7 +41,7 @@
     {
         "name": String("TupleWithZeroSizedData"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_transparent_removed"),
             String("TupleWithZeroSizedData"),
@@ -54,7 +54,7 @@
     {
         "name": String("WithPubZeroSizedData"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_transparent_removed"),
             String("WithPubZeroSizedData"),
@@ -67,7 +67,7 @@
     {
         "name": String("WithSpecificZeroSizedData"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_transparent_removed"),
             String("WithSpecificZeroSizedData"),
@@ -80,7 +80,7 @@
     {
         "name": String("WithFoo"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_transparent_removed"),
             String("WithFoo"),
@@ -93,7 +93,7 @@
     {
         "name": String("WithRef"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_transparent_removed"),
             String("WithRef"),
@@ -106,7 +106,7 @@
     {
         "name": String("WithTuple"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_transparent_removed"),
             String("WithTuple"),
@@ -119,7 +119,7 @@
     {
         "name": String("WithGeneric"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_transparent_removed"),
             String("WithGeneric"),

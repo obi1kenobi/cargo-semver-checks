@@ -3,7 +3,7 @@
         "enum_name": String("Enum"),
         "variant_name": String("FieldWillBeMissing"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_struct_variant_field_missing"),
             String("Enum"),

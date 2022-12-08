@@ -3,7 +3,7 @@
         "struct_name": String("FieldWillBeRemoved"),
         "struct_type": String("plain"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_pub_field_missing"),
             String("FieldWillBeRemoved"),

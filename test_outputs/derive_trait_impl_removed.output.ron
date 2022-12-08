@@ -2,7 +2,7 @@
     {
         "name": String("DebugFoo"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("derive_trait_impl_removed"),
             String("DebugFoo"),
@@ -20,7 +20,7 @@
     {
         "name": String("CopyBar"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("derive_trait_impl_removed"),
             String("CopyBar"),
@@ -38,7 +38,7 @@
     {
         "name": String("EqFoo"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("derive_trait_impl_removed"),
             String("EqFoo"),
