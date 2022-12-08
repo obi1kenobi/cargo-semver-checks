@@ -50,7 +50,7 @@
     {
         "name": String("U8CEnum"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_repr_int_removed"),
             String("U8CEnum"),
@@ -62,7 +62,7 @@
     {
         "name": String("SeparateU8CEnum"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_repr_int_removed"),
             String("SeparateU8CEnum"),

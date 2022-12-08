@@ -14,7 +14,7 @@
     {
         "name": String("CRemovedAlign16"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("struct_repr_c_removed"),
             String("CRemovedAlign16"),

@@ -66,7 +66,7 @@
     {
         "name": String("U8ToU16CEnum"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_repr_int_changed"),
             String("U8ToU16CEnum"),
@@ -82,7 +82,7 @@
     {
         "name": String("SeparateU8ToU16CEnum"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_repr_int_changed"),
             String("SeparateU8ToU16CEnum"),

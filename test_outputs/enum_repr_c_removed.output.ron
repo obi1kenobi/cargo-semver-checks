@@ -14,7 +14,7 @@
     {
         "name": String("ComplexRemovedReprEnum"),
         "path": List([
-            String("semver_tests"),
+            String("test_crates"),
             String("test_cases"),
             String("enum_repr_c_removed"),
             String("ComplexRemovedReprEnum"),
