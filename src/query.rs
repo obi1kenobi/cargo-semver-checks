@@ -300,8 +300,7 @@ mod tests {
 
             let flattened_actual_results: Vec<_> = actual_results
                 .into_iter()
-                .map(|(_key, value)| value)
-                .flatten()
+                .flat_map(|(_key, value)| value)
                 .collect();
             for semver_violation_result in flattened_actual_results {
                 let pretty_result: BTreeMap<String, TransparentValue> = semver_violation_result
