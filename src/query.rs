@@ -260,18 +260,24 @@ mod tests {
                         (
                             format!("./test_crates/{}/", crate_pair),
                             results_iter
-                                .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+                                .map(|res| {
+                                    res.into_iter().map(|(k, v)| (k.to_string(), v)).collect()
+                                })
                                 .collect::<Vec<BTreeMap<_, _>>>(),
                         )
                     };
 
                 assert!(
-                    run_query_on(&indexed_crate_new, &indexed_crate_new).1.is_empty(),
+                    run_query_on(&indexed_crate_new, &indexed_crate_new)
+                        .1
+                        .is_empty(),
                     "{}",
                     crate_pair
                 );
                 assert!(
-                    run_query_on(&indexed_crate_old, &indexed_crate_old).1.is_empty(),
+                    run_query_on(&indexed_crate_old, &indexed_crate_old)
+                        .1
+                        .is_empty(),
                     "{}",
                     crate_pair
                 );
