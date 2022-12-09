@@ -1,5 +1,5 @@
 {
-    "sized_impl_removed crate pair": [
+    "./test_crates/sized_impl_removed/": [
         {
             "name": String("SizedStruct"),
             "path": List([

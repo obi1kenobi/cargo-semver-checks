@@ -1,5 +1,5 @@
 {
-    "enum_variant_added crate pair": [
+    "./test_crates/enum_variant_added/": [
         {
             "enum_name": String("EnumWithNewVariant"),
             "path": List([

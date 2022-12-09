@@ -1,5 +1,5 @@
 {
-    "unit_struct_changed_kind crate pair": [
+    "./test_crates/unit_struct_changed_kind/": [
         {
             "name": String("UnitStructToPlain"),
             "path": List([

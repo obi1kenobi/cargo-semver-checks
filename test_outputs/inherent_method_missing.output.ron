@@ -1,5 +1,5 @@
 {
-    "inherent_method_missing crate pair": [
+    "./test_crates/inherent_method_missing/": [
         {
             "method_name": String("will_be_removed_associated_fn"),
             "method_visibility": String("public"),

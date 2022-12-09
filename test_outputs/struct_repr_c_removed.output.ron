@@ -1,5 +1,5 @@
 {
-    "struct_repr_c_removed crate pair": [
+    "./test_crates/struct_repr_c_removed/": [
         {
             "name": String("Foo"),
             "path": List([

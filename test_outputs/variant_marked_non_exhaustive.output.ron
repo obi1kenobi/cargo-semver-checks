@@ -1,5 +1,5 @@
 {
-    "non_exhaustive crate pair": [
+    "./test_crates/non_exhaustive/": [
         {
             "name": String("MyEnum"),
             "path": List([

@@ -1,5 +1,5 @@
 {
-    "enum_struct_variant_field_missing crate pair": [
+    "./test_crates/enum_struct_variant_field_missing/": [
         {
             "enum_name": String("Enum"),
             "field_name": String("bar"),

@@ -1,5 +1,5 @@
 {
-    "inherent_method_missing crate pair": [
+    "./test_crates/inherent_method_missing/": [
         {
             "current_parameter_count": List([]),
             "method_name": String("will_be_removed_associated_fn"),
@@ -33,7 +33,7 @@
             "visibility_limit": String("public"),
         },
     ],
-    "parameter_count_changed crate pair": [
+    "./test_crates/parameter_count_changed/": [
         {
             "current_parameter_count": List([
                 Uint64(1),

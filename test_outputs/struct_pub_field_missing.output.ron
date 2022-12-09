@@ -1,5 +1,5 @@
 {
-    "struct_pub_field_missing crate pair": [
+    "./test_crates/struct_pub_field_missing/": [
         {
             "field_name": String("bar"),
             "path": List([

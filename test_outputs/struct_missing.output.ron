@@ -1,5 +1,5 @@
 {
-    "struct_missing crate pair": [
+    "./test_crates/struct_missing/": [
         {
             "name": String("WillBeRemovedStruct"),
             "path": List([
@@ -23,7 +23,7 @@
             "visibility_limit": String("public"),
         },
     ],
-    "struct_pub_field_missing crate pair": [
+    "./test_crates/struct_pub_field_missing/": [
         {
             "name": String("StructRemoved"),
             "path": List([
@@ -36,7 +36,7 @@
             "visibility_limit": String("public"),
         },
     ],
-    "unit_struct_changed_kind crate pair": [
+    "./test_crates/unit_struct_changed_kind/": [
         {
             "name": String("UnitStructToPlain"),
             "path": List([

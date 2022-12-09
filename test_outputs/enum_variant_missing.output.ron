@@ -1,5 +1,5 @@
 {
-    "enum_struct_variant_field_missing crate pair": [
+    "./test_crates/enum_struct_variant_field_missing/": [
         {
             "enum_name": String("IgnoredEnum"),
             "path": List([
@@ -12,7 +12,7 @@
             "visibility_limit": String("public"),
         },
     ],
-    "enum_variant_missing crate pair": [
+    "./test_crates/enum_variant_missing/": [
         {
             "enum_name": String("VariantWillBeRemoved"),
             "path": List([

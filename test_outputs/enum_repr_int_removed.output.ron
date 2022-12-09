@@ -1,5 +1,5 @@
 {
-    "enum_repr_int_changed crate pair": [
+    "./test_crates/enum_repr_int_changed/": [
         {
             "name": String("U8Enum"),
             "path": List([
@@ -41,7 +41,7 @@
             "visibility_limit": String("public"),
         },
     ],
-    "enum_repr_int_removed crate pair": [
+    "./test_crates/enum_repr_int_removed/": [
         {
             "name": String("U8Enum"),
             "path": List([

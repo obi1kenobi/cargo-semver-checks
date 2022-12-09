@@ -1,5 +1,5 @@
 {
-    "enum_missing crate pair": [
+    "./test_crates/enum_missing/": [
         {
             "name": String("WillBeRemovedEnum"),
             "path": List([
@@ -21,7 +21,7 @@
             "visibility_limit": String("public"),
         },
     ],
-    "enum_variant_missing crate pair": [
+    "./test_crates/enum_variant_missing/": [
         {
             "name": String("ShouldNotMatch"),
             "path": List([

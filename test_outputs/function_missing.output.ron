@@ -1,5 +1,5 @@
 {
-    "function_missing crate pair": [
+    "./test_crates/function_missing/": [
         {
             "name": String("will_be_removed_fn"),
             "path": List([

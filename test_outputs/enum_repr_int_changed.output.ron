@@ -1,5 +1,5 @@
 {
-    "enum_repr_int_changed crate pair": [
+    "./test_crates/enum_repr_int_changed/": [
         {
             "name": String("U8ToU16Enum"),
             "new_attr": List([

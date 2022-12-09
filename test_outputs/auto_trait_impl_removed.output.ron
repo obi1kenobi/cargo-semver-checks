@@ -1,5 +1,5 @@
 {
-    "auto_trait_impl_removed crate pair": [
+    "./test_crates/auto_trait_impl_removed/": [
         {
             "auto_trait": String("Sync"),
             "auto_trait_path": List([

@@ -1,5 +1,5 @@
 {
-    "parameter_count_changed crate pair": [
+    "./test_crates/parameter_count_changed/": [
         {
             "current_parameter_count": Uint64(2),
             "name": String("function_with_a_parameter_added"),

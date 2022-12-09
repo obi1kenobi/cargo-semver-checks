@@ -255,7 +255,7 @@ mod tests {
                     .run_query(&semver_query.query, semver_query.arguments.clone())
                     .unwrap();
                 (
-                    format!("{} crate pair", crate_pair),
+                    format!("./test_crates/{}/", crate_pair),
                     results_iter
                         .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
                         .collect::<Vec<BTreeMap<_, _>>>(),
