@@ -1,5 +1,5 @@
 [package]
-name = "item_missing"
+name = "inherent_method_missing"
 version = "0.1.0"
 edition = "2021"
 
