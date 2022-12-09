@@ -2,22 +2,22 @@
     {
         "name": String("WillBeRemovedEnum"),
         "path": List([
-            String("item_missing"),
+            String("enum_missing"),
             String("WillBeRemovedEnum"),
         ]),
         "visibility_limit": String("public"),
         "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(5),
+        "span_begin_line": Uint64(1),
     },
     {
         "name": String("PubUseRemovedEnum"),
         "path": List([
-            String("item_missing"),
+            String("enum_missing"),
             String("PubUseRemovedEnum"),
         ]),
         "visibility_limit": String("public"),
         "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(27),
+        "span_begin_line": Uint64(4),
     },
     {
         "name": String("ShouldNotMatch"), 

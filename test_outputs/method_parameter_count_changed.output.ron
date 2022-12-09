@@ -87,8 +87,8 @@
         "non_matching_span_begin_line": List([]), 
         "non_matching_span_filename": List([]), 
         "old_parameter_count": Uint64(0), 
-        "path": List([String("item_missing"), String("Foo")]), 
-        "span_begin_line": Uint64(15), 
+        "path": List([String("inherent_method_missing"), String("Foo")]),
+        "span_begin_line": Uint64(7),
         "span_filename": String("src/main.rs"), 
         "visibility_limit": String("public")
     },
@@ -100,8 +100,8 @@
         "non_matching_span_begin_line": List([]), 
         "non_matching_span_filename": List([]), 
         "old_parameter_count": Uint64(1), 
-        "path": List([String("item_missing"), String("Foo")]), 
-        "span_begin_line": Uint64(17), 
+        "path": List([String("inherent_method_missing"), String("Foo")]),
+        "span_begin_line": Uint64(9),
         "span_filename": String("src/main.rs"), 
         "visibility_limit": String("public")
     }
