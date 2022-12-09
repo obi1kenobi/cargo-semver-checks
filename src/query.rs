@@ -236,13 +236,13 @@ mod tests {
             std::fs::read_to_string(&format!("./test_outputs/{}.output.ron", query_name))
             .with_context(|| format!("Could not load test_outputs/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
             .expect("failed to load expected outputs");
-        let mut expected_results: Vec<BTreeMap<String, FieldValue>> =
+        let mut expected_results: BTreeMap<String, Vec<BTreeMap<String, FieldValue>>> =
             ron::from_str(&expected_result_text)
                 .expect("could not parse expected outputs as ron format");
 
-        let mut actual_results: Vec<BTreeMap<_, _>> = get_test_crate_names()
+        let mut actual_results: BTreeMap<String, Vec<BTreeMap<_, _>>> = get_test_crate_names()
             .into_iter()
-            .flat_map(|crate_pair| {
+            .map(|crate_pair| {
                 let crate_new = load_pregenerated_rustdoc(&crate_pair, "new");
                 let crate_old = load_pregenerated_rustdoc(&crate_pair, "old");
                 let indexed_crate_new = VersionedIndexedCrate::new(&crate_new);
@@ -257,43 +257,68 @@ mod tests {
                         let results_iter = adapter
                             .run_query(&semver_query.query, semver_query.arguments.clone())
                             .unwrap();
-                        results_iter
-                            .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
-                            .collect::<Vec<BTreeMap<_, _>>>()
+                        (
+                            format!("./test_crates/{}/", crate_pair),
+                            results_iter
+                                .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+                                .collect::<Vec<BTreeMap<_, _>>>(),
+                        )
                     };
 
                 assert!(
-                    run_query_on(&indexed_crate_new, &indexed_crate_new).is_empty(),
+                    run_query_on(&indexed_crate_new, &indexed_crate_new).1.is_empty(),
                     "{}",
                     crate_pair
                 );
                 assert!(
-                    run_query_on(&indexed_crate_old, &indexed_crate_old).is_empty(),
+                    run_query_on(&indexed_crate_old, &indexed_crate_old).1.is_empty(),
                     "{}",
                     crate_pair
                 );
                 run_query_on(&indexed_crate_new, &indexed_crate_old)
             })
+            .filter(|(_crate_pair, output)| !output.is_empty())
             .collect();
 
         // Reorder both vectors of results into a deterministic order that will compensate for
         // nondeterminism in how the results are ordered.
-        let key_func = |elem: &BTreeMap<String, FieldValue>| {
-            (
-                elem["span_filename"].as_str().unwrap().to_owned(),
-                elem["span_begin_line"].as_usize().unwrap(),
-            )
+        let sort_individual_outputs = |results: &mut BTreeMap<String, Vec<_>>| {
+            let key_func = |elem: &BTreeMap<String, FieldValue>| {
+                (
+                    elem["span_filename"].as_str().unwrap().to_owned(),
+                    elem["span_begin_line"].as_usize().unwrap(),
+                )
+            };
+            for (_key, value) in results.iter_mut() {
+                value.sort_unstable_by_key(key_func);
+            }
         };
-        expected_results.sort_unstable_by_key(key_func);
-        actual_results.sort_unstable_by_key(key_func);
+        sort_individual_outputs(&mut expected_results);
+        sort_individual_outputs(&mut actual_results);
 
-        assert_eq!(expected_results, actual_results);
+        if expected_results != actual_results {
+            let results_to_string = |name, results| {
+                format!(
+                    "{}:\n{}\n",
+                    name,
+                    ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default())
+                        .unwrap()
+                )
+            };
+            panic!("Query {} produced incorrect output (./src/lints/{}).\n{}\n{}\nNote that the individual outputs might have been deliberately reordered.", &query_name, &query_name, 
+                results_to_string(format!("Expected (./test_outputs/{}.output.ron)", &query_name), &expected_results),
+                results_to_string("Actual".to_string(), &actual_results));
+        }
 
         let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
             assert!(!actual_results.is_empty());
 
-            for semver_violation_result in actual_results {
+            let flattened_actual_results: Vec<_> = actual_results
+                .into_iter()
+                .flat_map(|(_key, value)| value)
+                .collect();
+            for semver_violation_result in flattened_actual_results {
                 let pretty_result: BTreeMap<String, TransparentValue> = semver_violation_result
                     .into_iter()
                     .map(|(k, v)| (k, v.into()))

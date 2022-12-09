@@ -1,35 +1,37 @@
-[
-    {
-        "name": String("MyEnum"),
-        "path": List([
-            String("non_exhaustive"),
-            String("MyEnum"),
-        ]),
-        "variant_name": String("UnitVariant"),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(38),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("MyEnum"),
-        "path": List([
-            String("non_exhaustive"),
-            String("MyEnum"),
-        ]),
-        "variant_name": String("TupleVariant"),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(41),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("MyEnum"),
-        "path": List([
-            String("non_exhaustive"),
-            String("MyEnum"),
-        ]),
-        "variant_name": String("StructVariant"),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(44),
-        "visibility_limit": String("public"),
-    }
-]
+{
+    "./test_crates/non_exhaustive/": [
+        {
+            "name": String("MyEnum"),
+            "path": List([
+                String("non_exhaustive"),
+                String("MyEnum"),
+            ]),
+            "span_begin_line": Uint64(38),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("UnitVariant"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("MyEnum"),
+            "path": List([
+                String("non_exhaustive"),
+                String("MyEnum"),
+            ]),
+            "span_begin_line": Uint64(41),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("TupleVariant"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("MyEnum"),
+            "path": List([
+                String("non_exhaustive"),
+                String("MyEnum"),
+            ]),
+            "span_begin_line": Uint64(44),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("StructVariant"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

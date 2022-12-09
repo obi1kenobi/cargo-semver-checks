@@ -1,12 +1,14 @@
-[
-    {
-        "name": String("UnitStructToPlain"),
-        "path": List([
-            String("unit_struct_changed_kind"),
-            String("UnitStructToPlain"),
-        ]),
-        "visibility_limit": String("public"),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(1),
-    }
-]
+{
+    "./test_crates/unit_struct_changed_kind/": [
+        {
+            "name": String("UnitStructToPlain"),
+            "path": List([
+                String("unit_struct_changed_kind"),
+                String("UnitStructToPlain"),
+            ]),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}
