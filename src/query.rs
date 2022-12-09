@@ -190,7 +190,7 @@ mod tests {
         assert_eq!(expected_paths, actual_paths);
     }
 
-    pub fn check_query_execution(query_name: &str) {
+    pub(in crate::query) fn check_query_execution(query_name: &str) {
         // Ensure the rustdocs JSON outputs have been regenerated.
         let baseline_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
             .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
