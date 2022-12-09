@@ -7,7 +7,7 @@
                 String("FieldWillBeRemoved"),
             ]),
             "span_begin_line": Uint64(5),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "struct_name": String("FieldWillBeRemoved"),
             "struct_type": String("plain"),
         },

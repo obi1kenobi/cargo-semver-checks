@@ -7,7 +7,7 @@
                 String("DebugFoo"),
             ]),
             "span_begin_line": Uint64(2),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "trait_name": String("Debug"),
             "trait_path": List([
                 String("core"),
@@ -23,7 +23,7 @@
                 String("CopyBar"),
             ]),
             "span_begin_line": Uint64(5),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "trait_name": String("Copy"),
             "trait_path": List([
                 String("core"),
@@ -39,7 +39,7 @@
                 String("EqFoo"),
             ]),
             "span_begin_line": Uint64(10),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "trait_name": String("Eq"),
             "trait_path": List([
                 String("core"),

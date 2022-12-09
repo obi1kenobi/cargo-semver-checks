@@ -7,7 +7,7 @@
                 String("Foo"),
             ]),
             "span_begin_line": Uint64(1),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "transparent_field_name": List([
                 String("bar"),
             ]),
@@ -20,7 +20,7 @@
                 String("Bar"),
             ]),
             "span_begin_line": Uint64(5),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "transparent_field_name": List([
                 String("0"),
             ]),
@@ -33,7 +33,7 @@
                 String("WithZeroSizedData"),
             ]),
             "span_begin_line": Uint64(7),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "transparent_field_name": List([
                 String("bar"),
             ]),
@@ -46,7 +46,7 @@
                 String("TupleWithZeroSizedData"),
             ]),
             "span_begin_line": Uint64(12),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "transparent_field_name": List([
                 String("0"),
             ]),
@@ -59,7 +59,7 @@
                 String("WithPubZeroSizedData"),
             ]),
             "span_begin_line": Uint64(14),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "transparent_field_name": List([
                 String("bar"),
             ]),
@@ -72,7 +72,7 @@
                 String("WithSpecificZeroSizedData"),
             ]),
             "span_begin_line": Uint64(19),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "transparent_field_name": List([
                 String("bar"),
             ]),
@@ -85,7 +85,7 @@
                 String("WithFoo"),
             ]),
             "span_begin_line": Uint64(24),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "transparent_field_name": List([
                 String("bar"),
             ]),
@@ -98,7 +98,7 @@
                 String("WithRef"),
             ]),
             "span_begin_line": Uint64(29),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "transparent_field_name": List([
                 String("bar"),
             ]),
@@ -111,7 +111,7 @@
                 String("WithTuple"),
             ]),
             "span_begin_line": Uint64(34),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "transparent_field_name": List([
                 String("bar"),
             ]),
@@ -124,7 +124,7 @@
                 String("WithGeneric"),
             ]),
             "span_begin_line": Uint64(39),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "transparent_field_name": List([
                 String("bar"),
             ]),

@@ -8,7 +8,7 @@
                 String("Enum"),
             ]),
             "span_begin_line": Uint64(6),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "variant_name": String("FieldWillBeMissing"),
         },
     ],

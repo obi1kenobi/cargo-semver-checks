@@ -13,7 +13,7 @@
                 String("Foo"),
             ]),
             "span_begin_line": Uint64(7),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -29,7 +29,7 @@
                 String("Foo"),
             ]),
             "span_begin_line": Uint64(9),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
     ],
@@ -45,7 +45,7 @@
                 Uint64(10),
             ]),
             "non_matching_span_filename": List([
-                String("src/main.rs"),
+                String("src/lib.rs"),
             ]),
             "old_parameter_count": Uint64(0),
             "path": List([
@@ -53,7 +53,7 @@
                 String("StructWithMethods"),
             ]),
             "span_begin_line": Uint64(10),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -67,7 +67,7 @@
                 Uint64(12),
             ]),
             "non_matching_span_filename": List([
-                String("src/main.rs"),
+                String("src/lib.rs"),
             ]),
             "old_parameter_count": Uint64(1),
             "path": List([
@@ -75,7 +75,7 @@
                 String("StructWithMethods"),
             ]),
             "span_begin_line": Uint64(12),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -89,7 +89,7 @@
                 Uint64(14),
             ]),
             "non_matching_span_filename": List([
-                String("src/main.rs"),
+                String("src/lib.rs"),
             ]),
             "old_parameter_count": Uint64(4),
             "path": List([
@@ -97,7 +97,7 @@
                 String("StructWithMethods"),
             ]),
             "span_begin_line": Uint64(14),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -111,7 +111,7 @@
                 Uint64(18),
             ]),
             "non_matching_span_filename": List([
-                String("src/main.rs"),
+                String("src/lib.rs"),
             ]),
             "old_parameter_count": Uint64(2),
             "path": List([
@@ -119,7 +119,7 @@
                 String("StructWithMethods"),
             ]),
             "span_begin_line": Uint64(16),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -133,7 +133,7 @@
                 Uint64(28),
             ]),
             "non_matching_span_filename": List([
-                String("src/main.rs"),
+                String("src/lib.rs"),
             ]),
             "old_parameter_count": Uint64(2),
             "path": List([
@@ -141,7 +141,7 @@
                 String("StructWithMethods"),
             ]),
             "span_begin_line": Uint64(20),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
     ],

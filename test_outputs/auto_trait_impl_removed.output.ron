@@ -13,7 +13,7 @@
                 String("SyncStruct"),
             ]),
             "span_begin_line": Uint64(9),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -29,7 +29,7 @@
                 String("SendStruct"),
             ]),
             "span_begin_line": Uint64(16),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -46,7 +46,7 @@
                 String("UnwindSafeStruct"),
             ]),
             "span_begin_line": Uint64(22),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -63,7 +63,7 @@
                 String("RefUnwindSafeStruct"),
             ]),
             "span_begin_line": Uint64(27),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -79,7 +79,7 @@
                 String("UnpinStruct"),
             ]),
             "span_begin_line": Uint64(40),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
     ],

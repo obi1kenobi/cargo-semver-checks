@@ -7,7 +7,7 @@
                 String("will_be_removed_fn"),
             ]),
             "span_begin_line": Uint64(1),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -17,7 +17,7 @@
                 String("pub_use_removed_fn"),
             ]),
             "span_begin_line": Uint64(4),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
     ],

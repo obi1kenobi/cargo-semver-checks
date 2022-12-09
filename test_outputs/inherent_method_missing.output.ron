@@ -9,7 +9,7 @@
                 String("Foo"),
             ]),
             "span_begin_line": Uint64(7),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -21,7 +21,7 @@
                 String("Foo"),
             ]),
             "span_begin_line": Uint64(9),
-            "span_filename": String("src/main.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
     ],
