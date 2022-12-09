@@ -9,7 +9,7 @@ Lint your crate API changes for semver violations.
 ## Quick Start
 
 ```console
-$ cargo install cargo-semver-checks
+$ cargo install cargo-semver-checks --locked
 
 # Check whether it's safe to release the new version:
 $ cargo semver-checks check-release
