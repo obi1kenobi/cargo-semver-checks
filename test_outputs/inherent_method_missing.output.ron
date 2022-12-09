@@ -1,26 +1,28 @@
-[
-    {
-        "name": String("Foo"),
-        "method_name": String("will_be_removed_associated_fn"),
-        "path": List([
-            String("inherent_method_missing"),
-            String("Foo"),
-        ]),
-        "visibility_limit": String("public"),
-        "method_visibility": String("public"),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(7),
-    },
-    {
-        "name": String("Foo"),
-        "method_name": String("will_be_removed_method"),
-        "path": List([
-            String("inherent_method_missing"),
-            String("Foo"),
-        ]),
-        "visibility_limit": String("public"),
-        "method_visibility": String("public"),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(9),
-    }
-]
+{
+    "inherent_method_missing crate pair": [
+        {
+            "method_name": String("will_be_removed_associated_fn"),
+            "method_visibility": String("public"),
+            "name": String("Foo"),
+            "path": List([
+                String("inherent_method_missing"),
+                String("Foo"),
+            ]),
+            "span_begin_line": Uint64(7),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "method_name": String("will_be_removed_method"),
+            "method_visibility": String("public"),
+            "name": String("Foo"),
+            "path": List([
+                String("inherent_method_missing"),
+                String("Foo"),
+            ]),
+            "span_begin_line": Uint64(9),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

@@ -1,12 +1,14 @@
-[
-    {
-        "name": String("SizedStruct"),
-        "path": List([
-            String("sized_impl_removed"),
-            String("SizedStruct"),
-        ]),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(1),
-        "visibility_limit": String("public"),
-    }
-]
+{
+    "sized_impl_removed crate pair": [
+        {
+            "name": String("SizedStruct"),
+            "path": List([
+                String("sized_impl_removed"),
+                String("SizedStruct"),
+            ]),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

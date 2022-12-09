@@ -1,70 +1,86 @@
-[
-    {
-        "name": String("U8Enum"),
-        "path": List([
-            String("enum_repr_int_removed"),
-            String("U8Enum"),
-        ]),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(1),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("I32Enum"),
-        "path": List([
-            String("enum_repr_int_removed"),
-            String("I32Enum"),
-        ]),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(6),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("IsizeEnum"),
-        "path": List([
-            String("enum_repr_int_removed"),
-            String("IsizeEnum"),
-        ]),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(11),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("UsizeEnum"),
-        "path": List([
-            String("enum_repr_int_removed"),
-            String("UsizeEnum"),
-        ]),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(16),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("U8Enum"), 
-        "path": List([String("enum_repr_int_changed"), String("U8Enum")]), 
-        "span_begin_line": Uint64(29), 
-        "span_filename": String("src/main.rs"), 
-        "visibility_limit": String("public")
-    },
-    {
-        "name": String("I32Enum"), 
-        "path": List([String("enum_repr_int_changed"), String("I32Enum")]), 
-        "span_begin_line": Uint64(34), 
-        "span_filename": String("src/main.rs"), 
-        "visibility_limit": String("public")
-    }, 
-    {
-        "name": String("IsizeEnum"), 
-        "path": List([String("enum_repr_int_changed"), String("IsizeEnum")]), 
-        "span_begin_line": Uint64(39), 
-        "span_filename": String("src/main.rs"), 
-        "visibility_limit": String("public")
-    }, 
-    {
-        "name": String("UsizeEnum"), 
-        "path": List([String("enum_repr_int_changed"), String("UsizeEnum")]), 
-        "span_begin_line": Uint64(44), 
-        "span_filename": String("src/main.rs"), 
-        "visibility_limit": String("public")
-    }
-]
+{
+    "enum_repr_int_changed crate pair": [
+        {
+            "name": String("U8Enum"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("U8Enum"),
+            ]),
+            "span_begin_line": Uint64(29),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("I32Enum"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("I32Enum"),
+            ]),
+            "span_begin_line": Uint64(34),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("IsizeEnum"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("IsizeEnum"),
+            ]),
+            "span_begin_line": Uint64(39),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("UsizeEnum"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("UsizeEnum"),
+            ]),
+            "span_begin_line": Uint64(44),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+    "enum_repr_int_removed crate pair": [
+        {
+            "name": String("U8Enum"),
+            "path": List([
+                String("enum_repr_int_removed"),
+                String("U8Enum"),
+            ]),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("I32Enum"),
+            "path": List([
+                String("enum_repr_int_removed"),
+                String("I32Enum"),
+            ]),
+            "span_begin_line": Uint64(6),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("IsizeEnum"),
+            "path": List([
+                String("enum_repr_int_removed"),
+                String("IsizeEnum"),
+            ]),
+            "span_begin_line": Uint64(11),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("UsizeEnum"),
+            "path": List([
+                String("enum_repr_int_removed"),
+                String("UsizeEnum"),
+            ]),
+            "span_begin_line": Uint64(16),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

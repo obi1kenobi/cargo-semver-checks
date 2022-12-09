@@ -1,13 +1,15 @@
-[
-    {
-        "enum_name": String("Enum"),
-        "variant_name": String("FieldWillBeMissing"),
-        "path": List([
-            String("enum_struct_variant_field_missing"),
-            String("Enum"),
-        ]),
-        "field_name": String("bar"),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(6),
-    }
-]
+{
+    "enum_struct_variant_field_missing crate pair": [
+        {
+            "enum_name": String("Enum"),
+            "field_name": String("bar"),
+            "path": List([
+                String("enum_struct_variant_field_missing"),
+                String("Enum"),
+            ]),
+            "span_begin_line": Uint64(6),
+            "span_filename": String("src/main.rs"),
+            "variant_name": String("FieldWillBeMissing"),
+        },
+    ],
+}

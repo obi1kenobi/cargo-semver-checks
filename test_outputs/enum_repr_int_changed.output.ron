@@ -1,58 +1,60 @@
-[
-    {
-        "name": String("U8ToU16Enum"),
-        "path": List([
-            String("enum_repr_int_changed"),
-            String("U8ToU16Enum"),
-        ]),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(2),
-        "old_attr": String("#[repr(u8)]"),
-        "new_attr": List([
-            String("#[repr(u16)]"),
-        ]),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("I32ToI8Enum"),
-        "path": List([
-            String("enum_repr_int_changed"),
-            String("I32ToI8Enum"),
-        ]),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(8),
-        "old_attr": String("#[repr(i32)]"),
-        "new_attr": List([
-            String("#[repr(i8)]"),
-        ]),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("I32ToU32Enum"),
-        "path": List([
-            String("enum_repr_int_changed"),
-            String("I32ToU32Enum"),
-        ]),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(14),
-        "old_attr": String("#[repr(i32)]"),
-        "new_attr": List([
-            String("#[repr(u32)]"),
-        ]),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("IsizeToUsizeEnum"),
-        "path": List([
-            String("enum_repr_int_changed"),
-            String("IsizeToUsizeEnum"),
-        ]),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(20),
-        "old_attr": String("#[repr(isize)]"),
-        "new_attr": List([
-            String("#[repr(usize)]"),
-        ]),
-        "visibility_limit": String("public"),
-    }
-]
+{
+    "enum_repr_int_changed crate pair": [
+        {
+            "name": String("U8ToU16Enum"),
+            "new_attr": List([
+                String("#[repr(u16)]"),
+            ]),
+            "old_attr": String("#[repr(u8)]"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("U8ToU16Enum"),
+            ]),
+            "span_begin_line": Uint64(2),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("I32ToI8Enum"),
+            "new_attr": List([
+                String("#[repr(i8)]"),
+            ]),
+            "old_attr": String("#[repr(i32)]"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("I32ToI8Enum"),
+            ]),
+            "span_begin_line": Uint64(8),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("I32ToU32Enum"),
+            "new_attr": List([
+                String("#[repr(u32)]"),
+            ]),
+            "old_attr": String("#[repr(i32)]"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("I32ToU32Enum"),
+            ]),
+            "span_begin_line": Uint64(14),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("IsizeToUsizeEnum"),
+            "new_attr": List([
+                String("#[repr(usize)]"),
+            ]),
+            "old_attr": String("#[repr(isize)]"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("IsizeToUsizeEnum"),
+            ]),
+            "span_begin_line": Uint64(20),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

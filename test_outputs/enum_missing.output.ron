@@ -1,29 +1,36 @@
-[
-    {
-        "name": String("WillBeRemovedEnum"),
-        "path": List([
-            String("enum_missing"),
-            String("WillBeRemovedEnum"),
-        ]),
-        "visibility_limit": String("public"),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(1),
-    },
-    {
-        "name": String("PubUseRemovedEnum"),
-        "path": List([
-            String("enum_missing"),
-            String("PubUseRemovedEnum"),
-        ]),
-        "visibility_limit": String("public"),
-        "span_filename": String("src/main.rs"),
-        "span_begin_line": Uint64(4),
-    },
-    {
-        "name": String("ShouldNotMatch"), 
-        "path": List([String("enum_variant_missing"), String("ShouldNotMatch")]), 
-        "span_begin_line": Uint64(11), 
-        "span_filename": String("src/main.rs"), 
-        "visibility_limit": String("public")
-    }
-]
+{
+    "enum_missing crate pair": [
+        {
+            "name": String("WillBeRemovedEnum"),
+            "path": List([
+                String("enum_missing"),
+                String("WillBeRemovedEnum"),
+            ]),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("PubUseRemovedEnum"),
+            "path": List([
+                String("enum_missing"),
+                String("PubUseRemovedEnum"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+    "enum_variant_missing crate pair": [
+        {
+            "name": String("ShouldNotMatch"),
+            "path": List([
+                String("enum_variant_missing"),
+                String("ShouldNotMatch"),
+            ]),
+            "span_begin_line": Uint64(11),
+            "span_filename": String("src/main.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}
