@@ -254,9 +254,12 @@ mod tests {
                 let results_iter = adapter
                     .run_query(&semver_query.query, semver_query.arguments.clone())
                     .unwrap();
-                (format!("{} crate pair", crate_pair), results_iter
-                    .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
-                    .collect::<Vec<BTreeMap<_, _>>>())
+                (
+                    format!("{} crate pair", crate_pair),
+                    results_iter
+                        .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+                        .collect::<Vec<BTreeMap<_, _>>>(),
+                )
             })
             .filter(|(_crate_pair, output)| !output.is_empty())
             .collect();
@@ -279,7 +282,12 @@ mod tests {
 
         if expected_results != actual_results {
             let results_to_string = |name, results| {
-                format!("{}:\n{}\n", name, ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default()).unwrap())
+                format!(
+                    "{}:\n{}\n",
+                    name,
+                    ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default())
+                        .unwrap()
+                )
             };
             panic!("Query {} produced incorrect output (./src/lints/{}).\n{}\n{}\nNote that the individual outputs might have been deliberately reordered.", &query_name, &query_name, 
                 results_to_string(format!("Expected (./test_outputs/{}.output.ron)", &query_name), &expected_results),
@@ -290,7 +298,11 @@ mod tests {
         if let Some(template) = semver_query.per_result_error_template {
             assert!(!actual_results.is_empty());
 
-            let flattened_actual_results: Vec<_> = actual_results.into_iter().map(|(_key, value)| value).flatten().collect();
+            let flattened_actual_results: Vec<_> = actual_results
+                .into_iter()
+                .map(|(_key, value)| value)
+                .flatten()
+                .collect();
             for semver_violation_result in flattened_actual_results {
                 let pretty_result: BTreeMap<String, TransparentValue> = semver_violation_result
                     .into_iter()
