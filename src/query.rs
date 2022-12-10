@@ -258,15 +258,19 @@ mod tests {
         if expected_results != actual_results {
             let results_to_string = |name, results| {
                 format!(
-                    "{}:\n{}\n",
+                    "{}:\n{}",
                     name,
                     ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default())
                         .unwrap()
                 )
             };
-            panic!("Query {} produced incorrect output (./src/lints/{}).\n{}\n{}\nNote that the individual outputs might have been deliberately reordered.", &query_name, &query_name, 
-                results_to_string(format!("Expected (./test_outputs/{}.output.ron)", &query_name), &expected_results),
-                results_to_string("Actual".to_string(), &actual_results));
+            let messages = vec![
+                format!("Query {} produced incorrect output (./src/lints/{}.ron).", &query_name, &query_name),
+                results_to_string(format!("Expected output (./test_outputs/{}.output.ron)", &query_name), &expected_results),
+                results_to_string("Actual output".to_string(), &actual_results),
+                "Note that the individual outputs might have been deliberately reordered. Also, remember about running ./scripts/regenerate_test_rustdocs.sh when needed.".to_string(),
+            ];
+            panic!("\n{}\n", messages.join("\n\n"));
         }
 
         let registry = make_handlebars_registry();
@@ -286,7 +290,7 @@ mod tests {
                 registry
                     .render_template(&template, &pretty_result)
                     .with_context(|| "Error instantiating semver query template.")
-                    .expect("Could not materialize template.");
+                    .expect("could not materialize template");
             }
         }
     }
