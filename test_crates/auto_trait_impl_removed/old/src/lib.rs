@@ -1,10 +1,4 @@
-use std::{
-    cell::RefCell,
-    marker::PhantomPinned,
-    panic::{AssertUnwindSafe, UnwindSafe},
-    rc::Rc,
-    sync::Arc,
-};
+use std::{cell::RefCell, rc::Rc};
 
 pub struct SyncStruct {
     bar: usize,

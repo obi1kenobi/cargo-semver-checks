@@ -3,7 +3,6 @@ use std::{
     marker::PhantomPinned,
     panic::{AssertUnwindSafe, UnwindSafe},
     rc::Rc,
-    sync::Arc,
 };
 
 pub struct SyncStruct {

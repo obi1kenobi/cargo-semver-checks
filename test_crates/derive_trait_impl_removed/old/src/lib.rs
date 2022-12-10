@@ -3,7 +3,7 @@ pub struct DebugFoo;
 
 #[derive(Clone, Copy)]
 pub enum CopyBar {
-    Var
+    Var,
 }
 
 #[derive(PartialEq, Eq)]
