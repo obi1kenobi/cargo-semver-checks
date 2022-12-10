@@ -18,12 +18,12 @@ SemverQuery(
                         name @tag @output
 
                         attribute {
-                            as_string @output(name: "old_attr")
+                            old_attr: as_string @output
                             content {
                                 base @filter(op: "=", value: ["$repr"])
                                 argument {
                                     old_attr_value: base @filter(op: "regex", value: ["$repr_regex"])
-                                                            @tag
+                                                         @tag
                                 }
                             }
                         }
@@ -54,7 +54,7 @@ SemverQuery(
                                 base @filter(op: "=", value: ["$repr"])
                                 argument {
                                     base @filter(op: "regex", value: ["$repr_regex"])
-                                            @filter(op: "!=", value: ["%old_attr_value"])
+                                         @filter(op: "!=", value: ["%old_attr_value"])
                                 }
                             }
                         }
