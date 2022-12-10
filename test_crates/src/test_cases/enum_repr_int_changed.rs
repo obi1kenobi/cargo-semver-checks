@@ -56,21 +56,35 @@ pub enum IsizeToUsizeEnum {
 
 #[cfg(not(feature = "enum_repr_int_changed"))]
 #[repr(u8, C)]
-pub enum U8ToU16CEnum {
+pub enum U8CToU16CEnum {
     Bar,
     Baz,
 }
 
 #[cfg(feature = "enum_repr_int_changed")]
 #[repr(u16, C)]
-pub enum U8ToU16CEnum {
+pub enum U8CToU16CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(C, u8)]
+pub enum CU8ToCU16Enum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(C, u16)]
+pub enum CU8ToCU16Enum {
     Bar,
     Baz,
 }
 
 #[cfg(not(feature = "enum_repr_int_changed"))]
 #[repr(u8, C)]
-pub enum SeparateU8ToU16CEnum {
+pub enum U8CToSeparateU16CEnum {
     Bar,
     Baz,
 }
@@ -78,7 +92,7 @@ pub enum SeparateU8ToU16CEnum {
 #[cfg(feature = "enum_repr_int_changed")]
 #[repr(u16)]
 #[repr(C)]
-pub enum SeparateU8ToU16CEnum {
+pub enum U8CToSeparateU16CEnum {
     Bar,
     Baz,
 }
@@ -86,14 +100,103 @@ pub enum SeparateU8ToU16CEnum {
 #[cfg(not(feature = "enum_repr_int_changed"))]
 #[repr(u8)]
 #[repr(C)]
-pub enum SeparateU8ToU8CEnum {
+pub enum SeparateU8CToU8CEnum {
     Bar,
     Baz,
 }
 
 #[cfg(feature = "enum_repr_int_changed")]
 #[repr(u8, C)]
-pub enum SeparateU8ToU8CEnum {
+pub enum SeparateU8CToU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(C)]
+#[repr(u8)]
+pub enum SeparateCU8ToCU8Enum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(C, u8)]
+pub enum SeparateCU8ToCU8Enum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(u8)]
+#[repr(C)]
+pub enum SeparateU8CToCU8Enum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(C, u8)]
+pub enum SeparateU8CToCU8Enum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(C)]
+#[repr(u8)]
+pub enum SeparateCU8ToU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(u8, C)]
+pub enum SeparateCU8ToU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(C, u8)]
+pub enum CU8ToU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(u8, C)]
+pub enum CU8ToU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(u8, C)]
+pub enum U8CToCU8Enum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(C, u8)]
+pub enum U8CToCU8Enum {
+    Bar,
+    Baz,
+}
+
+#[cfg(not(feature = "enum_repr_int_changed"))]
+#[repr(C)]
+#[repr(u8)]
+pub enum SeparateCU8ToSeparateU8CEnum {
+    Bar,
+    Baz,
+}
+
+#[cfg(feature = "enum_repr_int_changed")]
+#[repr(u8)]
+#[repr(C)]
+pub enum SeparateCU8ToSeparateU8CEnum {
     Bar,
     Baz,
 }
