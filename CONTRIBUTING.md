@@ -115,9 +115,9 @@ Lints are written as queries for the  `trustfall` ["query everything" engine](ht
 
 Checklist:
 - Choose an appropriate name for your query. We'll refer to it as `<query_name>`.
-- Add the query file: `src/queries/<query_name>.ron`.
-- Add a `<query-name>` feature to `semver_tests/Cargo.toml`.
-- Add a `<query-name>.rs` file in `semver_tests/src/test_cases`.
+- Add the query file: `src/lints/<query_name>.ron`.
+- Add a `<query-name>` feature to `test_crates/Cargo.toml`.
+- Add a `<query-name>.rs` file in `test_crates/src/test_cases`.
 - Add code to that file that demonstrates that semver issue: write the "baseline" first,
   and then use `#[cfg(feature = <query_name>)]` and `#[cfg(not(feature = <query_name>))]` as
   necessary to alter that baseline into a shape that causes the semver issue
@@ -128,13 +128,13 @@ Checklist:
   since it would overwhelm the user with errors, instead of having a separate query that
   specifically reports the removal of the struct rather than all its fields separately.
 - Add the outputs you expect your query to produce over your test case in
-  a new file: `src/test_data/<query_name>.output.run`.
-- Add `<query_name>` to the list of queries tested by the `query_execution_tests!()`
-  macro near the bottom of `src/query.rs`.
+  a new file: `test_outputs/<query_name>.output.run`.
+- Add `<query_name>` to the list of queries used by the `add_lints!()` macro near the bottom
+  of `src/query.rs`. It includes the query content and also creates a new test function
+  named `<query_name>` that compares the output of running this query on `test_crates/`
+  with the output saved in `test_outputs/`.
 - Re-run `./scripts/regenerate_test_rustdocs.sh` to generate the new rustdoc JSON file.
 - Run `cargo test` and ensure your new test appears in the test list and runs correctly.
-- Add an `include_str!("queries/<query_name>.ron"),` line to `SemverQuery::all_queries()`
-  in the `src/query.rs` file, to ensure your query is enabled for use in query runs.
 - Whew! You're done. Thanks for your contribution.
 - If you have the energy, please try to simplify this process by removing and
   automating some of these steps.
