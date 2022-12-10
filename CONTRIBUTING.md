@@ -129,9 +129,9 @@ Checklist:
   specifically reports the removal of the struct rather than all its fields separately.
 - Add the outputs you expect your query to produce over your test case in
   a new file: `test_outputs/<query_name>.output.run`.
-- Add `<query_name>` to the list of queries used by the `add_lints!()`
-  macro near the bottom of `src/query.rs`. It includes the query content and also creates
-  a new test named `<query_name>` that compares the output of running this query on `test_crates/`
+- Add `<query_name>` to the list of queries used by the `add_lints!()` macro near the bottom
+  of `src/query.rs`. It includes the query content and also creates a new test function
+  named `<query_name>` that compares the output of running this query on `test_crates/`
   with the output saved in `test_outputs/`.
 - Re-run `./scripts/regenerate_test_rustdocs.sh` to generate the new rustdoc JSON file.
 - Run `cargo test` and ensure your new test appears in the test list and runs correctly.
