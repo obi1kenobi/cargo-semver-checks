@@ -74,33 +74,8 @@ pub(crate) struct SemverQuery {
 impl SemverQuery {
     pub(crate) fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
-
-        let query_text_contents = [
-            include_str!("./lints/auto_trait_impl_removed.ron"),
-            include_str!("./lints/derive_trait_impl_removed.ron"),
-            include_str!("./lints/enum_marked_non_exhaustive.ron"),
-            include_str!("./lints/enum_missing.ron"),
-            include_str!("./lints/enum_repr_c_removed.ron"),
-            include_str!("./lints/enum_repr_int_changed.ron"),
-            include_str!("./lints/enum_repr_int_removed.ron"),
-            include_str!("./lints/enum_variant_added.ron"),
-            include_str!("./lints/enum_variant_missing.ron"),
-            include_str!("./lints/enum_struct_variant_field_missing.ron"),
-            include_str!("./lints/function_missing.ron"),
-            include_str!("./lints/function_parameter_count_changed.ron"),
-            include_str!("./lints/inherent_method_missing.ron"),
-            include_str!("./lints/method_parameter_count_changed.ron"),
-            include_str!("./lints/sized_impl_removed.ron"),
-            include_str!("./lints/struct_marked_non_exhaustive.ron"),
-            include_str!("./lints/struct_missing.ron"),
-            include_str!("./lints/struct_pub_field_missing.ron"),
-            include_str!("./lints/struct_repr_c_removed.ron"),
-            include_str!("./lints/struct_repr_transparent_removed.ron"),
-            include_str!("./lints/unit_struct_changed_kind.ron"),
-            include_str!("./lints/variant_marked_non_exhaustive.ron"),
-        ];
-        for query_text in query_text_contents {
-            let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
+        for query_text in get_query_text_contents() {
+            let query: SemverQuery = ron::from_str(&query_text).unwrap_or_else(|e| {
                 panic!(
                     "\
 Failed to parse a query: {}
@@ -215,7 +190,7 @@ mod tests {
         assert_eq!(expected_paths, actual_paths);
     }
 
-    fn check_query_execution(query_name: &str) {
+    pub(in crate::query) fn check_query_execution(query_name: &str) {
         // Ensure the rustdocs JSON outputs have been regenerated.
         let baseline_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
             .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
@@ -280,40 +255,55 @@ mod tests {
             }
         }
     }
+}
 
-    macro_rules! query_execution_tests {
-        ($($name:ident,)*) => {
+macro_rules! add_lints {
+    ($($name:ident,)*) => {
+        #[cfg(test)]
+        mod tests_lints {
             $(
                 #[test]
                 fn $name() {
-                    check_query_execution(stringify!($name))
+                    super::tests::check_query_execution(stringify!($name))
                 }
             )*
         }
-    }
 
-    query_execution_tests!(
-        auto_trait_impl_removed,
-        derive_trait_impl_removed,
-        enum_marked_non_exhaustive,
-        enum_missing,
-        enum_repr_c_removed,
-        enum_repr_int_changed,
-        enum_repr_int_removed,
-        enum_variant_added,
-        enum_variant_missing,
-        enum_struct_variant_field_missing,
-        function_missing,
-        function_parameter_count_changed,
-        inherent_method_missing,
-        method_parameter_count_changed,
-        sized_impl_removed,
-        struct_marked_non_exhaustive,
-        struct_missing,
-        struct_pub_field_missing,
-        struct_repr_c_removed,
-        struct_repr_transparent_removed,
-        unit_struct_changed_kind,
-        variant_marked_non_exhaustive,
-    );
+        fn get_query_text_contents() -> Vec<String> {
+            let mut temp_vec = Vec::new();
+            $(
+                temp_vec.push(
+                    std::fs::read_to_string(
+                        format!("./src/lints/{}.ron", stringify!($name))
+                    ).unwrap()
+                );
+            )*
+            temp_vec
+        }
+    }
 }
+
+add_lints!(
+    auto_trait_impl_removed,
+    derive_trait_impl_removed,
+    enum_marked_non_exhaustive,
+    enum_missing,
+    enum_repr_c_removed,
+    enum_repr_int_changed,
+    enum_repr_int_removed,
+    enum_variant_added,
+    enum_variant_missing,
+    enum_struct_variant_field_missing,
+    function_missing,
+    function_parameter_count_changed,
+    inherent_method_missing,
+    method_parameter_count_changed,
+    sized_impl_removed,
+    struct_marked_non_exhaustive,
+    struct_missing,
+    struct_pub_field_missing,
+    struct_repr_c_removed,
+    struct_repr_transparent_removed,
+    unit_struct_changed_kind,
+    variant_marked_non_exhaustive,
+);

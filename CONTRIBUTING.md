@@ -129,12 +129,12 @@ Checklist:
   specifically reports the removal of the struct rather than all its fields separately.
 - Add the outputs you expect your query to produce over your test case in
   a new file: `test_outputs/<query_name>.output.run`.
-- Add `<query_name>` to the list of queries tested by the `query_execution_tests!()`
-  macro near the bottom of `src/query.rs`.
+- Add `<query_name>` to the list of queries used by the `add_lints!()` macro near the bottom
+  of `src/query.rs`. It includes the query content and also creates a new test function
+  named `<query_name>` that compares the output of running this query on `test_crates/`
+  with the output saved in `test_outputs/`.
 - Re-run `./scripts/regenerate_test_rustdocs.sh` to generate the new rustdoc JSON file.
 - Run `cargo test` and ensure your new test appears in the test list and runs correctly.
-- Add an `include_str!("lints/<query_name>.ron"),` line to `SemverQuery::all_queries()`
-  in the `src/query.rs` file, to ensure your query is enabled for use in query runs.
 - Whew! You're done. Thanks for your contribution.
 - If you have the energy, please try to simplify this process by removing and
   automating some of these steps.
