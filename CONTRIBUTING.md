@@ -118,10 +118,8 @@ Checklist:
 - Add the query file: `src/lints/<query_name>.ron`.
 - Add a `<query-name>` feature to `test_crates/Cargo.toml`.
 - Add a `<query-name>.rs` file in `test_crates/src/test_cases`.
-- Add code to that file that demonstrates that semver issue: write the "baseline" first,
-  and then use `#[cfg(feature = <query_name>)]` and `#[cfg(not(feature = <query_name>))]` as
-  necessary to alter that baseline into a shape that causes the semver issue
-  your query looks for.
+- Create a new testing crate pair (the process is described in `test_crates/README.md`)
+  and add code in both the `new/` and `old/` crates that demonstrates that semver issue.
 - Add test code for false-positives and/or true-but-unintended-positives your query might report.
   For example, a true-but-unintended output would be if a query that looks for
   removal of public fields were to report that a struct was removed. This is unintended
