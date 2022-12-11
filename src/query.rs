@@ -166,12 +166,8 @@ mod tests {
             .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
             .collect();
 
-        let expected_result: FieldValue = vec![
-            "pub_use_handling", 
-            "inner", 
-            "CheckPubUseHandling",
-        ]
-        .into();
+        let expected_result: FieldValue =
+            vec!["pub_use_handling", "inner", "CheckPubUseHandling"].into();
         assert_eq!(1, actual_results.len(), "{actual_results:?}");
         assert_eq!(
             expected_result, actual_results[0]["canonical_path"],

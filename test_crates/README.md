@@ -7,8 +7,3 @@ is a map from the crate pair path to the (sorted) list of query output.
 The output of a lint on a crate pair (a pair is a `new` and `old` crate) 
 is the raw output of a query. The current crate is the `new` one,
 and the baseline crate is the `old` one.
-
-The `template` crate pair is mostly for convenience -- it is safe to
-copy-paste it to create a new crate pair 
-(the `name` in both of the new crates needs to be the same as the name
-of the directory they are in).
