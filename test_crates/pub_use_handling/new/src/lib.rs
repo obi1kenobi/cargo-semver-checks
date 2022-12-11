@@ -1,1 +1,2 @@
-pub struct CheckPubUseHandling;
+pub mod inner;
+pub use inner::CheckPubUseHandling;
