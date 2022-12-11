@@ -198,9 +198,16 @@ mod tests {
             })
             .map(|dir_entry| {
                 String::from(
-                    String::from(dir_entry.path().to_str().unwrap())
-                        .strip_prefix("./test_crates/")
-                        .unwrap(),
+                    String::from(
+                        dir_entry
+                            .path()
+                            .to_str()
+                            .expect("failed to convert dir_entry to String"),
+                    )
+                    .strip_prefix("./test_crates/")
+                    .expect(
+                        "the dir_entry doesn't start with './test_crates/', which is unexpected",
+                    ),
                 )
             })
             .collect()
