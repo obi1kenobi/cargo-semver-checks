@@ -248,7 +248,7 @@ mod tests {
                     elem["span_begin_line"].as_usize().unwrap(),
                 )
             };
-            for (_key, value) in results.iter_mut() {
+            for value in results.values_mut() {
                 value.sort_unstable_by_key(key_func);
             }
         };
