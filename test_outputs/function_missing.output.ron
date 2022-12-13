@@ -1,26 +1,24 @@
-[
-    {
-        "name": String("will_be_removed_fn"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("item_missing"),
-            String("will_be_removed_fn"),
-        ]),
-        "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(10),
-    },
-    {
-        "name": String("pub_use_removed_fn"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("item_missing"),
-            String("pub_use_removed_fn"),
-        ]),
-        "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(37),
-    }
-]
+{
+    "./test_crates/function_missing/": [
+        {
+            "name": String("will_be_removed_fn"),
+            "path": List([
+                String("function_missing"),
+                String("will_be_removed_fn"),
+            ]),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("pub_use_removed_fn"),
+            "path": List([
+                String("function_missing"),
+                String("pub_use_removed_fn"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

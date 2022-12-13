@@ -1,28 +1,63 @@
-[
-    {
-        "name": String("WillBeRemovedStruct"),
-        "struct_type": String("unit"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("item_missing"),
-            String("WillBeRemovedStruct"),
-        ]),
-        "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(4),
-    },
-    {
-        "name": String("PubUseRemovedStruct"),
-        "struct_type": String("unit"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("item_missing"),
-            String("PubUseRemovedStruct"),
-        ]),
-        "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(33),
-    }
-]
+{
+    "./test_crates/struct_missing/": [
+        {
+            "name": String("WillBeRemovedStruct"),
+            "path": List([
+                String("struct_missing"),
+                String("WillBeRemovedStruct"),
+            ]),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("unit"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("PubUseRemovedStruct"),
+            "path": List([
+                String("struct_missing"),
+                String("PubUseRemovedStruct"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("unit"),
+            "visibility_limit": String("public"),
+        },
+    ],
+    "./test_crates/struct_pub_field_missing/": [
+        {
+            "name": String("StructRemoved"),
+            "path": List([
+                String("struct_pub_field_missing"),
+                String("StructRemoved"),
+            ]),
+            "span_begin_line": Uint64(11),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("plain"),
+            "visibility_limit": String("public"),
+        },
+    ],
+    "./test_crates/unit_struct_changed_kind/": [
+        {
+            "name": String("UnitStructToPlain"),
+            "path": List([
+                String("unit_struct_changed_kind"),
+                String("UnitStructToPlain"),
+            ]),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("unit"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("NonExhaustiveUnitStructToPlain"),
+            "path": List([
+                String("unit_struct_changed_kind"),
+                String("NonExhaustiveUnitStructToPlain"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("unit"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

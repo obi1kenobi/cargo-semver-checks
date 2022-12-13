@@ -116,12 +116,9 @@ Lints are written as queries for the  `trustfall` ["query everything" engine](ht
 Checklist:
 - Choose an appropriate name for your query. We'll refer to it as `<query_name>`.
 - Add the query file: `src/lints/<query_name>.ron`.
-- Add a `<query-name>` feature to `test_crates/Cargo.toml`.
-- Add a `<query-name>.rs` file in `test_crates/src/test_cases`.
-- Add code to that file that demonstrates that semver issue: write the "baseline" first,
-  and then use `#[cfg(feature = <query_name>)]` and `#[cfg(not(feature = <query_name>))]` as
-  necessary to alter that baseline into a shape that causes the semver issue
-  your query looks for.
+- Create a new testing crate pair (by copy-pasting `test_crates/template` 
+  to `test_crates/<query-name>` and changing the names in its `Cargo.toml`s to `<query_name>`)
+  and add code in both the `new/` and `old/` crates that demonstrates that semver issue.
 - Add test code for false-positives and/or true-but-unintended-positives your query might report.
   For example, a true-but-unintended output would be if a query that looks for
   removal of public fields were to report that a struct was removed. This is unintended
@@ -129,6 +126,7 @@ Checklist:
   specifically reports the removal of the struct rather than all its fields separately.
 - Add the outputs you expect your query to produce over your test case in
   a new file: `test_outputs/<query_name>.output.run`.
+  The test output generation process is described in `test_crates/README.md`.
 - Add `<query_name>` to the list of queries used by the `add_lints!()` macro near the bottom
   of `src/query.rs`. It includes the query content and also creates a new test function
   named `<query_name>` that compares the output of running this query on `test_crates/`

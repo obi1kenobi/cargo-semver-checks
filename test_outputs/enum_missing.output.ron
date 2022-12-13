@@ -1,26 +1,36 @@
-[
-    {
-        "name": String("WillBeRemovedEnum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("item_missing"),
-            String("WillBeRemovedEnum"),
-        ]),
-        "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(7),
-    },
-    {
-        "name": String("PubUseRemovedEnum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("item_missing"),
-            String("PubUseRemovedEnum"),
-        ]),
-        "visibility_limit": String("public"),
-        "span_filename": String("src/test_cases/item_missing.rs"),
-        "span_begin_line": Uint64(35),
-    }
-]
+{
+    "./test_crates/enum_missing/": [
+        {
+            "name": String("WillBeRemovedEnum"),
+            "path": List([
+                String("enum_missing"),
+                String("WillBeRemovedEnum"),
+            ]),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("PubUseRemovedEnum"),
+            "path": List([
+                String("enum_missing"),
+                String("PubUseRemovedEnum"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+    "./test_crates/enum_variant_missing/": [
+        {
+            "name": String("ShouldNotMatch"),
+            "path": List([
+                String("enum_variant_missing"),
+                String("ShouldNotMatch"),
+            ]),
+            "span_begin_line": Uint64(11),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

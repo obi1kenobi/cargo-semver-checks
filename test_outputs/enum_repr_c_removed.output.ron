@@ -1,14 +1,14 @@
-[
-    {
-        "name": String("Foo"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("enum_repr_c_removed"),
-            String("Foo"),
-        ]),
-        "span_filename": String("src/test_cases/enum_repr_c_removed.rs"),
-        "span_begin_line": Uint64(8),
-        "visibility_limit": String("public"),
-    }
-]
+{
+    "./test_crates/enum_repr_c_removed/": [
+        {
+            "name": String("Foo"),
+            "path": List([
+                String("enum_repr_c_removed"),
+                String("Foo"),
+            ]),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}
