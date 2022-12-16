@@ -84,7 +84,7 @@ impl RustDocCommand {
         cmd.env("RUSTC_BOOTSTRAP", "1")
             .env(
                 "RUSTDOCFLAGS",
-                "-Z unstable-options --document-hidden-items --output-format=json",
+                "-Z unstable-options --document-private-items --document-hidden-items --output-format=json",
             )
             .stdout(std::process::Stdio::null()) // Don't pollute output
             .stderr(stderr)
