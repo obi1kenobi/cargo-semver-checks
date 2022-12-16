@@ -214,8 +214,7 @@ mod tests {
     }
 
     pub(in crate::query) fn check_query_execution(query_name: &str) {
-        let query_text =
-            std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
+        let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
 
         let expected_result_text =
