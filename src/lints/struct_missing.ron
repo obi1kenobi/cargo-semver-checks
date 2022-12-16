@@ -12,7 +12,7 @@ SemverQuery(
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @output @tag
-                        struct_type @output @tag
+                        struct_type @output
 
                         importable_path {
                             path @output @tag
@@ -30,7 +30,6 @@ SemverQuery(
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%name"])
-                        struct_type @filter(op: "=", value: ["%struct_type"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
