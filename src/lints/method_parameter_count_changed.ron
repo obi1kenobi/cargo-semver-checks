@@ -56,6 +56,17 @@ SemverQuery(
                         # "there is no method with the correct name and number of arguments"
                         # rather than the (incorrect!) alternative
                         # "the named method does not have the correct number of arguments."
+                        #
+                        # The above by itself is still not enough: say if the method was removed,
+                        # that still makes the "there is no method ..." statement true.
+                        # So we add an additional clause demanding that a method by that name
+                        # with appropriate visibility actually exists.
+                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                            }
+                        }
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
