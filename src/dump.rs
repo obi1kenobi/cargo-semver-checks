@@ -4,23 +4,6 @@ pub struct RustDocCommand {
     silence: bool,
 }
 
-// #[derive(Clone, Debug, PartialEq, Eq)]
-// pub enum RustdocPackageSpec<'a> {
-//     Implicit,
-//     ExplicitInManifest(&'a str),
-//     ExplicitExternal(&'a str),
-// }
-
-// impl<'a> RustdocPackageSpec<'a> {
-//     fn as_explicit_spec(&self) -> Option<&'a str> {
-//         match self {
-//             RustdocPackageSpec::Implicit => None,
-//             RustdocPackageSpec::ExplicitInManifest(spec) => Some(*spec),
-//             RustdocPackageSpec::ExplicitExternal(spec) => Some(*spec),
-//         }
-//     }
-// }
-
 impl RustDocCommand {
     pub fn new() -> Self {
         Self {
