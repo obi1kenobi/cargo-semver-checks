@@ -35,8 +35,6 @@ impl RustDocCommand {
     }
 
     /// Produce a rustdoc JSON file for the specified configuration.
-    ///
-    /// - If
     pub fn dump(
         &self,
         manifest_path: &std::path::Path,
