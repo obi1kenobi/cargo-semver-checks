@@ -126,7 +126,7 @@ mod tests {
 
         let schema = adapter.schema();
         for semver_query in SemverQuery::all_queries().into_values() {
-            let _ = parse(schema, &semver_query.query).expect("not a valid query");
+            let _ = parse(schema, semver_query.query).expect("not a valid query");
         }
     }
 
@@ -214,12 +214,11 @@ mod tests {
     }
 
     pub(in crate::query) fn check_query_execution(query_name: &str) {
-        let query_text =
-            std::fs::read_to_string(&format!("./src/lints/{}.ron", query_name)).unwrap();
+        let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
 
         let expected_result_text =
-            std::fs::read_to_string(&format!("./test_outputs/{}.output.ron", query_name))
+            std::fs::read_to_string(format!("./test_outputs/{query_name}.output.ron"))
             .with_context(|| format!("Could not load test_outputs/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
             .expect("failed to load expected outputs");
         let mut expected_results: BTreeMap<String, Vec<BTreeMap<String, FieldValue>>> =
