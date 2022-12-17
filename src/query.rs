@@ -346,6 +346,7 @@ add_lints!(
     function_const_removed,
     function_missing,
     function_parameter_count_changed,
+    inherent_method_const_removed,
     inherent_method_missing,
     method_parameter_count_changed,
     sized_impl_removed,

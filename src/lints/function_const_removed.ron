@@ -11,7 +11,7 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        const @filter(op: "=", value: ["$true"]) @output
+                        const @filter(op: "=", value: ["$true"])
                         name @output @tag
 
                         importable_path {

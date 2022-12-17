@@ -1,7 +1,6 @@
 {
     "./test_crates/function_const_removed/": [
         {
-            "const": Boolean(true),
             "name": String("add"),
             "path": List([
                 String("function_const_removed"),
