@@ -343,6 +343,7 @@ add_lints!(
     enum_variant_added,
     enum_variant_missing,
     enum_struct_variant_field_missing,
+    function_const_removed,
     function_missing,
     function_parameter_count_changed,
     inherent_method_missing,
