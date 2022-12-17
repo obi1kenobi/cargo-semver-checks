@@ -8,4 +8,8 @@ impl Foo {
     pub fn method(&self, x: i64) -> i64 {
         x
     }
+
+    pub unsafe fn associated_fn_removed() {}
+
+    pub unsafe fn method_removed(&self) {}
 }
