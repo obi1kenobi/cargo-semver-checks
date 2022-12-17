@@ -1,0 +1,49 @@
+SemverQuery(
+    id: "function_unsafe_added",
+    human_readable_name: "pub fn became unsafe",
+    description: "A function became unsafe to call.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#calling-an-unsafe-function-or-method"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        unsafe @filter(op: "!=", value: ["$true"])
+                        name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+                        unsafe @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A publicly-visible function became `unsafe`, so calling it now requires an `unsafe` block.",
+    per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+)
