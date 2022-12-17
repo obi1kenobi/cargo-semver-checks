@@ -22,6 +22,11 @@ SemverQuery(
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @output @tag
                                 const @filter(op: "=", value: ["$true"])
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
                             }
                         }
                     }
@@ -42,8 +47,19 @@ SemverQuery(
                         # a breaking change, so we don't want to report it.
                         #
                         # We look for "zero matching const methods" rather than
-                        # "methods that are not const" since multiple methods with the same name
-                        # are allowed to exist on the same type (e.g. via traits).
+                        # "methods that are not const" (incorrect!) since multiple methods with
+                        # the same name are allowed to exist on the same type (e.g. via traits).
+                        #
+                        # The above by itself is still not enough: say if the method was removed,
+                        # that still makes the "there is no method ..." statement true.
+                        # So we add an additional clause demanding that a method by that name
+                        # with appropriate visibility actually exists.
+                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                            }
+                        }
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
@@ -52,9 +68,19 @@ SemverQuery(
                             }
                         }
 
-                        span_: span @optional {
-                            filename @output
-                            begin_line @output
+                        # Get the non-matching methods by that name so we can report them
+                        # in the lint error message.
+                        impl @fold {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                unsafe @filter(op: "=", value: ["$true"])
+
+                                non_matching_span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
+                            }
                         }
                     }
                 }
