@@ -33,27 +33,5 @@
             "struct_type": String("plain"),
             "visibility_limit": String("public"),
         },
-        {
-            "name": String("NonExternallyConstructibleTupleStruct"),
-            "path": List([
-                String("non_exhaustive"),
-                String("NonExternallyConstructibleTupleStruct"),
-            ]),
-            "span_begin_line": Uint64(25),
-            "span_filename": String("src/lib.rs"),
-            "struct_type": String("tuple"),
-            "visibility_limit": String("public"),
-        },
-        {
-            "name": String("NonExternallyConstructibleStruct"),
-            "path": List([
-                String("non_exhaustive"),
-                String("NonExternallyConstructibleStruct"),
-            ]),
-            "span_begin_line": Uint64(28),
-            "span_filename": String("src/lib.rs"),
-            "struct_type": String("plain"),
-            "visibility_limit": String("public"),
-        },
     ],
 }

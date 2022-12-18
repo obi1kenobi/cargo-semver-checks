@@ -4,23 +4,6 @@ pub struct RustDocCommand {
     silence: bool,
 }
 
-// #[derive(Clone, Debug, PartialEq, Eq)]
-// pub enum RustdocPackageSpec<'a> {
-//     Implicit,
-//     ExplicitInManifest(&'a str),
-//     ExplicitExternal(&'a str),
-// }
-
-// impl<'a> RustdocPackageSpec<'a> {
-//     fn as_explicit_spec(&self) -> Option<&'a str> {
-//         match self {
-//             RustdocPackageSpec::Implicit => None,
-//             RustdocPackageSpec::ExplicitInManifest(spec) => Some(*spec),
-//             RustdocPackageSpec::ExplicitExternal(spec) => Some(*spec),
-//         }
-//     }
-// }
-
 impl RustDocCommand {
     pub fn new() -> Self {
         Self {
@@ -52,8 +35,6 @@ impl RustDocCommand {
     }
 
     /// Produce a rustdoc JSON file for the specified configuration.
-    ///
-    /// - If
     pub fn dump(
         &self,
         manifest_path: &std::path::Path,
@@ -84,7 +65,7 @@ impl RustDocCommand {
         cmd.env("RUSTC_BOOTSTRAP", "1")
             .env(
                 "RUSTDOCFLAGS",
-                "-Z unstable-options --document-hidden-items --output-format=json",
+                "-Z unstable-options --document-private-items --document-hidden-items --output-format=json",
             )
             .stdout(std::process::Stdio::null()) // Don't pollute output
             .stderr(stderr)

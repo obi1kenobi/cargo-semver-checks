@@ -74,33 +74,8 @@ pub(crate) struct SemverQuery {
 impl SemverQuery {
     pub(crate) fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
-
-        let query_text_contents = [
-            include_str!("./lints/auto_trait_impl_removed.ron"),
-            include_str!("./lints/derive_trait_impl_removed.ron"),
-            include_str!("./lints/enum_marked_non_exhaustive.ron"),
-            include_str!("./lints/enum_missing.ron"),
-            include_str!("./lints/enum_repr_c_removed.ron"),
-            include_str!("./lints/enum_repr_int_changed.ron"),
-            include_str!("./lints/enum_repr_int_removed.ron"),
-            include_str!("./lints/enum_variant_added.ron"),
-            include_str!("./lints/enum_variant_missing.ron"),
-            include_str!("./lints/enum_struct_variant_field_missing.ron"),
-            include_str!("./lints/function_missing.ron"),
-            include_str!("./lints/function_parameter_count_changed.ron"),
-            include_str!("./lints/inherent_method_missing.ron"),
-            include_str!("./lints/method_parameter_count_changed.ron"),
-            include_str!("./lints/sized_impl_removed.ron"),
-            include_str!("./lints/struct_marked_non_exhaustive.ron"),
-            include_str!("./lints/struct_missing.ron"),
-            include_str!("./lints/struct_pub_field_missing.ron"),
-            include_str!("./lints/struct_repr_c_removed.ron"),
-            include_str!("./lints/struct_repr_transparent_removed.ron"),
-            include_str!("./lints/unit_struct_changed_kind.ron"),
-            include_str!("./lints/variant_marked_non_exhaustive.ron"),
-        ];
-        for query_text in query_text_contents {
-            let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
+        for query_text in get_query_text_contents() {
+            let query: SemverQuery = ron::from_str(&query_text).unwrap_or_else(|e| {
                 panic!(
                     "\
 Failed to parse a query: {}
@@ -151,7 +126,7 @@ mod tests {
 
         let schema = adapter.schema();
         for semver_query in SemverQuery::all_queries().into_values() {
-            let _ = parse(schema, &semver_query.query).expect("not a valid query");
+            let _ = parse(schema, semver_query.query).expect("not a valid query");
         }
     }
 
@@ -191,7 +166,8 @@ mod tests {
             .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
             .collect();
 
-        let expected_result: FieldValue = vec!["pub_use_handling", "CheckPubUseHandling"].into();
+        let expected_result: FieldValue =
+            vec!["pub_use_handling", "inner", "CheckPubUseHandling"].into();
         assert_eq!(1, actual_results.len(), "{actual_results:?}");
         assert_eq!(
             expected_result, actual_results[0]["canonical_path"],
@@ -203,7 +179,10 @@ mod tests {
             .expect("not a Vec<Vec<&str>>");
         actual_paths.sort_unstable();
 
-        let expected_paths = vec![vec!["pub_use_handling", "CheckPubUseHandling"]];
+        let expected_paths = vec![
+            vec!["pub_use_handling", "CheckPubUseHandling"],
+            vec!["pub_use_handling", "inner", "CheckPubUseHandling"],
+        ];
         assert_eq!(expected_paths, actual_paths);
     }
 
@@ -219,21 +198,27 @@ mod tests {
             })
             .map(|dir_entry| {
                 String::from(
-                    String::from(dir_entry.path().to_str().unwrap())
-                        .strip_prefix("./test_crates/")
-                        .unwrap(),
+                    String::from(
+                        dir_entry
+                            .path()
+                            .to_str()
+                            .expect("failed to convert dir_entry to String"),
+                    )
+                    .strip_prefix("./test_crates/")
+                    .expect(
+                        "the dir_entry doesn't start with './test_crates/', which is unexpected",
+                    ),
                 )
             })
             .collect()
     }
 
-    fn check_query_execution(query_name: &str) {
-        let query_text =
-            std::fs::read_to_string(&format!("./src/lints/{}.ron", query_name)).unwrap();
+    pub(in crate::query) fn check_query_execution(query_name: &str) {
+        let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
 
         let expected_result_text =
-            std::fs::read_to_string(&format!("./test_outputs/{}.output.ron", query_name))
+            std::fs::read_to_string(format!("./test_outputs/{query_name}.output.ron"))
             .with_context(|| format!("Could not load test_outputs/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
             .expect("failed to load expected outputs");
         let mut expected_results: BTreeMap<String, Vec<BTreeMap<String, FieldValue>>> =
@@ -253,7 +238,7 @@ mod tests {
                      indexed_crate_2: &VersionedIndexedCrate| {
                         let adapter =
                             VersionedRustdocAdapter::new(indexed_crate_1, Some(indexed_crate_2))
-                                .expect("Could not create adapter.");
+                                .expect("could not create adapter");
                         let results_iter = adapter
                             .run_query(&semver_query.query, semver_query.arguments.clone())
                             .unwrap();
@@ -295,7 +280,7 @@ mod tests {
                     elem["span_begin_line"].as_usize().unwrap(),
                 )
             };
-            for (_key, value) in results.iter_mut() {
+            for value in results.values_mut() {
                 value.sort_unstable_by_key(key_func);
             }
         };
@@ -305,15 +290,19 @@ mod tests {
         if expected_results != actual_results {
             let results_to_string = |name, results| {
                 format!(
-                    "{}:\n{}\n",
+                    "{}:\n{}",
                     name,
                     ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default())
                         .unwrap()
                 )
             };
-            panic!("Query {} produced incorrect output (./src/lints/{}).\n{}\n{}\nNote that the individual outputs might have been deliberately reordered.", &query_name, &query_name, 
-                results_to_string(format!("Expected (./test_outputs/{}.output.ron)", &query_name), &expected_results),
-                results_to_string("Actual".to_string(), &actual_results));
+            let messages = vec![
+                format!("Query {} produced incorrect output (./src/lints/{}.ron).", &query_name, &query_name),
+                results_to_string(format!("Expected output (./test_outputs/{}.output.ron)", &query_name), &expected_results),
+                results_to_string("Actual output".to_string(), &actual_results),
+                "Note that the individual outputs might have been deliberately reordered. Also, remember about running ./scripts/regenerate_test_rustdocs.sh when needed.".to_string(),
+            ];
+            panic!("\n{}\n", messages.join("\n\n"));
         }
 
         let registry = make_handlebars_registry();
@@ -333,44 +322,63 @@ mod tests {
                 registry
                     .render_template(&template, &pretty_result)
                     .with_context(|| "Error instantiating semver query template.")
-                    .expect("Could not materialize template.");
+                    .expect("could not materialize template");
             }
         }
     }
+}
 
-    macro_rules! query_execution_tests {
-        ($($name:ident,)*) => {
+macro_rules! add_lints {
+    ($($name:ident,)*) => {
+        #[cfg(test)]
+        mod tests_lints {
             $(
                 #[test]
                 fn $name() {
-                    check_query_execution(stringify!($name))
+                    super::tests::check_query_execution(stringify!($name))
                 }
             )*
         }
-    }
 
-    query_execution_tests!(
-        auto_trait_impl_removed,
-        derive_trait_impl_removed,
-        enum_marked_non_exhaustive,
-        enum_missing,
-        enum_repr_c_removed,
-        enum_repr_int_changed,
-        enum_repr_int_removed,
-        enum_variant_added,
-        enum_variant_missing,
-        enum_struct_variant_field_missing,
-        function_missing,
-        function_parameter_count_changed,
-        inherent_method_missing,
-        method_parameter_count_changed,
-        sized_impl_removed,
-        struct_marked_non_exhaustive,
-        struct_missing,
-        struct_pub_field_missing,
-        struct_repr_c_removed,
-        struct_repr_transparent_removed,
-        unit_struct_changed_kind,
-        variant_marked_non_exhaustive,
-    );
+        fn get_query_text_contents() -> Vec<String> {
+            let mut temp_vec = Vec::new();
+            $(
+                temp_vec.push(
+                    std::fs::read_to_string(
+                        format!("./src/lints/{}.ron", stringify!($name))
+                    ).unwrap()
+                );
+            )*
+            temp_vec
+        }
+    }
 }
+
+add_lints!(
+    auto_trait_impl_removed,
+    derive_trait_impl_removed,
+    enum_marked_non_exhaustive,
+    enum_missing,
+    enum_repr_c_removed,
+    enum_repr_int_changed,
+    enum_repr_int_removed,
+    enum_variant_added,
+    enum_variant_missing,
+    enum_struct_variant_field_missing,
+    function_const_removed,
+    function_missing,
+    function_parameter_count_changed,
+    function_unsafe_added,
+    inherent_method_const_removed,
+    inherent_method_missing,
+    inherent_method_unsafe_added,
+    method_parameter_count_changed,
+    sized_impl_removed,
+    struct_marked_non_exhaustive,
+    struct_missing,
+    struct_pub_field_missing,
+    struct_repr_c_removed,
+    struct_repr_transparent_removed,
+    unit_struct_changed_kind,
+    variant_marked_non_exhaustive,
+);
