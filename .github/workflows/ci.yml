@@ -123,6 +123,8 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
+      - uses: Swatinem/rust-cache@v2
+
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="crate/core/Cargo.toml"
 
@@ -135,7 +137,7 @@ jobs:
   run-on-core-graphics:
     # Run cargo-semver-checks on a crate with no semver violations,
     # to make sure there are no false-positives.
-
+    #
     # cargo-semver-checks previously reported a false-positive here,
     # due to multiple methods by the same name being defined on the same type.
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/193
@@ -161,6 +163,8 @@ jobs:
           toolchain: stable
           profile: minimal
           override: true
+
+      - uses: Swatinem/rust-cache@v2
 
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="crate/core-graphics/Cargo.toml"
@@ -213,11 +217,12 @@ jobs:
             # Unexpected outcome, indicates a bug.
             exit "$EXIT_CODE"
           fi
-      - name: Check the version
+      - name: Determine the tag name
         id: tag
         run: |
           export TAG_NAME="v$(./scripts/get_current_version.sh cargo-semver-checks)"
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+
   pre-publish-checks:
     name: Check for semver compliance
     runs-on: ubuntu-latest
