@@ -213,6 +213,36 @@ mod tests {
             .collect()
     }
 
+    type TestOutput = BTreeMap<String, Vec<BTreeMap<String, FieldValue>>>;
+
+    fn pretty_format_output_difference(
+        query_name: &str,
+        output_name1: String,
+        output1: TestOutput,
+        output_name2: String,
+        output2: TestOutput,
+    ) -> String {
+        let results_to_string = |name, results| {
+            format!(
+                "{}:\n{}",
+                name,
+                ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default()).unwrap()
+            )
+        };
+        vec![
+            format!(
+                "Query {} produced incorrect output (./src/lints/{}.ron).",
+                &query_name, &query_name
+            ),
+            results_to_string(output_name1, &output1),
+            results_to_string(output_name2, &output2),
+            "Note that the individual outputs might have been deliberately reordered.".to_string(),
+            "Also, remember about running ./scripts/regenerate_test_rustdocs.sh when needed."
+                .to_string(),
+        ]
+        .join("\n\n")
+    }
+
     pub(in crate::query) fn check_query_execution(query_name: &str) {
         let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
@@ -221,11 +251,10 @@ mod tests {
             std::fs::read_to_string(format!("./test_outputs/{query_name}.output.ron"))
             .with_context(|| format!("Could not load test_outputs/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
             .expect("failed to load expected outputs");
-        let mut expected_results: BTreeMap<String, Vec<BTreeMap<String, FieldValue>>> =
-            ron::from_str(&expected_result_text)
-                .expect("could not parse expected outputs as ron format");
+        let mut expected_results: TestOutput = ron::from_str(&expected_result_text)
+            .expect("could not parse expected outputs as ron format");
 
-        let mut actual_results: BTreeMap<String, Vec<BTreeMap<_, _>>> = get_test_crate_names()
+        let mut actual_results: TestOutput = get_test_crate_names()
             .into_iter()
             .map(|crate_pair| {
                 let crate_new = load_pregenerated_rustdoc(&crate_pair, "new");
@@ -252,20 +281,24 @@ mod tests {
                         )
                     };
 
-                assert!(
-                    run_query_on(&indexed_crate_new, &indexed_crate_new)
-                        .1
-                        .is_empty(),
-                    "{}",
-                    crate_pair
-                );
-                assert!(
-                    run_query_on(&indexed_crate_old, &indexed_crate_old)
-                        .1
-                        .is_empty(),
-                    "{}",
-                    crate_pair
-                );
+                let assert_no_false_positives_in_nonchanged_crate =
+                    |crate_: &VersionedIndexedCrate,
+                     crate_version: &str| {
+                         let output_pair = run_query_on(crate_, crate_);
+                         if !output_pair.1.is_empty() {
+                             let output_difference = pretty_format_output_difference(
+                                 query_name,
+                                 "Expected output (empty output)".to_string(),
+                                 BTreeMap::new(),
+                                 format!("Actual output ({}/{})", crate_pair, crate_version),
+                                 BTreeMap::from([output_pair]));
+                             panic!("Running a query on a crate that didn't change should always produce an empty output.\n{}\n", 
+                                    output_difference);
+                         }
+                     };
+                assert_no_false_positives_in_nonchanged_crate(&indexed_crate_new, "new");
+                assert_no_false_positives_in_nonchanged_crate(&indexed_crate_old, "old");
+
                 run_query_on(&indexed_crate_new, &indexed_crate_old)
             })
             .filter(|(_crate_pair, output)| !output.is_empty())
@@ -273,7 +306,7 @@ mod tests {
 
         // Reorder both vectors of results into a deterministic order that will compensate for
         // nondeterminism in how the results are ordered.
-        let sort_individual_outputs = |results: &mut BTreeMap<String, Vec<_>>| {
+        let sort_individual_outputs = |results: &mut TestOutput| {
             let key_func = |elem: &BTreeMap<String, FieldValue>| {
                 (
                     elem["span_filename"].as_str().unwrap().to_owned(),
@@ -288,21 +321,19 @@ mod tests {
         sort_individual_outputs(&mut actual_results);
 
         if expected_results != actual_results {
-            let results_to_string = |name, results| {
-                format!(
-                    "{}:\n{}",
-                    name,
-                    ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default())
-                        .unwrap()
+            panic!(
+                "\n{}\n",
+                pretty_format_output_difference(
+                    query_name,
+                    format!(
+                        "Expected output (./test_outputs/{}.output.ron)",
+                        &query_name
+                    ),
+                    expected_results,
+                    "Actual output".to_string(),
+                    actual_results
                 )
-            };
-            let messages = vec![
-                format!("Query {} produced incorrect output (./src/lints/{}.ron).", &query_name, &query_name),
-                results_to_string(format!("Expected output (./test_outputs/{}.output.ron)", &query_name), &expected_results),
-                results_to_string("Actual output".to_string(), &actual_results),
-                "Note that the individual outputs might have been deliberately reordered. Also, remember about running ./scripts/regenerate_test_rustdocs.sh when needed.".to_string(),
-            ];
-            panic!("\n{}\n", messages.join("\n\n"));
+            );
         }
 
         let registry = make_handlebars_registry();
