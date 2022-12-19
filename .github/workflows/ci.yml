@@ -169,42 +169,37 @@ jobs:
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="crate/core-graphics/Cargo.toml"
 
-  publish:
-    name: Publish to crates.io
-    runs-on: ubuntu-latest
+  init-release:
+    name: Run the release workflow
     needs:
       - should-publish
       - ci-everything
       - pre-publish-checks
     if: needs.should-publish.outputs.is_new_version == 'yes' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          persist-credentials: true
-
-      - name: Tag the version
-        run: |
-          set -euxo pipefail
-          export CURRENT_VERSION="$(./scripts/get_current_version.sh cargo-semver-checks)"
-          git tag "v$CURRENT_VERSION"
-          git push origin "v$CURRENT_VERSION"
-
-      - name: Publish
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: cargo publish
+    uses: ./.github/workflows/release.yml
+    with:
+      publish-tag: ${{ needs.should-publish.outputs.publish-tag }}
+    secrets:
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
   should-publish:
     name: Check if version changed
     runs-on: ubuntu-latest
     outputs:
       is_new_version: ${{ steps.check.outputs.is_new_version }}
+      publish-tag: ${{ steps.tag.outputs.tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           persist-credentials: false
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
 
       - uses: Swatinem/rust-cache@v2
 
@@ -222,6 +217,11 @@ jobs:
             # Unexpected outcome, indicates a bug.
             exit "$EXIT_CODE"
           fi
+      - name: Determine the tag name
+        id: tag
+        run: |
+          export TAG_NAME="v$(./scripts/get_current_version.sh cargo-semver-checks)"
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
 
   pre-publish-checks:
     name: Check for semver compliance
