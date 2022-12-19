@@ -24,6 +24,7 @@ if [[ -f "$LINT_FILENAME" ]]; then
     echo "A lint named '$NEW_LINT_NAME' appears to have already been defined in $LINT_FILENAME"
     exit 1
 fi
+echo -n "Creating the lint definition file ${LINT_FILENAME#"$TOPLEVEL/"} ..."
 cat <<EOF >"$LINT_FILENAME"
 SemverQuery(
     id: "$NEW_LINT_NAME",
@@ -45,21 +46,36 @@ SemverQuery(
     per_result_error_template: Some("TODO"),
 )
 EOF
+echo ' done!'
 
 # Make the test crates.
-cp -R "$TEST_CRATES_DIR/template" "$TEST_CRATES_DIR/$NEW_LINT_NAME"
-sed -i'' "s/template/$NEW_LINT_NAME/g" "$TEST_CRATES_DIR/$NEW_LINT_NAME/old/Cargo.toml"
-sed -i'' "s/template/$NEW_LINT_NAME/g" "$TEST_CRATES_DIR/$NEW_LINT_NAME/new/Cargo.toml"
+NEW_LINT_TEST_CRATES_DIR="$TEST_CRATES_DIR/$NEW_LINT_NAME"
+echo -n "Creating test crates in ${NEW_LINT_TEST_CRATES_DIR#"$TOPLEVEL/"} ..."
+cp -R "$TEST_CRATES_DIR/template" "$NEW_LINT_TEST_CRATES_DIR"
+sed -i'' "s/template/$NEW_LINT_NAME/g" "$NEW_LINT_TEST_CRATES_DIR/old/Cargo.toml"
+sed -i'' "s/template/$NEW_LINT_NAME/g" "$NEW_LINT_TEST_CRATES_DIR/new/Cargo.toml"
+echo ' done!'
 
 # Add the test outputs file.
-cat <<EOF >"$TEST_OUTPUTS_DIR/$NEW_LINT_NAME.output.ron"
+NEW_TEST_OUTPUT_FILE="$TEST_OUTPUTS_DIR/$NEW_LINT_NAME.output.ron"
+echo -n "Creating the test outputs file ${NEW_TEST_OUTPUT_FILE#"$TOPLEVEL/"} ..."
+cat <<EOF >"$NEW_TEST_OUTPUT_FILE"
 [
     "./test_crates/$NEW_LINT_NAME/": [
         // TODO
     ]
 ]
 EOF
+echo ' done!'
 
 # Add the new lint to the `add_lints!()` macro.
+echo -n "Registering the new lint in src/query.rs ..."
 # The -z flag allows us to process newline characters with sed.
 sed -i'' -z "s/add_lints!(/add_lints!(\n    $NEW_LINT_NAME,/" "$SRC_QUERY_FILE"
+echo ' done!'
+
+echo ''
+echo 'Lint created successfully! Remember to:'
+echo "- implement the lint in ${LINT_FILENAME#"$TOPLEVEL/"}"
+echo "- populate the test crates in ${NEW_LINT_TEST_CRATES_DIR#"$TOPLEVEL/"}"
+echo "- add the expected test outputs in ${NEW_TEST_OUTPUT_FILE#"$TOPLEVEL/"}"
