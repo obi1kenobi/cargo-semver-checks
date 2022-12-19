@@ -334,6 +334,8 @@ macro_rules! add_lints {
 
 add_lints!(
     auto_trait_impl_removed,
+    constructible_struct_adds_field,
+    constructible_struct_adds_private_field,
     derive_trait_impl_removed,
     enum_marked_non_exhaustive,
     enum_missing,
