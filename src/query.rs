@@ -75,7 +75,7 @@ impl SemverQuery {
     pub(crate) fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
         for query_text in get_query_text_contents() {
-            let query: SemverQuery = ron::from_str(&query_text).unwrap_or_else(|e| {
+            let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
                 panic!(
                     "\
 Failed to parse a query: {}
@@ -318,13 +318,13 @@ macro_rules! add_lints {
             )*
         }
 
-        fn get_query_text_contents() -> Vec<String> {
+        // No way to avoid this lint -- the push() calls are macro-generated.
+        #[allow(clippy::vec_init_then_push)]
+        fn get_query_text_contents() -> Vec<&'static str> {
             let mut temp_vec = Vec::new();
             $(
                 temp_vec.push(
-                    std::fs::read_to_string(
-                        format!("./src/lints/{}.ron", stringify!($name))
-                    ).unwrap()
+                    include_str!(concat!("lints/", stringify!($name), ".ron"))
                 );
             )*
             temp_vec
