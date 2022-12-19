@@ -357,6 +357,7 @@ add_lints!(
     struct_pub_field_missing,
     struct_repr_c_removed,
     struct_repr_transparent_removed,
+    trait_missing,
     unit_struct_changed_kind,
     variant_marked_non_exhaustive,
 );

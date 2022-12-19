@@ -1,0 +1,45 @@
+{
+    "./test_crates/trait_missing/": [
+        {
+            "name": String("RemovedTrait"),
+            "path": List([
+                String("trait_missing"),
+                String("RemovedTrait"),
+            ]),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("RemovedUnsafeTrait"),
+            "path": List([
+                String("trait_missing"),
+                String("RemovedUnsafeTrait"),
+            ]),
+            "span_begin_line": Uint64(3),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("PubUseRemovedTrait"),
+            "path": List([
+                String("trait_missing"),
+                String("my_pub_mod"),
+                String("PubUseRemovedTrait"),
+            ]),
+            "span_begin_line": Uint64(6),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("PubUseRemovedTrait"),
+            "path": List([
+                String("trait_missing"),
+                String("PubUseRemovedTrait"),
+            ]),
+            "span_begin_line": Uint64(6),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}
