@@ -131,11 +131,11 @@ the [`test_outputs` directory](https://github.com/obi1kenobi/cargo-semver-checks
 
 First, choose an appropriate name for your lint. We'll refer to it as `<lint_name>`.
 
-We'll use the `scripts/make_new_lint.sh` script to automatically create the necessary file stubs, which you'll then fill in. It will:
+We'll use the [`scripts/make_new_lint.sh`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/scripts/make_new_lint.sh) script to automatically create the necessary file stubs, which you'll then fill in. It will:
 - Add a new lint file: `src/lints/<lint_name>.ron`.
 - Create a new test crate pair: `test_crates/<lint_name>/old` and `test_crates/<lint_name>/new`.
 - Add an empty expected test outputs file: `test_outputs/<lint_name>.output.ron`.
-- Register your new lint in the `add_lints!()` macro in `src/query.rs`.
+- Register your new lint in the `add_lints!()` macro near the bottom of [`src/query.rs`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/src/query.rs).
 
 Now it's time to fill in these files!
 - Define the lint in `src/lints/<lint_name>.ron`.
@@ -147,7 +147,8 @@ Now it's time to fill in these files!
   removal of public fields were to report that a struct was removed.
   Struct removal has its own lint, so there's no reason to also report that
   the removed struct also had its fields removed.
-- Re-run `./scripts/regenerate_test_rustdocs.sh` to generate the new rustdoc JSON file.
+- Re-run [`./scripts/regenerate_test_rustdocs.sh`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/scripts/regenerate_test_rustdocs.sh)
+  to generate rustdoc JSON files for your new test crates.
 
 At this point, everything is wired up to let you test your new lint -- but
 the expected outputs file is still empty. That's okay for now!
