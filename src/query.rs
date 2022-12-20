@@ -263,8 +263,8 @@ mod tests {
         crate_version: &str,
     ) {
         let (crate_pair_path, output) = run_query_on_crate_pair(
-            &semver_query,
-            &crate_pair_name,
+            semver_query,
+            crate_pair_name,
             indexed_crate,
             indexed_crate,
         );
