@@ -255,6 +255,32 @@ mod tests {
         )
     }
 
+    fn assert_no_false_positives_in_nonchanged_crate(
+        query_name: &str,
+        semver_query: &SemverQuery,
+        indexed_crate: &VersionedIndexedCrate,
+        crate_pair_name: &String,
+        crate_version: &str,
+    ) {
+        let (crate_pair_path, output) = run_query_on_crate_pair(
+            &semver_query,
+            &crate_pair_name,
+            indexed_crate,
+            indexed_crate,
+        );
+        if !output.is_empty() {
+            let output_difference = pretty_format_output_difference(
+                query_name,
+                "Expected output (empty output)".to_string(),
+                BTreeMap::new(),
+                format!("Actual output ({crate_pair_name}/{crate_version})"),
+                BTreeMap::from([(crate_pair_path, output)]),
+            );
+            panic!("Running a query on a crate that didn't change should always produce an empty output.\n{}\n", 
+                output_difference);
+        }
+    }
+
     pub(in crate::query) fn check_query_execution(query_name: &str) {
         let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
@@ -274,25 +300,27 @@ mod tests {
                 let indexed_crate_new = VersionedIndexedCrate::new(&crate_new);
                 let indexed_crate_old = VersionedIndexedCrate::new(&crate_old);
 
-                let assert_no_false_positives_in_nonchanged_crate =
-                    |crate_: &VersionedIndexedCrate,
-                     crate_version: &str| {
-                         let (crate_pair_path, output) = run_query_on_crate_pair(&semver_query, &crate_pair_name, crate_, crate_);
-                         if !output.is_empty() {
-                             let output_difference = pretty_format_output_difference(
-                                 query_name,
-                                 "Expected output (empty output)".to_string(),
-                                 BTreeMap::new(),
-                                 format!("Actual output ({crate_pair_name}/{crate_version})"),
-                                 BTreeMap::from([(crate_pair_path, output)]));
-                             panic!("Running a query on a crate that didn't change should always produce an empty output.\n{}\n", 
-                                    output_difference);
-                         }
-                     };
-                assert_no_false_positives_in_nonchanged_crate(&indexed_crate_new, "new");
-                assert_no_false_positives_in_nonchanged_crate(&indexed_crate_old, "old");
+                assert_no_false_positives_in_nonchanged_crate(
+                    query_name,
+                    &semver_query,
+                    &indexed_crate_new,
+                    &crate_pair_name,
+                    "new",
+                );
+                assert_no_false_positives_in_nonchanged_crate(
+                    query_name,
+                    &semver_query,
+                    &indexed_crate_old,
+                    &crate_pair_name,
+                    "old",
+                );
 
-                run_query_on_crate_pair(&semver_query, &crate_pair_name, &indexed_crate_new, &indexed_crate_old)
+                run_query_on_crate_pair(
+                    &semver_query,
+                    &crate_pair_name,
+                    &indexed_crate_new,
+                    &indexed_crate_old,
+                )
             })
             .filter(|(_crate_pair_name, output)| !output.is_empty())
             .collect();
