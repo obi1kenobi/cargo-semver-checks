@@ -108,12 +108,9 @@ mod tests {
     use crate::templating::make_handlebars_registry;
 
     fn load_pregenerated_rustdoc(crate_pair: &str, crate_version: &str) -> VersionedCrate {
-        let path = format!(
-            "./localdata/test_data/{}/{}/rustdoc.json",
-            crate_pair, crate_version
-        );
+        let path = format!("./localdata/test_data/{crate_pair}/{crate_version}/rustdoc.json");
         load_rustdoc(Path::new(&path))
-            .with_context(|| format!("Could not load {} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?", path))
+            .with_context(|| format!("Could not load {path} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?"))
             .expect("failed to load baseline rustdoc")
     }
 
@@ -224,16 +221,12 @@ mod tests {
     ) -> String {
         let results_to_string = |name, results| {
             format!(
-                "{}:\n{}",
-                name,
+                "{name}:\n{}",
                 ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default()).unwrap()
             )
         };
         vec![
-            format!(
-                "Query {} produced incorrect output (./src/lints/{}.ron).",
-                &query_name, &query_name
-            ),
+            format!("Query {query_name} produced incorrect output (./src/lints/{query_name}.ron)."),
             results_to_string(output_name1, &output1),
             results_to_string(output_name2, &output2),
             "Note that the individual outputs might have been deliberately reordered.".to_string(),
@@ -325,10 +318,7 @@ mod tests {
                 "\n{}\n",
                 pretty_format_output_difference(
                     query_name,
-                    format!(
-                        "Expected output (./test_outputs/{}.output.ron)",
-                        &query_name
-                    ),
+                    format!("Expected output (./test_outputs/{query_name}.output.ron)"),
                     expected_results,
                     "Actual output".to_string(),
                     actual_results
