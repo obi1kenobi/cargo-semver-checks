@@ -1,0 +1,15 @@
+{
+    "./test_crates/enum_struct_variant_field_added/": [
+        {
+            "enum_name": String("PubEnum"),
+            "field_name": String("y"),
+            "path": List([
+                String("enum_struct_variant_field_added"),
+                String("PubEnum"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("Foo"),
+        },
+    ],
+}

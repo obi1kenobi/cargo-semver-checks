@@ -1,4 +1,17 @@
 {
+    "./test_crates/enum_struct_variant_field_added/": [
+        {
+            "name": String("EnumWithExhaustiveVariant"),
+            "path": List([
+                String("enum_struct_variant_field_added"),
+                String("EnumWithExhaustiveVariant"),
+            ]),
+            "span_begin_line": Uint64(32),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("ExhaustiveVariant"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/non_exhaustive/": [
         {
             "name": String("MyEnum"),
