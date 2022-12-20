@@ -18,14 +18,13 @@ if [[ "$NEW_LINT_NAME" == "" || "$NEW_LINT_NAME" == "--help" ]]; then
 fi
 set -u
 
-# Make the lint file. If the file already exists, bail so as not to overwrite existing lints.
+# Make the lint file.
 LINT_FILENAME="$LINTS_DIR/$NEW_LINT_NAME.ron"
+echo -n "Creating lint definition file ${LINT_FILENAME#"$TOPLEVEL/"} ..."
 if [[ -f "$LINT_FILENAME" ]]; then
-    echo "A lint named '$NEW_LINT_NAME' appears to have already been defined in $LINT_FILENAME"
-    exit 1
-fi
-echo -n "Creating the lint definition file ${LINT_FILENAME#"$TOPLEVEL/"} ..."
-cat <<EOF >"$LINT_FILENAME"
+    echo ' already exists.'
+else
+    cat <<EOF >"$LINT_FILENAME"
 SemverQuery(
     id: "$NEW_LINT_NAME",
     human_readable_name: "TODO",
@@ -46,33 +45,53 @@ SemverQuery(
     per_result_error_template: Some("TODO"),
 )
 EOF
-echo ' done!'
+    echo ' done!'
+fi
 
 # Make the test crates.
 NEW_LINT_TEST_CRATES_DIR="$TEST_CRATES_DIR/$NEW_LINT_NAME"
 echo -n "Creating test crates in ${NEW_LINT_TEST_CRATES_DIR#"$TOPLEVEL/"} ..."
-cp -R "$TEST_CRATES_DIR/template" "$NEW_LINT_TEST_CRATES_DIR"
-sed -i'' "s/template/$NEW_LINT_NAME/g" "$NEW_LINT_TEST_CRATES_DIR/old/Cargo.toml"
-sed -i'' "s/template/$NEW_LINT_NAME/g" "$NEW_LINT_TEST_CRATES_DIR/new/Cargo.toml"
-echo ' done!'
+if [[ -d "$NEW_LINT_TEST_CRATES_DIR" ]]; then
+    echo ' already exists.'
+else
+    cp -R "$TEST_CRATES_DIR/template" "$NEW_LINT_TEST_CRATES_DIR"
+    sed -i'' "s/template/$NEW_LINT_NAME/g" "$NEW_LINT_TEST_CRATES_DIR/old/Cargo.toml"
+    sed -i'' "s/template/$NEW_LINT_NAME/g" "$NEW_LINT_TEST_CRATES_DIR/new/Cargo.toml"
+    echo ' done!'
+fi
 
 # Add the test outputs file.
 NEW_TEST_OUTPUT_FILE="$TEST_OUTPUTS_DIR/$NEW_LINT_NAME.output.ron"
-echo -n "Creating the test outputs file ${NEW_TEST_OUTPUT_FILE#"$TOPLEVEL/"} ..."
-cat <<EOF >"$NEW_TEST_OUTPUT_FILE"
+echo -n "Creating test outputs file ${NEW_TEST_OUTPUT_FILE#"$TOPLEVEL/"} ..."
+if [[ -f "$NEW_TEST_OUTPUT_FILE" ]]; then
+    echo ' already exists.'
+else
+    cat <<EOF >"$NEW_TEST_OUTPUT_FILE"
 [
     "./test_crates/$NEW_LINT_NAME/": [
         // TODO
     ]
 ]
 EOF
-echo ' done!'
+    echo ' done!'
+fi
 
 # Add the new lint to the `add_lints!()` macro.
-echo -n "Registering the new lint in src/query.rs ..."
-# The -z flag allows us to process newline characters with sed.
-sed -i'' -z "s/add_lints!(/add_lints!(\n    $NEW_LINT_NAME,/" "$SRC_QUERY_FILE"
-echo ' done!'
+echo -n "Registering lint in src/query.rs ..."
+set +e
+# -E = extended regex mode, which behaves more similarly to regex in most programming languages.
+# -z = use \0 as separators instead of \n, so that we can do multi-line matches.
+grep -Ez --regexp "add_lints\!\\([^)]+[ ]+$NEW_LINT_NAME," "$SRC_QUERY_FILE" >/dev/null
+OUTPUT="$?"
+set -e
+if [[ "$OUTPUT" == "0" ]]; then
+    echo ' already exists.'
+else
+    # -E = extended regex mode, which behaves more similarly to regex in most programming languages.
+    # -z = use \0 as separators instead of \n, so that we can do multi-line matches.
+    sed -i'' -Ez "s/add_lints\!\\(([^)]+)\\)/add_lints\!(\\1    $NEW_LINT_NAME,\n)/" "$SRC_QUERY_FILE"
+    echo ' done!'
+fi
 
 echo ''
 echo 'Lint created successfully! Remember to:'
