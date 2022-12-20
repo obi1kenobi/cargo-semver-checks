@@ -243,6 +243,26 @@ mod tests {
         .join("\n\n")
     }
 
+    fn run_query_on_crate_pair(
+        query_name: &str,
+        semver_query: &SemverQuery,
+        crate_pair_name: String,
+        indexed_crate_new: &VersionedIndexedCrate,
+        indexed_crate_old: &VersionedIndexedCrate,
+    ) {
+        let adapter = VersionedRustdocAdapter::new(indexed_crate_new, Some(indexed_crate_old))
+            .expect("could not create adapter");
+        let results_iter = adapter
+            .run_query(&semver_query.query, semver_query.arguments.clone())
+            .unwrap();
+        (
+            format!("./test_crates/{crate_pair_name}/"),
+            results_iter
+                .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+                .collect::<Vec<BTreeMap<_, _>>>(),
+        )
+    }
+
     pub(in crate::query) fn check_query_execution(query_name: &str) {
         let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
@@ -256,41 +276,22 @@ mod tests {
 
         let mut actual_results: TestOutput = get_test_crate_names()
             .into_iter()
-            .map(|crate_pair| {
-                let crate_new = load_pregenerated_rustdoc(&crate_pair, "new");
-                let crate_old = load_pregenerated_rustdoc(&crate_pair, "old");
+            .map(|crate_pair_name| {
+                let crate_new = load_pregenerated_rustdoc(&crate_pair_name, "new");
+                let crate_old = load_pregenerated_rustdoc(&crate_pair_name, "old");
                 let indexed_crate_new = VersionedIndexedCrate::new(&crate_new);
                 let indexed_crate_old = VersionedIndexedCrate::new(&crate_old);
-
-                let run_query_on =
-                    |indexed_crate_1: &VersionedIndexedCrate,
-                     indexed_crate_2: &VersionedIndexedCrate| {
-                        let adapter =
-                            VersionedRustdocAdapter::new(indexed_crate_1, Some(indexed_crate_2))
-                                .expect("could not create adapter");
-                        let results_iter = adapter
-                            .run_query(&semver_query.query, semver_query.arguments.clone())
-                            .unwrap();
-                        (
-                            format!("./test_crates/{}/", crate_pair),
-                            results_iter
-                                .map(|res| {
-                                    res.into_iter().map(|(k, v)| (k.to_string(), v)).collect()
-                                })
-                                .collect::<Vec<BTreeMap<_, _>>>(),
-                        )
-                    };
 
                 let assert_no_false_positives_in_nonchanged_crate =
                     |crate_: &VersionedIndexedCrate,
                      crate_version: &str| {
-                         let output_pair = run_query_on(crate_, crate_);
+                         let output_pair = run_query_on_crate_pair(query_name, &semver_query, crate_pair_name, crate_, crate_);
                          if !output_pair.1.is_empty() {
                              let output_difference = pretty_format_output_difference(
                                  query_name,
                                  "Expected output (empty output)".to_string(),
                                  BTreeMap::new(),
-                                 format!("Actual output ({}/{})", crate_pair, crate_version),
+                                 format!("Actual output ({}/{})", crate_pair_name, crate_version),
                                  BTreeMap::from([output_pair]));
                              panic!("Running a query on a crate that didn't change should always produce an empty output.\n{}\n", 
                                     output_difference);
@@ -299,9 +300,9 @@ mod tests {
                 assert_no_false_positives_in_nonchanged_crate(&indexed_crate_new, "new");
                 assert_no_false_positives_in_nonchanged_crate(&indexed_crate_old, "old");
 
-                run_query_on(&indexed_crate_new, &indexed_crate_old)
+                run_query_on(query_name, &semver_query, crate_pair_name, &indexed_crate_new, &indexed_crate_old)
             })
-            .filter(|(_crate_pair, output)| !output.is_empty())
+            .filter(|(_crate_pair_name, output)| !output.is_empty())
             .collect();
 
         // Reorder both vectors of results into a deterministic order that will compensate for
