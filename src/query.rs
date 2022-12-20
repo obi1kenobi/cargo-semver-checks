@@ -277,14 +277,14 @@ mod tests {
                 let assert_no_false_positives_in_nonchanged_crate =
                     |crate_: &VersionedIndexedCrate,
                      crate_version: &str| {
-                         let output_pair = run_query_on_crate_pair(&semver_query, &crate_pair_name, crate_, crate_);
-                         if !output_pair.1.is_empty() {
+                         let (crate_pair_path, output) = run_query_on_crate_pair(&semver_query, &crate_pair_name, crate_, crate_);
+                         if !output.is_empty() {
                              let output_difference = pretty_format_output_difference(
                                  query_name,
                                  "Expected output (empty output)".to_string(),
                                  BTreeMap::new(),
                                  format!("Actual output ({crate_pair_name}/{crate_version})"),
-                                 BTreeMap::from([output_pair]));
+                                 BTreeMap::from([(crate_pair_path, output)]));
                              panic!("Running a query on a crate that didn't change should always produce an empty output.\n{}\n", 
                                     output_difference);
                          }
