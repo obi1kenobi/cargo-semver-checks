@@ -262,12 +262,8 @@ mod tests {
         crate_pair_name: &String,
         crate_version: &str,
     ) {
-        let (crate_pair_path, output) = run_query_on_crate_pair(
-            semver_query,
-            crate_pair_name,
-            indexed_crate,
-            indexed_crate,
-        );
+        let (crate_pair_path, output) =
+            run_query_on_crate_pair(semver_query, crate_pair_name, indexed_crate, indexed_crate);
         if !output.is_empty() {
             // This `if` statement means that a false positive happened.
             // The query was ran on two identical crates (with the same rustdoc)
