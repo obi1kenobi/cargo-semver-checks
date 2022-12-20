@@ -18,7 +18,7 @@ if [[ "$NEW_LINT_NAME" == "" || "$NEW_LINT_NAME" == "--help" ]]; then
 fi
 set -u
 
-# Make the lint file. If the file already exists, bail so as not to overwrite existing lints.
+# Make the lint file.
 LINT_FILENAME="$LINTS_DIR/$NEW_LINT_NAME.ron"
 echo -n "Creating lint definition file ${LINT_FILENAME#"$TOPLEVEL/"} ..."
 if [[ -f "$LINT_FILENAME" ]]; then
