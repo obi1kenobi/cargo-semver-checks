@@ -36,8 +36,7 @@ SemverQuery(
         CrateDiff {
             # TODO
         }
-    }
-    "#,
+    }"#,
     arguments: {
         // TODO
     },
@@ -67,11 +66,11 @@ if [[ -f "$NEW_TEST_OUTPUT_FILE" ]]; then
     echo ' already exists.'
 else
     cat <<EOF >"$NEW_TEST_OUTPUT_FILE"
-[
+{
     "./test_crates/$NEW_LINT_NAME/": [
         // TODO
     ]
-]
+}
 EOF
     echo ' done!'
 fi
