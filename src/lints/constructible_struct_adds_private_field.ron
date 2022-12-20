@@ -1,0 +1,80 @@
+SemverQuery(
+    id: "constructible_struct_adds_private_field",
+    human_readable_name: "struct no longer constructible due to new private field",
+    description: "A struct is no longer constructible with a struct literal due to a new private field.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/reference/expressions/struct-expr.html"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        # If the struct is now marked `#[non_exhaustive]`, that's
+                        # already a breaking change that has its own rule.
+                        # Don't also report new field additions, since the programmer has
+                        # clearly stated that they don't consider the struct exhaustive anymore.
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        struct_name: name @output @tag
+                        struct_type @output @tag
+
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        field {
+                            field_name: name @output @tag
+                            visibility_limit @filter(op: "!=", value: ["$public"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    # The struct needs to previously have been constructible with a struct literal.
+                    # Both of the following need to be true for that to have been the case:
+                    # 1. It needs to not have been marked `#[non_exhaustive]`.
+                    # 2. It needs to not have had any non-public fields.
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%struct_name"])
+                        struct_type @filter(op: "=", value: ["%struct_type"])
+
+                        # 1. It needs to not have been marked `#[non_exhaustive]`.
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        # 2. It needs to not have had any non-public fields.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            visibility_limit @filter(op: "!=", value: ["$public"])
+                        }
+
+                        # The new field did not previously exist.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%field_name"])
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "non_exhaustive": "#[non_exhaustive]",
+        "zero": 0,
+    },
+    error_message: "A struct constructible with a struct literal has a new non-public field. It can no longer be constructed using a struct literal outside of its crate.",
+    per_result_error_template: Some("field {{struct_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
+)

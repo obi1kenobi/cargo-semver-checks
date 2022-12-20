@@ -1,0 +1,75 @@
+SemverQuery(
+    id: "enum_struct_variant_field_added",
+    human_readable_name: "pub enum struct variant field added",
+    description: "An enum's exhaustive struct variant has a new field.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        enum_name: name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        variant {
+                            ... on StructVariant {
+                                # If the variant is now marked `#[non_exhaustive]`,
+                                # that's already a breaking change that has its own rule.
+                                # Don't also report new field additions, since the programmer has
+                                # clearly stated that they don't consider it exhaustive anymore.
+                                attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                                variant_name: name @output @tag
+
+                                field {
+                                    field_name: name @output @tag
+
+                                    span_: span @optional {
+                                        filename @output
+                                        begin_line @output
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%enum_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        variant {
+                            ... on StructVariant {
+                                name @filter(op: "=", value: ["%variant_name"])
+                                attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                                field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                    name @filter(op: "=", value: ["%field_name"])
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+        "non_exhaustive": "#[non_exhaustive]",
+    },
+    error_message: "An enum's exhaustive struct variant has a new field, which has to be included when constructing or matching on this variant.",
+    per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+)
