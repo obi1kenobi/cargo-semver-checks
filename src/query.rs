@@ -269,6 +269,11 @@ mod tests {
             indexed_crate,
         );
         if !output.is_empty() {
+            // This `if` statement means that a false positive happened.
+            // The query was ran on two identical crates (with the same rustdoc)
+            // and it produced a non-empty output, which means that it found issues
+            // in a crate pair that definitely has no semver breaks.
+
             let output_difference = pretty_format_output_difference(
                 query_name,
                 "Expected output (empty output)".to_string(),
@@ -276,7 +281,7 @@ mod tests {
                 format!("Actual output ({crate_pair_name}/{crate_version})"),
                 BTreeMap::from([(crate_pair_path, output)]),
             );
-            panic!("Running a query on a crate that didn't change should always produce an empty output.\n{}\n", 
+            panic!("The query produced a non-empty output when it compared two crates with the same rustdoc.\n{}\n", 
                 output_difference);
         }
     }
