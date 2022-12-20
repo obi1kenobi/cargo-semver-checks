@@ -244,12 +244,11 @@ mod tests {
     }
 
     fn run_query_on_crate_pair(
-        query_name: &str,
         semver_query: &SemverQuery,
-        crate_pair_name: String,
+        crate_pair_name: &String,
         indexed_crate_new: &VersionedIndexedCrate,
         indexed_crate_old: &VersionedIndexedCrate,
-    ) {
+    ) -> (String, Vec<BTreeMap<String, FieldValue>>) {
         let adapter = VersionedRustdocAdapter::new(indexed_crate_new, Some(indexed_crate_old))
             .expect("could not create adapter");
         let results_iter = adapter
@@ -269,7 +268,7 @@ mod tests {
 
         let expected_result_text =
             std::fs::read_to_string(format!("./test_outputs/{query_name}.output.ron"))
-            .with_context(|| format!("Could not load test_outputs/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
+            .with_context(|| format!("Could not load test_outputs/{query_name}.output.ron expected-outputs file, did you forget to add it?"))
             .expect("failed to load expected outputs");
         let mut expected_results: TestOutput = ron::from_str(&expected_result_text)
             .expect("could not parse expected outputs as ron format");
@@ -285,13 +284,13 @@ mod tests {
                 let assert_no_false_positives_in_nonchanged_crate =
                     |crate_: &VersionedIndexedCrate,
                      crate_version: &str| {
-                         let output_pair = run_query_on_crate_pair(query_name, &semver_query, crate_pair_name, crate_, crate_);
+                         let output_pair = run_query_on_crate_pair(&semver_query, &crate_pair_name, crate_, crate_);
                          if !output_pair.1.is_empty() {
                              let output_difference = pretty_format_output_difference(
                                  query_name,
                                  "Expected output (empty output)".to_string(),
                                  BTreeMap::new(),
-                                 format!("Actual output ({}/{})", crate_pair_name, crate_version),
+                                 format!("Actual output ({crate_pair_name}/{crate_version})"),
                                  BTreeMap::from([output_pair]));
                              panic!("Running a query on a crate that didn't change should always produce an empty output.\n{}\n", 
                                     output_difference);
@@ -300,7 +299,7 @@ mod tests {
                 assert_no_false_positives_in_nonchanged_crate(&indexed_crate_new, "new");
                 assert_no_false_positives_in_nonchanged_crate(&indexed_crate_old, "old");
 
-                run_query_on(query_name, &semver_query, crate_pair_name, &indexed_crate_new, &indexed_crate_old)
+                run_query_on_crate_pair(&semver_query, &crate_pair_name, &indexed_crate_new, &indexed_crate_old)
             })
             .filter(|(_crate_pair_name, output)| !output.is_empty())
             .collect();
