@@ -19,9 +19,8 @@ and relies on similar information.
 For example, if implementing a lint that uses information about attributes,
 find other lints that check attribute information and use them as guides as you write your lint.
 
-The ["Adding a new lint"](#adding-a-new-lint) section of this document has a checklist of steps
-you can follow to ensure your new lint is tested and included in the lints that
-`cargo-semver-checks` runs.
+The ["Adding a new lint"](#adding-a-new-lint) section of this document has a walkthrough for
+defining and testing new lints.
 
 Please see the ["Running `cargo test` for the first time"](#running-cargo-test-for-the-first-time)
 section to generate the test rustdoc JSON data the tests require. Failing to run this step
@@ -127,7 +126,7 @@ Each `new` crate version is generally expected to trigger one or more lints due 
 The expected outputs for each of the lints are stored in per-lint files in
 the [`test_outputs` directory](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/test_outputs).
 
-### Checklist for adding a new lint
+### Walkthrough for adding a new lint
 
 First, choose an appropriate name for your lint. We'll refer to it as `<lint_name>`.
 
