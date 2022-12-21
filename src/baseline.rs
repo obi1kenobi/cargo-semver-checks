@@ -73,8 +73,8 @@ impl BaselineLoader for PathBaseline {
             .lookup
             .get(name)
             .with_context(|| format!("package `{}` not found in {}", name, self.root.display()))?;
-        let version = version.map(|v| format!(" v{}", v)).unwrap_or_default();
-        config.shell_status("Parsing", format_args!("{}{} (baseline)", name, version))?;
+        let version = version.map(|v| format!(" v{v}")).unwrap_or_default();
+        config.shell_status("Parsing", format_args!("{name}{version} (baseline)"))?;
         let rustdoc_path = rustdoc.dump(manifest_path.as_path(), None, true)?;
         Ok(rustdoc_path)
     }
@@ -310,13 +310,10 @@ impl BaselineLoader for RegistryBaseline {
         )?;
         std::fs::write(base_root.join("lib.rs"), "")?;
 
-        config.shell_status(
-            "Parsing",
-            format_args!("{} v{} (baseline)", name, base_version),
-        )?;
+        config.shell_status("Parsing", format_args!("{name} v{base_version} (baseline)"))?;
         let rustdoc_path = rustdoc.dump(
             manifest_path.as_path(),
-            Some(&format!("{}@{}", name, base_version)),
+            Some(&format!("{name}@{base_version}")),
             false,
         )?;
         Ok(rustdoc_path)

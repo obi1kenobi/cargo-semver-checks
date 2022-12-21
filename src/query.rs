@@ -78,15 +78,14 @@ impl SemverQuery {
             let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
                 panic!(
                     "\
-Failed to parse a query: {}
+Failed to parse a query: {e}
 ```ron
-{}
-```",
-                    e, query_text
+{query_text}
+```"
                 );
             });
             let id_conflict = queries.insert(query.id.clone(), query);
-            assert!(id_conflict.is_none(), "{:?}", id_conflict);
+            assert!(id_conflict.is_none(), "{id_conflict:?}");
         }
 
         queries
@@ -108,12 +107,9 @@ mod tests {
     use crate::templating::make_handlebars_registry;
 
     fn load_pregenerated_rustdoc(crate_pair: &str, crate_version: &str) -> VersionedCrate {
-        let path = format!(
-            "./localdata/test_data/{}/{}/rustdoc.json",
-            crate_pair, crate_version
-        );
+        let path = format!("./localdata/test_data/{crate_pair}/{crate_version}/rustdoc.json");
         load_rustdoc(Path::new(&path))
-            .with_context(|| format!("Could not load {} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?", path))
+            .with_context(|| format!("Could not load {path} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?"))
             .expect("failed to load baseline rustdoc")
     }
 
@@ -213,45 +209,124 @@ mod tests {
             .collect()
     }
 
+    type TestOutput = BTreeMap<String, Vec<BTreeMap<String, FieldValue>>>;
+
+    fn pretty_format_output_difference(
+        query_name: &str,
+        output_name1: String,
+        output1: TestOutput,
+        output_name2: String,
+        output2: TestOutput,
+    ) -> String {
+        let results_to_string = |name, results| {
+            format!(
+                "{name}:\n{}",
+                ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default()).unwrap()
+            )
+        };
+        vec![
+            format!("Query {query_name} produced incorrect output (./src/lints/{query_name}.ron)."),
+            results_to_string(output_name1, &output1),
+            results_to_string(output_name2, &output2),
+            "Note that the individual outputs might have been deliberately reordered.".to_string(),
+            "Also, remember about running ./scripts/regenerate_test_rustdocs.sh when needed."
+                .to_string(),
+        ]
+        .join("\n\n")
+    }
+
+    fn run_query_on_crate_pair(
+        semver_query: &SemverQuery,
+        crate_pair_name: &String,
+        indexed_crate_new: &VersionedIndexedCrate,
+        indexed_crate_old: &VersionedIndexedCrate,
+    ) -> (String, Vec<BTreeMap<String, FieldValue>>) {
+        let adapter = VersionedRustdocAdapter::new(indexed_crate_new, Some(indexed_crate_old))
+            .expect("could not create adapter");
+        let results_iter = adapter
+            .run_query(&semver_query.query, semver_query.arguments.clone())
+            .unwrap();
+        (
+            format!("./test_crates/{crate_pair_name}/"),
+            results_iter
+                .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+                .collect::<Vec<BTreeMap<_, _>>>(),
+        )
+    }
+
+    fn assert_no_false_positives_in_nonchanged_crate(
+        query_name: &str,
+        semver_query: &SemverQuery,
+        indexed_crate: &VersionedIndexedCrate,
+        crate_pair_name: &String,
+        crate_version: &str,
+    ) {
+        let (crate_pair_path, output) =
+            run_query_on_crate_pair(semver_query, crate_pair_name, indexed_crate, indexed_crate);
+        if !output.is_empty() {
+            // This `if` statement means that a false positive happened.
+            // The query was ran on two identical crates (with the same rustdoc)
+            // and it produced a non-empty output, which means that it found issues
+            // in a crate pair that definitely has no semver breaks.
+
+            let output_difference = pretty_format_output_difference(
+                query_name,
+                "Expected output (empty output)".to_string(),
+                BTreeMap::new(),
+                format!("Actual output ({crate_pair_name}/{crate_version})"),
+                BTreeMap::from([(crate_pair_path, output)]),
+            );
+            panic!("The query produced a non-empty output when it compared two crates with the same rustdoc.\n{output_difference}\n");
+        }
+    }
+
     pub(in crate::query) fn check_query_execution(query_name: &str) {
         let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
 
         let expected_result_text =
             std::fs::read_to_string(format!("./test_outputs/{query_name}.output.ron"))
-            .with_context(|| format!("Could not load test_outputs/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
+            .with_context(|| format!("Could not load test_outputs/{query_name}.output.ron expected-outputs file, did you forget to add it?"))
             .expect("failed to load expected outputs");
-        let mut expected_results: BTreeMap<String, Vec<BTreeMap<String, FieldValue>>> =
-            ron::from_str(&expected_result_text)
-                .expect("could not parse expected outputs as ron format");
+        let mut expected_results: TestOutput = ron::from_str(&expected_result_text)
+            .expect("could not parse expected outputs as ron format");
 
-        let mut actual_results: BTreeMap<String, Vec<BTreeMap<_, _>>> = get_test_crate_names()
+        let mut actual_results: TestOutput = get_test_crate_names()
             .into_iter()
-            .map(|crate_pair| {
-                let crate_new = load_pregenerated_rustdoc(&crate_pair, "new");
-                let crate_old = load_pregenerated_rustdoc(&crate_pair, "old");
+            .map(|crate_pair_name| {
+                let crate_new = load_pregenerated_rustdoc(&crate_pair_name, "new");
+                let crate_old = load_pregenerated_rustdoc(&crate_pair_name, "old");
                 let indexed_crate_new = VersionedIndexedCrate::new(&crate_new);
                 let indexed_crate_old = VersionedIndexedCrate::new(&crate_old);
 
-                let adapter =
-                    VersionedRustdocAdapter::new(&indexed_crate_new, Some(&indexed_crate_old))
-                        .expect("could not create adapter");
-                let results_iter = adapter
-                    .run_query(&semver_query.query, semver_query.arguments.clone())
-                    .unwrap();
-                (
-                    format!("./test_crates/{}/", crate_pair),
-                    results_iter
-                        .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
-                        .collect::<Vec<BTreeMap<_, _>>>(),
+                assert_no_false_positives_in_nonchanged_crate(
+                    query_name,
+                    &semver_query,
+                    &indexed_crate_new,
+                    &crate_pair_name,
+                    "new",
+                );
+                assert_no_false_positives_in_nonchanged_crate(
+                    query_name,
+                    &semver_query,
+                    &indexed_crate_old,
+                    &crate_pair_name,
+                    "old",
+                );
+
+                run_query_on_crate_pair(
+                    &semver_query,
+                    &crate_pair_name,
+                    &indexed_crate_new,
+                    &indexed_crate_old,
                 )
             })
-            .filter(|(_crate_pair, output)| !output.is_empty())
+            .filter(|(_crate_pair_name, output)| !output.is_empty())
             .collect();
 
         // Reorder both vectors of results into a deterministic order that will compensate for
         // nondeterminism in how the results are ordered.
-        let sort_individual_outputs = |results: &mut BTreeMap<String, Vec<_>>| {
+        let sort_individual_outputs = |results: &mut TestOutput| {
             let key_func = |elem: &BTreeMap<String, FieldValue>| {
                 (
                     elem["span_filename"].as_str().unwrap().to_owned(),
@@ -266,21 +341,16 @@ mod tests {
         sort_individual_outputs(&mut actual_results);
 
         if expected_results != actual_results {
-            let results_to_string = |name, results| {
-                format!(
-                    "{}:\n{}",
-                    name,
-                    ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default())
-                        .unwrap()
+            panic!(
+                "\n{}\n",
+                pretty_format_output_difference(
+                    query_name,
+                    format!("Expected output (./test_outputs/{query_name}.output.ron)"),
+                    expected_results,
+                    "Actual output".to_string(),
+                    actual_results
                 )
-            };
-            let messages = vec![
-                format!("Query {} produced incorrect output (./src/lints/{}.ron).", &query_name, &query_name),
-                results_to_string(format!("Expected output (./test_outputs/{}.output.ron)", &query_name), &expected_results),
-                results_to_string("Actual output".to_string(), &actual_results),
-                "Note that the individual outputs might have been deliberately reordered. Also, remember about running ./scripts/regenerate_test_rustdocs.sh when needed.".to_string(),
-            ];
-            panic!("\n{}\n", messages.join("\n\n"));
+            );
         }
 
         let registry = make_handlebars_registry();
