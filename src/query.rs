@@ -78,15 +78,14 @@ impl SemverQuery {
             let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
                 panic!(
                     "\
-Failed to parse a query: {}
+Failed to parse a query: {e}
 ```ron
-{}
-```",
-                    e, query_text
+{query_text}
+```"
                 );
             });
             let id_conflict = queries.insert(query.id.clone(), query);
-            assert!(id_conflict.is_none(), "{:?}", id_conflict);
+            assert!(id_conflict.is_none(), "{id_conflict:?}");
         }
 
         queries
@@ -277,8 +276,7 @@ mod tests {
                 format!("Actual output ({crate_pair_name}/{crate_version})"),
                 BTreeMap::from([(crate_pair_path, output)]),
             );
-            panic!("The query produced a non-empty output when it compared two crates with the same rustdoc.\n{}\n", 
-                output_difference);
+            panic!("The query produced a non-empty output when it compared two crates with the same rustdoc.\n{output_difference}\n");
         }
     }
 
