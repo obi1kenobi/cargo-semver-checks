@@ -112,7 +112,7 @@ impl RustDocCommand {
 
             // N.B.: Crates named like `foo-bar` have rustdoc JSON named like `foo_bar.json`.
             let crate_name_with_underscores = crate_name.replace('-', "_");
-            let json_path = target_dir.join(format!("doc/{}.json", crate_name_with_underscores));
+            let json_path = target_dir.join(format!("doc/{crate_name_with_underscores}.json"));
             if json_path.exists() {
                 Ok(json_path)
             } else {
@@ -126,13 +126,13 @@ impl RustDocCommand {
             let manifest = crate::manifest::Manifest::parse(manifest_path)?;
 
             let lib_target_name = crate::manifest::get_lib_target_name(&manifest)?;
-            let json_path = target_dir.join(format!("doc/{}.json", lib_target_name));
+            let json_path = target_dir.join(format!("doc/{lib_target_name}.json"));
             if json_path.exists() {
                 return Ok(json_path);
             }
 
             let first_bin_target_name = crate::manifest::get_first_bin_target_name(&manifest)?;
-            let json_path = target_dir.join(format!("doc/{}.json", first_bin_target_name));
+            let json_path = target_dir.join(format!("doc/{first_bin_target_name}.json"));
             if !json_path.exists() {
                 let crate_name = if let Some(pkg_spec) = pkg_spec {
                     pkg_spec

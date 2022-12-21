@@ -320,7 +320,7 @@ pub(super) fn run_check_release(
                                     .expect("serde failed");
                                 let indented_serde = serde_pretty
                                     .split('\n')
-                                    .map(|line| format!("    {}", line))
+                                    .map(|line| format!("    {line}"))
                                     .join("\n");
                                 colored!(w, "    lint rule output values:\n{}", indented_serde)
                             })
