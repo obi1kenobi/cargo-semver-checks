@@ -310,10 +310,7 @@ impl BaselineLoader for RegistryBaseline {
         )?;
         std::fs::write(base_root.join("lib.rs"), "")?;
 
-        config.shell_status(
-            "Parsing",
-            format_args!("{name} v{base_version} (baseline)"),
-        )?;
+        config.shell_status("Parsing", format_args!("{name} v{base_version} (baseline)"))?;
         let rustdoc_path = rustdoc.dump(
             manifest_path.as_path(),
             Some(&format!("{name}@{base_version}")),
