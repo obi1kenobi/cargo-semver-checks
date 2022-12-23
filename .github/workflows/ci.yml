@@ -89,6 +89,27 @@ jobs:
       - name: test
         run: cargo test
 
+      - name: Run binary on crate pairs
+        run: |
+          cargo build
+          run_binary_on_crate_pair() {
+            pushd "test_crates/$1/new"
+            ../../../target/debug/cargo-semver-checks semver-checks check-release --baseline-root=../old/Cargo.toml > /dev/null 2>&1
+            return_value="$?"
+            popd
+            return "$return_value"
+          }
+          if ! run_binary_on_crate_pair template; then
+            echo "Running on template crate pair returns a non-zero code, whereas it should end successfully"
+            exit 1
+          fi
+          for crate_pair in "enum_missing" "function_const_removed" "function_unsafe_added"; do
+            if run_binary_on_crate_pair $crate_pair; then
+              echo "Running on $crate_pair crate pair ended successfully, whereas it should return a non-zero code"
+              exit 1
+            fi
+          done
+
   run-on-rust-libp2p:
     # Run cargo-semver-checks on a crate with no semver violations,
     # to make sure there are no false-positives.
