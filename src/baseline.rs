@@ -10,7 +10,7 @@ pub(crate) trait BaselineLoader {
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
         name: &str,
-        version: Option<&semver::Version>,
+        version_current: Option<&semver::Version>,
     ) -> anyhow::Result<std::path::PathBuf>;
 }
 
@@ -30,7 +30,7 @@ impl BaselineLoader for RustdocBaseline {
         _config: &mut GlobalConfig,
         _rustdoc: &RustDocCommand,
         _name: &str,
-        _version: Option<&semver::Version>,
+        _version_current: Option<&semver::Version>,
     ) -> anyhow::Result<std::path::PathBuf> {
         Ok(self.path.clone())
     }
@@ -38,7 +38,7 @@ impl BaselineLoader for RustdocBaseline {
 
 pub(crate) struct PathBaseline {
     root: std::path::PathBuf,
-    lookup: std::collections::HashMap<String, std::path::PathBuf>,
+    lookup: std::collections::HashMap<String, (String, std::path::PathBuf)>,
 }
 
 impl PathBaseline {
@@ -47,10 +47,13 @@ impl PathBaseline {
         for result in ignore::Walk::new(root) {
             let entry = result?;
             if entry.file_name() == "Cargo.toml" {
-                if let Ok(name) = crate::manifest::Manifest::parse(entry.path())
-                    .and_then(|manifest| crate::manifest::get_package_name(&manifest))
-                {
-                    lookup.insert(name, entry.into_path());
+                if let Ok(manifest) = crate::manifest::Manifest::parse(entry.path()) {
+                    if let (Ok(name), Ok(version)) = (
+                        crate::manifest::get_package_name(&manifest),
+                        crate::manifest::get_package_version(&manifest),
+                    ) {
+                        lookup.insert(name, (version, entry.into_path()));
+                    }
                 }
             }
         }
@@ -67,13 +70,13 @@ impl BaselineLoader for PathBaseline {
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
         name: &str,
-        version: Option<&semver::Version>,
+        _version_current: Option<&semver::Version>,
     ) -> anyhow::Result<std::path::PathBuf> {
-        let manifest_path = self
+        let (version, manifest_path) = self
             .lookup
             .get(name)
             .with_context(|| format!("package `{}` not found in {}", name, self.root.display()))?;
-        let version = version.map(|v| format!(" v{v}")).unwrap_or_default();
+        let version = format!(" v{version}");
         config.shell_status("Parsing", format_args!("{name}{version} (baseline)"))?;
         let rustdoc_path = rustdoc.dump(manifest_path.as_path(), None, true)?;
         Ok(rustdoc_path)
@@ -146,9 +149,10 @@ impl BaselineLoader for GitBaseline {
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
         name: &str,
-        version: Option<&semver::Version>,
+        version_current: Option<&semver::Version>,
     ) -> anyhow::Result<std::path::PathBuf> {
-        self.path.load_rustdoc(config, rustdoc, name, version)
+        self.path
+            .load_rustdoc(config, rustdoc, name, version_current)
     }
 }
 
@@ -244,7 +248,7 @@ impl BaselineLoader for RegistryBaseline {
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
         name: &str,
-        version: Option<&semver::Version>,
+        version_current: Option<&semver::Version>,
     ) -> anyhow::Result<std::path::PathBuf> {
         let crate_ = self
             .index
@@ -255,7 +259,7 @@ impl BaselineLoader for RegistryBaseline {
         // - Most likely the user cares about the last official release
         let base_version = if let Some(base) = self.version.as_ref() {
             base.to_string()
-        } else if let Some(current) = version {
+        } else if let Some(current) = version_current {
             let mut instances = crate_
                 .versions()
                 .iter()
