@@ -1,7 +1,7 @@
 SemverQuery(
     id: "tuple_struct_to_plain_struct",
     human_readable_name: "tuple struct changed to plain struct",
-    description: "An exhaustive struct is no longer tuple",
+    description: "A struct changed from a tuple struct to plain struct",
     reference: Some(r#"
 This is breaking even if the fields have the same names, because tuple struct patterns won't work.
 Source: Rust for Rustaceans, Chapter 3, "Type Modifications", page 51
@@ -57,6 +57,6 @@ Source: Rust for Rustaceans, Chapter 3, "Type Modifications", page 51
         "non_exhaustive": "#[non_exhaustive]",
         "zero": 0,
     },
-    error_message: "A publicly-visible, exhaustive tuple struct with all fields public changed to plain struct.",
+    error_message: "A publicly-visible, exhaustive tuple struct with all fields public changed to normal (curly-braces) struct, which cannot be constructed using the same struct literal syntax.",
     per_result_error_template: Some("struct {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )
