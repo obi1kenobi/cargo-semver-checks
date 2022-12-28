@@ -82,8 +82,3 @@ pub enum SeparateCU8ToSeparateU8CEnum {
     Bar,
     Baz,
 }
-
-
-pub enum Foo {
-    Bar,
-}
