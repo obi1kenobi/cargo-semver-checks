@@ -79,7 +79,7 @@ fn main() -> anyhow::Result<()> {
         );
         if let Some(link) = &query.reference_link {
             println!();
-            println!("See also {}", link);
+            println!("See also {link}");
         }
         std::process::exit(0);
     }
@@ -101,7 +101,7 @@ fn main() -> anyhow::Result<()> {
                         .target_directory
                         .as_std_path()
                         .join(util::SCOPE)
-                        .join(format!("git-{}", slug));
+                        .join(format!("git-{slug}"));
                     Box::new(baseline::GitBaseline::with_rev(
                         source,
                         &target,
@@ -145,7 +145,7 @@ fn main() -> anyhow::Result<()> {
                         config.verbose(|config| {
                             config.shell_status(
                                 "Skipping",
-                                format_args!("{} v{} (current)", crate_name, version),
+                                format_args!("{crate_name} v{version} (current)"),
                             )
                         })?;
                         continue;
@@ -153,7 +153,7 @@ fn main() -> anyhow::Result<()> {
 
                     config.shell_status(
                         "Parsing",
-                        format_args!("{} v{} (current)", crate_name, version),
+                        format_args!("{crate_name} v{version} (current)"),
                     )?;
                     let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
                     let baseline_path = loader.load_rustdoc(
