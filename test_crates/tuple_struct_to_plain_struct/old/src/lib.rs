@@ -16,3 +16,13 @@ struct TupleToPlainStructPrivate(pub i32, pub usize, pub String);
 
 // Tuple struct changing to unit struct is a different kind of breaking change.
 pub struct TupleToUnitStruct();
+
+// Plain struct changing to tuple struct is a different kind of breaking change.
+pub struct PlainToTupleStruct {
+    pub a: i32,
+    pub b: usize,
+    pub c: String,
+}
+
+// Struct becoming non_exhaustive should take priority, and not get reported
+pub struct TupleToNonExhaustivePlainStruct(pub i32, pub usize, pub String);

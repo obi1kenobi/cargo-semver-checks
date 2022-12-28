@@ -35,3 +35,11 @@ pub struct TupleToUnitStruct;
 
 // Plain struct changing to tuple struct is a different kind of breaking change.
 pub struct PlainToTupleStruct(pub i32, pub usize, pub String);
+
+// Struct becoming non_exhaustive should take priority, and not get reported
+#[non_exhaustive]
+pub struct TupleToNonExhaustivePlainStruct {
+    pub a: i32,
+    pub b: usize,
+    pub c: String,
+}
