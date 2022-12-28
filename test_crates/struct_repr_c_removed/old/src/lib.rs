@@ -1,10 +1,4 @@
 #[repr(C)]
-pub struct Foo {
-    pub bar: usize,
-}
-
-
-#[repr(C)]
 pub struct CRemoved {
     pub bar: usize,
 }

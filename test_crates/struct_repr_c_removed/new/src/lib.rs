@@ -1,8 +1,3 @@
-pub struct Foo {
-    pub bar: usize,
-}
-
-
 pub struct CRemoved {
     pub bar: usize,
 }
