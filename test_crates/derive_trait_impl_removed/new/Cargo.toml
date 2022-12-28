@@ -1,0 +1,6 @@
+[package]
+name = "derive_trait_impl_removed"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

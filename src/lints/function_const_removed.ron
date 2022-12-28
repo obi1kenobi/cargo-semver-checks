@@ -1,0 +1,49 @@
+SemverQuery(
+    id: "function_const_removed",
+    human_readable_name: "pub fn is no longer const",
+    description: "A function can no longer be called in a const context.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/reference/const_eval.html"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        const @filter(op: "=", value: ["$true"])
+                        name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+                        const @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A publicly-visible function is no longer `const` and can no longer be used in a `const` context.",
+    per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+)

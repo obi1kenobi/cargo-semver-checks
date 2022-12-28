@@ -74,44 +74,18 @@ pub(crate) struct SemverQuery {
 impl SemverQuery {
     pub(crate) fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
-
-        let query_text_contents = [
-            include_str!("./lints/auto_trait_impl_removed.ron"),
-            include_str!("./lints/derive_trait_impl_removed.ron"),
-            include_str!("./lints/enum_marked_non_exhaustive.ron"),
-            include_str!("./lints/enum_missing.ron"),
-            include_str!("./lints/enum_repr_c_removed.ron"),
-            include_str!("./lints/enum_repr_int_changed.ron"),
-            include_str!("./lints/enum_repr_int_removed.ron"),
-            include_str!("./lints/enum_variant_added.ron"),
-            include_str!("./lints/enum_variant_missing.ron"),
-            include_str!("./lints/enum_struct_variant_field_missing.ron"),
-            include_str!("./lints/function_missing.ron"),
-            include_str!("./lints/function_parameter_count_changed.ron"),
-            include_str!("./lints/inherent_method_missing.ron"),
-            include_str!("./lints/method_parameter_count_changed.ron"),
-            include_str!("./lints/sized_impl_removed.ron"),
-            include_str!("./lints/struct_marked_non_exhaustive.ron"),
-            include_str!("./lints/struct_missing.ron"),
-            include_str!("./lints/struct_pub_field_missing.ron"),
-            include_str!("./lints/struct_repr_c_removed.ron"),
-            include_str!("./lints/struct_repr_transparent_removed.ron"),
-            include_str!("./lints/unit_struct_changed_kind.ron"),
-            include_str!("./lints/variant_marked_non_exhaustive.ron"),
-        ];
-        for query_text in query_text_contents {
+        for query_text in get_query_text_contents() {
             let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
                 panic!(
                     "\
-Failed to parse a query: {}
+Failed to parse a query: {e}
 ```ron
-{}
-```",
-                    e, query_text
+{query_text}
+```"
                 );
             });
             let id_conflict = queries.insert(query.id.clone(), query);
-            assert!(id_conflict.is_none(), "{:?}", id_conflict);
+            assert!(id_conflict.is_none(), "{id_conflict:?}");
         }
 
         queries
@@ -125,32 +99,36 @@ mod tests {
     use anyhow::Context;
     use trustfall_core::ir::TransparentValue;
     use trustfall_core::{frontend::parse, ir::FieldValue};
-    use trustfall_rustdoc::{load_rustdoc, VersionedIndexedCrate, VersionedRustdocAdapter};
+    use trustfall_rustdoc::{
+        load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
+    };
 
     use crate::query::SemverQuery;
     use crate::templating::make_handlebars_registry;
 
+    fn load_pregenerated_rustdoc(crate_pair: &str, crate_version: &str) -> VersionedCrate {
+        let path = format!("./localdata/test_data/{crate_pair}/{crate_version}/rustdoc.json");
+        load_rustdoc(Path::new(&path))
+            .with_context(|| format!("Could not load {path} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?"))
+            .expect("failed to load baseline rustdoc")
+    }
+
     #[test]
     fn all_queries_parse_correctly() {
-        let current_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
-            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
-            .expect("failed to load baseline rustdoc");
+        let current_crate = load_pregenerated_rustdoc("template", "new");
         let indexed_crate = VersionedIndexedCrate::new(&current_crate);
         let adapter =
             VersionedRustdocAdapter::new(&indexed_crate, None).expect("failed to create adapter");
 
         let schema = adapter.schema();
         for semver_query in SemverQuery::all_queries().into_values() {
-            let _ = parse(schema, &semver_query.query).expect("not a valid query");
+            let _ = parse(schema, semver_query.query).expect("not a valid query");
         }
     }
 
     #[test]
     fn pub_use_handling() {
-        let current_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
-            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
-            .expect("failed to load baseline rustdoc");
-
+        let current_crate = load_pregenerated_rustdoc("pub_use_handling", "new");
         let current = VersionedIndexedCrate::new(&current_crate);
 
         let query = r#"
@@ -184,13 +162,8 @@ mod tests {
             .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
             .collect();
 
-        let expected_result: FieldValue = vec![
-            "test_crates",
-            "import_handling",
-            "inner",
-            "CheckPubUseHandling",
-        ]
-        .into();
+        let expected_result: FieldValue =
+            vec!["pub_use_handling", "inner", "CheckPubUseHandling"].into();
         assert_eq!(1, actual_results.len(), "{actual_results:?}");
         assert_eq!(
             expected_result, actual_results[0]["canonical_path"],
@@ -203,71 +176,192 @@ mod tests {
         actual_paths.sort_unstable();
 
         let expected_paths = vec![
-            vec!["test_crates", "CheckPubUseHandling"],
-            vec!["test_crates", "import_handling", "CheckPubUseHandling"],
-            vec![
-                "test_crates",
-                "import_handling",
-                "inner",
-                "CheckPubUseHandling",
-            ],
+            vec!["pub_use_handling", "CheckPubUseHandling"],
+            vec!["pub_use_handling", "inner", "CheckPubUseHandling"],
         ];
         assert_eq!(expected_paths, actual_paths);
     }
 
-    fn check_query_execution(query_name: &str) {
-        // Ensure the rustdocs JSON outputs have been regenerated.
-        let baseline_crate = load_rustdoc(Path::new("./localdata/test_data/baseline.json"))
-            .with_context(|| "Could not load localdata/test_data/baseline.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?")
-            .expect("failed to load baseline rustdoc");
-        let current_crate =
-            load_rustdoc(Path::new(&format!("./localdata/test_data/{}.json", query_name)))
-            .with_context(|| format!("Could not load localdata/test_data/{}.json file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?", query_name))
-            .expect("failed to load rustdoc under test");
+    fn get_test_crate_names() -> Vec<String> {
+        std::fs::read_dir("./test_crates/")
+            .expect("directory test_crates/ not found")
+            .map(|dir_entry| dir_entry.expect("failed to list test_crates/"))
+            .filter(|dir_entry| {
+                dir_entry
+                    .metadata()
+                    .expect("failed to retrieve test_crates/* metadata")
+                    .is_dir()
+            })
+            .map(|dir_entry| {
+                String::from(
+                    String::from(
+                        dir_entry
+                            .path()
+                            .to_str()
+                            .expect("failed to convert dir_entry to String"),
+                    )
+                    .strip_prefix("./test_crates/")
+                    .expect(
+                        "the dir_entry doesn't start with './test_crates/', which is unexpected",
+                    ),
+                )
+            })
+            .collect()
+    }
 
-        let baseline = VersionedIndexedCrate::new(&baseline_crate);
-        let current = VersionedIndexedCrate::new(&current_crate);
+    type TestOutput = BTreeMap<String, Vec<BTreeMap<String, FieldValue>>>;
 
-        let query_text =
-            std::fs::read_to_string(&format!("./src/lints/{}.ron", query_name)).unwrap();
-        let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
+    fn pretty_format_output_difference(
+        query_name: &str,
+        output_name1: String,
+        output1: TestOutput,
+        output_name2: String,
+        output2: TestOutput,
+    ) -> String {
+        let results_to_string = |name, results| {
+            format!(
+                "{name}:\n{}",
+                ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default()).unwrap()
+            )
+        };
+        vec![
+            format!("Query {query_name} produced incorrect output (./src/lints/{query_name}.ron)."),
+            results_to_string(output_name1, &output1),
+            results_to_string(output_name2, &output2),
+            "Note that the individual outputs might have been deliberately reordered.".to_string(),
+            "Also, remember about running ./scripts/regenerate_test_rustdocs.sh when needed."
+                .to_string(),
+        ]
+        .join("\n\n")
+    }
 
-        let expected_result_text =
-            std::fs::read_to_string(&format!("./test_outputs/{}.output.ron", query_name))
-            .with_context(|| format!("Could not load test_outputs/{}.output.ron expected-outputs file, did you forget to add it?", query_name))
-            .expect("failed to load expected outputs");
-        let mut expected_results: Vec<BTreeMap<String, FieldValue>> =
-            ron::from_str(&expected_result_text)
-                .expect("could not parse expected outputs as ron format");
-
-        let adapter = VersionedRustdocAdapter::new(&current, Some(&baseline))
+    fn run_query_on_crate_pair(
+        semver_query: &SemverQuery,
+        crate_pair_name: &String,
+        indexed_crate_new: &VersionedIndexedCrate,
+        indexed_crate_old: &VersionedIndexedCrate,
+    ) -> (String, Vec<BTreeMap<String, FieldValue>>) {
+        let adapter = VersionedRustdocAdapter::new(indexed_crate_new, Some(indexed_crate_old))
             .expect("could not create adapter");
         let results_iter = adapter
             .run_query(&semver_query.query, semver_query.arguments.clone())
             .unwrap();
+        (
+            format!("./test_crates/{crate_pair_name}/"),
+            results_iter
+                .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+                .collect::<Vec<BTreeMap<_, _>>>(),
+        )
+    }
 
-        let mut actual_results: Vec<BTreeMap<_, _>> = results_iter
-            .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+    fn assert_no_false_positives_in_nonchanged_crate(
+        query_name: &str,
+        semver_query: &SemverQuery,
+        indexed_crate: &VersionedIndexedCrate,
+        crate_pair_name: &String,
+        crate_version: &str,
+    ) {
+        let (crate_pair_path, output) =
+            run_query_on_crate_pair(semver_query, crate_pair_name, indexed_crate, indexed_crate);
+        if !output.is_empty() {
+            // This `if` statement means that a false positive happened.
+            // The query was ran on two identical crates (with the same rustdoc)
+            // and it produced a non-empty output, which means that it found issues
+            // in a crate pair that definitely has no semver breaks.
+
+            let output_difference = pretty_format_output_difference(
+                query_name,
+                "Expected output (empty output)".to_string(),
+                BTreeMap::new(),
+                format!("Actual output ({crate_pair_name}/{crate_version})"),
+                BTreeMap::from([(crate_pair_path, output)]),
+            );
+            panic!("The query produced a non-empty output when it compared two crates with the same rustdoc.\n{output_difference}\n");
+        }
+    }
+
+    pub(in crate::query) fn check_query_execution(query_name: &str) {
+        let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
+        let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
+
+        let expected_result_text =
+            std::fs::read_to_string(format!("./test_outputs/{query_name}.output.ron"))
+            .with_context(|| format!("Could not load test_outputs/{query_name}.output.ron expected-outputs file, did you forget to add it?"))
+            .expect("failed to load expected outputs");
+        let mut expected_results: TestOutput = ron::from_str(&expected_result_text)
+            .expect("could not parse expected outputs as ron format");
+
+        let mut actual_results: TestOutput = get_test_crate_names()
+            .into_iter()
+            .map(|crate_pair_name| {
+                let crate_new = load_pregenerated_rustdoc(&crate_pair_name, "new");
+                let crate_old = load_pregenerated_rustdoc(&crate_pair_name, "old");
+                let indexed_crate_new = VersionedIndexedCrate::new(&crate_new);
+                let indexed_crate_old = VersionedIndexedCrate::new(&crate_old);
+
+                assert_no_false_positives_in_nonchanged_crate(
+                    query_name,
+                    &semver_query,
+                    &indexed_crate_new,
+                    &crate_pair_name,
+                    "new",
+                );
+                assert_no_false_positives_in_nonchanged_crate(
+                    query_name,
+                    &semver_query,
+                    &indexed_crate_old,
+                    &crate_pair_name,
+                    "old",
+                );
+
+                run_query_on_crate_pair(
+                    &semver_query,
+                    &crate_pair_name,
+                    &indexed_crate_new,
+                    &indexed_crate_old,
+                )
+            })
+            .filter(|(_crate_pair_name, output)| !output.is_empty())
             .collect();
 
         // Reorder both vectors of results into a deterministic order that will compensate for
         // nondeterminism in how the results are ordered.
-        let key_func = |elem: &BTreeMap<String, FieldValue>| {
-            (
-                elem["span_filename"].as_str().unwrap().to_owned(),
-                elem["span_begin_line"].as_usize().unwrap(),
-            )
+        let sort_individual_outputs = |results: &mut TestOutput| {
+            let key_func = |elem: &BTreeMap<String, FieldValue>| {
+                (
+                    elem["span_filename"].as_str().unwrap().to_owned(),
+                    elem["span_begin_line"].as_usize().unwrap(),
+                )
+            };
+            for value in results.values_mut() {
+                value.sort_unstable_by_key(key_func);
+            }
         };
-        expected_results.sort_unstable_by_key(key_func);
-        actual_results.sort_unstable_by_key(key_func);
+        sort_individual_outputs(&mut expected_results);
+        sort_individual_outputs(&mut actual_results);
 
-        assert_eq!(expected_results, actual_results);
+        if expected_results != actual_results {
+            panic!(
+                "\n{}\n",
+                pretty_format_output_difference(
+                    query_name,
+                    format!("Expected output (./test_outputs/{query_name}.output.ron)"),
+                    expected_results,
+                    "Actual output".to_string(),
+                    actual_results
+                )
+            );
+        }
 
         let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
             assert!(!actual_results.is_empty());
 
-            for semver_violation_result in actual_results {
+            let flattened_actual_results: Vec<_> = actual_results
+                .into_iter()
+                .flat_map(|(_key, value)| value)
+                .collect();
+            for semver_violation_result in flattened_actual_results {
                 let pretty_result: BTreeMap<String, TransparentValue> = semver_violation_result
                     .into_iter()
                     .map(|(k, v)| (k, v.into()))
@@ -280,40 +374,63 @@ mod tests {
             }
         }
     }
+}
 
-    macro_rules! query_execution_tests {
-        ($($name:ident,)*) => {
+macro_rules! add_lints {
+    ($($name:ident,)*) => {
+        #[cfg(test)]
+        mod tests_lints {
             $(
                 #[test]
                 fn $name() {
-                    check_query_execution(stringify!($name))
+                    super::tests::check_query_execution(stringify!($name))
                 }
             )*
         }
-    }
 
-    query_execution_tests!(
-        auto_trait_impl_removed,
-        derive_trait_impl_removed,
-        enum_marked_non_exhaustive,
-        enum_missing,
-        enum_repr_c_removed,
-        enum_repr_int_changed,
-        enum_repr_int_removed,
-        enum_variant_added,
-        enum_variant_missing,
-        enum_struct_variant_field_missing,
-        function_missing,
-        function_parameter_count_changed,
-        inherent_method_missing,
-        method_parameter_count_changed,
-        sized_impl_removed,
-        struct_marked_non_exhaustive,
-        struct_missing,
-        struct_pub_field_missing,
-        struct_repr_c_removed,
-        struct_repr_transparent_removed,
-        unit_struct_changed_kind,
-        variant_marked_non_exhaustive,
-    );
+        // No way to avoid this lint -- the push() calls are macro-generated.
+        #[allow(clippy::vec_init_then_push)]
+        fn get_query_text_contents() -> Vec<&'static str> {
+            let mut temp_vec = Vec::new();
+            $(
+                temp_vec.push(
+                    include_str!(concat!("lints/", stringify!($name), ".ron"))
+                );
+            )*
+            temp_vec
+        }
+    }
 }
+
+add_lints!(
+    auto_trait_impl_removed,
+    constructible_struct_adds_field,
+    constructible_struct_adds_private_field,
+    derive_trait_impl_removed,
+    enum_marked_non_exhaustive,
+    enum_missing,
+    enum_repr_c_removed,
+    enum_repr_int_changed,
+    enum_repr_int_removed,
+    enum_struct_variant_field_added,
+    enum_struct_variant_field_missing,
+    enum_variant_added,
+    enum_variant_missing,
+    function_const_removed,
+    function_missing,
+    function_parameter_count_changed,
+    function_unsafe_added,
+    inherent_method_const_removed,
+    inherent_method_missing,
+    inherent_method_unsafe_added,
+    method_parameter_count_changed,
+    sized_impl_removed,
+    struct_marked_non_exhaustive,
+    struct_missing,
+    struct_pub_field_missing,
+    struct_repr_c_removed,
+    struct_repr_transparent_removed,
+    trait_missing,
+    unit_struct_changed_kind,
+    variant_marked_non_exhaustive,
+);

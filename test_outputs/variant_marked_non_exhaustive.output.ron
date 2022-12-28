@@ -1,41 +1,50 @@
-[
-    {
-        "name": String("MyEnum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("non_exhaustive"),
-            String("MyEnum"),
-        ]),
-        "variant_name": String("UnitVariant"),
-        "span_filename": String("src/test_cases/non_exhaustive.rs"),
-        "span_begin_line": Uint64(74),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("MyEnum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("non_exhaustive"),
-            String("MyEnum"),
-        ]),
-        "variant_name": String("TupleVariant"),
-        "span_filename": String("src/test_cases/non_exhaustive.rs"),
-        "span_begin_line": Uint64(77),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("MyEnum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("non_exhaustive"),
-            String("MyEnum"),
-        ]),
-        "variant_name": String("StructVariant"),
-        "span_filename": String("src/test_cases/non_exhaustive.rs"),
-        "span_begin_line": Uint64(80),
-        "visibility_limit": String("public"),
-    }
-]
+{
+    "./test_crates/enum_struct_variant_field_added/": [
+        {
+            "name": String("EnumWithExhaustiveVariant"),
+            "path": List([
+                String("enum_struct_variant_field_added"),
+                String("EnumWithExhaustiveVariant"),
+            ]),
+            "span_begin_line": Uint64(32),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("ExhaustiveVariant"),
+            "visibility_limit": String("public"),
+        },
+    ],
+    "./test_crates/non_exhaustive/": [
+        {
+            "name": String("MyEnum"),
+            "path": List([
+                String("non_exhaustive"),
+                String("MyEnum"),
+            ]),
+            "span_begin_line": Uint64(38),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("UnitVariant"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("MyEnum"),
+            "path": List([
+                String("non_exhaustive"),
+                String("MyEnum"),
+            ]),
+            "span_begin_line": Uint64(41),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("TupleVariant"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("MyEnum"),
+            "path": List([
+                String("non_exhaustive"),
+                String("MyEnum"),
+            ]),
+            "span_begin_line": Uint64(44),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("StructVariant"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

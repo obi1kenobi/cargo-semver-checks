@@ -25,6 +25,23 @@ pub(crate) fn get_package_name(manifest: &Manifest) -> anyhow::Result<String> {
     Ok(package.name.clone())
 }
 
+pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<String> {
+    let package = manifest.parsed.package.as_ref().ok_or_else(|| {
+        anyhow::format_err!(
+            "Failed to parse {}: no `package` table",
+            manifest.path.display()
+        )
+    })?;
+    let version = package.version.get().map_err(|e| {
+        anyhow::format_err!(
+            "Failed to retrieve package version from {}: {}",
+            manifest.path.display(),
+            e
+        )
+    })?;
+    Ok(version.clone())
+}
+
 pub(crate) fn get_lib_target_name(manifest: &Manifest) -> anyhow::Result<String> {
     // If there's a [lib] section, return the name it specifies, if any.
     if let Some(product) = &manifest.parsed.lib {

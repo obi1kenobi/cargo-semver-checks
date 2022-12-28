@@ -113,7 +113,7 @@ impl GlobalConfig {
         if justified {
             write!(self.stderr(), "{status:>12}")?;
         } else {
-            write!(self.stderr(), "{}", status)?;
+            write!(self.stderr(), "{status}")?;
             self.stderr()
                 .set_color(termcolor::ColorSpec::new().set_bold(true))?;
             write!(self.stderr(), ":")?;

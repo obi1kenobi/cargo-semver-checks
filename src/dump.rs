@@ -4,23 +4,6 @@ pub struct RustDocCommand {
     silence: bool,
 }
 
-// #[derive(Clone, Debug, PartialEq, Eq)]
-// pub enum RustdocPackageSpec<'a> {
-//     Implicit,
-//     ExplicitInManifest(&'a str),
-//     ExplicitExternal(&'a str),
-// }
-
-// impl<'a> RustdocPackageSpec<'a> {
-//     fn as_explicit_spec(&self) -> Option<&'a str> {
-//         match self {
-//             RustdocPackageSpec::Implicit => None,
-//             RustdocPackageSpec::ExplicitInManifest(spec) => Some(*spec),
-//             RustdocPackageSpec::ExplicitExternal(spec) => Some(*spec),
-//         }
-//     }
-// }
-
 impl RustDocCommand {
     pub fn new() -> Self {
         Self {
@@ -52,8 +35,6 @@ impl RustDocCommand {
     }
 
     /// Produce a rustdoc JSON file for the specified configuration.
-    ///
-    /// - If
     pub fn dump(
         &self,
         manifest_path: &std::path::Path,
@@ -84,7 +65,7 @@ impl RustDocCommand {
         cmd.env("RUSTC_BOOTSTRAP", "1")
             .env(
                 "RUSTDOCFLAGS",
-                "-Z unstable-options --document-hidden-items --output-format=json",
+                "-Z unstable-options --document-private-items --document-hidden-items --output-format=json",
             )
             .stdout(std::process::Stdio::null()) // Don't pollute output
             .stderr(stderr)
@@ -131,7 +112,7 @@ impl RustDocCommand {
 
             // N.B.: Crates named like `foo-bar` have rustdoc JSON named like `foo_bar.json`.
             let crate_name_with_underscores = crate_name.replace('-', "_");
-            let json_path = target_dir.join(format!("doc/{}.json", crate_name_with_underscores));
+            let json_path = target_dir.join(format!("doc/{crate_name_with_underscores}.json"));
             if json_path.exists() {
                 Ok(json_path)
             } else {
@@ -145,13 +126,13 @@ impl RustDocCommand {
             let manifest = crate::manifest::Manifest::parse(manifest_path)?;
 
             let lib_target_name = crate::manifest::get_lib_target_name(&manifest)?;
-            let json_path = target_dir.join(format!("doc/{}.json", lib_target_name));
+            let json_path = target_dir.join(format!("doc/{lib_target_name}.json"));
             if json_path.exists() {
                 return Ok(json_path);
             }
 
             let first_bin_target_name = crate::manifest::get_first_bin_target_name(&manifest)?;
-            let json_path = target_dir.join(format!("doc/{}.json", first_bin_target_name));
+            let json_path = target_dir.join(format!("doc/{first_bin_target_name}.json"));
             if !json_path.exists() {
                 let crate_name = if let Some(pkg_spec) = pkg_spec {
                     pkg_spec

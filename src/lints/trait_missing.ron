@@ -1,0 +1,47 @@
+SemverQuery(
+    id: "trait_missing",
+    human_readable_name: "pub trait removed or renamed",
+    description: "A trait can no longer be imported by its prior path.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A publicly-visible trait cannot be imported by its prior path. A `pub use` may have been removed, or the trait itself may have been renamed or removed entirely.",
+    per_result_error_template: Some("trait {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+)
