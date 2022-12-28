@@ -1,117 +1,3 @@
-[
-    {
-        "name": String("U8ToU16Enum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("enum_repr_int_changed"),
-            String("U8ToU16Enum"),
-        ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(10),
-        "old_attr": String("#[repr(u8)]"),
-        "new_attr": List([
-            String("#[repr(u16)]"),
-        ]),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("I32ToI8Enum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("enum_repr_int_changed"),
-            String("I32ToI8Enum"),
-        ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(24),
-        "old_attr": String("#[repr(i32)]"),
-        "new_attr": List([
-            String("#[repr(i8)]"),
-        ]),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("I32ToU32Enum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("enum_repr_int_changed"),
-            String("I32ToU32Enum"),
-        ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(38),
-        "old_attr": String("#[repr(i32)]"),
-        "new_attr": List([
-            String("#[repr(u32)]"),
-        ]),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("IsizeToUsizeEnum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("enum_repr_int_changed"),
-            String("IsizeToUsizeEnum"),
-        ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(52),
-        "old_attr": String("#[repr(isize)]"),
-        "new_attr": List([
-            String("#[repr(usize)]"),
-        ]),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("U8CToU16CEnum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("enum_repr_int_changed"),
-            String("U8CToU16CEnum"),
-        ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(66),
-        "old_attr": String("#[repr(u8, C)]"),
-        "new_attr": List([
-            String("#[repr(u16, C)]"),
-        ]),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("CU8ToCU16Enum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("enum_repr_int_changed"),
-            String("CU8ToCU16Enum"),
-        ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(80),
-        "old_attr": String("#[repr(C, u8)]"),
-        "new_attr": List([
-            String("#[repr(C, u16)]"),
-        ]),
-        "visibility_limit": String("public"),
-    },
-    {
-        "name": String("U8CToSeparateU16CEnum"),
-        "path": List([
-            String("test_crates"),
-            String("test_cases"),
-            String("enum_repr_int_changed"),
-            String("U8CToSeparateU16CEnum"),
-        ]),
-        "span_filename": String("src/test_cases/enum_repr_int_changed.rs"),
-        "span_begin_line": Uint64(95),
-        "old_attr": String("#[repr(u8, C)]"),
-        "new_attr": List([
-            String("#[repr(u16)]"),
-        ]),
-        "visibility_limit": String("public"),
-    }
-]
 {
     "./test_crates/enum_repr_int_changed/": [
         {
@@ -167,6 +53,48 @@
                 String("IsizeToUsizeEnum"),
             ]),
             "span_begin_line": Uint64(20),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("U8CToU16CEnum"),
+            "new_attr": List([
+                String("#[repr(u16, C)]"),
+            ]),
+            "old_attr": String("#[repr(u8, C)]"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("U8CToU16CEnum"),
+            ]),
+            "span_begin_line": Uint64(26),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("CU8ToCU16Enum"),
+            "new_attr": List([
+                String("#[repr(C, u16)]"),
+            ]),
+            "old_attr": String("#[repr(C, u8)]"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("CU8ToCU16Enum"),
+            ]),
+            "span_begin_line": Uint64(32),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("U8CToSeparateU16CEnum"),
+            "new_attr": List([
+                String("#[repr(u16)]"),
+            ]),
+            "old_attr": String("#[repr(u8, C)]"),
+            "path": List([
+                String("enum_repr_int_changed"),
+                String("U8CToSeparateU16CEnum"),
+            ]),
+            "span_begin_line": Uint64(39),
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
