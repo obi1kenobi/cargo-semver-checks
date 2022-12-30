@@ -434,4 +434,5 @@ add_lints!(
     unit_struct_changed_kind,
     variant_marked_non_exhaustive,
     trait_unsafe_added,
+    trait_unsafe_removed,
 );
