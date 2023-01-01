@@ -251,6 +251,7 @@ fn choose_baseline_version(
         let mut instances = crate_
             .versions()
             .iter()
+            .filter(|i| !i.is_yanked())
             .filter_map(|i| semver::Version::parse(i.version()).ok())
             // For unpublished changes when the user doesn't increment the version
             // post-release, allow using the current version as a baseline.
@@ -353,5 +354,41 @@ fn need_retry(res: Result<(), crates_index::Error>) -> anyhow::Result<bool> {
             }
         }
         Err(err) => Err(err.into()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crates_index::{Crate, Version};
+
+    use super::choose_baseline_version;
+
+    fn new_mock_version(version_name: &str, yanked: bool) -> Version {
+        serde_json::from_value(serde_json::json!({
+            "name": "test-crate",
+            "vers": version_name,
+            "deps": [],
+            "features": {},
+            "yanked": yanked,
+            "cksum": "00".repeat(32),
+        }))
+        .unwrap()
+    }
+
+    fn new_crate(versions: &[Version]) -> Crate {
+        serde_json::from_value(serde_json::json!({ "versions": versions })).unwrap()
+    }
+
+    #[test]
+    fn choose_baseline_version_yanked() {
+        let crate_ = new_crate(&[
+            new_mock_version("1.2.0", false),
+            new_mock_version("1.2.1", true),
+        ]);
+        let current_version = semver::Version::new(1, 2, 2);
+        assert_eq!(
+            choose_baseline_version(&crate_, Some(&current_version)).unwrap(),
+            "1.2.0".to_string()
+        );
     }
 }
