@@ -1,4 +1,5 @@
 use anyhow::Context as _;
+use crates_index::Crate;
 
 use crate::dump::RustDocCommand;
 use crate::util::slugify;
@@ -242,6 +243,42 @@ fn create_rustdoc_manifest_for_crate_version(
     }
 }
 
+fn choose_baseline_version(
+    crate_: &Crate,
+    version_current: Option<&semver::Version>,
+) -> anyhow::Result<String> {
+    if let Some(current) = version_current {
+        let mut instances = crate_
+            .versions()
+            .iter()
+            .filter_map(|i| semver::Version::parse(i.version()).ok())
+            // For unpublished changes when the user doesn't increment the version
+            // post-release, allow using the current version as a baseline.
+            .filter(|v| v <= current)
+            .collect::<Vec<_>>();
+        instances.sort();
+        instances
+            .iter()
+            .rev()
+            .find(|v| v.pre.is_empty())
+            .or_else(|| instances.last())
+            .map(|v| v.to_string())
+            .with_context(|| {
+                anyhow::format_err!(
+                    "No available baseline versions for {}@{}",
+                    crate_.name(),
+                    current
+                )
+            })
+    } else {
+        let instance = crate_
+            .highest_normal_version()
+            .unwrap_or_else(|| crate_.highest_version())
+            .version();
+        Ok(instance.to_owned())
+    }
+}
+
 impl BaselineLoader for RegistryBaseline {
     fn load_rustdoc(
         &self,
@@ -259,30 +296,8 @@ impl BaselineLoader for RegistryBaseline {
         // - Most likely the user cares about the last official release
         let base_version = if let Some(base) = self.version.as_ref() {
             base.to_string()
-        } else if let Some(current) = version_current {
-            let mut instances = crate_
-                .versions()
-                .iter()
-                .filter_map(|i| semver::Version::parse(i.version()).ok())
-                // For unpublished changes when the user doesn't increment the version
-                // post-release, allow using the current version as a baseline.
-                .filter(|v| v <= current)
-                .collect::<Vec<_>>();
-            instances.sort();
-            let instance = instances
-                .iter()
-                .rev()
-                .find(|v| v.pre.is_empty())
-                .or_else(|| instances.last())
-                .with_context(|| {
-                    anyhow::format_err!("No available baseline versions for {}@{}", name, current)
-                })?;
-            instance.to_string()
         } else {
-            let instance = crate_
-                .highest_normal_version()
-                .unwrap_or_else(|| crate_.highest_version());
-            instance.version().to_owned()
+            choose_baseline_version(&crate_, version_current)?
         };
 
         let base_root = self.target_root.join(format!(
