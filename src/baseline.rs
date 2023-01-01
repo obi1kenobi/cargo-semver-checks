@@ -391,4 +391,43 @@ mod tests {
             "1.2.0".to_string()
         );
     }
+
+    #[test]
+    fn choose_baseline_version_not_latest() {
+        let crate_ = new_crate(&[
+            new_mock_version("1.2.0", false),
+            new_mock_version("1.2.1", false),
+        ]);
+        let current_version = semver::Version::new(1, 2, 0);
+        assert_eq!(
+            choose_baseline_version(&crate_, Some(&current_version)).unwrap(),
+            "1.2.0".to_string()
+        );
+    }
+
+    #[test]
+    fn choose_baseline_version_pre_release() {
+        let crate_ = new_crate(&[
+            new_mock_version("1.2.0", false),
+            new_mock_version("1.2.1-rc1", false),
+        ]);
+        let current_version = semver::Version::parse("1.2.1-rc2").unwrap();
+        assert_eq!(
+            choose_baseline_version(&crate_, Some(&current_version)).unwrap(),
+            "1.2.0".to_string()
+        );
+    }
+
+    #[test]
+    fn choose_baseline_version_no_current() {
+        let crate_ = new_crate(&[
+            new_mock_version("1.2.0", false),
+            new_mock_version("1.2.1-rc1", false),
+            new_mock_version("1.3.1", true),
+        ]);
+        assert_eq!(
+            choose_baseline_version(&crate_, None).unwrap(),
+            "1.2.0".to_string()
+        );
+    }
 }
