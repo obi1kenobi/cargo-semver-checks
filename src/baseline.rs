@@ -364,6 +364,8 @@ mod tests {
     use super::choose_baseline_version;
 
     fn new_mock_version(version_name: &str, yanked: bool) -> Version {
+        // `crates_index::Version` cannot be created explicitly, as all its fields
+        // are private, so we use the fact that it can be deserialized.
         serde_json::from_value(serde_json::json!({
             "name": "test-crate",
             "vers": version_name,
@@ -376,6 +378,8 @@ mod tests {
     }
 
     fn new_crate(versions: &[Version]) -> Crate {
+        // `crates_index::Crate` cannot be created explicitly, as its field
+        // is private, so we use the fact that it can be deserialized.
         serde_json::from_value(serde_json::json!({ "versions": versions })).unwrap()
     }
 
