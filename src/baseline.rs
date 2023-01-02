@@ -254,19 +254,22 @@ fn choose_baseline_version(
         let mut instances = crate_
             .versions()
             .iter()
-            .filter(|i| !i.is_yanked())
-            .filter_map(|i| semver::Version::parse(i.version()).ok())
+            .filter_map(|i| {
+                semver::Version::parse(i.version())
+                    .map(|v| (v, i.is_yanked()))
+                    .ok()
+            })
             // For unpublished changes when the user doesn't increment the version
             // post-release, allow using the current version as a baseline.
-            .filter(|v| v <= current)
+            .filter(|(v, _)| v <= current)
             .collect::<Vec<_>>();
         instances.sort();
         instances
             .iter()
             .rev()
-            .find(|v| v.pre.is_empty())
+            .find(|(v, yanked)| v.pre.is_empty() && !yanked)
             .or_else(|| instances.last())
-            .map(|v| v.to_string())
+            .map(|(v, _)| v.to_string())
             .with_context(|| {
                 anyhow::format_err!(
                     "No available baseline versions for {}@{}",
@@ -437,6 +440,24 @@ mod tests {
             vec![("1.2.0", false), ("1.2.1-rc1", false), ("1.3.1", true)],
             None,
             "1.2.0",
+        );
+    }
+
+    #[test]
+    fn choose_baseline_version_no_normal_largest_yanked() {
+        test_choose_baseline_version(
+            vec![("1.2.0", true), ("1.2.1-rc1", false)],
+            Some("1.2.1"),
+            "1.2.1-rc1",
+        );
+    }
+
+    #[test]
+    fn choose_baseline_version_no_normal_largest_pre_release() {
+        test_choose_baseline_version(
+            vec![("1.2.1-rc1", false), ("1.2.1", true)],
+            Some("1.2.1"),
+            "1.2.1",
         );
     }
 }
