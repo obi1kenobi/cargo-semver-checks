@@ -403,11 +403,11 @@ mod tests {
                 .collect(),
         );
         let current_version = current_version_name.map(|version_name| {
-            semver::Version::parse(version_name).expect("current_version_name should be valid")
+            semver::Version::parse(version_name).expect("Failed to parse hand-written string as a valid version name.")
         });
-        let choosen_baseline = choose_baseline_version(&crate_, current_version.as_ref())
+        let chosen_baseline = choose_baseline_version(&crate_, current_version.as_ref())
             .expect("choose_baseline_version should not return any error");
-        assert_eq!(choosen_baseline, expected.to_owned());
+        assert_eq!(chosen_baseline, expected.to_owned());
     }
 
     #[test]
