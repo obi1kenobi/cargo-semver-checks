@@ -378,17 +378,17 @@ mod tests {
             "yanked": yanked,
             "cksum": "00".repeat(32),
         }))
-        .expect("Parsing JSON as crates_index::Version should not result in any errors.")
+        .expect("Failed to create crates_index::Version from a hand-written JSON.")
     }
 
     fn new_crate(versions: Vec<Version>) -> Crate {
         // `crates_index::Crate` cannot be created explicitly, as its field
         // is private, so we use the fact that it can be deserialized.
         serde_json::from_value(serde_json::json!({ "versions": versions }))
-            .expect("Parsing JSON as crates_index::Crate should not result in any errors.")
+            .expect("Failed to create crates_index::Crate from a hand-written JSON.")
     }
 
-    fn test_choose_baseline_version(
+    fn assert_correctly_picks_baseline_version(
         versions: Vec<(&str, bool)>,
         current_version_name: Option<&str>,
         expected: &str,
@@ -408,8 +408,8 @@ mod tests {
     }
 
     #[test]
-    fn choose_baseline_version_yanked() {
-        test_choose_baseline_version(
+    fn baseline_choosing_logic_skips_yanked() {
+        assert_correctly_picks_baseline_version(
             vec![("1.2.0", false), ("1.2.1", true)],
             Some("1.2.2"),
             "1.2.0",
@@ -417,8 +417,8 @@ mod tests {
     }
 
     #[test]
-    fn choose_baseline_version_not_latest() {
-        test_choose_baseline_version(
+    fn baseline_choosing_logic_skips_greater_than_current() {
+        assert_correctly_picks_baseline_version(
             vec![("1.2.0", false), ("1.2.1", false)],
             Some("1.2.0"),
             "1.2.0",
@@ -426,8 +426,8 @@ mod tests {
     }
 
     #[test]
-    fn choose_baseline_version_pre_release() {
-        test_choose_baseline_version(
+    fn baseline_choosing_logic_skips_pre_releases() {
+        assert_correctly_picks_baseline_version(
             vec![("1.2.0", false), ("1.2.1-rc1", false)],
             Some("1.2.1-rc2"),
             "1.2.0",
@@ -435,8 +435,8 @@ mod tests {
     }
 
     #[test]
-    fn choose_baseline_version_no_current() {
-        test_choose_baseline_version(
+    fn baseline_choosing_logic_without_current_picks_latest_normal() {
+        assert_correctly_picks_baseline_version(
             vec![("1.2.0", false), ("1.2.1-rc1", false), ("1.3.1", true)],
             None,
             "1.2.0",
@@ -444,8 +444,8 @@ mod tests {
     }
 
     #[test]
-    fn choose_baseline_version_no_normal_largest_yanked() {
-        test_choose_baseline_version(
+    fn baseline_choosing_logic_picks_pre_release_if_there_is_no_normal() {
+        assert_correctly_picks_baseline_version(
             vec![("1.2.0", true), ("1.2.1-rc1", false)],
             Some("1.2.1"),
             "1.2.1-rc1",
@@ -453,8 +453,8 @@ mod tests {
     }
 
     #[test]
-    fn choose_baseline_version_no_normal_largest_pre_release() {
-        test_choose_baseline_version(
+    fn baseline_choosing_logic_picks_yanked_if_there_is_no_normal() {
+        assert_correctly_picks_baseline_version(
             vec![("1.2.1-rc1", false), ("1.2.1", true)],
             Some("1.2.1"),
             "1.2.1",
