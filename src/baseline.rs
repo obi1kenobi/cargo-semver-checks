@@ -374,64 +374,68 @@ mod tests {
             "yanked": yanked,
             "cksum": "00".repeat(32),
         }))
-        .unwrap()
+        .expect("Parsing JSON as crates_index::Version should not result in any errors.")
     }
 
-    fn new_crate(versions: &[Version]) -> Crate {
+    fn new_crate(versions: Vec<Version>) -> Crate {
         // `crates_index::Crate` cannot be created explicitly, as its field
         // is private, so we use the fact that it can be deserialized.
-        serde_json::from_value(serde_json::json!({ "versions": versions })).unwrap()
+        serde_json::from_value(serde_json::json!({ "versions": versions }))
+            .expect("Parsing JSON as crates_index::Crate should not result in any errors.")
+    }
+
+    fn test_choose_baseline_version(
+        versions: Vec<(&str, bool)>,
+        current_version_name: Option<&str>,
+        expected: &str,
+    ) {
+        let crate_ = new_crate(
+            versions
+                .into_iter()
+                .map(|(version, yanked)| new_mock_version(version, yanked))
+                .collect(),
+        );
+        let current_version = current_version_name.map(|version_name| {
+            semver::Version::parse(version_name).expect("current_version_name should be valid")
+        });
+        let choosen_baseline = choose_baseline_version(&crate_, current_version.as_ref())
+            .expect("choose_baseline_version should not return any error");
+        assert_eq!(choosen_baseline, expected.to_owned());
     }
 
     #[test]
     fn choose_baseline_version_yanked() {
-        let crate_ = new_crate(&[
-            new_mock_version("1.2.0", false),
-            new_mock_version("1.2.1", true),
-        ]);
-        let current_version = semver::Version::new(1, 2, 2);
-        assert_eq!(
-            choose_baseline_version(&crate_, Some(&current_version)).unwrap(),
-            "1.2.0".to_string()
+        test_choose_baseline_version(
+            vec![("1.2.0", false), ("1.2.1", true)],
+            Some("1.2.2"),
+            "1.2.0",
         );
     }
 
     #[test]
     fn choose_baseline_version_not_latest() {
-        let crate_ = new_crate(&[
-            new_mock_version("1.2.0", false),
-            new_mock_version("1.2.1", false),
-        ]);
-        let current_version = semver::Version::new(1, 2, 0);
-        assert_eq!(
-            choose_baseline_version(&crate_, Some(&current_version)).unwrap(),
-            "1.2.0".to_string()
+        test_choose_baseline_version(
+            vec![("1.2.0", false), ("1.2.1", false)],
+            Some("1.2.0"),
+            "1.2.0",
         );
     }
 
     #[test]
     fn choose_baseline_version_pre_release() {
-        let crate_ = new_crate(&[
-            new_mock_version("1.2.0", false),
-            new_mock_version("1.2.1-rc1", false),
-        ]);
-        let current_version = semver::Version::parse("1.2.1-rc2").unwrap();
-        assert_eq!(
-            choose_baseline_version(&crate_, Some(&current_version)).unwrap(),
-            "1.2.0".to_string()
+        test_choose_baseline_version(
+            vec![("1.2.0", false), ("1.2.1-rc1", false)],
+            Some("1.2.1-rc2"),
+            "1.2.0",
         );
     }
 
     #[test]
     fn choose_baseline_version_no_current() {
-        let crate_ = new_crate(&[
-            new_mock_version("1.2.0", false),
-            new_mock_version("1.2.1-rc1", false),
-            new_mock_version("1.3.1", true),
-        ]);
-        assert_eq!(
-            choose_baseline_version(&crate_, None).unwrap(),
-            "1.2.0".to_string()
+        test_choose_baseline_version(
+            vec![("1.2.0", false), ("1.2.1-rc1", false), ("1.3.1", true)],
+            None,
+            "1.2.0",
         );
     }
 }
