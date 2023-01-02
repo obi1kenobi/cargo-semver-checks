@@ -278,6 +278,9 @@ fn choose_baseline_version(
                 )
             })
     } else {
+        // If there is no normal version (not yanked and not a pre-release)
+        // choosing the latest one anyway is more reasonable than throwing an
+        // error, as there is still a chance that it is what the user expects.
         let instance = crate_
             .highest_normal_version()
             .unwrap_or_else(|| crate_.highest_version())
@@ -458,6 +461,15 @@ mod tests {
             vec![("1.2.1-rc1", false), ("1.2.1", true)],
             Some("1.2.1"),
             "1.2.1",
+        );
+    }
+
+    #[test]
+    fn baseline_choosing_logic_picks_yanked_if_there_is_no_normal2() {
+        assert_correctly_picks_baseline_version(
+            vec![("1.2.2", true), ("1.2.3", true)],
+            Some("1.2.1"),
+            "1.2.3",
         );
     }
 }
