@@ -4,6 +4,9 @@ pub unsafe trait TraitBecomesUnsafe {}
 // Trait that was not publicly-visible becomes unsafe, shouldn't get reported.
 pub unsafe trait TraitBecomesPublicAndUnsafe {}
 
+// Trait that is publicly-visibly becomes private and unsafe, shouldn't get reported.
+unsafe trait TraitBecomesPrivateAndUnsafe {}
+
 // Private trait becomes unsafe, shouldn't get reported.
 unsafe trait PrivateTraitBecomesUnsafe {}
 
