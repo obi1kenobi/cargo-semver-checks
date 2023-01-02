@@ -247,6 +247,9 @@ fn choose_baseline_version(
     crate_: &Crate,
     version_current: Option<&semver::Version>,
 ) -> anyhow::Result<String> {
+    // Try to avoid pre-releases
+    // - Breaking changes are allowed between them
+    // - Most likely the user cares about the last official release
     if let Some(current) = version_current {
         let mut instances = crate_
             .versions()
@@ -292,9 +295,7 @@ impl BaselineLoader for RegistryBaseline {
             .index
             .crate_(name)
             .with_context(|| anyhow::format_err!("{} not found in registry", name))?;
-        // Try to avoid pre-releases
-        // - Breaking changes are allowed between them
-        // - Most likely the user cares about the last official release
+
         let base_version = if let Some(base) = self.version.as_ref() {
             base.to_string()
         } else {
