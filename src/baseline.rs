@@ -463,13 +463,4 @@ mod tests {
             "1.2.1",
         );
     }
-
-    #[test]
-    fn baseline_choosing_logic_picks_yanked_if_there_is_no_normal2() {
-        assert_correctly_picks_baseline_version(
-            vec![("1.2.2", true), ("1.2.3", true)],
-            Some("1.2.1"),
-            "1.2.3",
-        );
-    }
 }
