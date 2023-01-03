@@ -381,14 +381,14 @@ mod tests {
             "yanked": yanked,
             "cksum": "00".repeat(32),
         }))
-        .expect("Failed to create crates_index::Version from a hand-written JSON.")
+        .expect("hand-written JSON used to create mock crates_index::Version should be valid")
     }
 
     fn new_crate(versions: Vec<Version>) -> Crate {
         // `crates_index::Crate` cannot be created explicitly, as its field
         // is private, so we use the fact that it can be deserialized.
         serde_json::from_value(serde_json::json!({ "versions": versions }))
-            .expect("Failed to create crates_index::Crate from a hand-written JSON.")
+            .expect("hand-written JSON used to create mock crates_index::Crate should be valid")
     }
 
     fn assert_correctly_picks_baseline_version(
@@ -404,10 +404,10 @@ mod tests {
         );
         let current_version = current_version_name.map(|version_name| {
             semver::Version::parse(version_name)
-                .expect("Failed to parse hand-written string as a valid version name.")
+                .expect("current_version_name used in assertion should encode a valid version")
         });
         let chosen_baseline = choose_baseline_version(&crate_, current_version.as_ref())
-            .expect("choose_baseline_version should not return any error");
+            .expect("choose_baseline_version should not return any error in the test case");
         assert_eq!(chosen_baseline, expected.to_owned());
     }
 
