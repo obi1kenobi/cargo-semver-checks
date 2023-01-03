@@ -278,12 +278,14 @@ fn choose_baseline_version(
                 )
             })
     } else {
-        // If there is no normal version (not yanked and not a pre-release)
-        // choosing the latest one anyway is more reasonable than throwing an
-        // error, as there is still a chance that it is what the user expects.
         let instance = crate_
             .highest_normal_version()
-            .unwrap_or_else(|| crate_.highest_version())
+            .unwrap_or_else(|| {
+                // If there is no normal version (not yanked and not a pre-release)
+                // choosing the latest one anyway is more reasonable than throwing an
+                // error, as there is still a chance that it is what the user expects.
+                crate_.highest_version()
+            })
             .version();
         Ok(instance.to_owned())
     }
