@@ -2,6 +2,7 @@
     "./test_crates/enum_repr_c_removed/": [
         {
             "name": String("CEnumToEnum"),
+            "old_attr": String("#[repr(C)]"),
             "path": List([
                 String("enum_repr_c_removed"),
                 String("CEnumToEnum"),
@@ -12,6 +13,7 @@
         },
         {
             "name": String("U8CEnumToU8Enum"),
+            "old_attr": String("#[repr(u8, C)]"),
             "path": List([
                 String("enum_repr_c_removed"),
                 String("U8CEnumToU8Enum"),
@@ -22,6 +24,7 @@
         },
         {
             "name": String("SeparateU8CEnumToU8Enum"),
+            "old_attr": String("#[repr(C)]"),
             "path": List([
                 String("enum_repr_c_removed"),
                 String("SeparateU8CEnumToU8Enum"),
@@ -32,6 +35,7 @@
         },
         {
             "name": String("CU8EnumToU8Enum"),
+            "old_attr": String("#[repr(C, u8)]"),
             "path": List([
                 String("enum_repr_c_removed"),
                 String("CU8EnumToU8Enum"),
@@ -42,6 +46,7 @@
         },
         {
             "name": String("SeparateCU8EnumToU8Enum"),
+            "old_attr": String("#[repr(C)]"),
             "path": List([
                 String("enum_repr_c_removed"),
                 String("SeparateCU8EnumToU8Enum"),
