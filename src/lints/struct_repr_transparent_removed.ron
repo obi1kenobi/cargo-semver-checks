@@ -40,6 +40,7 @@ To avoid false-positives, this query is restricted to checking only structs that
                         name @tag @output
                         
                         attribute {
+                            old_attr: raw_attribute @output
                             content {
                                 base @filter(op: "=", value: ["$repr"])
                                 argument {
