@@ -16,12 +16,6 @@ pub enum I32ToU32Enum {
     Baz,
 }
 
-#[repr(isize)]
-pub enum IsizeToUsizeEnum {
-    Bar,
-    Baz,
-}
-
 #[repr(u8, C)]
 pub enum U8CToU16CEnum {
     Bar,
@@ -36,6 +30,47 @@ pub enum CU8ToCU16Enum {
 
 #[repr(u8, C)]
 pub enum U8CToSeparateU16CEnum {
+    Bar,
+    Baz,
+}
+
+
+// The following enums have changes that can be breaking on some systems.
+// Since there are no guarantees on what particular system a given crate
+// might run on, this is a breaking change.
+
+#[repr(u64)]
+pub enum U64ToUsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[repr(usize)]
+pub enum UsizeToU64Enum {
+    Bar,
+    Baz,
+}
+
+#[repr(i64)]
+pub enum I64ToIsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[repr(isize)]
+pub enum IsizeToI64Enum {
+    Bar,
+    Baz,
+}
+
+#[repr(usize)]
+pub enum UsizeToIsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[repr(isize)]
+pub enum IsizeToUsizeEnum {
     Bar,
     Baz,
 }

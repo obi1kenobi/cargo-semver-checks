@@ -16,12 +16,6 @@ pub enum I32ToU32Enum {
     Baz,
 }
 
-#[repr(usize)]
-pub enum IsizeToUsizeEnum {
-    Bar,
-    Baz,
-}
-
 #[repr(u16, C)]
 pub enum U8CToU16CEnum {
     Bar,
@@ -40,6 +34,53 @@ pub enum U8CToSeparateU16CEnum {
     Bar,
     Baz,
 }
+
+
+// The following enums have changes that can be breaking on some systems.
+// Since there are no guarantees on what particular system a given crate
+// might run on, this is a breaking change.
+
+#[repr(usize)]
+pub enum U64ToUsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[repr(u64)]
+pub enum UsizeToU64Enum {
+    Bar,
+    Baz,
+}
+
+#[repr(isize)]
+pub enum I64ToIsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[repr(i64)]
+pub enum IsizeToI64Enum {
+    Bar,
+    Baz,
+}
+
+#[repr(isize)]
+pub enum UsizeToIsizeEnum {
+    Bar,
+    Baz,
+}
+
+#[repr(usize)]
+pub enum IsizeToUsizeEnum {
+    Bar,
+    Baz,
+}
+
+
+// The following enums have *rearrangements* of repr(*), potentially
+// splitting singular repr(*) into multiple, smaller repr(*) or merging
+// repr(*) into larger repr(*).
+// They should not be reported by this rule, because they are legal.
 
 #[repr(u8, C)]
 pub enum SeparateU8CToU8CEnum {
