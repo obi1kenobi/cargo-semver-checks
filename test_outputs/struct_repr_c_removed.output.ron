@@ -2,6 +2,7 @@
     "./test_crates/struct_repr_c_removed/": [
         {
             "name": String("CRemoved"),
+            "old_attr": String("#[repr(C)]"),
             "path": List([
                 String("struct_repr_c_removed"),
                 String("CRemoved"),
@@ -12,6 +13,7 @@
         },
         {
             "name": String("CRemovedAlign16"),
+            "old_attr": String("#[repr(C, align(16))]"),
             "path": List([
                 String("struct_repr_c_removed"),
                 String("CRemovedAlign16"),
