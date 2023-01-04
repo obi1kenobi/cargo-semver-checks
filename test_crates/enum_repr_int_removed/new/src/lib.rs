@@ -98,3 +98,45 @@ pub enum SeparateCU8ToSeparateU8CEnum {
     Bar,
     Baz,
 }
+
+
+// The following enums have *changes* of repr(i*) and repr(u*),
+// not removals of repr(i*) or repr(u*).
+// They should not be reported by this rule, because they have their own rule.
+
+#[repr(u16)]
+pub enum U8ToU16Enum {
+    Bar,
+    Baz,
+}
+
+#[repr(i8)]
+pub enum I32ToI8Enum {
+    Bar,
+    Baz,
+}
+
+#[repr(u32)]
+pub enum I32ToU32Enum {
+    Bar,
+    Baz,
+}
+
+#[repr(u16, C)]
+pub enum U8CToU16CEnum {
+    Bar,
+    Baz,
+}
+
+#[repr(C, u16)]
+pub enum CU8ToCU16Enum {
+    Bar,
+    Baz,
+}
+
+#[repr(u16)]
+#[repr(C)]
+pub enum U8CToSeparateU16CEnum {
+    Bar,
+    Baz,
+}
