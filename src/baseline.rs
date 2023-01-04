@@ -1,4 +1,5 @@
 use anyhow::Context as _;
+use crates_index::Crate;
 
 use crate::dump::RustDocCommand;
 use crate::util::slugify;
@@ -242,6 +243,54 @@ fn create_rustdoc_manifest_for_crate_version(
     }
 }
 
+fn choose_baseline_version(
+    crate_: &Crate,
+    version_current: Option<&semver::Version>,
+) -> anyhow::Result<String> {
+    // Try to avoid pre-releases
+    // - Breaking changes are allowed between them
+    // - Most likely the user cares about the last official release
+    if let Some(current) = version_current {
+        let mut instances = crate_
+            .versions()
+            .iter()
+            .filter_map(|i| {
+                semver::Version::parse(i.version())
+                    .map(|v| (v, i.is_yanked()))
+                    .ok()
+            })
+            // For unpublished changes when the user doesn't increment the version
+            // post-release, allow using the current version as a baseline.
+            .filter(|(v, _)| v <= current)
+            .collect::<Vec<_>>();
+        instances.sort();
+        instances
+            .iter()
+            .rev()
+            .find(|(v, yanked)| v.pre.is_empty() && !yanked)
+            .or_else(|| instances.last())
+            .map(|(v, _)| v.to_string())
+            .with_context(|| {
+                anyhow::format_err!(
+                    "No available baseline versions for {}@{}",
+                    crate_.name(),
+                    current
+                )
+            })
+    } else {
+        let instance = crate_
+            .highest_normal_version()
+            .unwrap_or_else(|| {
+                // If there is no normal version (not yanked and not a pre-release)
+                // choosing the latest one anyway is more reasonable than throwing an
+                // error, as there is still a chance that it is what the user expects.
+                crate_.highest_version()
+            })
+            .version();
+        Ok(instance.to_owned())
+    }
+}
+
 impl BaselineLoader for RegistryBaseline {
     fn load_rustdoc(
         &self,
@@ -254,35 +303,11 @@ impl BaselineLoader for RegistryBaseline {
             .index
             .crate_(name)
             .with_context(|| anyhow::format_err!("{} not found in registry", name))?;
-        // Try to avoid pre-releases
-        // - Breaking changes are allowed between them
-        // - Most likely the user cares about the last official release
+
         let base_version = if let Some(base) = self.version.as_ref() {
             base.to_string()
-        } else if let Some(current) = version_current {
-            let mut instances = crate_
-                .versions()
-                .iter()
-                .filter_map(|i| semver::Version::parse(i.version()).ok())
-                // For unpublished changes when the user doesn't increment the version
-                // post-release, allow using the current version as a baseline.
-                .filter(|v| v <= current)
-                .collect::<Vec<_>>();
-            instances.sort();
-            let instance = instances
-                .iter()
-                .rev()
-                .find(|v| v.pre.is_empty())
-                .or_else(|| instances.last())
-                .with_context(|| {
-                    anyhow::format_err!("No available baseline versions for {}@{}", name, current)
-                })?;
-            instance.to_string()
         } else {
-            let instance = crate_
-                .highest_normal_version()
-                .unwrap_or_else(|| crate_.highest_version());
-            instance.version().to_owned()
+            choose_baseline_version(&crate_, version_current)?
         };
 
         let base_root = self.target_root.join(format!(
@@ -338,5 +363,107 @@ fn need_retry(res: Result<(), crates_index::Error>) -> anyhow::Result<bool> {
             }
         }
         Err(err) => Err(err.into()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crates_index::{Crate, Version};
+
+    use super::choose_baseline_version;
+
+    fn new_mock_version(version_name: &str, yanked: bool) -> Version {
+        // `crates_index::Version` cannot be created explicitly, as all its fields
+        // are private, so we use the fact that it can be deserialized.
+        serde_json::from_value(serde_json::json!({
+            "name": "test-crate",
+            "vers": version_name,
+            "deps": [],
+            "features": {},
+            "yanked": yanked,
+            "cksum": "00".repeat(32),
+        }))
+        .expect("hand-written JSON used to create mock crates_index::Version should be valid")
+    }
+
+    fn new_crate(versions: Vec<Version>) -> Crate {
+        // `crates_index::Crate` cannot be created explicitly, as its field
+        // is private, so we use the fact that it can be deserialized.
+        serde_json::from_value(serde_json::json!({ "versions": versions }))
+            .expect("hand-written JSON used to create mock crates_index::Crate should be valid")
+    }
+
+    fn assert_correctly_picks_baseline_version(
+        versions: Vec<(&str, bool)>,
+        current_version_name: Option<&str>,
+        expected: &str,
+    ) {
+        let crate_ = new_crate(
+            versions
+                .into_iter()
+                .map(|(version, yanked)| new_mock_version(version, yanked))
+                .collect(),
+        );
+        let current_version = current_version_name.map(|version_name| {
+            semver::Version::parse(version_name)
+                .expect("current_version_name used in assertion should encode a valid version")
+        });
+        let chosen_baseline = choose_baseline_version(&crate_, current_version.as_ref())
+            .expect("choose_baseline_version should not return any error in the test case");
+        assert_eq!(chosen_baseline, expected.to_owned());
+    }
+
+    #[test]
+    fn baseline_choosing_logic_skips_yanked() {
+        assert_correctly_picks_baseline_version(
+            vec![("1.2.0", false), ("1.2.1", true)],
+            Some("1.2.2"),
+            "1.2.0",
+        );
+    }
+
+    #[test]
+    fn baseline_choosing_logic_skips_greater_than_current() {
+        assert_correctly_picks_baseline_version(
+            vec![("1.2.0", false), ("1.2.1", false)],
+            Some("1.2.0"),
+            "1.2.0",
+        );
+    }
+
+    #[test]
+    fn baseline_choosing_logic_skips_pre_releases() {
+        assert_correctly_picks_baseline_version(
+            vec![("1.2.0", false), ("1.2.1-rc1", false)],
+            Some("1.2.1-rc2"),
+            "1.2.0",
+        );
+    }
+
+    #[test]
+    fn baseline_choosing_logic_without_current_picks_latest_normal() {
+        assert_correctly_picks_baseline_version(
+            vec![("1.2.0", false), ("1.2.1-rc1", false), ("1.3.1", true)],
+            None,
+            "1.2.0",
+        );
+    }
+
+    #[test]
+    fn baseline_choosing_logic_picks_pre_release_if_there_is_no_normal() {
+        assert_correctly_picks_baseline_version(
+            vec![("1.2.0", true), ("1.2.1-rc1", false)],
+            Some("1.2.1"),
+            "1.2.1-rc1",
+        );
+    }
+
+    #[test]
+    fn baseline_choosing_logic_picks_yanked_if_there_is_no_normal() {
+        assert_correctly_picks_baseline_version(
+            vec![("1.2.1-rc1", false), ("1.2.1", true)],
+            Some("1.2.1"),
+            "1.2.1",
+        );
     }
 }
