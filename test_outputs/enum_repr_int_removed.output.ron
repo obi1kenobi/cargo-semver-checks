@@ -3,6 +3,7 @@
     "./test_crates/enum_repr_int_changed/": [
         {
             "name": String("U8EnumToEnum"),
+            "old_attr": String("#[repr(u8)]"),
             "path": List([
                 String("enum_repr_int_changed"),
                 String("U8EnumToEnum"),
@@ -13,6 +14,7 @@
         },
         {
             "name": String("I32EnumToEnum"),
+            "old_attr": String("#[repr(i32)]"),
             "path": List([
                 String("enum_repr_int_changed"),
                 String("I32EnumToEnum"),
@@ -23,6 +25,7 @@
         },
         {
             "name": String("IsizeEnumToEnum"),
+            "old_attr": String("#[repr(isize)]"),
             "path": List([
                 String("enum_repr_int_changed"),
                 String("IsizeEnumToEnum"),
@@ -33,6 +36,7 @@
         },
         {
             "name": String("UsizeEnumToEnum"),
+            "old_attr": String("#[repr(usize)]"),
             "path": List([
                 String("enum_repr_int_changed"),
                 String("UsizeEnumToEnum"),
@@ -43,6 +47,7 @@
         },
         {
             "name": String("U8CEnumToCEnum"),
+            "old_attr": String("#[repr(u8, C)]"),
             "path": List([
                 String("enum_repr_int_changed"),
                 String("U8CEnumToCEnum"),
@@ -53,6 +58,7 @@
         },
         {
             "name": String("SeparateU8CEnumToCEnum"),
+            "old_attr": String("#[repr(u8)]"),
             "path": List([
                 String("enum_repr_int_changed"),
                 String("SeparateU8CEnumToCEnum"),
@@ -63,6 +69,7 @@
         },
         {
             "name": String("CU8EnumToCEnum"),
+            "old_attr": String("#[repr(C, u8)]"),
             "path": List([
                 String("enum_repr_int_changed"),
                 String("CU8EnumToCEnum"),
@@ -73,6 +80,7 @@
         },
         {
             "name": String("SeparateCU8EnumToCEnum"),
+            "old_attr": String("#[repr(u8)]"),
             "path": List([
                 String("enum_repr_int_changed"),
                 String("SeparateCU8EnumToCEnum"),
@@ -85,6 +93,7 @@
     "./test_crates/enum_repr_int_removed/": [
         {
             "name": String("U8EnumToEnum"),
+            "old_attr": String("#[repr(u8)]"),
             "path": List([
                 String("enum_repr_int_removed"),
                 String("U8EnumToEnum"),
@@ -95,6 +104,7 @@
         },
         {
             "name": String("I32EnumToEnum"),
+            "old_attr": String("#[repr(i32)]"),
             "path": List([
                 String("enum_repr_int_removed"),
                 String("I32EnumToEnum"),
@@ -105,6 +115,7 @@
         },
         {
             "name": String("IsizeEnumToEnum"),
+            "old_attr": String("#[repr(isize)]"),
             "path": List([
                 String("enum_repr_int_removed"),
                 String("IsizeEnumToEnum"),
@@ -115,6 +126,7 @@
         },
         {
             "name": String("UsizeEnumToEnum"),
+            "old_attr": String("#[repr(usize)]"),
             "path": List([
                 String("enum_repr_int_removed"),
                 String("UsizeEnumToEnum"),
@@ -125,6 +137,7 @@
         },
         {
             "name": String("U8CEnumToCEnum"),
+            "old_attr": String("#[repr(u8, C)]"),
             "path": List([
                 String("enum_repr_int_removed"),
                 String("U8CEnumToCEnum"),
@@ -135,6 +148,7 @@
         },
         {
             "name": String("SeparateU8CEnumToCEnum"),
+            "old_attr": String("#[repr(u8)]"),
             "path": List([
                 String("enum_repr_int_removed"),
                 String("SeparateU8CEnumToCEnum"),
@@ -145,6 +159,7 @@
         },
         {
             "name": String("CU8EnumToCEnum"),
+            "old_attr": String("#[repr(C, u8)]"),
             "path": List([
                 String("enum_repr_int_removed"),
                 String("CU8EnumToCEnum"),
@@ -155,6 +170,7 @@
         },
         {
             "name": String("SeparateCU8EnumToCEnum"),
+            "old_attr": String("#[repr(u8)]"),
             "path": List([
                 String("enum_repr_int_removed"),
                 String("SeparateCU8EnumToCEnum"),
