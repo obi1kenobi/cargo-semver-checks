@@ -77,9 +77,10 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           profile: minimal
+          override: true
 
       - name: Regenerate test data
-        run: ./scripts/regenerate_test_rustdocs.sh
+        run: ./scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
 
       - uses: Swatinem/rust-cache@v2
 
