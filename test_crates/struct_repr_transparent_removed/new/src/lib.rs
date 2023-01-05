@@ -46,3 +46,8 @@ pub struct FieldNotPublicSoNotPublicAbi {
 }
 
 pub struct TupleFieldNotPublicSoNotPublicAbi(pub(crate) usize);
+
+#[repr(transparent)]
+pub struct BothTransparent {
+    pub bar: usize,
+}

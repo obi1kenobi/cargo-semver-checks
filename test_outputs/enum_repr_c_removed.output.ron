@@ -1,12 +1,57 @@
 {
     "./test_crates/enum_repr_c_removed/": [
         {
-            "name": String("Foo"),
+            "name": String("CEnumToEnum"),
+            "old_attr": String("#[repr(C)]"),
             "path": List([
                 String("enum_repr_c_removed"),
-                String("Foo"),
+                String("CEnumToEnum"),
             ]),
             "span_begin_line": Uint64(1),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("U8CEnumToU8Enum"),
+            "old_attr": String("#[repr(u8, C)]"),
+            "path": List([
+                String("enum_repr_c_removed"),
+                String("U8CEnumToU8Enum"),
+            ]),
+            "span_begin_line": Uint64(6),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("SeparateU8CEnumToU8Enum"),
+            "old_attr": String("#[repr(C)]"),
+            "path": List([
+                String("enum_repr_c_removed"),
+                String("SeparateU8CEnumToU8Enum"),
+            ]),
+            "span_begin_line": Uint64(12),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("CU8EnumToU8Enum"),
+            "old_attr": String("#[repr(C, u8)]"),
+            "path": List([
+                String("enum_repr_c_removed"),
+                String("CU8EnumToU8Enum"),
+            ]),
+            "span_begin_line": Uint64(18),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("SeparateCU8EnumToU8Enum"),
+            "old_attr": String("#[repr(C)]"),
+            "path": List([
+                String("enum_repr_c_removed"),
+                String("SeparateCU8EnumToU8Enum"),
+            ]),
+            "span_begin_line": Uint64(24),
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
