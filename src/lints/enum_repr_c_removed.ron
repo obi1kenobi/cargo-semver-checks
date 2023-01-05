@@ -16,7 +16,16 @@ SemverQuery(
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @tag @output
-                        attrs @filter(op: "contains", value: ["$repr_c"])
+                        
+                        attribute {
+                            old_attr: raw_attribute @output
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$c"])
+                                }
+                            }
+                        }
 
                         importable_path {
                             path @tag @output
@@ -29,7 +38,15 @@ SemverQuery(
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%name"])
-                        attrs @filter(op: "not_contains", value: ["$repr_c"])
+                        
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$c"])
+                                }
+                            }
+                        }
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -46,7 +63,9 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
-        "repr_c": "#[repr(C)]",
+        "repr": "repr",
+        "c": "C",
+        "zero": 0,
     },
     error_message: "repr(C) was removed from an enum. This can cause its memory layout to change, breaking FFI use cases.",
     per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),

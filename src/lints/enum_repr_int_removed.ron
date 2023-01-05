@@ -18,7 +18,13 @@ SemverQuery(
                         name @tag @output
 
                         attribute {
-                            value @filter(op: "regex", value: ["$repr_regex"])
+                            old_attr: raw_attribute @output
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "regex", value: ["$repr_regex"])
+                                }
+                            }
                         }
 
                         importable_path {
@@ -38,7 +44,12 @@ SemverQuery(
                         }
 
                         attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            value @filter(op: "regex", value: ["$repr_regex"])
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "regex", value: ["$repr_regex"])
+                                }
+                            }
                         }
 
                         span_: span @optional {
@@ -52,7 +63,8 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
-        "repr_regex": "#\\[repr\\([ui]\\d+|size\\)\\]",
+        "repr": "repr",
+        "repr_regex": "[ui](\\d+|size)",
         "zero": 0,
     },
     error_message: "repr(u*) or repr(i*) was removed from an enum. This can cause its memory representation to change, breaking FFI use cases.",

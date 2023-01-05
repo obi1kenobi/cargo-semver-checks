@@ -34,4 +34,17 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/tuple_struct_to_plain_struct/": [
+        {
+            "name": String("TupleToNonExhaustivePlainStruct"),
+            "path": List([
+                String("tuple_struct_to_plain_struct"),
+                String("TupleToNonExhaustivePlainStruct"),
+            ]),
+            "span_begin_line": Uint64(41),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("plain"),
+            "visibility_limit": String("public"),
+        },
+    ],
 }

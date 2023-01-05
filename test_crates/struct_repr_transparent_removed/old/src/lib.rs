@@ -51,6 +51,7 @@ pub struct WithGeneric {
     _marker: std::marker::PhantomData<&'static usize>,
 }
 
+
 // Per https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent
 // `repr(transparent)` is only part of the public ABI if the single non-zero-sized field
 // within the struct is public. In the following structs, the field is not public,
@@ -63,3 +64,11 @@ pub struct FieldNotPublicSoNotPublicAbi {
 
 #[repr(transparent)]
 pub struct TupleFieldNotPublicSoNotPublicAbi(pub(crate) usize);
+
+
+// A trailing comma corner case - checks if attributes are parsed correctly.
+
+#[repr(transparent, )]
+pub struct BothTransparent {
+    pub bar: usize,
+}

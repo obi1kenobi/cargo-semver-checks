@@ -433,4 +433,5 @@ add_lints!(
     trait_missing,
     unit_struct_changed_kind,
     variant_marked_non_exhaustive,
+    tuple_struct_to_plain_struct,
 );

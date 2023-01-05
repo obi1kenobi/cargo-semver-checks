@@ -1,0 +1,6 @@
+[package]
+name = "tuple_struct_to_plain_struct"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
