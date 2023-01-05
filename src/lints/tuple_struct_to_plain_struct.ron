@@ -1,0 +1,63 @@
+SemverQuery(
+    id: "tuple_struct_to_plain_struct",
+    human_readable_name: "tuple struct changed to plain struct",
+    description: "A struct changed from a tuple struct to plain struct",
+    reference: Some(r#"
+This is breaking even if the fields have the same names, because tuple struct patterns won't work.
+Source: Rust for Rustaceans, Chapter 3, "Type Modifications", page 51
+"#),
+    required_update: Major,
+    reference_link: None,
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @tag @output
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+                        struct_type @filter(op: "=", value: ["$tuple"])
+
+                        # Filter out structs that have private fields
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            visibility: visibility_limit @filter(op: "!=", value: ["$public"])
+                        }
+
+                        importable_path {
+                            path @tag @output
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+                        struct_type @filter(op: "=", value: ["$plain"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "tuple": "tuple",
+        "plain": "plain",
+        "non_exhaustive": "#[non_exhaustive]",
+        "zero": 0,
+    },
+    error_message: "A publicly-visible, exhaustive tuple struct with pub fields changed to normal (curly-braces) struct, which cannot be constructed using the same struct literal syntax.",
+    per_result_error_template: Some("struct {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)

@@ -2,6 +2,7 @@
     "./test_crates/struct_repr_transparent_removed/": [
         {
             "name": String("Foo"),
+            "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("struct_repr_transparent_removed"),
                 String("Foo"),
@@ -15,6 +16,7 @@
         },
         {
             "name": String("Bar"),
+            "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("struct_repr_transparent_removed"),
                 String("Bar"),
@@ -28,6 +30,7 @@
         },
         {
             "name": String("WithZeroSizedData"),
+            "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("struct_repr_transparent_removed"),
                 String("WithZeroSizedData"),
@@ -41,6 +44,7 @@
         },
         {
             "name": String("TupleWithZeroSizedData"),
+            "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("struct_repr_transparent_removed"),
                 String("TupleWithZeroSizedData"),
@@ -54,6 +58,7 @@
         },
         {
             "name": String("WithPubZeroSizedData"),
+            "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("struct_repr_transparent_removed"),
                 String("WithPubZeroSizedData"),
@@ -67,6 +72,7 @@
         },
         {
             "name": String("WithSpecificZeroSizedData"),
+            "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("struct_repr_transparent_removed"),
                 String("WithSpecificZeroSizedData"),
@@ -80,6 +86,7 @@
         },
         {
             "name": String("WithFoo"),
+            "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("struct_repr_transparent_removed"),
                 String("WithFoo"),
@@ -93,6 +100,7 @@
         },
         {
             "name": String("WithRef"),
+            "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("struct_repr_transparent_removed"),
                 String("WithRef"),
@@ -106,6 +114,7 @@
         },
         {
             "name": String("WithTuple"),
+            "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("struct_repr_transparent_removed"),
                 String("WithTuple"),
@@ -119,6 +128,7 @@
         },
         {
             "name": String("WithGeneric"),
+            "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("struct_repr_transparent_removed"),
                 String("WithGeneric"),
