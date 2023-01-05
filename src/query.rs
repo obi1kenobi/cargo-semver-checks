@@ -491,4 +491,5 @@ add_lints!(
     type_marked_deprecated,
     unit_struct_changed_kind,
     variant_marked_non_exhaustive,
+    enum_tuple_variant_field_missing,
 );
