@@ -169,8 +169,7 @@ pub(super) fn run_check_release(
             .run_query(&semver_query.query, semver_query.arguments.clone())?
             .peekable();
         let peeked = results_iter.peek();
-        let end_instant = std::time::Instant::now();
-        let time_to_decide = end_instant - start_instant;
+        let time_to_decide = start_instant.elapsed();
         total_duration += time_to_decide;
 
         if peeked.is_none() {
@@ -338,8 +337,7 @@ pub(super) fn run_check_release(
                     .expect("print failed");
                 }
             }
-            let end_instant = std::time::Instant::now();
-            total_duration += end_instant - start_instant;
+            total_duration += start_instant.elapsed();
         }
 
         let required_bump = if required_versions.contains(&RequiredSemverUpdate::Major) {
