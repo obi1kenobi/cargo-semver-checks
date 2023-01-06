@@ -222,7 +222,10 @@ fn create_rustdoc_manifest_for_crate_version(
         },
         dependencies: {
             let project_with_features = DependencyDetail {
-                version: Some(crate_baseline.version().to_string()),
+                // we need the *exact* version as a dependency, or else cargo will
+                // give us the latest semver-compatible version which is not we want;
+                // fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
+                version: Some(format!("={}", crate_baseline.version())),
                 // adding features fixes:
                 // https://github.com/obi1kenobi/cargo-semver-check/issues/147
                 features: crate_baseline
