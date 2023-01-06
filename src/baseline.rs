@@ -234,25 +234,30 @@ fn create_rustdoc_manifest_for_crate_version(
             // - regular features: https://github.com/obi1kenobi/cargo-semver-check/issues/147
             // - implicit features from optional dependencies:
             //     https://github.com/obi1kenobi/cargo-semver-checks/issues/265
-            let features: BTreeSet<_> = crate_baseline
-                .features()
-                .keys()
-                .cloned()
-                .chain(
-                    crate_baseline
-                        .dependencies()
-                        .iter()
-                        .filter_map(|dep| dep.is_optional().then_some(dep.name()))
-                        .map(|x| x.to_string()),
-                )
+            let mut implicit_features: BTreeSet<_> = crate_baseline
+                .dependencies()
+                .iter()
+                .filter_map(|dep| dep.is_optional().then_some(dep.name()))
+                .map(|x| x.to_string())
                 .collect();
+            for feature_defn in crate_baseline.features().values().flatten() {
+                // "If you specify the optional dependency with the dep: prefix anywhere
+                //  in the [features] table, that disables the implicit feature."
+                // https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies
+                if let Some(optional_dep) = feature_defn.strip_prefix("dep:") {
+                    implicit_features.remove(optional_dep);
+                }
+            }
+            let regular_features: BTreeSet<_> = crate_baseline.features().keys().cloned().collect();
+            let mut all_features = implicit_features;
+            all_features.extend(regular_features);
 
             let project_with_features = DependencyDetail {
                 // We need the *exact* version as a dependency, or else cargo will
                 // give us the latest semver-compatible version which is not we want.
                 // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
                 version: Some(format!("={}", crate_baseline.version())),
-                features: features.into_iter().collect(),
+                features: all_features.into_iter().collect(),
                 ..DependencyDetail::default()
             };
             let mut deps = DepsSet::new();
