@@ -192,7 +192,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
-          ref: '3dd8b42f7287340913055db34db5606c1720b9d5'
+          ref: 'v0.9.0'
           path: 'subject'
 
       - name: Install rust
