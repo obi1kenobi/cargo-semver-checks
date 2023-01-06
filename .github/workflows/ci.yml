@@ -180,7 +180,7 @@ jobs:
     # cargo-semver-checks previously crashed here due to
     # a bug in the generated Cargo.toml when generating a registry baseline:
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/261
-    name: Run cargo-semver-checks on bevy-core v0.9.0
+    name: Run cargo-semver-checks on bevy_core v0.9.0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout cargo-semver-checks
