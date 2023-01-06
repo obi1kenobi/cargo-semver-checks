@@ -436,4 +436,5 @@ add_lints!(
     tuple_struct_to_plain_struct,
     unit_struct_changed_kind,
     variant_marked_non_exhaustive,
+    enum_must_use_added,
 );
