@@ -87,7 +87,7 @@ impl RustDocCommand {
         if !output.status.success() {
             if self.silence {
                 anyhow::bail!(
-                    "Failed when running cargo-doc on {}: {}",
+                    "Failed when running cargo-doc on {}:\n{}",
                     manifest_path.display(),
                     String::from_utf8_lossy(&output.stderr)
                 )

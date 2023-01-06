@@ -21,6 +21,8 @@ jobs:
       - rust-tests
       - run-on-rust-libp2p
       - run-on-core-graphics
+      - run-on-bevy-core
+      - run-on-bevy-gltf
     steps:
       - run: exit 0
 
@@ -111,7 +113,7 @@ jobs:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
           ref: '3371d7ceab242440216ae9ab99829631fa418f3b'
-          path: 'crate'
+          path: 'subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -125,15 +127,17 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: rust-libp2p
 
       - name: Run semver-checks
-        run: cargo run semver-checks check-release --manifest-path="crate/core/Cargo.toml"
+        run: cargo run semver-checks check-release --manifest-path="subject/core/Cargo.toml"
 
       # Test passing package name explicitly.
       # It was previously possible to make the command above work while the one here failed.
       # Reference: https://github.com/obi1kenobi/cargo-semver-checks/issues/174
       - name: Run semver-checks (alternative command)
-        run: cargo run semver-checks check-release --manifest-path="crate/core/Cargo.toml" --package="libp2p-core"
+        run: cargo run semver-checks check-release --manifest-path="subject/core/Cargo.toml" --package="libp2p-core"
 
   run-on-core-graphics:
     # Run cargo-semver-checks on a crate with no semver violations,
@@ -156,7 +160,7 @@ jobs:
           persist-credentials: false
           repository: 'servo/core-foundation-rs'
           ref: '786895643140fa0ee4f913d7b4aeb0c4626b2085'
-          path: 'crate'
+          path: 'subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -166,9 +170,79 @@ jobs:
           override: true
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: core-graphics
 
       - name: Run semver-checks
-        run: cargo run semver-checks check-release --manifest-path="crate/core-graphics/Cargo.toml"
+        run: cargo run semver-checks check-release --manifest-path="subject/core-graphics/Cargo.toml"
+
+  run-on-bevy-core:
+    # cargo-semver-checks previously crashed here due to
+    # a bug in the generated Cargo.toml when generating a registry baseline:
+    # https://github.com/obi1kenobi/cargo-semver-checks/issues/261
+    name: Run cargo-semver-checks on bevy_core v0.9.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout bevy
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'bevyengine/bevy'
+          ref: 'v0.9.0'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: bevy-core
+
+      - name: Run semver-checks
+        run: cargo run semver-checks check-release --manifest-path="subject/crates/bevy_core/Cargo.toml"
+
+  run-on-bevy-gltf:
+    # cargo-semver-checks reported false-positives since it did not include
+    # features defined implicitly via optional dependencies:
+    # https://github.com/obi1kenobi/cargo-semver-checks/issues/265
+    name: Run cargo-semver-checks on bevy_gltf v0.9.1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout bevy
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'bevyengine/bevy'
+          ref: 'v0.9.1'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: bevy-gltf
+
+      - name: Run semver-checks
+        run: cargo run semver-checks check-release --manifest-path="subject/crates/bevy_gltf/Cargo.toml" --baseline-version 0.9.0
 
   init-release:
     name: Run the release workflow
