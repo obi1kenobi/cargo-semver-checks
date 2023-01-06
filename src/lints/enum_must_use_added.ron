@@ -5,7 +5,7 @@ SemverQuery(
     required_update: Minor,
 
     // TODO: Change the reference link to point to the cargo semver reference
-    //       once it has a section on attribute [must_use].
+    //       once it has a section on attribute #[must_use].
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute"),
     query: r#"
     {
