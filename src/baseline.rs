@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use anyhow::Context as _;
 use crates_index::Crate;
 
@@ -221,18 +223,36 @@ fn create_rustdoc_manifest_for_crate_version(
             Some(product)
         },
         dependencies: {
+            // Sometimes crates ship types with fields or variants that are included
+            // only when certain features are enabled.
+            //
+            // The current crate's rustdoc is generated with `--all-features`.
+            // We need the baseline to be generated with all features too,
+            // but that option isn't available here so we have to implement it ourselves.
+            //
+            // Fixes:
+            // - regular features: https://github.com/obi1kenobi/cargo-semver-check/issues/147
+            // - implicit features from optional dependencies:
+            //     https://github.com/obi1kenobi/cargo-semver-checks/issues/265
+            let features: BTreeSet<_> = crate_baseline
+                .features()
+                .keys()
+                .cloned()
+                .chain(
+                    crate_baseline
+                        .dependencies()
+                        .iter()
+                        .filter_map(|dep| dep.is_optional().then_some(dep.name()))
+                        .map(|x| x.to_string()),
+                )
+                .collect();
+
             let project_with_features = DependencyDetail {
-                // we need the *exact* version as a dependency, or else cargo will
-                // give us the latest semver-compatible version which is not we want;
-                // fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
+                // We need the *exact* version as a dependency, or else cargo will
+                // give us the latest semver-compatible version which is not we want.
+                // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
                 version: Some(format!("={}", crate_baseline.version())),
-                // adding features fixes:
-                // https://github.com/obi1kenobi/cargo-semver-check/issues/147
-                features: crate_baseline
-                    .features()
-                    .iter()
-                    .map(|(key, _values)| key.clone())
-                    .collect(),
+                features: features.into_iter().collect(),
                 ..DependencyDetail::default()
             };
             let mut deps = DepsSet::new();
