@@ -439,4 +439,5 @@ add_lints!(
     enum_must_use_added,
     struct_must_use_added,
     function_must_use_added,
+    trait_must_use_added,
 );
