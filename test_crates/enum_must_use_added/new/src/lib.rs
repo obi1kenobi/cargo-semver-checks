@@ -5,6 +5,7 @@
 pub enum EnumToMustUseEnum {
     Bar,
 }
+
 #[must_use = "Foo"]
 pub enum EnumToMustUseMessageEnum {
     Bar,
