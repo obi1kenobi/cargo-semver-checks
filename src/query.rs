@@ -437,4 +437,5 @@ add_lints!(
     unit_struct_changed_kind,
     variant_marked_non_exhaustive,
     enum_must_use_added,
+    struct_must_use_added,
 );
