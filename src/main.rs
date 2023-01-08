@@ -123,8 +123,17 @@ fn main() -> anyhow::Result<()> {
                 .silence(!config.is_verbose());
 
             let mut success = true;
-            let mut run_check_release = |config: &mut GlobalConfig, crate_name: &str, current_crate: VersionedCrate, baseline_crate: VersionedCrate| -> anyhow::Result<()> {
-                if !check_release::run_check_release(config, crate_name, current_crate, baseline_crate)? {
+            let mut run_check_release = |config: &mut GlobalConfig,
+                                         crate_name: &str,
+                                         current_crate: VersionedCrate,
+                                         baseline_crate: VersionedCrate|
+             -> anyhow::Result<()> {
+                if !check_release::run_check_release(
+                    config,
+                    crate_name,
+                    current_crate,
+                    baseline_crate,
+                )? {
                     success = false;
                 }
                 Ok(())
