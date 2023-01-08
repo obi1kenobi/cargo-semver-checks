@@ -12,9 +12,9 @@ mod util;
 use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
-use trustfall_rustdoc::load_rustdoc;
+use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
-use crate::{check_release::run_check_release, config::GlobalConfig, util::slugify};
+use crate::{config::GlobalConfig, util::slugify};
 
 fn main() -> anyhow::Result<()> {
     human_panic::setup_panic!();
@@ -122,70 +122,67 @@ fn main() -> anyhow::Result<()> {
                 .deps(false)
                 .silence(!config.is_verbose());
 
-            let prepared_crates =
-                if let Some(current_rustdoc_path) = args.current_rustdoc.as_deref() {
-                    let name = "<unknown>";
-                    let version = None;
-                    let baseline_path =
-                        loader.load_rustdoc(&mut config, &rustdoc_cmd, name, version)?;
-                    vec![(
-                        name.to_owned(),
-                        load_rustdoc(&baseline_path)?,
-                        load_rustdoc(current_rustdoc_path)?,
-                    )]
-                } else {
-                    let metadata = args.manifest.metadata().exec()?;
-                    let (selected, _) = args.workspace.partition_packages(&metadata);
-                    let mut prepared_crates = Vec::with_capacity(selected.len());
-                    for selected in selected {
-                        let manifest_path = selected.manifest_path.as_std_path();
-                        let crate_name = &selected.name;
-                        let version = &selected.version;
-
-                        let is_implied = args.workspace.all || args.workspace.workspace;
-                        if is_implied && selected.publish == Some(vec![]) {
-                            config.verbose(|config| {
-                                config.shell_status(
-                                    "Skipping",
-                                    format_args!("{crate_name} v{version} (current)"),
-                                )
-                            })?;
-                            continue;
-                        }
-
-                        config.shell_status(
-                            "Parsing",
-                            format_args!("{crate_name} v{version} (current)"),
-                        )?;
-
-                        let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
-                        let current_crate = load_rustdoc(&rustdoc_path)?;
-
-                        // Can overwrite rustdoc for current crate.
-                        // For example, this happens when target-dir is specified in `.cargo/config.toml`.
-                        let baseline_path = loader.load_rustdoc(
-                            &mut config,
-                            &rustdoc_cmd,
-                            crate_name,
-                            Some(version),
-                        )?;
-                        let baseline_crate = load_rustdoc(&baseline_path)?;
-
-                        prepared_crates.push((crate_name.clone(), baseline_crate, current_crate));
-                    }
-                    prepared_crates
-                };
             let mut success = true;
-            for (crate_name, baseline_crate, current_crate) in prepared_crates {
-                if !run_check_release(&mut config, &crate_name, current_crate, baseline_crate)? {
+            let mut run_check_release = |config: &mut GlobalConfig, crate_name: &str, current_crate: VersionedCrate, baseline_crate: VersionedCrate| -> anyhow::Result<()> {
+                if !check_release::run_check_release(config, crate_name, current_crate, baseline_crate)? {
                     success = false;
                 }
-            }
-            if success {
-                std::process::exit(0);
+                Ok(())
+            };
+
+            if let Some(current_rustdoc_path) = args.current_rustdoc.as_deref() {
+                let current_crate = load_rustdoc(current_rustdoc_path)?;
+
+                let name = "<unknown>";
+                let version = None;
+                let baseline_path =
+                    loader.load_rustdoc(&mut config, &rustdoc_cmd, name, version)?;
+                let baseline_crate = load_rustdoc(&baseline_path)?;
+
+                run_check_release(&mut config, name, current_crate, baseline_crate)?;
             } else {
-                std::process::exit(1);
+                let metadata = args.manifest.metadata().exec()?;
+                let (selected, _) = args.workspace.partition_packages(&metadata);
+                for selected in selected {
+                    let manifest_path = selected.manifest_path.as_std_path();
+                    let crate_name = &selected.name;
+                    let version = &selected.version;
+
+                    let is_implied = args.workspace.all || args.workspace.workspace;
+                    if is_implied && selected.publish == Some(vec![]) {
+                        config.verbose(|config| {
+                            config.shell_status(
+                                "Skipping",
+                                format_args!("{crate_name} v{version} (current)"),
+                            )
+                        })?;
+                        continue;
+                    }
+
+                    config.shell_status(
+                        "Parsing",
+                        format_args!("{crate_name} v{version} (current)"),
+                    )?;
+
+                    let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
+                    let current_crate = load_rustdoc(&rustdoc_path)?;
+
+                    // Can overwrite rustdoc of current crate.
+                    // For example, this happens when target-dir is specified in `.cargo/config.toml`.
+                    // That's the reason why we're immediately loading the rustdocs to memory.
+                    let baseline_path = loader.load_rustdoc(
+                        &mut config,
+                        &rustdoc_cmd,
+                        crate_name,
+                        Some(version),
+                    )?;
+                    let baseline_crate = load_rustdoc(&baseline_path)?;
+
+                    run_check_release(&mut config, crate_name, current_crate, baseline_crate)?;
+                }
             }
+
+            std::process::exit(i32::from(!success));
         }
         None => {
             anyhow::bail!("subcommand required");
