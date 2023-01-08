@@ -42,3 +42,11 @@ pub fn MustUseMessageFunctionToMustUseFunction(x: i64) -> i64 {
 pub fn MustUseMessageFunctionToMustUseMessageFunction(x: i64) -> i64 {
     x
 }
+
+
+// This function is private and should not be reported by this rule.
+
+#[must_use]
+fn MustUsePrivateFunction(x: i64) -> i64 {
+    x
+}

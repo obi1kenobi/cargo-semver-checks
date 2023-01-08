@@ -42,3 +42,11 @@ pub enum MustUseMessageEnumToMustUseEnum {
 pub enum MustUseMessageEnumToMustUseMessageEnum {
     Bar,
 }
+
+
+// This enum is private and should not be reported by this rule.
+
+#[must_use]
+enum MustUsePrivateEnum {
+    Bar,
+}

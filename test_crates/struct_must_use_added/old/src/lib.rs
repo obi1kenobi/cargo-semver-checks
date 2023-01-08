@@ -42,3 +42,10 @@ pub struct MustUseMessageStructToMustUseStruct {
 pub struct MustUseMessageStructToMustUseMessageStruct {
     bar: u64,
 }
+
+
+// This struct is private and should not be reported by this rule.
+
+struct MustUsePrivateStruct {
+    bar: u64,
+}
