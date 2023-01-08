@@ -7,44 +7,50 @@ use crate::dump::RustDocCommand;
 use crate::util::slugify;
 use crate::GlobalConfig;
 
-pub(crate) trait BaselineLoader {
-    fn load_rustdoc(
+pub(crate) trait RustdocGenerator {
+    fn generate_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc_command: &RustDocCommand,
         name: &str,
-        version_current: Option<&semver::Version>,
+        highest_considered_registry_version: Option<&semver::Version>,
+        crate_type: &str,
     ) -> anyhow::Result<std::path::PathBuf>;
 }
 
-pub(crate) struct RustdocBaseline {
+pub(crate) struct FromRustdoc {
     path: std::path::PathBuf,
 }
 
-impl RustdocBaseline {
+impl FromRustdoc {
     pub(crate) fn new(path: std::path::PathBuf) -> Self {
         Self { path }
     }
 }
 
-impl BaselineLoader for RustdocBaseline {
-    fn load_rustdoc(
+impl RustdocGenerator for FromRustdoc {
+    fn generate_rustdoc(
         &self,
-        _config: &mut GlobalConfig,
-        _rustdoc: &RustDocCommand,
-        _name: &str,
-        _version_current: Option<&semver::Version>,
+        config: &mut GlobalConfig,
+        _rustdoc_command: &RustDocCommand,
+        name: &str,
+        _highest_considered_registry_version: Option<&semver::Version>,
+        crate_type: &str,
     ) -> anyhow::Result<std::path::PathBuf> {
+        config.shell_status(
+            "Using",
+            format_args!("{name}: {} ({crate_type})", self.path.display()),
+        )?;
         Ok(self.path.clone())
     }
 }
 
-pub(crate) struct PathBaseline {
+pub(crate) struct FromPath {
     root: std::path::PathBuf,
     lookup: std::collections::HashMap<String, (String, std::path::PathBuf)>,
 }
 
-impl PathBaseline {
+impl FromPath {
     pub(crate) fn new(root: &std::path::Path) -> anyhow::Result<Self> {
         let mut lookup = std::collections::HashMap::new();
         for result in ignore::Walk::new(root) {
@@ -67,30 +73,31 @@ impl PathBaseline {
     }
 }
 
-impl BaselineLoader for PathBaseline {
-    fn load_rustdoc(
+impl RustdocGenerator for FromPath {
+    fn generate_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc_command: &RustDocCommand,
         name: &str,
-        _version_current: Option<&semver::Version>,
+        _highest_considered_registry_version: Option<&semver::Version>,
+        crate_type: &str,
     ) -> anyhow::Result<std::path::PathBuf> {
         let (version, manifest_path) = self
             .lookup
             .get(name)
             .with_context(|| format!("package `{}` not found in {}", name, self.root.display()))?;
         let version = format!(" v{version}");
-        config.shell_status("Parsing", format_args!("{name}{version} (baseline)"))?;
-        let rustdoc_path = rustdoc.dump(manifest_path.as_path(), None, true)?;
+        config.shell_status("Parsing", format_args!("{name}{version} ({crate_type})"))?;
+        let rustdoc_path = rustdoc_command.dump(manifest_path.as_path(), None, true)?;
         Ok(rustdoc_path)
     }
 }
 
-pub(crate) struct GitBaseline {
-    path: PathBaseline,
+pub(crate) struct FromGitRevision {
+    path: FromPath,
 }
 
-impl GitBaseline {
+impl FromGitRevision {
     pub fn with_rev(
         source: &std::path::Path,
         target: &std::path::Path,
@@ -107,7 +114,7 @@ impl GitBaseline {
         let tree = rev.peel_to_tree()?;
         extract_tree(&repo, tree, &target)?;
 
-        let path = PathBaseline::new(&target)?;
+        let path = FromPath::new(&target)?;
         Ok(Self { path })
     }
 }
@@ -146,16 +153,22 @@ fn extract_tree(
     Ok(())
 }
 
-impl BaselineLoader for GitBaseline {
-    fn load_rustdoc(
+impl RustdocGenerator for FromGitRevision {
+    fn generate_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc_command: &RustDocCommand,
         name: &str,
-        version_current: Option<&semver::Version>,
+        highest_considered_registry_version: Option<&semver::Version>,
+        crate_type: &str,
     ) -> anyhow::Result<std::path::PathBuf> {
-        self.path
-            .load_rustdoc(config, rustdoc, name, version_current)
+        self.path.generate_rustdoc(
+            config,
+            rustdoc_command,
+            name,
+            highest_considered_registry_version,
+            crate_type,
+        )
     }
 }
 
@@ -173,13 +186,13 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
     std::ffi::OsStr::new(str::from_utf8(b).unwrap())
 }
 
-pub(crate) struct RegistryBaseline {
+pub(crate) struct FromRegistry {
     target_root: std::path::PathBuf,
     version: Option<semver::Version>,
     index: crates_index::Index,
 }
 
-impl RegistryBaseline {
+impl FromRegistry {
     pub fn new(target_root: &std::path::Path, config: &mut GlobalConfig) -> anyhow::Result<Self> {
         let mut index = crates_index::Index::new_cargo_default()?;
 
@@ -196,15 +209,15 @@ impl RegistryBaseline {
         })
     }
 
-    pub fn set_version(&mut self, version: semver::Version) {
+    pub fn set_exact_version(&mut self, version: semver::Version) {
         self.version = Some(version);
     }
 }
 
-/// To get the rustdoc of the baseline, we first create a placeholder project somewhere
-/// with the baseline as a dependency, and run `cargo rustdoc` on it.
+/// To generate the rustdoc from the registry, we first create a placeholder project somewhere
+/// with the crate as a dependency, and run `cargo rustdoc` on it.
 fn create_rustdoc_manifest_for_crate_version(
-    crate_baseline: &crates_index::Version,
+    crate_: &crates_index::Version,
 ) -> cargo_toml::Manifest<()> {
     use cargo_toml::*;
 
@@ -226,21 +239,21 @@ fn create_rustdoc_manifest_for_crate_version(
             // Sometimes crates ship types with fields or variants that are included
             // only when certain features are enabled.
             //
-            // The current crate's rustdoc is generated with `--all-features`.
-            // We need the baseline to be generated with all features too,
+            // The FromPath crate's rustdoc is generated with `--all-features`.
+            // We need the FromRegistry to be generated with all features too,
             // but that option isn't available here so we have to implement it ourselves.
             //
             // Fixes:
             // - regular features: https://github.com/obi1kenobi/cargo-semver-check/issues/147
             // - implicit features from optional dependencies:
             //     https://github.com/obi1kenobi/cargo-semver-checks/issues/265
-            let mut implicit_features: BTreeSet<_> = crate_baseline
+            let mut implicit_features: BTreeSet<_> = crate_
                 .dependencies()
                 .iter()
                 .filter_map(|dep| dep.is_optional().then_some(dep.name()))
                 .map(|x| x.to_string())
                 .collect();
-            for feature_defn in crate_baseline.features().values().flatten() {
+            for feature_defn in crate_.features().values().flatten() {
                 // "If you specify the optional dependency with the dep: prefix anywhere
                 //  in the [features] table, that disables the implicit feature."
                 // https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies
@@ -248,7 +261,7 @@ fn create_rustdoc_manifest_for_crate_version(
                     implicit_features.remove(optional_dep);
                 }
             }
-            let regular_features: BTreeSet<_> = crate_baseline.features().keys().cloned().collect();
+            let regular_features: BTreeSet<_> = crate_.features().keys().cloned().collect();
             let mut all_features = implicit_features;
             all_features.extend(regular_features);
 
@@ -256,13 +269,13 @@ fn create_rustdoc_manifest_for_crate_version(
                 // We need the *exact* version as a dependency, or else cargo will
                 // give us the latest semver-compatible version which is not we want.
                 // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
-                version: Some(format!("={}", crate_baseline.version())),
+                version: Some(format!("={}", crate_.version())),
                 features: all_features.into_iter().collect(),
                 ..DependencyDetail::default()
             };
             let mut deps = DepsSet::new();
             deps.insert(
-                crate_baseline.name().to_string(),
+                crate_.name().to_string(),
                 Dependency::Detailed(project_with_features),
             );
             deps
@@ -271,14 +284,14 @@ fn create_rustdoc_manifest_for_crate_version(
     }
 }
 
-fn choose_baseline_version(
+fn choose_version_from_registry(
     crate_: &Crate,
-    version_current: Option<&semver::Version>,
+    highest_considered_registry_version: Option<&semver::Version>,
 ) -> anyhow::Result<String> {
     // Try to avoid pre-releases
     // - Breaking changes are allowed between them
     // - Most likely the user cares about the last official release
-    if let Some(current) = version_current {
+    if let Some(current) = highest_considered_registry_version {
         let mut instances = crate_
             .versions()
             .iter()
@@ -288,7 +301,7 @@ fn choose_baseline_version(
                     .ok()
             })
             // For unpublished changes when the user doesn't increment the version
-            // post-release, allow using the current version as a baseline.
+            // post-release, allow using the current version.
             .filter(|(v, _)| v <= current)
             .collect::<Vec<_>>();
         instances.sort();
@@ -300,7 +313,7 @@ fn choose_baseline_version(
             .map(|(v, _)| v.to_string())
             .with_context(|| {
                 anyhow::format_err!(
-                    "No available baseline versions for {}@{}",
+                    "Couldn't find available versions in registry for {}@{}",
                     crate_.name(),
                     current
                 )
@@ -319,13 +332,14 @@ fn choose_baseline_version(
     }
 }
 
-impl BaselineLoader for RegistryBaseline {
-    fn load_rustdoc(
+impl RustdocGenerator for FromRegistry {
+    fn generate_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc_command: &RustDocCommand,
         name: &str,
-        version_current: Option<&semver::Version>,
+        highest_considered_registry_version: Option<&semver::Version>,
+        crate_type: &str,
     ) -> anyhow::Result<std::path::PathBuf> {
         let crate_ = self
             .index
@@ -335,7 +349,7 @@ impl BaselineLoader for RegistryBaseline {
         let base_version = if let Some(base) = self.version.as_ref() {
             base.to_string()
         } else {
-            choose_baseline_version(&crate_, version_current)?
+            choose_version_from_registry(&crate_, highest_considered_registry_version)?
         };
 
         let base_root = self.target_root.join(format!(
@@ -346,7 +360,7 @@ impl BaselineLoader for RegistryBaseline {
         std::fs::create_dir_all(&base_root)?;
         let manifest_path = base_root.join("Cargo.toml");
 
-        let crate_baseline = crate_
+        let crate_ = crate_
             .versions()
             .iter()
             .find(|v| v.version() == base_version)
@@ -363,12 +377,15 @@ impl BaselineLoader for RegistryBaseline {
 
         std::fs::write(
             &manifest_path,
-            toml::to_string(&create_rustdoc_manifest_for_crate_version(crate_baseline))?,
+            toml::to_string(&create_rustdoc_manifest_for_crate_version(crate_))?,
         )?;
         std::fs::write(base_root.join("lib.rs"), "")?;
 
-        config.shell_status("Parsing", format_args!("{name} v{base_version} (baseline)"))?;
-        let rustdoc_path = rustdoc.dump(
+        config.shell_status(
+            "Parsing",
+            format_args!("{name} v{base_version} ({crate_type})"),
+        )?;
+        let rustdoc_path = rustdoc_command.dump(
             manifest_path.as_path(),
             Some(&format!("{name}@{base_version}")),
             false,
@@ -398,7 +415,7 @@ fn need_retry(res: Result<(), crates_index::Error>) -> anyhow::Result<bool> {
 mod tests {
     use crates_index::{Crate, Version};
 
-    use super::choose_baseline_version;
+    use super::choose_version_from_registry;
 
     fn new_mock_version(version_name: &str, yanked: bool) -> Version {
         // `crates_index::Version` cannot be created explicitly, as all its fields
@@ -421,7 +438,7 @@ mod tests {
             .expect("hand-written JSON used to create mock crates_index::Crate should be valid")
     }
 
-    fn assert_correctly_picks_baseline_version(
+    fn assert_correctly_picks_version(
         versions: Vec<(&str, bool)>,
         current_version_name: Option<&str>,
         expected: &str,
@@ -436,14 +453,14 @@ mod tests {
             semver::Version::parse(version_name)
                 .expect("current_version_name used in assertion should encode a valid version")
         });
-        let chosen_baseline = choose_baseline_version(&crate_, current_version.as_ref())
-            .expect("choose_baseline_version should not return any error in the test case");
-        assert_eq!(chosen_baseline, expected.to_owned());
+        let chosen_version = choose_version_from_registry(&crate_, current_version.as_ref())
+            .expect("choose_version_from_registry should not return any error in the test case");
+        assert_eq!(chosen_version, expected.to_owned());
     }
 
     #[test]
-    fn baseline_choosing_logic_skips_yanked() {
-        assert_correctly_picks_baseline_version(
+    fn version_choosing_logic_skips_yanked() {
+        assert_correctly_picks_version(
             vec![("1.2.0", false), ("1.2.1", true)],
             Some("1.2.2"),
             "1.2.0",
@@ -451,8 +468,8 @@ mod tests {
     }
 
     #[test]
-    fn baseline_choosing_logic_skips_greater_than_current() {
-        assert_correctly_picks_baseline_version(
+    fn version_choosing_logic_skips_greater_than_current() {
+        assert_correctly_picks_version(
             vec![("1.2.0", false), ("1.2.1", false)],
             Some("1.2.0"),
             "1.2.0",
@@ -460,8 +477,8 @@ mod tests {
     }
 
     #[test]
-    fn baseline_choosing_logic_skips_pre_releases() {
-        assert_correctly_picks_baseline_version(
+    fn version_choosing_logic_skips_pre_releases() {
+        assert_correctly_picks_version(
             vec![("1.2.0", false), ("1.2.1-rc1", false)],
             Some("1.2.1-rc2"),
             "1.2.0",
@@ -469,8 +486,8 @@ mod tests {
     }
 
     #[test]
-    fn baseline_choosing_logic_without_current_picks_latest_normal() {
-        assert_correctly_picks_baseline_version(
+    fn version_choosing_logic_without_current_picks_latest_normal() {
+        assert_correctly_picks_version(
             vec![("1.2.0", false), ("1.2.1-rc1", false), ("1.3.1", true)],
             None,
             "1.2.0",
@@ -478,8 +495,8 @@ mod tests {
     }
 
     #[test]
-    fn baseline_choosing_logic_picks_pre_release_if_there_is_no_normal() {
-        assert_correctly_picks_baseline_version(
+    fn version_choosing_logic_picks_pre_release_if_there_is_no_normal() {
+        assert_correctly_picks_version(
             vec![("1.2.0", true), ("1.2.1-rc1", false)],
             Some("1.2.1"),
             "1.2.1-rc1",
@@ -487,8 +504,8 @@ mod tests {
     }
 
     #[test]
-    fn baseline_choosing_logic_picks_yanked_if_there_is_no_normal() {
-        assert_correctly_picks_baseline_version(
+    fn version_choosing_logic_picks_yanked_if_there_is_no_normal() {
+        assert_correctly_picks_version(
             vec![("1.2.1-rc1", false), ("1.2.1", true)],
             Some("1.2.1"),
             "1.2.1",
