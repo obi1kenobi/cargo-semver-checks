@@ -50,3 +50,13 @@ pub enum MustUseMessageEnumToMustUseMessageEnum {
 enum MustUsePrivateEnum {
     Bar,
 }
+
+
+// This enum was added in the new version of the crate with it's attribute.
+// It should not be reported by this rule because adding a new enum is not
+// a breaking change.
+
+#[must_use]
+pub enum MustUseNewEnum {
+    Bar,
+}

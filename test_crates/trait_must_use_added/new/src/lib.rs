@@ -34,3 +34,11 @@ pub trait MustUseMessageTraitToMustUseMessageTrait {}
 
 #[must_use]
 trait MustUsePrivateTrait {}
+
+
+// This trait was added in the new version of the crate with it's attribute.
+// It should not be reported by this rule because adding a new trait is not
+// a breaking change.
+
+#[must_use]
+pub trait MustUseNewTrait {}

@@ -34,3 +34,11 @@ pub fn MustUseMessageFunctionToMustUseMessageFunction() {}
 
 #[must_use]
 fn MustUsePrivateFunction() {}
+
+
+// This function was added in the new version of the crate with it's attribute.
+// It should not be reported by this rule because adding a new function is not
+// a breaking change.
+
+#[must_use]
+pub fn MustUseNewFunction() {}

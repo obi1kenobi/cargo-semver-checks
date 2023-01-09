@@ -50,3 +50,13 @@ pub struct MustUseMessageStructToMustUseMessageStruct {
 struct MustUsePrivateStruct {
     bar: u64,
 }
+
+
+// This struct was added in the new version of the crate with it's attribute.
+// It should not be reported by this rule because adding a new struct is not
+// a breaking change.
+
+#[must_use]
+pub struct MustUseNewStruct {
+    bar: u64,
+}
