@@ -1,7 +1,7 @@
 SemverQuery(
     id: "inherent_method_must_use_added",
-    human_readable_name: "inherent_method #[must_use] added",
-    description: "An inherent_method has been marked with #[must_use].",
+    human_readable_name: "inherent method #[must_use] added",
+    description: "An inherent method has been marked with #[must_use].",
     required_update: Minor,
 
     // TODO: Change the reference link to point to the cargo semver reference
@@ -73,6 +73,6 @@ SemverQuery(
         "must_use": "must_use",
         "zero": 0,
     },
-    error_message: "An inherent_method has been marked with #[must_use]. This can cause downstream crates that did not use the value returned by this method to get a compiler lint.",
-    per_result_error_template: Some("inherent_method {{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "An inherent method has been marked with #[must_use]. This can cause downstream crates that did not use the value returned by this method to get a compiler lint.",
+    per_result_error_template: Some("inherent method {{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
