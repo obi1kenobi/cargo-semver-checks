@@ -28,3 +28,9 @@ pub trait MustUseMessageTraitToMustUseTrait {}
 
 #[must_use = "Baz"]
 pub trait MustUseMessageTraitToMustUseMessageTrait {}
+
+
+// This trait is private and should not be reported by this rule.
+
+#[must_use]
+trait MustUsePrivateTrait {}
