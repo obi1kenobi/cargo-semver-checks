@@ -1,5 +1,5 @@
 [package]
-name = "method_must_use_added"
+name = "inherent_method_moved_must_use_added"
 version = "0.1.0"
 edition = "2021"
 
