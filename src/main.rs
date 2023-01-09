@@ -176,9 +176,11 @@ fn main() -> anyhow::Result<()> {
                     let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
                     let current_crate = load_rustdoc(&rustdoc_path)?;
 
-                    // Can overwrite rustdoc of current crate.
+                    // The process of generating baseline rustdoc can overwrite 
+                    // the already-generated rustdoc of the current crate.
                     // For example, this happens when target-dir is specified in `.cargo/config.toml`.
-                    // That's the reason why we're immediately loading the rustdocs to memory.
+                    // That's the reason why we're immediately loading the rustdocs into memory.
+                    // See: https://github.com/obi1kenobi/cargo-semver-checks/issues/269
                     let baseline_path = loader.load_rustdoc(
                         &mut config,
                         &rustdoc_cmd,
