@@ -1,0 +1,30 @@
+{
+    "./test_crates/inherent_method_must_use_added/": [
+        {
+            "method_name": String("MethodToMustUseMethod"),
+            "method_visibility": String("public"),
+            "name": String("StructWithMustUseMethods"),
+            "new_attr": String("#[must_use]"),
+            "path": List([
+                String("inherent_method_must_use_added"),
+                String("StructWithMustUseMethods"),
+            ]),
+            "span_begin_line": Uint64(9),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "method_name": String("MethodToMustUseMessageMethod"),
+            "method_visibility": String("public"),
+            "name": String("StructWithMustUseMethods"),
+            "new_attr": String("#[must_use = \"Foo\"]"),
+            "path": List([
+                String("inherent_method_must_use_added"),
+                String("StructWithMustUseMethods"),
+            ]),
+            "span_begin_line": Uint64(12),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

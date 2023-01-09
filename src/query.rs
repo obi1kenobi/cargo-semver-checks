@@ -440,4 +440,5 @@ add_lints!(
     struct_must_use_added,
     function_must_use_added,
     trait_must_use_added,
+    inherent_method_must_use_added,
 );
