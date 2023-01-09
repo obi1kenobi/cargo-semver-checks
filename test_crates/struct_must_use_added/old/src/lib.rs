@@ -11,7 +11,7 @@ pub struct StructToMustUseMessageStruct {
 
 
 // These structs had the #[must_use] attribute in the old version. Changes of
-// the attribute, including deletion, should not be reported by this rule.
+// the attribute, including deletion, should NOT be reported by this rule.
 
 #[must_use]
 pub struct MustUseStructToStruct {
@@ -26,7 +26,7 @@ pub struct MustUseStructToMustUseMessageStruct {
 
 // These structs had the #[must_use] attribute in the old version.
 // They also included the user-defined warning message. Changes of
-// the attribute, including deletion, should not be reported by this rule.
+// the attribute, including deletion, should NOT be reported by this rule.
 
 #[must_use = "Foo"]
 pub struct MustUseMessageStructToStruct {
@@ -44,7 +44,7 @@ pub struct MustUseMessageStructToMustUseMessageStruct {
 }
 
 
-// This struct is private and should not be reported by this rule.
+// This struct is private and should NOT be reported by this rule.
 
 struct MustUsePrivateStruct {
     bar: u64,

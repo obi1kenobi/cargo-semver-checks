@@ -9,7 +9,7 @@ pub trait TraitToMustUseMessageTrait {}
 
 
 // These traits had the #[must_use] attribute in the old version. Changes of
-// the attribute, including deletion, should not be reported by this rule.
+// the attribute, including deletion, should NOT be reported by this rule.
 
 pub trait MustUseTraitToTrait {}
 
@@ -19,7 +19,7 @@ pub trait MustUseTraitToMustUseMessageTrait {}
 
 // These traits had the #[must_use] attribute in the old version.
 // They also included the user-defined warning message. Changes of
-// the attribute, including deletion, should not be reported by this rule.
+// the attribute, including deletion, should NOT be reported by this rule.
 
 pub trait MustUseMessageTraitToTrait {}
 
@@ -30,14 +30,14 @@ pub trait MustUseMessageTraitToMustUseTrait {}
 pub trait MustUseMessageTraitToMustUseMessageTrait {}
 
 
-// This trait is private and should not be reported by this rule.
+// This trait is private and should NOT be reported by this rule.
 
 #[must_use]
 trait MustUsePrivateTrait {}
 
 
 // This trait was added in the new version of the crate with it's attribute.
-// It should not be reported by this rule because adding a new trait is not
+// It should NOT be reported by this rule because adding a new trait is not
 // a breaking change.
 
 #[must_use]
