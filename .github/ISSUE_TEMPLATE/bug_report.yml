@@ -1,6 +1,6 @@
 name: "Bug report"
 description: "Things didn't meet expectations"
-labels: 'C-bug'
+labels: ['C-bug']
 body:
   - type: textarea
     attributes:
@@ -26,6 +26,10 @@ body:
       description: "Run `cargo semver-checks --bugreport` and copy-paste the output here."
     validations:
       required: true
+  - type: textarea
+    attributes:
+      label: "Build Configuration"
+      description: "Any local [Rust build configuration](https://doc.rust-lang.org/cargo/reference/config.html) in config.toml files? Paste the file content here, if you have one."
   - type: textarea
     attributes:
       label: "Additional Context"
