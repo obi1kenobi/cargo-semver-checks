@@ -1,11 +1,10 @@
-// The role of this test crate is to prevent reporting more than one lint on
-// the same change. In this crate, there could be reports about both #[must_use]
-// being added to the methods, as well as the methods themselves being moved
-// from an impl Struct block to a trait with a respective impl Trait for Struct
-// (this is handled by method_moved_to_trait check).
-// Because both of these are minor changes, and the #[must_use] added is
-// not possible to achieve without the latter check failing, we want to just
-// report the latter one (method_moved_to_trait).
+// The purpose of this test crate is to avoid duplicate lints. In this crate,
+// there could be reports about both #[must_use] being added to the methods,
+// as well as the methods themselves being moved to a Trait. 
+// Because both of these are minor changes, and the #[must_use] added violation
+// is impossible to achieve here without the method_moved_to_trait check failing,
+// we want the #[must_use] checks to not find any changes, but expect a failure
+// on the method_moved_to_trait check.
 
 
 pub struct StructWithMovedProvidedMustUseMethods {}
@@ -101,7 +100,7 @@ impl TraitWithMovedDeclaredMustUseMethods for StructWithMovedDeclaredMustUseMeth
 }
 
 
-// This struct is private and adding #[must_use] to it's methods,
+// This struct is private and adding #[must_use] to its methods,
 // after moving them to a private trait, should NOT be reported.
 
 struct PrivateStructWithMovedMustUseMethods {}
@@ -149,9 +148,10 @@ impl TraitWithMovedImplMustUseMethods for StructWithMovedImplMustUseMethods {
 }
 
 
-// This struct, trait and it's inherent methods were added in the new version of
-// the crate, together with the method's attribute. It should NOT be reported
-// because adding a new struct or trait is not a breaking change.
+// This struct with its inherent methods and the Trait were added in the new
+// version of the crate, together with the methods' attributes. They should NOT
+// be reported by this rule to avoid duplicate lints.
+// They should be reported as a new pub types that are part of the crate's API.
 
 pub struct NewStructWithTraitMustUseMethods {}
 
