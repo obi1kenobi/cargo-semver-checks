@@ -59,6 +59,6 @@ SemverQuery(
         "must_use": "must_use",
         "zero": 0,
     },
-    error_message: "A function has been marked with #[must_use]. This can cause downstream crates that did not use the value returned by this function to get a compiler lint.",
+    error_message: "A function is now #[must_use]. Downstream crates that did not use its return value will get a compiler lint.",
     per_result_error_template: Some("function {{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
 )

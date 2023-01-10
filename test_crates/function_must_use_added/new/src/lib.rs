@@ -36,9 +36,9 @@ pub fn MustUseMessageFunctionToMustUseMessageFunction() {}
 fn MustUsePrivateFunction() {}
 
 
-// This function was added in the new version of the crate with it's attribute.
-// It should NOT be reported by this rule because adding a new function is not
-// a breaking change.
+// This function was added in the new version of the crate with its attribute.
+// It should NOT be reported by this rule to avoid duplicate lints.
+// It should be reported as a new pub item that is part of the crate's API.
 
 #[must_use]
 pub fn MustUseNewFunction() {}
