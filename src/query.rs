@@ -409,6 +409,7 @@ add_lints!(
     derive_trait_impl_removed,
     enum_marked_non_exhaustive,
     enum_missing,
+    enum_must_use_added,
     enum_repr_c_removed,
     enum_repr_int_changed,
     enum_repr_int_removed,
