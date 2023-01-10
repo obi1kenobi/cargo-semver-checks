@@ -149,8 +149,8 @@ impl TraitWithMovedImplMustUseMethods for StructWithMovedImplMustUseMethods {
 
 
 // This struct with its inherent methods and the Trait were added in the new
-// version of the crate, together with the methods' attributes. They should NOT
-// be reported by this rule to avoid duplicate lints.
+// version of the crate, together with the methods' attributes.
+// They should NOT be reported by this rule to avoid duplicate lints.
 // They should be reported as a new pub types that are part of the crate's API.
 
 pub struct NewStructWithTraitMustUseMethods {}
