@@ -48,7 +48,7 @@ impl StructWithPrivateMustUseMethods {
 }
 
 
-// This struct is private and adding #[must_use] to its inherent methods
+// This struct is private and adding #[must_use] to its inherent method
 // should NOT be reported.
 
 struct PrivateStructWithMustUseMethods {}
