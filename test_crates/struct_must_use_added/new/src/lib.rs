@@ -52,9 +52,9 @@ struct MustUsePrivateStruct {
 }
 
 
-// This struct was added in the new version of the crate with it's attribute.
-// It should NOT be reported by this rule because adding a new struct is not
-// a breaking change.
+// This struct was added in the new version of the crate with its attribute.
+// It should NOT be reported by this rule to avoid duplicate lints.
+// It should be reported as a new pub type that is part of the crate's API.
 
 #[must_use]
 pub struct MustUseNewStruct {
