@@ -52,7 +52,7 @@ enum MustUsePrivateEnum {
 }
 
 
-// This enum was added in the new version of the crate with it's attribute.
+// This enum was added in the new version of the crate with its attribute.
 // It should NOT be reported by this rule because adding a new enum is not
 // a breaking change.
 
