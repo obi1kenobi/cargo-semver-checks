@@ -422,7 +422,7 @@ add_lints!(
     function_unsafe_added,
     inherent_method_const_removed,
     inherent_method_missing,
-    inherent_method_must_use_added
+    inherent_method_must_use_added,
     inherent_method_unsafe_added,
     method_parameter_count_changed,
     sized_impl_removed,
