@@ -1,0 +1,6 @@
+[package]
+name = "method_moved_to_trait_must_use_added"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
