@@ -59,6 +59,6 @@ SemverQuery(
         "must_use": "must_use",
         "zero": 0,
     },
-    error_message: "An enum has been marked with #[must_use]. This can cause downstream crates that did not use this enum's value to get a compiler lint.",
+    error_message: "An enum is now #[must_use]. Downstream crates that did not use its value will get a compiler lint.",
     per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )
