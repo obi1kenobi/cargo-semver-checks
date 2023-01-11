@@ -1,0 +1,64 @@
+SemverQuery(
+    id: "trait_must_use_added",
+    human_readable_name: "trait #[must_use] added",
+    description: "A trait has been marked with #[must_use].",
+    required_update: Minor,
+
+    // TODO: Change the reference link to point to the cargo semver reference
+    //       once it has a section on attribute #[must_use].
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @tag @output
+
+                        importable_path {
+                            path @tag @output
+                        }
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$must_use"])
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        attribute {
+                            new_attr: raw_attribute @output
+                            content {
+                                base @filter(op: "=", value: ["$must_use"])
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "must_use": "must_use",
+        "zero": 0,
+    },
+    error_message: "A trait is now #[must_use]. Downstream crates that called a function returning an impl trait or dyn trait of this trait will get a compiler lint.",
+    per_result_error_template: Some("trait {{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
+)

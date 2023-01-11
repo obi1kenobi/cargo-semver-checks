@@ -432,6 +432,7 @@ add_lints!(
     struct_repr_c_removed,
     struct_repr_transparent_removed,
     trait_missing,
+    trait_must_use_added,
     trait_unsafe_added,
     trait_unsafe_removed,
     tuple_struct_to_plain_struct,
