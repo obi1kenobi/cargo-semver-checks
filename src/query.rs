@@ -418,6 +418,7 @@ add_lints!(
     enum_variant_missing,
     function_const_removed,
     function_missing,
+    function_must_use_added,
     function_parameter_count_changed,
     function_unsafe_added,
     inherent_method_const_removed,
