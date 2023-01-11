@@ -427,6 +427,7 @@ add_lints!(
     sized_impl_removed,
     struct_marked_non_exhaustive,
     struct_missing,
+    struct_must_use_added,
     struct_pub_field_missing,
     struct_repr_c_removed,
     struct_repr_transparent_removed,
