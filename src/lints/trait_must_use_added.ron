@@ -10,32 +10,14 @@ SemverQuery(
     query: r#"
     {
         CrateDiff {
-            baseline {
-                item {
-                    ... on Trait {
-                        visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @tag @output
-
-                        importable_path {
-                            path @tag @output
-                        }
-
-                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            content {
-                                base @filter(op: "=", value: ["$must_use"])
-                            }
-                        }
-                    }
-                }
-            }
             current {
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
+                        name @tag @output
 
                         importable_path {
-                            path @filter(op: "=", value: ["%path"])
+                            path @tag @output
                         }
 
                         attribute {
@@ -48,6 +30,24 @@ SemverQuery(
                         span_: span @optional {
                             filename @output
                             begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @filter(op: "=", value: ["%name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$must_use"])
+                            }
                         }
                     }
                 }
