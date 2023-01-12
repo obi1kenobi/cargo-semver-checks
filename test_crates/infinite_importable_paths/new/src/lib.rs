@@ -9,7 +9,7 @@
 //! No semver issues should be reported when comparing the two.
 
 mod nested_other {
-    use super::nested;
+    pub use super::nested;
 
     pub fn foo() {}
 }
