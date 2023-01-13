@@ -112,7 +112,7 @@ code down to the basics for identifying changes.  However, is tightly coupled
 to specific nightly compiler versions and [takes work to stay in
 sync](https://github.com/rust-lang/rust-semverver/search?q=Rustup+to&type=commits).
 
-[cargo breaking](https://github.com/iomentum/cargo-breakinga) effectively runs
+[cargo breaking](https://github.com/iomentum/cargo-breaking) effectively runs
 `cargo expand` and re-parses the code using
 [`syn`](https://crates.io/crates/syn) which requires re-implementing large
 swaths of rust's semantics to then lint the API for changes.
