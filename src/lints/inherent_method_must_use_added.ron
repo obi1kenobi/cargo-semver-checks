@@ -10,11 +10,12 @@ SemverQuery(
     query: r#"
     {
         CrateDiff {
-            baseline {
+            current {
                 item {
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @tag @output
+                        owner_type: __typename @tag
 
                         importable_path {
                             path @tag @output
@@ -24,31 +25,6 @@ SemverQuery(
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @tag @output
-
-                                attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                                    content {
-                                        base @filter(op: "=", value: ["$must_use"])
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            current {
-                item {
-                    ... on ImplOwner {
-                        visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
-
-                        importable_path {
-                            path @filter(op: "=", value: ["%path"])
-                        }
-
-                        inherent_impl {
-                            method {
-                                visibility_limit @filter(op: "=", value: ["$public"])
-                                name @filter(op: "=", value: ["%method_name"])
 
                                 attribute {
                                     new_attr: raw_attribute @output
@@ -60,6 +36,32 @@ SemverQuery(
                                 span_: span @optional {
                                     filename @output
                                     begin_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+                        __typename @filter(op: "=", value: ["%owner_type"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }                        
+
+                        inherent_impl {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+
+                                attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                    content {
+                                        base @filter(op: "=", value: ["$must_use"])
+                                    }
                                 }
                             }
                         }
