@@ -1,4 +1,5 @@
 [package]
+publish = false
 name = "trait_method_must_use_added"
 version = "0.1.0"
 edition = "2021"
