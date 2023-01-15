@@ -5,6 +5,7 @@
             "method_visibility": String("public"),
             "name": String("EnumWithMustUseMethods"),
             "new_attr": String("#[must_use]"),
+            "owner_type": String("Enum"),
             "path": List([
                 String("inherent_method_must_use_added"),
                 String("enum_inherent_method_must_use_added"),
@@ -19,6 +20,7 @@
             "method_visibility": String("public"),
             "name": String("EnumWithMustUseMethods"),
             "new_attr": String("#[must_use = \"Foo\"]"),
+            "owner_type": String("Enum"),
             "path": List([
                 String("inherent_method_must_use_added"),
                 String("enum_inherent_method_must_use_added"),
@@ -33,6 +35,7 @@
             "method_visibility": String("public"),
             "name": String("StructWithMustUseMethods"),
             "new_attr": String("#[must_use]"),
+            "owner_type": String("Struct"),
             "path": List([
                 String("inherent_method_must_use_added"),
                 String("struct_inherent_method_must_use_added"),
@@ -47,6 +50,7 @@
             "method_visibility": String("public"),
             "name": String("StructWithMustUseMethods"),
             "new_attr": String("#[must_use = \"Foo\"]"),
+            "owner_type": String("Struct"),
             "path": List([
                 String("inherent_method_must_use_added"),
                 String("struct_inherent_method_must_use_added"),
