@@ -68,6 +68,70 @@ pub trait TraitWithProvidedMustUseMethods {
 }
 
 
+pub trait TraitWithDeclaredToProvidedMustUseMethods {
+
+    // These methods did not have the #[must_use] attribute in the old version.
+    // Addition of the attribute should be reported.
+
+    #[must_use]
+    fn DeclaredMethodToProvidedMustUseMethod(&self) {}
+
+    #[must_use = "Foo"]
+    fn DeclaredMethodToProvidedMustUseMessageMethod(&self) {}
+
+
+    // These methods had the #[must_use] attribute in the old version. Changes of
+    // the attribute, including deletion, should not be reported.
+
+    fn DeclaredMustUseMethodToProvidedMethod(&self) {}
+
+    #[must_use = "Foo"]
+    fn DeclaredMustUseMethodToProvidedMustUseMessageMethod(&self) {}
+
+
+    // These methods had the #[must_use] attribute in the old version.
+    // They also included the user-defined warning message. Changes of
+    // the attribute, including deletion, should not be reported.
+
+    fn DeclaredMustUseMessageMethodToProvidedMethod(&self) {}
+
+    #[must_use]
+    fn DeclaredMustUseMessageMethodToProvidedMustUseMethod(&self) {}
+
+    #[must_use = "Baz"]
+    fn DeclaredMustUseMessageMethodToProvidedMustUseMessageMethod(&self) {}
+}
+
+
+// This trait's methods were provided in the old version of the crate, but
+// their bodies have been removed turning them into declared methods.
+// They should NOT be reported by this rule to avoid duplicate lints.
+// They should be reported as changes of the trait's provided methods into
+// declared methods.
+
+pub trait TraitWithProvidedToDeclaredMustUseMethods {
+
+    #[must_use]
+    fn ProvidedMethodToDeclaredMustUseMethod(&self);
+
+    #[must_use = "Foo"]
+    fn ProvidedMethodToDeclaredMustUseMessageMethod(&self);
+
+    fn ProvidedMustUseMethodToDeclaredMethod(&self);
+
+    #[must_use = "Foo"]
+    fn ProvidedMustUseMethodToDeclaredMustUseMessageMethod(&self);
+
+    fn ProvidedMustUseMessageMethodToDeclaredMethod(&self);
+
+    #[must_use]
+    fn ProvidedMustUseMessageMethodToDeclaredMustUseMethod(&self);
+
+    #[must_use = "Baz"]
+    fn ProvidedMustUseMessageMethodToDeclaredMustUseMessageMethod(&self);
+}
+
+
 // This trait is private and adding #[must_use] to its methods
 // should NOT be reported.
 
@@ -78,6 +142,12 @@ trait PrivateTraitWithMustUseMethods {
 
     #[must_use]
     fn PrivateProvidedMethodToPrivateProvidedMustUseMethod(&self) {}
+
+    #[must_use]
+    fn PrivateDeclaredMethodToPrivateProvidedMustUseMethod(&self) {}
+
+    #[must_use]
+    fn PrivateProvidedMethodToPrivateDeclaredMustUseMethod(&self);
 }
 
 
