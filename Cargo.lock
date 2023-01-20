@@ -217,6 +217,7 @@ dependencies = [
  "human-panic",
  "ignore",
  "itertools",
+ "lazy_static",
  "log",
  "ron 0.7.1",
  "semver",

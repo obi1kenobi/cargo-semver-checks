@@ -106,6 +106,67 @@ mod tests {
     use crate::query::SemverQuery;
     use crate::templating::make_handlebars_registry;
 
+    lazy_static::lazy_static! {
+        static ref TEST_CRATE_NAMES: Vec<String> = get_test_crate_names();
+
+        /// Mapping test crate (pair) name -> (old rustdoc, new rustdoc).
+        static ref TEST_CRATE_RUSTDOCS: BTreeMap<String, (VersionedCrate, VersionedCrate)> =
+            get_test_crate_rustdocs();
+    }
+
+    fn get_test_crate_names() -> Vec<String> {
+        std::fs::read_dir("./test_crates/")
+            .expect("directory test_crates/ not found")
+            .map(|dir_entry| dir_entry.expect("failed to list test_crates/"))
+            .filter(|dir_entry| {
+                // Only return directories inside `test_crates/` that contain
+                // an `old/Cargo.toml` file. This works around finicky git + cargo behavior:
+                // - Create a git branch, commit a new test case, and generate its rustdoc.
+                // - Cargo will then create `Cargo.lock` files for the crate,
+                //   which are ignored by git.
+                // - Check out another branch, and git won't delete the `Cargo.lock` files
+                //   since they aren't tracked. But we don't want to run tests on those crates!
+                if !dir_entry
+                    .metadata()
+                    .expect("failed to retrieve test_crates/* metadata")
+                    .is_dir()
+                {
+                    return false;
+                }
+
+                let mut test_crate_cargo_toml = dir_entry.path();
+                test_crate_cargo_toml.extend(["old", "Cargo.toml"].into_iter());
+                test_crate_cargo_toml.as_path().is_file()
+            })
+            .map(|dir_entry| {
+                String::from(
+                    String::from(
+                        dir_entry
+                            .path()
+                            .to_str()
+                            .expect("failed to convert dir_entry to String"),
+                    )
+                    .strip_prefix("./test_crates/")
+                    .expect(
+                        "the dir_entry doesn't start with './test_crates/', which is unexpected",
+                    ),
+                )
+            })
+            .collect()
+    }
+
+    fn get_test_crate_rustdocs() -> BTreeMap<String, (VersionedCrate, VersionedCrate)> {
+        TEST_CRATE_NAMES
+            .iter()
+            .map(|crate_pair| {
+                let old_rustdoc = load_pregenerated_rustdoc(crate_pair.as_str(), "old");
+                let new_rustdoc = load_pregenerated_rustdoc(crate_pair, "new");
+
+                (crate_pair.clone(), (old_rustdoc, new_rustdoc))
+            })
+            .collect()
+    }
+
     fn load_pregenerated_rustdoc(crate_pair: &str, crate_version: &str) -> VersionedCrate {
         let path = format!("./localdata/test_data/{crate_pair}/{crate_version}/rustdoc.json");
         load_rustdoc(Path::new(&path))
@@ -115,8 +176,8 @@ mod tests {
 
     #[test]
     fn all_queries_parse_correctly() {
-        let current_crate = load_pregenerated_rustdoc("template", "new");
-        let indexed_crate = VersionedIndexedCrate::new(&current_crate);
+        let current_crate = &TEST_CRATE_RUSTDOCS["template"].1;
+        let indexed_crate = VersionedIndexedCrate::new(current_crate);
         let adapter =
             VersionedRustdocAdapter::new(&indexed_crate, None).expect("failed to create adapter");
 
@@ -128,8 +189,8 @@ mod tests {
 
     #[test]
     fn pub_use_handling() {
-        let current_crate = load_pregenerated_rustdoc("pub_use_handling", "new");
-        let current = VersionedIndexedCrate::new(&current_crate);
+        let current_crate = &TEST_CRATE_RUSTDOCS["pub_use_handling"].1;
+        let current = VersionedIndexedCrate::new(current_crate);
 
         let query = r#"
             {
@@ -180,33 +241,6 @@ mod tests {
             vec!["pub_use_handling", "inner", "CheckPubUseHandling"],
         ];
         assert_eq!(expected_paths, actual_paths);
-    }
-
-    fn get_test_crate_names() -> Vec<String> {
-        std::fs::read_dir("./test_crates/")
-            .expect("directory test_crates/ not found")
-            .map(|dir_entry| dir_entry.expect("failed to list test_crates/"))
-            .filter(|dir_entry| {
-                dir_entry
-                    .metadata()
-                    .expect("failed to retrieve test_crates/* metadata")
-                    .is_dir()
-            })
-            .map(|dir_entry| {
-                String::from(
-                    String::from(
-                        dir_entry
-                            .path()
-                            .to_str()
-                            .expect("failed to convert dir_entry to String"),
-                    )
-                    .strip_prefix("./test_crates/")
-                    .expect(
-                        "the dir_entry doesn't start with './test_crates/', which is unexpected",
-                    ),
-                )
-            })
-            .collect()
     }
 
     type TestOutput = BTreeMap<String, Vec<BTreeMap<String, FieldValue>>>;
@@ -291,32 +325,31 @@ mod tests {
         let mut expected_results: TestOutput = ron::from_str(&expected_result_text)
             .expect("could not parse expected outputs as ron format");
 
-        let mut actual_results: TestOutput = get_test_crate_names()
-            .into_iter()
+        let mut actual_results: TestOutput = TEST_CRATE_NAMES
+            .iter()
             .map(|crate_pair_name| {
-                let crate_new = load_pregenerated_rustdoc(&crate_pair_name, "new");
-                let crate_old = load_pregenerated_rustdoc(&crate_pair_name, "old");
-                let indexed_crate_new = VersionedIndexedCrate::new(&crate_new);
-                let indexed_crate_old = VersionedIndexedCrate::new(&crate_old);
+                let (crate_old, crate_new) = &TEST_CRATE_RUSTDOCS[crate_pair_name];
+                let indexed_crate_old = VersionedIndexedCrate::new(crate_old);
+                let indexed_crate_new = VersionedIndexedCrate::new(crate_new);
 
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
                     &indexed_crate_new,
-                    &crate_pair_name,
+                    crate_pair_name,
                     "new",
                 );
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
                     &indexed_crate_old,
-                    &crate_pair_name,
+                    crate_pair_name,
                     "old",
                 );
 
                 run_query_on_crate_pair(
                     &semver_query,
-                    &crate_pair_name,
+                    crate_pair_name,
                     &indexed_crate_new,
                     &indexed_crate_old,
                 )
