@@ -189,7 +189,7 @@ mod tests {
 
     #[test]
     fn pub_use_handling() {
-        let (_baseline_crate, current_crate) = &TEST_CRATE_RUSTDOCS["template"];
+        let (_baseline_crate, current_crate) = &TEST_CRATE_RUSTDOCS["pub_use_handling"];
         let current = VersionedIndexedCrate::new(current_crate);
 
         let query = r#"
