@@ -40,3 +40,4 @@ toml = "0.5.9"
 
 [dev-dependencies]
 assert_cmd = "2.0"
+lazy_static = "1.4.0"
