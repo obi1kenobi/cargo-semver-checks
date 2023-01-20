@@ -176,7 +176,7 @@ mod tests {
 
     #[test]
     fn all_queries_parse_correctly() {
-        let current_crate = &TEST_CRATE_RUSTDOCS["template"].1;
+        let (_baseline_crate, current_crate) = &TEST_CRATE_RUSTDOCS["template"];
         let indexed_crate = VersionedIndexedCrate::new(current_crate);
         let adapter =
             VersionedRustdocAdapter::new(&indexed_crate, None).expect("failed to create adapter");
@@ -189,7 +189,7 @@ mod tests {
 
     #[test]
     fn pub_use_handling() {
-        let current_crate = &TEST_CRATE_RUSTDOCS["pub_use_handling"].1;
+        let (_baseline_crate, current_crate) = &TEST_CRATE_RUSTDOCS["template"];
         let current = VersionedIndexedCrate::new(current_crate);
 
         let query = r#"
