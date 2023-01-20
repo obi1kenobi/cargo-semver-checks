@@ -25,6 +25,19 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/struct_becomes_enum/": [
+        {
+            "name": String("StructToEnum"),
+            "path": List([
+                String("struct_becomes_enum"),
+                String("StructToEnum"),
+            ]),
+            "span_begin_line": Uint64(9),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("plain"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/struct_missing/": [
         {
             "name": String("WillBeRemovedStruct"),

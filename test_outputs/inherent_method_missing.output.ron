@@ -77,4 +77,30 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/struct_becomes_enum/": [
+        {
+            "method_name": String("will_be_removed_associated_fn"),
+            "method_visibility": String("public"),
+            "name": String("StructToEnum"),
+            "path": List([
+                String("struct_becomes_enum"),
+                String("StructToEnum"),
+            ]),
+            "span_begin_line": Uint64(22),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "method_name": String("will_be_removed_method"),
+            "method_visibility": String("public"),
+            "name": String("StructToEnum"),
+            "path": List([
+                String("struct_becomes_enum"),
+                String("StructToEnum"),
+            ]),
+            "span_begin_line": Uint64(24),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
 }
