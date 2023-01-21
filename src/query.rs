@@ -468,6 +468,7 @@ add_lints!(
     struct_pub_field_missing,
     struct_repr_c_removed,
     struct_repr_transparent_removed,
+    struct_with_pub_fields_changed_type,
     trait_missing,
     trait_must_use_added,
     trait_unsafe_added,
