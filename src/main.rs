@@ -9,11 +9,13 @@ mod query;
 mod templating;
 mod util;
 
+use dump::RustDocCommand;
 use itertools::Itertools;
-use std::path::PathBuf;
+use semver::Version;
+use std::path::{Path, PathBuf};
 
 use clap::{Args, Parser, Subcommand};
-use trustfall_rustdoc::load_rustdoc;
+use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
 use crate::{check_release::run_check_release, config::GlobalConfig, util::slugify};
 
@@ -126,13 +128,15 @@ fn main() -> anyhow::Result<()> {
             let all_outcomes: Vec<anyhow::Result<bool>> = if let Some(current_rustdoc_path) =
                 args.current_rustdoc.as_deref()
             {
-                let current_crate = load_rustdoc(current_rustdoc_path)?;
-
                 let name = "<unknown>";
-                let version = None;
-                let baseline_path =
-                    loader.load_rustdoc(&mut config, &rustdoc_cmd, name, version)?;
-                let baseline_crate = load_rustdoc(&baseline_path)?;
+                let (current_crate, baseline_crate) = generate_versioned_crates(
+                    &mut config,
+                    CurrentCratePath::CurrentRustdocPath(current_rustdoc_path),
+                    &loader,
+                    &rustdoc_cmd,
+                    name,
+                    None,
+                )?;
 
                 let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
                 vec![Ok(success)]
@@ -161,21 +165,14 @@ fn main() -> anyhow::Result<()> {
                                 format_args!("{crate_name} v{version} (current)"),
                             )?;
 
-                            let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
-                            let current_crate = load_rustdoc(&rustdoc_path)?;
-
-                            // The process of generating baseline rustdoc can overwrite
-                            // the already-generated rustdoc of the current crate.
-                            // For example, this happens when target-dir is specified in `.cargo/config.toml`.
-                            // That's the reason why we're immediately loading the rustdocs into memory.
-                            // See: https://github.com/obi1kenobi/cargo-semver-checks/issues/269
-                            let baseline_path = loader.load_rustdoc(
+                            let (current_crate, baseline_crate) = generate_versioned_crates(
                                 &mut config,
+                                CurrentCratePath::ManifestPath(manifest_path),
+                                &loader,
                                 &rustdoc_cmd,
                                 crate_name,
                                 Some(version),
                             )?;
-                            let baseline_crate = load_rustdoc(&baseline_path)?;
 
                             Ok(run_check_release(
                                 &mut config,
@@ -201,6 +198,40 @@ fn main() -> anyhow::Result<()> {
             anyhow::bail!("subcommand required");
         }
     }
+}
+
+// Argument to the generate_versioned_crates function.
+// It can be either a path to an existing rustdoc, or a manifest path of a crate.
+enum CurrentCratePath<'a> {
+    CurrentRustdocPath(&'a Path),
+    ManifestPath(&'a Path),
+}
+
+fn generate_versioned_crates(
+    config: &mut GlobalConfig,
+    current_crate_path: CurrentCratePath,
+    loader: &Box<dyn baseline::BaselineLoader>,
+    rustdoc_cmd: &RustDocCommand,
+    crate_name: &str,
+    version: Option<&Version>,
+) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
+    let current_crate = match current_crate_path {
+        CurrentCratePath::CurrentRustdocPath(rustdoc_path) => load_rustdoc(rustdoc_path)?,
+        CurrentCratePath::ManifestPath(manifest_path) => {
+            let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
+            load_rustdoc(&rustdoc_path)?
+        }
+    };
+
+    // The process of generating baseline rustdoc can overwrite
+    // the already-generated rustdoc of the current crate.
+    // For example, this happens when target-dir is specified in `.cargo/config.toml`.
+    // That's the reason why we're immediately loading the rustdocs into memory.
+    // See: https://github.com/obi1kenobi/cargo-semver-checks/issues/269
+    let baseline_path = loader.load_rustdoc(config, &rustdoc_cmd, crate_name, version)?;
+    let baseline_crate = load_rustdoc(&baseline_path)?;
+
+    Ok((current_crate, baseline_crate))
 }
 
 #[derive(Parser)]
