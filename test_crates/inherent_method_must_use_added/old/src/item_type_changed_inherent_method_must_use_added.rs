@@ -59,7 +59,9 @@ impl EnumToUnionWithMustUseMethods {
 }
 
 
-pub struct StructToEnumWithMustUseMethods {}
+pub struct StructToEnumWithMustUseMethods {
+    internal: bool,
+}
 
 impl StructToEnumWithMustUseMethods {
 
@@ -84,7 +86,9 @@ impl StructToEnumWithMustUseMethods {
 }
 
 
-pub struct StructToUnionWithMustUseMethods {}
+pub struct StructToUnionWithMustUseMethods {
+    internal: bool,
+}
 
 impl StructToUnionWithMustUseMethods {
 

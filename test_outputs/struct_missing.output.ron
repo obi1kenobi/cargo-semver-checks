@@ -8,7 +8,7 @@
                 String("item_type_changed_inherent_method_must_use_added"),
                 String("StructToUnionWithMustUseMethods"),
             ]),
-            "span_begin_line": Uint64(87),
+            "span_begin_line": Uint64(89),
             "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
             "struct_type": String("plain"),
             "visibility_limit": String("public"),
