@@ -1,0 +1,72 @@
+SemverQuery(
+    id: "constructible_struct_changed_type",
+    human_readable_name: "struct constructible with literal became an enum or union",
+    description: "A struct was converted into an enum or union, breaking struct literals.",
+    required_update: Major,
+    reference_link: Some("https://github.com/obi1kenobi/cargo-semver-checks/issues/297#issuecomment-1399099659"),
+    reference: Some(
+        r#"\
+Exhaustive structs with no fields are constructible with a struct literal. Changing such a struct \
+to make it an enum or union is a breaking change, since the new enum / union cannot be constructed \
+with the same struct literal syntax.
+
+While struct literals can be used to create any exhaustive struct whose fields are all public, \
+structs with *any* (not *only*) public fields are handled in a different lint. \
+This lint covers the remaining edge case: exhaustive structs with no fields whatsoever.
+
+More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
+"#
+    ),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Struct {
+                        struct_typename: __typename @tag @output
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+                        struct_type @output
+
+                        # If the struct is non-exhaustive, it can't be constructed using a literal.
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        # The struct must not have any fields.
+                        # If it does, it's the domain of another lint.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"])
+
+                        importable_path {
+                            path @output @tag
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        current_typename: __typename @filter(op: "!=", value: ["%struct_typename"])
+                                                     @output
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "non_exhaustive": "#[non_exhaustive]",
+        "zero": 0,
+    },
+    error_message: "A struct became an enum or union, and is no longer publicly constructible with a struct literal.",
+    per_result_error_template: Some("struct {{join \"::\" path}} became {{lowercase current_typename}} in file {{span_filename}}:{{span_begin_line}}"),
+)

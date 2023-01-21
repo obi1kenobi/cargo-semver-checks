@@ -39,7 +39,8 @@ pub enum ConstructibleFieldlessStruct {}
 // They have no pub fields that might become inaccessible,
 // so they can become enums with a non-breaking change.
 //
-// They are even allowed to become non-exhaustive without that being a breaking change, either.
+// They are even allowed to (but not required to) become non-exhaustive without
+// that being a breaking change, either.
 
 pub enum TupleToEnum {
     Var(i64)
