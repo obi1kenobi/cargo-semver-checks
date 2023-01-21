@@ -27,7 +27,10 @@ SemverQuery(
             }
             current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                 item {
-                    ... on Struct {
+                    # We coerce to `ImplOwner` here, not `Struct`, because it's sometimes possible
+                    # to change a struct into an enum or union without causing a breaking change.
+                    # More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
+                    ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%name"])
 
