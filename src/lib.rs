@@ -196,12 +196,6 @@ impl Check {
         let loader: Box<dyn baseline::BaselineLoader> = match &self.baseline {
             Baseline::RustDoc(path) => Box::new(baseline::RustdocBaseline::new(path.to_owned())),
             Baseline::Root(root) => Box::new(baseline::PathBaseline::new(root)?),
-            Baseline::Version(version) => {
-                let mut registry = self.registry_baseline(&mut config)?;
-                let version = semver::Version::parse(version)?;
-                registry.set_version(version);
-                Box::new(registry)
-            }
             Baseline::Revision(rev) => {
                 let metadata = self.manifest_metadata_no_deps()?;
                 let source = metadata.workspace_root.as_std_path();
@@ -217,6 +211,12 @@ impl Check {
                     rev,
                     &mut config,
                 )?)
+            }
+            Baseline::Version(version) => {
+                let mut registry = self.registry_baseline(&mut config)?;
+                let version = semver::Version::parse(version)?;
+                registry.set_version(version);
+                Box::new(registry)
             }
             Baseline::LatestVersion => {
                 let metadata = self.manifest_metadata_no_deps()?;
