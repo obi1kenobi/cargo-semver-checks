@@ -7,8 +7,8 @@ mod query;
 mod templating;
 mod util;
 
-pub use query::*;
 pub use config::*;
+pub use query::*;
 
 use check_release::run_check_release;
 use trustfall_rustdoc::load_rustdoc;
@@ -112,6 +112,56 @@ impl Scope {
 impl Check {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn with_manifest(&mut self, path: PathBuf) -> &mut Self {
+        self.current = Current::Manifest(path);
+        self
+    }
+
+    pub fn with_workspace(&mut self) -> &mut Self {
+        self.scope.selection = ScopeSelection::Workspace;
+        self
+    }
+
+    pub fn with_packages(&mut self, packages: Vec<String>) -> &mut Self {
+        self.scope.selection = ScopeSelection::Packages(packages);
+        self
+    }
+
+    pub fn with_excluded_packages(&mut self, excluded_packages: Vec<String>) -> &mut Self {
+        self.scope.excluded_packages = excluded_packages;
+        self
+    }
+
+    pub fn with_current_rustdoc(&mut self, rustdoc: PathBuf) -> &mut Self {
+        self.current = Current::RustDoc(rustdoc);
+        self
+    }
+
+    pub fn with_baseline_version(&mut self, version: String) -> &mut Self {
+        self.baseline = Baseline::Version(version);
+        self
+    }
+
+    pub fn with_baseline_revision(&mut self, revision: String) -> &mut Self {
+        self.baseline = Baseline::Revision(revision);
+        self
+    }
+
+    pub fn with_baseline_root(&mut self, root: PathBuf) -> &mut Self {
+        self.baseline = Baseline::Root(root);
+        self
+    }
+
+    pub fn with_baseline_rustdoc(&mut self, rustdoc: PathBuf) -> &mut Self {
+        self.baseline = Baseline::RustDoc(rustdoc);
+        self
+    }
+
+    pub fn with_log_level(&mut self, log_level: log::Level) -> &mut Self {
+        self.log_level = Some(log_level);
+        self
     }
 
     fn manifest_path(&self) -> anyhow::Result<PathBuf> {

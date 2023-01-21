@@ -187,7 +187,37 @@ struct CheckRelease {
 
 impl From<CheckRelease> for cargo_semver_checks::Check {
     fn from(value: CheckRelease) -> Self {
-        Self::default()
+        let mut check = Self::default();
+        if let Some(manifest) = value.manifest.manifest_path {
+            check.with_manifest(manifest);
+        }
+        if value.workspace.all || value.workspace.workspace {
+            check.with_workspace();
+        } else if !value.workspace.package.is_empty() {
+            check.with_packages(value.workspace.package);
+        }
+        if !value.workspace.exclude.is_empty() {
+            check.with_excluded_packages(value.workspace.exclude);
+        }
+        if let Some(current_rustdoc) = value.current_rustdoc {
+            check.with_current_rustdoc(current_rustdoc);
+        }
+        if let Some(baseline_version) = value.baseline_version {
+            check.with_baseline_version(baseline_version);
+        }
+        if let Some(baseline_rev) = value.baseline_rev {
+            check.with_baseline_revision(baseline_rev);
+        }
+        if let Some(baseline_root) = value.baseline_root {
+            check.with_baseline_root(baseline_root);
+        }
+        if let Some(baseline_rustdoc) = value.baseline_rustdoc {
+            check.with_baseline_rustdoc(baseline_rustdoc);
+        }
+        if let Some(log_level) = value.verbosity.log_level() {
+            check.with_log_level(log_level);
+        }
+        check
     }
 }
 
