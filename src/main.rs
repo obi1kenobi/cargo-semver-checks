@@ -129,13 +129,14 @@ fn main() -> anyhow::Result<()> {
                 args.current_rustdoc.as_deref()
             {
                 let name = "<unknown>";
+                let version = None;
                 let (current_crate, baseline_crate) = generate_versioned_crates(
                     &mut config,
                     CurrentCratePath::CurrentRustdocPath(current_rustdoc_path),
-                    &loader,
+                    &*loader,
                     &rustdoc_cmd,
                     name,
-                    None,
+                    version,
                 )?;
 
                 let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
@@ -168,7 +169,7 @@ fn main() -> anyhow::Result<()> {
                             let (current_crate, baseline_crate) = generate_versioned_crates(
                                 &mut config,
                                 CurrentCratePath::ManifestPath(manifest_path),
-                                &loader,
+                                &*loader,
                                 &rustdoc_cmd,
                                 crate_name,
                                 Some(version),
@@ -210,7 +211,7 @@ enum CurrentCratePath<'a> {
 fn generate_versioned_crates(
     config: &mut GlobalConfig,
     current_crate_path: CurrentCratePath,
-    loader: &Box<dyn baseline::BaselineLoader>,
+    loader: &dyn baseline::BaselineLoader,
     rustdoc_cmd: &RustDocCommand,
     crate_name: &str,
     version: Option<&Version>,
@@ -228,7 +229,7 @@ fn generate_versioned_crates(
     // For example, this happens when target-dir is specified in `.cargo/config.toml`.
     // That's the reason why we're immediately loading the rustdocs into memory.
     // See: https://github.com/obi1kenobi/cargo-semver-checks/issues/269
-    let baseline_path = loader.load_rustdoc(config, &rustdoc_cmd, crate_name, version)?;
+    let baseline_path = loader.load_rustdoc(config, rustdoc_cmd, crate_name, version)?;
     let baseline_crate = load_rustdoc(&baseline_path)?;
 
     Ok((current_crate, baseline_crate))
