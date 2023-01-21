@@ -194,6 +194,8 @@ impl Check {
         let mut config = GlobalConfig::new().set_level(self.log_level);
 
         let loader: Box<dyn baseline::BaselineLoader> = match &self.baseline {
+            Baseline::RustDoc(path) => Box::new(baseline::RustdocBaseline::new(path.to_owned())),
+            Baseline::Root(root) => Box::new(baseline::PathBaseline::new(root)?),
             Baseline::Version(version) => {
                 let mut registry = self.registry_baseline(&mut config)?;
                 let version = semver::Version::parse(version)?;
@@ -216,8 +218,6 @@ impl Check {
                     &mut config,
                 )?)
             }
-            Baseline::Root(root) => Box::new(baseline::PathBaseline::new(root)?),
-            Baseline::RustDoc(path) => Box::new(baseline::RustdocBaseline::new(path.to_owned())),
             Baseline::LatestVersion => {
                 let metadata = self.manifest_metadata_no_deps()?;
                 let target = metadata.target_directory.as_std_path().join(util::SCOPE);
