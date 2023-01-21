@@ -1,20 +1,12 @@
 #![forbid(unsafe_code)]
 
-mod baseline;
-mod check_release;
-mod config;
-mod dump;
-mod manifest;
-mod query;
-mod templating;
-mod util;
-
 use std::path::PathBuf;
 
+use cargo_semver_checks::{baseline, dump, query};
 use clap::{Args, Parser, Subcommand};
 use trustfall_rustdoc::load_rustdoc;
 
-use crate::{check_release::run_check_release, config::GlobalConfig, util::slugify};
+use cargo_semver_checks::{check_release::run_check_release, config::GlobalConfig, util::slugify};
 
 fn main() -> anyhow::Result<()> {
     human_panic::setup_panic!();
@@ -86,99 +78,14 @@ fn main() -> anyhow::Result<()> {
 
     match args.command {
         Some(SemverChecksCommands::CheckRelease(args)) => {
-            let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
-
-            let loader: Box<dyn baseline::BaselineLoader> =
-                if let Some(path) = args.baseline_rustdoc.as_deref() {
-                    Box::new(baseline::RustdocBaseline::new(path.to_owned()))
-                } else if let Some(root) = args.baseline_root.as_deref() {
-                    Box::new(baseline::PathBaseline::new(root)?)
-                } else if let Some(rev) = args.baseline_rev.as_deref() {
-                    let metadata = args.manifest.metadata().no_deps().exec()?;
-                    let source = metadata.workspace_root.as_std_path();
-                    let slug = slugify(rev);
-                    let target = metadata
-                        .target_directory
-                        .as_std_path()
-                        .join(util::SCOPE)
-                        .join(format!("git-{slug}"));
-                    Box::new(baseline::GitBaseline::with_rev(
-                        source,
-                        &target,
-                        rev,
-                        &mut config,
-                    )?)
-                } else {
-                    let metadata = args.manifest.metadata().no_deps().exec()?;
-                    let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-                    let mut registry = baseline::RegistryBaseline::new(&target, &mut config)?;
-                    if let Some(version) = args.baseline_version.as_deref() {
-                        let version = semver::Version::parse(version)?;
-                        registry.set_version(version);
-                    }
-                    Box::new(registry)
-                };
-            let rustdoc_cmd = dump::RustDocCommand::new()
-                .deps(false)
-                .silence(!config.is_verbose());
-
-            let rustdoc_paths = if let Some(current_rustdoc_path) = args.current_rustdoc.as_deref()
-            {
-                let name = "<unknown>";
-                let version = None;
-                vec![(
-                    name.to_owned(),
-                    loader.load_rustdoc(&mut config, &rustdoc_cmd, name, version)?,
-                    current_rustdoc_path.to_owned(),
-                )]
-            } else {
-                let metadata = args.manifest.metadata().exec()?;
-                let (selected, _) = args.workspace.partition_packages(&metadata);
-                let mut rustdoc_paths = Vec::with_capacity(selected.len());
-                for selected in selected {
-                    let manifest_path = selected.manifest_path.as_std_path();
-                    let crate_name = &selected.name;
-                    let version = &selected.version;
-
-                    let is_implied = args.workspace.all || args.workspace.workspace;
-                    if is_implied && selected.publish == Some(vec![]) {
-                        config.verbose(|config| {
-                            config.shell_status(
-                                "Skipping",
-                                format_args!("{crate_name} v{version} (current)"),
-                            )
-                        })?;
-                        continue;
-                    }
-
-                    config.shell_status(
-                        "Parsing",
-                        format_args!("{crate_name} v{version} (current)"),
-                    )?;
-                    let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
-                    let baseline_path = loader.load_rustdoc(
-                        &mut config,
-                        &rustdoc_cmd,
-                        crate_name,
-                        Some(version),
-                    )?;
-                    rustdoc_paths.push((crate_name.clone(), baseline_path, rustdoc_path));
+            let check: cargo_semver_checks::Check = args.into();
+            match check.check_release() {
+                Ok(()) => std::process::exit(0),
+                Err(err) => {
+                    let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
+                    config.shell_error(&err)?;
+                    std::process::exit(1);
                 }
-                rustdoc_paths
-            };
-            let mut success = true;
-            for (crate_name, baseline_path, current_path) in rustdoc_paths {
-                let baseline_crate = load_rustdoc(&baseline_path)?;
-                let current_crate = load_rustdoc(&current_path)?;
-
-                if !run_check_release(&mut config, &crate_name, current_crate, baseline_crate)? {
-                    success = false;
-                }
-            }
-            if success {
-                std::process::exit(0);
-            } else {
-                std::process::exit(1);
             }
         }
         None => {
@@ -280,6 +187,12 @@ struct CheckRelease {
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
+}
+
+impl From<CheckRelease> for cargo_semver_checks::Check {
+    fn from(value: CheckRelease) -> Self {
+        Self::default()
+    }
 }
 
 #[test]

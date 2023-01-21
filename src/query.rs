@@ -4,13 +4,13 @@ use serde::{Deserialize, Serialize};
 use trustfall_core::ir::TransparentValue;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) enum RequiredSemverUpdate {
+pub enum RequiredSemverUpdate {
     Major,
     Minor,
 }
 
 impl RequiredSemverUpdate {
-    pub(crate) fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         match self {
             Self::Major => "major",
             Self::Minor => "minor",
@@ -40,20 +40,20 @@ impl ActualSemverUpdate {
 /// A query that can be executed on a pair of rustdoc output files,
 /// returning instances of a particular kind of semver violation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct SemverQuery {
-    pub(crate) id: String,
+pub struct SemverQuery {
+    pub id: String,
 
     pub(crate) human_readable_name: String,
 
-    pub(crate) description: String,
+    pub description: String,
 
-    pub(crate) required_update: RequiredSemverUpdate,
-
-    #[serde(default)]
-    pub(crate) reference: Option<String>,
+    pub required_update: RequiredSemverUpdate,
 
     #[serde(default)]
-    pub(crate) reference_link: Option<String>,
+    pub reference: Option<String>,
+
+    #[serde(default)]
+    pub reference_link: Option<String>,
 
     pub(crate) query: String,
 
@@ -72,7 +72,7 @@ pub(crate) struct SemverQuery {
 }
 
 impl SemverQuery {
-    pub(crate) fn all_queries() -> BTreeMap<String, SemverQuery> {
+    pub fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
         for query_text in get_query_text_contents() {
             let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
