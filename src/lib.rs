@@ -25,19 +25,22 @@ pub struct Check {
     log_level: Option<log::Level>,
 }
 
-#[derive(Default)]
 enum Baseline {
     /// Version from registry to lookup for a baseline. E.g. "1.0.0".
-    Version(String),
+    /// If `None`, it uses the version published to the cargo registry.
+    Version(Option<String>),
     /// Git revision to lookup for a baseline.
     Revision(String),
     /// Directory containing baseline crate source.
     Root(PathBuf),
     /// The rustdoc json file to use as a semver baseline.
     RustDoc(PathBuf),
-    /// Latest version published to the cargo registry.
-    #[default]
-    LatestVersion,
+}
+
+impl Default for Baseline {
+    fn default() -> Self {
+        Self::Version(None)
+    }
 }
 
 /// Current version of the project to analyze.
@@ -140,7 +143,7 @@ impl Check {
     }
 
     pub fn with_baseline_version(&mut self, version: String) -> &mut Self {
-        self.baseline = Baseline::Version(version);
+        self.baseline = Baseline::Version(Some(version));
         self
     }
 
@@ -214,14 +217,10 @@ impl Check {
             }
             Baseline::Version(version) => {
                 let mut registry = self.registry_baseline(&mut config)?;
-                let version = semver::Version::parse(version)?;
-                registry.set_version(version);
-                Box::new(registry)
-            }
-            Baseline::LatestVersion => {
-                let metadata = self.manifest_metadata_no_deps()?;
-                let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-                let registry = baseline::RegistryBaseline::new(&target, &mut config)?;
+                if let Some(ver) = version {
+                    let semver = semver::Version::parse(ver)?;
+                    registry.set_version(semver);
+                }
                 Box::new(registry)
             }
         };
