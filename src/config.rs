@@ -11,6 +11,12 @@ pub struct GlobalConfig {
     handlebars: handlebars::Handlebars<'static>,
 }
 
+impl Default for GlobalConfig {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GlobalConfig {
     pub fn new() -> Self {
         let is_stdout_tty = atty::is(atty::Stream::Stdout);
