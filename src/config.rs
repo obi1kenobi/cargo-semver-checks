@@ -3,7 +3,7 @@ use termcolor::{ColorChoice, StandardStream};
 use crate::templating::make_handlebars_registry;
 
 #[allow(dead_code)]
-pub(crate) struct GlobalConfig {
+pub struct GlobalConfig {
     level: Option<log::Level>,
     is_stderr_tty: bool,
     stdout: StandardStream,

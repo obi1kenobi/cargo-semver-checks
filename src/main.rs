@@ -2,11 +2,9 @@
 
 use std::path::PathBuf;
 
-use cargo_semver_checks::{baseline, dump, query};
+use cargo_semver_checks::GlobalConfig;
+use cargo_semver_checks::SemverQuery;
 use clap::{Args, Parser, Subcommand};
-use trustfall_rustdoc::load_rustdoc;
-
-use cargo_semver_checks::{check_release::run_check_release, config::GlobalConfig, util::slugify};
 
 fn main() -> anyhow::Result<()> {
     human_panic::setup_panic!();
@@ -23,7 +21,7 @@ fn main() -> anyhow::Result<()> {
             .print::<Markdown>();
         std::process::exit(0);
     } else if args.list {
-        let queries = query::SemverQuery::all_queries();
+        let queries = SemverQuery::all_queries();
         let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
         for query in queries.values() {
             rows.push([
@@ -53,7 +51,7 @@ fn main() -> anyhow::Result<()> {
         config.shell_note("Use `--explain <id>` to see more details")?;
         std::process::exit(0);
     } else if let Some(id) = args.explain.as_deref() {
-        let queries = query::SemverQuery::all_queries();
+        let queries = SemverQuery::all_queries();
         let query = queries.get(id).ok_or_else(|| {
             let ids = queries.keys().cloned().collect::<Vec<_>>();
             anyhow::format_err!(
@@ -79,13 +77,11 @@ fn main() -> anyhow::Result<()> {
     match args.command {
         Some(SemverChecksCommands::CheckRelease(args)) => {
             let check: cargo_semver_checks::Check = args.into();
-            match check.check_release() {
-                Ok(()) => std::process::exit(0),
-                Err(err) => {
-                    let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
-                    config.shell_error(&err)?;
-                    std::process::exit(1);
-                }
+            let report = check.check_release()?;
+            if report.success() {
+                std::process::exit(0)
+            } else {
+                std::process::exit(1);
             }
         }
         None => {

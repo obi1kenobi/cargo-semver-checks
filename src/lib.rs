@@ -7,11 +7,13 @@ mod query;
 mod templating;
 mod util;
 
-use config::GlobalConfig;
-pub use dump::*;
-pub use templating::*;
+pub use query::*;
+pub use config::*;
 
-use std::path::PathBuf;
+use check_release::run_check_release;
+use trustfall_rustdoc::load_rustdoc;
+
+use std::{collections::HashSet, path::PathBuf};
 
 /// Test a release for semver violations.
 #[derive(Default)]
@@ -51,16 +53,60 @@ enum Current {
     CurrentDir,
 }
 
-/// Which packages to analyze.
 #[derive(Default)]
-enum Scope {
-    /// A subset of packages in the workspace.
+struct Scope {
+    selection: ScopeSelection,
+    excluded_packages: Vec<String>,
+}
+
+/// Which packages to analyze.
+#[derive(Default, PartialEq, Eq)]
+enum ScopeSelection {
+    /// Package to process (see `cargo help pkgid`)
     Packages(Vec<String>),
-    /// All packages in the workspace.
-    #[default]
+    /// All packages in the workspace. Equivalent to `--workspace`.
     Workspace,
-    /// All packages in the workspace, except these.
-    Exclude(Vec<String>),
+    /// Default members of the workspace.
+    #[default]
+    DefaultMembers,
+}
+
+impl Scope {
+    fn selected_packages<'m>(
+        &self,
+        meta: &'m cargo_metadata::Metadata,
+    ) -> Vec<&'m cargo_metadata::Package> {
+        let workspace_members: HashSet<_> = meta.workspace_members.iter().collect();
+        let base_ids: HashSet<_> = match &self.selection {
+            ScopeSelection::DefaultMembers => {
+                // Deviating from cargo because Metadata doesn't have default members
+                let resolve = meta.resolve.as_ref().expect("no-deps is unsupported");
+                match &resolve.root {
+                    Some(root) => {
+                        let mut base_ids = HashSet::new();
+                        base_ids.insert(root);
+                        base_ids
+                    }
+                    None => workspace_members,
+                }
+            }
+            ScopeSelection::Workspace => workspace_members,
+            ScopeSelection::Packages(patterns) => {
+                meta.packages
+                    .iter()
+                    // Deviating from cargo by not supporting patterns
+                    // Deviating from cargo by only checking workspace members
+                    .filter(|p| workspace_members.contains(&p.id) && patterns.contains(&p.name))
+                    .map(|p| &p.id)
+                    .collect()
+            }
+        };
+
+        meta.packages
+            .iter()
+            .filter(|p| base_ids.contains(&p.id) && !self.excluded_packages.contains(&p.name))
+            .collect()
+    }
 }
 
 impl Check {
@@ -79,6 +125,12 @@ impl Check {
         Ok(path)
     }
 
+    fn manifest_metadata(&self) -> anyhow::Result<cargo_metadata::Metadata> {
+        let mut command = cargo_metadata::MetadataCommand::new();
+        let metadata = command.manifest_path(self.manifest_path()?).exec()?;
+        Ok(metadata)
+    }
+
     fn manifest_metadata_no_deps(&self) -> anyhow::Result<cargo_metadata::Metadata> {
         let mut command = cargo_metadata::MetadataCommand::new();
         let metadata = command
@@ -91,7 +143,7 @@ impl Check {
     pub fn check_release(&self) -> anyhow::Result<Report> {
         let mut config = GlobalConfig::new().set_level(self.log_level);
 
-        let loader: Box<dyn baseline::BaselineLoader> = match self.baseline {
+        let loader: Box<dyn baseline::BaselineLoader> = match &self.baseline {
             Baseline::Version(version) => {
                 let mut registry = self.registry_baseline(&mut config)?;
                 let version = semver::Version::parse(&version)?;
@@ -119,7 +171,7 @@ impl Check {
             Baseline::LatestVersion => {
                 let metadata = self.manifest_metadata_no_deps()?;
                 let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-                let mut registry = baseline::RegistryBaseline::new(&target, &mut config)?;
+                let registry = baseline::RegistryBaseline::new(&target, &mut config)?;
                 Box::new(registry)
             }
         };
@@ -127,49 +179,51 @@ impl Check {
             .deps(false)
             .silence(!config.is_verbose());
 
-            let rustdoc_paths = match self.current {
-                Current::Manifest(_) => todo!(),
-                Current::RustDoc(rustdoc_path) => {
-
-            let name = "<unknown>";
-            let version = None;
-            vec![(
-                name.to_owned(),
-                loader.load_rustdoc(&mut config, &rustdoc_cmd, name, version)?,
-                rustdoc_path.to_owned(),
-            )]
-                }
-                Current::CurrentDir => todo!(),
+        let rustdoc_paths = match &self.current {
+            Current::RustDoc(rustdoc_path) => {
+                let name = "<unknown>";
+                let version = None;
+                vec![(
+                    name.to_owned(),
+                    loader.load_rustdoc(&mut config, &rustdoc_cmd, name, version)?,
+                    rustdoc_path.to_owned(),
+                )]
             }
-        let rustdoc_paths =
-         {
-            let metadata = args.manifest.metadata().exec()?;
-            let (selected, _) = args.workspace.partition_packages(&metadata);
-            let mut rustdoc_paths = Vec::with_capacity(selected.len());
-            for selected in selected {
-                let manifest_path = selected.manifest_path.as_std_path();
-                let crate_name = &selected.name;
-                let version = &selected.version;
+            _ => {
+                let metadata = self.manifest_metadata()?;
+                let selected = self.scope.selected_packages(&metadata);
+                let mut rustdoc_paths = Vec::with_capacity(selected.len());
+                for selected in selected {
+                    let manifest_path = selected.manifest_path.as_std_path();
+                    let crate_name = &selected.name;
+                    let version = &selected.version;
 
-                let is_implied = args.workspace.all || args.workspace.workspace;
-                if is_implied && selected.publish == Some(vec![]) {
-                    config.verbose(|config| {
-                        config.shell_status(
-                            "Skipping",
-                            format_args!("{crate_name} v{version} (current)"),
-                        )
-                    })?;
-                    continue;
+                    let is_implied = self.scope.selection == ScopeSelection::Workspace;
+                    if is_implied && selected.publish == Some(vec![]) {
+                        config.verbose(|config| {
+                            config.shell_status(
+                                "Skipping",
+                                format_args!("{crate_name} v{version} (current)"),
+                            )
+                        })?;
+                        continue;
+                    }
+
+                    config.shell_status(
+                        "Parsing",
+                        format_args!("{crate_name} v{version} (current)"),
+                    )?;
+                    let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
+                    let baseline_path = loader.load_rustdoc(
+                        &mut config,
+                        &rustdoc_cmd,
+                        crate_name,
+                        Some(version),
+                    )?;
+                    rustdoc_paths.push((crate_name.clone(), baseline_path, rustdoc_path));
                 }
-
-                config
-                    .shell_status("Parsing", format_args!("{crate_name} v{version} (current)"))?;
-                let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
-                let baseline_path =
-                    loader.load_rustdoc(&mut config, &rustdoc_cmd, crate_name, Some(version))?;
-                rustdoc_paths.push((crate_name.clone(), baseline_path, rustdoc_path));
+                rustdoc_paths
             }
-            rustdoc_paths
         };
         let mut success = true;
         for (crate_name, baseline_path, current_path) in rustdoc_paths {
@@ -181,15 +235,26 @@ impl Check {
             }
         }
 
-        Ok(Report {})
+        Ok(Report { success })
     }
 
-    fn registry_baseline(&self, config: &mut GlobalConfig) -> Result<baseline::RegistryBaseline, anyhow::Error> {
+    fn registry_baseline(
+        &self,
+        config: &mut GlobalConfig,
+    ) -> Result<baseline::RegistryBaseline, anyhow::Error> {
         let metadata = self.manifest_metadata_no_deps()?;
         let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-        let mut registry = baseline::RegistryBaseline::new(&target, config)?;
+        let registry = baseline::RegistryBaseline::new(&target, config)?;
         Ok(registry)
     }
 }
 
-pub struct Report {}
+pub struct Report {
+    success: bool,
+}
+
+impl Report {
+    pub fn success(&self) -> bool {
+        self.success
+    }
+}
