@@ -196,14 +196,14 @@ impl Check {
         let loader: Box<dyn baseline::BaselineLoader> = match &self.baseline {
             Baseline::Version(version) => {
                 let mut registry = self.registry_baseline(&mut config)?;
-                let version = semver::Version::parse(&version)?;
+                let version = semver::Version::parse(version)?;
                 registry.set_version(version);
                 Box::new(registry)
             }
             Baseline::Revision(rev) => {
                 let metadata = self.manifest_metadata_no_deps()?;
                 let source = metadata.workspace_root.as_std_path();
-                let slug = util::slugify(&rev);
+                let slug = util::slugify(rev);
                 let target = metadata
                     .target_directory
                     .as_std_path()
@@ -212,11 +212,11 @@ impl Check {
                 Box::new(baseline::GitBaseline::with_rev(
                     source,
                     &target,
-                    &rev,
+                    rev,
                     &mut config,
                 )?)
             }
-            Baseline::Root(root) => Box::new(baseline::PathBaseline::new(&root)?),
+            Baseline::Root(root) => Box::new(baseline::PathBaseline::new(root)?),
             Baseline::RustDoc(path) => Box::new(baseline::RustdocBaseline::new(path.to_owned())),
             Baseline::LatestVersion => {
                 let metadata = self.manifest_metadata_no_deps()?;
