@@ -239,7 +239,7 @@ impl Check {
                     rustdoc_path.to_owned(),
                 )]
             }
-            _ => {
+            Current::CurrentDir | Current::Manifest(_) => {
                 let metadata = self.manifest_metadata()?;
                 let selected = self.scope.selected_packages(&metadata);
                 let mut rustdoc_paths = Vec::with_capacity(selected.len());
