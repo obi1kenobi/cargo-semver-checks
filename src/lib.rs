@@ -27,7 +27,9 @@ pub struct Check {
 
 enum Baseline {
     /// Version from registry to lookup for a baseline. E.g. "1.0.0".
-    /// If `None`, it uses the version published to the cargo registry.
+    /// If `None`, uses the largest-numbered non-yanked non-prerelease version 
+    /// published to the cargo registry. If no such version, uses
+    /// the largest-numbered version including yanked and prerelease versions.
     Version(Option<String>),
     /// Git revision to lookup for a baseline.
     Revision(String),
