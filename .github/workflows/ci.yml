@@ -284,7 +284,9 @@ jobs:
           key: clap
 
       - name: Run semver-checks
-        run: not cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-root="subject-baseline/Cargo.toml" > output
+        run: |
+          cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-root="subject-baseline/Cargo.toml" > output
+          if [[ $? == 0 ]]; then exit 1; else exit 0; fi
 
       - name: Check output
         run: |
