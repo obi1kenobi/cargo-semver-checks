@@ -284,9 +284,14 @@ jobs:
           key: clap
 
       - name: Run semver-checks
+        continue-on-error: true
         run: |
           cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-root="subject-baseline/Cargo.toml" > output
-          if [[ $? == 0 ]]; then exit 1; else exit 0; fi
+          echo "$?" > return_code
+
+      - name: Check return code
+        run: |
+          if [[ $(cat return_code) == 0 ]]; then exit 1; else exit 0; fi
 
       - name: Check output
         run: |
