@@ -205,7 +205,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          key: bevy-core
+          key: bevy--core
 
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="subject/crates/bevy_core/Cargo.toml"
@@ -243,6 +243,40 @@ jobs:
 
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="subject/crates/bevy_gltf/Cargo.toml" --baseline-version 0.9.0
+
+  run-on-clap:
+    # clap v3.2.0 added a semver violation
+    # check if cargo-semver-checks detects the issue
+    # https://github.com/clap-rs/clap/issues/3876
+    name: Run cargo-semver-checks on clap v3.2.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout clap
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'clap-rs/clap'
+          ref: 'v3.2.0'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: clap
+
+      - name: Run semver-checks
+        run: cargo run semver-checks check-release --manifest-path="subject/Cargo.toml"
 
   init-release:
     name: Run the release workflow
