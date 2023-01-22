@@ -205,7 +205,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          key: bevy--core
+          key: bevy-core
 
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="subject/crates/bevy_core/Cargo.toml"
