@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 mod baseline;
 mod check_release;
 mod config;
@@ -11,9 +13,13 @@ pub use config::*;
 pub use query::*;
 
 use check_release::run_check_release;
-use trustfall_rustdoc::load_rustdoc;
+use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
-use std::{collections::HashSet, path::PathBuf};
+use dump::RustDocCommand;
+use itertools::Itertools;
+use semver::Version;
+use std::collections::HashSet;
+use std::path::{Path, PathBuf};
 
 /// Test a release for semver violations.
 #[derive(Default)]
@@ -27,7 +33,7 @@ pub struct Check {
 
 enum Baseline {
     /// Version from registry to lookup for a baseline. E.g. "1.0.0".
-    /// If `None`, uses the largest-numbered non-yanked non-prerelease version 
+    /// If `None`, uses the largest-numbered non-yanked non-prerelease version
     /// published to the cargo registry. If no such version, uses
     /// the largest-numbered version including yanked and prerelease versions.
     Version(Option<String>),
@@ -230,61 +236,70 @@ impl Check {
             .deps(false)
             .silence(!config.is_verbose());
 
-        let rustdoc_paths = match &self.current {
-            Current::RustDoc(rustdoc_path) => {
+        let all_outcomes: Vec<anyhow::Result<bool>> = match &self.current {
+            Current::RustDoc(current_rustdoc_path) => {
                 let name = "<unknown>";
                 let version = None;
-                vec![(
-                    name.to_owned(),
-                    loader.load_rustdoc(&mut config, &rustdoc_cmd, name, version)?,
-                    rustdoc_path.to_owned(),
-                )]
+                let (current_crate, baseline_crate) = generate_versioned_crates(
+                    &mut config,
+                    CurrentCratePath::CurrentRustdocPath(current_rustdoc_path),
+                    &*loader,
+                    &rustdoc_cmd,
+                    name,
+                    version,
+                )?;
+
+                let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
+                vec![Ok(success)]
             }
             Current::CurrentDir | Current::Manifest(_) => {
                 let metadata = self.manifest_metadata()?;
                 let selected = self.scope.selected_packages(&metadata);
-                let mut rustdoc_paths = Vec::with_capacity(selected.len());
-                for selected in selected {
-                    let manifest_path = selected.manifest_path.as_std_path();
-                    let crate_name = &selected.name;
-                    let version = &selected.version;
+                selected
+                    .iter()
+                    .map(|selected| {
+                        let manifest_path = selected.manifest_path.as_std_path();
+                        let crate_name = &selected.name;
+                        let version = &selected.version;
 
-                    let is_implied = self.scope.selection == ScopeSelection::Workspace;
-                    if is_implied && selected.publish == Some(vec![]) {
-                        config.verbose(|config| {
+                        let is_implied = self.scope.selection == ScopeSelection::Workspace;
+                        if is_implied && selected.publish == Some(vec![]) {
+                            config.verbose(|config| {
+                                config.shell_status(
+                                    "Skipping",
+                                    format_args!("{crate_name} v{version} (current)"),
+                                )
+                            })?;
+                            Ok(true)
+                        } else {
                             config.shell_status(
-                                "Skipping",
+                                "Parsing",
                                 format_args!("{crate_name} v{version} (current)"),
-                            )
-                        })?;
-                        continue;
-                    }
+                            )?;
 
-                    config.shell_status(
-                        "Parsing",
-                        format_args!("{crate_name} v{version} (current)"),
-                    )?;
-                    let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
-                    let baseline_path = loader.load_rustdoc(
-                        &mut config,
-                        &rustdoc_cmd,
-                        crate_name,
-                        Some(version),
-                    )?;
-                    rustdoc_paths.push((crate_name.clone(), baseline_path, rustdoc_path));
-                }
-                rustdoc_paths
+                            let (current_crate, baseline_crate) = generate_versioned_crates(
+                                &mut config,
+                                CurrentCratePath::ManifestPath(manifest_path),
+                                &*loader,
+                                &rustdoc_cmd,
+                                crate_name,
+                                Some(version),
+                            )?;
+
+                            Ok(run_check_release(
+                                &mut config,
+                                crate_name,
+                                current_crate,
+                                baseline_crate,
+                            )?)
+                        }
+                    })
+                    .collect()
             }
         };
-        let mut success = true;
-        for (crate_name, baseline_path, current_path) in rustdoc_paths {
-            let baseline_crate = load_rustdoc(&baseline_path)?;
-            let current_crate = load_rustdoc(&current_path)?;
-
-            if !run_check_release(&mut config, &crate_name, current_crate, baseline_crate)? {
-                success = false;
-            }
-        }
+        let success = all_outcomes
+            .into_iter()
+            .fold_ok(true, std::ops::BitAnd::bitand)?;
 
         Ok(Report { success })
     }
@@ -308,4 +323,37 @@ impl Report {
     pub fn success(&self) -> bool {
         self.success
     }
+}
+
+// Argument to the generate_versioned_crates function.
+enum CurrentCratePath<'a> {
+    CurrentRustdocPath(&'a Path), // If rustdoc is passed, it is just loaded into the memory.
+    ManifestPath(&'a Path),       // Otherwise, the function generates the rustdoc.
+}
+
+fn generate_versioned_crates(
+    config: &mut GlobalConfig,
+    current_crate_path: CurrentCratePath,
+    loader: &dyn baseline::BaselineLoader,
+    rustdoc_cmd: &RustDocCommand,
+    crate_name: &str,
+    version: Option<&Version>,
+) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
+    let current_crate = match current_crate_path {
+        CurrentCratePath::CurrentRustdocPath(rustdoc_path) => load_rustdoc(rustdoc_path)?,
+        CurrentCratePath::ManifestPath(manifest_path) => {
+            let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
+            load_rustdoc(&rustdoc_path)?
+        }
+    };
+
+    // The process of generating baseline rustdoc can overwrite
+    // the already-generated rustdoc of the current crate.
+    // For example, this happens when target-dir is specified in `.cargo/config.toml`.
+    // That's the reason why we're immediately loading the rustdocs into memory.
+    // See: https://github.com/obi1kenobi/cargo-semver-checks/issues/269
+    let baseline_path = loader.load_rustdoc(config, rustdoc_cmd, crate_name, version)?;
+    let baseline_crate = load_rustdoc(&baseline_path)?;
+
+    Ok((current_crate, baseline_crate))
 }
