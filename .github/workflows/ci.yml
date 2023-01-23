@@ -246,7 +246,7 @@ jobs:
 
   run-on-clap:
     # clap v3.2.0 added a semver violation
-    # check if cargo-semver-checks detects the issue
+    # check whether cargo-semver-checks detects the issue
     # https://github.com/clap-rs/clap/issues/3876
     name: Run cargo-semver-checks on clap v3.2.0
     runs-on: ubuntu-latest

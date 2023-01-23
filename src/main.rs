@@ -202,10 +202,9 @@ fn main() -> anyhow::Result<()> {
 }
 
 // Argument to the generate_versioned_crates function.
-// It can be either a path to an existing rustdoc, or a manifest path of a crate.
 enum CurrentCratePath<'a> {
-    CurrentRustdocPath(&'a Path),
-    ManifestPath(&'a Path),
+    CurrentRustdocPath(&'a Path), // If rustdoc is passed, it is just loaded into the memory.
+    ManifestPath(&'a Path),       // Otherwise, the function generates the rustdoc.
 }
 
 fn generate_versioned_crates(
