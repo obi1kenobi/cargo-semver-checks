@@ -23,6 +23,7 @@ jobs:
       - run-on-core-graphics
       - run-on-bevy-core
       - run-on-bevy-gltf
+      - run-on-clap
     steps:
       - run: exit 0
 
