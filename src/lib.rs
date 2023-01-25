@@ -75,6 +75,22 @@ impl Rustdoc {
             source: RustdocSource::Version(Some(version.into())),
         }
     }
+
+    fn registry(&self, config: &mut GlobalConfig) -> anyhow::Result<baseline::RegistryBaseline> {
+        let manifest_dir = match &self.source {
+            RustdocSource::Root(manifest_dir) | RustdocSource::Revision(manifest_dir, _) => {
+                manifest_dir
+            }
+            RustdocSource::Version(_) | RustdocSource::Rustdoc(_) => {
+                anyhow::bail!("not supported yet")
+            }
+        };
+        let manifest = manifest_from_dir(&manifest_dir);
+        let metadata = manifest_metadata_no_deps(&manifest)?;
+        let target = metadata.target_directory.as_std_path().join(util::SCOPE);
+        let registry = baseline::RegistryBaseline::new(&target, config)?;
+        Ok(registry)
+    }
 }
 
 enum RustdocSource {
@@ -183,32 +199,6 @@ impl Check {
         self
     }
 
-    fn manifest_path(&self) -> anyhow::Result<&Path> {
-        let path = match &self.current.source {
-            RustdocSource::Rustdoc(path) | RustdocSource::Revision(path, _) => path,
-            RustdocSource::Root(_) | RustdocSource::Version(_) => {
-                // TODO: this shouldn't happen
-                anyhow::bail!("error: RustDoc is not supported with these arguments.")
-            }
-        };
-        Ok(path)
-    }
-
-    fn manifest_metadata(&self) -> anyhow::Result<cargo_metadata::Metadata> {
-        let mut command = cargo_metadata::MetadataCommand::new();
-        let metadata = command.manifest_path(self.manifest_path()?).exec()?;
-        Ok(metadata)
-    }
-
-    fn manifest_metadata_no_deps(&self) -> anyhow::Result<cargo_metadata::Metadata> {
-        let mut command = cargo_metadata::MetadataCommand::new();
-        let metadata = command
-            .manifest_path(self.manifest_path()?)
-            .no_deps()
-            .exec()?;
-        Ok(metadata)
-    }
-
     pub fn check_release(&self) -> anyhow::Result<Report> {
         let mut config = GlobalConfig::new().set_level(self.log_level);
 
@@ -217,9 +207,8 @@ impl Check {
                 Box::new(baseline::RustdocBaseline::new(path.to_owned()))
             }
             RustdocSource::Root(root) => Box::new(baseline::PathBaseline::new(root)?),
-            // TODO: _root is unused
-            RustdocSource::Revision(_root, rev) => {
-                let metadata = self.manifest_metadata_no_deps()?;
+            RustdocSource::Revision(root, rev) => {
+                let metadata = manifest_metadata_no_deps(root)?;
                 let source = metadata.workspace_root.as_std_path();
                 let slug = util::slugify(rev);
                 let target = metadata
@@ -235,7 +224,7 @@ impl Check {
                 )?)
             }
             RustdocSource::Version(version) => {
-                let mut registry = self.registry_baseline(&mut config)?;
+                let mut registry = self.current.registry(&mut config)?;
                 if let Some(ver) = version {
                     let semver = semver::Version::parse(ver)?;
                     registry.set_version(semver);
@@ -263,8 +252,8 @@ impl Check {
                 let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
                 vec![Ok(success)]
             }
-            RustdocSource::Root(_project_root) => {
-                let metadata = self.manifest_metadata()?;
+            RustdocSource::Root(project_root) => {
+                let metadata = manifest_metadata(project_root)?;
                 let selected = self.scope.selected_packages(&metadata);
                 selected
                     .iter()
@@ -315,16 +304,6 @@ impl Check {
 
         Ok(Report { success })
     }
-
-    fn registry_baseline(
-        &self,
-        config: &mut GlobalConfig,
-    ) -> Result<baseline::RegistryBaseline, anyhow::Error> {
-        let metadata = self.manifest_metadata_no_deps()?;
-        let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-        let registry = baseline::RegistryBaseline::new(&target, config)?;
-        Ok(registry)
-    }
 }
 
 pub struct Report {
@@ -368,4 +347,22 @@ fn generate_versioned_crates(
     let baseline_crate = load_rustdoc(&baseline_path)?;
 
     Ok((current_crate, baseline_crate))
+}
+
+fn manifest_from_dir(manifest_dir: &Path) -> PathBuf {
+    manifest_dir.join("Cargo.toml")
+}
+
+fn manifest_metadata(manifest_dir: &Path) -> anyhow::Result<cargo_metadata::Metadata> {
+    let manifest_path = manifest_from_dir(manifest_dir);
+    let mut command = cargo_metadata::MetadataCommand::new();
+    let metadata = command.manifest_path(manifest_path).exec()?;
+    Ok(metadata)
+}
+
+fn manifest_metadata_no_deps(manifest_dir: &Path) -> anyhow::Result<cargo_metadata::Metadata> {
+    let manifest_path = manifest_from_dir(manifest_dir);
+    let mut command = cargo_metadata::MetadataCommand::new();
+    let metadata = command.manifest_path(manifest_path).no_deps().exec()?;
+    Ok(metadata)
 }
