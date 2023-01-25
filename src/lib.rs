@@ -85,8 +85,7 @@ impl Rustdoc {
                 anyhow::bail!("not supported yet")
             }
         };
-        let manifest = manifest_from_dir(manifest_dir);
-        let metadata = manifest_metadata_no_deps(&manifest)?;
+        let metadata = manifest_metadata_no_deps(manifest_dir)?;
         let target = metadata.target_directory.as_std_path().join(util::SCOPE);
         let registry = baseline::RegistryBaseline::new(&target, config)?;
         Ok(registry)
