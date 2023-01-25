@@ -22,46 +22,74 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 /// Test a release for semver violations.
-#[derive(Default)]
 pub struct Check {
     /// Which packages to analyze.
     scope: Scope,
-    current: Current,
-    baseline: Baseline,
+    current: Rustdoc,
+    baseline: Rustdoc,
     log_level: Option<log::Level>,
 }
 
-enum Baseline {
-    /// Version from registry to lookup for a baseline. E.g. "1.0.0".
+pub struct Rustdoc {
+    source: RustdocSource,
+}
+
+impl Rustdoc {
+    /// Use an existing rustdoc file.
+    pub fn from_path(rustdoc_path: impl Into<PathBuf>) -> Self {
+        Self {
+            source: RustdocSource::Rustdoc(rustdoc_path.into()),
+        }
+    }
+
+    /// Generate the rustdoc file from the project root directory, i.e. the directory containing the crate source.
+    /// It can be a workspace or a single package.
+    /// Same as `from_git_revision`, but with the current git revision.
+    pub fn from_root(project_root: impl Into<PathBuf>) -> Self {
+        Self {
+            source: RustdocSource::Root(project_root.into()),
+        }
+    }
+
+    /// Generate the rustdoc file from the project at a given git revision.
+    pub fn from_git_revision(
+        project_root: impl Into<PathBuf>,
+        revision: impl Into<String>,
+    ) -> Self {
+        Self {
+            source: RustdocSource::Revision(project_root.into(), revision.into()),
+        }
+    }
+
+    /// Generate the rustdoc file from the largest-numbered non-yanked non-prerelease version
+    /// published to the cargo registry. If no such version, uses
+    /// the largest-numbered version including yanked and prerelease versions.
+    pub fn from_latest_version() -> Self {
+        Self {
+            source: RustdocSource::Version(None),
+        }
+    }
+
+    pub fn from_version(version: impl Into<String>) -> Self {
+        Self {
+            source: RustdocSource::Version(Some(version.into())),
+        }
+    }
+}
+
+enum RustdocSource {
+    /// Path to the Rustdoc json file. Use this option when you have already generated the rustdoc file.
+    Rustdoc(PathBuf),
+    /// Project root directory, i.e. the directory containing the crate source.
+    /// It can be a workspace or a single package.
+    Root(PathBuf),
+    /// Project root directory and Git Revision.
+    Revision(PathBuf, String),
+    /// Version from cargo registry to lookup. E.g. "1.0.0".
     /// If `None`, uses the largest-numbered non-yanked non-prerelease version
     /// published to the cargo registry. If no such version, uses
     /// the largest-numbered version including yanked and prerelease versions.
     Version(Option<String>),
-    /// Git revision to lookup for a baseline.
-    Revision(String),
-    /// Directory containing baseline crate source.
-    Root(PathBuf),
-    /// The rustdoc json file to use as a semver baseline.
-    RustDoc(PathBuf),
-}
-
-impl Default for Baseline {
-    fn default() -> Self {
-        Self::Version(None)
-    }
-}
-
-/// Current version of the project to analyze.
-#[derive(Default)]
-enum Current {
-    /// Path to the manifest of the current version of the project.
-    /// It can be a workspace or a single package.
-    Manifest(PathBuf),
-    /// The rustdoc json of the current version of the project.
-    RustDoc(PathBuf),
-    /// Use the manifest in the current directory.
-    #[default]
-    CurrentDir,
 }
 
 #[derive(Default)]
@@ -121,13 +149,13 @@ impl Scope {
 }
 
 impl Check {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn with_manifest(&mut self, path: PathBuf) -> &mut Self {
-        self.current = Current::Manifest(path);
-        self
+    pub fn new(current: Rustdoc) -> Self {
+        Self {
+            scope: Scope::default(),
+            current,
+            baseline: Rustdoc::from_latest_version(),
+            log_level: Default::default(),
+        }
     }
 
     pub fn with_workspace(&mut self) -> &mut Self {
@@ -145,28 +173,8 @@ impl Check {
         self
     }
 
-    pub fn with_current_rustdoc(&mut self, rustdoc: PathBuf) -> &mut Self {
-        self.current = Current::RustDoc(rustdoc);
-        self
-    }
-
-    pub fn with_baseline_version(&mut self, version: String) -> &mut Self {
-        self.baseline = Baseline::Version(Some(version));
-        self
-    }
-
-    pub fn with_baseline_revision(&mut self, revision: String) -> &mut Self {
-        self.baseline = Baseline::Revision(revision);
-        self
-    }
-
-    pub fn with_baseline_root(&mut self, root: PathBuf) -> &mut Self {
-        self.baseline = Baseline::Root(root);
-        self
-    }
-
-    pub fn with_baseline_rustdoc(&mut self, rustdoc: PathBuf) -> &mut Self {
-        self.baseline = Baseline::RustDoc(rustdoc);
+    pub fn with_baseline(&mut self, baseline: Rustdoc) -> &mut Self {
+        self.baseline = baseline;
         self
     }
 
@@ -175,13 +183,13 @@ impl Check {
         self
     }
 
-    fn manifest_path(&self) -> anyhow::Result<PathBuf> {
-        let path = match &self.current {
-            Current::Manifest(path) => path.clone(),
-            Current::RustDoc(_) => {
+    fn manifest_path(&self) -> anyhow::Result<&Path> {
+        let path = match &self.current.source {
+            RustdocSource::Rustdoc(path) | RustdocSource::Revision(path, _) => path,
+            RustdocSource::Root(_) | RustdocSource::Version(_) => {
+                // TODO: this shouldn't happen
                 anyhow::bail!("error: RustDoc is not supported with these arguments.")
             }
-            Current::CurrentDir => PathBuf::from("Cargo.toml"),
         };
         Ok(path)
     }
@@ -204,10 +212,13 @@ impl Check {
     pub fn check_release(&self) -> anyhow::Result<Report> {
         let mut config = GlobalConfig::new().set_level(self.log_level);
 
-        let loader: Box<dyn baseline::BaselineLoader> = match &self.baseline {
-            Baseline::RustDoc(path) => Box::new(baseline::RustdocBaseline::new(path.to_owned())),
-            Baseline::Root(root) => Box::new(baseline::PathBaseline::new(root)?),
-            Baseline::Revision(rev) => {
+        let loader: Box<dyn baseline::BaselineLoader> = match &self.baseline.source {
+            RustdocSource::Rustdoc(path) => {
+                Box::new(baseline::RustdocBaseline::new(path.to_owned()))
+            }
+            RustdocSource::Root(root) => Box::new(baseline::PathBaseline::new(root)?),
+            // TODO: _root is unused
+            RustdocSource::Revision(_root, rev) => {
                 let metadata = self.manifest_metadata_no_deps()?;
                 let source = metadata.workspace_root.as_std_path();
                 let slug = util::slugify(rev);
@@ -223,7 +234,7 @@ impl Check {
                     &mut config,
                 )?)
             }
-            Baseline::Version(version) => {
+            RustdocSource::Version(version) => {
                 let mut registry = self.registry_baseline(&mut config)?;
                 if let Some(ver) = version {
                     let semver = semver::Version::parse(ver)?;
@@ -236,8 +247,8 @@ impl Check {
             .deps(false)
             .silence(!config.is_verbose());
 
-        let all_outcomes: Vec<anyhow::Result<bool>> = match &self.current {
-            Current::RustDoc(current_rustdoc_path) => {
+        let all_outcomes: Vec<anyhow::Result<bool>> = match &self.current.source {
+            RustdocSource::Rustdoc(current_rustdoc_path) => {
                 let name = "<unknown>";
                 let version = None;
                 let (current_crate, baseline_crate) = generate_versioned_crates(
@@ -252,7 +263,7 @@ impl Check {
                 let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
                 vec![Ok(success)]
             }
-            Current::CurrentDir | Current::Manifest(_) => {
+            RustdocSource::Root(_project_root) => {
                 let metadata = self.manifest_metadata()?;
                 let selected = self.scope.selected_packages(&metadata);
                 selected
@@ -296,6 +307,7 @@ impl Check {
                     })
                     .collect()
             }
+            RustdocSource::Revision(_, _) | RustdocSource::Version(_) => todo!(),
         };
         let success = all_outcomes
             .into_iter()
