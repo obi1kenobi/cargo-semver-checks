@@ -12,6 +12,7 @@ TARGET_DIR="$TOPLEVEL/localdata/test_data"
 set +u
 TOOLCHAIN="$1"
 set -u
+echo "Generating rustdoc with: $(cargo $TOOLCHAIN --version)"
 RUSTDOC_CMD="cargo $TOOLCHAIN rustdoc"
 
 # Run rustdoc on test_crates/*/{new,old}/
