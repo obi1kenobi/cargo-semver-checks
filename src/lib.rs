@@ -9,6 +9,7 @@ mod query;
 mod templating;
 mod util;
 
+use cargo_metadata::PackageId;
 pub use config::*;
 pub use query::*;
 
@@ -92,17 +93,47 @@ enum RustdocSource {
     Version(Option<String>),
 }
 
+/// Which packages to analyze.
 #[derive(Default)]
 struct Scope {
+    mode: ScopeMode,
+}
+
+enum ScopeMode {
+    /// All packages except the excluded ones.
+    DenyList(PackageSelection),
+    /// Packages to process (see `cargo help pkgid`)
+    AllowList(Vec<String>),
+}
+
+impl Default for ScopeMode {
+    fn default() -> Self {
+        Self::DenyList(PackageSelection::default())
+    }
+}
+
+#[derive(Default, Clone)]
+pub struct PackageSelection {
     selection: ScopeSelection,
     excluded_packages: Vec<String>,
 }
 
-/// Which packages to analyze.
-#[derive(Default, PartialEq, Eq)]
-enum ScopeSelection {
-    /// Package to process (see `cargo help pkgid`)
-    Packages(Vec<String>),
+impl PackageSelection {
+    pub fn new(selection: ScopeSelection) -> Self {
+        Self {
+            selection,
+            excluded_packages: vec![],
+        }
+    }
+
+    pub fn with_excluded_packages(&mut self, packages: Vec<String>) -> &mut Self {
+        self.excluded_packages = packages;
+        self
+    }
+}
+
+#[derive(Default, PartialEq, Eq, Clone)]
+pub enum ScopeSelection {
     /// All packages in the workspace. Equivalent to `--workspace`.
     Workspace,
     /// Default members of the workspace.
@@ -115,22 +146,35 @@ impl Scope {
         &self,
         meta: &'m cargo_metadata::Metadata,
     ) -> Vec<&'m cargo_metadata::Package> {
-        let workspace_members: HashSet<_> = meta.workspace_members.iter().collect();
-        let base_ids: HashSet<_> = match &self.selection {
-            ScopeSelection::DefaultMembers => {
-                // Deviating from cargo because Metadata doesn't have default members
-                let resolve = meta.resolve.as_ref().expect("no-deps is unsupported");
-                match &resolve.root {
-                    Some(root) => {
-                        let mut base_ids = HashSet::new();
-                        base_ids.insert(root);
-                        base_ids
+        let workspace_members: HashSet<&PackageId> = meta.workspace_members.iter().collect();
+        let base_ids: HashSet<&PackageId> = match &self.mode {
+            ScopeMode::DenyList(PackageSelection {
+                selection,
+                excluded_packages,
+            }) => {
+                let packages = match selection {
+                    ScopeSelection::Workspace => workspace_members,
+                    ScopeSelection::DefaultMembers => {
+                        // Deviating from cargo because Metadata doesn't have default members
+                        let resolve = meta.resolve.as_ref().expect("no-deps is unsupported");
+                        match &resolve.root {
+                            Some(root) => {
+                                let mut base_ids = HashSet::new();
+                                base_ids.insert(root);
+                                base_ids
+                            }
+                            None => workspace_members,
+                        }
                     }
-                    None => workspace_members,
-                }
+                };
+
+                packages
+                    .iter()
+                    .filter(|p| !excluded_packages.contains(&meta[p].name))
+                    .map(|p| *p)
+                    .collect()
             }
-            ScopeSelection::Workspace => workspace_members,
-            ScopeSelection::Packages(patterns) => {
+            ScopeMode::AllowList(patterns) => {
                 meta.packages
                     .iter()
                     // Deviating from cargo by not supporting patterns
@@ -143,7 +187,7 @@ impl Scope {
 
         meta.packages
             .iter()
-            .filter(|p| base_ids.contains(&p.id) && !self.excluded_packages.contains(&p.name))
+            .filter(|&p| base_ids.contains(&p.id))
             .collect()
     }
 }
@@ -158,18 +202,13 @@ impl Check {
         }
     }
 
-    pub fn with_workspace(&mut self) -> &mut Self {
-        self.scope.selection = ScopeSelection::Workspace;
+    pub fn with_package_selection(&mut self, selection: PackageSelection) -> &mut Self {
+        self.scope.mode = ScopeMode::DenyList(selection);
         self
     }
 
     pub fn with_packages(&mut self, packages: Vec<String>) -> &mut Self {
-        self.scope.selection = ScopeSelection::Packages(packages);
-        self
-    }
-
-    pub fn with_excluded_packages(&mut self, excluded_packages: Vec<String>) -> &mut Self {
-        self.scope.excluded_packages = excluded_packages;
+        self.scope.mode = ScopeMode::AllowList(packages);
         self
     }
 
@@ -257,7 +296,13 @@ impl Check {
                         let crate_name = &selected.name;
                         let version = &selected.version;
 
-                        let is_implied = self.scope.selection == ScopeSelection::Workspace;
+                        let is_implied = matches!(
+                            self.scope.mode,
+                            ScopeMode::DenyList(PackageSelection {
+                                selection: ScopeSelection::Workspace,
+                                ..
+                            })
+                        ) && selected.publish == Some(vec![]);
                         if is_implied && selected.publish == Some(vec![]) {
                             config.verbose(|config| {
                                 config.shell_status(

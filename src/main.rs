@@ -3,7 +3,9 @@
 use std::path::PathBuf;
 
 use cargo_semver_checks::GlobalConfig;
+use cargo_semver_checks::PackageSelection;
 use cargo_semver_checks::Rustdoc;
+use cargo_semver_checks::ScopeSelection;
 use cargo_semver_checks::SemverQuery;
 use clap::{Args, Parser, Subcommand};
 
@@ -198,12 +200,11 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         };
         let mut check = Self::new(current);
         if value.workspace.all || value.workspace.workspace {
-            check.with_workspace();
+            let mut selection = PackageSelection::new(ScopeSelection::Workspace);
+            selection.with_excluded_packages(value.workspace.exclude);
+            check.with_package_selection(selection);
         } else if !value.workspace.package.is_empty() {
             check.with_packages(value.workspace.package);
-        }
-        if !value.workspace.exclude.is_empty() {
-            check.with_excluded_packages(value.workspace.exclude);
         }
         let baseline = {
             let baseline_root = if let Some(baseline_root) = value.baseline_root {
