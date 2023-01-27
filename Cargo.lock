@@ -1613,9 +1613,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall_rustdoc"
-version = "0.8.1"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45cda7e572f56f3d5a48a83644e8f8a4ec9a88e7fcb4f0979e9dd257e80d58ab"
+checksum = "8f350bb76f94a69f79a391c9f49d0f081df095bfbbb4b10f96ccfccc1dd4754f"
 dependencies = [
  "anyhow",
  "serde",
