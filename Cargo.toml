@@ -43,4 +43,5 @@ assert_cmd = "2.0"
 lazy_static = "1.4.0"
 
 [features]
+default = ["vendored-openssl"]
 vendored-openssl = ["crates-index/vendored-openssl"]
