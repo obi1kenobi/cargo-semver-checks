@@ -75,21 +75,6 @@ impl Rustdoc {
             source: RustdocSource::Version(Some(version.into())),
         }
     }
-
-    fn registry(&self, config: &mut GlobalConfig) -> anyhow::Result<baseline::RegistryBaseline> {
-        let manifest_dir = match &self.source {
-            RustdocSource::Root(manifest_dir) | RustdocSource::Revision(manifest_dir, _) => {
-                manifest_dir
-            }
-            RustdocSource::Version(_) | RustdocSource::Rustdoc(_) => {
-                anyhow::bail!("not supported yet")
-            }
-        };
-        let metadata = manifest_metadata_no_deps(manifest_dir)?;
-        let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-        let registry = baseline::RegistryBaseline::new(&target, config)?;
-        Ok(registry)
-    }
 }
 
 enum RustdocSource {
@@ -223,7 +208,18 @@ impl Check {
                 )?)
             }
             RustdocSource::Version(version) => {
-                let mut registry = self.current.registry(&mut config)?;
+                let mut registry = {
+                    let manifest_dir = match &self.current.source {
+                        RustdocSource::Root(manifest_dir)
+                        | RustdocSource::Revision(manifest_dir, _) => manifest_dir,
+                        RustdocSource::Version(_) | RustdocSource::Rustdoc(_) => {
+                            anyhow::bail!("this combination of current and baseline sources isn't supported yet")
+                        }
+                    };
+                    let metadata = manifest_metadata_no_deps(manifest_dir)?;
+                    let target = metadata.target_directory.as_std_path().join(util::SCOPE);
+                    baseline::RegistryBaseline::new(&target, &mut config)?
+                };
                 if let Some(ver) = version {
                     let semver = semver::Version::parse(ver)?;
                     registry.set_version(semver);
