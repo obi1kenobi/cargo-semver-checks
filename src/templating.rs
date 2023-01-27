@@ -1,6 +1,15 @@
 use handlebars::{handlebars_helper, Handlebars};
 use serde_json::Value;
 
+// a helper to lowercase a string
+handlebars_helper!(lowercase: |arg: Value| {
+    if let Value::String(arg) = arg {
+        arg.to_ascii_lowercase()
+    } else {
+        unreachable!("non-string value provided: {arg:?}")
+    }
+});
+
 // a helper to join all values
 handlebars_helper!(join: |sep: str, args: Value| {
     if let Value::Array(arr) = args {
@@ -53,6 +62,7 @@ handlebars_helper!(multiple_spans: |files: Value, begin_line_numbers: Value| {
 pub(crate) fn make_handlebars_registry() -> Handlebars<'static> {
     let mut registry = Handlebars::new();
     registry.set_strict_mode(true);
+    registry.register_helper("lowercase", Box::new(lowercase));
     registry.register_helper("join", Box::new(join));
     registry.register_helper("unpack_if_singleton", Box::new(unpack_if_singleton));
     registry.register_helper("multiple_spans", Box::new(multiple_spans));

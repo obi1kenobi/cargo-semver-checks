@@ -33,4 +33,28 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/inherent_method_must_use_added/": [
+        {
+            "name": String("EnumToStructWithMustUseMethods"),
+            "path": List([
+                String("inherent_method_must_use_added"),
+                String("item_type_changed_inherent_method_must_use_added"),
+                String("EnumToStructWithMustUseMethods"),
+            ]),
+            "span_begin_line": Uint64(8),
+            "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("EnumToUnionWithMustUseMethods"),
+            "path": List([
+                String("inherent_method_must_use_added"),
+                String("item_type_changed_inherent_method_must_use_added"),
+                String("EnumToUnionWithMustUseMethods"),
+            ]),
+            "span_begin_line": Uint64(35),
+            "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
 }

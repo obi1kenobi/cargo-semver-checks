@@ -29,7 +29,7 @@ body:
   - type: textarea
     attributes:
       label: "Build Configuration"
-      description: "Any local [Rust build configuration](https://doc.rust-lang.org/cargo/reference/config.html) in config.toml files? Paste the file content here, if you have one."
+      description: "Any local [Rust build configuration](https://doc.rust-lang.org/cargo/reference/config.html) in config.toml files, or in env vars prefixed with `CARGO_`? Paste them here, if you have any."
   - type: textarea
     attributes:
       label: "Additional Context"

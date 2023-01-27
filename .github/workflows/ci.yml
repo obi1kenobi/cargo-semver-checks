@@ -23,6 +23,7 @@ jobs:
       - run-on-core-graphics
       - run-on-bevy-core
       - run-on-bevy-gltf
+      - run-on-clap
     steps:
       - run: exit 0
 
@@ -63,7 +64,7 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        toolchain: ["stable", "beta"]
+        toolchain: ["1.65", "1.66", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -243,6 +244,61 @@ jobs:
 
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="subject/crates/bevy_gltf/Cargo.toml" --baseline-version 0.9.0
+
+  run-on-clap:
+    # clap v3.2.0 added a semver violation
+    # check whether cargo-semver-checks detects the issue
+    # https://github.com/clap-rs/clap/issues/3876
+    name: Run cargo-semver-checks on clap v3.2.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout clap v3.2.0
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'clap-rs/clap'
+          ref: 'v3.2.0'
+          path: 'subject-current'
+
+      - name: Checkout clap v3.1.18
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'clap-rs/clap'
+          ref: 'v3.1.18'
+          path: 'subject-baseline'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: clap
+
+      - name: Run semver-checks
+        continue-on-error: true
+        run: |
+          cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-root="subject-baseline/Cargo.toml" > output
+          echo "$?" > return_code
+
+      - name: Check return code
+        run: |
+          if [[ "$(cat return_code)" == "0" ]]; then exit 1; else exit 0; fi
+
+      - name: Check output
+        run: |
+          EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---\n--- failure trait_missing: pub trait removed or renamed ---")"
+          RESULT="$(cat output | grep failure)"
+          diff <(echo "$RESULT") <(echo "$EXPECTED")
 
   init-release:
     name: Run the release workflow

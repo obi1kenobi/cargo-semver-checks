@@ -1,4 +1,19 @@
 {
+    "./test_crates/inherent_method_must_use_added/": [
+        // This test output will disappear when unions are added to the schema.
+        {
+            "name": String("StructToUnionWithMustUseMethods"),
+            "path": List([
+                String("inherent_method_must_use_added"),
+                String("item_type_changed_inherent_method_must_use_added"),
+                String("StructToUnionWithMustUseMethods"),
+            ]),
+            "span_begin_line": Uint64(89),
+            "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+            "struct_type": String("plain"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/struct_missing/": [
         {
             "name": String("WillBeRemovedStruct"),
