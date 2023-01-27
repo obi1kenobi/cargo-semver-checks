@@ -171,7 +171,7 @@ impl Scope {
                 packages
                     .iter()
                     .filter(|p| !excluded_packages.contains(&meta[p].name))
-                    .map(|p| *p)
+                    .copied()
                     .collect()
             }
             ScopeMode::AllowList(patterns) => {
