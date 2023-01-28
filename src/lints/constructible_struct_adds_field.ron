@@ -18,7 +18,7 @@ SemverQuery(
                         # clearly stated that they don't consider the struct exhaustive anymore.
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
-                        struct_name: name @output @tag
+                        struct_name: name @output
                         struct_type @output @tag
 
                         importable_path {
@@ -45,7 +45,6 @@ SemverQuery(
                     # 2. It needs to not have had any non-public fields.
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%struct_name"])
                         struct_type @filter(op: "=", value: ["%struct_type"])
 
                         # 1. It needs to not have been marked `#[non_exhaustive]`.

@@ -15,7 +15,6 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @tag @output
 
                         attribute {
                             old_attr: raw_attribute @output
@@ -37,7 +36,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
+                        name @output
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])

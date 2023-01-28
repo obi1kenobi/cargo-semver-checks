@@ -14,7 +14,7 @@ SemverQuery(
                 item {
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @tag @output
+                        name @output
                         owner_type: __typename @tag @output
 
                         importable_path {
@@ -46,7 +46,6 @@ SemverQuery(
                 item {
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
                         __typename @filter(op: "=", value: ["%owner_type"])
 
                         importable_path {

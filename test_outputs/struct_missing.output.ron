@@ -14,6 +14,52 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/move_item_and_reexport/": [
+        {
+            "name": String("NonEquivalentReorderedGenerics"),
+            "path": List([
+                String("move_item_and_reexport"),
+                String("NonEquivalentReorderedGenerics"),
+            ]),
+            "span_begin_line": Uint64(38),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("plain"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("NonEquivalentRemovedLifetime"),
+            "path": List([
+                String("move_item_and_reexport"),
+                String("NonEquivalentRemovedLifetime"),
+            ]),
+            "span_begin_line": Uint64(42),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("plain"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("NonEquivalentRemovedConst"),
+            "path": List([
+                String("move_item_and_reexport"),
+                String("NonEquivalentRemovedConst"),
+            ]),
+            "span_begin_line": Uint64(46),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("plain"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("NonEquivalentRemovedType"),
+            "path": List([
+                String("move_item_and_reexport"),
+                String("NonEquivalentRemovedType"),
+            ]),
+            "span_begin_line": Uint64(50),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("plain"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/struct_missing/": [
         {
             "name": String("WillBeRemovedStruct"),

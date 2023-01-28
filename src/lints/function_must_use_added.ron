@@ -14,7 +14,7 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @tag @output
+                        name @output
 
                         importable_path {
                             path @tag @output
@@ -38,7 +38,6 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @filter(op: "=", value: ["%name"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])

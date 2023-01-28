@@ -18,7 +18,7 @@ SemverQuery(
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @output @tag
+                        name @output
                         struct_type @output
 
                         # The struct is now marked #[non_exhaustive] so it can't be constructed
@@ -40,7 +40,6 @@ SemverQuery(
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         # Ensure the struct could previously be constructed outside of its crate

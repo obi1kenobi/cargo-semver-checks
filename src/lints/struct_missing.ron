@@ -11,7 +11,7 @@ SemverQuery(
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @output @tag
+                        name @output
                         struct_type @output
 
                         importable_path {
@@ -32,7 +32,6 @@ SemverQuery(
                     # More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])

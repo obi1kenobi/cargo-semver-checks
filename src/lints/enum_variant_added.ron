@@ -10,7 +10,7 @@ SemverQuery(
             current {
                 item {
                     ... on Enum {
-                        enum_name: name @output @tag
+                        enum_name: name @output
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
@@ -32,7 +32,6 @@ SemverQuery(
             baseline {
                 item {
                     ... on Enum {
-                        name @filter(op: "=", value: ["%enum_name"])
                         visibility_limit @filter(op: "=", value: ["$public"])
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 

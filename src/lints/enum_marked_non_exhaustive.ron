@@ -18,7 +18,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @output @tag
+                        name @output
 
                         attrs @filter(op: "contains", value: ["$non_exhaustive"])
 
@@ -37,7 +37,6 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         importable_path {
