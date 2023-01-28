@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "infinite_importable_paths"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
