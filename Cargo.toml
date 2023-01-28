@@ -46,11 +46,17 @@ lazy_static = "1.4.0"
 default = ["vendored-openssl"]
 vendored-openssl = ["crates-index/vendored-openssl"]
 
-# When testing, compile all dependencies with optimizations enabled,
+# In dev and test profiles, compile all dependencies with optimizations enabled,
 # but still checking debug assertions and overflows.
 #
 # This produces a more than 10x speedup on tests, since the tests
 # check dozens of test crates with dozens of trustfall queries.
+[profile.dev.package."*"]
+opt-level = 3
+debug-assertions = true
+overflow-checks = true
+codegen-units = 16
+
 [profile.test.package."*"]
 opt-level = 3
 debug-assertions = true
