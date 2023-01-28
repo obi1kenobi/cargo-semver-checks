@@ -20,6 +20,7 @@ jobs:
       - lint
       - rust-tests
       - run-on-rust-libp2p
+      - run-on-libp2p-dcutr-relay
       - run-on-core-graphics
       - run-on-bevy-core
       - run-on-bevy-gltf
@@ -139,6 +140,51 @@ jobs:
       # Reference: https://github.com/obi1kenobi/cargo-semver-checks/issues/174
       - name: Run semver-checks (alternative command)
         run: cargo run semver-checks check-release --manifest-path="subject/core/Cargo.toml" --package="libp2p-core"
+
+  run-on-libp2p-dcutr-relay:
+    # Run cargo-semver-checks on a crate with no semver violations,
+    # to make sure there are no false-positives.
+    #
+    # cargo-semver-checks previously reported false-positives here
+    # due to renaming re-exports causing confusion about which types match each other:
+    # https://github.com/obi1kenobi/cargo-semver-checks/issues/202
+    # https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1340254920
+    name: Run cargo-semver-checks on libp2p-dcutr 1.62.0 and libp2p-relay 0.14.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout rust-libp2p
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'libp2p/rust-libp2p'
+          ref: 'be0b62a78fe9d72811b9eda742137cc8ddc4da35'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      # rust-libp2p requires protobuf-compiler.
+      - name: Install protobuf-compiler
+        run: sudo apt install protobuf-compiler
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: libp2p-dcutr-relay
+
+      - name: Run semver-checks on libp2p-dcutr
+        run: cargo run semver-checks check-release --manifest-path="subject/protocols/dcutr/Cargo.toml"
+
+      - name: Run semver-checks on libp2p-relay
+        run: cargo run semver-checks check-release --manifest-path="subject/protocols/relay/Cargo.toml"
 
   run-on-core-graphics:
     # Run cargo-semver-checks on a crate with no semver violations,
