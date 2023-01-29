@@ -13,7 +13,6 @@ SemverQuery(
                 item {
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @output @tag
 
                         importable_path {
                             path @output @tag
@@ -49,7 +48,7 @@ SemverQuery(
                 item {
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
+                        name @output
 
                         importable_path @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             path @filter(op: "=", value: ["%path"])

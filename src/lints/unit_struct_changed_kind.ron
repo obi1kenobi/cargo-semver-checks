@@ -18,7 +18,6 @@ SemverQuery(
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @output @tag
                         struct_type @filter(op: "=", value: ["$unit"])
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
@@ -32,7 +31,7 @@ SemverQuery(
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
+                        name @output
                         struct_type @filter(op: "=", value: ["$plain"])
 
                         importable_path {

@@ -11,7 +11,6 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        enum_name: name @output @tag
 
                         importable_path {
                             path @output @tag
@@ -37,7 +36,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%enum_name"])
+                        enum_name: name @output
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -46,7 +45,7 @@ SemverQuery(
                         variant {
                             ... on StructVariant {
                                 name @filter(op: "=", value: ["%variant_name"])
-                                
+
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     name @filter(op: "=", value: ["%field_name"])
                                 }
