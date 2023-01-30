@@ -361,9 +361,9 @@ dependencies = [
 
 [[package]]
 name = "crates-index"
-version = "0.19.0"
+version = "0.19.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75096e85e0ce07c430da88f21b404734f81c873d107177004f2ca97fc4baa267"
+checksum = "829d7547825bd38a7f57afc7a1aea6cb1da0b1e43a92009467f277f94ad5226b"
 dependencies = [
  "git2",
  "hex",
@@ -376,7 +376,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "smartstring",
+ "smol_str",
  "toml 0.6.0",
 ]
 
@@ -1363,22 +1363,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "smartstring"
-version = "1.0.1"
+name = "smol_str"
+version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fb72c633efbaa2dd666986505016c32c3044395ceaf881518399d2f4127ee29"
+checksum = "7475118a28b7e3a2e157ce0131ba8c5526ea96e90ee601d9f6bb2e286a35ab44"
 dependencies = [
- "autocfg",
  "serde",
- "static_assertions",
- "version_check",
 ]
-
-[[package]]
-name = "static_assertions"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "strsim"
