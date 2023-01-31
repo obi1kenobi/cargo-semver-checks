@@ -9,6 +9,9 @@ TEST_CRATES_DIR="$TOPLEVEL/test_crates"
 TEST_OUTPUTS_DIR="$TOPLEVEL/test_outputs"
 SRC_QUERY_FILE="$TOPLEVEL/src/query.rs"
 
+# Make the script cwd-independent by always moving to the repo root first.
+cd "$TOPLEVEL"
+
 # What should the lint be called?
 set +u
 NEW_LINT_NAME="$1"
@@ -49,15 +52,7 @@ fi
 
 # Make the test crates.
 NEW_LINT_TEST_CRATES_DIR="$TEST_CRATES_DIR/$NEW_LINT_NAME"
-echo -n "Creating test crates in ${NEW_LINT_TEST_CRATES_DIR#"$TOPLEVEL/"} ..."
-if [[ -d "$NEW_LINT_TEST_CRATES_DIR" ]]; then
-    echo ' already exists.'
-else
-    cp -R "$TEST_CRATES_DIR/template" "$NEW_LINT_TEST_CRATES_DIR"
-    sed -i'' "s/template/$NEW_LINT_NAME/g" "$NEW_LINT_TEST_CRATES_DIR/old/Cargo.toml"
-    sed -i'' "s/template/$NEW_LINT_NAME/g" "$NEW_LINT_TEST_CRATES_DIR/new/Cargo.toml"
-    echo ' done!'
-fi
+./scripts/make_new_test_crate.sh "$NEW_LINT_NAME"
 
 # Add the test outputs file.
 NEW_TEST_OUTPUT_FILE="$TEST_OUTPUTS_DIR/$NEW_LINT_NAME.output.ron"
