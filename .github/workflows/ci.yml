@@ -21,6 +21,7 @@ jobs:
       - rust-tests
       - run-on-rust-libp2p
       - run-on-libp2p-dcutr-relay
+      - run-on-libp2p-gossipsub-request-response
       - run-on-core-graphics
       - run-on-bevy-core
       - run-on-bevy-gltf
@@ -185,6 +186,48 @@ jobs:
 
       - name: Run semver-checks on libp2p-relay
         run: cargo run semver-checks check-release --manifest-path="subject/protocols/relay/Cargo.toml"
+
+  run-on-libp2p-gossipsub-request-response:
+    # Run cargo-semver-checks on two crates that used to trip an assert and cause a crash,
+    # due to re-exports that omit generic parameters because the underlying generic type supplies
+    # default values for those generics.
+    # https://github.com/libp2p/rust-libp2p/pull/3401#issuecomment-1409381365
+    name: Run cargo-semver-checks on libp2p-gossipsub 0.44.0 and libp2p-request-response 0.23.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout rust-libp2p
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'libp2p/rust-libp2p'
+          ref: '8b8dc26e0601433f5675430b29b50687a37d4cd8'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      # rust-libp2p requires protobuf-compiler.
+      - name: Install protobuf-compiler
+        run: sudo apt install protobuf-compiler
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: libp2p-gossipsub-request-response
+
+      - name: Run semver-checks on libp2p-gossipsub
+        run: cargo run semver-checks check-release --manifest-path="subject/protocols/gossipsub/Cargo.toml"
+
+      - name: Run semver-checks on libp2p-request-response
+        run: cargo run semver-checks check-release --manifest-path="subject/protocols/request-response/Cargo.toml"
 
   run-on-core-graphics:
     # Run cargo-semver-checks on a crate with no semver violations,
