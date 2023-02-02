@@ -338,13 +338,19 @@ impl BaselineLoader for RegistryBaseline {
             choose_baseline_version(&crate_, version_current)?
         };
 
-        let base_root = self.target_root.join(format!(
-            "registry-{}-{}",
-            slugify(name),
-            slugify(&base_version)
-        ));
-        std::fs::create_dir_all(&base_root)?;
-        let manifest_path = base_root.join("Cargo.toml");
+        let crate_identifier = format!("registry-{}-{}", slugify(name), slugify(&base_version));
+
+        let cache_dir = self.target_root.join("cache");
+        let cached_rustdoc = cache_dir.join(format!("{crate_identifier}.json"));
+
+        // We assume that the generated rustdoc is untouched. Users should run cargo-clean if they experience any anomalies.
+        if cached_rustdoc.exists() {
+            return Ok(cached_rustdoc);
+        }
+
+        let build_dir = self.target_root.join(crate_identifier);
+        std::fs::create_dir_all(&build_dir)?;
+        let manifest_path = build_dir.join("Cargo.toml");
 
         let crate_baseline = crate_
             .versions()
@@ -359,13 +365,13 @@ impl BaselineLoader for RegistryBaseline {
             })?;
 
         // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
-        let _: std::io::Result<()> = std::fs::remove_file(base_root.join("Cargo.lock"));
+        let _: std::io::Result<()> = std::fs::remove_file(build_dir.join("Cargo.lock"));
 
         std::fs::write(
             &manifest_path,
             toml::to_string(&create_rustdoc_manifest_for_crate_version(crate_baseline))?,
         )?;
-        std::fs::write(base_root.join("lib.rs"), "")?;
+        std::fs::write(build_dir.join("lib.rs"), "")?;
 
         config.shell_status("Parsing", format_args!("{name} v{base_version} (baseline)"))?;
         let rustdoc_path = rustdoc.dump(
@@ -373,7 +379,13 @@ impl BaselineLoader for RegistryBaseline {
             Some(&format!("{name}@{base_version}")),
             false,
         )?;
-        Ok(rustdoc_path)
+
+        // Clean up after ourselves.
+        std::fs::create_dir_all(cache_dir)?;
+        std::fs::copy(rustdoc_path, &cached_rustdoc)?;
+        std::fs::remove_dir_all(build_dir)?;
+
+        Ok(cached_rustdoc)
     }
 }
 
