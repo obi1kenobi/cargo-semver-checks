@@ -82,7 +82,7 @@ fn create_placeholder_rustdoc_manifest(
                     features: get_all_crate_features_from_registry(crate_),
                     ..DependencyDetail::default()
                 },
-                CrateSource::ManifestPath { path, name: _ } => DependencyDetail {
+                CrateSource::ManifestPath { path, .. } => DependencyDetail {
                     path: Some(
                         // The Manifest will be saved in some other directory,
                         // so for convenience, we're using absolute paths.
