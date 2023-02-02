@@ -52,10 +52,12 @@ enum CrateSource<'a> {
 
 /// To get the rustdoc of the baseline, we first create a placeholder project somewhere
 /// with the baseline as a dependency, and run `cargo rustdoc` on it.
-fn create_placeholder_rustdoc_manifest(crate_source: &CrateSource) -> cargo_toml::Manifest<()> {
+fn create_placeholder_rustdoc_manifest(
+    crate_source: &CrateSource,
+) -> anyhow::Result<cargo_toml::Manifest<()>> {
     use cargo_toml::*;
 
-    Manifest::<()> {
+    Ok(Manifest::<()> {
         package: {
             let mut package = Package::new("rustdoc", "0.0.0");
             package.publish = Inheritable::Set(Publish::Flag(false));
@@ -84,9 +86,9 @@ fn create_placeholder_rustdoc_manifest(crate_source: &CrateSource) -> cargo_toml
                         // The Manifest will be saved in some other directory,
                         // so for convenience, we're using absolute paths.
                         path.canonicalize()
-                            .expect("Failed to canonicalize Manifest path")
+                            .with_context(|| "failed to canonicalize Manifest path")?
                             .to_str()
-                            .expect("Manifest path is not valid UTF-8")
+                            .with_context(|| "Manifest path is not valid UTF-8")?
                             .to_string(),
                     ),
                     features: get_all_crate_features_from_manifest(path),
@@ -104,14 +106,14 @@ fn create_placeholder_rustdoc_manifest(crate_source: &CrateSource) -> cargo_toml
             deps
         },
         ..Default::default()
-    }
+    })
 }
 
 fn save_placeholder_rustdoc_manifest(
     placeholder_build_dir: &Path,
     placeholder_manifest: cargo_toml::Manifest<()>,
 ) -> anyhow::Result<PathBuf> {
-    std::fs::create_dir_all(placeholder_build_dir)?;
+    std::fs::create_dir_all(placeholder_build_dir).with_context(|| "failed to create build dir")?;
     let placeholder_manifest_path = placeholder_build_dir.join("Cargo.toml");
 
     // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
@@ -120,8 +122,10 @@ fn save_placeholder_rustdoc_manifest(
     std::fs::write(
         &placeholder_manifest_path,
         toml::to_string(&placeholder_manifest)?,
-    )?;
-    std::fs::write(placeholder_build_dir.join("lib.rs"), "")?;
+    )
+    .with_context(|| "failed to write placeholder Manifest")?;
+    std::fs::write(placeholder_build_dir.join("lib.rs"), "")
+        .with_context(|| "failed to create empty lib.rs")?;
     Ok(placeholder_manifest_path)
 }
 
@@ -138,14 +142,12 @@ fn generate_rustdoc(
     let (build_dir, cache_dir) = match crate_source {
         CrateSource::Registry { .. } => {
             let crate_identifier = format!("registry-{}-{}", slugify(&name), slugify(version));
-            let cache_dir = target_root
-                .join("cache")
-                .join(format!("{crate_identifier}.json"));
+            let cache_dir = target_root.join("cache").join(&crate_identifier);
 
             // We assume that the generated rustdoc is untouched.
             // Users should run cargo-clean if they experience any anomalies.
             if cache_dir.exists() {
-                return Ok(cache_dir);
+                return Ok(cache_dir.join("rustdoc.json"));
             }
 
             let build_dir = target_root.join(crate_identifier);
@@ -156,9 +158,11 @@ fn generate_rustdoc(
         }
     };
 
-    let placeholder_manifest = create_placeholder_rustdoc_manifest(&crate_source);
+    let placeholder_manifest = create_placeholder_rustdoc_manifest(&crate_source)
+        .with_context(|| "failed to create placeholder manifest")?;
     let placeholder_manifest_path =
-        save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)?;
+        save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)
+            .with_context(|| "failed to save placeholder rustdoc manifest")?;
 
     config.shell_status("Parsing", format_args!("{name} v{version} (baseline)"))?;
     // TODO: replace (baseline) with something else
@@ -172,14 +176,17 @@ fn generate_rustdoc(
     match crate_source {
         CrateSource::Registry { .. } => {
             // Clean up after ourselves.
-            std::fs::create_dir_all(&cache_dir)?;
-            std::fs::copy(rustdoc_path, &cache_dir)?;
-            std::fs::remove_dir_all(build_dir)?;
+            std::fs::create_dir_all(&cache_dir).with_context(|| "failed to create cache dir")?;
+            let cache_rustdoc_path = cache_dir.join("rustdoc.json");
+            std::fs::copy(rustdoc_path, &cache_rustdoc_path)
+                .with_context(|| "failed to copy cache dir")?;
+            std::fs::remove_dir_all(build_dir).with_context(|| "failed to remove build dir")?;
+            Ok(cache_rustdoc_path)
         }
-        CrateSource::ManifestPath { .. } => {}
-    };
-
-    Ok(cache_dir)
+        CrateSource::ManifestPath { .. } => {
+            unimplemented!()
+        }
+    }
 }
 
 pub(crate) trait BaselineLoader {
