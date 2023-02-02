@@ -184,7 +184,9 @@ fn generate_rustdoc(
             Ok(cache_rustdoc_path)
         }
         CrateSource::ManifestPath { .. } => {
-            unimplemented!()
+            // We don't do any caching here -- since the crate is saved locally,
+            // it could be modified by the user since it was cached.
+            Ok(rustdoc_path)
         }
     }
 }
