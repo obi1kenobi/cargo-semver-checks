@@ -348,9 +348,9 @@ impl BaselineLoader for RegistryBaseline {
             return Ok(cached_rustdoc);
         }
 
-        let base_root = self.target_root.join(crate_identifier);
-        std::fs::create_dir_all(&base_root)?;
-        let manifest_path = base_root.join("Cargo.toml");
+        let build_dir = self.target_root.join(crate_identifier);
+        std::fs::create_dir_all(&build_dir)?;
+        let manifest_path = build_dir.join("Cargo.toml");
 
         let crate_baseline = crate_
             .versions()
@@ -365,13 +365,13 @@ impl BaselineLoader for RegistryBaseline {
             })?;
 
         // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
-        let _: std::io::Result<()> = std::fs::remove_file(base_root.join("Cargo.lock"));
+        let _: std::io::Result<()> = std::fs::remove_file(build_dir.join("Cargo.lock"));
 
         std::fs::write(
             &manifest_path,
             toml::to_string(&create_rustdoc_manifest_for_crate_version(crate_baseline))?,
         )?;
-        std::fs::write(base_root.join("lib.rs"), "")?;
+        std::fs::write(build_dir.join("lib.rs"), "")?;
 
         config.shell_status("Parsing", format_args!("{name} v{base_version} (baseline)"))?;
         let rustdoc_path = rustdoc.dump(
@@ -383,7 +383,7 @@ impl BaselineLoader for RegistryBaseline {
         // Clean up after ourselves.
         std::fs::create_dir_all(cache_dir)?;
         std::fs::copy(rustdoc_path, &cached_rustdoc)?;
-        std::fs::remove_dir_all(base_root)?;
+        std::fs::remove_dir_all(build_dir)?;
 
         Ok(cached_rustdoc)
     }
