@@ -13,8 +13,8 @@ categories = ["command-line-utilities", "development-tools::cargo-plugins"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-trustfall_core = "0.1.1"
-trustfall_rustdoc = { version = "0.8.2", features = ["v21", "v22", "v23", "v24"] }
+trustfall_core = { version = "0.2.0", path = "../trustfall/trustfall_core" }
+trustfall_rustdoc = { version = "0.8.2", features = ["v24"], path = "../trustfall-rustdoc" }
 clap = { version = "4.0.0", features = ["derive", "cargo"] }
 serde_json = "1.0.82"
 anyhow = "1.0.58"
