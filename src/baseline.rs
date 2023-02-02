@@ -18,7 +18,6 @@ mod crate_features {
     pub(crate) fn get_all_crate_features_from_registry(
         crate_: &crates_index::Version,
     ) -> Vec<String> {
-        //
         // Implicit features from optional dependencies have to be added separately
         // from regular features: https://github.com/obi1kenobi/cargo-semver-checks/issues/265
         let mut implicit_features: std::collections::BTreeSet<_> = crate_
