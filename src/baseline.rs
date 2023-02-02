@@ -127,7 +127,7 @@ fn save_placeholder_rustdoc_manifest(
         &placeholder_manifest_path,
         toml::to_string(&placeholder_manifest)?,
     )
-    .with_context(|| "failed to write placeholder Manifest")?;
+    .with_context(|| "failed to write placeholder manifest")?;
     std::fs::write(placeholder_build_dir.join("lib.rs"), "")
         .with_context(|| "failed to create empty lib.rs")?;
     Ok(placeholder_manifest_path)
