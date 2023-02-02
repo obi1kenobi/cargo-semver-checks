@@ -338,11 +338,12 @@ impl BaselineLoader for RegistryBaseline {
             choose_baseline_version(&crate_, version_current)?
         };
 
-        let base_root = self.target_root.join(format!(
+        let crate_identifier = format!(
             "registry-{}-{}",
             slugify(name),
             slugify(&base_version)
-        ));
+        );
+        let base_root = self.target_root.join(crate_identifier);
         std::fs::create_dir_all(&base_root)?;
         let manifest_path = base_root.join("Cargo.toml");
 
@@ -411,7 +412,7 @@ mod tests {
             "yanked": yanked,
             "cksum": "00".repeat(32),
         }))
-        .expect("hand-written JSON used to create mock crates_index::Version should be valid")
+            .expect("hand-written JSON used to create mock crates_index::Version should be valid")
     }
 
     fn new_crate(versions: Vec<Version>) -> Crate {
