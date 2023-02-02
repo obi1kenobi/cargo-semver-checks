@@ -12,7 +12,8 @@ mod crate_features {
     /// only when certain features are enabled.
     ///
     /// By default, we want to generate rustdoc with `--all-features`,
-    /// but that option isn't available here so we have to implement it ourselves.
+    /// but that option isn't available outside of the current crate,
+    /// so we have to implement it ourselves.
 
     pub(crate) fn get_all_crate_features_from_registry(
         crate_: &crates_index::Version,
