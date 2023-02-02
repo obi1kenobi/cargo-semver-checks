@@ -1,4 +1,3 @@
-use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use anyhow::Context as _;
@@ -8,40 +7,44 @@ use crate::dump::RustDocCommand;
 use crate::util::slugify;
 use crate::GlobalConfig;
 
-fn get_all_crate_features_from_registry(crate_: &crates_index::Version) -> Vec<String> {
-    // Sometimes crates ship types with fields or variants that are included
-    // only when certain features are enabled.
-    //
-    // By default, we want to generate rustdoc with `--all-features`,
-    // but that option isn't available here so we have to implement it ourselves.
-    // TODO: this comment is not yet true, but it'll be in some next PR. Then move the whole comment
-    // outside and remove this TODO.
-    //
-    // Implicit features from optional dependencies have to be added separately
-    // from regular features: https://github.com/obi1kenobi/cargo-semver-checks/issues/265
-    let mut implicit_features: BTreeSet<_> = crate_
-        .dependencies()
-        .iter()
-        .filter_map(|dep| dep.is_optional().then_some(dep.name()))
-        .map(|x| x.to_string())
-        .collect();
-    for feature_defn in crate_.features().values().flatten() {
-        // "If you specify the optional dependency with the dep: prefix anywhere
-        //  in the [features] table, that disables the implicit feature."
-        // https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies
-        if let Some(optional_dep) = feature_defn.strip_prefix("dep:") {
-            implicit_features.remove(optional_dep);
-        }
-    }
-    let regular_features: BTreeSet<_> = crate_.features().keys().cloned().collect();
-    let mut all_crate_features = implicit_features;
-    all_crate_features.extend(regular_features);
-    all_crate_features.into_iter().collect()
-}
+mod crate_features {
+    /// Sometimes crates ship types with fields or variants that are included
+    /// only when certain features are enabled.
+    ///
+    /// By default, we want to generate rustdoc with `--all-features`,
+    /// but that option isn't available here so we have to implement it ourselves.
 
-#[allow(unused_variables)]
-fn get_all_crate_features_from_manifest(path: &Path) -> Vec<String> {
-    unimplemented!()
+    pub(crate) fn get_all_crate_features_from_registry(
+        crate_: &crates_index::Version,
+    ) -> Vec<String> {
+        //
+        // Implicit features from optional dependencies have to be added separately
+        // from regular features: https://github.com/obi1kenobi/cargo-semver-checks/issues/265
+        let mut implicit_features: std::collections::BTreeSet<_> = crate_
+            .dependencies()
+            .iter()
+            .filter_map(|dep| dep.is_optional().then_some(dep.name()))
+            .map(|x| x.to_string())
+            .collect();
+        for feature_defn in crate_.features().values().flatten() {
+            // "If you specify the optional dependency with the dep: prefix anywhere
+            //  in the [features] table, that disables the implicit feature."
+            // https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies
+            if let Some(optional_dep) = feature_defn.strip_prefix("dep:") {
+                implicit_features.remove(optional_dep);
+            }
+        }
+        let regular_features: std::collections::BTreeSet<_> =
+            crate_.features().keys().cloned().collect();
+        let mut all_crate_features = implicit_features;
+        all_crate_features.extend(regular_features);
+        all_crate_features.into_iter().collect()
+    }
+
+    #[allow(unused_variables)]
+    pub(crate) fn get_all_crate_features_from_manifest(path: &std::path::Path) -> Vec<String> {
+        unimplemented!()
+    }
 }
 
 #[allow(dead_code)]
@@ -79,7 +82,7 @@ fn create_placeholder_rustdoc_manifest(
                     // give us the latest semver-compatible version which is not we want.
                     // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
                     version: Some(format!("={}", crate_.version())),
-                    features: get_all_crate_features_from_registry(crate_),
+                    features: crate_features::get_all_crate_features_from_registry(crate_),
                     ..DependencyDetail::default()
                 },
                 CrateSource::ManifestPath { path, .. } => DependencyDetail {
@@ -92,7 +95,7 @@ fn create_placeholder_rustdoc_manifest(
                             .with_context(|| "Manifest path is not valid UTF-8")?
                             .to_string(),
                     ),
-                    features: get_all_crate_features_from_manifest(path),
+                    features: crate_features::get_all_crate_features_from_manifest(path),
                     ..DependencyDetail::default()
                 },
             };
