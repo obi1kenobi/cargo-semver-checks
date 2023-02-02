@@ -143,19 +143,20 @@ fn generate_rustdoc(
         CrateSource::Registry { crate_ } => (crate_.name().to_string(), crate_.version()),
         CrateSource::ManifestPath { .. } => unimplemented!(),
     };
-    let (build_dir, cache_dir) = match crate_source {
+    let (build_dir, cache_dir, cached_rustdoc) = match crate_source {
         CrateSource::Registry { .. } => {
             let crate_identifier = format!("registry-{}-{}", slugify(&name), slugify(version));
-            let cache_dir = target_root.join("cache").join(&crate_identifier);
+            let cache_dir = target_root.join("cache");
+            let cached_rustdoc = cache_dir.join(format!("{crate_identifier}.json"));
 
             // We assume that the generated rustdoc is untouched.
             // Users should run cargo-clean if they experience any anomalies.
-            if cache_dir.exists() {
-                return Ok(cache_dir.join("rustdoc.json"));
+            if cached_rustdoc.exists() {
+                return Ok(cached_rustdoc);
             }
 
             let build_dir = target_root.join(crate_identifier);
-            (build_dir, cache_dir)
+            (build_dir, cache_dir, cached_rustdoc)
         }
         CrateSource::ManifestPath { .. } => {
             unimplemented!()
@@ -180,12 +181,11 @@ fn generate_rustdoc(
     match crate_source {
         CrateSource::Registry { .. } => {
             // Clean up after ourselves.
-            std::fs::create_dir_all(&cache_dir).with_context(|| "failed to create cache dir")?;
-            let cache_rustdoc_path = cache_dir.join("rustdoc.json");
-            std::fs::copy(rustdoc_path, &cache_rustdoc_path)
-                .with_context(|| "failed to copy cache dir")?;
-            std::fs::remove_dir_all(build_dir).with_context(|| "failed to remove build dir")?;
-            Ok(cache_rustdoc_path)
+            std::fs::create_dir_all(cache_dir)?;
+            std::fs::copy(rustdoc_path, &cached_rustdoc)?;
+            std::fs::remove_dir_all(build_dir)?;
+
+            Ok(cached_rustdoc)
         }
         CrateSource::ManifestPath { .. } => {
             // We don't do any caching here -- since the crate is saved locally,
