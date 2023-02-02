@@ -87,12 +87,12 @@ fn create_placeholder_rustdoc_manifest(
                 },
                 CrateSource::ManifestPath { path, .. } => DependencyDetail {
                     path: Some(
-                        // The Manifest will be saved in some other directory,
+                        // The manifest will be saved in some other directory,
                         // so for convenience, we're using absolute paths.
                         path.canonicalize()
-                            .with_context(|| "failed to canonicalize Manifest path")?
+                            .with_context(|| "failed to canonicalize manifest path")?
                             .to_str()
-                            .with_context(|| "Manifest path is not valid UTF-8")?
+                            .with_context(|| "manifest path is not valid UTF-8")?
                             .to_string(),
                     ),
                     features: crate_features::get_all_crate_features_from_manifest(path),
