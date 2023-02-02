@@ -45,6 +45,7 @@ fn get_all_crate_features_from_manifest(path: &Path) -> Vec<String> {
 }
 
 #[allow(dead_code)]
+#[derive(Debug, Clone)]
 enum CrateSource<'a> {
     Registry { crate_: &'a crates_index::Version },
     ManifestPath { path: &'a Path, name: String },
