@@ -338,11 +338,16 @@ impl BaselineLoader for RegistryBaseline {
             choose_baseline_version(&crate_, version_current)?
         };
 
-        let crate_identifier = format!(
-            "registry-{}-{}",
-            slugify(name),
-            slugify(&base_version)
-        );
+        let crate_identifier = format!("registry-{}-{}", slugify(name), slugify(&base_version));
+
+        let cache_dir = self.target_root.join("cache");
+        let cached_rustdoc = cache_dir.join(format!("{crate_identifier}.json"));
+
+        // We assume that the generated rustdoc is untouched. Users should run cargo-clean if they experience any anomalies.
+        if cached_rustdoc.exists() {
+            return Ok(cached_rustdoc);
+        }
+
         let base_root = self.target_root.join(crate_identifier);
         std::fs::create_dir_all(&base_root)?;
         let manifest_path = base_root.join("Cargo.toml");
@@ -374,7 +379,13 @@ impl BaselineLoader for RegistryBaseline {
             Some(&format!("{name}@{base_version}")),
             false,
         )?;
-        Ok(rustdoc_path)
+
+        // Clean up after ourselves.
+        std::fs::create_dir_all(cache_dir)?;
+        std::fs::copy(rustdoc_path, &cached_rustdoc)?;
+        std::fs::remove_dir_all(base_root)?;
+
+        Ok(cached_rustdoc)
     }
 }
 
@@ -412,7 +423,7 @@ mod tests {
             "yanked": yanked,
             "cksum": "00".repeat(32),
         }))
-            .expect("hand-written JSON used to create mock crates_index::Version should be valid")
+        .expect("hand-written JSON used to create mock crates_index::Version should be valid")
     }
 
     fn new_crate(versions: Vec<Version>) -> Crate {
