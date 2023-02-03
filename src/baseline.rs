@@ -167,6 +167,9 @@ fn generate_rustdoc(
             // We assume that the generated rustdoc is untouched.
             // Users should run cargo-clean if they experience any anomalies.
             if cached_rustdoc.exists() {
+                config.shell_status("Parsing", format_args!("{name} v{version} (baseline, cached)"))?;
+                // TODO: replace "baseline" with a string passed as a function argument
+                // (the plan is to make this function work for both baseline and current).
                 return Ok(cached_rustdoc);
             }
 
@@ -185,7 +188,8 @@ fn generate_rustdoc(
             .context("failed to save placeholder rustdoc manifest")?;
 
     config.shell_status("Parsing", format_args!("{name} v{version} (baseline)"))?;
-    // TODO: replace (baseline) with something else
+    // TODO: replace "baseline" with a string passed as a function argument
+    // (the plan is to make this function work for both baseline and current).
 
     let rustdoc_path = rustdoc.dump(
         placeholder_manifest_path.as_path(),
