@@ -55,14 +55,14 @@ enum CrateSource<'a> {
 }
 
 impl<'a> CrateSource<'a> {
-    fn get_name(&self) -> String {
+    fn name(&self) -> String {
         match self {
             Self::Registry { crate_ } => crate_.name().to_string(),
             Self::ManifestPath { .. } => unimplemented!(),
         }
     }
 
-    fn get_version(&self) -> String {
+    fn version(&self) -> String {
         match self {
             Self::Registry { crate_ } => crate_.version().to_string(),
             Self::ManifestPath { .. } => unimplemented!(),
@@ -117,7 +117,7 @@ fn create_placeholder_rustdoc_manifest(
             };
             let mut deps = DepsSet::new();
             deps.insert(
-                crate_source.get_name(),
+                crate_source.name(),
                 Dependency::Detailed(project_with_features),
             );
             deps
@@ -152,8 +152,8 @@ fn generate_rustdoc(
     target_root: PathBuf,
     crate_source: CrateSource,
 ) -> anyhow::Result<PathBuf> {
-    let name = crate_source.get_name();
-    let version = crate_source.get_version();
+    let name = crate_source.name();
+    let version = crate_source.version();
 
     let (build_dir, cache_dir, cached_rustdoc) = match crate_source {
         CrateSource::Registry { .. } => {
