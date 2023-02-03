@@ -187,6 +187,9 @@ fn generate_rustdoc(
         "{}-{}-{}",
         match crate_source {
             CrateSource::Registry { .. } => "registry",
+            // Identifiers of manifest-based crates cannot be used for caching,
+            // since they probably correspond to a specific (and unknown) gitrev and git state
+            // so cached entries cannot be checked to see if they are a match or not.
             CrateSource::ManifestPath { .. } => "local",
         },
         slugify(&name),
