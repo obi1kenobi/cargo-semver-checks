@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::path::{Path, PathBuf};
 
 use anyhow::Context as _;
 use crates_index::Crate;
@@ -7,6 +7,213 @@ use crate::dump::RustDocCommand;
 use crate::util::slugify;
 use crate::GlobalConfig;
 
+mod crate_features {
+    /// Sometimes crates ship types with fields or variants that are included
+    /// only when certain features are enabled.
+    ///
+    /// By default, we want to generate rustdoc with `--all-features`,
+    /// but that option isn't available outside of the current crate,
+    /// so we have to implement it ourselves.
+
+    pub(crate) fn get_all_crate_features_from_registry(
+        crate_: &crates_index::Version,
+    ) -> Vec<String> {
+        // Implicit features from optional dependencies have to be added separately
+        // from regular features: https://github.com/obi1kenobi/cargo-semver-checks/issues/265
+        let mut implicit_features: std::collections::BTreeSet<_> = crate_
+            .dependencies()
+            .iter()
+            .filter_map(|dep| dep.is_optional().then_some(dep.name()))
+            .map(|x| x.to_string())
+            .collect();
+        for feature_defn in crate_.features().values().flatten() {
+            // "If you specify the optional dependency with the dep: prefix anywhere
+            //  in the [features] table, that disables the implicit feature."
+            // https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies
+            if let Some(optional_dep) = feature_defn.strip_prefix("dep:") {
+                implicit_features.remove(optional_dep);
+            }
+        }
+        let regular_features: std::collections::BTreeSet<_> =
+            crate_.features().keys().cloned().collect();
+        let mut all_crate_features = implicit_features;
+        all_crate_features.extend(regular_features);
+        all_crate_features.into_iter().collect()
+    }
+
+    #[allow(unused_variables)]
+    pub(crate) fn get_all_crate_features_from_manifest(path: &std::path::Path) -> Vec<String> {
+        unimplemented!()
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+enum CrateSource<'a> {
+    Registry { crate_: &'a crates_index::Version },
+    ManifestPath { path: &'a Path, name: String },
+}
+
+impl<'a> CrateSource<'a> {
+    fn name(&self) -> &str {
+        match self {
+            Self::Registry { crate_ } => crate_.name(),
+            Self::ManifestPath { .. } => unimplemented!(),
+        }
+    }
+
+    fn version(&self) -> &str {
+        match self {
+            Self::Registry { crate_ } => crate_.version(),
+            Self::ManifestPath { .. } => unimplemented!(),
+        }
+    }
+}
+
+/// To get the rustdoc of the baseline, we first create a placeholder project somewhere
+/// with the baseline as a dependency, and run `cargo rustdoc` on it.
+fn create_placeholder_rustdoc_manifest(
+    crate_source: &CrateSource,
+) -> anyhow::Result<cargo_toml::Manifest<()>> {
+    use cargo_toml::*;
+
+    Ok(Manifest::<()> {
+        package: {
+            let mut package = Package::new("rustdoc", "0.0.0");
+            package.publish = Inheritable::Set(Publish::Flag(false));
+            Some(package)
+        },
+        workspace: Some(Workspace::<()>::default()),
+        lib: {
+            let product = Product {
+                path: Some("lib.rs".to_string()),
+                ..Product::default()
+            };
+            Some(product)
+        },
+        dependencies: {
+            let project_with_features: DependencyDetail = match crate_source {
+                CrateSource::Registry { crate_ } => DependencyDetail {
+                    // We need the *exact* version as a dependency, or else cargo will
+                    // give us the latest semver-compatible version which is not we want.
+                    // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
+                    version: Some(format!("={}", crate_.version())),
+                    features: crate_features::get_all_crate_features_from_registry(crate_),
+                    ..DependencyDetail::default()
+                },
+                CrateSource::ManifestPath { path, .. } => DependencyDetail {
+                    path: Some(
+                        // The manifest will be saved in some other directory,
+                        // so for convenience, we're using absolute paths.
+                        path.canonicalize()
+                            .context("failed to canonicalize manifest path")?
+                            .to_str()
+                            .context("manifest path is not valid UTF-8")?
+                            .to_string(),
+                    ),
+                    features: crate_features::get_all_crate_features_from_manifest(path),
+                    ..DependencyDetail::default()
+                },
+            };
+            let mut deps = DepsSet::new();
+            deps.insert(
+                crate_source.name().to_string(),
+                Dependency::Detailed(project_with_features),
+            );
+            deps
+        },
+        ..Default::default()
+    })
+}
+
+fn save_placeholder_rustdoc_manifest(
+    placeholder_build_dir: &Path,
+    placeholder_manifest: cargo_toml::Manifest<()>,
+) -> anyhow::Result<PathBuf> {
+    std::fs::create_dir_all(placeholder_build_dir).context("failed to create build dir")?;
+    let placeholder_manifest_path = placeholder_build_dir.join("Cargo.toml");
+
+    // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
+    let _: std::io::Result<()> = std::fs::remove_file(placeholder_build_dir.join("Cargo.lock"));
+
+    std::fs::write(
+        &placeholder_manifest_path,
+        toml::to_string(&placeholder_manifest)?,
+    )
+    .context("failed to write placeholder manifest")?;
+    std::fs::write(placeholder_build_dir.join("lib.rs"), "")
+        .context("failed to create empty lib.rs")?;
+    Ok(placeholder_manifest_path)
+}
+
+fn generate_rustdoc(
+    config: &mut GlobalConfig,
+    rustdoc: &RustDocCommand,
+    target_root: PathBuf,
+    crate_source: CrateSource,
+) -> anyhow::Result<PathBuf> {
+    let name = crate_source.name();
+    let version = crate_source.version();
+
+    let (build_dir, cache_dir, cached_rustdoc) = match crate_source {
+        CrateSource::Registry { .. } => {
+            let crate_identifier = format!("registry-{}-{}", slugify(name), slugify(version));
+            let cache_dir = target_root.join("cache");
+            let cached_rustdoc = cache_dir.join(format!("{crate_identifier}.json"));
+
+            // We assume that the generated rustdoc is untouched.
+            // Users should run cargo-clean if they experience any anomalies.
+            if cached_rustdoc.exists() {
+                config.shell_status(
+                    "Parsing",
+                    format_args!("{name} v{version} (baseline, cached)"),
+                )?;
+                // TODO: replace "baseline" with a string passed as a function argument
+                // (the plan is to make this function work for both baseline and current).
+                return Ok(cached_rustdoc);
+            }
+
+            let build_dir = target_root.join(crate_identifier);
+            (build_dir, cache_dir, cached_rustdoc)
+        }
+        CrateSource::ManifestPath { .. } => {
+            unimplemented!()
+        }
+    };
+
+    let placeholder_manifest = create_placeholder_rustdoc_manifest(&crate_source)
+        .context("failed to create placeholder manifest")?;
+    let placeholder_manifest_path =
+        save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)
+            .context("failed to save placeholder rustdoc manifest")?;
+
+    config.shell_status("Parsing", format_args!("{name} v{version} (baseline)"))?;
+    // TODO: replace "baseline" with a string passed as a function argument
+    // (the plan is to make this function work for both baseline and current).
+
+    let rustdoc_path = rustdoc.dump(
+        placeholder_manifest_path.as_path(),
+        Some(&format!("{name}@{version}")),
+        false,
+    )?;
+
+    match crate_source {
+        CrateSource::Registry { .. } => {
+            // Clean up after ourselves.
+            std::fs::create_dir_all(cache_dir)?;
+            std::fs::copy(rustdoc_path, &cached_rustdoc)?;
+            std::fs::remove_dir_all(build_dir)?;
+
+            Ok(cached_rustdoc)
+        }
+        CrateSource::ManifestPath { .. } => {
+            // We don't do any caching here -- since the crate is saved locally,
+            // it could be modified by the user since it was cached.
+            Ok(rustdoc_path)
+        }
+    }
+}
+
 pub(crate) trait BaselineLoader {
     fn load_rustdoc(
         &self,
@@ -14,15 +221,15 @@ pub(crate) trait BaselineLoader {
         rustdoc: &RustDocCommand,
         name: &str,
         version_current: Option<&semver::Version>,
-    ) -> anyhow::Result<std::path::PathBuf>;
+    ) -> anyhow::Result<PathBuf>;
 }
 
 pub(crate) struct RustdocBaseline {
-    path: std::path::PathBuf,
+    path: PathBuf,
 }
 
 impl RustdocBaseline {
-    pub(crate) fn new(path: std::path::PathBuf) -> Self {
+    pub(crate) fn new(path: PathBuf) -> Self {
         Self { path }
     }
 }
@@ -34,14 +241,14 @@ impl BaselineLoader for RustdocBaseline {
         _rustdoc: &RustDocCommand,
         _name: &str,
         _version_current: Option<&semver::Version>,
-    ) -> anyhow::Result<std::path::PathBuf> {
+    ) -> anyhow::Result<PathBuf> {
         Ok(self.path.clone())
     }
 }
 
 pub(crate) struct PathBaseline {
-    root: std::path::PathBuf,
-    lookup: std::collections::HashMap<String, (String, std::path::PathBuf)>,
+    root: PathBuf,
+    lookup: std::collections::HashMap<String, (String, PathBuf)>,
 }
 
 impl PathBaseline {
@@ -74,7 +281,7 @@ impl BaselineLoader for PathBaseline {
         rustdoc: &RustDocCommand,
         name: &str,
         _version_current: Option<&semver::Version>,
-    ) -> anyhow::Result<std::path::PathBuf> {
+    ) -> anyhow::Result<PathBuf> {
         let (version, manifest_path) = self
             .lookup
             .get(name)
@@ -153,7 +360,7 @@ impl BaselineLoader for GitBaseline {
         rustdoc: &RustDocCommand,
         name: &str,
         version_current: Option<&semver::Version>,
-    ) -> anyhow::Result<std::path::PathBuf> {
+    ) -> anyhow::Result<PathBuf> {
         self.path
             .load_rustdoc(config, rustdoc, name, version_current)
     }
@@ -174,7 +381,7 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
 }
 
 pub(crate) struct RegistryBaseline {
-    target_root: std::path::PathBuf,
+    target_root: PathBuf,
     version: Option<semver::Version>,
     index: crates_index::Index,
 }
@@ -198,76 +405,6 @@ impl RegistryBaseline {
 
     pub fn set_version(&mut self, version: semver::Version) {
         self.version = Some(version);
-    }
-}
-
-/// To get the rustdoc of the baseline, we first create a placeholder project somewhere
-/// with the baseline as a dependency, and run `cargo rustdoc` on it.
-fn create_rustdoc_manifest_for_crate_version(
-    crate_baseline: &crates_index::Version,
-) -> cargo_toml::Manifest<()> {
-    use cargo_toml::*;
-
-    Manifest::<()> {
-        package: {
-            let mut package = Package::new("rustdoc", "0.0.0");
-            package.publish = Inheritable::Set(Publish::Flag(false));
-            Some(package)
-        },
-        workspace: Some(Workspace::<()>::default()),
-        lib: {
-            let product = Product {
-                path: Some("lib.rs".to_string()),
-                ..Product::default()
-            };
-            Some(product)
-        },
-        dependencies: {
-            // Sometimes crates ship types with fields or variants that are included
-            // only when certain features are enabled.
-            //
-            // The current crate's rustdoc is generated with `--all-features`.
-            // We need the baseline to be generated with all features too,
-            // but that option isn't available here so we have to implement it ourselves.
-            //
-            // Fixes:
-            // - regular features: https://github.com/obi1kenobi/cargo-semver-check/issues/147
-            // - implicit features from optional dependencies:
-            //     https://github.com/obi1kenobi/cargo-semver-checks/issues/265
-            let mut implicit_features: BTreeSet<_> = crate_baseline
-                .dependencies()
-                .iter()
-                .filter_map(|dep| dep.is_optional().then_some(dep.name()))
-                .map(|x| x.to_string())
-                .collect();
-            for feature_defn in crate_baseline.features().values().flatten() {
-                // "If you specify the optional dependency with the dep: prefix anywhere
-                //  in the [features] table, that disables the implicit feature."
-                // https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies
-                if let Some(optional_dep) = feature_defn.strip_prefix("dep:") {
-                    implicit_features.remove(optional_dep);
-                }
-            }
-            let regular_features: BTreeSet<_> = crate_baseline.features().keys().cloned().collect();
-            let mut all_features = implicit_features;
-            all_features.extend(regular_features);
-
-            let project_with_features = DependencyDetail {
-                // We need the *exact* version as a dependency, or else cargo will
-                // give us the latest semver-compatible version which is not we want.
-                // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
-                version: Some(format!("={}", crate_baseline.version())),
-                features: all_features.into_iter().collect(),
-                ..DependencyDetail::default()
-            };
-            let mut deps = DepsSet::new();
-            deps.insert(
-                crate_baseline.name().to_string(),
-                Dependency::Detailed(project_with_features),
-            );
-            deps
-        },
-        ..Default::default()
     }
 }
 
@@ -326,7 +463,7 @@ impl BaselineLoader for RegistryBaseline {
         rustdoc: &RustDocCommand,
         name: &str,
         version_current: Option<&semver::Version>,
-    ) -> anyhow::Result<std::path::PathBuf> {
+    ) -> anyhow::Result<PathBuf> {
         let crate_ = self
             .index
             .crate_(name)
@@ -338,15 +475,7 @@ impl BaselineLoader for RegistryBaseline {
             choose_baseline_version(&crate_, version_current)?
         };
 
-        let base_root = self.target_root.join(format!(
-            "registry-{}-{}",
-            slugify(name),
-            slugify(&base_version)
-        ));
-        std::fs::create_dir_all(&base_root)?;
-        let manifest_path = base_root.join("Cargo.toml");
-
-        let crate_baseline = crate_
+        let crate_ = crate_
             .versions()
             .iter()
             .find(|v| v.version() == base_version)
@@ -358,22 +487,12 @@ impl BaselineLoader for RegistryBaseline {
                 )
             })?;
 
-        // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
-        let _: std::io::Result<()> = std::fs::remove_file(base_root.join("Cargo.lock"));
-
-        std::fs::write(
-            &manifest_path,
-            toml::to_string(&create_rustdoc_manifest_for_crate_version(crate_baseline))?,
-        )?;
-        std::fs::write(base_root.join("lib.rs"), "")?;
-
-        config.shell_status("Parsing", format_args!("{name} v{base_version} (baseline)"))?;
-        let rustdoc_path = rustdoc.dump(
-            manifest_path.as_path(),
-            Some(&format!("{name}@{base_version}")),
-            false,
-        )?;
-        Ok(rustdoc_path)
+        generate_rustdoc(
+            config,
+            rustdoc,
+            self.target_root.clone(),
+            CrateSource::Registry { crate_ },
+        )
     }
 }
 

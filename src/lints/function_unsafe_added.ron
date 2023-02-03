@@ -12,7 +12,6 @@ SemverQuery(
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         unsafe @filter(op: "!=", value: ["$true"])
-                        name @output @tag
 
                         importable_path {
                             path @output @tag
@@ -24,7 +23,7 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
+                        name @output
                         unsafe @filter(op: "=", value: ["$true"])
 
                         importable_path {

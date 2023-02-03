@@ -11,7 +11,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        enum_name: name @output @tag
+                        enum_name: name @output
 
                         importable_path {
                             path @output @tag
@@ -44,7 +44,6 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%enum_name"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])

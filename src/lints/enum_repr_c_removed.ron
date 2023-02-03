@@ -15,8 +15,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @tag @output
-                        
+
                         attribute {
                             old_attr: raw_attribute @output
                             content {
@@ -37,8 +36,8 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
-                        
+                        name @output
+
                         attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             content {
                                 base @filter(op: "=", value: ["$repr"])
