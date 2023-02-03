@@ -97,7 +97,7 @@ fn main() -> anyhow::Result<()> {
                 } else if let Some(root) = args.baseline_root.as_deref() {
                     let metadata = args.manifest.metadata().no_deps().exec()?;
                     let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-                    Box::new(baseline::PathBaseline::new(&target, root)?)
+                    Box::new(baseline::PathBaseline::new(root, &target)?)
                 } else if let Some(rev) = args.baseline_rev.as_deref() {
                     let metadata = args.manifest.metadata().no_deps().exec()?;
                     let source = metadata.workspace_root.as_std_path();

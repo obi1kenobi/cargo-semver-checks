@@ -294,18 +294,21 @@ impl BaselineLoader for RustdocBaseline {
 }
 
 pub(crate) struct PathBaseline {
-    target_root: PathBuf,
-    root: PathBuf,
+    project_root: PathBuf,
     lookup: std::collections::HashMap<String, Manifest>,
+    target_root: PathBuf,
 }
 
 impl PathBaseline {
     pub(crate) fn new(
+        // Path to a directory with the manifest or with subdirectories with the manifests.
+        project_root: &std::path::Path,
+
+        // Path to a directory where the placeholder manifest / rustdoc can be created.
         target_root: &std::path::Path,
-        root: &std::path::Path,
     ) -> anyhow::Result<Self> {
         let mut lookup = std::collections::HashMap::new();
-        for result in ignore::Walk::new(root) {
+        for result in ignore::Walk::new(project_root) {
             let entry = result?;
             if entry.file_name() == "Cargo.toml" {
                 if let Ok(manifest) = crate::manifest::Manifest::parse(entry.into_path()) {
@@ -316,9 +319,9 @@ impl PathBaseline {
             }
         }
         Ok(Self {
-            target_root: target_root.to_owned(),
-            root: root.to_owned(),
+            project_root: project_root.to_owned(),
             lookup,
+            target_root: target_root.to_owned(),
         })
     }
 }
@@ -331,10 +334,13 @@ impl BaselineLoader for PathBaseline {
         name: &str,
         _version_current: Option<&semver::Version>,
     ) -> anyhow::Result<PathBuf> {
-        let manifest: &Manifest = self
-            .lookup
-            .get(name)
-            .with_context(|| format!("package `{}` not found in {}", name, self.root.display()))?;
+        let manifest: &Manifest = self.lookup.get(name).with_context(|| {
+            format!(
+                "package `{}` not found in {}",
+                name,
+                self.project_root.display()
+            )
+        })?;
         generate_rustdoc(
             config,
             rustdoc,
@@ -365,7 +371,7 @@ impl GitBaseline {
         let tree = rev.peel_to_tree()?;
         extract_tree(&repo, tree, &rev_dir)?;
 
-        let path = PathBaseline::new(target, &rev_dir)?;
+        let path = PathBaseline::new(&rev_dir, target)?;
         Ok(Self { path })
     }
 }
