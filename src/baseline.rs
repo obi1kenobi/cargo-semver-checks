@@ -117,10 +117,7 @@ fn create_placeholder_rustdoc_manifest(
             };
             let mut deps = DepsSet::new();
             deps.insert(
-                match crate_source {
-                    CrateSource::Registry { crate_ } => crate_.name().to_string(),
-                    CrateSource::ManifestPath { name, path: _ } => name.to_string(),
-                },
+                crate_source.get_name(),
                 Dependency::Detailed(project_with_features),
             );
             deps
