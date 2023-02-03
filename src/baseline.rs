@@ -55,16 +55,16 @@ enum CrateSource<'a> {
 }
 
 impl<'a> CrateSource<'a> {
-    fn name(&self) -> String {
+    fn name(&self) -> &str {
         match self {
-            Self::Registry { crate_ } => crate_.name().to_string(),
+            Self::Registry { crate_ } => crate_.name(),
             Self::ManifestPath { .. } => unimplemented!(),
         }
     }
 
-    fn version(&self) -> String {
+    fn version(&self) -> &str {
         match self {
-            Self::Registry { crate_ } => crate_.version().to_string(),
+            Self::Registry { crate_ } => crate_.version(),
             Self::ManifestPath { .. } => unimplemented!(),
         }
     }
@@ -117,7 +117,7 @@ fn create_placeholder_rustdoc_manifest(
             };
             let mut deps = DepsSet::new();
             deps.insert(
-                crate_source.name(),
+                crate_source.name().to_string(),
                 Dependency::Detailed(project_with_features),
             );
             deps
@@ -157,7 +157,7 @@ fn generate_rustdoc(
 
     let (build_dir, cache_dir, cached_rustdoc) = match crate_source {
         CrateSource::Registry { .. } => {
-            let crate_identifier = format!("registry-{}-{}", slugify(&name), slugify(&version));
+            let crate_identifier = format!("registry-{}-{}", slugify(name), slugify(version));
             let cache_dir = target_root.join("cache");
             let cached_rustdoc = cache_dir.join(format!("{crate_identifier}.json"));
 
