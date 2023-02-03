@@ -54,6 +54,22 @@ enum CrateSource<'a> {
     ManifestPath { path: &'a Path, name: String },
 }
 
+impl<'a> CrateSource<'a> {
+    fn get_name(&self) -> String {
+        match self {
+            Self::Registry { crate_ } => crate_.name().to_string(),
+            Self::ManifestPath { .. } => unimplemented!(),
+        }
+    }
+
+    fn get_version(&self) -> String {
+        match self {
+            Self::Registry { crate_ } => crate_.version().to_string(),
+            Self::ManifestPath { .. } => unimplemented!(),
+        }
+    }
+}
+
 /// To get the rustdoc of the baseline, we first create a placeholder project somewhere
 /// with the baseline as a dependency, and run `cargo rustdoc` on it.
 fn create_placeholder_rustdoc_manifest(
@@ -139,13 +155,12 @@ fn generate_rustdoc(
     target_root: PathBuf,
     crate_source: CrateSource,
 ) -> anyhow::Result<PathBuf> {
-    let (name, version) = match crate_source {
-        CrateSource::Registry { crate_ } => (crate_.name().to_string(), crate_.version()),
-        CrateSource::ManifestPath { .. } => unimplemented!(),
-    };
+    let name = crate_source.get_name();
+    let version = crate_source.get_version();
+
     let (build_dir, cache_dir, cached_rustdoc) = match crate_source {
         CrateSource::Registry { .. } => {
-            let crate_identifier = format!("registry-{}-{}", slugify(&name), slugify(version));
+            let crate_identifier = format!("registry-{}-{}", slugify(&name), slugify(&version));
             let cache_dir = target_root.join("cache");
             let cached_rustdoc = cache_dir.join(format!("{crate_identifier}.json"));
 
