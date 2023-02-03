@@ -95,7 +95,9 @@ fn main() -> anyhow::Result<()> {
                 if let Some(path) = args.baseline_rustdoc.as_deref() {
                     Box::new(baseline::RustdocBaseline::new(path.to_owned()))
                 } else if let Some(root) = args.baseline_root.as_deref() {
-                    Box::new(baseline::PathBaseline::new(root)?)
+                    let metadata = args.manifest.metadata().no_deps().exec()?;
+                    let target = metadata.target_directory.as_std_path().join(util::SCOPE);
+                    Box::new(baseline::PathBaseline::new(&target, root)?)
                 } else if let Some(rev) = args.baseline_rev.as_deref() {
                     let metadata = args.manifest.metadata().no_deps().exec()?;
                     let source = metadata.workspace_root.as_std_path();

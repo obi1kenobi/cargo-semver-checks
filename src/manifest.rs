@@ -1,12 +1,12 @@
 #[derive(Debug, Clone)]
-pub(crate) struct Manifest<'a> {
-    path: &'a std::path::Path,
-    parsed: cargo_toml::Manifest,
+pub(crate) struct Manifest {
+    pub(crate) path: std::path::PathBuf,
+    pub(crate) parsed: cargo_toml::Manifest,
 }
 
-impl<'a> Manifest<'a> {
-    pub(crate) fn parse(path: &'a std::path::Path) -> anyhow::Result<Self> {
-        let manifest_text = std::fs::read_to_string(path)
+impl Manifest {
+    pub(crate) fn parse(path: std::path::PathBuf) -> anyhow::Result<Self> {
+        let manifest_text = std::fs::read_to_string(&path)
             .map_err(|e| anyhow::format_err!("Failed when reading {}: {}", path.display(), e))?;
         let parsed = toml::from_str(manifest_text.as_str())
             .map_err(|e| anyhow::format_err!("Failed to parse {}: {}", path.display(), e))?;

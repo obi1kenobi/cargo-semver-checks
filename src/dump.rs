@@ -123,7 +123,7 @@ impl RustDocCommand {
                 );
             }
         } else {
-            let manifest = crate::manifest::Manifest::parse(manifest_path)?;
+            let manifest = crate::manifest::Manifest::parse(manifest_path.to_path_buf())?;
 
             let lib_target_name = crate::manifest::get_lib_target_name(&manifest)?;
             let json_path = target_dir.join(format!("doc/{lib_target_name}.json"));
