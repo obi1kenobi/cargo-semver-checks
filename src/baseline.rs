@@ -237,8 +237,12 @@ fn generate_rustdoc(
     match crate_source {
         CrateSource::Registry { .. } => {
             // Clean up after ourselves.
-            let cache_dir = cache_dir.unwrap();
-            let cached_rustdoc = cached_rustdoc.unwrap();
+            let cache_dir = cache_dir.expect(
+                "when crate_source is Registry a cache_dir was created, so it should be Some",
+            );
+            let cached_rustdoc = cached_rustdoc.expect(
+                "when crate_source is Registry a cached_rustdoc was created, so it should be Some",
+            );
             std::fs::create_dir_all(cache_dir)?;
             std::fs::copy(rustdoc_path, &cached_rustdoc)?;
             std::fs::remove_dir_all(build_dir)?;
