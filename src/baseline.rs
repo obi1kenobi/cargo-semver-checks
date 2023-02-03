@@ -106,9 +106,9 @@ fn create_placeholder_rustdoc_manifest(
                         // The manifest will be saved in some other directory,
                         // so for convenience, we're using absolute paths.
                         path.canonicalize()
-                            .with_context(|| "failed to canonicalize manifest path")?
+                            .context("failed to canonicalize manifest path")?
                             .to_str()
-                            .with_context(|| "manifest path is not valid UTF-8")?
+                            .context("manifest path is not valid UTF-8")?
                             .to_string(),
                     ),
                     features: crate_features::get_all_crate_features_from_manifest(path),
@@ -133,7 +133,7 @@ fn save_placeholder_rustdoc_manifest(
     placeholder_build_dir: &Path,
     placeholder_manifest: cargo_toml::Manifest<()>,
 ) -> anyhow::Result<PathBuf> {
-    std::fs::create_dir_all(placeholder_build_dir).with_context(|| "failed to create build dir")?;
+    std::fs::create_dir_all(placeholder_build_dir).context("failed to create build dir")?;
     let placeholder_manifest_path = placeholder_build_dir.join("Cargo.toml");
 
     // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
@@ -143,9 +143,9 @@ fn save_placeholder_rustdoc_manifest(
         &placeholder_manifest_path,
         toml::to_string(&placeholder_manifest)?,
     )
-    .with_context(|| "failed to write placeholder manifest")?;
+    .context("failed to write placeholder manifest")?;
     std::fs::write(placeholder_build_dir.join("lib.rs"), "")
-        .with_context(|| "failed to create empty lib.rs")?;
+        .context("failed to create empty lib.rs")?;
     Ok(placeholder_manifest_path)
 }
 
@@ -179,10 +179,10 @@ fn generate_rustdoc(
     };
 
     let placeholder_manifest = create_placeholder_rustdoc_manifest(&crate_source)
-        .with_context(|| "failed to create placeholder manifest")?;
+        .context("failed to create placeholder manifest")?;
     let placeholder_manifest_path =
         save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)
-            .with_context(|| "failed to save placeholder rustdoc manifest")?;
+            .context("failed to save placeholder rustdoc manifest")?;
 
     config.shell_status("Parsing", format_args!("{name} v{version} (baseline)"))?;
     // TODO: replace (baseline) with something else
