@@ -167,7 +167,10 @@ fn generate_rustdoc(
             // We assume that the generated rustdoc is untouched.
             // Users should run cargo-clean if they experience any anomalies.
             if cached_rustdoc.exists() {
-                config.shell_status("Parsing", format_args!("{name} v{version} (baseline, cached)"))?;
+                config.shell_status(
+                    "Parsing",
+                    format_args!("{name} v{version} (baseline, cached)"),
+                )?;
                 // TODO: replace "baseline" with a string passed as a function argument
                 // (the plan is to make this function work for both baseline and current).
                 return Ok(cached_rustdoc);
