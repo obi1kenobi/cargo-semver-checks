@@ -1,12 +1,12 @@
 #[derive(Debug, Clone)]
-pub(crate) struct Manifest<'a> {
-    path: &'a std::path::Path,
-    parsed: cargo_toml::Manifest,
+pub(crate) struct Manifest {
+    pub(crate) path: std::path::PathBuf,
+    pub(crate) parsed: cargo_toml::Manifest,
 }
 
-impl<'a> Manifest<'a> {
-    pub(crate) fn parse(path: &'a std::path::Path) -> anyhow::Result<Self> {
-        let manifest_text = std::fs::read_to_string(path)
+impl Manifest {
+    pub(crate) fn parse(path: std::path::PathBuf) -> anyhow::Result<Self> {
+        let manifest_text = std::fs::read_to_string(&path)
             .map_err(|e| anyhow::format_err!("Failed when reading {}: {}", path.display(), e))?;
         let parsed = toml::from_str(manifest_text.as_str())
             .map_err(|e| anyhow::format_err!("Failed to parse {}: {}", path.display(), e))?;
@@ -15,17 +15,17 @@ impl<'a> Manifest<'a> {
     }
 }
 
-pub(crate) fn get_package_name(manifest: &Manifest) -> anyhow::Result<String> {
+pub(crate) fn get_package_name(manifest: &Manifest) -> anyhow::Result<&str> {
     let package = manifest.parsed.package.as_ref().ok_or_else(|| {
         anyhow::format_err!(
             "Failed to parse {}: no `package` table",
             manifest.path.display()
         )
     })?;
-    Ok(package.name.clone())
+    Ok(&package.name)
 }
 
-pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<String> {
+pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<&str> {
     let package = manifest.parsed.package.as_ref().ok_or_else(|| {
         anyhow::format_err!(
             "Failed to parse {}: no `package` table",
@@ -39,7 +39,7 @@ pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<String>
             e
         )
     })?;
-    Ok(version.clone())
+    Ok(version)
 }
 
 pub(crate) fn get_lib_target_name(manifest: &Manifest) -> anyhow::Result<String> {

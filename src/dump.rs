@@ -123,7 +123,7 @@ impl RustDocCommand {
                 );
             }
         } else {
-            let manifest = crate::manifest::Manifest::parse(manifest_path)?;
+            let manifest = crate::manifest::Manifest::parse(manifest_path.to_path_buf())?;
 
             let lib_target_name = crate::manifest::get_lib_target_name(&manifest)?;
             let json_path = target_dir.join(format!("doc/{lib_target_name}.json"));
@@ -135,11 +135,7 @@ impl RustDocCommand {
             let json_path = target_dir.join(format!("doc/{first_bin_target_name}.json"));
             if !json_path.exists() {
                 let crate_name = if let Some(pkg_spec) = pkg_spec {
-                    pkg_spec
-                        .split_once('@')
-                        .map(|s| s.0)
-                        .unwrap_or(pkg_spec)
-                        .to_owned()
+                    pkg_spec.split_once('@').map(|s| s.0).unwrap_or(pkg_spec)
                 } else {
                     crate::manifest::get_package_name(&manifest)?
                 };

@@ -373,15 +373,42 @@ jobs:
         with:
           key: clap
 
-      - name: Run semver-checks
+      - name: Run semver-checks with --baseline-root
         continue-on-error: true
         run: |
           cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-root="subject-baseline/Cargo.toml" > output
-          echo "$?" > return_code
+          touch unexpectedly_did_not_fail
 
-      - name: Check return code
+      - name: Check whether it failed
         run: |
-          if [[ "$(cat return_code)" == "0" ]]; then exit 1; else exit 0; fi
+          if [ -f unexpectedly_did_not_fail ]; then exit 1; else exit 0; fi
+
+      - name: Check output
+        run: |
+          EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---\n--- failure trait_missing: pub trait removed or renamed ---")"
+          RESULT="$(cat output | grep failure)"
+          diff <(echo "$RESULT") <(echo "$EXPECTED")
+
+      - name: Cleanup
+        run: |
+          rm output
+          rm -f unexpectedly_did_not_fail
+
+      - name: Fetch v3.1.18 in subject-current
+        run: |
+          cd subject-current
+          git fetch origin 524e36cf1a67ee6a447d3615a70b065d2b4f5e60
+          cd ..
+
+      - name: Run semver-checks with --baseline-rev
+        continue-on-error: true
+        run: |
+          cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-rev=524e36cf1a67ee6a447d3615a70b065d2b4f5e60 > output
+          touch unexpectedly_did_not_fail
+
+      - name: Check whether it failed
+        run: |
+          if [ -f unexpectedly_did_not_fail ]; then exit 1; else exit 0; fi
 
       - name: Check output
         run: |
