@@ -61,9 +61,9 @@ jobs:
           args: -- --check
 
       - name: cargo doc
-        uses: actions-rs/cargo@v1
-        with:
-          command: doc
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --all-features --no-deps --document-private-items
 
   rust-tests:
     name: Run tests
