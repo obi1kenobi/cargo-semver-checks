@@ -468,7 +468,6 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
     std::ffi::OsStr::new(str::from_utf8(b).unwrap())
 }
 
-#[derive(Debug)]
 pub(crate) struct RustdocFromRegistry {
     target_root: PathBuf,
     version: Option<semver::Version>,
