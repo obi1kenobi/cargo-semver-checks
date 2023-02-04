@@ -177,6 +177,7 @@ fn save_placeholder_rustdoc_manifest(
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub(crate) enum CrateType<'a> {
     Current,
     Baseline {
@@ -187,6 +188,7 @@ pub(crate) enum CrateType<'a> {
     },
 }
 
+#[derive(Debug)]
 pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) crate_type: CrateType<'a>,
     pub(crate) name: &'a str,
