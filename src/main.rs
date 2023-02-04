@@ -12,7 +12,7 @@ mod util;
 use itertools::Itertools;
 use rustdoc_cmd::RustdocCommand;
 use semver::Version;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
@@ -91,7 +91,7 @@ fn main() -> anyhow::Result<()> {
         Some(SemverChecksCommands::CheckRelease(args)) => {
             let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
 
-            let loader: Box<dyn rustdoc_gen::RustdocGenerator> =
+            let baseline_loader: Box<dyn rustdoc_gen::RustdocGenerator> =
                 if let Some(path) = args.baseline_rustdoc.as_deref() {
                     Box::new(rustdoc_gen::RustdocFromFile::new(path.to_owned()))
                 } else if let Some(root) = args.baseline_root.as_deref() {
@@ -132,11 +132,13 @@ fn main() -> anyhow::Result<()> {
             {
                 let name = "<unknown>";
                 let baseline_highest_allowed_version = None;
+                let current_loader =
+                    rustdoc_gen::RustdocFromFile::new(current_rustdoc_path.to_path_buf());
                 let (current_crate, baseline_crate) = generate_versioned_crates(
                     &mut config,
-                    CurrentCratePath::CurrentRustdocPath(current_rustdoc_path),
-                    &*loader,
                     &rustdoc_cmd,
+                    &current_loader,
+                    &*baseline_loader,
                     name,
                     baseline_highest_allowed_version,
                 )?;
@@ -163,16 +165,16 @@ fn main() -> anyhow::Result<()> {
                             })?;
                             Ok(true)
                         } else {
-                            config.shell_status(
-                                "Parsing",
-                                format_args!("{crate_name} v{current_version} (current)"),
+                            let target = metadata.target_directory.as_std_path().join(util::SCOPE);
+                            let current_loader = rustdoc_gen::RustdocFromProjectRoot::new(
+                                &manifest::get_project_dir_from_manifest_path(manifest_path)?,
+                                &target,
                             )?;
-
                             let (current_crate, baseline_crate) = generate_versioned_crates(
                                 &mut config,
-                                CurrentCratePath::ManifestPath(manifest_path),
-                                &*loader,
                                 &rustdoc_cmd,
+                                &current_loader,
+                                &*baseline_loader,
                                 crate_name,
                                 Some(current_version),
                             )?;
@@ -203,34 +205,30 @@ fn main() -> anyhow::Result<()> {
     }
 }
 
-// Argument to the generate_versioned_crates function.
-enum CurrentCratePath<'a> {
-    CurrentRustdocPath(&'a Path), // If rustdoc is passed, it is just loaded into the memory.
-    ManifestPath(&'a Path),       // Otherwise, the function generates the rustdoc.
-}
-
 fn generate_versioned_crates(
     config: &mut GlobalConfig,
-    current_crate_path: CurrentCratePath,
-    loader: &dyn rustdoc_gen::RustdocGenerator,
     rustdoc_cmd: &RustdocCommand,
+    current_loader: &dyn rustdoc_gen::RustdocGenerator,
+    baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
     crate_name: &str,
     version: Option<&Version>,
 ) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
-    let current_crate = match current_crate_path {
-        CurrentCratePath::CurrentRustdocPath(rustdoc_path) => load_rustdoc(rustdoc_path)?,
-        CurrentCratePath::ManifestPath(manifest_path) => {
-            let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
-            load_rustdoc(&rustdoc_path)?
-        }
-    };
+    let current_path = current_loader.load_rustdoc(
+        config,
+        rustdoc_cmd,
+        rustdoc_gen::CrateDataForRustdoc {
+            name: crate_name,
+            crate_type: rustdoc_gen::CrateType::Current,
+        },
+    )?;
+    let current_crate = load_rustdoc(&current_path)?;
 
     // The process of generating baseline rustdoc can overwrite
     // the already-generated rustdoc of the current crate.
     // For example, this happens when target-dir is specified in `.cargo/config.toml`.
     // That's the reason why we're immediately loading the rustdocs into memory.
     // See: https://github.com/obi1kenobi/cargo-semver-checks/issues/269
-    let baseline_path = loader.load_rustdoc(
+    let baseline_path = baseline_loader.load_rustdoc(
         config,
         rustdoc_cmd,
         rustdoc_gen::CrateDataForRustdoc {

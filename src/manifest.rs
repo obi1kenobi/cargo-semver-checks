@@ -1,3 +1,5 @@
+use anyhow::Context as _;
+
 #[derive(Debug, Clone)]
 pub(crate) struct Manifest {
     pub(crate) path: std::path::PathBuf,
@@ -66,4 +68,18 @@ pub(crate) fn get_first_bin_target_name(manifest: &Manifest) -> anyhow::Result<S
     // Otherwise, assume the crate is a bin crate with the default bin target name:
     // the same name as the package but with dashes replaced with underscores.
     Ok(get_package_name(manifest)?.replace('-', "_"))
+}
+
+pub(crate) fn get_project_dir_from_manifest_path(
+    manifest_path: &std::path::Path,
+) -> anyhow::Result<std::path::PathBuf> {
+    assert!(
+        manifest_path.ends_with("Cargo.toml"),
+        "path {} isn't pointing to a manifest",
+        manifest_path.display()
+    );
+    let dir_path = manifest_path
+        .parent()
+        .context("manifest path doesn't have a parent")?;
+    Ok(dir_path.to_path_buf())
 }

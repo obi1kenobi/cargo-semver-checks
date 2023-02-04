@@ -123,15 +123,8 @@ fn create_placeholder_rustdoc_manifest(
                 },
                 CrateSource::ManifestPath { manifest } => DependencyDetail {
                     path: Some({
-                        assert!(
-                            manifest.path.ends_with("Cargo.toml"),
-                            "path {} isn't pointing to a manifest",
-                            manifest.path.display()
-                        );
-                        let dir_path = manifest
-                            .path
-                            .parent()
-                            .context("manifest path doesn't have a parent")?;
+                        let dir_path =
+                            crate::manifest::get_project_dir_from_manifest_path(&manifest.path)?;
                         // The manifest will be saved in some other directory,
                         // so for convenience, we're using absolute paths.
                         dir_path
