@@ -127,6 +127,8 @@ fn main() -> anyhow::Result<()> {
                 .deps(false)
                 .silence(!config.is_verbose());
 
+            let feature_behaviour = rustdoc_gen::FeatureBehaviour::AllFeatures;
+
             let all_outcomes: Vec<anyhow::Result<bool>> = if let Some(current_rustdoc_path) =
                 args.current_rustdoc.as_deref()
             {
@@ -140,6 +142,7 @@ fn main() -> anyhow::Result<()> {
                     &current_loader,
                     &*baseline_loader,
                     name,
+                    &feature_behaviour,
                     baseline_highest_allowed_version,
                 )?;
 
@@ -176,6 +179,7 @@ fn main() -> anyhow::Result<()> {
                                 &current_loader,
                                 &*baseline_loader,
                                 crate_name,
+                                &feature_behaviour,
                                 Some(current_version),
                             )?;
 
@@ -211,6 +215,7 @@ fn generate_versioned_crates(
     current_loader: &dyn rustdoc_gen::RustdocGenerator,
     baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
     crate_name: &str,
+    feature_behaviour: &rustdoc_gen::FeatureBehaviour,
     version: Option<&Version>,
 ) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
     let current_path = current_loader.load_rustdoc(
@@ -219,6 +224,7 @@ fn generate_versioned_crates(
         rustdoc_gen::CrateDataForRustdoc {
             name: crate_name,
             crate_type: rustdoc_gen::CrateType::Current,
+            feature_behaviour,
         },
     )?;
     let current_crate = load_rustdoc(&current_path)?;
@@ -236,6 +242,7 @@ fn generate_versioned_crates(
             crate_type: rustdoc_gen::CrateType::Baseline {
                 highest_allowed_version: version,
             },
+            feature_behaviour,
         },
     )?;
     let baseline_crate = load_rustdoc(&baseline_path)?;

@@ -90,10 +90,40 @@ impl<'a> CrateSource<'a> {
     }
 }
 
+#[derive(Debug, Clone)]
+pub(crate) struct FeatureSet {
+    pub(crate) default_features: bool,
+    pub(crate) features: Vec<String>,
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub(crate) enum FeatureBehaviour {
+    AllFeatures,
+    SpecifiedFeatues(FeatureSet),
+}
+
+impl FeatureBehaviour {
+    fn get_features(&self, crate_source: &CrateSource) -> Vec<String> {
+        match self {
+            FeatureBehaviour::AllFeatures => crate_source.all_features(),
+            FeatureBehaviour::SpecifiedFeatues(feature_set) => feature_set.features.clone(),
+        }
+    }
+
+    fn default_features(&self) -> bool {
+        match self {
+            FeatureBehaviour::AllFeatures => true,
+            FeatureBehaviour::SpecifiedFeatues(feature_set) => feature_set.default_features,
+        }
+    }
+}
+
 /// To get the rustdoc of the project, we first create a placeholder project somewhere
 /// with the project as a dependency, and run `cargo rustdoc` on it.
 fn create_placeholder_rustdoc_manifest(
     crate_source: &CrateSource,
+    feature_behaviour: &FeatureBehaviour,
 ) -> anyhow::Result<cargo_toml::Manifest<()>> {
     use cargo_toml::*;
 
@@ -118,7 +148,8 @@ fn create_placeholder_rustdoc_manifest(
                     // give us the latest semver-compatible version which is not we want.
                     // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
                     version: Some(format!("={}", crate_.version())),
-                    features: crate_source.all_features(),
+                    features: feature_behaviour.get_features(crate_source),
+                    default_features: feature_behaviour.default_features(),
                     ..DependencyDetail::default()
                 },
                 CrateSource::ManifestPath { manifest } => DependencyDetail {
@@ -134,7 +165,8 @@ fn create_placeholder_rustdoc_manifest(
                             .context("manifest path is not valid UTF-8")?
                             .to_string()
                     }),
-                    features: crate_source.all_features(),
+                    features: feature_behaviour.get_features(crate_source),
+                    default_features: feature_behaviour.default_features(),
                     ..DependencyDetail::default()
                 },
             };
@@ -183,7 +215,7 @@ pub(crate) enum CrateType<'a> {
 pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) crate_type: CrateType<'a>,
     pub(crate) name: &'a str,
-    // TODO: pass an enum describing which features to enable
+    pub(crate) feature_behaviour: &'a FeatureBehaviour,
 }
 
 impl<'a> ToString for CrateType<'a> {
@@ -244,8 +276,9 @@ fn generate_rustdoc(
         CrateSource::ManifestPath { .. } => (None, None),
     };
 
-    let placeholder_manifest = create_placeholder_rustdoc_manifest(&crate_source)
-        .context("failed to create placeholder manifest")?;
+    let placeholder_manifest =
+        create_placeholder_rustdoc_manifest(&crate_source, crate_data.feature_behaviour)
+            .context("failed to create placeholder manifest")?;
     let placeholder_manifest_path =
         save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)
             .context("failed to save placeholder rustdoc manifest")?;
