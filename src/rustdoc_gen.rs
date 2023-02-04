@@ -169,7 +169,6 @@ fn save_placeholder_rustdoc_manifest(
     Ok(placeholder_manifest_path)
 }
 
-#[allow(dead_code)]
 pub(crate) enum CrateType<'a> {
     Current,
     Baseline {
