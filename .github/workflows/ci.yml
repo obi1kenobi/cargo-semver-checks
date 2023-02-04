@@ -60,6 +60,11 @@ jobs:
           command: fmt
           args: -- --check
 
+      - name: cargo doc
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+
   rust-tests:
     name: Run tests
     runs-on: ubuntu-latest
