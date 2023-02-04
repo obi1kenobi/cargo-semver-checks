@@ -90,8 +90,8 @@ impl<'a> CrateSource<'a> {
     }
 }
 
-/// To get the rustdoc of the baseline, we first create a placeholder project somewhere
-/// with the baseline as a dependency, and run `cargo rustdoc` on it.
+/// To get the rustdoc of the project, we first create a placeholder project somewhere
+/// with the project as a dependency, and run `cargo rustdoc` on it.
 fn create_placeholder_rustdoc_manifest(
     crate_source: &CrateSource,
 ) -> anyhow::Result<cargo_toml::Manifest<()>> {
@@ -293,7 +293,7 @@ fn generate_rustdoc(
     }
 }
 
-pub(crate) trait BaselineLoader {
+pub(crate) trait RustdocGenerator {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
@@ -303,17 +303,17 @@ pub(crate) trait BaselineLoader {
 }
 
 #[derive(Debug)]
-pub(crate) struct RustdocBaseline {
+pub(crate) struct RustdocFromFile {
     path: PathBuf,
 }
 
-impl RustdocBaseline {
+impl RustdocFromFile {
     pub(crate) fn new(path: PathBuf) -> Self {
         Self { path }
     }
 }
 
-impl BaselineLoader for RustdocBaseline {
+impl RustdocGenerator for RustdocFromFile {
     fn load_rustdoc(
         &self,
         _config: &mut GlobalConfig,
@@ -325,13 +325,13 @@ impl BaselineLoader for RustdocBaseline {
 }
 
 #[derive(Debug)]
-pub(crate) struct PathBaseline {
+pub(crate) struct RustdocFromProjectRoot {
     project_root: PathBuf,
     lookup: std::collections::HashMap<String, Manifest>,
     target_root: PathBuf,
 }
 
-impl PathBaseline {
+impl RustdocFromProjectRoot {
     /// # Arguments
     /// * `project_root` - Path to a directory with the manifest or with subdirectories with the manifests.
     /// * `target_root` - Path to a directory where the placeholder manifest / rustdoc can be created.
@@ -358,7 +358,7 @@ impl PathBaseline {
     }
 }
 
-impl BaselineLoader for PathBaseline {
+impl RustdocGenerator for RustdocFromProjectRoot {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
@@ -383,11 +383,11 @@ impl BaselineLoader for PathBaseline {
 }
 
 #[derive(Debug)]
-pub(crate) struct GitBaseline {
-    path: PathBaseline,
+pub(crate) struct RustdocFromGitRevision {
+    path: RustdocFromProjectRoot,
 }
 
-impl GitBaseline {
+impl RustdocFromGitRevision {
     pub fn with_rev(
         source: &std::path::Path,
         target: &std::path::Path,
@@ -404,7 +404,7 @@ impl GitBaseline {
         let tree = rev.peel_to_tree()?;
         extract_tree(&repo, tree, &rev_dir)?;
 
-        let path = PathBaseline::new(&rev_dir, target)?;
+        let path = RustdocFromProjectRoot::new(&rev_dir, target)?;
         Ok(Self { path })
     }
 }
@@ -443,7 +443,7 @@ fn extract_tree(
     Ok(())
 }
 
-impl BaselineLoader for GitBaseline {
+impl RustdocGenerator for RustdocFromGitRevision {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
@@ -469,13 +469,13 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
 }
 
 #[derive(Debug)]
-pub(crate) struct RegistryBaseline {
+pub(crate) struct RustdocFromRegistry {
     target_root: PathBuf,
     version: Option<semver::Version>,
     index: crates_index::Index,
 }
 
-impl RegistryBaseline {
+impl RustdocFromRegistry {
     pub fn new(target_root: &std::path::Path, config: &mut GlobalConfig) -> anyhow::Result<Self> {
         let mut index = crates_index::Index::new_cargo_default()?;
 
@@ -545,7 +545,7 @@ fn choose_baseline_version(
     }
 }
 
-impl BaselineLoader for RegistryBaseline {
+impl RustdocGenerator for RustdocFromRegistry {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,

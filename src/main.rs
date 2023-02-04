@@ -91,13 +91,13 @@ fn main() -> anyhow::Result<()> {
         Some(SemverChecksCommands::CheckRelease(args)) => {
             let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
 
-            let loader: Box<dyn rustdoc_gen::BaselineLoader> =
+            let loader: Box<dyn rustdoc_gen::RustdocGenerator> =
                 if let Some(path) = args.baseline_rustdoc.as_deref() {
-                    Box::new(rustdoc_gen::RustdocBaseline::new(path.to_owned()))
+                    Box::new(rustdoc_gen::RustdocFromFile::new(path.to_owned()))
                 } else if let Some(root) = args.baseline_root.as_deref() {
                     let metadata = args.manifest.metadata().no_deps().exec()?;
                     let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-                    Box::new(rustdoc_gen::PathBaseline::new(root, &target)?)
+                    Box::new(rustdoc_gen::RustdocFromProjectRoot::new(root, &target)?)
                 } else if let Some(rev) = args.baseline_rev.as_deref() {
                     let metadata = args.manifest.metadata().no_deps().exec()?;
                     let source = metadata.workspace_root.as_std_path();
@@ -107,7 +107,7 @@ fn main() -> anyhow::Result<()> {
                         .as_std_path()
                         .join(util::SCOPE)
                         .join(format!("git-{slug}"));
-                    Box::new(rustdoc_gen::GitBaseline::with_rev(
+                    Box::new(rustdoc_gen::RustdocFromGitRevision::with_rev(
                         source,
                         &target,
                         rev,
@@ -116,7 +116,7 @@ fn main() -> anyhow::Result<()> {
                 } else {
                     let metadata = args.manifest.metadata().no_deps().exec()?;
                     let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-                    let mut registry = rustdoc_gen::RegistryBaseline::new(&target, &mut config)?;
+                    let mut registry = rustdoc_gen::RustdocFromRegistry::new(&target, &mut config)?;
                     if let Some(version) = args.baseline_version.as_deref() {
                         let version = semver::Version::parse(version)?;
                         registry.set_version(version);
@@ -212,7 +212,7 @@ enum CurrentCratePath<'a> {
 fn generate_versioned_crates(
     config: &mut GlobalConfig,
     current_crate_path: CurrentCratePath,
-    loader: &dyn rustdoc_gen::BaselineLoader,
+    loader: &dyn rustdoc_gen::RustdocGenerator,
     rustdoc_cmd: &RustdocCommand,
     crate_name: &str,
     version: Option<&Version>,
