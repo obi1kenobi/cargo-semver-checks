@@ -15,16 +15,16 @@ enum CrateSource<'a> {
 }
 
 impl<'a> CrateSource<'a> {
-    fn name(&self) -> anyhow::Result<String> {
+    fn name(&self) -> anyhow::Result<&str> {
         Ok(match self {
-            Self::Registry { crate_ } => crate_.name().to_string(),
+            Self::Registry { crate_ } => crate_.name(),
             Self::ManifestPath { manifest } => crate::manifest::get_package_name(manifest)?,
         })
     }
 
-    fn version(&self) -> anyhow::Result<String> {
+    fn version(&self) -> anyhow::Result<&str> {
         Ok(match self {
-            Self::Registry { crate_ } => crate_.version().to_string(),
+            Self::Registry { crate_ } => crate_.version(),
             Self::ManifestPath { manifest } => crate::manifest::get_package_version(manifest)?,
         })
     }
@@ -153,7 +153,7 @@ fn create_placeholder_rustdoc_manifest(
             };
             let mut deps = DepsSet::new();
             deps.insert(
-                crate_source.name()?,
+                crate_source.name()?.to_string(),
                 Dependency::Detailed(project_with_features),
             );
             deps
@@ -200,8 +200,8 @@ fn generate_rustdoc(
             // so cached entries cannot be checked to see if they are a match or not.
             CrateSource::ManifestPath { .. } => "local",
         },
-        slugify(&name),
-        slugify(&version)
+        slugify(name),
+        slugify(version)
     );
     let build_dir = target_root.join(&crate_identifier);
     let (cache_dir, cached_rustdoc) = match crate_source {
@@ -317,7 +317,7 @@ impl PathBaseline {
             if entry.file_name() == "Cargo.toml" {
                 if let Ok(manifest) = crate::manifest::Manifest::parse(entry.into_path()) {
                     if let Ok(name) = crate::manifest::get_package_name(&manifest) {
-                        lookup.insert(name, manifest);
+                        lookup.insert(name.to_string(), manifest);
                     }
                 }
             }

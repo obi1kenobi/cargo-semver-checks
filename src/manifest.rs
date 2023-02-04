@@ -15,17 +15,17 @@ impl Manifest {
     }
 }
 
-pub(crate) fn get_package_name(manifest: &Manifest) -> anyhow::Result<String> {
+pub(crate) fn get_package_name(manifest: &Manifest) -> anyhow::Result<&str> {
     let package = manifest.parsed.package.as_ref().ok_or_else(|| {
         anyhow::format_err!(
             "Failed to parse {}: no `package` table",
             manifest.path.display()
         )
     })?;
-    Ok(package.name.clone())
+    Ok(&package.name)
 }
 
-pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<String> {
+pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<&str> {
     let package = manifest.parsed.package.as_ref().ok_or_else(|| {
         anyhow::format_err!(
             "Failed to parse {}: no `package` table",
@@ -39,7 +39,7 @@ pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<String>
             e
         )
     })?;
-    Ok(version.clone())
+    Ok(version)
 }
 
 pub(crate) fn get_lib_target_name(manifest: &Manifest) -> anyhow::Result<String> {
