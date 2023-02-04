@@ -304,11 +304,11 @@ pub(crate) struct PathBaseline {
 }
 
 impl PathBaseline {
+    /// # Arguments
+    /// * `project_root` - Path to a directory with the manifest or with subdirectories with the manifests.
+    /// * `target_root` - Path to a directory where the placeholder manifest / rustdoc can be created.
     pub(crate) fn new(
-        // Path to a directory with the manifest or with subdirectories with the manifests.
         project_root: &std::path::Path,
-
-        // Path to a directory where the placeholder manifest / rustdoc can be created.
         target_root: &std::path::Path,
     ) -> anyhow::Result<Self> {
         let mut lookup = std::collections::HashMap::new();
