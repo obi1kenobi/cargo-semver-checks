@@ -30,7 +30,7 @@ impl<'a> CrateSource<'a> {
     }
 
     /// Returns features listed in `[features]` section in the manifest
-    /// https://doc.rust-lang.org/cargo/reference/features.html#the-features-section
+    /// <https://doc.rust-lang.org/cargo/reference/features.html#the-features-section>
     fn regular_features(&self) -> Vec<String> {
         match self {
             Self::Registry { crate_ } => crate_.features().keys().cloned().into_iter().collect(),
@@ -45,7 +45,7 @@ impl<'a> CrateSource<'a> {
     }
 
     /// Returns features implicitly defined by optional dependencies
-    /// https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies
+    /// <https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies>
     fn implicit_features(&self) -> std::collections::BTreeSet<String> {
         let mut implicit_features: std::collections::BTreeSet<_> = match self {
             Self::Registry { crate_ } => crate_
