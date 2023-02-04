@@ -377,11 +377,11 @@ jobs:
         continue-on-error: true
         run: |
           cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-root="subject-baseline/Cargo.toml" > output
-          echo "$?" > return_code
+          touch failed_successfully
 
-      - name: Check return code
+      - name: Check whether it failed
         run: |
-          if [[ "$(cat return_code)" == "0" ]]; then exit 1; else exit 0; fi
+          if [ -f failed_successfully ]; then exit 1; else exit 0; fi
 
       - name: Check output
         run: |
@@ -391,17 +391,18 @@ jobs:
 
       - name: Cleanup
         run: |
-          rm output return_code
+          rm output
+          rm -f failed_successfully
 
       - name: Run semver-checks with --baseline-rev
         continue-on-error: true
         run: |
           cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-rev=3.1.18 > output
-          echo "$?" > return_code
+          touch failed_successfully
 
-      - name: Check return code
+      - name: Check whether it failed
         run: |
-          if [[ "$(cat return_code)" == "0" ]]; then exit 1; else exit 0; fi
+          if [ -f failed_successfully ]; then exit 1; else exit 0; fi
 
       - name: Check output
         run: |
