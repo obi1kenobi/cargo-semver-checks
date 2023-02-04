@@ -397,7 +397,7 @@ jobs:
       - name: Run semver-checks with --baseline-rev
         continue-on-error: true
         run: |
-          cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-rev=v3.1.18 > output
+          cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-rev=524e36cf1a67ee6a447d3615a70b065d2b4f5e60 > output
           touch failed_successfully
 
       - name: Check whether it failed
