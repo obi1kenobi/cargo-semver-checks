@@ -241,8 +241,6 @@ fn generate_rustdoc(
                         crate_data.crate_type.to_string()
                     ),
                 )?;
-                // TODO: replace "baseline" with a string passed as a function argument
-                // (the plan is to make this function work for both baseline and current).
                 return Ok(cached_rustdoc);
             }
 
@@ -261,8 +259,6 @@ fn generate_rustdoc(
         "Parsing",
         format_args!("{name} v{version} ({})", crate_data.crate_type.to_string()),
     )?;
-    // TODO: replace "baseline" with a string passed as a function argument
-    // (the plan is to make this function work for both baseline and current).
 
     let rustdoc_path = rustdoc.dump(
         placeholder_manifest_path.as_path(),
