@@ -129,7 +129,11 @@ fn create_placeholder_rustdoc_manifest(
                 },
                 CrateSource::ManifestPath { manifest } => DependencyDetail {
                     path: Some({
-                        assert!(manifest.path.ends_with("Cargo.toml"));
+                        assert!(
+                            manifest.path.ends_with("Cargo.toml"),
+                            "path {} isn't pointing to a manifest",
+                            manifest.path.display()
+                        );
                         let dir_path = manifest
                             .path
                             .parent()
