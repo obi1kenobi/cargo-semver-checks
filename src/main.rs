@@ -131,14 +131,14 @@ fn main() -> anyhow::Result<()> {
                 args.current_rustdoc.as_deref()
             {
                 let name = "<unknown>";
-                let version = None;
+                let baseline_highest_allowed_version = None;
                 let (current_crate, baseline_crate) = generate_versioned_crates(
                     &mut config,
                     CurrentCratePath::CurrentRustdocPath(current_rustdoc_path),
                     &*loader,
                     &rustdoc_cmd,
                     name,
-                    version,
+                    baseline_highest_allowed_version,
                 )?;
 
                 let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
@@ -151,21 +151,21 @@ fn main() -> anyhow::Result<()> {
                     .map(|selected| {
                         let manifest_path = selected.manifest_path.as_std_path();
                         let crate_name = &selected.name;
-                        let version = &selected.version;
+                        let current_version = &selected.version;
 
                         let is_implied = args.workspace.all || args.workspace.workspace;
                         if is_implied && selected.publish == Some(vec![]) {
                             config.verbose(|config| {
                                 config.shell_status(
                                     "Skipping",
-                                    format_args!("{crate_name} v{version} (current)"),
+                                    format_args!("{crate_name} v{current_version} (current)"),
                                 )
                             })?;
                             Ok(true)
                         } else {
                             config.shell_status(
                                 "Parsing",
-                                format_args!("{crate_name} v{version} (current)"),
+                                format_args!("{crate_name} v{current_version} (current)"),
                             )?;
 
                             let (current_crate, baseline_crate) = generate_versioned_crates(
@@ -174,7 +174,7 @@ fn main() -> anyhow::Result<()> {
                                 &*loader,
                                 &rustdoc_cmd,
                                 crate_name,
-                                Some(version),
+                                Some(current_version),
                             )?;
 
                             Ok(run_check_release(
@@ -230,7 +230,16 @@ fn generate_versioned_crates(
     // For example, this happens when target-dir is specified in `.cargo/config.toml`.
     // That's the reason why we're immediately loading the rustdocs into memory.
     // See: https://github.com/obi1kenobi/cargo-semver-checks/issues/269
-    let baseline_path = loader.load_rustdoc(config, rustdoc_cmd, crate_name, version)?;
+    let baseline_path = loader.load_rustdoc(
+        config,
+        rustdoc_cmd,
+        baseline::CrateDataForRustdoc {
+            name: crate_name,
+            crate_type: baseline::CrateType::Baseline {
+                highest_allowed_version: version,
+            },
+        },
+    )?;
     let baseline_crate = load_rustdoc(&baseline_path)?;
 
     Ok((current_crate, baseline_crate))
