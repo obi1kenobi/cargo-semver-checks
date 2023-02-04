@@ -302,6 +302,7 @@ pub(crate) trait BaselineLoader {
     ) -> anyhow::Result<PathBuf>;
 }
 
+#[derive(Debug)]
 pub(crate) struct RustdocBaseline {
     path: PathBuf,
 }
@@ -323,6 +324,7 @@ impl BaselineLoader for RustdocBaseline {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct PathBaseline {
     project_root: PathBuf,
     lookup: std::collections::HashMap<String, Manifest>,
@@ -380,6 +382,7 @@ impl BaselineLoader for PathBaseline {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct GitBaseline {
     path: PathBaseline,
 }
@@ -465,6 +468,7 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
     std::ffi::OsStr::new(str::from_utf8(b).unwrap())
 }
 
+#[derive(Debug)]
 pub(crate) struct RegistryBaseline {
     target_root: PathBuf,
     version: Option<semver::Version>,
