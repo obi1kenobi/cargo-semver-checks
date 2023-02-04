@@ -1,10 +1,10 @@
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RustDocCommand {
+pub struct RustdocCommand {
     deps: bool,
     silence: bool,
 }
 
-impl RustDocCommand {
+impl RustdocCommand {
     pub fn new() -> Self {
         Self {
             deps: false,
@@ -152,7 +152,7 @@ impl RustDocCommand {
     }
 }
 
-impl Default for RustDocCommand {
+impl Default for RustdocCommand {
     fn default() -> Self {
         Self::new()
     }
@@ -162,11 +162,11 @@ impl Default for RustDocCommand {
 mod tests {
     use std::path::Path;
 
-    use super::RustDocCommand;
+    use super::RustdocCommand;
 
     #[test]
     fn rustdoc_for_lib_crate_without_lib_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
                 Path::new("./test_rustdoc/implicit_lib/Cargo.toml"),
                 None,
@@ -177,7 +177,7 @@ mod tests {
 
     #[test]
     fn rustdoc_for_lib_crate_with_lib_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
                 Path::new("./test_rustdoc/renamed_lib/Cargo.toml"),
                 None,
@@ -188,7 +188,7 @@ mod tests {
 
     #[test]
     fn rustdoc_for_bin_crate_without_bin_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
                 Path::new("./test_rustdoc/implicit_bin/Cargo.toml"),
                 None,
@@ -199,7 +199,7 @@ mod tests {
 
     #[test]
     fn rustdoc_for_bin_crate_with_bin_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
                 Path::new("./test_rustdoc/renamed_bin/Cargo.toml"),
                 None,

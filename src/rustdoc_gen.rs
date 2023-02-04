@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 use anyhow::Context as _;
 use crates_index::Crate;
 
-use crate::dump::RustDocCommand;
 use crate::manifest::Manifest;
+use crate::rustdoc_cmd::RustdocCommand;
 use crate::util::slugify;
 use crate::GlobalConfig;
 
@@ -205,7 +205,7 @@ impl<'a> ToString for CrateType<'a> {
 
 fn generate_rustdoc(
     config: &mut GlobalConfig,
-    rustdoc: &RustDocCommand,
+    rustdoc: &RustdocCommand,
     target_root: PathBuf,
     crate_source: CrateSource,
     crate_data: CrateDataForRustdoc,
@@ -297,7 +297,7 @@ pub(crate) trait BaselineLoader {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf>;
 }
@@ -316,7 +316,7 @@ impl BaselineLoader for RustdocBaseline {
     fn load_rustdoc(
         &self,
         _config: &mut GlobalConfig,
-        _rustdoc: &RustDocCommand,
+        _rustdoc: &RustdocCommand,
         _crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         Ok(self.path.clone())
@@ -360,7 +360,7 @@ impl BaselineLoader for PathBaseline {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         let manifest: &Manifest = self.lookup.get(crate_data.name).with_context(|| {
@@ -444,7 +444,7 @@ impl BaselineLoader for GitBaseline {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         self.path.load_rustdoc(config, rustdoc, crate_data)
@@ -545,7 +545,7 @@ impl BaselineLoader for RegistryBaseline {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         let crate_ = self
