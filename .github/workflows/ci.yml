@@ -394,10 +394,15 @@ jobs:
           rm output
           rm -f failed_successfully
 
+      - name: Fetch v3.1.18 in subject-current
+        run: |
+          cd subject-current
+          git fetch origin e36cf1a67ee6a447d3615a70b065d2b4f5e60
+          cd ..
+
       - name: Run semver-checks with --baseline-rev
         continue-on-error: true
         run: |
-          git fetch origin e36cf1a67ee6a447d3615a70b065d2b4f5e60
           cargo run semver-checks check-release --manifest-path="subject-current/Cargo.toml" --baseline-rev=524e36cf1a67ee6a447d3615a70b065d2b4f5e60 > output
           touch failed_successfully
 
