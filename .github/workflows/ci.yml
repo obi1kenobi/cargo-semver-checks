@@ -397,7 +397,7 @@ jobs:
       - name: Fetch v3.1.18 in subject-current
         run: |
           cd subject-current
-          git fetch origin e36cf1a67ee6a447d3615a70b065d2b4f5e60
+          git fetch origin 524e36cf1a67ee6a447d3615a70b065d2b4f5e60
           cd ..
 
       - name: Run semver-checks with --baseline-rev
