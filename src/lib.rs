@@ -357,7 +357,7 @@ impl Check {
 }
 
 #[non_exhaustive]
-#[derive(Debug)
+#[derive(Debug)]
 pub struct Report {
     success: bool,
 }
