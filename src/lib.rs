@@ -1,11 +1,11 @@
 #![forbid(unsafe_code)]
 
-mod baseline;
 mod check_release;
 mod config;
-mod dump;
 mod manifest;
 mod query;
+mod rustdoc_cmd;
+mod rustdoc_gen;
 mod templating;
 mod util;
 
@@ -16,8 +16,8 @@ pub use query::*;
 use check_release::run_check_release;
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
-use dump::RustDocCommand;
 use itertools::Itertools;
+use rustdoc_cmd::RustdocCommand;
 use semver::Version;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
@@ -233,63 +233,74 @@ impl Check {
         self
     }
 
-    pub fn check_release(&self) -> anyhow::Result<Report> {
-        let mut config = GlobalConfig::new().set_level(self.log_level);
+    fn get_target_dir(&self, source: &RustdocSource) -> anyhow::Result<PathBuf> {
+        Ok(if let Some(path) = get_target_dir_from_config() {
+            path
+        } else if let Some(path) = get_target_dir_from_project_root(source)? {
+            path
+        } else if let Some(path) = get_target_dir_from_project_root(&self.current.source)? {
+            path
+        } else if let Some(path) = get_target_dir_from_project_root(&self.baseline.source)? {
+            path
+        } else {
+            std::env::current_dir()?.join("target")
+        })
+    }
 
-        let loader: Box<dyn baseline::BaselineLoader> = match &self.baseline.source {
+    fn get_rustdoc_generator(
+        &self,
+        config: &mut GlobalConfig,
+        source: &RustdocSource,
+    ) -> anyhow::Result<Box<dyn rustdoc_gen::RustdocGenerator>> {
+        let target_dir = self.get_target_dir(source)?;
+        Ok(match source {
             RustdocSource::Rustdoc(path) => {
-                Box::new(baseline::RustdocBaseline::new(path.to_owned()))
+                Box::new(rustdoc_gen::RustdocFromFile::new(path.to_owned()))
             }
-            RustdocSource::Root(root) => Box::new(baseline::PathBaseline::new(root)?),
+            RustdocSource::Root(root) => {
+                Box::new(rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?)
+            }
             RustdocSource::Revision(root, rev) => {
                 let metadata = manifest_metadata_no_deps(root)?;
                 let source = metadata.workspace_root.as_std_path();
-                let slug = util::slugify(rev);
-                let target = metadata
-                    .target_directory
-                    .as_std_path()
-                    .join(util::SCOPE)
-                    .join(format!("git-{slug}"));
-                Box::new(baseline::GitBaseline::with_rev(
+                Box::new(rustdoc_gen::RustdocFromGitRevision::with_rev(
                     source,
-                    &target,
+                    &target_dir,
                     rev,
-                    &mut config,
+                    config,
                 )?)
             }
             RustdocSource::Version(version) => {
-                let mut registry = {
-                    let manifest_dir = match &self.current.source {
-                        RustdocSource::Root(manifest_dir)
-                        | RustdocSource::Revision(manifest_dir, _) => manifest_dir,
-                        RustdocSource::Version(_) | RustdocSource::Rustdoc(_) => {
-                            anyhow::bail!("this combination of current and baseline sources isn't supported yet")
-                        }
-                    };
-                    let metadata = manifest_metadata_no_deps(manifest_dir)?;
-                    let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-                    baseline::RegistryBaseline::new(&target, &mut config)?
-                };
+                let mut registry = rustdoc_gen::RustdocFromRegistry::new(&target_dir, config)?;
                 if let Some(ver) = version {
                     let semver = semver::Version::parse(ver)?;
                     registry.set_version(semver);
                 }
                 Box::new(registry)
             }
-        };
-        let rustdoc_cmd = dump::RustDocCommand::new()
+        })
+    }
+
+    pub fn check_release(&self) -> anyhow::Result<Report> {
+        let mut config = GlobalConfig::new().set_level(self.log_level);
+        let rustdoc_cmd = RustdocCommand::new()
             .deps(false)
             .silence(!config.is_verbose());
 
+        let current_loader = self.get_rustdoc_generator(&mut config, &self.current.source)?;
+        let baseline_loader = self.get_rustdoc_generator(&mut config, &self.baseline.source)?;
+
         let all_outcomes: Vec<anyhow::Result<bool>> = match &self.current.source {
-            RustdocSource::Rustdoc(current_rustdoc_path) => {
+            RustdocSource::Rustdoc(_)
+            | RustdocSource::Revision(_, _)
+            | RustdocSource::Version(_) => {
                 let name = "<unknown>";
                 let version = None;
                 let (current_crate, baseline_crate) = generate_versioned_crates(
                     &mut config,
-                    CurrentCratePath::CurrentRustdocPath(current_rustdoc_path),
-                    &*loader,
                     &rustdoc_cmd,
+                    &*current_loader,
+                    &*baseline_loader,
                     name,
                     version,
                 )?;
@@ -303,7 +314,6 @@ impl Check {
                 selected
                     .iter()
                     .map(|selected| {
-                        let manifest_path = selected.manifest_path.as_std_path();
                         let crate_name = &selected.name;
                         let version = &selected.version;
 
@@ -330,9 +340,9 @@ impl Check {
 
                             let (current_crate, baseline_crate) = generate_versioned_crates(
                                 &mut config,
-                                CurrentCratePath::ManifestPath(manifest_path),
-                                &*loader,
                                 &rustdoc_cmd,
+                                &*current_loader,
+                                &*baseline_loader,
                                 crate_name,
                                 Some(version),
                             )?;
@@ -347,7 +357,6 @@ impl Check {
                     })
                     .collect()
             }
-            RustdocSource::Revision(_, _) | RustdocSource::Version(_) => todo!(),
         };
         let success = all_outcomes
             .into_iter()
@@ -369,35 +378,39 @@ impl Report {
     }
 }
 
-// Argument to the generate_versioned_crates function.
-#[derive(Debug)]
-enum CurrentCratePath<'a> {
-    CurrentRustdocPath(&'a Path), // If rustdoc is passed, it is just loaded into the memory.
-    ManifestPath(&'a Path),       // Otherwise, the function generates the rustdoc.
-}
-
 fn generate_versioned_crates(
     config: &mut GlobalConfig,
-    current_crate_path: CurrentCratePath,
-    loader: &dyn baseline::BaselineLoader,
-    rustdoc_cmd: &RustDocCommand,
+    rustdoc_cmd: &RustdocCommand,
+    current_loader: &dyn rustdoc_gen::RustdocGenerator,
+    baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
     crate_name: &str,
     version: Option<&Version>,
 ) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
-    let current_crate = match current_crate_path {
-        CurrentCratePath::CurrentRustdocPath(rustdoc_path) => load_rustdoc(rustdoc_path)?,
-        CurrentCratePath::ManifestPath(manifest_path) => {
-            let rustdoc_path = rustdoc_cmd.dump(manifest_path, None, true)?;
-            load_rustdoc(&rustdoc_path)?
-        }
-    };
+    let current_path = current_loader.load_rustdoc(
+        config,
+        rustdoc_cmd,
+        rustdoc_gen::CrateDataForRustdoc {
+            name: crate_name,
+            crate_type: rustdoc_gen::CrateType::Current,
+        },
+    )?;
+    let current_crate = load_rustdoc(&current_path)?;
 
     // The process of generating baseline rustdoc can overwrite
     // the already-generated rustdoc of the current crate.
     // For example, this happens when target-dir is specified in `.cargo/config.toml`.
     // That's the reason why we're immediately loading the rustdocs into memory.
     // See: https://github.com/obi1kenobi/cargo-semver-checks/issues/269
-    let baseline_path = loader.load_rustdoc(config, rustdoc_cmd, crate_name, version)?;
+    let baseline_path = baseline_loader.load_rustdoc(
+        config,
+        rustdoc_cmd,
+        rustdoc_gen::CrateDataForRustdoc {
+            name: crate_name,
+            crate_type: rustdoc_gen::CrateType::Baseline {
+                highest_allowed_version: version,
+            },
+        },
+    )?;
     let baseline_crate = load_rustdoc(&baseline_path)?;
 
     Ok((current_crate, baseline_crate))
@@ -419,4 +432,27 @@ fn manifest_metadata_no_deps(manifest_dir: &Path) -> anyhow::Result<cargo_metada
     let mut command = cargo_metadata::MetadataCommand::new();
     let metadata = command.manifest_path(manifest_path).no_deps().exec()?;
     Ok(metadata)
+}
+
+fn get_target_dir_from_config() -> Option<PathBuf> {
+    // TODO: I'll implement this function probably tomorrow
+    None
+}
+
+fn get_target_dir_from_project_root(source: &RustdocSource) -> anyhow::Result<Option<PathBuf>> {
+    Ok(match source {
+        RustdocSource::Root(root) => {
+            let metadata = manifest_metadata_no_deps(root)?;
+            let target = metadata.target_directory.as_std_path().join(util::SCOPE);
+            Some(target)
+        }
+        RustdocSource::Revision(root, rev) => {
+            let metadata = manifest_metadata_no_deps(root)?;
+            let target = metadata.target_directory.as_std_path().join(util::SCOPE);
+            let target = target.join(format!("git-{}", util::slugify(rev)));
+            Some(target)
+        }
+        RustdocSource::Rustdoc(_path) => None,
+        RustdocSource::Version(_version) => None,
+    })
 }

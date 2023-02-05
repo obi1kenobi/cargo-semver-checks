@@ -1,10 +1,10 @@
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RustDocCommand {
+pub struct RustdocCommand {
     deps: bool,
     silence: bool,
 }
 
-impl RustDocCommand {
+impl RustdocCommand {
     pub fn new() -> Self {
         Self {
             deps: false,
@@ -123,7 +123,7 @@ impl RustDocCommand {
                 );
             }
         } else {
-            let manifest = crate::manifest::Manifest::parse(manifest_path)?;
+            let manifest = crate::manifest::Manifest::parse(manifest_path.to_path_buf())?;
 
             let lib_target_name = crate::manifest::get_lib_target_name(&manifest)?;
             let json_path = target_dir.join(format!("doc/{lib_target_name}.json"));
@@ -135,11 +135,7 @@ impl RustDocCommand {
             let json_path = target_dir.join(format!("doc/{first_bin_target_name}.json"));
             if !json_path.exists() {
                 let crate_name = if let Some(pkg_spec) = pkg_spec {
-                    pkg_spec
-                        .split_once('@')
-                        .map(|s| s.0)
-                        .unwrap_or(pkg_spec)
-                        .to_owned()
+                    pkg_spec.split_once('@').map(|s| s.0).unwrap_or(pkg_spec)
                 } else {
                     crate::manifest::get_package_name(&manifest)?
                 };
@@ -156,7 +152,7 @@ impl RustDocCommand {
     }
 }
 
-impl Default for RustDocCommand {
+impl Default for RustdocCommand {
     fn default() -> Self {
         Self::new()
     }
@@ -166,11 +162,11 @@ impl Default for RustDocCommand {
 mod tests {
     use std::path::Path;
 
-    use super::RustDocCommand;
+    use super::RustdocCommand;
 
     #[test]
     fn rustdoc_for_lib_crate_without_lib_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
                 Path::new("./test_rustdoc/implicit_lib/Cargo.toml"),
                 None,
@@ -181,7 +177,7 @@ mod tests {
 
     #[test]
     fn rustdoc_for_lib_crate_with_lib_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
                 Path::new("./test_rustdoc/renamed_lib/Cargo.toml"),
                 None,
@@ -192,7 +188,7 @@ mod tests {
 
     #[test]
     fn rustdoc_for_bin_crate_without_bin_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
                 Path::new("./test_rustdoc/implicit_bin/Cargo.toml"),
                 None,
@@ -203,7 +199,7 @@ mod tests {
 
     #[test]
     fn rustdoc_for_bin_crate_with_bin_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
                 Path::new("./test_rustdoc/renamed_bin/Cargo.toml"),
                 None,
