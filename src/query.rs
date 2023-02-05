@@ -39,6 +39,7 @@ impl ActualSemverUpdate {
 
 /// A query that can be executed on a pair of rustdoc output files,
 /// returning instances of a particular kind of semver violation.
+#[non_exhaustive]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SemverQuery {
     pub id: String,
