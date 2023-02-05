@@ -33,14 +33,8 @@ impl<'a> CrateSource<'a> {
     /// <https://doc.rust-lang.org/cargo/reference/features.html#the-features-section>
     fn regular_features(&self) -> Vec<String> {
         match self {
-            Self::Registry { crate_ } => crate_.features().keys().cloned().into_iter().collect(),
-            Self::ManifestPath { manifest } => manifest
-                .parsed
-                .features
-                .keys()
-                .cloned()
-                .into_iter()
-                .collect(),
+            Self::Registry { crate_ } => crate_.features().keys().cloned().collect(),
+            Self::ManifestPath { manifest } => manifest.parsed.features.keys().cloned().collect(),
         }
     }
 
@@ -182,11 +176,41 @@ fn save_placeholder_rustdoc_manifest(
     Ok(placeholder_manifest_path)
 }
 
+#[allow(dead_code)]
+#[derive(Debug)]
+pub(crate) enum CrateType<'a> {
+    Current,
+    Baseline {
+        /// When the baseline is being generated from registry
+        /// and no specific version was chosen, we want to select a version
+        /// that is the same or older than the version of the current crate.
+        highest_allowed_version: Option<&'a semver::Version>,
+    },
+}
+
+#[derive(Debug)]
+pub(crate) struct CrateDataForRustdoc<'a> {
+    pub(crate) crate_type: CrateType<'a>,
+    pub(crate) name: &'a str,
+    // TODO: pass an enum describing which features to enable
+}
+
+impl<'a> ToString for CrateType<'a> {
+    fn to_string(&self) -> String {
+        match self {
+            CrateType::Current => "current",
+            CrateType::Baseline { .. } => "baseline",
+        }
+        .to_string()
+    }
+}
+
 fn generate_rustdoc(
     config: &mut GlobalConfig,
     rustdoc: &RustDocCommand,
     target_root: PathBuf,
     crate_source: CrateSource,
+    crate_data: CrateDataForRustdoc,
 ) -> anyhow::Result<PathBuf> {
     let name = crate_source.name()?;
     let version = crate_source.version()?;
@@ -214,10 +238,11 @@ fn generate_rustdoc(
             if cached_rustdoc.exists() {
                 config.shell_status(
                     "Parsing",
-                    format_args!("{name} v{version} (baseline, cached)"),
+                    format_args!(
+                        "{name} v{version} ({}, cached)",
+                        crate_data.crate_type.to_string()
+                    ),
                 )?;
-                // TODO: replace "baseline" with a string passed as a function argument
-                // (the plan is to make this function work for both baseline and current).
                 return Ok(cached_rustdoc);
             }
 
@@ -232,9 +257,10 @@ fn generate_rustdoc(
         save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)
             .context("failed to save placeholder rustdoc manifest")?;
 
-    config.shell_status("Parsing", format_args!("{name} v{version} (baseline)"))?;
-    // TODO: replace "baseline" with a string passed as a function argument
-    // (the plan is to make this function work for both baseline and current).
+    config.shell_status(
+        "Parsing",
+        format_args!("{name} v{version} ({})", crate_data.crate_type.to_string()),
+    )?;
 
     let rustdoc_path = rustdoc.dump(
         placeholder_manifest_path.as_path(),
@@ -270,8 +296,7 @@ pub(crate) trait BaselineLoader {
         &self,
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
-        name: &str,
-        version_current: Option<&semver::Version>,
+        crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf>;
 }
 
@@ -290,8 +315,7 @@ impl BaselineLoader for RustdocBaseline {
         &self,
         _config: &mut GlobalConfig,
         _rustdoc: &RustDocCommand,
-        _name: &str,
-        _version_current: Option<&semver::Version>,
+        _crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         Ok(self.path.clone())
     }
@@ -335,13 +359,12 @@ impl BaselineLoader for PathBaseline {
         &self,
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
-        name: &str,
-        _version_current: Option<&semver::Version>,
+        crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        let manifest: &Manifest = self.lookup.get(name).with_context(|| {
+        let manifest: &Manifest = self.lookup.get(crate_data.name).with_context(|| {
             format!(
                 "package `{}` not found in {}",
-                name,
+                crate_data.name,
                 self.project_root.display()
             )
         })?;
@@ -350,6 +373,7 @@ impl BaselineLoader for PathBaseline {
             rustdoc,
             self.target_root.clone(),
             CrateSource::ManifestPath { manifest },
+            crate_data,
         )
     }
 }
@@ -419,11 +443,9 @@ impl BaselineLoader for GitBaseline {
         &self,
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
-        name: &str,
-        version_current: Option<&semver::Version>,
+        crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        self.path
-            .load_rustdoc(config, rustdoc, name, version_current)
+        self.path.load_rustdoc(config, rustdoc, crate_data)
     }
 }
 
@@ -522,18 +544,25 @@ impl BaselineLoader for RegistryBaseline {
         &self,
         config: &mut GlobalConfig,
         rustdoc: &RustDocCommand,
-        name: &str,
-        version_current: Option<&semver::Version>,
+        crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         let crate_ = self
             .index
-            .crate_(name)
-            .with_context(|| anyhow::format_err!("{} not found in registry", name))?;
+            .crate_(crate_data.name)
+            .with_context(|| anyhow::format_err!("{} not found in registry", crate_data.name))?;
 
         let base_version = if let Some(base) = self.version.as_ref() {
             base.to_string()
         } else {
-            choose_baseline_version(&crate_, version_current)?
+            choose_baseline_version(
+                &crate_,
+                match crate_data.crate_type {
+                    CrateType::Current => None,
+                    CrateType::Baseline {
+                        highest_allowed_version,
+                    } => highest_allowed_version,
+                },
+            )?
         };
 
         let crate_ = crate_
@@ -543,7 +572,7 @@ impl BaselineLoader for RegistryBaseline {
             .with_context(|| {
                 anyhow::format_err!(
                     "Version {} of crate {} not found in registry",
-                    name,
+                    crate_data.name,
                     base_version
                 )
             })?;
@@ -553,6 +582,7 @@ impl BaselineLoader for RegistryBaseline {
             rustdoc,
             self.target_root.clone(),
             CrateSource::Registry { crate_ },
+            crate_data,
         )
     }
 }
