@@ -83,7 +83,8 @@ impl Rustdoc {
 
 #[derive(Debug)]
 enum RustdocSource {
-    /// Path to the Rustdoc json file. Use this option when you have already generated the rustdoc file.
+    /// Path to the Rustdoc json file.
+    /// Use this option when you have already generated the rustdoc file.
     Rustdoc(PathBuf),
     /// Project root directory, i.e. the directory containing the crate source.
     /// It can be a workspace or a single package.
