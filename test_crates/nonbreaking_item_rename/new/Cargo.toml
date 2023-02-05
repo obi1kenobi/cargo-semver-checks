@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "nonbreaking_item_rename"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

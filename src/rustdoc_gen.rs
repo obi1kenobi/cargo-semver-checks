@@ -169,6 +169,7 @@ fn save_placeholder_rustdoc_manifest(
     Ok(placeholder_manifest_path)
 }
 
+#[derive(Debug, Clone)]
 pub(crate) enum CrateType<'a> {
     Current,
     Baseline {
@@ -179,19 +180,19 @@ pub(crate) enum CrateType<'a> {
     },
 }
 
+#[derive(Debug, Clone)]
 pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) crate_type: CrateType<'a>,
     pub(crate) name: &'a str,
     // TODO: pass an enum describing which features to enable
 }
 
-impl<'a> ToString for CrateType<'a> {
-    fn to_string(&self) -> String {
+impl<'a> CrateType<'a> {
+    fn type_name(&self) -> &'static str {
         match self {
             CrateType::Current => "current",
             CrateType::Baseline { .. } => "baseline",
         }
-        .to_string()
     }
 }
 
@@ -230,11 +231,9 @@ fn generate_rustdoc(
                     "Parsing",
                     format_args!(
                         "{name} v{version} ({}, cached)",
-                        crate_data.crate_type.to_string()
+                        crate_data.crate_type.type_name()
                     ),
                 )?;
-                // TODO: replace "baseline" with a string passed as a function argument
-                // (the plan is to make this function work for both baseline and current).
                 return Ok(cached_rustdoc);
             }
 
@@ -251,10 +250,8 @@ fn generate_rustdoc(
 
     config.shell_status(
         "Parsing",
-        format_args!("{name} v{version} ({})", crate_data.crate_type.to_string()),
+        format_args!("{name} v{version} ({})", crate_data.crate_type.type_name()),
     )?;
-    // TODO: replace "baseline" with a string passed as a function argument
-    // (the plan is to make this function work for both baseline and current).
 
     let rustdoc_path = rustdoc.dump(
         placeholder_manifest_path.as_path(),
@@ -464,6 +461,15 @@ pub(crate) struct RustdocFromRegistry {
     target_root: PathBuf,
     version: Option<semver::Version>,
     index: crates_index::Index,
+}
+
+impl core::fmt::Debug for RustdocFromRegistry {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RustdocFromRegistry")
+            .field("target_root", &self.target_root)
+            .field("version", &self.version)
+            .finish()
+    }
 }
 
 impl RustdocFromRegistry {
