@@ -33,14 +33,8 @@ impl<'a> CrateSource<'a> {
     /// <https://doc.rust-lang.org/cargo/reference/features.html#the-features-section>
     fn regular_features(&self) -> Vec<String> {
         match self {
-            Self::Registry { crate_ } => crate_.features().keys().cloned().into_iter().collect(),
-            Self::ManifestPath { manifest } => manifest
-                .parsed
-                .features
-                .keys()
-                .cloned()
-                .into_iter()
-                .collect(),
+            Self::Registry { crate_ } => crate_.features().keys().cloned().collect(),
+            Self::ManifestPath { manifest } => manifest.parsed.features.keys().cloned().collect(),
         }
     }
 
