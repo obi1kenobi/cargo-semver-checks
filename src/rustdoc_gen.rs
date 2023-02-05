@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 use anyhow::Context as _;
 use crates_index::Crate;
 
-use crate::dump::RustDocCommand;
 use crate::manifest::Manifest;
+use crate::rustdoc_cmd::RustdocCommand;
 use crate::util::slugify;
 use crate::GlobalConfig;
 
@@ -177,7 +177,7 @@ fn save_placeholder_rustdoc_manifest(
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) enum CrateType<'a> {
     Current,
     Baseline {
@@ -188,26 +188,25 @@ pub(crate) enum CrateType<'a> {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) crate_type: CrateType<'a>,
     pub(crate) name: &'a str,
     // TODO: pass an enum describing which features to enable
 }
 
-impl<'a> ToString for CrateType<'a> {
-    fn to_string(&self) -> String {
+impl<'a> CrateType<'a> {
+    fn type_name(&self) -> &'static str {
         match self {
             CrateType::Current => "current",
             CrateType::Baseline { .. } => "baseline",
         }
-        .to_string()
     }
 }
 
 fn generate_rustdoc(
     config: &mut GlobalConfig,
-    rustdoc: &RustDocCommand,
+    rustdoc: &RustdocCommand,
     target_root: PathBuf,
     crate_source: CrateSource,
     crate_data: CrateDataForRustdoc,
@@ -240,7 +239,7 @@ fn generate_rustdoc(
                     "Parsing",
                     format_args!(
                         "{name} v{version} ({}, cached)",
-                        crate_data.crate_type.to_string()
+                        crate_data.crate_type.type_name()
                     ),
                 )?;
                 return Ok(cached_rustdoc);
@@ -259,8 +258,10 @@ fn generate_rustdoc(
 
     config.shell_status(
         "Parsing",
-        format_args!("{name} v{version} ({})", crate_data.crate_type.to_string()),
+        format_args!("{name} v{version} ({})", crate_data.crate_type.type_name()),
     )?;
+    // TODO: replace "baseline" with a string passed as a function argument
+    // (the plan is to make this function work for both baseline and current).
 
     let rustdoc_path = rustdoc.dump(
         placeholder_manifest_path.as_path(),
@@ -295,7 +296,7 @@ pub(crate) trait BaselineLoader {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf>;
 }
@@ -314,7 +315,7 @@ impl BaselineLoader for RustdocBaseline {
     fn load_rustdoc(
         &self,
         _config: &mut GlobalConfig,
-        _rustdoc: &RustDocCommand,
+        _rustdoc: &RustdocCommand,
         _crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         Ok(self.path.clone())
@@ -358,7 +359,7 @@ impl BaselineLoader for PathBaseline {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         let manifest: &Manifest = self.lookup.get(crate_data.name).with_context(|| {
@@ -442,7 +443,7 @@ impl BaselineLoader for GitBaseline {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         self.path.load_rustdoc(config, rustdoc, crate_data)
@@ -543,7 +544,7 @@ impl BaselineLoader for RegistryBaseline {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustDocCommand,
+        rustdoc: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         let crate_ = self
