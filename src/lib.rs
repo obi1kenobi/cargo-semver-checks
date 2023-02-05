@@ -137,6 +137,7 @@ impl PackageSelection {
     }
 }
 
+#[non_exhaustive]
 #[derive(Default, Debug, PartialEq, Eq, Clone)]
 pub enum ScopeSelection {
     /// All packages in the workspace. Equivalent to `--workspace`.
