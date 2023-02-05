@@ -50,7 +50,7 @@ impl Rustdoc {
     /// Generate the rustdoc file from the project root directory,
     /// i.e. the directory containing the crate source.
     /// It can be a workspace or a single package.
-    /// Same as `from_git_revision`, but with the current git revision.
+    /// Same as [`Rustdoc::from_git_revision()`], but with the current git revision.
     pub fn from_root(project_root: impl Into<PathBuf>) -> Self {
         Self {
             source: RustdocSource::Root(project_root.into()),
