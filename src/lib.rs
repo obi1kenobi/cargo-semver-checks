@@ -23,6 +23,7 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 /// Test a release for semver violations.
+#[derive(Debug)]
 pub struct Check {
     /// Which packages to analyze.
     scope: Scope,
@@ -31,6 +32,7 @@ pub struct Check {
     log_level: Option<log::Level>,
 }
 
+#[derive(Debug)]
 pub struct Rustdoc {
     source: RustdocSource,
 }
@@ -78,6 +80,7 @@ impl Rustdoc {
     }
 }
 
+#[derive(Debug)]
 enum RustdocSource {
     /// Path to the Rustdoc json file. Use this option when you have already generated the rustdoc file.
     Rustdoc(PathBuf),
@@ -94,11 +97,12 @@ enum RustdocSource {
 }
 
 /// Which packages to analyze.
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Scope {
     mode: ScopeMode,
 }
 
+#[derive(Debug)]
 enum ScopeMode {
     /// All packages except the excluded ones.
     DenyList(PackageSelection),
@@ -112,7 +116,7 @@ impl Default for ScopeMode {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct PackageSelection {
     selection: ScopeSelection,
     excluded_packages: Vec<String>,
@@ -132,7 +136,7 @@ impl PackageSelection {
     }
 }
 
-#[derive(Default, PartialEq, Eq, Clone)]
+#[derive(Default, Debug, PartialEq, Eq, Clone)]
 pub enum ScopeSelection {
     /// All packages in the workspace. Equivalent to `--workspace`.
     Workspace,
