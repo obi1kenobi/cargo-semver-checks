@@ -23,6 +23,7 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 /// Test a release for semver violations.
+#[non_exhaustive]
 #[derive(Debug)]
 pub struct Check {
     /// Which packages to analyze.
@@ -32,6 +33,7 @@ pub struct Check {
     log_level: Option<log::Level>,
 }
 
+#[non_exhaustive]
 #[derive(Debug)]
 pub struct Rustdoc {
     source: RustdocSource,
@@ -118,6 +120,7 @@ impl Default for ScopeMode {
     }
 }
 
+#[non_exhaustive]
 #[derive(Default, Clone, Debug)]
 pub struct PackageSelection {
     selection: ScopeSelection,
