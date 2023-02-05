@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use anyhow::Context as _;
+use anyhow::Context;
 use crates_index::Crate;
 
 use crate::manifest::Manifest;
@@ -201,7 +201,7 @@ fn save_placeholder_rustdoc_manifest(
     Ok(placeholder_manifest_path)
 }
 
-#[allow(dead_code)]
+#[derive(Debug, Clone)]
 pub(crate) enum CrateType<'a> {
     Current,
     Baseline {
@@ -212,25 +212,25 @@ pub(crate) enum CrateType<'a> {
     },
 }
 
+#[derive(Debug, Clone)]
 pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) crate_type: CrateType<'a>,
     pub(crate) name: &'a str,
     pub(crate) feature_behaviour: &'a FeatureBehaviour,
 }
 
-impl<'a> ToString for CrateType<'a> {
-    fn to_string(&self) -> String {
+impl<'a> CrateType<'a> {
+    fn type_name(&self) -> &'static str {
         match self {
             CrateType::Current => "current",
             CrateType::Baseline { .. } => "baseline",
         }
-        .to_string()
     }
 }
 
 fn generate_rustdoc(
     config: &mut GlobalConfig,
-    rustdoc: &RustdocCommand,
+    rustdoc_cmd: &RustdocCommand,
     target_root: PathBuf,
     crate_source: CrateSource,
     crate_data: CrateDataForRustdoc,
@@ -263,11 +263,9 @@ fn generate_rustdoc(
                     "Parsing",
                     format_args!(
                         "{name} v{version} ({}, cached)",
-                        crate_data.crate_type.to_string()
+                        crate_data.crate_type.type_name()
                     ),
                 )?;
-                // TODO: replace "baseline" with a string passed as a function argument
-                // (the plan is to make this function work for both baseline and current).
                 return Ok(cached_rustdoc);
             }
 
@@ -285,12 +283,10 @@ fn generate_rustdoc(
 
     config.shell_status(
         "Parsing",
-        format_args!("{name} v{version} ({})", crate_data.crate_type.to_string()),
+        format_args!("{name} v{version} ({})", crate_data.crate_type.type_name()),
     )?;
-    // TODO: replace "baseline" with a string passed as a function argument
-    // (the plan is to make this function work for both baseline and current).
 
-    let rustdoc_path = rustdoc.dump(
+    let rustdoc_path = rustdoc_cmd.dump(
         placeholder_manifest_path.as_path(),
         Some(&format!("{name}@{version}")),
         false,
@@ -323,7 +319,7 @@ pub(crate) trait RustdocGenerator {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustdocCommand,
+        rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf>;
 }
@@ -343,7 +339,7 @@ impl RustdocGenerator for RustdocFromFile {
     fn load_rustdoc(
         &self,
         _config: &mut GlobalConfig,
-        _rustdoc: &RustdocCommand,
+        _rustdoc_cmd: &RustdocCommand,
         _crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         Ok(self.path.clone())
@@ -388,7 +384,7 @@ impl RustdocGenerator for RustdocFromProjectRoot {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustdocCommand,
+        rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         let manifest: &Manifest = self.lookup.get(crate_data.name).with_context(|| {
@@ -400,7 +396,7 @@ impl RustdocGenerator for RustdocFromProjectRoot {
         })?;
         generate_rustdoc(
             config,
-            rustdoc,
+            rustdoc_cmd,
             self.target_root.clone(),
             CrateSource::ManifestPath { manifest },
             crate_data,
@@ -473,10 +469,10 @@ impl RustdocGenerator for RustdocFromGitRevision {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustdocCommand,
+        rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        self.path.load_rustdoc(config, rustdoc, crate_data)
+        self.path.load_rustdoc(config, rustdoc_cmd, crate_data)
     }
 }
 
@@ -498,6 +494,16 @@ pub(crate) struct RustdocFromRegistry {
     target_root: PathBuf,
     version: Option<semver::Version>,
     index: crates_index::Index,
+}
+
+impl core::fmt::Debug for RustdocFromRegistry {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RustdocFromRegistry")
+            .field("target_root", &self.target_root)
+            .field("version", &self.version)
+            .field("index", &"<elided>")
+            .finish()
+    }
 }
 
 impl RustdocFromRegistry {
@@ -574,7 +580,7 @@ impl RustdocGenerator for RustdocFromRegistry {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustdocCommand,
+        rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         let crate_ = self
@@ -610,7 +616,7 @@ impl RustdocGenerator for RustdocFromRegistry {
 
         generate_rustdoc(
             config,
-            rustdoc,
+            rustdoc_cmd,
             self.target_root.clone(),
             CrateSource::Registry { crate_ },
             crate_data,
