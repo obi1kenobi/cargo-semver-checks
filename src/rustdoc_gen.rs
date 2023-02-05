@@ -198,7 +198,7 @@ impl<'a> CrateType<'a> {
 
 fn generate_rustdoc(
     config: &mut GlobalConfig,
-    rustdoc: &RustdocCommand,
+    rustdoc_cmd: &RustdocCommand,
     target_root: PathBuf,
     crate_source: CrateSource,
     crate_data: CrateDataForRustdoc,
@@ -253,7 +253,7 @@ fn generate_rustdoc(
         format_args!("{name} v{version} ({})", crate_data.crate_type.type_name()),
     )?;
 
-    let rustdoc_path = rustdoc.dump(
+    let rustdoc_path = rustdoc_cmd.dump(
         placeholder_manifest_path.as_path(),
         Some(&format!("{name}@{version}")),
         false,
@@ -286,7 +286,7 @@ pub(crate) trait RustdocGenerator {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustdocCommand,
+        rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf>;
 }
@@ -306,7 +306,7 @@ impl RustdocGenerator for RustdocFromFile {
     fn load_rustdoc(
         &self,
         _config: &mut GlobalConfig,
-        _rustdoc: &RustdocCommand,
+        _rustdoc_cmd: &RustdocCommand,
         _crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         Ok(self.path.clone())
@@ -351,7 +351,7 @@ impl RustdocGenerator for RustdocFromProjectRoot {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustdocCommand,
+        rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         let manifest: &Manifest = self.lookup.get(crate_data.name).with_context(|| {
@@ -363,7 +363,7 @@ impl RustdocGenerator for RustdocFromProjectRoot {
         })?;
         generate_rustdoc(
             config,
-            rustdoc,
+            rustdoc_cmd,
             self.target_root.clone(),
             CrateSource::ManifestPath { manifest },
             crate_data,
@@ -436,10 +436,10 @@ impl RustdocGenerator for RustdocFromGitRevision {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustdocCommand,
+        rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        self.path.load_rustdoc(config, rustdoc, crate_data)
+        self.path.load_rustdoc(config, rustdoc_cmd, crate_data)
     }
 }
 
@@ -547,7 +547,7 @@ impl RustdocGenerator for RustdocFromRegistry {
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        rustdoc: &RustdocCommand,
+        rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         let crate_ = self
@@ -583,7 +583,7 @@ impl RustdocGenerator for RustdocFromRegistry {
 
         generate_rustdoc(
             config,
-            rustdoc,
+            rustdoc_cmd,
             self.target_root.clone(),
             CrateSource::Registry { crate_ },
             crate_data,
