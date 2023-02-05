@@ -476,7 +476,7 @@ impl core::fmt::Debug for RustdocFromRegistry {
         f.debug_struct("RustdocFromRegistry")
             .field("target_root", &self.target_root)
             .field("version", &self.version)
-            .field("index", "<elided>")
+            .field("index", &"<elided>")
             .finish()
     }
 }
