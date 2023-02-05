@@ -76,6 +76,7 @@ impl Rustdoc {
         }
     }
 
+    /// Generate the rustdoc file from a specific crate version.
     pub fn from_version(version: impl Into<String>) -> Self {
         Self {
             source: RustdocSource::Version(Some(version.into())),
