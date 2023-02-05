@@ -471,6 +471,15 @@ pub(crate) struct RustdocFromRegistry {
     index: crates_index::Index,
 }
 
+impl core::fmt::Debug for RustdocFromRegistry {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RustdocFromRegistry")
+            .field("target_root", &self.target_root)
+            .field("version", &self.version)
+            .finish()
+    }
+}
+
 impl RustdocFromRegistry {
     pub fn new(target_root: &std::path::Path, config: &mut GlobalConfig) -> anyhow::Result<Self> {
         let mut index = crates_index::Index::new_cargo_default()?;
