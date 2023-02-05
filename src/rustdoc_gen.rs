@@ -101,7 +101,7 @@ pub(crate) enum FeatureBehaviour {
 }
 
 impl FeatureBehaviour {
-    fn get_features(&self, crate_source: &CrateSource) -> Vec<String> {
+    fn features(&self, crate_source: &CrateSource) -> Vec<String> {
         match self {
             FeatureBehaviour::AllFeatures => crate_source.all_features(),
             FeatureBehaviour::SpecifiedFeatues { features, .. } => features.clone(),
@@ -147,7 +147,7 @@ fn create_placeholder_rustdoc_manifest(
                     // give us the latest semver-compatible version which is not we want.
                     // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
                     version: Some(format!("={}", crate_.version())),
-                    features: feature_behaviour.get_features(crate_source),
+                    features: feature_behaviour.features(crate_source),
                     default_features: feature_behaviour.default_features(),
                     ..DependencyDetail::default()
                 },
@@ -164,7 +164,7 @@ fn create_placeholder_rustdoc_manifest(
                             .context("manifest path is not valid UTF-8")?
                             .to_string()
                     }),
-                    features: feature_behaviour.get_features(crate_source),
+                    features: feature_behaviour.features(crate_source),
                     default_features: feature_behaviour.default_features(),
                     ..DependencyDetail::default()
                 },
