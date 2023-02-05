@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use anyhow::Context as _;
+use anyhow::Context;
 use crates_index::Crate;
 
 use crate::manifest::Manifest;

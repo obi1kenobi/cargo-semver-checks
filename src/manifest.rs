@@ -1,4 +1,4 @@
-use anyhow::Context as _;
+use anyhow::Context;
 
 #[derive(Debug, Clone)]
 pub(crate) struct Manifest {
