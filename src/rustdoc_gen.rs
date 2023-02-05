@@ -90,31 +90,30 @@ impl<'a> CrateSource<'a> {
     }
 }
 
-#[derive(Debug, Clone)]
-pub(crate) struct FeatureSet {
-    pub(crate) default_features: bool,
-    pub(crate) features: Vec<String>,
-}
-
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub(crate) enum FeatureBehaviour {
     AllFeatures,
-    SpecifiedFeatues(FeatureSet),
+    SpecifiedFeatues {
+        features: Vec<String>,
+        default_features: bool,
+    },
 }
 
 impl FeatureBehaviour {
     fn get_features(&self, crate_source: &CrateSource) -> Vec<String> {
         match self {
             FeatureBehaviour::AllFeatures => crate_source.all_features(),
-            FeatureBehaviour::SpecifiedFeatues(feature_set) => feature_set.features.clone(),
+            FeatureBehaviour::SpecifiedFeatues { features, .. } => features.clone(),
         }
     }
 
     fn default_features(&self) -> bool {
         match self {
             FeatureBehaviour::AllFeatures => true,
-            FeatureBehaviour::SpecifiedFeatues(feature_set) => feature_set.default_features,
+            FeatureBehaviour::SpecifiedFeatues {
+                default_features, ..
+            } => *default_features,
         }
     }
 }
