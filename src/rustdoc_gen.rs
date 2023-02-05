@@ -258,7 +258,7 @@ fn generate_rustdoc(
 
     config.shell_status(
         "Parsing",
-        format_args!("{name} v{version} ({})", crate_data.crate_type.to_string()),
+        format_args!("{name} v{version} ({})", crate_data.crate_type.type_name()),
     )?;
     // TODO: replace "baseline" with a string passed as a function argument
     // (the plan is to make this function work for both baseline and current).
