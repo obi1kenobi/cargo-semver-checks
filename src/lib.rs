@@ -233,18 +233,25 @@ impl Check {
         self
     }
 
+    /// Some `RustdocSource`s don't contain a path to the project root,
+    /// so they don't have a target directory. We try to deduce the target directory
+    /// on a "best effort" basis -- when the source contains a target dir,
+    /// we use it, otherwise when the other source contains one, we use it,
+    /// otherwise we just use a standard cache folder as specified by XDG.
+    /// We cannot use a temporary directory, because the rustdocs from registry
+    /// are being cached in the target directory.
     fn get_target_dir(&self, source: &RustdocSource) -> anyhow::Result<PathBuf> {
-        Ok(if let Some(path) = get_target_dir_from_config() {
-            path
-        } else if let Some(path) = get_target_dir_from_project_root(source)? {
-            path
-        } else if let Some(path) = get_target_dir_from_project_root(&self.current.source)? {
-            path
-        } else if let Some(path) = get_target_dir_from_project_root(&self.baseline.source)? {
-            path
-        } else {
-            std::env::current_dir()?.join("target")
-        })
+        Ok(
+            if let Some(path) = get_target_dir_from_project_root(source)? {
+                path
+            } else if let Some(path) = get_target_dir_from_project_root(&self.current.source)? {
+                path
+            } else if let Some(path) = get_target_dir_from_project_root(&self.baseline.source)? {
+                path
+            } else {
+                get_xdg_cache_dir()
+            },
+        )
     }
 
     fn get_rustdoc_generator(
@@ -457,9 +464,10 @@ fn manifest_metadata_no_deps(project_root: &Path) -> anyhow::Result<cargo_metada
     Ok(metadata)
 }
 
-fn get_target_dir_from_config() -> Option<PathBuf> {
-    // TODO: I'll implement this function probably tomorrow
-    None
+fn get_xdg_cache_dir() -> PathBuf {
+    xdg::BaseDirectories::with_prefix("cargo-semver-checks")
+        .expect("failed to retrieve XDG base directories")
+        .get_cache_home()
 }
 
 fn get_target_dir_from_project_root(source: &RustdocSource) -> anyhow::Result<Option<PathBuf>> {
