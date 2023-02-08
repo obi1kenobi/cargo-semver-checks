@@ -324,7 +324,7 @@ impl Check {
                                 ..
                             })
                         ) && selected.publish == Some(vec![]);
-                        if is_implied && selected.publish == Some(vec![]) {
+                        if is_implied {
                             config.verbose(|config| {
                                 config.shell_status(
                                     "Skipping",
