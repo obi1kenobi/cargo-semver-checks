@@ -193,7 +193,15 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         let current = if let Some(current_rustdoc) = value.current_rustdoc {
             Rustdoc::from_path(current_rustdoc)
         } else if let Some(manifest) = value.manifest.manifest_path {
-            Rustdoc::from_root(manifest.parent().expect("manifest path is not a directory"))
+            let project_root = if manifest.is_dir() {
+                manifest
+            } else {
+                manifest
+                    .parent()
+                    .expect("manifest path doesn't have a parent")
+                    .to_path_buf()
+            };
+            Rustdoc::from_root(project_root)
         } else {
             let project_root = std::env::current_dir().expect("can't determine current directory");
             Rustdoc::from_root(project_root)

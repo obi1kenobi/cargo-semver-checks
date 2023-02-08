@@ -416,19 +416,42 @@ fn generate_versioned_crates(
     Ok((current_crate, baseline_crate))
 }
 
-fn manifest_from_dir(manifest_dir: &Path) -> PathBuf {
-    manifest_dir.join("Cargo.toml")
+fn manifest_path(project_root: &Path) -> anyhow::Result<PathBuf> {
+    if project_root.is_dir() {
+        let manifest_path = project_root.join("Cargo.toml");
+        // Checking whether the file exists here is not necessary
+        // (it will nevertheless be checked while parsing the manifest),
+        // but it should give a nicer error message for the user.
+        if manifest_path.exists() {
+            Ok(manifest_path)
+        } else {
+            anyhow::bail!(
+                "couldn't find Cargo.toml in directory {}",
+                project_root.display()
+            )
+        }
+    } else if project_root.ends_with("Cargo.toml") {
+        // Even though the `project_root` should be a directory,
+        // someone could by accident directly pass the path to the manifest
+        // and we're kind enough to accept it.
+        Ok(project_root.to_path_buf())
+    } else {
+        anyhow::bail!(
+            "path {} is not a directory or a manifest",
+            project_root.display()
+        )
+    }
 }
 
-fn manifest_metadata(manifest_dir: &Path) -> anyhow::Result<cargo_metadata::Metadata> {
-    let manifest_path = manifest_from_dir(manifest_dir);
+fn manifest_metadata(project_root: &Path) -> anyhow::Result<cargo_metadata::Metadata> {
+    let manifest_path = manifest_path(project_root)?;
     let mut command = cargo_metadata::MetadataCommand::new();
     let metadata = command.manifest_path(manifest_path).exec()?;
     Ok(metadata)
 }
 
-fn manifest_metadata_no_deps(manifest_dir: &Path) -> anyhow::Result<cargo_metadata::Metadata> {
-    let manifest_path = manifest_from_dir(manifest_dir);
+fn manifest_metadata_no_deps(project_root: &Path) -> anyhow::Result<cargo_metadata::Metadata> {
+    let manifest_path = manifest_path(project_root)?;
     let mut command = cargo_metadata::MetadataCommand::new();
     let metadata = command.manifest_path(manifest_path).no_deps().exec()?;
     Ok(metadata)
