@@ -190,8 +190,8 @@ struct CheckRelease {
 
 impl From<CheckRelease> for cargo_semver_checks::Check {
     fn from(value: CheckRelease) -> Self {
-        let current = if let Some(current_rustdoc) = value.current_rustdoc {
-            Rustdoc::from_path(current_rustdoc)
+        let (current, current_project_root) = if let Some(current_rustdoc) = value.current_rustdoc {
+            (Rustdoc::from_path(current_rustdoc), None)
         } else if let Some(manifest) = value.manifest.manifest_path {
             let project_root = if manifest.is_dir() {
                 manifest
@@ -201,10 +201,10 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
                     .expect("manifest path doesn't have a parent")
                     .to_path_buf()
             };
-            Rustdoc::from_root(project_root)
+            (Rustdoc::from_root(&project_root), Some(project_root))
         } else {
             let project_root = std::env::current_dir().expect("can't determine current directory");
-            Rustdoc::from_root(project_root)
+            (Rustdoc::from_root(&project_root), Some(project_root))
         };
         let mut check = Self::new(current);
         if value.workspace.all || value.workspace.workspace {
@@ -215,20 +215,26 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             check.with_packages(value.workspace.package);
         }
         let baseline = {
-            let baseline_root = if let Some(baseline_root) = value.baseline_root {
-                baseline_root
-            } else {
-                std::env::current_dir().expect("can't determine current directory")
-            };
-
             if let Some(baseline_version) = value.baseline_version {
                 Rustdoc::from_version(baseline_version)
             } else if let Some(baseline_rev) = value.baseline_rev {
-                Rustdoc::from_git_revision(baseline_root, baseline_rev)
+                let root = if let Some(baseline_root) = value.baseline_root {
+                    baseline_root
+                } else if let Some(current_root) = current_project_root {
+                    current_root
+                } else {
+                    std::env::current_dir().expect("can't determine current directory")
+                };
+                Rustdoc::from_git_revision(root, baseline_rev)
             } else if let Some(baseline_rustdoc) = value.baseline_rustdoc {
                 Rustdoc::from_path(baseline_rustdoc)
             } else {
-                Rustdoc::from_root(baseline_root)
+                let root = if let Some(baseline_root) = value.baseline_root {
+                    baseline_root
+                } else {
+                    std::env::current_dir().expect("can't determine current directory")
+                };
+                Rustdoc::from_root(root)
             }
         };
         check.with_baseline(baseline);
