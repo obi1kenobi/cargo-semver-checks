@@ -10,7 +10,7 @@ use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocA
 
 use crate::{
     query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
-    GlobalConfig,
+    GlobalConfig, LintLevel,
 };
 
 type QueryResultItem = BTreeMap<Arc<str>, FieldValue>;
@@ -83,6 +83,7 @@ pub(super) fn run_check_release(
     crate_name: &str,
     current_crate: VersionedCrate,
     baseline_crate: VersionedCrate,
+    lint_level: LintLevel,
 ) -> anyhow::Result<bool> {
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
@@ -113,6 +114,7 @@ pub(super) fn run_check_release(
     let queries_to_run: Vec<_> = queries
         .iter()
         .filter(|(_, query)| !version_change.supports_requirement(query.required_update))
+        .filter(|(_, query)| query.relevant_at_lint_level(lint_level))
         .collect();
     let skipped_queries = queries.len().saturating_sub(queries_to_run.len());
 

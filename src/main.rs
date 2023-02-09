@@ -14,7 +14,7 @@ use rustdoc_cmd::RustdocCommand;
 use semver::Version;
 use std::path::PathBuf;
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
 use crate::{check_release::run_check_release, config::GlobalConfig, util::slugify};
@@ -143,7 +143,13 @@ fn main() -> anyhow::Result<()> {
                     baseline_highest_allowed_version,
                 )?;
 
-                let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
+                let success = run_check_release(
+                    &mut config,
+                    name,
+                    current_crate,
+                    baseline_crate,
+                    args.lint_level,
+                )?;
                 vec![Ok(success)]
             } else {
                 let metadata = args.manifest.metadata().exec()?;
@@ -184,6 +190,7 @@ fn main() -> anyhow::Result<()> {
                                 crate_name,
                                 current_crate,
                                 baseline_crate,
+                                args.lint_level,
                             )?)
                         }
                     })
@@ -277,6 +284,20 @@ enum SemverChecksCommands {
     CheckRelease(CheckRelease),
 }
 
+#[derive(Copy, Clone, ValueEnum, Debug)]
+enum LintLevel {
+    Major,
+    Minor,
+}
+impl std::fmt::Display for LintLevel {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.write_str(match self {
+            LintLevel::Major => "major",
+            LintLevel::Minor => "minor",
+        })
+    }
+}
+
 #[derive(Args)]
 struct CheckRelease {
     #[command(flatten, next_help_heading = "Current")]
@@ -333,6 +354,10 @@ struct CheckRelease {
         group = "baseline"
     )]
     baseline_rustdoc: Option<PathBuf>,
+
+    /// Skip lints that fall below the given semver level
+    #[arg(long, value_name = "LEVEL", default_value_t = LintLevel::Minor)]
+    lint_level: LintLevel,
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,

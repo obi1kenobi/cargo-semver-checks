@@ -3,6 +3,8 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use trustfall_core::ir::TransparentValue;
 
+use crate::LintLevel;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) enum RequiredSemverUpdate {
     Major,
@@ -89,6 +91,15 @@ Failed to parse a query: {e}
         }
 
         queries
+    }
+
+    pub(crate) fn relevant_at_lint_level(&self, lint_level: LintLevel) -> bool {
+        match (self.required_update, lint_level) {
+            (RequiredSemverUpdate::Major, LintLevel::Minor) => true,
+            (RequiredSemverUpdate::Minor, LintLevel::Minor) => true,
+            (RequiredSemverUpdate::Major, LintLevel::Major) => true,
+            (RequiredSemverUpdate::Minor, LintLevel::Major) => false,
+        }
     }
 }
 
