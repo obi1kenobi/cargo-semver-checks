@@ -83,6 +83,9 @@ impl RustdocCommand {
         if all_features {
             cmd.arg("--all-features");
         }
+        if atty::is(atty::Stream::Stderr) {
+            cmd.arg("--color=always");
+        }
         let output = cmd.output()?;
         if !output.status.success() {
             if self.silence {
