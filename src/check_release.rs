@@ -83,24 +83,30 @@ pub(super) fn run_check_release(
     crate_name: &str,
     current_crate: VersionedCrate,
     baseline_crate: VersionedCrate,
+    assume_semver: Option<ActualSemverUpdate>,
 ) -> anyhow::Result<bool> {
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
 
-    let version_change = classify_semver_version_change(current_version, baseline_version)
-        .unwrap_or_else(|| {
+    let version_change = assume_semver.unwrap_or_else(|| {
+        classify_semver_version_change(current_version, baseline_version).unwrap_or_else(|| {
             config
                 .shell_warn(
                     "Could not determine whether crate version changed. Assuming no change.",
                 )
                 .expect("print failed");
             ActualSemverUpdate::NotChanged
-        });
+        })
+    });
     let change = match version_change {
         ActualSemverUpdate::Major => "major",
         ActualSemverUpdate::Minor => "minor",
         ActualSemverUpdate::Patch => "patch",
         ActualSemverUpdate::NotChanged => "no",
+    };
+    let assume = match assume_semver {
+        Some(_) => "assume ",
+        None => "",
     };
 
     let queries = SemverQuery::all_queries();
@@ -119,9 +125,10 @@ pub(super) fn run_check_release(
     config.shell_status(
         "Checking",
         format_args!(
-            "{crate_name} v{} -> v{} ({} change)",
+            "{crate_name} v{} -> v{} ({}{} change)",
             baseline_version.unwrap_or("unknown"),
             current_version.unwrap_or("unknown"),
+            assume,
             change
         ),
     )?;

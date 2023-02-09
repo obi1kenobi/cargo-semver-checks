@@ -18,7 +18,7 @@ impl RequiredSemverUpdate {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
 pub(crate) enum ActualSemverUpdate {
     Major,
     Minor,

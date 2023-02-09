@@ -17,7 +17,10 @@ use std::path::PathBuf;
 use clap::{Args, Parser, Subcommand};
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
-use crate::{check_release::run_check_release, config::GlobalConfig, util::slugify};
+use crate::{
+    check_release::run_check_release, config::GlobalConfig, query::ActualSemverUpdate,
+    util::slugify,
+};
 
 fn main() -> anyhow::Result<()> {
     human_panic::setup_panic!();
@@ -143,7 +146,13 @@ fn main() -> anyhow::Result<()> {
                     baseline_highest_allowed_version,
                 )?;
 
-                let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
+                let success = run_check_release(
+                    &mut config,
+                    name,
+                    current_crate,
+                    baseline_crate,
+                    args.assume_semver,
+                )?;
                 vec![Ok(success)]
             } else {
                 let metadata = args.manifest.metadata().exec()?;
@@ -184,6 +193,7 @@ fn main() -> anyhow::Result<()> {
                                 crate_name,
                                 current_crate,
                                 baseline_crate,
+                                args.assume_semver,
                             )?)
                         }
                     })
@@ -333,6 +343,16 @@ struct CheckRelease {
         group = "baseline"
     )]
     baseline_rustdoc: Option<PathBuf>,
+
+    /// Assume given semver type and ignore the actual version difference.
+    #[arg(
+        value_enum,
+        long,
+        value_name = "SEMVER_TYPE",
+        help_heading = "Overrides",
+        group = "overrides"
+    )]
+    assume_semver: Option<ActualSemverUpdate>,
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
