@@ -348,7 +348,7 @@ struct CheckRelease {
     #[arg(
         value_enum,
         long,
-        value_name = "SEMVER_TYPE",
+        value_name = "TYPE",
         help_heading = "Overrides",
         group = "overrides"
     )]
