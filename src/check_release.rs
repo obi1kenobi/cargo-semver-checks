@@ -265,7 +265,7 @@ pub(super) fn run_check_release(
                         ref_link,
                         "impl:",
                         format!(
-                            "https://github.com/obi1kenobi/cargo-semver-check/tree/v{}/src/queries/{}.ron",
+                            "https://github.com/obi1kenobi/cargo-semver-check/tree/v{}/src/lints/{}.ron",
                             crate_version!(),
                             semver_query.id,
                         )
@@ -282,7 +282,7 @@ pub(super) fn run_check_release(
                         &semver_query.error_message,
                         "impl:",
                         format!(
-                            "https://github.com/obi1kenobi/cargo-semver-check/tree/v{}/src/queries/{}.ron",
+                            "https://github.com/obi1kenobi/cargo-semver-check/tree/v{}/src/lints/{}.ron",
                             crate_version!(),
                             semver_query.id,
                         )
