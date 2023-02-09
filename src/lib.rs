@@ -70,16 +70,16 @@ impl Rustdoc {
     /// Generate the rustdoc file from the largest-numbered non-yanked non-prerelease version
     /// published to the cargo registry. If no such version, uses
     /// the largest-numbered version including yanked and prerelease versions.
-    pub fn from_latest_version() -> Self {
+    pub fn from_registry_latest_crate_version() -> Self {
         Self {
-            source: RustdocSource::Version(None),
+            source: RustdocSource::VersionFromRegistry(None),
         }
     }
 
     /// Generate the rustdoc file from a specific crate version.
-    pub fn from_version(version: impl Into<String>) -> Self {
+    pub fn from_registry(crate_version: impl Into<String>) -> Self {
         Self {
-            source: RustdocSource::Version(Some(version.into())),
+            source: RustdocSource::VersionFromRegistry(Some(crate_version.into())),
         }
     }
 }
@@ -98,7 +98,7 @@ enum RustdocSource {
     /// If `None`, uses the largest-numbered non-yanked non-prerelease version
     /// published to the cargo registry. If no such version, uses
     /// the largest-numbered version including yanked and prerelease versions.
-    Version(Option<String>),
+    VersionFromRegistry(Option<String>),
 }
 
 /// Which packages to analyze.
@@ -208,7 +208,7 @@ impl Check {
         Self {
             scope: Scope::default(),
             current,
-            baseline: Rustdoc::from_latest_version(),
+            baseline: Rustdoc::from_registry_latest_crate_version(),
             log_level: Default::default(),
         }
     }
@@ -277,7 +277,7 @@ impl Check {
                     config,
                 )?)
             }
-            RustdocSource::Version(version) => {
+            RustdocSource::VersionFromRegistry(version) => {
                 let mut registry = rustdoc_gen::RustdocFromRegistry::new(&target_dir, config)?;
                 if let Some(ver) = version {
                     let semver = semver::Version::parse(ver)?;
@@ -300,7 +300,7 @@ impl Check {
         let all_outcomes: Vec<anyhow::Result<bool>> = match &self.current.source {
             RustdocSource::Rustdoc(_)
             | RustdocSource::Revision(_, _)
-            | RustdocSource::Version(_) => {
+            | RustdocSource::VersionFromRegistry(_) => {
                 let name = "<unknown>";
                 let version = None;
                 let (current_crate, baseline_crate) = generate_versioned_crates(
@@ -484,6 +484,6 @@ fn get_target_dir_from_project_root(source: &RustdocSource) -> anyhow::Result<Op
             Some(target)
         }
         RustdocSource::Rustdoc(_path) => None,
-        RustdocSource::Version(_version) => None,
+        RustdocSource::VersionFromRegistry(_version) => None,
     })
 }

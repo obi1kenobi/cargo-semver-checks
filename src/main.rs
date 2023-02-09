@@ -216,7 +216,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         }
         let baseline = {
             if let Some(baseline_version) = value.baseline_version {
-                Rustdoc::from_version(baseline_version)
+                Rustdoc::from_registry(baseline_version)
             } else if let Some(baseline_rev) = value.baseline_rev {
                 let root = if let Some(baseline_root) = value.baseline_root {
                     baseline_root
