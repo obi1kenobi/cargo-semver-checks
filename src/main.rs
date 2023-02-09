@@ -344,7 +344,7 @@ struct CheckRelease {
     )]
     baseline_rustdoc: Option<PathBuf>,
 
-    /// Assume given semver type and ignore the actual version difference.
+    /// Assume the version change is of the given semver type, overriding the actual change kind.
     #[arg(
         value_enum,
         long,
