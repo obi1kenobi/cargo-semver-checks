@@ -1,0 +1,60 @@
+SemverQuery(
+    id: "struct_deprecated_added",
+    human_readable_name: "struct #[deprecated] added",
+    description: "A struct has been newly marked with #[deprecated].",
+    required_update: Minor,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-deprecated-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                        }
+
+                        attribute {
+                            new_attr: raw_attribute @output
+                            content {
+                                base @filter(op: "=", value: ["$deprecated"])
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$deprecated"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "deprecated": "deprecated",
+        "zero": 0,
+    },
+    error_message: "A struct is now #[deprecated]. Downstream crates will get a compiler warning.",
+    per_result_error_template: Some("struct {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)

@@ -1,0 +1,26 @@
+{
+    "./test_crates/struct_deprecated_added/": [
+        {
+            "name": String("StructToDeprecatedStruct"),
+            "new_attr": String("#[deprecated]"),
+            "path": List([
+                String("struct_deprecated_added"),
+                String("StructToDeprecatedStruct"),
+            ]),
+            "span_begin_line": Uint64(5),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("StructToDeprecatedMessageStruct"),
+            "new_attr": String("#[deprecated = \"Foo\"]"),
+            "path": List([
+                String("struct_deprecated_added"),
+                String("StructToDeprecatedMessageStruct"),
+            ]),
+            "span_begin_line": Uint64(10),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ]
+}
