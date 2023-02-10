@@ -143,7 +143,13 @@ fn main() -> anyhow::Result<()> {
                     baseline_highest_allowed_version,
                 )?;
 
-                let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
+                let success = run_check_release(
+                    &mut config,
+                    name,
+                    current_crate,
+                    baseline_crate,
+                    args.skip_minor_lints,
+                )?;
                 vec![Ok(success)]
             } else {
                 let metadata = args.manifest.metadata().exec()?;
@@ -184,6 +190,7 @@ fn main() -> anyhow::Result<()> {
                                 crate_name,
                                 current_crate,
                                 baseline_crate,
+                                args.skip_minor_lints,
                             )?)
                         }
                     })
@@ -284,6 +291,10 @@ struct CheckRelease {
 
     #[command(flatten, next_help_heading = "Current")]
     pub workspace: clap_cargo::Workspace,
+
+    /// Only check whether a major version increment is required.
+    #[arg(long)]
+    skip_minor_lints: bool,
 
     /// The current rustdoc json output to test for semver violations.
     #[arg(

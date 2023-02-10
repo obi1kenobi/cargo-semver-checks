@@ -83,6 +83,7 @@ pub(super) fn run_check_release(
     crate_name: &str,
     current_crate: VersionedCrate,
     baseline_crate: VersionedCrate,
+    skip_minor_lints: bool,
 ) -> anyhow::Result<bool> {
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
@@ -113,6 +114,10 @@ pub(super) fn run_check_release(
     let queries_to_run: Vec<_> = queries
         .iter()
         .filter(|(_, query)| !version_change.supports_requirement(query.required_update))
+        .filter(|(_, query)| match query.required_update {
+            RequiredSemverUpdate::Major => true,
+            RequiredSemverUpdate::Minor => !skip_minor_lints,
+        })
         .collect();
     let skipped_queries = queries.len().saturating_sub(queries_to_run.len());
 
