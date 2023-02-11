@@ -88,19 +88,17 @@ pub(super) fn run_check_release(
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
 
-    let version_change = match release_type {
-        Some(release_type) => release_type.into(),
-        None => {
-            classify_semver_version_change(current_version, baseline_version).unwrap_or_else(|| {
-                config
-                    .shell_warn(
-                        "Could not determine whether crate version changed. Assuming no change.",
-                    )
-                    .expect("print failed");
-                ActualSemverUpdate::NotChanged
-            })
-        }
-    };
+    let version_change = release_type
+        .map(Into::into)
+        .or_else(|| classify_semver_version_change(current_version, baseline_version))
+        .unwrap_or_else(|| {
+            config
+                .shell_warn(
+                    "Could not determine whether crate version changed. Assuming no change.",
+                )
+                .expect("print failed");
+            ActualSemverUpdate::NotChanged
+        });
     let change = match version_change {
         ActualSemverUpdate::Major => "major",
         ActualSemverUpdate::Minor => "minor",
