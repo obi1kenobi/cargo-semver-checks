@@ -18,7 +18,7 @@ pub struct DeprecatedStructToStruct {
     bar: u64,
 }
 
-#[deprecated = "Foo"]
+#[deprecated = "This message was added"]
 pub struct DeprecatedStructToDeprecatedMessageStruct {
     bar: u64,
 }
@@ -36,7 +36,7 @@ pub struct DeprecatedMessageStructToDeprecatedStruct {
     bar: u64,
 }
 
-#[deprecated = "Baz"]
+#[deprecated = "This message was changed"]
 pub struct DeprecatedMessageStructToDeprecatedMessageStruct {
     bar: u64,
 }
