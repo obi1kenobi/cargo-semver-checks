@@ -27,7 +27,7 @@ for crate_pair in $(find "$TOPLEVEL/test_crates/" -maxdepth 1 -mindepth 1 -type 
                 echo "Generating: $crate"
 
                 pushd "$TOPLEVEL/test_crates/$crate"
-                RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --document-private-items --document-hidden-items --output-format=json
+                RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --document-private-items --document-hidden-items --cap-lints allow --output-format=json
                 mkdir -p "$TARGET_DIR/$crate"
                 mv "$RUSTDOC_OUTPUT_DIR/$crate_pair.json" "$TARGET_DIR/$crate/rustdoc.json"
                 popd
