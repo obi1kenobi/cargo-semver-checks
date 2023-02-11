@@ -151,7 +151,7 @@ fn main() -> anyhow::Result<()> {
                     name,
                     current_crate,
                     baseline_crate,
-                    args.assume_semver,
+                    args.release_type,
                 )?;
                 vec![Ok(success)]
             } else {
@@ -193,7 +193,7 @@ fn main() -> anyhow::Result<()> {
                                 crate_name,
                                 current_crate,
                                 baseline_crate,
-                                args.assume_semver,
+                                args.release_type,
                             )?)
                         }
                     })
@@ -344,7 +344,7 @@ struct CheckRelease {
     )]
     baseline_rustdoc: Option<PathBuf>,
 
-    /// Assume the version change is of the given semver type, overriding the actual change kind.
+    /// Set the desired release type instead of deriving it from the version number.
     #[arg(
         value_enum,
         long,
@@ -352,7 +352,7 @@ struct CheckRelease {
         help_heading = "Overrides",
         group = "overrides"
     )]
-    assume_semver: Option<ActualSemverUpdate>,
+    release_type: Option<ActualSemverUpdate>,
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
