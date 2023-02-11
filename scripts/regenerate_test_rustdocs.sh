@@ -27,7 +27,16 @@ for crate_pair in $(find "$TOPLEVEL/test_crates/" -maxdepth 1 -mindepth 1 -type 
                 echo "Generating: $crate"
 
                 pushd "$TOPLEVEL/test_crates/$crate"
-                RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --document-private-items --document-hidden-items --cap-lints allow --output-format=json
+
+                # Determine whether to warn on lints or allow them.
+                CAP_LINTS="warn"
+                if [[ "$crate" == "broken_rustdoc" ]]; then
+                    # This crate *intentionally* has broken rustdoc.
+                    # Don't warn on it. The warnings and errors are thing being tested.
+                    CAP_LINTS="allow"
+                fi
+
+                RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --document-private-items --document-hidden-items --cap-lints "$CAP_LINTS" --output-format=json
                 mkdir -p "$TARGET_DIR/$crate"
                 mv "$RUSTDOC_OUTPUT_DIR/$crate_pair.json" "$TARGET_DIR/$crate/rustdoc.json"
                 popd
