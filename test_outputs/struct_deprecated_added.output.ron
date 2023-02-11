@@ -3,6 +3,7 @@
         {
             "name": String("StructToDeprecatedStruct"),
             "new_attr": String("#[deprecated]"),
+            "owner_type": String("Struct"),
             "path": List([
                 String("struct_deprecated_added"),
                 String("StructToDeprecatedStruct"),
@@ -14,6 +15,7 @@
         {
             "name": String("StructToDeprecatedMessageStruct"),
             "new_attr": String("#[deprecated = \"Foo\"]"),
+            "owner_type": String("Struct"),
             "path": List([
                 String("struct_deprecated_added"),
                 String("StructToDeprecatedMessageStruct"),

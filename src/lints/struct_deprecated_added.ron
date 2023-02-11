@@ -9,9 +9,10 @@ SemverQuery(
         CrateDiff {
             current {
                 item {
-                    ... on Struct {
+                    ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
+                        owner_type: __typename @tag @output
 
                         importable_path {
                             path @tag @output
@@ -33,8 +34,9 @@ SemverQuery(
             }
             baseline {
                 item {
-                    ... on Struct {
+                    ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        __typename @filter(op: "=", value: ["%owner_type"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
