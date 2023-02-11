@@ -10,7 +10,7 @@ use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocA
 
 use crate::{
     query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
-    GlobalConfig,
+    GlobalConfig, ReleaseType,
 };
 
 type QueryResultItem = BTreeMap<Arc<str>, FieldValue>;
@@ -83,11 +83,14 @@ pub(super) fn run_check_release(
     crate_name: &str,
     current_crate: VersionedCrate,
     baseline_crate: VersionedCrate,
+    release_type: Option<ReleaseType>,
 ) -> anyhow::Result<bool> {
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
 
-    let version_change = classify_semver_version_change(current_version, baseline_version)
+    let version_change = release_type
+        .map(Into::into)
+        .or_else(|| classify_semver_version_change(current_version, baseline_version))
         .unwrap_or_else(|| {
             config
                 .shell_warn(
@@ -101,6 +104,10 @@ pub(super) fn run_check_release(
         ActualSemverUpdate::Minor => "minor",
         ActualSemverUpdate::Patch => "patch",
         ActualSemverUpdate::NotChanged => "no",
+    };
+    let assume = match release_type {
+        Some(_) => "assume ",
+        None => "",
     };
 
     let queries = SemverQuery::all_queries();
@@ -119,9 +126,10 @@ pub(super) fn run_check_release(
     config.shell_status(
         "Checking",
         format_args!(
-            "{crate_name} v{} -> v{} ({} change)",
+            "{crate_name} v{} -> v{} ({}{} change)",
             baseline_version.unwrap_or("unknown"),
             current_version.unwrap_or("unknown"),
+            assume,
             change
         ),
     )?;
