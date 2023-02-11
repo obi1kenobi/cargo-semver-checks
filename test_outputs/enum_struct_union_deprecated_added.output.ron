@@ -1,11 +1,11 @@
 {
-    "./test_crates/struct_deprecated_added/": [
+    "./test_crates/enum_struct_union_deprecated_added/": [
         {
             "name": String("StructToDeprecatedStruct"),
             "new_attr": String("#[deprecated]"),
             "owner_type": String("Struct"),
             "path": List([
-                String("struct_deprecated_added"),
+                String("enum_struct_union_deprecated_added"),
                 String("StructToDeprecatedStruct"),
             ]),
             "span_begin_line": Uint64(5),
@@ -17,7 +17,7 @@
             "new_attr": String("#[deprecated = \"Foo\"]"),
             "owner_type": String("Struct"),
             "path": List([
-                String("struct_deprecated_added"),
+                String("enum_struct_union_deprecated_added"),
                 String("StructToDeprecatedMessageStruct"),
             ]),
             "span_begin_line": Uint64(10),
