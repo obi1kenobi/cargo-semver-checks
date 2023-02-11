@@ -14,13 +14,10 @@ use rustdoc_cmd::RustdocCommand;
 use semver::Version;
 use std::path::PathBuf;
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
-use crate::{
-    check_release::run_check_release, config::GlobalConfig, query::ActualSemverUpdate,
-    util::slugify,
-};
+use crate::{check_release::run_check_release, config::GlobalConfig, util::slugify};
 
 fn main() -> anyhow::Result<()> {
     human_panic::setup_panic!();
@@ -253,6 +250,13 @@ fn generate_versioned_crates(
     Ok((current_crate, baseline_crate))
 }
 
+#[derive(ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
+enum ReleaseType {
+    Major,
+    Minor,
+    Patch,
+}
+
 #[derive(Parser)]
 #[command(name = "cargo")]
 #[command(bin_name = "cargo")]
@@ -344,7 +348,7 @@ struct CheckRelease {
     )]
     baseline_rustdoc: Option<PathBuf>,
 
-    /// Set the desired release type instead of deriving it from the version number.
+    /// Sets the release type instead of deriving it from the version number.
     #[arg(
         value_enum,
         long,
@@ -352,7 +356,7 @@ struct CheckRelease {
         help_heading = "Overrides",
         group = "overrides"
     )]
-    release_type: Option<ActualSemverUpdate>,
+    release_type: Option<ReleaseType>,
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,

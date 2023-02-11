@@ -3,6 +3,8 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use trustfall_core::ir::TransparentValue;
 
+use crate::ReleaseType;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) enum RequiredSemverUpdate {
     Major,
@@ -18,7 +20,7 @@ impl RequiredSemverUpdate {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum ActualSemverUpdate {
     Major,
     Minor,
@@ -33,6 +35,16 @@ impl ActualSemverUpdate {
             (ActualSemverUpdate::Minor, RequiredSemverUpdate::Major) => false,
             (ActualSemverUpdate::Minor, _) => true,
             (_, _) => false,
+        }
+    }
+}
+
+impl From<ReleaseType> for ActualSemverUpdate {
+    fn from(value: ReleaseType) -> Self {
+        match value {
+            ReleaseType::Major => Self::Major,
+            ReleaseType::Minor => Self::Minor,
+            ReleaseType::Patch => Self::Patch,
         }
     }
 }

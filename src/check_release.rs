@@ -10,7 +10,7 @@ use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocA
 
 use crate::{
     query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
-    GlobalConfig,
+    GlobalConfig, ReleaseType,
 };
 
 type QueryResultItem = BTreeMap<Arc<str>, FieldValue>;
@@ -83,21 +83,23 @@ pub(super) fn run_check_release(
     crate_name: &str,
     current_crate: VersionedCrate,
     baseline_crate: VersionedCrate,
-    release_type: Option<ActualSemverUpdate>,
+    release_type: Option<ReleaseType>,
 ) -> anyhow::Result<bool> {
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
 
-    let version_change = release_type.unwrap_or_else(|| {
-        classify_semver_version_change(current_version, baseline_version).unwrap_or_else(|| {
-            config
-                .shell_warn(
-                    "Could not determine whether crate version changed. Assuming no change.",
-                )
-                .expect("print failed");
-            ActualSemverUpdate::NotChanged
-        })
-    });
+    let version_change = release_type
+        .map(ActualSemverUpdate::from)
+        .unwrap_or_else(|| {
+            classify_semver_version_change(current_version, baseline_version).unwrap_or_else(|| {
+                config
+                    .shell_warn(
+                        "Could not determine whether crate version changed. Assuming no change.",
+                    )
+                    .expect("print failed");
+                ActualSemverUpdate::NotChanged
+            })
+        });
     let change = match version_change {
         ActualSemverUpdate::Major => "major",
         ActualSemverUpdate::Minor => "minor",
