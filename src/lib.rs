@@ -10,6 +10,7 @@ mod templating;
 mod util;
 
 use cargo_metadata::PackageId;
+use clap::ValueEnum;
 pub use config::*;
 pub use query::*;
 
@@ -31,6 +32,19 @@ pub struct Check {
     current: Rustdoc,
     baseline: Rustdoc,
     log_level: Option<log::Level>,
+    release_type: Option<ReleaseType>,
+}
+
+/// The kind of release we're making.
+///
+/// Affects which lints are executed.
+/// Non-exhaustive in case we want to add "pre-release" as an option in the future.
+#[non_exhaustive]
+#[derive(ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ReleaseType {
+    Major,
+    Minor,
+    Patch,
 }
 
 #[non_exhaustive]
@@ -210,6 +224,7 @@ impl Check {
             current,
             baseline: Rustdoc::from_registry_latest_crate_version(),
             log_level: Default::default(),
+            release_type: None,
         }
     }
 
@@ -230,6 +245,11 @@ impl Check {
 
     pub fn with_log_level(&mut self, log_level: log::Level) -> &mut Self {
         self.log_level = Some(log_level);
+        self
+    }
+
+    pub fn with_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
+        self.release_type = Some(release_type);
         self
     }
 
@@ -312,7 +332,7 @@ impl Check {
                     version,
                 )?;
 
-                let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
+                let success = run_check_release(&mut config, name, current_crate, baseline_crate, self.release_type)?;
                 vec![Ok(success)]
             }
             RustdocSource::Root(project_root) => {
@@ -359,6 +379,7 @@ impl Check {
                                 crate_name,
                                 current_crate,
                                 baseline_crate,
+                                self.release_type,
                             )?)
                         }
                     })

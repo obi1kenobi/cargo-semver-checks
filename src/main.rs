@@ -2,11 +2,9 @@
 
 use std::path::PathBuf;
 
-use cargo_semver_checks::GlobalConfig;
-use cargo_semver_checks::PackageSelection;
-use cargo_semver_checks::Rustdoc;
-use cargo_semver_checks::ScopeSelection;
-use cargo_semver_checks::SemverQuery;
+use cargo_semver_checks::{
+    GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
+};
 use clap::{Args, Parser, Subcommand};
 
 fn main() -> anyhow::Result<()> {
@@ -183,6 +181,16 @@ struct CheckRelease {
         group = "baseline"
     )]
     baseline_rustdoc: Option<PathBuf>,
+
+    /// Sets the release type instead of deriving it from the version number.
+    #[arg(
+        value_enum,
+        long,
+        value_name = "TYPE",
+        help_heading = "Overrides",
+        group = "overrides"
+    )]
+    release_type: Option<ReleaseType>,
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
