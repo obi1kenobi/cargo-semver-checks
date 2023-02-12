@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "enum_struct_union_deprecated_added"
+name = "type_marked_deprecated"
 version = "0.1.0"
 edition = "2021"
 

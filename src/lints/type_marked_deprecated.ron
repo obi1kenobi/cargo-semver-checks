@@ -1,7 +1,7 @@
 SemverQuery(
-    id: "enum_struct_union_deprecated_added",
-    human_readable_name: "enum/struct/union #[deprecated] added",
-    description: "Either an enum, a struct or a union has been newly marked with #[deprecated].",
+    id: "type_marked_deprecated",
+    human_readable_name: "#[deprecated] added on type",
+    description: "A type has been newly marked with #[deprecated].",
     required_update: Minor,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-deprecated-attribute"),
     query: r#"
@@ -57,6 +57,6 @@ SemverQuery(
         "deprecated": "deprecated",
         "zero": 0,
     },
-    error_message: "Either an enum, a struct or a union is now #[deprecated]. Downstream crates will get a compiler warning.",
+    error_message: "A type is now #[deprecated]. Downstream crates will get a compiler warning when using this type.",
     per_result_error_template: Some("{{owner_type}} {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )

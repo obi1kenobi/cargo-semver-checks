@@ -447,7 +447,6 @@ add_lints!(
     enum_repr_c_removed,
     enum_repr_int_changed,
     enum_repr_int_removed,
-    enum_struct_union_deprecated_added,
     enum_struct_variant_field_added,
     enum_struct_variant_field_missing,
     enum_variant_added,
@@ -475,6 +474,7 @@ add_lints!(
     trait_unsafe_added,
     trait_unsafe_removed,
     tuple_struct_to_plain_struct,
+    type_marked_deprecated,
     unit_struct_changed_kind,
     variant_marked_non_exhaustive,
 );

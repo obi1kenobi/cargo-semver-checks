@@ -1,11 +1,11 @@
 {
-    "./test_crates/enum_struct_union_deprecated_added/": [
+    "./test_crates/type_marked_deprecated/": [
         {
             "name": String("StructToDeprecatedStruct"),
             "new_attr": String("#[deprecated]"),
             "owner_type": String("Struct"),
             "path": List([
-                String("enum_struct_union_deprecated_added"),
+                String("type_marked_deprecated"),
                 String("StructToDeprecatedStruct"),
             ]),
             "span_begin_line": Uint64(7),
@@ -17,7 +17,7 @@
             "new_attr": String("#[deprecated = \"This attribute was added\"]"),
             "owner_type": String("Struct"),
             "path": List([
-                String("enum_struct_union_deprecated_added"),
+                String("type_marked_deprecated"),
                 String("StructToDeprecatedMessageStruct"),
             ]),
             "span_begin_line": Uint64(12),
@@ -29,7 +29,7 @@
             "new_attr": String("#[deprecated]"),
             "owner_type": String("Enum"),
             "path": List([
-                String("enum_struct_union_deprecated_added"),
+                String("type_marked_deprecated"),
                 String("EnumToDeprecatedEnum"),
             ]),
             "span_begin_line": Uint64(69),
@@ -41,7 +41,7 @@
             "new_attr": String("#[deprecated = \"This attribute was added\"]"),
             "owner_type": String("Enum"),
             "path": List([
-                String("enum_struct_union_deprecated_added"),
+                String("type_marked_deprecated"),
                 String("EnumToDeprecatedMessageEnum"),
             ]),
             "span_begin_line": Uint64(74),
