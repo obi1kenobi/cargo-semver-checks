@@ -1,0 +1,62 @@
+SemverQuery(
+    id: "type_marked_deprecated",
+    human_readable_name: "#[deprecated] added on type",
+    description: "A type has been newly marked with #[deprecated].",
+    required_update: Minor,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-deprecated-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        owner_type: __typename @tag @output
+
+                        importable_path {
+                            path @tag @output
+                        }
+
+                        attribute {
+                            new_attr: raw_attribute @output
+                            content {
+                                base @filter(op: "=", value: ["$deprecated"])
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        __typename @filter(op: "=", value: ["%owner_type"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$deprecated"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "deprecated": "deprecated",
+        "zero": 0,
+    },
+    error_message: "A type is now #[deprecated]. Downstream crates will get a compiler warning when using this type.",
+    per_result_error_template: Some("{{owner_type}} {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)
