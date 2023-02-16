@@ -8,11 +8,7 @@ pub(crate) struct Manifest {
 
 impl Manifest {
     pub(crate) fn parse(path: std::path::PathBuf) -> anyhow::Result<Self> {
-        let manifest_text = std::fs::read_to_string(&path)
-            .map_err(|e| anyhow::format_err!("Failed when reading {}: {}", path.display(), e))?;
-        let parsed = toml::from_str(manifest_text.as_str())
-            .map_err(|e| anyhow::format_err!("Failed to parse {}: {}", path.display(), e))?;
-
+        let parsed = cargo_toml::Manifest::from_path(&path)?;
         Ok(Self { path, parsed })
     }
 }
