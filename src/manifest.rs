@@ -8,13 +8,22 @@ pub(crate) struct Manifest {
 
 impl Manifest {
     pub(crate) fn parse(path: std::path::PathBuf) -> anyhow::Result<Self> {
+        // Normally, we'd like to parse directly via `cargo_toml::Manifest::from_path()`.
+        // Using the path is preferable to parsing from a string, because auto-detection of
+        // surrounding files is sometimes necessary to determine the existence of lib targets
+        // and ensure proper handling of workspace inheritance.
+        //
+        // However, `cargo_toml` currently has buggy handling of renamed library targets:
+        // https://gitlab.com/crates.rs/cargo_toml/-/merge_requests/16/
+        //
+        // This is a workaround for that bug, added in:
+        // https://github.com/obi1kenobi/cargo-semver-checks/pull/371/files#diff-a44cbf177b0e747788be2cc21913a967ce8a76f371b98a6c17cd908c400bf1a9
         let manifest_text = std::fs::read_to_string(&path)
             .map_err(|e| anyhow::format_err!("Failed when reading {}: {}", path.display(), e))?;
-        let parsed = match toml::from_str(manifest_text.as_str()) {
+        let parsed = match toml::from_str(&manifest_text) {
             Ok(parsed) => parsed,
             Err(_) => {
-                // If we cannot directly parse with toml (probably because of workspace inheritance),
-                // retry with cargo_toml. TODO: remove this once cargo_toml correctly parses renamed lib.
+                // Parsing failed, possibly because of workspace inheritance. Retry with cargo_toml.
                 cargo_toml::Manifest::from_path(&path)?
             }
         };
