@@ -207,4 +207,15 @@ mod tests {
             )
             .expect("no errors");
     }
+
+    #[test]
+    fn rustdoc_for_crate_in_workspace() {
+        RustdocCommand::default()
+            .dump(
+                Path::new("./test_rustdoc/crate_in_workspace/crate1/Cargo.toml"),
+                None,
+                true,
+            )
+            .expect("no errors");
+    }
 }

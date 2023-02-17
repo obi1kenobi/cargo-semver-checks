@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "crate_in_workspace_crate1"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
