@@ -18,15 +18,23 @@ impl Manifest {
         //
         // This is a workaround for that bug, added in:
         // https://github.com/obi1kenobi/cargo-semver-checks/pull/371/files#diff-a44cbf177b0e747788be2cc21913a967ce8a76f371b98a6c17cd908c400bf1a9
+
+        // First, try parsing with cargo_toml, which should always succeed as long as the manifest is valid.
+        // Due to the bug, the library name will be incorrect, but we'll fix that later.
+        let mut parsed = cargo_toml::Manifest::from_path(&path).unwrap();
+
+        // Next, try directly parsing with toml. This will get us the correct name for the library.
         let manifest_text = std::fs::read_to_string(&path)
             .map_err(|e| anyhow::format_err!("Failed when reading {}: {}", path.display(), e))?;
-        let parsed = match toml::from_str(&manifest_text) {
-            Ok(parsed) => parsed,
-            Err(_) => {
-                // Parsing failed, possibly because of workspace inheritance. Retry with cargo_toml.
-                cargo_toml::Manifest::from_path(&path)?
+        let parsed_toml: cargo_toml::Manifest = toml::from_str(&manifest_text)?;
+
+        // Force overwrite the library name to mitigate the bug.
+        if let Some(ref lib) = parsed_toml.lib {
+            if let Some(ref name) = lib.name {
+                *parsed.lib.as_mut().unwrap().name.as_mut().unwrap() = name.clone();
             }
-        };
+        }
+
         Ok(Self { path, parsed })
     }
 }
