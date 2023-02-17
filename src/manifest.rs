@@ -8,7 +8,16 @@ pub(crate) struct Manifest {
 
 impl Manifest {
     pub(crate) fn parse(path: std::path::PathBuf) -> anyhow::Result<Self> {
-        let parsed = cargo_toml::Manifest::from_path(&path)?;
+        let manifest_text = std::fs::read_to_string(&path)
+            .map_err(|e| anyhow::format_err!("Failed when reading {}: {}", path.display(), e))?;
+        let parsed = match toml::from_str(manifest_text.as_str()) {
+            Ok(parsed) => parsed,
+            Err(_) => {
+                // If we cannot directly parse with toml (probably because of workspace inheritance),
+                // retry with cargo_toml. TODO: remove this once cargo_toml correctly parses renamed lib.
+                cargo_toml::Manifest::from_path(&path)?
+            }
+        };
         Ok(Self { path, parsed })
     }
 }
