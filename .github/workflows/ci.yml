@@ -26,6 +26,7 @@ jobs:
       - run-on-bevy-core
       - run-on-bevy-gltf
       - run-on-clap
+      - run-on-sqllogictest
     steps:
       - run: exit 0
 
@@ -338,6 +339,42 @@ jobs:
 
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="subject/crates/bevy_gltf/Cargo.toml" --baseline-version 0.9.0
+
+  run-on-sqllogictest:
+    # cargo-semver-checks failed to run here due to workspace manifest-parsing issues:
+    # https://github.com/obi1kenobi/cargo-semver-checks/issues/370
+    name: Run cargo-semver-checks on sqllogictest v0.13.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout sqllogictest
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'risinglightdb/sqllogictest-rs'
+          ref: 'v0.13.0'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: sqllogictest
+
+      - name: Run via workspace Cargo.toml
+        run: cargo run semver-checks check-release --manifest-path subject/Cargo.toml -p sqllogictest
+
+      - name: Run via package Cargo.toml
+        run: cargo run semver-checks check-release --manifest-path subject/sqllogictest/Cargo.toml
 
   run-on-clap:
     # clap v3.2.0 added a semver violation
