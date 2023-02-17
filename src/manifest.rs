@@ -8,30 +8,31 @@ pub(crate) struct Manifest {
 
 impl Manifest {
     pub(crate) fn parse(path: std::path::PathBuf) -> anyhow::Result<Self> {
-        // Normally, we'd like to parse directly via `cargo_toml::Manifest::from_path()`.
-        // Using the path is preferable to parsing from a string, because auto-detection of
-        // surrounding files is sometimes necessary to determine the existence of lib targets
-        // and ensure proper handling of workspace inheritance.
-        //
-        // However, `cargo_toml` currently has buggy handling of renamed library targets:
+        // Parsing via `cargo_toml::Manifest::from_path()` is preferable to parsing from a string,.
+        // because inspection of surrounding files is sometimes necessary to determine
+        // the existence of lib targets and ensure proper handling of workspace inheritance.
+        let mut parsed = cargo_toml::Manifest::from_path(&path).unwrap();
+
+        // `cargo_toml` currently has buggy handling of renamed library targets:
         // https://gitlab.com/crates.rs/cargo_toml/-/merge_requests/16/
         //
         // This is a workaround for that bug, added in:
-        // https://github.com/obi1kenobi/cargo-semver-checks/pull/371/files#diff-a44cbf177b0e747788be2cc21913a967ce8a76f371b98a6c17cd908c400bf1a9
-
-        // First, try parsing with cargo_toml, which should always succeed as long as the manifest is valid.
-        // Due to the bug, the library name will be incorrect, but we'll fix that later.
-        let mut parsed = cargo_toml::Manifest::from_path(&path).unwrap();
-
-        // Next, try directly parsing with toml. This will get us the correct name for the library.
+        // https://github.com/obi1kenobi/cargo-semver-checks/pull/371/
+        //
+        // We load the manifest *a second time* as raw TOML with the correct library name,
+        // then forcefully overwrite the library name in `parsed`.
         let manifest_text = std::fs::read_to_string(&path)
             .map_err(|e| anyhow::format_err!("Failed when reading {}: {}", path.display(), e))?;
         let parsed_toml: cargo_toml::Manifest = toml::from_str(&manifest_text)?;
-
-        // Force overwrite the library name to mitigate the bug.
         if let Some(ref lib) = parsed_toml.lib {
             if let Some(ref name) = lib.name {
-                *parsed.lib.as_mut().unwrap().name.as_mut().unwrap() = name.clone();
+                *parsed
+                    .lib
+                    .as_mut()
+                    .expect("no lib element")
+                    .name
+                    .as_mut()
+                    .expect("no name in the lib") = name.clone();
             }
         }
 
