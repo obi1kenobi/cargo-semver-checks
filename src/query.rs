@@ -487,6 +487,7 @@ add_lints!(
     trait_unsafe_added,
     trait_unsafe_removed,
     tuple_struct_to_plain_struct,
+    type_marked_deprecated,
     unit_struct_changed_kind,
     variant_marked_non_exhaustive,
 );

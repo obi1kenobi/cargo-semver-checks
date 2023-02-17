@@ -207,4 +207,26 @@ mod tests {
             )
             .expect("no errors");
     }
+
+    #[test]
+    fn rustdoc_for_crate_in_workspace_with_workspace_manifest() {
+        RustdocCommand::default()
+            .dump(
+                Path::new("./test_rustdoc/crate_in_workspace/Cargo.toml"),
+                Some("crate_in_workspace_crate1"),
+                true,
+            )
+            .expect("no errors");
+    }
+
+    #[test]
+    fn rustdoc_for_crate_in_workspace_with_crate_manifest() {
+        RustdocCommand::default()
+            .dump(
+                Path::new("./test_rustdoc/crate_in_workspace/crate1/Cargo.toml"),
+                None,
+                true,
+            )
+            .expect("no errors");
+    }
 }

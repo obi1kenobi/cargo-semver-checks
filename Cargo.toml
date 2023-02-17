@@ -1,6 +1,6 @@
 [package]
 name = "cargo-semver-checks"
-version = "0.17.1"
+version = "0.18.1"
 edition = "2021"
 authors = ["Predrag Gruevski <obi1kenobi82@gmail.com>"]
 license = "Apache-2.0 OR MIT"
@@ -35,7 +35,7 @@ crates-index = { version = "0.19.2" }
 human-panic = "1.0.3"
 bugreport = "0.5.0"
 itertools = "0.10.5"
-cargo_toml = "0.13.0"
+cargo_toml = "0.15"
 toml = "0.5.9"
 xdg = "2.4.1"
 
