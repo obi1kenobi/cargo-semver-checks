@@ -332,7 +332,13 @@ impl Check {
                     version,
                 )?;
 
-                let success = run_check_release(&mut config, name, current_crate, baseline_crate, self.release_type)?;
+                let success = run_check_release(
+                    &mut config,
+                    name,
+                    current_crate,
+                    baseline_crate,
+                    self.release_type,
+                )?;
                 vec![Ok(success)]
             }
             RustdocSource::Root(project_root) => {
