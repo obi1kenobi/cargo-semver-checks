@@ -13,7 +13,7 @@ impl Manifest {
         // the existence of lib targets and ensure proper handling of workspace inheritance.
 
         let parsed = cargo_toml::Manifest::from_path(&path)
-            .map_err(|e| anyhow::format_err!("Failed when reading {}: {}", path.display(), e))?;
+            .with_context(|| format!("Failed when reading {}", path.display()))?;
 
         Ok(Self { path, parsed })
     }
@@ -36,11 +36,10 @@ pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<&str> {
             manifest.path.display()
         )
     })?;
-    let version = package.version.get().map_err(|e| {
-        anyhow::format_err!(
-            "Failed to retrieve package version from {}: {}",
+    let version = package.version.get().with_context(|| {
+        format!(
+            "Failed to retrieve package version from {}",
             manifest.path.display(),
-            e
         )
     })?;
     Ok(version)
