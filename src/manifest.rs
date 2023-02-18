@@ -11,30 +11,9 @@ impl Manifest {
         // Parsing via `cargo_toml::Manifest::from_path()` is preferable to parsing from a string,
         // because inspection of surrounding files is sometimes necessary to determine
         // the existence of lib targets and ensure proper handling of workspace inheritance.
-        let mut parsed = cargo_toml::Manifest::from_path(&path).unwrap();
 
-        // `cargo_toml` currently has buggy handling of renamed library targets:
-        // https://gitlab.com/crates.rs/cargo_toml/-/merge_requests/16/
-        //
-        // This is a workaround for that bug, added in:
-        // https://github.com/obi1kenobi/cargo-semver-checks/pull/371/
-        //
-        // We load the manifest *a second time* as raw TOML with the correct library name,
-        // then forcefully overwrite the library name in `parsed`.
-        let manifest_text = std::fs::read_to_string(&path)
+        let parsed = cargo_toml::Manifest::from_path(&path)
             .map_err(|e| anyhow::format_err!("Failed when reading {}: {}", path.display(), e))?;
-        let parsed_toml: cargo_toml::Manifest = toml::from_str(&manifest_text)?;
-        if let Some(ref lib) = parsed_toml.lib {
-            if let Some(ref name) = lib.name {
-                *parsed
-                    .lib
-                    .as_mut()
-                    .expect("no lib element")
-                    .name
-                    .as_mut()
-                    .expect("no name in the lib") = name.clone();
-            }
-        }
 
         Ok(Self { path, parsed })
     }
