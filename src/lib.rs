@@ -9,9 +9,11 @@ mod rustdoc_gen;
 mod templating;
 mod util;
 
+use anyhow::Context;
 use cargo_metadata::PackageId;
 use clap::ValueEnum;
 pub use config::*;
+use directories::ProjectDirs;
 pub use query::*;
 
 use check_release::run_check_release;
@@ -21,6 +23,7 @@ use itertools::Itertools;
 use rustdoc_cmd::RustdocCommand;
 use semver::Version;
 use std::collections::HashSet;
+use std::fs;
 use std::path::{Path, PathBuf};
 
 /// Test a release for semver violations.
@@ -269,7 +272,7 @@ impl Check {
             } else if let Some(path) = get_target_dir_from_project_root(&self.baseline.source)? {
                 path
             } else {
-                get_xdg_cache_dir()
+                get_cache_dir()?
             },
         )
     }
@@ -491,10 +494,12 @@ fn manifest_metadata_no_deps(project_root: &Path) -> anyhow::Result<cargo_metada
     Ok(metadata)
 }
 
-fn get_xdg_cache_dir() -> PathBuf {
-    xdg::BaseDirectories::with_prefix("cargo-semver-checks")
-        .expect("failed to retrieve XDG base directories")
-        .get_cache_home()
+fn get_cache_dir() -> anyhow::Result<PathBuf> {
+    let project_dirs =
+        ProjectDirs::from("", "", "cargo-semver-checks").context("can't determine project dirs")?;
+    let cache_dir = project_dirs.cache_dir();
+    fs::create_dir_all(cache_dir).context("can't create cache dir")?;
+    Ok(cache_dir.to_path_buf())
 }
 
 fn get_target_dir_from_project_root(source: &RustdocSource) -> anyhow::Result<Option<PathBuf>> {
