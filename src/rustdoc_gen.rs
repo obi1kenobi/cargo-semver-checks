@@ -51,6 +51,10 @@ impl<'a> CrateSource<'a> {
             Self::ManifestPath { manifest } => {
                 let mut dependencies = manifest.parsed.dependencies.clone();
                 for target in manifest.parsed.target.values() {
+                    // Fixes https://github.com/obi1kenobi/cargo-semver-checks/issues/369
+                    // This part is not relevant to `Self::Registry`, because
+                    // it doesn't have a `target` field and doesn't differentiate dependencies
+                    // between different targets.
                     dependencies.extend(target.dependencies.clone().into_iter());
                 }
                 dependencies
