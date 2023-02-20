@@ -48,13 +48,17 @@ impl<'a> CrateSource<'a> {
                 .filter_map(|dep| dep.is_optional().then_some(dep.name()))
                 .map(|x| x.to_string())
                 .collect(),
-            Self::ManifestPath { manifest } => manifest
-                .parsed
-                .dependencies
-                .iter()
-                .filter_map(|(name, dep)| dep.optional().then_some(name))
-                .map(|x| x.to_string())
-                .collect(),
+            Self::ManifestPath { manifest } => {
+                let mut dependencies = manifest.parsed.dependencies.clone();
+                for target in manifest.parsed.target.values() {
+                    dependencies.extend(target.dependencies.clone().into_iter());
+                }
+                dependencies
+                    .iter()
+                    .filter_map(|(name, dep)| dep.optional().then_some(name))
+                    .map(|x| x.to_string())
+                    .collect()
+            }
         };
 
         let feature_defns: Vec<&String> = match self {

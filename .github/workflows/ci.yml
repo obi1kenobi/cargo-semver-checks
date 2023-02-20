@@ -235,6 +235,43 @@ jobs:
       - name: Run semver-checks on libp2p-request-response
         run: cargo run semver-checks check-release --manifest-path="subject/protocols/request-response/Cargo.toml"
 
+    run-on-libp2p-uds:
+    # Run cargo-semver-checks on a crate that has dependencies in a custom target
+    # https://github.com/obi1kenobi/cargo-semver-checks/issues/369
+    name: Run cargo-semver-checks on libp2p-uds 0.37.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout rust-libp2p
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'libp2p/rust-libp2p'
+          ref: '5b4eab7bafe6cba8fea6c806027ea680662b7cc6'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      # rust-libp2p requires protobuf-compiler.
+      - name: Install protobuf-compiler
+        run: sudo apt install protobuf-compiler
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: libp2p-gossipsub-request-response
+
+      - name: Run semver-checks on libp2p-uds
+        run: cargo run semver-checks check-release --manifest-path="subject/transports/uds/Cargo.toml"
+
   run-on-core-graphics:
     # Run cargo-semver-checks on a crate with no semver violations,
     # to make sure there are no false-positives.
