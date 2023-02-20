@@ -22,6 +22,7 @@ jobs:
       - run-on-rust-libp2p
       - run-on-libp2p-dcutr-relay
       - run-on-libp2p-gossipsub-request-response
+      - run-on-libp2p-uds
       - run-on-core-graphics
       - run-on-bevy-core
       - run-on-bevy-gltf
@@ -235,7 +236,7 @@ jobs:
       - name: Run semver-checks on libp2p-request-response
         run: cargo run semver-checks check-release --manifest-path="subject/protocols/request-response/Cargo.toml"
 
-    run-on-libp2p-uds:
+  run-on-libp2p-uds:
     # Run cargo-semver-checks on a crate that has dependencies in a custom target
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/369
     name: Run cargo-semver-checks on libp2p-uds 0.37.0
