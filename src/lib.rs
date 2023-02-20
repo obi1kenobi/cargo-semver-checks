@@ -324,25 +324,38 @@ impl Check {
             RustdocSource::Rustdoc(_)
             | RustdocSource::Revision(_, _)
             | RustdocSource::VersionFromRegistry(_) => {
-                let name = "<unknown>";
-                let version = None;
-                let (current_crate, baseline_crate) = generate_versioned_crates(
-                    &mut config,
-                    &rustdoc_cmd,
-                    &*current_loader,
-                    &*baseline_loader,
-                    name,
-                    version,
-                )?;
+                let names = match &self.scope.mode {
+                    ScopeMode::DenyList(_) =>
+                        match &self.current.source {
+                            RustdocSource::Rustdoc(_) =>
+                                vec!["the-name-doesnt-matter-here".to_string()],
+                            _ => panic!("couldn't deduce crate name, specify one through the package allow list")
+                        }
+                    ScopeMode::AllowList(lst) => lst.clone(),
+                };
+                names
+                    .iter()
+                    .map(|name| {
+                        let version = None;
+                        let (current_crate, baseline_crate) = generate_versioned_crates(
+                            &mut config,
+                            &rustdoc_cmd,
+                            &*current_loader,
+                            &*baseline_loader,
+                            name,
+                            version,
+                        )?;
 
-                let success = run_check_release(
-                    &mut config,
-                    name,
-                    current_crate,
-                    baseline_crate,
-                    self.release_type,
-                )?;
-                vec![Ok(success)]
+                        let success = run_check_release(
+                            &mut config,
+                            name,
+                            current_crate,
+                            baseline_crate,
+                            self.release_type,
+                        )?;
+                        Ok(success)
+                    })
+                    .collect()
             }
             RustdocSource::Root(project_root) => {
                 let metadata = manifest_metadata(project_root)?;
