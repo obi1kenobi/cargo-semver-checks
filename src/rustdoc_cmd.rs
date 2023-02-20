@@ -1,3 +1,5 @@
+use crate::GlobalConfig;
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RustdocCommand {
     deps: bool,
@@ -5,7 +7,7 @@ pub struct RustdocCommand {
 }
 
 impl RustdocCommand {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             deps: false,
             silence: false,
@@ -23,20 +25,21 @@ impl RustdocCommand {
     /// Reasons to have this enabled:
     /// - Check for accidental inclusion of dependencies in your API
     /// - Detect breaking changes from dependencies in your API
-    pub fn deps(mut self, yes: bool) -> Self {
+    pub(crate) fn deps(mut self, yes: bool) -> Self {
         self.deps = yes;
         self
     }
 
     /// Don't write progress to stderr
-    pub fn silence(mut self, yes: bool) -> Self {
+    pub(crate) fn silence(mut self, yes: bool) -> Self {
         self.silence = yes;
         self
     }
 
     /// Produce a rustdoc JSON file for the specified configuration.
-    pub fn dump(
+    pub(crate) fn dump(
         &self,
+        config: &mut GlobalConfig,
         manifest_path: &std::path::Path,
         pkg_spec: Option<&str>,
         all_features: bool,
@@ -83,7 +86,7 @@ impl RustdocCommand {
         if all_features {
             cmd.arg("--all-features");
         }
-        if atty::is(atty::Stream::Stderr) {
+        if config.is_stderr_tty() {
             cmd.arg("--color=always");
         }
         let output = cmd.output()?;
@@ -163,6 +166,7 @@ impl Default for RustdocCommand {
 
 #[cfg(test)]
 mod tests {
+    use crate::GlobalConfig;
     use std::path::Path;
 
     use super::RustdocCommand;
@@ -171,6 +175,7 @@ mod tests {
     fn rustdoc_for_lib_crate_without_lib_section() {
         RustdocCommand::default()
             .dump(
+                &mut GlobalConfig::new(),
                 Path::new("./test_rustdoc/implicit_lib/Cargo.toml"),
                 None,
                 true,
@@ -182,6 +187,7 @@ mod tests {
     fn rustdoc_for_lib_crate_with_lib_section() {
         RustdocCommand::default()
             .dump(
+                &mut GlobalConfig::new(),
                 Path::new("./test_rustdoc/renamed_lib/Cargo.toml"),
                 None,
                 true,
@@ -193,6 +199,7 @@ mod tests {
     fn rustdoc_for_bin_crate_without_bin_section() {
         RustdocCommand::default()
             .dump(
+                &mut GlobalConfig::new(),
                 Path::new("./test_rustdoc/implicit_bin/Cargo.toml"),
                 None,
                 true,
@@ -204,6 +211,7 @@ mod tests {
     fn rustdoc_for_bin_crate_with_bin_section() {
         RustdocCommand::default()
             .dump(
+                &mut GlobalConfig::new(),
                 Path::new("./test_rustdoc/renamed_bin/Cargo.toml"),
                 None,
                 true,
