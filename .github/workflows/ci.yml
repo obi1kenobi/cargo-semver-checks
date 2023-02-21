@@ -455,8 +455,8 @@ jobs:
       - name: Run semver-checks on workspace manifest with explicit exclusions
         run: cargo run semver-checks check-release --manifest-path="subject/Cargo.toml" --release-type minor --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
 
-      # This test caught a bug where `publish = false` items were still semver-checked
-      # unless either `--workspace` was present or was implied e.g. via `--exclude`.
+      # This test caught a bug where `publish = false` items in a workspace were semver-checked
+      # unless either explicit `--workspace` was present or was implied e.g. via `--exclude`.
       - name: Run semver-checks on workspace manifest with implicit exclusions
         run: cargo run semver-checks check-release --manifest-path="subject/Cargo.toml" --release-type minor
 

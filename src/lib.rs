@@ -367,13 +367,7 @@ impl Check {
                         let crate_name = &selected.name;
                         let version = &selected.version;
 
-                        let is_implied = matches!(
-                            self.scope.mode,
-                            ScopeMode::DenyList(PackageSelection {
-                                selection: ScopeSelection::Workspace,
-                                ..
-                            })
-                        ) && selected.publish == Some(vec![]);
+                        let is_implied = selected.publish == Some(vec![]);
                         if is_implied {
                             config.verbose(|config| {
                                 config.shell_status(
