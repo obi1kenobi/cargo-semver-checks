@@ -262,6 +262,7 @@ fn generate_rustdoc(
     )?;
 
     let rustdoc_path = rustdoc_cmd.dump(
+        config,
         placeholder_manifest_path.as_path(),
         Some(&format!("{name}@{version}")),
         false,
