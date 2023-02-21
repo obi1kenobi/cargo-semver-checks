@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 use crates_index::Crate;
+use itertools::Itertools;
 
 use crate::manifest::Manifest;
 use crate::rustdoc_cmd::RustdocCommand;
@@ -325,7 +326,8 @@ impl RustdocGenerator for RustdocFromFile {
 #[derive(Debug)]
 pub(crate) struct RustdocFromProjectRoot {
     project_root: PathBuf,
-    lookup: std::collections::HashMap<String, Manifest>,
+    manifests: std::collections::HashMap<String, Manifest>,
+    manifest_errors: std::collections::HashMap<PathBuf, anyhow::Error>,
     target_root: PathBuf,
 }
 
@@ -337,20 +339,31 @@ impl RustdocFromProjectRoot {
         project_root: &std::path::Path,
         target_root: &std::path::Path,
     ) -> anyhow::Result<Self> {
-        let mut lookup = std::collections::HashMap::new();
+        let mut manifests = std::collections::HashMap::new();
+        let mut manifest_errors = std::collections::HashMap::new();
         for result in ignore::Walk::new(project_root) {
             let entry = result?;
             if entry.file_name() == "Cargo.toml" {
-                if let Ok(manifest) = crate::manifest::Manifest::parse(entry.into_path()) {
-                    if let Ok(name) = crate::manifest::get_package_name(&manifest) {
-                        lookup.insert(name.to_string(), manifest);
+                let path = entry.into_path();
+                match crate::manifest::Manifest::parse(path.clone()) {
+                    Ok(manifest) => match crate::manifest::get_package_name(&manifest) {
+                        Ok(name) => {
+                            manifests.insert(name.to_string(), manifest);
+                        }
+                        Err(e) => {
+                            manifest_errors.insert(path, e);
+                        }
+                    },
+                    Err(e) => {
+                        manifest_errors.insert(path, e);
                     }
                 }
             }
         }
         Ok(Self {
             project_root: project_root.to_owned(),
-            lookup,
+            manifests,
+            manifest_errors,
             target_root: target_root.to_owned(),
         })
     }
@@ -363,13 +376,24 @@ impl RustdocGenerator for RustdocFromProjectRoot {
         rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        let manifest: &Manifest = self.lookup.get(crate_data.name).with_context(|| {
-            format!(
-                "package `{}` not found in {}",
-                crate_data.name,
-                self.project_root.display()
-            )
-        })?;
+        let manifest: &Manifest = self
+            .manifests
+            .get(crate_data.name)
+            .with_context(|| {
+                let errors = self
+                    .manifest_errors
+                    .values()
+                    .map(|error| format!("  {error:#},"))
+                    .join("\n");
+                format!("possibly due to errors: [\n{errors}\n]")
+            })
+            .with_context(|| {
+                format!(
+                    "package `{}` not found in {}",
+                    crate_data.name,
+                    self.project_root.display(),
+                )
+            })?;
         generate_rustdoc(
             config,
             rustdoc_cmd,
