@@ -15,4 +15,4 @@ localdata/
 .vscode/
 
 # Unnecessary test data
-test_crates/*/*/Cargo.lock
+test_crates/**/Cargo.lock

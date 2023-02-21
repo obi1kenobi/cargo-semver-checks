@@ -367,7 +367,14 @@ impl Check {
                         let crate_name = &selected.name;
                         let version = &selected.version;
 
-                        let is_implied = selected.publish == Some(vec![]);
+                        // If the manifest we're using points to a workspace, then
+                        // ignore `publish = false` crates unless they are specifically selected.
+                        // If the manifest points to a specific crate, then check the crate
+                        // even if `publish = false` is set.
+                        let is_implied =
+                            matches!(self.scope.mode, ScopeMode::DenyList(..))
+                            && metadata.workspace_members.len() > 1
+                            && selected.publish == Some(vec![]);
                         if is_implied {
                             config.verbose(|config| {
                                 config.shell_status(
