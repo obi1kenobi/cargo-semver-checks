@@ -28,6 +28,7 @@ jobs:
       - run-on-bevy-gltf
       - run-on-clap
       - run-on-sqllogictest
+      - run-on-tokio
     steps:
       - run: exit 0
 
@@ -413,6 +414,42 @@ jobs:
 
       - name: Run via package Cargo.toml
         run: cargo run semver-checks check-release --manifest-path subject/sqllogictest/Cargo.toml
+
+  run-on-tokio:
+    # cargo-semver-checks crashed here due to improper CLI argument handling:
+    # https://github.com/obi1kenobi/cargo-semver-checks/issues/380
+    name: Run cargo-semver-checks on tokio ~v1.25.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Checkout tokio
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'tokio-rs/tokio'
+          ref: 'd7b7c6131774ab631be6529fef3680abfeeb4781'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: tokio
+
+      - name: Run semver-checks on tokio crate manifest only
+        run: cargo run semver-checks check-release --manifest-path="subject/tokio/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
+
+      - name: Run semver-checks on workspace manifest
+        run: cargo run semver-checks check-release --manifest-path="subject/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
 
   run-on-clap:
     # clap v3.2.0 added a semver violation

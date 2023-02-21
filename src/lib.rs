@@ -383,11 +383,6 @@ impl Check {
                             })?;
                             Ok(true)
                         } else {
-                            config.shell_status(
-                                "Parsing",
-                                format_args!("{crate_name} v{version} (current)"),
-                            )?;
-
                             let (current_crate, baseline_crate) = generate_versioned_crates(
                                 &mut config,
                                 &rustdoc_cmd,
