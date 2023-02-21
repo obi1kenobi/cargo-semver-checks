@@ -215,7 +215,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             (Rustdoc::from_root(&project_root), Some(project_root))
         };
         let mut check = Self::new(current);
-        if value.workspace.all || value.workspace.workspace {
+        if value.workspace.all || value.workspace.workspace || !value.workspace.exclude.is_empty() {
             let mut selection = PackageSelection::new(ScopeSelection::Workspace);
             selection.with_excluded_packages(value.workspace.exclude);
             check.with_package_selection(selection);

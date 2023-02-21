@@ -445,11 +445,20 @@ jobs:
         with:
           key: tokio
 
+      # This test caught a bug where the default baseline was set to the current path,
+      # instead of the default registry version.
       - name: Run semver-checks on tokio crate manifest only
         run: cargo run semver-checks check-release --manifest-path="subject/tokio/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
 
-      - name: Run semver-checks on workspace manifest
-        run: cargo run semver-checks check-release --manifest-path="subject/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
+      # This test caught a bug where `--exclude` was silently ignored
+      # if `--workspace` wasn't set at the same time.
+      - name: Run semver-checks on workspace manifest with explicit exclusions
+        run: cargo run semver-checks check-release --manifest-path="subject/Cargo.toml" --release-type minor --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
+
+      # This test caught a bug where `publish = false` items were still semver-checked
+      # unless either `--workspace` was present or was implied e.g. via `--exclude`.
+      - name: Run semver-checks on workspace manifest with implicit exclusions
+        run: cargo run semver-checks check-release --manifest-path="subject/Cargo.toml" --release-type minor
 
   run-on-clap:
     # clap v3.2.0 added a semver violation
