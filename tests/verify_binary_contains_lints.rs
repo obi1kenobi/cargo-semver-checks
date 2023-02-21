@@ -5,11 +5,7 @@ fn verify_binary_contains_lints() {
     let assert_on_crate_pair = |crate_pair: &str| {
         let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
         cmd.current_dir(format!("test_crates/{crate_pair}/new"))
-            .args([
-                "semver-checks",
-                "check-release",
-                "--baseline-root=../old/Cargo.toml",
-            ])
+            .args(["semver-checks", "check-release", "--baseline-root=../old/"])
             .assert()
     };
 

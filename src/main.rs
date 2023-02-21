@@ -1,23 +1,11 @@
 #![forbid(unsafe_code)]
 
-mod check_release;
-mod config;
-mod manifest;
-mod query;
-mod rustdoc_cmd;
-mod rustdoc_gen;
-mod templating;
-mod util;
-
-use itertools::Itertools;
-use rustdoc_cmd::RustdocCommand;
-use semver::Version;
 use std::path::PathBuf;
 
-use clap::{Args, Parser, Subcommand, ValueEnum};
-use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
-
-use crate::{check_release::run_check_release, config::GlobalConfig, util::slugify};
+use cargo_semver_checks::{
+    GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
+};
+use clap::{Args, Parser, Subcommand};
 
 fn main() -> anyhow::Result<()> {
     human_panic::setup_panic!();
@@ -34,7 +22,7 @@ fn main() -> anyhow::Result<()> {
             .print::<Markdown>();
         std::process::exit(0);
     } else if args.list {
-        let queries = query::SemverQuery::all_queries();
+        let queries = SemverQuery::all_queries();
         let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
         for query in queries.values() {
             rows.push([
@@ -64,7 +52,7 @@ fn main() -> anyhow::Result<()> {
         config.shell_note("Use `--explain <id>` to see more details")?;
         std::process::exit(0);
     } else if let Some(id) = args.explain.as_deref() {
-        let queries = query::SemverQuery::all_queries();
+        let queries = SemverQuery::all_queries();
         let query = queries.get(id).ok_or_else(|| {
             let ids = queries.keys().cloned().collect::<Vec<_>>();
             anyhow::format_err!(
@@ -89,119 +77,10 @@ fn main() -> anyhow::Result<()> {
 
     match args.command {
         Some(SemverChecksCommands::CheckRelease(args)) => {
-            let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
-
-            let baseline_loader: Box<dyn rustdoc_gen::RustdocGenerator> =
-                if let Some(path) = args.baseline_rustdoc.as_deref() {
-                    Box::new(rustdoc_gen::RustdocFromFile::new(path.to_owned()))
-                } else if let Some(root) = args.baseline_root.as_deref() {
-                    let metadata = args.manifest.metadata().no_deps().exec()?;
-                    let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-                    Box::new(rustdoc_gen::RustdocFromProjectRoot::new(root, &target)?)
-                } else if let Some(rev) = args.baseline_rev.as_deref() {
-                    let metadata = args.manifest.metadata().no_deps().exec()?;
-                    let source = metadata.workspace_root.as_std_path();
-                    let slug = slugify(rev);
-                    let target = metadata
-                        .target_directory
-                        .as_std_path()
-                        .join(util::SCOPE)
-                        .join(format!("git-{slug}"));
-                    Box::new(rustdoc_gen::RustdocFromGitRevision::with_rev(
-                        source,
-                        &target,
-                        rev,
-                        &mut config,
-                    )?)
-                } else {
-                    let metadata = args.manifest.metadata().no_deps().exec()?;
-                    let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-                    let mut registry = rustdoc_gen::RustdocFromRegistry::new(&target, &mut config)?;
-                    if let Some(version) = args.baseline_version.as_deref() {
-                        let version = semver::Version::parse(version)?;
-                        registry.set_version(version);
-                    }
-                    Box::new(registry)
-                };
-            let rustdoc_cmd = rustdoc_cmd::RustdocCommand::new()
-                .deps(false)
-                .silence(!config.is_verbose());
-
-            let all_outcomes: Vec<anyhow::Result<bool>> = if let Some(current_rustdoc_path) =
-                args.current_rustdoc.as_deref()
-            {
-                let name = "<unknown>";
-                let baseline_highest_allowed_version = None;
-                let current_loader =
-                    rustdoc_gen::RustdocFromFile::new(current_rustdoc_path.to_path_buf());
-                let (current_crate, baseline_crate) = generate_versioned_crates(
-                    &mut config,
-                    &rustdoc_cmd,
-                    &current_loader,
-                    &*baseline_loader,
-                    name,
-                    baseline_highest_allowed_version,
-                )?;
-
-                let success = run_check_release(
-                    &mut config,
-                    name,
-                    current_crate,
-                    baseline_crate,
-                    args.release_type,
-                )?;
-                vec![Ok(success)]
-            } else {
-                let metadata = args.manifest.metadata().exec()?;
-                let (selected, _) = args.workspace.partition_packages(&metadata);
-                selected
-                    .iter()
-                    .map(|selected| {
-                        let manifest_path = selected.manifest_path.as_std_path();
-                        let crate_name = &selected.name;
-                        let current_version = &selected.version;
-
-                        let is_implied = args.workspace.all || args.workspace.workspace;
-                        if is_implied && selected.publish == Some(vec![]) {
-                            config.verbose(|config| {
-                                config.shell_status(
-                                    "Skipping",
-                                    format_args!("{crate_name} v{current_version} (current)"),
-                                )
-                            })?;
-                            Ok(true)
-                        } else {
-                            let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-                            let current_loader = rustdoc_gen::RustdocFromProjectRoot::new(
-                                &manifest::get_project_dir_from_manifest_path(manifest_path)?,
-                                &target,
-                            )?;
-                            let (current_crate, baseline_crate) = generate_versioned_crates(
-                                &mut config,
-                                &rustdoc_cmd,
-                                &current_loader,
-                                &*baseline_loader,
-                                crate_name,
-                                Some(current_version),
-                            )?;
-
-                            Ok(run_check_release(
-                                &mut config,
-                                crate_name,
-                                current_crate,
-                                baseline_crate,
-                                args.release_type,
-                            )?)
-                        }
-                    })
-                    .collect()
-            };
-
-            let success = all_outcomes
-                .into_iter()
-                .fold_ok(true, std::ops::BitAnd::bitand)?;
-            if success {
-                std::process::exit(0);
+            let check: cargo_semver_checks::Check = args.into();
+            let report = check.check_release()?;
+            if report.success() {
+                std::process::exit(0)
             } else {
                 std::process::exit(1);
             }
@@ -210,51 +89,6 @@ fn main() -> anyhow::Result<()> {
             anyhow::bail!("subcommand required");
         }
     }
-}
-
-fn generate_versioned_crates(
-    config: &mut GlobalConfig,
-    rustdoc_cmd: &RustdocCommand,
-    current_loader: &dyn rustdoc_gen::RustdocGenerator,
-    baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
-    crate_name: &str,
-    version: Option<&Version>,
-) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
-    let current_path = current_loader.load_rustdoc(
-        config,
-        rustdoc_cmd,
-        rustdoc_gen::CrateDataForRustdoc {
-            name: crate_name,
-            crate_type: rustdoc_gen::CrateType::Current,
-        },
-    )?;
-    let current_crate = load_rustdoc(&current_path)?;
-
-    // The process of generating baseline rustdoc can overwrite
-    // the already-generated rustdoc of the current crate.
-    // For example, this happens when target-dir is specified in `.cargo/config.toml`.
-    // That's the reason why we're immediately loading the rustdocs into memory.
-    // See: https://github.com/obi1kenobi/cargo-semver-checks/issues/269
-    let baseline_path = baseline_loader.load_rustdoc(
-        config,
-        rustdoc_cmd,
-        rustdoc_gen::CrateDataForRustdoc {
-            name: crate_name,
-            crate_type: rustdoc_gen::CrateType::Baseline {
-                highest_allowed_version: version,
-            },
-        },
-    )?;
-    let baseline_crate = load_rustdoc(&baseline_path)?;
-
-    Ok((current_crate, baseline_crate))
-}
-
-#[derive(ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
-enum ReleaseType {
-    Major,
-    Minor,
-    Patch,
 }
 
 #[derive(Parser)]
@@ -360,6 +194,63 @@ struct CheckRelease {
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
+}
+
+impl From<CheckRelease> for cargo_semver_checks::Check {
+    fn from(value: CheckRelease) -> Self {
+        let (current, current_project_root) = if let Some(current_rustdoc) = value.current_rustdoc {
+            (Rustdoc::from_path(current_rustdoc), None)
+        } else if let Some(manifest) = value.manifest.manifest_path {
+            let project_root = if manifest.is_dir() {
+                manifest
+            } else {
+                manifest
+                    .parent()
+                    .expect("manifest path doesn't have a parent")
+                    .to_path_buf()
+            };
+            (Rustdoc::from_root(&project_root), Some(project_root))
+        } else {
+            let project_root = std::env::current_dir().expect("can't determine current directory");
+            (Rustdoc::from_root(&project_root), Some(project_root))
+        };
+        let mut check = Self::new(current);
+        if value.workspace.all || value.workspace.workspace {
+            let mut selection = PackageSelection::new(ScopeSelection::Workspace);
+            selection.with_excluded_packages(value.workspace.exclude);
+            check.with_package_selection(selection);
+        } else if !value.workspace.package.is_empty() {
+            check.with_packages(value.workspace.package);
+        }
+        let baseline = {
+            if let Some(baseline_version) = value.baseline_version {
+                Rustdoc::from_registry(baseline_version)
+            } else if let Some(baseline_rev) = value.baseline_rev {
+                let root = if let Some(baseline_root) = value.baseline_root {
+                    baseline_root
+                } else if let Some(current_root) = current_project_root {
+                    current_root
+                } else {
+                    std::env::current_dir().expect("can't determine current directory")
+                };
+                Rustdoc::from_git_revision(root, baseline_rev)
+            } else if let Some(baseline_rustdoc) = value.baseline_rustdoc {
+                Rustdoc::from_path(baseline_rustdoc)
+            } else {
+                let root = if let Some(baseline_root) = value.baseline_root {
+                    baseline_root
+                } else {
+                    std::env::current_dir().expect("can't determine current directory")
+                };
+                Rustdoc::from_root(root)
+            }
+        };
+        check.with_baseline(baseline);
+        if let Some(log_level) = value.verbosity.log_level() {
+            check.with_log_level(log_level);
+        }
+        check
+    }
 }
 
 #[test]
