@@ -223,6 +223,7 @@ mod tests {
     fn rustdoc_for_crate_in_workspace_with_workspace_manifest() {
         RustdocCommand::default()
             .dump(
+                &mut GlobalConfig::new(),
                 Path::new("./test_rustdoc/crate_in_workspace/Cargo.toml"),
                 Some("crate_in_workspace_crate1"),
                 true,
@@ -234,6 +235,7 @@ mod tests {
     fn rustdoc_for_crate_in_workspace_with_crate_manifest() {
         RustdocCommand::default()
             .dump(
+                &mut GlobalConfig::new(),
                 Path::new("./test_rustdoc/crate_in_workspace/crate1/Cargo.toml"),
                 None,
                 true,
