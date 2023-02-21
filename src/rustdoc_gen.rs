@@ -346,16 +346,14 @@ impl RustdocFromProjectRoot {
             if entry.file_name() == "Cargo.toml" {
                 let path = entry.into_path();
                 match crate::manifest::Manifest::parse(path.clone()) {
-                    Ok(manifest) => {
-                        match crate::manifest::get_package_name(&manifest) {
-                            Ok(name) => {
-                                manifests.insert(name.to_string(), manifest);
-                            }
-                            Err(e) => {
-                                manifest_errors.insert(path, e);
-                            }
+                    Ok(manifest) => match crate::manifest::get_package_name(&manifest) {
+                        Ok(name) => {
+                            manifests.insert(name.to_string(), manifest);
                         }
-                    }
+                        Err(e) => {
+                            manifest_errors.insert(path, e);
+                        }
+                    },
                     Err(e) => {
                         manifest_errors.insert(path, e);
                     }
@@ -378,18 +376,24 @@ impl RustdocGenerator for RustdocFromProjectRoot {
         rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        let manifest: &Manifest = self.manifests.get(crate_data.name).with_context(|| {
-            let errors = self.manifest_errors.values().map(|error| {
-                format!("  {error:#},")
-            }).join("\n");
-            format!("possibly due to errors: [\n{errors}\n]")
-        }).with_context(|| {
-            format!(
-                "package `{}` not found in {}",
-                crate_data.name,
-                self.project_root.display(),
-            )
-        })?;
+        let manifest: &Manifest = self
+            .manifests
+            .get(crate_data.name)
+            .with_context(|| {
+                let errors = self
+                    .manifest_errors
+                    .values()
+                    .map(|error| format!("  {error:#},"))
+                    .join("\n");
+                format!("possibly due to errors: [\n{errors}\n]")
+            })
+            .with_context(|| {
+                format!(
+                    "package `{}` not found in {}",
+                    crate_data.name,
+                    self.project_root.display(),
+                )
+            })?;
         generate_rustdoc(
             config,
             rustdoc_cmd,

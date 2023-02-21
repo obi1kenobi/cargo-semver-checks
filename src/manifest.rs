@@ -20,17 +20,26 @@ impl Manifest {
 
 pub(crate) fn get_package_name(manifest: &Manifest) -> anyhow::Result<&str> {
     let package = manifest.parsed.package.as_ref().with_context(|| {
-        format!("failed to parse {}: no `package` table", manifest.path.display())
+        format!(
+            "failed to parse {}: no `package` table",
+            manifest.path.display()
+        )
     })?;
     Ok(&package.name)
 }
 
 pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<&str> {
     let package = manifest.parsed.package.as_ref().with_context(|| {
-        format!("failed to parse {}: no `package` table", manifest.path.display())
+        format!(
+            "failed to parse {}: no `package` table",
+            manifest.path.display()
+        )
     })?;
     let version = package.version.get().with_context(|| {
-        format!("failed to retrieve package version from {}", manifest.path.display())
+        format!(
+            "failed to retrieve package version from {}",
+            manifest.path.display()
+        )
     })?;
     Ok(version)
 }
