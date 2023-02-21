@@ -5,6 +5,7 @@ use trustfall_core::ir::TransparentValue;
 
 use crate::ReleaseType;
 
+#[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RequiredSemverUpdate {
     Major,

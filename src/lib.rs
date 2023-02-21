@@ -12,9 +12,7 @@ mod util;
 use anyhow::Context;
 use cargo_metadata::PackageId;
 use clap::ValueEnum;
-pub use config::*;
 use directories::ProjectDirs;
-pub use query::*;
 
 use check_release::run_check_release;
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
@@ -25,6 +23,9 @@ use semver::Version;
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
+
+pub use config::GlobalConfig;
+pub use query::{RequiredSemverUpdate, SemverQuery};
 
 /// Test a release for semver violations.
 #[non_exhaustive]
