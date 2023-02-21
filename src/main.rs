@@ -14,7 +14,7 @@ use rustdoc_cmd::RustdocCommand;
 use semver::Version;
 use std::path::PathBuf;
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
 use crate::{check_release::run_check_release, config::GlobalConfig, util::slugify};
@@ -143,7 +143,13 @@ fn main() -> anyhow::Result<()> {
                     baseline_highest_allowed_version,
                 )?;
 
-                let success = run_check_release(&mut config, name, current_crate, baseline_crate)?;
+                let success = run_check_release(
+                    &mut config,
+                    name,
+                    current_crate,
+                    baseline_crate,
+                    args.release_type,
+                )?;
                 vec![Ok(success)]
             } else {
                 let metadata = args.manifest.metadata().exec()?;
@@ -184,6 +190,7 @@ fn main() -> anyhow::Result<()> {
                                 crate_name,
                                 current_crate,
                                 baseline_crate,
+                                args.release_type,
                             )?)
                         }
                     })
@@ -241,6 +248,13 @@ fn generate_versioned_crates(
     let baseline_crate = load_rustdoc(&baseline_path)?;
 
     Ok((current_crate, baseline_crate))
+}
+
+#[derive(ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
+enum ReleaseType {
+    Major,
+    Minor,
+    Patch,
 }
 
 #[derive(Parser)]
@@ -333,6 +347,16 @@ struct CheckRelease {
         group = "baseline"
     )]
     baseline_rustdoc: Option<PathBuf>,
+
+    /// Sets the release type instead of deriving it from the version number.
+    #[arg(
+        value_enum,
+        long,
+        value_name = "TYPE",
+        help_heading = "Overrides",
+        group = "overrides"
+    )]
+    release_type: Option<ReleaseType>,
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,

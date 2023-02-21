@@ -8,10 +8,12 @@ pub(crate) struct Manifest {
 
 impl Manifest {
     pub(crate) fn parse(path: std::path::PathBuf) -> anyhow::Result<Self> {
-        let manifest_text = std::fs::read_to_string(&path)
-            .map_err(|e| anyhow::format_err!("Failed when reading {}: {}", path.display(), e))?;
-        let parsed = toml::from_str(manifest_text.as_str())
-            .map_err(|e| anyhow::format_err!("Failed to parse {}: {}", path.display(), e))?;
+        // Parsing via `cargo_toml::Manifest::from_path()` is preferable to parsing from a string,
+        // because inspection of surrounding files is sometimes necessary to determine
+        // the existence of lib targets and ensure proper handling of workspace inheritance.
+
+        let parsed = cargo_toml::Manifest::from_path(&path)
+            .with_context(|| format!("Failed when reading {}", path.display()))?;
 
         Ok(Self { path, parsed })
     }
@@ -34,11 +36,10 @@ pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<&str> {
             manifest.path.display()
         )
     })?;
-    let version = package.version.get().map_err(|e| {
-        anyhow::format_err!(
-            "Failed to retrieve package version from {}: {}",
+    let version = package.version.get().with_context(|| {
+        format!(
+            "Failed to retrieve package version from {}",
             manifest.path.display(),
-            e
         )
     })?;
     Ok(version)
