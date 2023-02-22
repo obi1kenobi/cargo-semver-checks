@@ -586,7 +586,8 @@ jobs:
       - name: Run semver-checks
         continue-on-error: true
         run: |
-          cargo run semver-checks check-release --manifest-path="subject/Cargo.toml" > output
+          set -euo pipefail
+          cargo run semver-checks check-release --manifest-path="subject/Cargo.toml" 2>&1 | tee output
           touch unexpectedly_did_not_fail
 
       - name: Check whether it failed
