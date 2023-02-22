@@ -376,24 +376,24 @@ impl RustdocGenerator for RustdocFromProjectRoot {
         rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        let manifest: &Manifest = self
-            .manifests
-            .get(crate_data.name)
-            .with_context(|| {
-                let errors = self
+        let manifest: &Manifest = self.manifests.get(crate_data.name).ok_or_else(|| {
+            let err = anyhow::anyhow!(
+                "package `{}` not found in {}",
+                crate_data.name,
+                self.project_root.display(),
+            );
+            if self.manifest_errors.is_empty() {
+                err
+            } else {
+                let cause_list = self
                     .manifest_errors
                     .values()
                     .map(|error| format!("  {error:#},"))
                     .join("\n");
-                format!("possibly due to errors: [\n{errors}\n]")
-            })
-            .with_context(|| {
-                format!(
-                    "package `{}` not found in {}",
-                    crate_data.name,
-                    self.project_root.display(),
-                )
-            })?;
+                let possible_causes = format!("possibly due to errors: [\n{cause_list}\n]");
+                err.context(possible_causes)
+            }
+        })?;
         generate_rustdoc(
             config,
             rustdoc_cmd,
