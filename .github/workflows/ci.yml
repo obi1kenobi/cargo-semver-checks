@@ -28,7 +28,6 @@ jobs:
       - run-on-bevy-gltf
       - run-on-clap
       - run-on-sqllogictest
-      - run-on-tokio
       - run-on-ref-slice-fork
     steps:
       - run: exit 0
@@ -451,8 +450,8 @@ jobs:
       # - Specifying `--exclude` together with a crate manifest that is within a workspace
       #   (but doesn't *itself* define the workspace) would cause the entire workspace to
       #   get tested, even though only a single crate's manifest was specified.
-      - name: Run semver-checks on tokio crate manifest only
-        run: cargo run semver-checks check-release --manifest-path="subject/tokio/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
+      - name: Run semver-checks on tokio-stream crate manifest only
+        run: cargo run semver-checks check-release --manifest-path="subject/tokio-stream/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
 
       # This test caught a bug where `--exclude` was silently ignored
       # if `--workspace` wasn't set at the same time.
@@ -675,6 +674,7 @@ jobs:
     needs:
       - ci-everything
       - should-publish
+      - run-on-tokio  # this check is too expensive on every PR, so we do it pre-publish instead
     if: needs.should-publish.outputs.is_new_version == 'yes'
     steps:
       - name: Checkout
