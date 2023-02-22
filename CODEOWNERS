@@ -6,4 +6,4 @@
 # - It contains settings.yml, which affects repo-wide config;
 #   writing that file is equivalent to being a repo admin.
 # - it contains the GitHub Actions workflows, which can access repo secrets.
-.github/  @obi1kenobi @epage
+.github/  @obi1kenobi
