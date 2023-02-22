@@ -215,12 +215,21 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             (Rustdoc::from_root(&project_root), Some(project_root))
         };
         let mut check = Self::new(current);
-        if value.workspace.all || value.workspace.workspace || !value.workspace.exclude.is_empty() {
+        if value.workspace.all || value.workspace.workspace {
+            // Specified explicit `--workspace` or `--all`.
             let mut selection = PackageSelection::new(ScopeSelection::Workspace);
             selection.with_excluded_packages(value.workspace.exclude);
             check.with_package_selection(selection);
         } else if !value.workspace.package.is_empty() {
+            // Specified explicit `--package`.
             check.with_packages(value.workspace.package);
+        } else if !value.workspace.exclude.is_empty() {
+            // Specified `--exclude` without `--workspace/--all`.
+            // Leave the scope selection to the default ("workspace if the manifest is a workspace")
+            // while excluding any specified packages.
+            let mut selection = PackageSelection::new(ScopeSelection::DefaultMembers);
+            selection.with_excluded_packages(value.workspace.exclude);
+            check.with_package_selection(selection);
         }
         let custom_baseline = {
             if let Some(baseline_version) = value.baseline_version {

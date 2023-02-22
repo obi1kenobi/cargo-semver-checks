@@ -446,8 +446,11 @@ jobs:
         with:
           key: tokio
 
-      # This test caught a bug where the default baseline was set to the current path,
-      # instead of the default registry version.
+      # This test caught two bugs:
+      # - The default baseline was set to the current path instead of the default registry version.
+      # - Specifying `--exclude` together with a crate manifest that is within a workspace
+      #   (but doesn't *itself* define the workspace) would cause the entire workspace to
+      #   get tested, even though only a single crate's manifest was specified.
       - name: Run semver-checks on tokio crate manifest only
         run: cargo run semver-checks check-release --manifest-path="subject/tokio/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
 
