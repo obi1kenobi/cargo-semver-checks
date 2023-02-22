@@ -605,9 +605,8 @@ jobs:
           EXPECTED="$(echo -e "--- failure function_missing: pub fn removed or renamed ---")"
           RESULT="$(cat output | grep failure)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
-          EXPECTED="$(echo -e "  function ref_slice::ref_slice, previously in file")"
-          RESULT="$(cat output | grep 'previously in file')"
-          diff <(echo "$RESULT") <(echo "$EXPECTED")
+          # Ensure the following fragment (not full line!) is in the output file:
+          grep '  function ref_slice::ref_slice, previously in file' output
 
       - name: Cleanup
         run: |
