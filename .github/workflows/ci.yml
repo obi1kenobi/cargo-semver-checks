@@ -52,7 +52,6 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'semver'
           workspaces: 'semver'
 
       - name: cargo clippy
@@ -116,7 +115,6 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'semver'
           workspaces: 'semver'
 
       - name: compile
@@ -148,7 +146,6 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'semver'
           workspaces: 'semver'
 
       - name: build and cache
