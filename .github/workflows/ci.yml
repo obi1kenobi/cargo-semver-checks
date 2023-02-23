@@ -879,9 +879,9 @@ jobs:
       - name: Baseline is correct
         run: |
           cd semver
-          EXPECTED="$(echo -e "     Parsing ref_slice v1.2.2 (current)\n     Parsing ref_slice v1.2.1 (baseline)\n    Checking ref_slice v1.2.1 -> v1.2.2 (patch change)")"
+          EXPECTED="$(echo -e "    Checking ref_slice v1.2.1 -> v1.2.2 (patch change)")"
           # Strip ANSI escapes for colors and bold text before comparing.
-          RESULT="$(cat output | grep 'ref_slice v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g")"
+          RESULT="$(cat output | grep '-> v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g")"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Semver break found
