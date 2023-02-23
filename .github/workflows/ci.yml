@@ -204,7 +204,7 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspace: 'subject'
+          workspaces: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -286,7 +286,7 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspace: 'subject'
+          workspaces: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -362,7 +362,7 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspace: 'subject'
+          workspaces: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -433,11 +433,6 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspace: 'subject'
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v3
@@ -456,6 +451,11 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: 'subject -> subject/target/semver-checks/local-libp2p_uds-0_37_0/target'
 
       - name: Run semver-checks on libp2p-uds
         run: |
@@ -563,7 +563,7 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspace: 'subject'
+          workspaces: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -629,7 +629,7 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspace: 'subject'
+          workspaces: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -694,7 +694,7 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspace: 'subject'
+          workspaces: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -764,7 +764,7 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspace: 'subject'
+          workspaces: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -857,7 +857,7 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspace: 'subject-current'
+          workspaces: 'subject-current'
 
       - name: Restore binary
         id: cache-binary
@@ -976,7 +976,7 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspace: 'subject'
+          workspaces: 'subject'
 
       - name: Restore binary
         id: cache-binary
