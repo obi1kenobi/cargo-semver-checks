@@ -201,11 +201,6 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: 'subject'
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v3
@@ -224,6 +219,12 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-libp2p_core-0_47_0
 
       - name: Run semver-checks
         run: |
@@ -283,11 +284,6 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: 'subject'
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v3
@@ -306,6 +302,13 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-libp2p_dcutr-1_62_0
+            subject/target/semver-checks/local-libp2p_relay-0_14_0
 
       - name: Run semver-checks on libp2p-dcutr
         run: |
@@ -359,11 +362,6 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: 'subject'
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v3
@@ -382,6 +380,13 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-libp2p_gossipsub-0_44_0
+            subject/target/semver-checks/local-libp2p_request_response-0_23_0
 
       - name: Run semver-checks on libp2p-gossipsub
         run: |
@@ -455,7 +460,8 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: 'subject -> subject/target/semver-checks/local-libp2p_uds-0_37_0/target'
+          workspaces: |
+            subject/target/semver-checks/local-libp2p_uds-0_37_0
 
       - name: Run semver-checks on libp2p-uds
         run: |
@@ -560,11 +566,6 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: 'subject'
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v3
@@ -583,6 +584,12 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-bevy_core-0_9_0
 
       - name: Run semver-checks
         run: |
@@ -626,11 +633,6 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: 'subject'
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v3
@@ -649,6 +651,12 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-bevy_gltf-0_9_1
 
       - name: Run semver-checks
         run: |
@@ -691,11 +699,6 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: 'subject'
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v3
@@ -714,6 +717,12 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-sqllogictest-0_13_0
 
       - name: Run via workspace Cargo.toml
         run: |
@@ -854,11 +863,6 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: 'subject-current'
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v3
@@ -877,6 +881,14 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject-current/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject-current/target/semver-checks/local-clap-3_2_0/
+            subject-current/target/semver-checks/git-524e36cf1a67ee6a447d3615a70b065d2b4f5e60/local-clap-3_1_18/
+            subject-baseline/target/semver-checks/local-clap-3_1_18/
 
       - name: Run semver-checks with --baseline-root
         continue-on-error: true
@@ -973,11 +985,6 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: 'subject'
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v3
@@ -996,6 +1003,12 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject-current/target/semver-checks/local-ref_slice-1_2_2/
 
       - name: Run semver-checks
         continue-on-error: true
