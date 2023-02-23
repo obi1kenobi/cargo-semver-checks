@@ -177,7 +177,7 @@ jobs:
       - name: Run semver-checks
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/core/Cargo.toml"
+          cargo run semver-checks check-release --manifest-path="../subject/core/Cargo.toml" --verbose
 
       # Test passing package name explicitly.
       # It was previously possible to make the command above work while the one here failed.
@@ -185,7 +185,7 @@ jobs:
       - name: Run semver-checks (alternative command)
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/core/Cargo.toml" --package="libp2p-core"
+          cargo run semver-checks check-release --manifest-path="../subject/core/Cargo.toml" --package="libp2p-core" --verbose
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
@@ -250,12 +250,12 @@ jobs:
       - name: Run semver-checks on libp2p-dcutr
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/protocols/dcutr/Cargo.toml"
+          cargo run semver-checks check-release --manifest-path="../subject/protocols/dcutr/Cargo.toml" --verbose
 
       - name: Run semver-checks on libp2p-relay
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/protocols/relay/Cargo.toml"
+          cargo run semver-checks check-release --manifest-path="../subject/protocols/relay/Cargo.toml" --verbose
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
@@ -317,12 +317,12 @@ jobs:
       - name: Run semver-checks on libp2p-gossipsub
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/protocols/gossipsub/Cargo.toml"
+          cargo run semver-checks check-release --manifest-path="../subject/protocols/gossipsub/Cargo.toml" --verbose
 
       - name: Run semver-checks on libp2p-request-response
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/protocols/request-response/Cargo.toml"
+          cargo run semver-checks check-release --manifest-path="../subject/protocols/request-response/Cargo.toml" --verbose
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
@@ -382,7 +382,7 @@ jobs:
       - name: Run semver-checks on libp2p-uds
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/transports/uds/Cargo.toml"
+          cargo run semver-checks check-release --manifest-path="../subject/transports/uds/Cargo.toml" --verbose
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
@@ -443,7 +443,7 @@ jobs:
       - name: Run semver-checks
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/core-graphics/Cargo.toml"
+          cargo run semver-checks check-release --manifest-path="../subject/core-graphics/Cargo.toml" --verbose
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
@@ -500,7 +500,7 @@ jobs:
       - name: Run semver-checks
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/crates/bevy_core/Cargo.toml"
+          cargo run semver-checks check-release --manifest-path="../subject/crates/bevy_core/Cargo.toml" --verbose
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
@@ -557,7 +557,7 @@ jobs:
       - name: Run semver-checks
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/crates/bevy_gltf/Cargo.toml" --baseline-version 0.9.0
+          cargo run semver-checks check-release --manifest-path="../subject/crates/bevy_gltf/Cargo.toml" --baseline-version 0.9.0 --verbose
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
@@ -613,12 +613,12 @@ jobs:
       - name: Run via workspace Cargo.toml
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path ../subject/Cargo.toml -p sqllogictest
+          cargo run semver-checks check-release --manifest-path ../subject/Cargo.toml -p sqllogictest --verbose
 
       - name: Run via package Cargo.toml
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path ../subject/sqllogictest/Cargo.toml
+          cargo run semver-checks check-release --manifest-path ../subject/sqllogictest/Cargo.toml --verbose
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
@@ -679,21 +679,21 @@ jobs:
       - name: Run semver-checks on tokio-stream crate manifest only
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/tokio-stream/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
+          cargo run semver-checks check-release --manifest-path="../subject/tokio-stream/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration --verbose
 
       # This test caught a bug where `--exclude` was silently ignored
       # if `--workspace` wasn't set at the same time.
       - name: Run semver-checks on workspace manifest with explicit exclusions
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/Cargo.toml" --release-type minor --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration
+          cargo run semver-checks check-release --manifest-path="../subject/Cargo.toml" --release-type minor --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration --verbose
 
       # This test caught a bug where `publish = false` items in a workspace were semver-checked
       # unless either explicit `--workspace` was present or was implied e.g. via `--exclude`.
       - name: Run semver-checks on workspace manifest with implicit exclusions
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/Cargo.toml" --release-type minor
+          cargo run semver-checks check-release --manifest-path="../subject/Cargo.toml" --release-type minor --verbose
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
@@ -759,7 +759,7 @@ jobs:
         continue-on-error: true
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject-current/Cargo.toml" --baseline-root="../subject-baseline/Cargo.toml" > output
+          cargo run semver-checks check-release --manifest-path="../subject-current/Cargo.toml" --baseline-root="../subject-baseline/Cargo.toml" --verbose | tee output
           touch unexpectedly_did_not_fail
 
       - name: Check whether it failed
@@ -790,7 +790,7 @@ jobs:
         continue-on-error: true
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject-current/Cargo.toml" --baseline-rev=524e36cf1a67ee6a447d3615a70b065d2b4f5e60 > output
+          cargo run semver-checks check-release --manifest-path="../subject-current/Cargo.toml" --baseline-rev=524e36cf1a67ee6a447d3615a70b065d2b4f5e60 --verbose | tee output
           touch unexpectedly_did_not_fail
 
       - name: Check whether it failed
@@ -868,7 +868,7 @@ jobs:
         run: |
           set -euo pipefail
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/Cargo.toml" 2>&1 | tee output
+          cargo run semver-checks check-release --manifest-path="../subject/Cargo.toml" --verbose 2>&1 | tee output
           touch unexpectedly_did_not_fail
 
       - name: Check whether it failed
