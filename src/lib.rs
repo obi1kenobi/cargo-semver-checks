@@ -449,7 +449,7 @@ pub struct Report {
 
 impl Report {
     pub fn success(&self) -> bool {
-        !self.crate_reports.values().any(|report| report.success())
+        !self.crate_reports.values().any(|report| !report.success())
     }
 
     pub fn required_bump(&self) -> Option<RequiredSemverUpdate> {
