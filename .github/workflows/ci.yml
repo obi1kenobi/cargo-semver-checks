@@ -157,12 +157,6 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: 'semver'
-          workspaces: 'semver'
-          save-if: false
-
       - shell: bash
         run: |
           rustc --version | tee .rustc-version
@@ -173,6 +167,12 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: 'semver'
+          workspaces: 'semver'
+          save-if: false
 
       - name: Run semver-checks
         run: |
@@ -230,12 +230,6 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: 'semver'
-          workspaces: 'semver'
-          save-if: false
-
       - shell: bash
         run: |
           rustc --version | tee .rustc-version
@@ -246,6 +240,12 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: 'semver'
+          workspaces: 'semver'
+          save-if: false
 
       - name: Run semver-checks on libp2p-dcutr
         run: |
@@ -297,12 +297,6 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: 'semver'
-          workspaces: 'semver'
-          save-if: false
-
       - shell: bash
         run: |
           rustc --version | tee .rustc-version
@@ -313,6 +307,12 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: 'semver'
+          workspaces: 'semver'
+          save-if: false
 
       - name: Run semver-checks on libp2p-gossipsub
         run: |
