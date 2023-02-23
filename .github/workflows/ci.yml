@@ -422,11 +422,12 @@ jobs:
           profile: minimal
           override: true
 
+      # This job runs on macOS, not Linux like the rest.
+      # It should save its cache, because no other job will save it in its place.
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: 'semver'
           workspaces: 'semver'
-          save-if: false
 
       - shell: bash
         run: |
