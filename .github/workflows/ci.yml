@@ -149,7 +149,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ env.GITHUB_JOB }}-rustdoc
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: target/semver-checks/cache
 
       - name: Run semver-checks
@@ -165,7 +165,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ env.GITHUB_JOB }}-rustdoc
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: target/semver-checks/cache
 
   run-on-libp2p-dcutr-relay:
@@ -215,7 +215,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ env.GITHUB_JOB }}-rustdoc
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: target/semver-checks/cache
 
       - name: Run semver-checks on libp2p-dcutr
@@ -228,7 +228,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ env.GITHUB_JOB }}-rustdoc
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: target/semver-checks/cache
 
   run-on-libp2p-gossipsub-request-response:
