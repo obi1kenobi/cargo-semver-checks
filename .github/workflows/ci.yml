@@ -267,11 +267,29 @@ jobs:
         with:
           key: libp2p-gossipsub-request-response
 
+      - shell: bash
+        run: |
+          rustc --version > .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
+
       - name: Run semver-checks on libp2p-gossipsub
         run: cargo run semver-checks check-release --manifest-path="subject/protocols/gossipsub/Cargo.toml"
 
       - name: Run semver-checks on libp2p-request-response
         run: cargo run semver-checks check-release --manifest-path="subject/protocols/request-response/Cargo.toml"
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
 
   run-on-libp2p-uds:
     # Run cargo-semver-checks on a crate that has dependencies in a custom target
@@ -307,8 +325,26 @@ jobs:
         with:
           key: libp2p-gossipsub-request-response
 
+      - shell: bash
+        run: |
+          rustc --version > .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
+
       - name: Run semver-checks on libp2p-uds
         run: cargo run semver-checks check-release --manifest-path="subject/transports/uds/Cargo.toml"
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
 
   run-on-core-graphics:
     # Run cargo-semver-checks on a crate with no semver violations,
@@ -344,8 +380,26 @@ jobs:
         with:
           key: core-graphics
 
+      - shell: bash
+        run: |
+          rustc --version > .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
+
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="subject/core-graphics/Cargo.toml"
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
 
   run-on-bevy-core:
     # cargo-semver-checks previously crashed here due to
@@ -378,8 +432,26 @@ jobs:
         with:
           key: bevy-core
 
+      - shell: bash
+        run: |
+          rustc --version > .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
+
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="subject/crates/bevy_core/Cargo.toml"
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
 
   run-on-bevy-gltf:
     # cargo-semver-checks reported false-positives since it did not include
@@ -412,8 +484,26 @@ jobs:
         with:
           key: bevy-gltf
 
+      - shell: bash
+        run: |
+          rustc --version > .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
+
       - name: Run semver-checks
         run: cargo run semver-checks check-release --manifest-path="subject/crates/bevy_gltf/Cargo.toml" --baseline-version 0.9.0
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
 
   run-on-sqllogictest:
     # cargo-semver-checks failed to run here due to workspace manifest-parsing issues:
@@ -445,11 +535,29 @@ jobs:
         with:
           key: sqllogictest
 
+      - shell: bash
+        run: |
+          rustc --version > .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
+
       - name: Run via workspace Cargo.toml
         run: cargo run semver-checks check-release --manifest-path subject/Cargo.toml -p sqllogictest
 
       - name: Run via package Cargo.toml
         run: cargo run semver-checks check-release --manifest-path subject/sqllogictest/Cargo.toml
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
 
   run-on-tokio:
     # cargo-semver-checks crashed here due to improper CLI argument handling:
@@ -481,6 +589,17 @@ jobs:
         with:
           key: tokio
 
+      - shell: bash
+        run: |
+          rustc --version > .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
+
       # This test caught two bugs:
       # - The default baseline was set to the current path instead of the default registry version.
       # - Specifying `--exclude` together with a crate manifest that is within a workspace
@@ -498,6 +617,13 @@ jobs:
       # unless either explicit `--workspace` was present or was implied e.g. via `--exclude`.
       - name: Run semver-checks on workspace manifest with implicit exclusions
         run: cargo run semver-checks check-release --manifest-path="subject/Cargo.toml" --release-type minor
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
 
   run-on-clap:
     # clap v3.2.0 added a semver violation
@@ -537,6 +663,17 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: clap
+
+      - shell: bash
+        run: |
+          rustc --version > .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
 
       - name: Run semver-checks with --baseline-root
         continue-on-error: true
@@ -581,6 +718,13 @@ jobs:
           RESULT="$(cat output | grep failure)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
+
   run-on-ref-slice-fork:
     # Simulate testing an as-yet-unreleased crate version without an explicit baseline,
     # i.e. with the expectation that the largest crates.io version is used as a baseline.
@@ -618,6 +762,17 @@ jobs:
         with:
           key: ref-slice-fork
 
+      - shell: bash
+        run: |
+          rustc --version > .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
+
       - name: Run semver-checks
         continue-on-error: true
         run: |
@@ -648,6 +803,13 @@ jobs:
         run: |
           rm output
           rm -f unexpectedly_did_not_fail
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', '**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: target/semver-checks/cache
 
   init-release:
     name: Run the release workflow
