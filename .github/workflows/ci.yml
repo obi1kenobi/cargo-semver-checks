@@ -201,11 +201,10 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore cargo index
+      - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'cargo-registry'
-          cache-targets: false
+          workspace: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -284,11 +283,10 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore cargo index
+      - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'cargo-registry'
-          cache-targets: false
+          workspace: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -361,11 +359,10 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore cargo index
+      - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'cargo-registry'
-          cache-targets: false
+          workspace: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -436,11 +433,10 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore cargo index
+      - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'cargo-registry'
-          cache-targets: false
+          workspace: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -564,11 +560,10 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index
+      - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'cargo-registry'
-          cache-targets: false
+          workspace: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -631,11 +626,10 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index
+      - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'cargo-registry'
-          cache-targets: false
+          workspace: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -697,11 +691,10 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index
+      - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'cargo-registry'
-          cache-targets: false
+          workspace: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -768,11 +761,10 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index
+      - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'cargo-registry'
-          cache-targets: false
+          workspace: 'subject'
 
       - name: Restore binary
         id: cache-binary
@@ -862,11 +854,10 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index
+      - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'cargo-registry'
-          cache-targets: false
+          workspace: 'subject-current'
 
       - name: Restore binary
         id: cache-binary
@@ -982,11 +973,10 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Restore cargo index
+      - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'cargo-registry'
-          cache-targets: false
+          workspace: 'subject'
 
       - name: Restore binary
         id: cache-binary
