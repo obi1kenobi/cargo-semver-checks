@@ -40,6 +40,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           persist-credentials: false
+          path: 'semver'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -50,23 +51,26 @@ jobs:
           override: true
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: 'semver'
+          workspaces: 'semver'
 
       - name: cargo clippy
         uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --workspace --all-features --all-targets -- -D warnings --allow deprecated
+          args: --manifest-path semver/Cargo.toml --workspace --all-features --all-targets -- -D warnings --allow deprecated
 
       - name: cargo fmt
         uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: -- --check
+          args: --manifest-path semver/Cargo.toml -- --check
 
       - name: cargo doc
         env:
           RUSTDOCFLAGS: -D warnings
-        run: cargo doc --workspace --all-features --no-deps --document-private-items
+        run: cargo doc --manifest-path semver/Cargo.toml --workspace --all-features --no-deps --document-private-items
 
   rust-tests:
     name: Run tests
@@ -94,7 +98,9 @@ jobs:
           override: true
 
       - name: Regenerate test data
-        run: ./semver/scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
+        run: |
+          cd semver
+          ./scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
 
       - uses: Swatinem/rust-cache@v2
         with:
