@@ -17,10 +17,9 @@ use directories::ProjectDirs;
 use check_release::run_check_release;
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
-use itertools::Itertools;
 use rustdoc_cmd::RustdocCommand;
 use semver::Version;
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -321,7 +320,9 @@ impl Check {
         let current_loader = self.get_rustdoc_generator(&mut config, &self.current.source)?;
         let baseline_loader = self.get_rustdoc_generator(&mut config, &self.baseline.source)?;
 
-        let all_outcomes: Vec<anyhow::Result<bool>> = match &self.current.source {
+        // Create a report for each crate.
+        let all_outcomes: anyhow::Result<BTreeMap<String, CrateReport>> = match &self.current.source
+        {
             RustdocSource::Rustdoc(_)
             | RustdocSource::Revision(_, _)
             | RustdocSource::VersionFromRegistry(_) => {
@@ -335,7 +336,7 @@ impl Check {
                     ScopeMode::AllowList(lst) => lst.clone(),
                 };
                 names
-                    .iter()
+                    .into_iter()
                     .map(|name| {
                         let version = None;
                         let (current_crate, baseline_crate) = generate_versioned_crates(
@@ -343,18 +344,18 @@ impl Check {
                             &rustdoc_cmd,
                             &*current_loader,
                             &*baseline_loader,
-                            name,
+                            &name,
                             version,
                         )?;
 
-                        let success = run_check_release(
+                        let report = run_check_release(
                             &mut config,
-                            name,
+                            &name,
                             current_crate,
                             baseline_crate,
                             self.release_type,
                         )?;
-                        Ok(success)
+                        Ok((name, report))
                     })
                     .collect()
             }
@@ -381,7 +382,7 @@ impl Check {
                                     format_args!("{crate_name} v{version} (current)"),
                                 )
                             })?;
-                            Ok(true)
+                            Ok((crate_name.clone(), CrateReport::new_successful()))
                         } else {
                             let (current_crate, baseline_crate) = generate_versioned_crates(
                                 &mut config,
@@ -392,35 +393,78 @@ impl Check {
                                 Some(version),
                             )?;
 
-                            Ok(run_check_release(
-                                &mut config,
-                                crate_name,
-                                current_crate,
-                                baseline_crate,
-                                self.release_type,
-                            )?)
+                            Ok((
+                                crate_name.clone(),
+                                run_check_release(
+                                    &mut config,
+                                    crate_name,
+                                    current_crate,
+                                    baseline_crate,
+                                    self.release_type,
+                                )?,
+                            ))
                         }
                     })
                     .collect()
             }
         };
-        let success = all_outcomes
-            .into_iter()
-            .fold_ok(true, std::ops::BitAnd::bitand)?;
 
-        Ok(Report { success })
+        Ok(Report {
+            crate_reports: all_outcomes?,
+        })
+    }
+}
+
+#[non_exhaustive]
+#[derive(Debug)]
+pub struct CrateReport {
+    required_bump: Option<RequiredSemverUpdate>,
+}
+
+impl CrateReport {
+    pub(crate) fn new_successful() -> Self {
+        Self {
+            required_bump: None,
+        }
+    }
+
+    pub fn success(&self) -> bool {
+        self.required_bump.is_none()
+    }
+
+    pub fn required_bump(&self) -> Option<RequiredSemverUpdate> {
+        self.required_bump
     }
 }
 
 #[non_exhaustive]
 #[derive(Debug)]
 pub struct Report {
-    success: bool,
+    /// Collection containing the name and the report of each crate checked.
+    crate_reports: BTreeMap<String, CrateReport>,
 }
 
 impl Report {
     pub fn success(&self) -> bool {
-        self.success
+        !self.crate_reports.values().any(|report| report.success())
+    }
+
+    pub fn required_bump(&self) -> Option<RequiredSemverUpdate> {
+        if self
+            .crate_reports
+            .values()
+            .any(|report| report.required_bump() == Some(RequiredSemverUpdate::Major))
+        {
+            Some(RequiredSemverUpdate::Major)
+        } else if self
+            .crate_reports
+            .values()
+            .any(|report| report.required_bump() == Some(RequiredSemverUpdate::Minor))
+        {
+            Some(RequiredSemverUpdate::Minor)
+        } else {
+            None
+        }
     }
 }
 

@@ -10,7 +10,7 @@ use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocA
 
 use crate::{
     query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
-    GlobalConfig, ReleaseType,
+    CrateReport, GlobalConfig, ReleaseType,
 };
 
 type QueryResultItem = BTreeMap<Arc<str>, FieldValue>;
@@ -84,7 +84,7 @@ pub(super) fn run_check_release(
     current_crate: VersionedCrate,
     baseline_crate: VersionedCrate,
     release_type: Option<ReleaseType>,
-) -> anyhow::Result<bool> {
+) -> anyhow::Result<CrateReport> {
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
 
@@ -315,7 +315,7 @@ pub(super) fn run_check_release(
                     let message = config
                         .handlebars()
                         .render_template(template, &pretty_result)
-                        .with_context(|| "Error instantiating semver query template.")
+                        .context("Error instantiating semver query template.")
                         .expect("could not materialize template");
                     colored_ln(config.stdout(), |w| colored!(w, "  {}", message,))
                         .expect("print failed");
@@ -349,9 +349,9 @@ pub(super) fn run_check_release(
         }
 
         let required_bump = if required_versions.contains(&RequiredSemverUpdate::Major) {
-            "major"
+            RequiredSemverUpdate::Major
         } else if required_versions.contains(&RequiredSemverUpdate::Minor) {
-            "minor"
+            RequiredSemverUpdate::Minor
         } else {
             unreachable!("{:?}", required_versions)
         };
@@ -362,7 +362,7 @@ pub(super) fn run_check_release(
                 format_args!(
                     "[{:>8.3}s] semver requires new {} version: {} major and {} minor checks failed",
                     total_duration.as_secs_f32(),
-                    required_bump,
+                    required_bump.as_str(),
                     required_versions.iter().filter(|x| *x == &RequiredSemverUpdate::Major).count(),
                     required_versions.iter().filter(|x| *x == &RequiredSemverUpdate::Minor).count(),
                 ),
@@ -371,7 +371,9 @@ pub(super) fn run_check_release(
             )
             .expect("print failed");
 
-        Ok(false)
+        Ok(CrateReport {
+            required_bump: Some(required_bump),
+        })
     } else {
         config
             .shell_print(
@@ -387,7 +389,7 @@ pub(super) fn run_check_release(
                 true,
             )
             .expect("print failed");
-        Ok(true)
+        Ok(CrateReport::new_successful())
     }
 }
 
