@@ -97,7 +97,19 @@ jobs:
           profile: minimal
           override: true
 
+      - shell: bash
+        run: |
+          rustc --version | tee .rustc-version
+
+      - name: restore test rustdocs
+        id: cache-test-rustdocs
+        uses: actions/cache@v3
+        with:
+          path: semver/localdata/test_data/
+          key: test-rustdocs-${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/test_crates/**/Cargo.toml') }}
+
       - name: Regenerate test data
+        if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
         run: |
           cd semver
           ./scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
