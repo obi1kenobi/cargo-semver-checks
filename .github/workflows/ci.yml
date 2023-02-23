@@ -171,7 +171,7 @@ jobs:
     # cargo-semver-checks previously reported a false-positive here,
     # since an enum variant in the crate was included by a feature:
     # https://github.com/obi1kenobi/cargo-semver-check/issues/147
-    name: Run cargo-semver-checks on rust-libp2p 0.47.0
+    name: 'Semver: rust-libp2p 0.47.0'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -254,7 +254,7 @@ jobs:
     # due to renaming re-exports causing confusion about which types match each other:
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/202
     # https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1340254920
-    name: Run cargo-semver-checks on libp2p-dcutr 1.62.0 and libp2p-relay 0.14.0
+    name: 'Semver: libp2p-dcutr 1.62.0 and libp2p-relay 0.14.0'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -331,7 +331,7 @@ jobs:
     # due to re-exports that omit generic parameters because the underlying generic type supplies
     # default values for those generics.
     # https://github.com/libp2p/rust-libp2p/pull/3401#issuecomment-1409381365
-    name: Run cargo-semver-checks on libp2p-gossipsub 0.44.0 and libp2p-request-response 0.23.0
+    name: 'Semver: libp2p-gossipsub 0.44.0 + libp2p-request-response 0.23.0'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -406,7 +406,7 @@ jobs:
   run-on-libp2p-uds:
     # Run cargo-semver-checks on a crate that has dependencies in a custom target
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/369
-    name: Run cargo-semver-checks on libp2p-uds 0.37.0
+    name: 'Semver: libp2p-uds 0.37.0'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -480,7 +480,7 @@ jobs:
     # cargo-semver-checks previously reported a false-positive here,
     # due to multiple methods by the same name being defined on the same type.
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/193
-    name: Run cargo-semver-checks on core-graphics
+    name: 'Semver: core-graphics'
     runs-on: macos-latest
     steps:
       - name: Checkout cargo-semver-checks
@@ -538,7 +538,7 @@ jobs:
     # cargo-semver-checks previously crashed here due to
     # a bug in the generated Cargo.toml when generating a registry baseline:
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/261
-    name: Run cargo-semver-checks on bevy_core v0.9.0
+    name: 'Semver: bevy_core v0.9.0'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -605,7 +605,7 @@ jobs:
     # cargo-semver-checks reported false-positives since it did not include
     # features defined implicitly via optional dependencies:
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/265
-    name: Run cargo-semver-checks on bevy_gltf v0.9.1
+    name: 'Semver: bevy_gltf v0.9.1'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -671,7 +671,7 @@ jobs:
   run-on-sqllogictest:
     # cargo-semver-checks failed to run here due to workspace manifest-parsing issues:
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/370
-    name: Run cargo-semver-checks on sqllogictest v0.13.0
+    name: 'Semver: sqllogictest v0.13.0'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -742,7 +742,7 @@ jobs:
   run-on-tokio:
     # cargo-semver-checks crashed here due to improper CLI argument handling:
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/380
-    name: Run cargo-semver-checks on tokio ~v1.25.0
+    name: 'Semver: tokio ~v1.25.0'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -828,7 +828,7 @@ jobs:
     # clap v3.2.0 added a semver violation
     # check whether cargo-semver-checks detects the issue
     # https://github.com/clap-rs/clap/issues/3876
-    name: Run cargo-semver-checks on clap v3.2.0
+    name: 'Semver: clap v3.2.0'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -956,7 +956,7 @@ jobs:
     # an unreleased patch version (v1.2.2). In this test, we make sure that:
     # - v1.2.1 is chosen as the baseline, as the largest crates.io version,
     # - cargo-semver-checks detects the semver break we've manufactured.
-    name: Run cargo-semver-checks on ref-slice fork
+    name: 'Semver: ref-slice fork'
     runs-on: ubuntu-latest
     needs:
       - build-binary
