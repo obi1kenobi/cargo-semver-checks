@@ -759,6 +759,7 @@ jobs:
         continue-on-error: true
         run: |
           cd semver
+          set -euo pipefail
           cargo run semver-checks check-release --manifest-path="../subject-current/Cargo.toml" --baseline-root="../subject-baseline/Cargo.toml" --verbose | tee output
           touch unexpectedly_did_not_fail
 
@@ -790,6 +791,7 @@ jobs:
         continue-on-error: true
         run: |
           cd semver
+          set -euo pipefail
           cargo run semver-checks check-release --manifest-path="../subject-current/Cargo.toml" --baseline-rev=524e36cf1a67ee6a447d3615a70b065d2b4f5e60 --verbose | tee output
           touch unexpectedly_did_not_fail
 
@@ -866,8 +868,8 @@ jobs:
       - name: Run semver-checks
         continue-on-error: true
         run: |
-          set -euo pipefail
           cd semver
+          set -euo pipefail
           cargo run semver-checks check-release --manifest-path="../subject/Cargo.toml" --verbose 2>&1 | tee output
           touch unexpectedly_did_not_fail
 
