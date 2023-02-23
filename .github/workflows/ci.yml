@@ -124,7 +124,7 @@ jobs:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
           ref: '3371d7ceab242440216ae9ab99829631fa418f3b'
-          path: '~/subject'
+          path: '/home/runner/subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -190,7 +190,7 @@ jobs:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
           ref: 'be0b62a78fe9d72811b9eda742137cc8ddc4da35'
-          path: '~/subject'
+          path: '/home/runner/subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -250,7 +250,7 @@ jobs:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
           ref: '8b8dc26e0601433f5675430b29b50687a37d4cd8'
-          path: '~/subject'
+          path: '/home/runner/subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -308,7 +308,7 @@ jobs:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
           ref: '5b4eab7bafe6cba8fea6c806027ea680662b7cc6'
-          path: '~/subject'
+          path: '/home/runner/subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -367,7 +367,7 @@ jobs:
           persist-credentials: false
           repository: 'servo/core-foundation-rs'
           ref: '786895643140fa0ee4f913d7b4aeb0c4626b2085'
-          path: '~/subject'
+          path: '/home/runner/subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -419,7 +419,7 @@ jobs:
           persist-credentials: false
           repository: 'bevyengine/bevy'
           ref: 'v0.9.0'
-          path: '~/subject'
+          path: '/home/runner/subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -471,7 +471,7 @@ jobs:
           persist-credentials: false
           repository: 'bevyengine/bevy'
           ref: 'v0.9.1'
-          path: '~/subject'
+          path: '/home/runner/subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -522,7 +522,7 @@ jobs:
           persist-credentials: false
           repository: 'risinglightdb/sqllogictest-rs'
           ref: 'v0.13.0'
-          path: '~/subject'
+          path: '/home/runner/subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -576,7 +576,7 @@ jobs:
           persist-credentials: false
           repository: 'tokio-rs/tokio'
           ref: 'd7b7c6131774ab631be6529fef3680abfeeb4781'
-          path: '~/subject'
+          path: '/home/runner/subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -643,7 +643,7 @@ jobs:
           persist-credentials: false
           repository: 'clap-rs/clap'
           ref: 'v3.2.0'
-          path: '~/subject-current'
+          path: '/home/runner/subject-current'
 
       - name: Checkout clap v3.1.18
         uses: actions/checkout@v3
@@ -651,7 +651,7 @@ jobs:
           persist-credentials: false
           repository: 'clap-rs/clap'
           ref: 'v3.1.18'
-          path: '~/subject-baseline'
+          path: '/home/runner/subject-baseline'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
@@ -749,7 +749,7 @@ jobs:
           persist-credentials: false
           repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
           ref: 'major_change'
-          path: '~/subject'
+          path: '/home/runner/subject'
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
