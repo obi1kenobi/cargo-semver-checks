@@ -117,10 +117,40 @@ jobs:
           cd semver
           cargo test
 
-      - name: build
+  build-binary:
+    name: Build binary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: 'semver'
+          workspaces: 'semver'
+
+      - name: build and cache
         run: |
           cd semver
           cargo build
+          mkdir ../bins
+          mv target/debug/cargo-semver-checks ../bins/cargo-semver-checks
+
+      - name: cache binary
+        uses: actions/cache/save@v3
+        with:
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   run-on-rust-libp2p:
     # Run cargo-semver-checks on a crate with no semver violations,
@@ -131,6 +161,8 @@ jobs:
     # https://github.com/obi1kenobi/cargo-semver-check/issues/147
     name: Run cargo-semver-checks on rust-libp2p 0.47.0
     runs-on: ubuntu-latest
+    needs:
+      - build-binary
     steps:
       - name: Checkout cargo-semver-checks
         uses: actions/checkout@v3
@@ -157,11 +189,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - uses: Swatinem/rust-cache@v2
+      - name: Restore binary
+        id: cache-binary
+        uses: actions/cache/restore@v3
         with:
-          shared-key: 'semver'
-          workspaces: 'semver'
-          save-if: false
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
 
       - shell: bash
         run: |
@@ -177,7 +211,7 @@ jobs:
       - name: Run semver-checks
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/core/Cargo.toml"
+          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/core/Cargo.toml"
 
       # Test passing package name explicitly.
       # It was previously possible to make the command above work while the one here failed.
@@ -185,7 +219,7 @@ jobs:
       - name: Run semver-checks (alternative command)
         run: |
           cd semver
-          cargo run semver-checks check-release --manifest-path="../subject/core/Cargo.toml" --package="libp2p-core"
+          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/core/Cargo.toml" --package="libp2p-core"
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
