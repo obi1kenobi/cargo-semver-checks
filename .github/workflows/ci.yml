@@ -103,7 +103,7 @@ jobs:
 
       - name: restore test rustdocs
         id: cache-test-rustdocs
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         with:
           path: semver/localdata/test_data/
           key: test-rustdocs-${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/test_crates/**/Cargo.toml') }}
@@ -128,13 +128,6 @@ jobs:
         run: |
           cd semver
           cargo test
-
-      - name: cache test rustdocs
-        if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v3
-        with:
-          path: semver/localdata/test_data/
-          key: test-rustdocs-${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/test_crates/**/Cargo.toml') }}
 
       - name: build
         run: |
