@@ -511,7 +511,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: 'semver'
-          workspaces: 'semver'
+          workspaces: |
+            semver
+            subject/target/semver-checks/local-core_graphics-0_22_3
 
       - shell: bash
         run: |
@@ -773,7 +775,12 @@ jobs:
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: 'subject'
+          workspaces: |
+            subject/target/semver-checks/local-tokio-1_25_0
+            subject/target/semver-checks/local-tokio_macros-1_8_2
+            subject/target/semver-checks/local-tokio_stream-0_1_12
+            subject/target/semver-checks/local-tokio_test-0_4_2
+            subject/target/semver-checks/local-tokio_util-0_7_7
 
       - name: Restore binary
         id: cache-binary
