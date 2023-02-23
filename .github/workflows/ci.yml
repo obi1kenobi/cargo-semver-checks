@@ -29,6 +29,7 @@ jobs:
       - run-on-clap
       - run-on-sqllogictest
       - run-on-ref-slice-fork
+      - run-on-ref-slice-fork-windows
     steps:
       - run: exit 0
 
@@ -612,6 +613,73 @@ jobs:
         run: |
           rm output
           rm -f unexpectedly_did_not_fail
+
+  run-on-ref-slice-fork-windows:
+    # Same as above, but run on a Windows machine and from a compiled binary after
+    # removing .cargo/registry/index. This broke in a workflow of the GitHub Action
+    # using a precompiled binary after a fresh Rust installation, when the
+    # registry index does not exist yet.
+    name: Run cargo-semver-checks on ref-slice fork (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+
+      - name: Checkout ref-slice fork semver break
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
+          ref: 'major_change'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ref-slice-fork-windows
+
+      - name: Build cargo-semver-checks
+        run: cargo build
+
+      - name: Remove the cargo registry index
+        run: Remove-Item -Recurse -Force C:\Users\runneradmin\.cargo\registry\index
+
+      - name: Run cargo-semver-checks
+        continue-on-error: true
+        id: semver_checks
+        run: ./target/debug/cargo-semver-checks.exe semver-checks check-release --manifest-path="subject/Cargo.toml" 2>&1 | tee output
+
+      - name: Check whether it failed
+        if: steps.semver_checks.outcome != 'failure'
+        run: |
+          echo "Error! check-release should have failed because of the breaking change, but it has not."
+          exit 1
+
+      - name: Baseline is correct
+        run: |
+          $EXPECTED = "     Parsing ref_slice v1.2.2 (current)`r`n     Parsing ref_slice v1.2.1 (baseline)`r`n    Checking ref_slice v1.2.1 -> v1.2.2 (patch change)"
+          # Strip ANSI escapes for colors and bold text before comparing.
+          $RESULT = (cat output | grep 'ref_slice v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g") | Out-String
+          compare $RESULT $EXPECTED
+
+      - name: Semver break found
+        run: |
+          $EXPECTED = "--- failure function_missing: pub fn removed or renamed ---"
+          $RESULT = (cat output | grep failure)
+          compare $RESULT $EXPECTED
+          # Ensure the following fragment (not full line!) is in the output file:
+          grep '  function ref_slice::ref_slice, previously in file' output
+
+      - name: Cleanup
+        run: rm output
 
   init-release:
     name: Run the release workflow
