@@ -415,6 +415,7 @@ impl Check {
     }
 }
 
+/// A report for a single crate.
 #[non_exhaustive]
 #[derive(Debug)]
 pub struct CrateReport {
@@ -437,6 +438,8 @@ impl CrateReport {
     }
 }
 
+/// Report of the whole analysis.
+/// Contains a report for each crate checked.
 #[non_exhaustive]
 #[derive(Debug)]
 pub struct Report {
