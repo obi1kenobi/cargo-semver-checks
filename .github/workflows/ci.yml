@@ -148,7 +148,6 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: 'semver'
           workspaces: 'semver'
 
       - name: build and cache
