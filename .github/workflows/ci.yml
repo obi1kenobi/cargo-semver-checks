@@ -942,6 +942,12 @@ jobs:
       - name: Build cargo-semver-checks
         run: cargo build
 
+        # The index directory is created during the above built, but does not exist
+        # just after installing Rust. In especially it might not exist when one is
+        # using the precompiled cargo-semver-checks binary, which resulted in the
+        # following issue: https://github.com/frewsxcv/rust-crates-index/issues/97.
+        # We therefore remove the index directory in order to make sure that the
+        # compiled binary will work in spite of that.
       - name: Remove the cargo registry index
         run: Remove-Item -Recurse -Force C:\Users\runneradmin\.cargo\registry\index
 
