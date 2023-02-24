@@ -165,6 +165,40 @@ jobs:
           path: bins/
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
 
+  build-binary-windows:
+    name: Build binary (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: 'semver'
+
+      - name: build and cache
+        run: |
+          cd semver
+          cargo build
+          mkdir ../bins
+          mv target/debug/cargo-semver-checks.exe ../bins/cargo-semver-checks.exe
+
+      - name: cache binary
+        uses: actions/cache/save@v3
+        with:
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+
   run-on-rust-libp2p:
     # Run cargo-semver-checks on a crate with no semver violations,
     # to make sure there are no false-positives.
@@ -1127,17 +1161,20 @@ jobs:
           path: subject/target/semver-checks/cache
 
   run-on-ref-slice-fork-windows:
-    # Same as above, but run on a Windows machine and from a compiled binary after
-    # removing .cargo/registry/index. This broke in a workflow of the GitHub Action
-    # using a precompiled binary after a fresh Rust installation, when the
-    # registry index does not exist yet.
+    # Same as above, but run on a Windows machine.
+    # This broke in a workflow of the GitHub Action using a precompiled binary
+    # after a fresh Rust installation, when the registry index does not exist yet
+    # (see https://github.com/frewsxcv/rust-crates-index/issues/97).
     name: Run cargo-semver-checks on ref-slice fork (Windows)
     runs-on: windows-latest
+    needs:
+      - build-binary-windows
     steps:
       - name: Checkout cargo-semver-checks
         uses: actions/checkout@v3
         with:
           persist-credentials: true
+          path: semver
 
       - name: Checkout ref-slice fork semver break
         uses: actions/checkout@v3
@@ -1154,26 +1191,36 @@ jobs:
           profile: minimal
           override: true
 
-      - uses: Swatinem/rust-cache@v2
+      - name: Restore binary
+        id: cache-binary
+        uses: actions/cache/restore@v3
         with:
-          key: ref-slice-fork-windows
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
 
-      - name: Build cargo-semver-checks
-        run: cargo build
+      - run: |
+          rustc --version | tee .rustc-version
 
-        # The index directory is created during the above built, but does not exist
-        # just after installing Rust. In especially it might not exist when one is
-        # using the precompiled cargo-semver-checks binary, which resulted in the
-        # following issue: https://github.com/frewsxcv/rust-crates-index/issues/97.
-        # We therefore remove the index directory in order to make sure that the
-        # compiled binary will work in spite of that.
-      - name: Remove the cargo registry index
-        run: Remove-Item -Recurse -Force C:\Users\runneradmin\.cargo\registry\index
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-ref_slice-1_2_2/
 
       - name: Run cargo-semver-checks
         continue-on-error: true
         id: semver_checks
-        run: ./target/debug/cargo-semver-checks.exe semver-checks check-release --manifest-path="subject/Cargo.toml" 2>&1 | tee output
+        run: |
+          cd semver
+          ../bins/cargo-semver-checks.exe semver-checks check-release --manifest-path="../subject/Cargo.toml" 2>&1 | tee output
 
       - name: Check whether it failed
         if: steps.semver_checks.outcome != 'failure'
@@ -1183,13 +1230,15 @@ jobs:
 
       - name: Baseline is correct
         run: |
-          $EXPECTED = "     Parsing ref_slice v1.2.2 (current)`r`n     Parsing ref_slice v1.2.1 (baseline)`r`n    Checking ref_slice v1.2.1 -> v1.2.2 (patch change)"
+          cd semver
+          $EXPECTED = "    Checking ref_slice v1.2.1 -> v1.2.2 (patch change)"
           # Strip ANSI escapes for colors and bold text before comparing.
           $RESULT = (cat output | grep 'ref_slice v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g") | Out-String
           compare $RESULT $EXPECTED
 
       - name: Semver break found
         run: |
+          cd semver
           $EXPECTED = "--- failure function_missing: pub fn removed or renamed ---"
           $RESULT = (cat output | grep failure)
           compare $RESULT $EXPECTED
@@ -1197,7 +1246,16 @@ jobs:
           grep '  function ref_slice::ref_slice, previously in file' output
 
       - name: Cleanup
-        run: rm output
+        run: |
+          cd semver
+          rm output
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
 
   init-release:
     name: Run the release workflow
