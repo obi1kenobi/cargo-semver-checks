@@ -899,7 +899,7 @@ jobs:
           cd semver
           rm output
           rm -f unexpectedly_did_not_fail
-      
+
       - name: Save rustdoc
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
