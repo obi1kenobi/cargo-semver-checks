@@ -30,6 +30,8 @@ jobs:
       - run-on-clap
       - run-on-sqllogictest
       - run-on-ref-slice-fork
+      - run-on-tokio-explicit
+      - run-on-tokio-implicit
     steps:
       - run: exit 0
 
@@ -741,10 +743,10 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
-  run-on-tokio:
+  run-on-tokio-explicit:
     # cargo-semver-checks crashed here due to improper CLI argument handling:
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/380
-    name: 'Semver: tokio ~v1.25.0'
+    name: 'Semver: tokio ~v1.25.0 (explicit)'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -820,6 +822,71 @@ jobs:
         run: |
           cd semver
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --release-type minor --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration --verbose
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
+  run-on-tokio-implicit:
+    # cargo-semver-checks crashed here due to improper CLI argument handling:
+    # https://github.com/obi1kenobi/cargo-semver-checks/issues/380
+    name: 'Semver: tokio ~v1.25.0 (implicit)'
+    runs-on: ubuntu-latest
+    needs:
+      - build-binary
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      - name: Checkout tokio
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'tokio-rs/tokio'
+          ref: 'd7b7c6131774ab631be6529fef3680abfeeb4781'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-tokio-1_25_0
+            subject/target/semver-checks/local-tokio_macros-1_8_2
+            subject/target/semver-checks/local-tokio_stream-0_1_12
+            subject/target/semver-checks/local-tokio_test-0_4_2
+            subject/target/semver-checks/local-tokio_util-0_7_7
+
+      - name: Restore binary
+        id: cache-binary
+        uses: actions/cache/restore@v3
+        with:
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
+      - shell: bash
+        run: |
+          rustc --version | tee .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
 
       # This test caught a bug where `publish = false` items in a workspace were semver-checked
       # unless either explicit `--workspace` was present or was implied e.g. via `--exclude`.
@@ -1123,7 +1190,6 @@ jobs:
     needs:
       - ci-everything
       - should-publish
-      - run-on-tokio  # this check is too expensive on every PR, so we do it pre-publish instead
     if: needs.should-publish.outputs.is_new_version == 'yes'
     steps:
       - name: Checkout
