@@ -30,10 +30,29 @@ jobs:
       - run-on-clap
       - run-on-sqllogictest
       - run-on-ref-slice-fork
+      - run-on-ref-slice-fork-windows
       - run-on-tokio-explicit
       - run-on-tokio-implicit
     if: ${{ success() || failure() }}  # Run this job even if a dependency has failed.
     steps:
+      - name: Job outcomes
+        run: |
+          echo "lint: ${{ needs.lint.conclusion }}"
+          echo "rust-tests: ${{ needs.rust-tests.conclusion }}"
+          echo "run-on-rust-libp2p: ${{ needs.run-on-rust-libp2p.conclusion }}"
+          echo "run-on-libp2p-dcutr-relay: ${{ needs.run-on-libp2p-dcutr-relay.conclusion }}"
+          echo "run-on-libp2p-gossipsub-request-response: ${{ needs.run-on-libp2p-gossipsub-request-response.conclusion }}"
+          echo "run-on-libp2p-uds: ${{ needs.run-on-libp2p-uds.conclusion }}"
+          echo "run-on-core-graphics: ${{ needs.run-on-core-graphics.conclusion }}"
+          echo "run-on-bevy-core: ${{ needs.run-on-bevy-core.conclusion }}"
+          echo "run-on-bevy-gltf: ${{ needs.run-on-bevy-gltf.conclusion }}"
+          echo "run-on-clap: ${{ needs.run-on-clap.conclusion }}"
+          echo "run-on-sqllogictest: ${{ needs.run-on-sqllogictest.conclusion }}"
+          echo "run-on-ref-slice-fork: ${{ needs.run-on-ref-slice-fork.conclusion }}"
+          echo "run-on-ref-slice-fork-windows: ${{ needs.run-on-ref-slice-fork-windows.conclusion }}"
+          echo "run-on-tokio-explicit: ${{ needs.run-on-tokio-explicit.conclusion }}"
+          echo "run-on-tokio-implicit: ${{ needs.run-on-tokio-implicit.conclusion }}"
+
       # Fail this required job if any of its dependent jobs have failed.
       - name: Dependent jobs have failed
         if: |
@@ -50,6 +69,7 @@ jobs:
             needs.run-on-clap.conclusion == 'failure' ||
             needs.run-on-sqllogictest.conclusion == 'failure' ||
             needs.run-on-ref-slice-fork.conclusion == 'failure' ||
+            needs.run-on-ref-slice-fork-windows.conclusion == 'failure' ||
             needs.run-on-tokio-explicit.conclusion == 'failure' ||
             needs.run-on-tokio-implicit.conclusion == 'failure'
           }}
@@ -182,6 +202,40 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+  build-binary-windows:
+    name: Build binary (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: 'semver'
+
+      - name: build and cache
+        run: |
+          cd semver
+          cargo build
+          mkdir ..\bins
+          mv target\debug\cargo-semver-checks.exe ..\bins\cargo-semver-checks.exe
+
+      - name: cache binary
+        uses: actions/cache/save@v3
+        with:
+          path: bins\
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   run-on-rust-libp2p:
@@ -1144,6 +1198,103 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+  run-on-ref-slice-fork-windows:
+    # Same as above, but run on a Windows machine.
+    # This broke in a workflow of the GitHub Action using a precompiled binary
+    # after a fresh Rust installation, when the registry index does not exist yet
+    # (see https://github.com/frewsxcv/rust-crates-index/issues/97).
+    name: 'Semver: ref-slice fork (Windows)'
+    runs-on: windows-latest
+    needs:
+      - build-binary-windows
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+          path: semver
+
+      - name: Checkout ref-slice fork semver break
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
+          ref: 'major_change'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - name: Restore binary
+        id: cache-binary
+        uses: actions/cache/restore@v3
+        with:
+          path: bins\
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
+      - run: |
+          rustc --version | tee .rustc-version
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject\target\semver-checks\cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject\target\semver-checks\local-ref_slice-1_2_2\
+
+      - name: Run cargo-semver-checks
+        continue-on-error: true
+        id: semver_checks
+        run: |
+          cd semver
+          ..\bins\cargo-semver-checks.exe semver-checks check-release --manifest-path="..\subject\Cargo.toml" 2>&1 | tee output
+
+      - name: Check whether it failed
+        if: steps.semver_checks.outcome != 'failure'
+        run: |
+          echo "Error! check-release should have failed because of the breaking change, but it has not."
+          exit 1
+
+      - name: Baseline is correct
+        run: |
+          cd semver
+          $EXPECTED = "    Checking ref_slice v1.2.1 -> v1.2.2 (patch change)"
+          # Strip ANSI escapes for colors and bold text before comparing.
+          $RESULT = (cat output | grep 'ref_slice v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g") | Out-String
+          compare $RESULT $EXPECTED
+
+      - name: Semver break found
+        run: |
+          cd semver
+          $EXPECTED = "--- failure function_missing: pub fn removed or renamed ---"
+          $RESULT = (cat output | grep failure)
+          compare $RESULT $EXPECTED
+          # Ensure the following fragment (not full line!) is in the output file:
+          grep '  function ref_slice::ref_slice, previously in file' output
+
+      - name: Cleanup
+        run: |
+          cd semver
+          rm output
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject\target\semver-checks\cache
 
   init-release:
     name: Run the release workflow
