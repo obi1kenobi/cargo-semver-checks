@@ -413,14 +413,12 @@ impl Check {
             let mut reports = BTreeMap::new();
             for (name, outcome) in all_outcomes {
                 let outcome = outcome?;
-                reports.insert(name,outcome);
+                reports.insert(name, outcome);
             }
             reports
         };
 
-        Ok(Report {
-            crate_reports,
-        })
+        Ok(Report { crate_reports })
     }
 }
 
