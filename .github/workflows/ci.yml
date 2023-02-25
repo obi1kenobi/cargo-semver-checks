@@ -35,7 +35,24 @@ jobs:
     if: ${{ success() || failure() }}  # Run this job even if a dependency has failed.
     steps:
       # Fail this required job if any of its dependent jobs have failed.
-      - if: ${{ failure() }}
+      - name: Dependent jobs have failed
+        if: |
+          ${{
+            needs.lint.conclusion == 'failure' ||
+            needs.rust-tests.conclusion == 'failure' ||
+            needs.run-on-rust-libp2p.conclusion == 'failure' ||
+            needs.run-on-libp2p-dcutr-relay.conclusion == 'failure' ||
+            needs.run-on-libp2p-gossipsub-request-response.conclusion == 'failure' ||
+            needs.run-on-libp2p-uds.conclusion == 'failure' ||
+            needs.run-on-core-graphics.conclusion == 'failure' ||
+            needs.run-on-bevy-core.conclusion == 'failure' ||
+            needs.run-on-bevy-gltf.conclusion == 'failure' ||
+            needs.run-on-clap.conclusion == 'failure' ||
+            needs.run-on-sqllogictest.conclusion == 'failure' ||
+            needs.run-on-ref-slice-fork.conclusion == 'failure' ||
+            needs.run-on-tokio-explicit.conclusion == 'failure' ||
+            needs.run-on-tokio-implicit.conclusion == 'failure'
+          }}
         run: exit 1
 
   lint:
