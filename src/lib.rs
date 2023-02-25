@@ -451,24 +451,6 @@ impl Report {
     pub fn success(&self) -> bool {
         self.crate_reports.values().all(|report| report.success())
     }
-
-    pub fn required_bump(&self) -> Option<RequiredSemverUpdate> {
-        if self
-            .crate_reports
-            .values()
-            .any(|report| report.required_bump() == Some(RequiredSemverUpdate::Major))
-        {
-            Some(RequiredSemverUpdate::Major)
-        } else if self
-            .crate_reports
-            .values()
-            .any(|report| report.required_bump() == Some(RequiredSemverUpdate::Minor))
-        {
-            Some(RequiredSemverUpdate::Minor)
-        } else {
-            None
-        }
-    }
 }
 
 fn generate_versioned_crates(
