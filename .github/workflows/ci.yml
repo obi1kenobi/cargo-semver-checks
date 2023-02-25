@@ -33,7 +33,9 @@ jobs:
       - run-on-tokio-explicit
       - run-on-tokio-implicit
     steps:
-      - run: exit 0
+      # Fail this required job if any of its dependent jobs have failed.
+      - if: ${{ failure() }}
+        run: exit 1
 
   lint:
     name: Check lint and rustfmt
