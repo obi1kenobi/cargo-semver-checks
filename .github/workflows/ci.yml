@@ -352,7 +352,7 @@ jobs:
     # due to re-exports that omit generic parameters because the underlying generic type supplies
     # default values for those generics.
     # https://github.com/libp2p/rust-libp2p/pull/3401#issuecomment-1409381365
-    name: 'Semver: libp2p-gossipsub 0.44.0 + libp2p-request-response 0.23.0'
+    name: 'Semver: libp2p-gossipsub ~0.44.0 + libp2p-request-response ~0.24.0'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -411,12 +411,12 @@ jobs:
       - name: Run semver-checks on libp2p-gossipsub
         run: |
           cd semver
-          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/protocols/gossipsub/Cargo.toml" --verbose
+          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/protocols/gossipsub/Cargo.toml" --baseline-version 0.43.0 --verbose
 
       - name: Run semver-checks on libp2p-request-response
         run: |
           cd semver
-          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/protocols/request-response/Cargo.toml" --verbose
+          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/protocols/request-response/Cargo.toml" --baseline-version 0.23.0 --verbose
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
