@@ -32,6 +32,7 @@ jobs:
       - run-on-ref-slice-fork
       - run-on-tokio-explicit
       - run-on-tokio-implicit
+    if: ${{ success() || failure() }}  # Run this job even if a dependency has failed.
     steps:
       # Fail this required job if any of its dependent jobs have failed.
       - if: ${{ failure() }}
