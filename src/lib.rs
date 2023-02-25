@@ -449,8 +449,7 @@ pub struct Report {
 
 impl Report {
     pub fn success(&self) -> bool {
-        let failure = self.crate_reports.values().any(|report| !report.success());
-        !failure
+        self.crate_reports.values().all(|report| report.success())
     }
 
     pub fn required_bump(&self) -> Option<RequiredSemverUpdate> {
