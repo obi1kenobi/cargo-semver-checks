@@ -35,43 +35,25 @@ jobs:
       - run-on-tokio-implicit
     if: ${{ success() || failure() }}  # Run this job even if a dependency has failed.
     steps:
-      - name: Job outcomes
-        run: |
-          echo "lint: ${{ needs.lint.conclusion }}"
-          echo "rust-tests: ${{ needs.rust-tests.conclusion }}"
-          echo "run-on-rust-libp2p: ${{ needs.run-on-rust-libp2p.conclusion }}"
-          echo "run-on-libp2p-dcutr-relay: ${{ needs.run-on-libp2p-dcutr-relay.conclusion }}"
-          echo "run-on-libp2p-gossipsub-request-response: ${{ needs.run-on-libp2p-gossipsub-request-response.conclusion }}"
-          echo "run-on-libp2p-uds: ${{ needs.run-on-libp2p-uds.conclusion }}"
-          echo "run-on-core-graphics: ${{ needs.run-on-core-graphics.conclusion }}"
-          echo "run-on-bevy-core: ${{ needs.run-on-bevy-core.conclusion }}"
-          echo "run-on-bevy-gltf: ${{ needs.run-on-bevy-gltf.conclusion }}"
-          echo "run-on-clap: ${{ needs.run-on-clap.conclusion }}"
-          echo "run-on-sqllogictest: ${{ needs.run-on-sqllogictest.conclusion }}"
-          echo "run-on-ref-slice-fork: ${{ needs.run-on-ref-slice-fork.conclusion }}"
-          echo "run-on-ref-slice-fork-windows: ${{ needs.run-on-ref-slice-fork-windows.conclusion }}"
-          echo "run-on-tokio-explicit: ${{ needs.run-on-tokio-explicit.conclusion }}"
-          echo "run-on-tokio-implicit: ${{ needs.run-on-tokio-implicit.conclusion }}"
-
       # Fail this required job if any of its dependent jobs have failed.
       - name: Dependent jobs have failed
         if: |
           ${{
-            needs.lint.conclusion == 'failure' ||
-            needs.rust-tests.conclusion == 'failure' ||
-            needs.run-on-rust-libp2p.conclusion == 'failure' ||
-            needs.run-on-libp2p-dcutr-relay.conclusion == 'failure' ||
-            needs.run-on-libp2p-gossipsub-request-response.conclusion == 'failure' ||
-            needs.run-on-libp2p-uds.conclusion == 'failure' ||
-            needs.run-on-core-graphics.conclusion == 'failure' ||
-            needs.run-on-bevy-core.conclusion == 'failure' ||
-            needs.run-on-bevy-gltf.conclusion == 'failure' ||
-            needs.run-on-clap.conclusion == 'failure' ||
-            needs.run-on-sqllogictest.conclusion == 'failure' ||
-            needs.run-on-ref-slice-fork.conclusion == 'failure' ||
-            needs.run-on-ref-slice-fork-windows.conclusion == 'failure' ||
-            needs.run-on-tokio-explicit.conclusion == 'failure' ||
-            needs.run-on-tokio-implicit.conclusion == 'failure'
+            needs.lint.result == 'failure' ||
+            needs.rust-tests.result == 'failure' ||
+            needs.run-on-rust-libp2p.result == 'failure' ||
+            needs.run-on-libp2p-dcutr-relay.result == 'failure' ||
+            needs.run-on-libp2p-gossipsub-request-response.result == 'failure' ||
+            needs.run-on-libp2p-uds.result == 'failure' ||
+            needs.run-on-core-graphics.result == 'failure' ||
+            needs.run-on-bevy-core.result == 'failure' ||
+            needs.run-on-bevy-gltf.result == 'failure' ||
+            needs.run-on-clap.result == 'failure' ||
+            needs.run-on-sqllogictest.result == 'failure' ||
+            needs.run-on-ref-slice-fork.result == 'failure' ||
+            needs.run-on-ref-slice-fork-windows.result == 'failure' ||
+            needs.run-on-tokio-explicit.result == 'failure' ||
+            needs.run-on-tokio-implicit.result == 'failure'
           }}
         run: exit 1
 
