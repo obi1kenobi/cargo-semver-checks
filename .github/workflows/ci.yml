@@ -190,13 +190,13 @@ jobs:
         run: |
           cd semver
           cargo build
-          mkdir ../bins
-          mv target/debug/cargo-semver-checks.exe ../bins/cargo-semver-checks.exe
+          mkdir ..\bins
+          mv target\debug\cargo-semver-checks.exe ..\bins\cargo-semver-checks.exe
 
       - name: cache binary
         uses: actions/cache/save@v3
         with:
-          path: bins/
+          path: bins\
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   run-on-rust-libp2p:
@@ -1165,7 +1165,7 @@ jobs:
     # This broke in a workflow of the GitHub Action using a precompiled binary
     # after a fresh Rust installation, when the registry index does not exist yet
     # (see https://github.com/frewsxcv/rust-crates-index/issues/97).
-    name: Run cargo-semver-checks on ref-slice fork (Windows)
+    name: 'Semver: ref-slice fork (Windows)'
     runs-on: windows-latest
     needs:
       - build-binary-windows
@@ -1195,7 +1195,7 @@ jobs:
         id: cache-binary
         uses: actions/cache/restore@v3
         with:
-          path: bins/
+          path: bins\
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
@@ -1206,21 +1206,21 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
-          path: subject/target/semver-checks/cache
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject\target\semver-checks\cache
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            subject/target/semver-checks/local-ref_slice-1_2_2/
+            subject\target\semver-checks\local-ref_slice-1_2_2\
 
       - name: Run cargo-semver-checks
         continue-on-error: true
         id: semver_checks
         run: |
           cd semver
-          ../bins/cargo-semver-checks.exe semver-checks check-release --manifest-path="../subject/Cargo.toml" 2>&1 | tee output
+          ..\bins\cargo-semver-checks.exe semver-checks check-release --manifest-path="..\subject\Cargo.toml" 2>&1 | tee output
 
       - name: Check whether it failed
         if: steps.semver_checks.outcome != 'failure'
@@ -1254,8 +1254,8 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
-          path: subject/target/semver-checks/cache
+          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject\target\semver-checks\cache
 
   init-release:
     name: Run the release workflow
