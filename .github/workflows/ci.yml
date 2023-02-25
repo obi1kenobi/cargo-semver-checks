@@ -1080,7 +1080,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            subject-current/target/semver-checks/local-ref_slice-1_2_2/
+            subject/target/semver-checks/local-ref_slice-1_2_2/
 
       - name: Run semver-checks
         continue-on-error: true
