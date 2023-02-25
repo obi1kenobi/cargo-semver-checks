@@ -321,12 +321,12 @@ impl Check {
         let baseline_loader = self.get_rustdoc_generator(&mut config, &self.baseline.source)?;
 
         // Create a report for each crate.
-        let all_outcomes: anyhow::Result<BTreeMap<String, CrateReport>> = match &self.current.source
-        {
-            RustdocSource::Rustdoc(_)
-            | RustdocSource::Revision(_, _)
-            | RustdocSource::VersionFromRegistry(_) => {
-                let names = match &self.scope.mode {
+        let all_outcomes: anyhow::Result<BTreeMap<String, anyhow::Result<CrateReport>>> =
+            match &self.current.source {
+                RustdocSource::Rustdoc(_)
+                | RustdocSource::Revision(_, _)
+                | RustdocSource::VersionFromRegistry(_) => {
+                    let names = match &self.scope.mode {
                     ScopeMode::DenyList(_) =>
                         match &self.current.source {
                             RustdocSource::Rustdoc(_) =>
@@ -335,82 +335,91 @@ impl Check {
                         }
                     ScopeMode::AllowList(lst) => lst.clone(),
                 };
-                names
-                    .into_iter()
-                    .map(|name| {
-                        let version = None;
-                        let (current_crate, baseline_crate) = generate_versioned_crates(
-                            &mut config,
-                            &rustdoc_cmd,
-                            &*current_loader,
-                            &*baseline_loader,
-                            &name,
-                            version,
-                        )?;
-
-                        let report = run_check_release(
-                            &mut config,
-                            &name,
-                            current_crate,
-                            baseline_crate,
-                            self.release_type,
-                        )?;
-                        Ok((name, report))
-                    })
-                    .collect()
-            }
-            RustdocSource::Root(project_root) => {
-                let metadata = manifest_metadata(project_root)?;
-                let selected = self.scope.selected_packages(&metadata);
-                selected
-                    .iter()
-                    .map(|selected| {
-                        let crate_name = &selected.name;
-                        let version = &selected.version;
-
-                        // If the manifest we're using points to a workspace, then
-                        // ignore `publish = false` crates unless they are specifically selected.
-                        // If the manifest points to a specific crate, then check the crate
-                        // even if `publish = false` is set.
-                        let is_implied = matches!(self.scope.mode, ScopeMode::DenyList(..))
-                            && metadata.workspace_members.len() > 1
-                            && selected.publish == Some(vec![]);
-                        if is_implied {
-                            config.verbose(|config| {
-                                config.shell_status(
-                                    "Skipping",
-                                    format_args!("{crate_name} v{version} (current)"),
-                                )
-                            })?;
-                            Ok((crate_name.clone(), CrateReport::new_successful()))
-                        } else {
+                    names
+                        .into_iter()
+                        .map(|name| {
+                            let version = None;
                             let (current_crate, baseline_crate) = generate_versioned_crates(
                                 &mut config,
                                 &rustdoc_cmd,
                                 &*current_loader,
                                 &*baseline_loader,
-                                crate_name,
-                                Some(version),
+                                &name,
+                                version,
                             )?;
 
-                            Ok((
-                                crate_name.clone(),
-                                run_check_release(
+                            let report = run_check_release(
+                                &mut config,
+                                &name,
+                                current_crate,
+                                baseline_crate,
+                                self.release_type,
+                            );
+                            Ok((name, report))
+                        })
+                        .collect()
+                }
+                RustdocSource::Root(project_root) => {
+                    let metadata = manifest_metadata(project_root)?;
+                    let selected = self.scope.selected_packages(&metadata);
+                    selected
+                        .iter()
+                        .map(|selected| {
+                            let crate_name = &selected.name;
+                            let version = &selected.version;
+
+                            // If the manifest we're using points to a workspace, then
+                            // ignore `publish = false` crates unless they are specifically selected.
+                            // If the manifest points to a specific crate, then check the crate
+                            // even if `publish = false` is set.
+                            let is_implied = matches!(self.scope.mode, ScopeMode::DenyList(..))
+                                && metadata.workspace_members.len() > 1
+                                && selected.publish == Some(vec![]);
+                            if is_implied {
+                                config.verbose(|config| {
+                                    config.shell_status(
+                                        "Skipping",
+                                        format_args!("{crate_name} v{version} (current)"),
+                                    )
+                                })?;
+                                Ok((crate_name.clone(), Ok(CrateReport::new_successful())))
+                            } else {
+                                let (current_crate, baseline_crate) = generate_versioned_crates(
                                     &mut config,
+                                    &rustdoc_cmd,
+                                    &*current_loader,
+                                    &*baseline_loader,
                                     crate_name,
-                                    current_crate,
-                                    baseline_crate,
-                                    self.release_type,
-                                )?,
-                            ))
-                        }
-                    })
-                    .collect()
+                                    Some(version),
+                                )?;
+
+                                Ok((
+                                    crate_name.clone(),
+                                    run_check_release(
+                                        &mut config,
+                                        crate_name,
+                                        current_crate,
+                                        baseline_crate,
+                                        self.release_type,
+                                    ),
+                                ))
+                            }
+                        })
+                        .collect()
+                }
+            };
+        let all_outcomes: BTreeMap<String, anyhow::Result<CrateReport>> = all_outcomes?;
+        let crate_reports: BTreeMap<String, CrateReport> = {
+            let mut reports = BTreeMap::new();
+            for (name, outcome) in all_outcomes {
+                let outcome = outcome?;
+                reports.insert(name,outcome);
             }
+            reports
         };
 
         Ok(Report {
-            crate_reports: all_outcomes?,
+            crate_reports,
         })
     }
 }
