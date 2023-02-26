@@ -30,9 +30,10 @@ jobs:
       - run-on-clap
       - run-on-sqllogictest
       - run-on-ref-slice-fork
+      - run-on-ref-slice-fork-windows
       - run-on-tokio-explicit
       - run-on-tokio-implicit
-      - run-on-ref-slice-fork-windows
+    if: ${{ success() || failure() }}  # Run this job even if a dependency has failed.
     steps:
       - name: Job outcomes
         run: |
@@ -218,6 +219,12 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   build-binary-windows:
+    # It could be easily combined into a single job with build-binary using the
+    # matrix strategy, but it is not a good idea. Building the tool on Windows
+    # is much slower and if the matrix strategy is used, there is currently no
+    # supported by GitHub Actions way to depend only on a single case. It means
+    # all semver checks below would have to wait before both binaries are built,
+    # which would make whole CI last longer.
     name: Build binary (Windows)
     runs-on: windows-latest
     steps:
