@@ -35,6 +35,24 @@ jobs:
       - run-on-tokio-implicit
     if: ${{ success() || failure() }}  # Run this job even if a dependency has failed.
     steps:
+      - name: Job outcomes
+        run: |
+          echo "lint: ${{ needs.lint.result }}"
+          echo "rust-tests: ${{ needs.rust-tests.result }}"
+          echo "run-on-rust-libp2p: ${{ needs.run-on-rust-libp2p.result }}"
+          echo "run-on-libp2p-dcutr-relay: ${{ needs.run-on-libp2p-dcutr-relay.result }}"
+          echo "run-on-libp2p-gossipsub-request-response: ${{ needs.run-on-libp2p-gossipsub-request-response.result }}"
+          echo "run-on-libp2p-uds: ${{ needs.run-on-libp2p-uds.result }}"
+          echo "run-on-core-graphics: ${{ needs.run-on-core-graphics.result }}"
+          echo "run-on-bevy-core: ${{ needs.run-on-bevy-core.result }}"
+          echo "run-on-bevy-gltf: ${{ needs.run-on-bevy-gltf.result }}"
+          echo "run-on-clap: ${{ needs.run-on-clap.result }}"
+          echo "run-on-sqllogictest: ${{ needs.run-on-sqllogictest.result }}"
+          echo "run-on-ref-slice-fork: ${{ needs.run-on-ref-slice-fork.result }}"
+          echo "run-on-ref-slice-fork-windows: ${{ needs.run-on-ref-slice-fork-windows.result }}"
+          echo "run-on-tokio-explicit: ${{ needs.run-on-tokio-explicit.result }}"
+          echo "run-on-tokio-implicit: ${{ needs.run-on-tokio-implicit.result }}"
+
       # Fail this required job if any of its dependent jobs have failed.
       - name: Dependent jobs have failed
         if: |
