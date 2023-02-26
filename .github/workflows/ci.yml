@@ -54,8 +54,39 @@ jobs:
           echo "run-on-tokio-implicit: ${{ needs.run-on-tokio-implicit.result }}"
 
       # Fail this required job if any of its dependent jobs have failed.
-      - name: Dependent jobs have failed
-        if: ${{ needs.lint.result != 'success' || needs.rust-tests.result != 'success' || needs.run-on-rust-libp2p.result != 'success' || needs.run-on-libp2p-dcutr-relay.result != 'success' || needs.run-on-libp2p-gossipsub-request-response.result != 'success' || needs.run-on-libp2p-uds.result != 'success' || needs.run-on-core-graphics.result != 'success' || needs.run-on-bevy-core.result != 'success' || needs.run-on-bevy-gltf.result != 'success' || needs.run-on-clap.result != 'success' || needs.run-on-sqllogictest.result != 'success' || needs.run-on-ref-slice-fork.result != 'success' || needs.run-on-ref-slice-fork-windows.result != 'success' || needs.run-on-tokio-explicit.result != 'success' || needs.run-on-tokio-implicit.result != 'success' }}
+      #
+      # Do not attempt to consolidate these steps into one step, it won't work.
+      # Multi-line `if` clauses are not evaluated properly: see the intermediate commits in
+      # https://github.com/obi1kenobi/cargo-semver-checks/pull/405
+      - if: ${{ needs.lint.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.rust-tests.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-rust-libp2p.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-libp2p-dcutr-relay.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-libp2p-gossipsub-request-response.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-libp2p-uds.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-core-graphics.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-bevy-core.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-bevy-gltf.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-clap.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-sqllogictest.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-ref-slice-fork.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-ref-slice-fork-windows.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-tokio-explicit.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-tokio-implicit.result != 'success' }}
         run: exit 1
 
   lint:
