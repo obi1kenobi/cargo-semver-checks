@@ -55,24 +55,7 @@ jobs:
 
       # Fail this required job if any of its dependent jobs have failed.
       - name: Dependent jobs have failed
-        if: |
-          ${{
-            needs.lint.result != 'success' ||
-            needs.rust-tests.result != 'success' ||
-            needs.run-on-rust-libp2p.result != 'success' ||
-            needs.run-on-libp2p-dcutr-relay.result != 'success' ||
-            needs.run-on-libp2p-gossipsub-request-response.result != 'success' ||
-            needs.run-on-libp2p-uds.result != 'success' ||
-            needs.run-on-core-graphics.result != 'success' ||
-            needs.run-on-bevy-core.result != 'success' ||
-            needs.run-on-bevy-gltf.result != 'success' ||
-            needs.run-on-clap.result != 'success' ||
-            needs.run-on-sqllogictest.result != 'success' ||
-            needs.run-on-ref-slice-fork.result != 'success' ||
-            needs.run-on-ref-slice-fork-windows.result != 'success' ||
-            needs.run-on-tokio-explicit.result != 'success' ||
-            needs.run-on-tokio-implicit.result != 'success'
-          }}
+        if: ${{ needs.lint.result != 'success' || needs.rust-tests.result != 'success' || needs.run-on-rust-libp2p.result != 'success' || needs.run-on-libp2p-dcutr-relay.result != 'success' || needs.run-on-libp2p-gossipsub-request-response.result != 'success' || needs.run-on-libp2p-uds.result != 'success' || needs.run-on-core-graphics.result != 'success' || needs.run-on-bevy-core.result != 'success' || needs.run-on-bevy-gltf.result != 'success' || needs.run-on-clap.result != 'success' || needs.run-on-sqllogictest.result != 'success' || needs.run-on-ref-slice-fork.result != 'success' || needs.run-on-ref-slice-fork-windows.result != 'success' || needs.run-on-tokio-explicit.result != 'success' || needs.run-on-tokio-implicit.result != 'success' }}
         run: exit 1
 
   lint:
