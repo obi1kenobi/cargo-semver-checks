@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: '17 7 * * 1-5'  # run once per day Monday-Friday at 7:17am
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
