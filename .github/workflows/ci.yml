@@ -115,6 +115,8 @@ jobs:
         with:
           workspaces: 'semver'
 
+      - uses: r7kamura/rust-problem-matchers@v1
+
       - name: cargo clippy
         uses: actions-rs/clippy-check@v1
         with:
@@ -178,6 +180,8 @@ jobs:
         with:
           workspaces: 'semver'
 
+      - uses: r7kamura/rust-problem-matchers@v1
+
       - name: compile
         run: |
           cd semver
@@ -208,6 +212,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: 'semver'
+
+      - uses: r7kamura/rust-problem-matchers@v1
 
       - name: build and cache
         run: |
@@ -248,6 +254,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: 'semver'
+
+      - uses: r7kamura/rust-problem-matchers@v1
 
       - name: build and cache
         run: |
