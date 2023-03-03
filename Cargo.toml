@@ -9,6 +9,7 @@ repository = "https://github.com/obi1kenobi/cargo-semver-checks"
 readme = "./README.md"
 keywords = ["semver", "check", "crate", "cargo"]
 categories = ["command-line-utilities", "development-tools::cargo-plugins"]
+default-run = "cargo-semver-checks"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -38,6 +39,7 @@ itertools = "0.10.5"
 cargo_toml = "0.15.2"
 toml = "0.5.9"
 directories = "4.0.1"
+crates_io_api = { version = "0.8.1", optional = true }
 
 [dev-dependencies]
 assert_cmd = "2.0"
@@ -46,6 +48,11 @@ lazy_static = "1.4.0"
 [features]
 default = ["vendored-openssl"]
 vendored-openssl = ["crates-index/vendored-openssl"]
+semver-crater = ["dep:crates_io_api"]
+
+[[bin]]
+name = "semver-crater"
+required-features = ["semver-crater"]
 
 # In dev and test profiles, compile all dependencies with optimizations enabled,
 # but still checking debug assertions and overflows.
