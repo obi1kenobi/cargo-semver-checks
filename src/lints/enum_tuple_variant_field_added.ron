@@ -19,7 +19,7 @@ SemverQuery(
 
                         variant {
                             ... on TupleVariant {
-                                # If the variant is now marked `#[non_exhaustive]`,
+                                # If the variant is newly marked `#[non_exhaustive]`,
                                 # that's already a breaking change that has its own rule.
                                 # Don't also report new field additions, since the programmer has
                                 # clearly stated that they don't consider it exhaustive anymore.

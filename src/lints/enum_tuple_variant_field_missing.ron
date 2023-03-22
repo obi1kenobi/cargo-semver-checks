@@ -1,7 +1,7 @@
 SemverQuery(
     id: "enum_tuple_variant_field_missing",
-    human_readable_name: "pub enum tuple variant's field removed or renamed" ,
-    description: "An enum's tuple variant has a field that is no longer available under its prior name.",
+    human_readable_name: "pub enum tuple variant's field removed",
+    description: "A field has been removed from an enum's tuple variant.",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
@@ -61,6 +61,6 @@ SemverQuery(
         "public": "public",
         "zero": 0,
     },
-    error_message: "A publicly-visible enum has a tuple variant whose field is no longer available under its prior name. It may have been renamed or removed entirely.",
+    error_message: "A field of a tuple variant in a pub enum has been removed.",
     per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
 )
