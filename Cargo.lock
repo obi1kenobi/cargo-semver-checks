@@ -198,7 +198,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-semver-checks"
-version = "0.18.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
