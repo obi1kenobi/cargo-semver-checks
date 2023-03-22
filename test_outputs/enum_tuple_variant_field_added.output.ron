@@ -1,0 +1,15 @@
+{
+    "./test_crates/enum_tuple_variant_field_added/": [
+        {
+            "enum_name": String("PublicEnum"),
+            "field_name": String("2"),
+            "path": List([
+                String("enum_tuple_variant_field_added"),
+                String("PublicEnum"),
+            ]),
+            "span_begin_line": Uint64(3),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("TupleVariantWithFieldAdded"),
+        },
+    ],
+}
