@@ -371,7 +371,7 @@ jobs:
 
           # Ensure the cached rustdoc versions were indeed different before and after.
           set -x
-          [ "$OLD_RUSTDOC_VERSION" = "$NEW_RUSTDOC_VERSION" ] || exit 1
+          [ "$OLD_RUSTDOC_VERSION" != "$NEW_RUSTDOC_VERSION" ] || exit 1
 
   run-on-rust-libp2p:
     # Run cargo-semver-checks on a crate with no semver violations,
