@@ -365,8 +365,7 @@ jobs:
           export OLD_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
 
           # Run cargo-semver-checks with the older cached file.
-          cd semver
-          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject-new/core/Cargo.toml" --verbose
+          bins/cargo-semver-checks semver-checks check-release --manifest-path="subject-new/core/Cargo.toml" --verbose
 
           export NEW_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
 
