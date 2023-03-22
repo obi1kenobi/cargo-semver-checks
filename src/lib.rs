@@ -461,13 +461,21 @@ fn generate_versioned_crates(
                 format_args!("stale cached baseline rustdoc for {crate_name}"),
             )?;
             std::fs::remove_file(baseline_path)?;
-            let baseline_path =
-                get_baseline_rustdoc_path(config, rustdoc_cmd, baseline_loader, crate_name, version)?;
+            let baseline_path = get_baseline_rustdoc_path(
+                config,
+                rustdoc_cmd,
+                baseline_loader,
+                crate_name,
+                version,
+            )?;
             baseline_crate = load_rustdoc(&baseline_path)?;
 
-            assert_eq!(baseline_crate.version(), current_rustdoc_version,
+            assert_eq!(
+                baseline_crate.version(),
+                current_rustdoc_version,
                 "Deleting and regenerating the baseline JSON file did not resolve the rustdoc \
-                version mismatch.");
+                version mismatch."
+            );
         }
 
         baseline_crate
