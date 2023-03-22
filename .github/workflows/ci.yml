@@ -353,17 +353,26 @@ jobs:
           # Use a separate workspace, to avoid contaminating the cache for Swatinem/rust-cache@v2
           cp -R subject subject-new
 
+          # Show what's in the cache.
+          ls subject-new/target/semver-checks/cache/
+
           # Ensure the previous cached rustdoc file still exists.
           [ -f "subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json" ] || { \
-            echo "could not find libp2p-core cache file: " \
-            set -x; \
-            ls subject-new/target/semver-checks/cache/; \
+            echo "could not find libp2p-core cache file"; \
             exit 1;
           }
+
+          export OLD_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
 
           # Run cargo-semver-checks with the older cached file.
           cd semver
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject-new/core/Cargo.toml" --verbose
+
+          export NEW_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
+
+          # Ensure the cached rustdoc versions were indeed different before and after.
+          set -x
+          [ "$OLD_RUSTDOC_VERSION" = "$NEW_RUSTDOC_VERSION" ] || exit 1
 
   run-on-rust-libp2p:
     # Run cargo-semver-checks on a crate with no semver violations,
