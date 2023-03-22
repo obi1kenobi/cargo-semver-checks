@@ -44,6 +44,7 @@ jobs:
         run: |
           echo "lint: ${{ needs.lint.result }}"
           echo "rust-tests: ${{ needs.rust-tests.result }}"
+          echo "cross-version-caching: ${{ needs.cross-version-caching.result }}"
           echo "run-on-rust-libp2p: ${{ needs.run-on-rust-libp2p.result }}"
           echo "run-on-libp2p-dcutr-relay: ${{ needs.run-on-libp2p-dcutr-relay.result }}"
           echo "run-on-libp2p-gossipsub-request-response: ${{ needs.run-on-libp2p-gossipsub-request-response.result }}"
@@ -66,6 +67,8 @@ jobs:
       - if: ${{ needs.lint.result != 'success' }}
         run: exit 1
       - if: ${{ needs.rust-tests.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.cross-version-caching.result != 'success' }}
         run: exit 1
       - if: ${{ needs.run-on-rust-libp2p.result != 'success' }}
         run: exit 1
@@ -272,6 +275,9 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   cross-version-caching:
+    # Ensure that cached rustdoc JSON files from an mismatched rustdoc version
+    # are transparently cleared and overwritten with the rustdoc version from the current toolchain.
+    # Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/415
     name: 'Caching across rustdoc versions'
     runs-on: ubuntu-latest
     needs:
