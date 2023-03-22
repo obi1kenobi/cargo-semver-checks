@@ -21,7 +21,6 @@ use itertools::Itertools;
 use rustdoc_cmd::RustdocCommand;
 use semver::Version;
 use std::collections::HashSet;
-use std::fs;
 use std::path::{Path, PathBuf};
 
 pub use config::GlobalConfig;
@@ -442,11 +441,56 @@ fn generate_versioned_crates(
     )?;
     let current_crate = load_rustdoc(&current_path)?;
 
-    // The process of generating baseline rustdoc can overwrite
-    // the already-generated rustdoc of the current crate.
-    // For example, this happens when target-dir is specified in `.cargo/config.toml`.
-    // That's the reason why we're immediately loading the rustdocs into memory.
-    // See: https://github.com/obi1kenobi/cargo-semver-checks/issues/269
+    let current_rustdoc_version = current_crate.version();
+
+    let baseline_path =
+        get_baseline_rustdoc_path(config, rustdoc_cmd, baseline_loader, crate_name, version)?;
+    let baseline_crate = {
+        let mut baseline_crate = load_rustdoc(&baseline_path)?;
+
+        // The baseline rustdoc JSON may have been cached; ensure its rustdoc version matches
+        // the version emitted by the currently-installed toolchain.
+        //
+        // The baseline and current rustdoc JSONs should have the same version.
+        // If the baseline rustdoc version doesn't match, delete the cached baseline and rebuild it.
+        //
+        // Fix for: https://github.com/obi1kenobi/cargo-semver-checks/issues/415
+        if baseline_crate.version() != current_rustdoc_version {
+            config.shell_status(
+                "Removing",
+                format_args!("stale cached baseline rustdoc for {crate_name}"),
+            )?;
+            std::fs::remove_file(baseline_path)?;
+            let baseline_path = get_baseline_rustdoc_path(
+                config,
+                rustdoc_cmd,
+                baseline_loader,
+                crate_name,
+                version,
+            )?;
+            baseline_crate = load_rustdoc(&baseline_path)?;
+
+            assert_eq!(
+                baseline_crate.version(),
+                current_rustdoc_version,
+                "Deleting and regenerating the baseline JSON file did not resolve the rustdoc \
+                version mismatch."
+            );
+        }
+
+        baseline_crate
+    };
+
+    Ok((current_crate, baseline_crate))
+}
+
+fn get_baseline_rustdoc_path(
+    config: &mut GlobalConfig,
+    rustdoc_cmd: &RustdocCommand,
+    baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
+    crate_name: &str,
+    version: Option<&Version>,
+) -> anyhow::Result<PathBuf> {
     let baseline_path = baseline_loader.load_rustdoc(
         config,
         rustdoc_cmd,
@@ -457,9 +501,7 @@ fn generate_versioned_crates(
             },
         },
     )?;
-    let baseline_crate = load_rustdoc(&baseline_path)?;
-
-    Ok((current_crate, baseline_crate))
+    Ok(baseline_path)
 }
 
 fn manifest_path(project_root: &Path) -> anyhow::Result<PathBuf> {
@@ -507,7 +549,7 @@ fn get_cache_dir() -> anyhow::Result<PathBuf> {
     let project_dirs =
         ProjectDirs::from("", "", "cargo-semver-checks").context("can't determine project dirs")?;
     let cache_dir = project_dirs.cache_dir();
-    fs::create_dir_all(cache_dir).context("can't create cache dir")?;
+    std::fs::create_dir_all(cache_dir).context("can't create cache dir")?;
     Ok(cache_dir.to_path_buf())
 }
 
