@@ -119,16 +119,10 @@ jobs:
       - uses: r7kamura/rust-problem-matchers@v1
 
       - name: cargo clippy
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --manifest-path semver/Cargo.toml --workspace --all-features --all-targets -- -D warnings --allow deprecated
+        run: cargo clippy --manifest-path semver/Cargo.toml --workspace --all-features --all-targets -- -D warnings --allow deprecated
 
       - name: cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --manifest-path semver/Cargo.toml -- --check
+        run: cargo fmt --manifest-path semver/Cargo.toml -- --check
 
       - name: cargo doc
         env:
