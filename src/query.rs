@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
-use trustfall_core::ir::TransparentValue;
+use trustfall::TransparentValue;
 
 use crate::ReleaseType;
 
@@ -111,8 +111,7 @@ mod tests {
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
-    use trustfall_core::ir::TransparentValue;
-    use trustfall_core::{frontend::parse, ir::FieldValue};
+    use trustfall::{FieldValue, TransparentValue};
     use trustfall_rustdoc::{
         load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
     };
@@ -189,15 +188,16 @@ mod tests {
     }
 
     #[test]
-    fn all_queries_parse_correctly() {
+    fn all_queries_are_valid() {
         let (_baseline_crate, current_crate) = &TEST_CRATE_RUSTDOCS["template"];
         let indexed_crate = VersionedIndexedCrate::new(current_crate);
-        let adapter =
-            VersionedRustdocAdapter::new(&indexed_crate, None).expect("failed to create adapter");
 
-        let schema = adapter.schema();
+        let adapter = VersionedRustdocAdapter::new(&indexed_crate, Some(&indexed_crate))
+            .expect("failed to create adapter");
         for semver_query in SemverQuery::all_queries().into_values() {
-            let _ = parse(schema, semver_query.query).expect("not a valid query");
+            let _ = adapter
+                .run_query(&semver_query.query, semver_query.arguments)
+                .expect("not a valid query");
         }
     }
 
