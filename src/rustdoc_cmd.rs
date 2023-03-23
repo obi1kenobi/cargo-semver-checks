@@ -1,11 +1,13 @@
+use crate::GlobalConfig;
+
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RustDocCommand {
+pub struct RustdocCommand {
     deps: bool,
     silence: bool,
 }
 
-impl RustDocCommand {
-    pub fn new() -> Self {
+impl RustdocCommand {
+    pub(crate) fn new() -> Self {
         Self {
             deps: false,
             silence: false,
@@ -23,20 +25,21 @@ impl RustDocCommand {
     /// Reasons to have this enabled:
     /// - Check for accidental inclusion of dependencies in your API
     /// - Detect breaking changes from dependencies in your API
-    pub fn deps(mut self, yes: bool) -> Self {
+    pub(crate) fn deps(mut self, yes: bool) -> Self {
         self.deps = yes;
         self
     }
 
     /// Don't write progress to stderr
-    pub fn silence(mut self, yes: bool) -> Self {
+    pub(crate) fn silence(mut self, yes: bool) -> Self {
         self.silence = yes;
         self
     }
 
     /// Produce a rustdoc JSON file for the specified configuration.
-    pub fn dump(
+    pub(crate) fn dump(
         &self,
+        config: &mut GlobalConfig,
         manifest_path: &std::path::Path,
         pkg_spec: Option<&str>,
         all_features: bool,
@@ -65,7 +68,7 @@ impl RustDocCommand {
         cmd.env("RUSTC_BOOTSTRAP", "1")
             .env(
                 "RUSTDOCFLAGS",
-                "-Z unstable-options --document-private-items --document-hidden-items --output-format=json",
+                "-Z unstable-options --document-private-items --document-hidden-items --output-format=json --cap-lints allow",
             )
             .stdout(std::process::Stdio::null()) // Don't pollute output
             .stderr(stderr)
@@ -82,6 +85,9 @@ impl RustDocCommand {
         }
         if all_features {
             cmd.arg("--all-features");
+        }
+        if config.is_stderr_tty() {
+            cmd.arg("--color=always");
         }
         let output = cmd.output()?;
         if !output.status.success() {
@@ -123,7 +129,7 @@ impl RustDocCommand {
                 );
             }
         } else {
-            let manifest = crate::manifest::Manifest::parse(manifest_path)?;
+            let manifest = crate::manifest::Manifest::parse(manifest_path.to_path_buf())?;
 
             let lib_target_name = crate::manifest::get_lib_target_name(&manifest)?;
             let json_path = target_dir.join(format!("doc/{lib_target_name}.json"));
@@ -135,11 +141,7 @@ impl RustDocCommand {
             let json_path = target_dir.join(format!("doc/{first_bin_target_name}.json"));
             if !json_path.exists() {
                 let crate_name = if let Some(pkg_spec) = pkg_spec {
-                    pkg_spec
-                        .split_once('@')
-                        .map(|s| s.0)
-                        .unwrap_or(pkg_spec)
-                        .to_owned()
+                    pkg_spec.split_once('@').map(|s| s.0).unwrap_or(pkg_spec)
                 } else {
                     crate::manifest::get_package_name(&manifest)?
                 };
@@ -156,7 +158,7 @@ impl RustDocCommand {
     }
 }
 
-impl Default for RustDocCommand {
+impl Default for RustdocCommand {
     fn default() -> Self {
         Self::new()
     }
@@ -164,14 +166,16 @@ impl Default for RustDocCommand {
 
 #[cfg(test)]
 mod tests {
+    use crate::GlobalConfig;
     use std::path::Path;
 
-    use super::RustDocCommand;
+    use super::RustdocCommand;
 
     #[test]
     fn rustdoc_for_lib_crate_without_lib_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
+                &mut GlobalConfig::new(),
                 Path::new("./test_rustdoc/implicit_lib/Cargo.toml"),
                 None,
                 true,
@@ -181,8 +185,9 @@ mod tests {
 
     #[test]
     fn rustdoc_for_lib_crate_with_lib_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
+                &mut GlobalConfig::new(),
                 Path::new("./test_rustdoc/renamed_lib/Cargo.toml"),
                 None,
                 true,
@@ -192,8 +197,9 @@ mod tests {
 
     #[test]
     fn rustdoc_for_bin_crate_without_bin_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
+                &mut GlobalConfig::new(),
                 Path::new("./test_rustdoc/implicit_bin/Cargo.toml"),
                 None,
                 true,
@@ -203,9 +209,34 @@ mod tests {
 
     #[test]
     fn rustdoc_for_bin_crate_with_bin_section() {
-        RustDocCommand::default()
+        RustdocCommand::default()
             .dump(
+                &mut GlobalConfig::new(),
                 Path::new("./test_rustdoc/renamed_bin/Cargo.toml"),
+                None,
+                true,
+            )
+            .expect("no errors");
+    }
+
+    #[test]
+    fn rustdoc_for_crate_in_workspace_with_workspace_manifest() {
+        RustdocCommand::default()
+            .dump(
+                &mut GlobalConfig::new(),
+                Path::new("./test_rustdoc/crate_in_workspace/Cargo.toml"),
+                Some("crate_in_workspace_crate1"),
+                true,
+            )
+            .expect("no errors");
+    }
+
+    #[test]
+    fn rustdoc_for_crate_in_workspace_with_crate_manifest() {
+        RustdocCommand::default()
+            .dump(
+                &mut GlobalConfig::new(),
+                Path::new("./test_rustdoc/crate_in_workspace/crate1/Cargo.toml"),
                 None,
                 true,
             )

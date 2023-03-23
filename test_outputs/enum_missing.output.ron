@@ -21,6 +21,30 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/enum_tuple_variant_field_added/": [
+        {
+            "name": String("BecomesPrivateEnum"),
+            "path": List([
+                String("enum_tuple_variant_field_added"),
+                String("BecomesPrivateEnum"),
+            ]),
+            "span_begin_line": Uint64(29),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+    "./test_crates/enum_tuple_variant_field_missing/": [
+        {
+            "name": String("BecomesPrivateEnum"),
+            "path": List([
+                String("enum_tuple_variant_field_missing"),
+                String("BecomesPrivateEnum"),
+            ]),
+            "span_begin_line": Uint64(21),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/enum_variant_missing/": [
         {
             "name": String("ShouldNotMatch"),

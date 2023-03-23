@@ -12,6 +12,19 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/enum_tuple_variant_field_added/": [
+        {
+            "name": String("PublicEnum"),
+            "path": List([
+                String("enum_tuple_variant_field_added"),
+                String("PublicEnum"),
+            ]),
+            "span_begin_line": Uint64(11),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("TupleVariantWithFieldAddedBecomesNonExhaustive"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/non_exhaustive/": [
         {
             "name": String("MyEnum"),
