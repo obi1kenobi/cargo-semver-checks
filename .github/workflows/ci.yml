@@ -324,6 +324,9 @@ jobs:
           key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Check with older rustdoc version cached
         run: |
           # Use a separate workspace, to avoid contaminating the cache for Swatinem/rust-cache@v2
@@ -341,7 +344,9 @@ jobs:
           export OLD_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
 
           # Run cargo-semver-checks with the older cached file.
-          # This cargo-semver-checks is compiled on the most recent stable Rust.
+          # In a prior step, we installed stable Rust, so we'll set that as the default
+          # for cargo-semver-checks to invoke here.
+          rustup override set stable
           bins/cargo-semver-checks semver-checks check-release --manifest-path="subject-new/core/Cargo.toml" --verbose
 
           export NEW_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
