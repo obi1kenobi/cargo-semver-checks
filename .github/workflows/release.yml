@@ -29,11 +29,7 @@ jobs:
           persist-credentials: true
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
 
@@ -79,11 +75,7 @@ jobs:
           persist-credentials: false
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Upload binary
         uses: taiki-e/upload-rust-binary-action@v1

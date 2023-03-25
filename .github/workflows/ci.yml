@@ -24,6 +24,7 @@ jobs:
     needs:
       - lint
       - rust-tests
+      - cross-version-caching
       - run-on-rust-libp2p
       - run-on-libp2p-dcutr-relay
       - run-on-libp2p-gossipsub-request-response
@@ -43,6 +44,7 @@ jobs:
         run: |
           echo "lint: ${{ needs.lint.result }}"
           echo "rust-tests: ${{ needs.rust-tests.result }}"
+          echo "cross-version-caching: ${{ needs.cross-version-caching.result }}"
           echo "run-on-rust-libp2p: ${{ needs.run-on-rust-libp2p.result }}"
           echo "run-on-libp2p-dcutr-relay: ${{ needs.run-on-libp2p-dcutr-relay.result }}"
           echo "run-on-libp2p-gossipsub-request-response: ${{ needs.run-on-libp2p-gossipsub-request-response.result }}"
@@ -65,6 +67,8 @@ jobs:
       - if: ${{ needs.lint.result != 'success' }}
         run: exit 1
       - if: ${{ needs.rust-tests.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.cross-version-caching.result != 'success' }}
         run: exit 1
       - if: ${{ needs.run-on-rust-libp2p.result != 'success' }}
         run: exit 1
@@ -104,12 +108,9 @@ jobs:
           path: 'semver'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
           components: rustfmt, clippy
-          profile: minimal
-          override: true
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -118,16 +119,10 @@ jobs:
       - uses: r7kamura/rust-problem-matchers@v1
 
       - name: cargo clippy
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --manifest-path semver/Cargo.toml --workspace --all-features --all-targets -- -D warnings --allow deprecated
+        run: cargo clippy --manifest-path semver/Cargo.toml --workspace --all-features --all-targets -- -D warnings --allow deprecated
 
       - name: cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --manifest-path semver/Cargo.toml -- --check
+        run: cargo fmt --manifest-path semver/Cargo.toml -- --check
 
       - name: cargo doc
         env:
@@ -140,7 +135,7 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        toolchain: ["1.65", "1.66", "stable", "beta"]
+        toolchain: ["1.65", "1.66", "1.67", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -153,22 +148,17 @@ jobs:
           path: 'semver'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
+        id: toolchain
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
-          profile: minimal
-          override: true
-
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
 
       - name: restore test rustdocs
         id: cache-test-rustdocs
         uses: actions/cache@v3
         with:
           path: semver/localdata/test_data/
-          key: test-rustdocs-${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/test_crates/**/Cargo.toml') }}
+          key: test-rustdocs-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/test_crates/**/Cargo.toml') }}
 
       - name: Regenerate test data
         if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
@@ -203,11 +193,7 @@ jobs:
           path: 'semver'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -245,11 +231,7 @@ jobs:
           path: 'semver'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -270,6 +252,103 @@ jobs:
           path: bins\
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
 
+  cross-version-caching:
+    # Ensure that cached rustdoc JSON files from an mismatched rustdoc version
+    # are transparently cleared and overwritten with the rustdoc version from the current toolchain.
+    # Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/415
+    name: 'Caching across rustdoc versions'
+    runs-on: ubuntu-latest
+    needs:
+      - build-binary
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      - name: Checkout rust-libp2p
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: 'libp2p/rust-libp2p'
+          ref: '3371d7ceab242440216ae9ab99829631fa418f3b'
+          path: 'subject'
+
+      # rust-libp2p requires protobuf-compiler.
+      - name: Install protobuf-compiler
+        run: sudo apt install protobuf-compiler
+
+      - name: Restore binary
+        id: cache-binary
+        uses: actions/cache/restore@v3
+        with:
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
+      - name: Install rust
+        id: toolchain
+        uses: dtolnay/rust-toolchain@1.67
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-libp2p_core-0_37_0
+
+      # If we failed to set up the cache, set it up now.
+      - name: Run semver-checks
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          cd semver
+          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/core/Cargo.toml" --verbose
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Check with older rustdoc version cached
+        run: |
+          # Use a separate workspace, to avoid contaminating the cache for Swatinem/rust-cache@v2
+          cp -R subject subject-new
+
+          # Show what's in the cache.
+          ls subject-new/target/semver-checks/cache/
+
+          # Ensure the previous cached rustdoc file still exists.
+          [ -f "subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json" ] || { \
+            echo "could not find libp2p-core cache file"; \
+            exit 1;
+          }
+
+          export OLD_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
+
+          # Run cargo-semver-checks with the older cached file.
+          # In a prior step, we installed stable Rust, so we'll set that as the default
+          # for cargo-semver-checks to invoke here.
+          rustup override set stable
+          bins/cargo-semver-checks semver-checks check-release --manifest-path="subject-new/core/Cargo.toml" --verbose
+
+          export NEW_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
+
+          # Ensure the cached rustdoc versions were indeed different before and after.
+          set -x
+          [ "$OLD_RUSTDOC_VERSION" != "$NEW_RUSTDOC_VERSION" ] || exit 1
+
   run-on-rust-libp2p:
     # Run cargo-semver-checks on a crate with no semver violations,
     # to make sure there are no false-positives.
@@ -277,7 +356,7 @@ jobs:
     # cargo-semver-checks previously reported a false-positive here,
     # since an enum variant in the crate was included by a feature:
     # https://github.com/obi1kenobi/cargo-semver-check/issues/147
-    name: 'Semver: rust-libp2p 0.47.0'
+    name: 'Semver: libp2p-core 0.37.0'
     runs-on: ubuntu-latest
     needs:
       - build-binary
@@ -297,11 +376,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -315,22 +391,18 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            subject/target/semver-checks/local-libp2p_core-0_47_0
+            subject/target/semver-checks/local-libp2p_core-0_37_0
 
       - name: Run semver-checks
         run: |
@@ -349,7 +421,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-libp2p-dcutr-relay:
@@ -380,11 +452,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -398,15 +467,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -430,7 +495,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-libp2p-gossipsub-request-response:
@@ -458,11 +523,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -476,15 +538,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -508,7 +566,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-libp2p-uds:
@@ -534,11 +592,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -552,15 +607,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -578,7 +629,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-core-graphics:
@@ -606,11 +657,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       # This job runs on macOS, not Linux like the rest.
       # It should save its cache, because no other job will save it in its place.
@@ -621,15 +669,11 @@ jobs:
             semver
             subject/target/semver-checks/local-core_graphics-0_22_3
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Run semver-checks
@@ -641,7 +685,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-bevy-core:
@@ -668,11 +712,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Restore binary
         id: cache-binary
@@ -682,15 +723,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -708,7 +745,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-bevy-gltf:
@@ -735,11 +772,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Restore binary
         id: cache-binary
@@ -749,15 +783,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -775,7 +805,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-sqllogictest:
@@ -801,11 +831,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Restore binary
         id: cache-binary
@@ -815,15 +842,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -846,7 +869,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-tokio-explicit:
@@ -872,11 +895,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
@@ -896,15 +916,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       # This test caught two bugs:
@@ -928,7 +944,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-tokio-implicit:
@@ -954,11 +970,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
@@ -978,15 +991,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       # This test caught a bug where `publish = false` items in a workspace were semver-checked
@@ -1000,7 +1009,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-clap:
@@ -1035,11 +1044,8 @@ jobs:
           path: 'subject-baseline'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Restore binary
         id: cache-binary
@@ -1049,15 +1055,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject-current/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1124,7 +1126,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject-current/target/semver-checks/cache
 
   run-on-ref-slice-fork:
@@ -1157,11 +1159,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Restore binary
         id: cache-binary
@@ -1171,15 +1170,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - shell: bash
-        run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1228,7 +1223,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-ref-slice-fork-windows:
@@ -1256,11 +1251,8 @@ jobs:
           path: 'subject'
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Restore binary
         id: cache-binary
@@ -1270,14 +1262,11 @@ jobs:
           key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           fail-on-cache-miss: true
 
-      - run: |
-          rustc --version | tee .rustc-version
-
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject\target\semver-checks\cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1325,7 +1314,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ hashFiles('.rustc-version', 'semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject\target\semver-checks\cache
 
   init-release:
@@ -1354,11 +1343,8 @@ jobs:
           persist-credentials: false
 
       - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        id: toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
 

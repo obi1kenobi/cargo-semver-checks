@@ -5,7 +5,7 @@ use clap::crate_version;
 use itertools::Itertools;
 use termcolor::Color;
 use termcolor_output::{colored, colored_ln};
-use trustfall_core::ir::{FieldValue, TransparentValue};
+use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
 use crate::{
