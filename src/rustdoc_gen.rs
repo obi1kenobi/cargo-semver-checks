@@ -95,7 +95,26 @@ impl<'a> CrateSource<'a> {
         // from regular features: https://github.com/obi1kenobi/cargo-semver-checks/issues/265
         let mut all_crate_features = self.implicit_features();
         all_crate_features.extend(self.regular_features());
-        all_crate_features.into_iter().collect()
+        //all_crate_features.into_iter().collect()
+        /*
+        all_crate_features
+            .into_iter()
+            .filter(|s| {
+                !vec![
+                    "unstable",
+                    "nightly",
+                    "bench",
+                    "no_std",
+                    "rustc-dep-of-std",
+                    "std",
+                ]
+                .into_iter()
+                .map(|x| x.to_string())
+                .contains(s)
+            })
+            .collect()
+            */
+        vec![]
     }
 }
 
