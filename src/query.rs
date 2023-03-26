@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
-use trustfall::TransparentValue;
+use trustfall_core::ir::TransparentValue;
 
 use crate::ReleaseType;
 

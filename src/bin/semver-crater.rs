@@ -191,18 +191,20 @@ fn main() -> anyhow::Result<()> {
 
     match args.crates.is_empty() {
         true => {
-            let mut query = crates_io_api::CratesQuery::builder()
-                .page_size(100)
-                .sort(crates_io_api::Sort::Downloads)
-                .build();
-            query.set_page(1);
-            for crate_info in client.crates(query)?.crates.into_iter() {
-                check_crate(
-                    client.get_crate(&crate_info.name)?.versions,
-                    &crate_info.name,
-                    &mut csv_writer,
-                );
-                csv_writer.flush()?;
+            for page in 1..101 {
+                let mut query = crates_io_api::CratesQuery::builder()
+                    .page_size(100)
+                    .sort(crates_io_api::Sort::Downloads)
+                    .build();
+                query.set_page(page);
+                for crate_info in client.crates(query)?.crates.into_iter() {
+                    check_crate(
+                        client.get_crate(&crate_info.name)?.versions,
+                        &crate_info.name,
+                        &mut csv_writer,
+                    );
+                    csv_writer.flush()?;
+                }
             }
         }
         false => {
