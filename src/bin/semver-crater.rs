@@ -92,6 +92,7 @@ fn run_on_releases(
     buf_stdout.read_to_string(&mut output_stdout).unwrap();
     buf_stderr.read_to_string(&mut output_stderr).unwrap();
     Ok((report.success(), output_stderr + &output_stdout))
+    // Ok((report.success(), "".to_string()))
 }
 
 fn run_and_save<W: std::io::Write>(
@@ -114,10 +115,12 @@ fn check_crate(
     name: &str,
     csv_writer: &mut csv::Writer<std::fs::File>,
 ) {
-    // Considering only non-yanked non-prereleased versions.
+    // Considering only non-yanked non-prereleased versions
+    // that have been released since 2015.
     let versions: Vec<semver::Version> = versions
         .into_iter()
         .filter(|v| !v.yanked)
+        .filter(|v| v.created_at >= chrono::DateTime::parse_from_rfc3339("2017-01-01T00:00:00+00:00").unwrap())
         .map(|v| semver::Version::parse(&v.num).expect("couldn't parse a version"))
         .filter(|v| v.pre.is_empty())
         .collect();
@@ -177,6 +180,26 @@ fn check_crate(
     }
 }
 
+fn get_crates(client: &crates_io_api::SyncClient, query: crates_io_api::CratesQuery) -> Vec<crates_io_api::Crate> {
+    match client.crates(query.clone()) {
+        Ok(page) => page.crates,
+        _ => {
+            println!("failed to get crates, probably because of network issues");
+            get_crates(client, query)
+        },
+    }
+}
+
+fn get_versions(client: &crates_io_api::SyncClient, name: &str) -> Vec<crates_io_api::Version> {
+    match client.get_crate(name) {
+        Ok(crate_) => crate_.versions,
+        _ => {
+            println!("failed to get versions, probably because of network issues");
+            get_versions(client, name)
+        },
+    }
+}
+
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     let writer_file = std::fs::File::create("full_report.csv")?;
@@ -193,24 +216,35 @@ fn main() -> anyhow::Result<()> {
         true => {
             for page in 1..101 {
                 let mut query = crates_io_api::CratesQuery::builder()
-                    .page_size(100)
+                    .page_size(50)
                     .sort(crates_io_api::Sort::Downloads)
                     .build();
                 query.set_page(page);
-                for crate_info in client.crates(query)?.crates.into_iter() {
-                    check_crate(
-                        client.get_crate(&crate_info.name)?.versions,
-                        &crate_info.name,
-                        &mut csv_writer,
-                    );
-                    csv_writer.flush()?;
+                if page == 1 {
+                    println!("skip {page}");
+                }
+                else {
+                    for crate_info in get_crates(&client, query).into_iter() {
+                        let name = crate_info.name;
+                        if name == "percent-encoding" || name == "idna" || name == "either" || name == "pin-project-lite" || name == "url" || name == "ppv-lite86" || name == "tokio" || name == "heck" || name == "unicode-width" || name == "slab" || name == "thiserror" || name == "thiserror-impl" || name == "futures" {
+                            println!("skip {name}");
+                        }
+                        else {
+                            check_crate(
+                                get_versions(&client, &name),
+                                &name,
+                                &mut csv_writer,
+                            );
+                            csv_writer.flush()?;
+                        }
+                    }
                 }
             }
         }
         false => {
             for crate_name in args.crates {
                 check_crate(
-                    client.get_crate(&crate_name)?.versions,
+                    get_versions(&client, &crate_name),
                     &crate_name,
                     &mut csv_writer,
                 );

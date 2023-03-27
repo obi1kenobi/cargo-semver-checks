@@ -147,6 +147,7 @@ fn create_placeholder_rustdoc_manifest(
                     // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
                     version: Some(format!("={}", crate_.version())),
                     features: crate_source.all_features(),
+                    default_features: true,
                     ..DependencyDetail::default()
                 },
                 CrateSource::ManifestPath { manifest } => DependencyDetail {
@@ -163,6 +164,7 @@ fn create_placeholder_rustdoc_manifest(
                             .to_string()
                     }),
                     features: crate_source.all_features(),
+                    default_features: true,
                     ..DependencyDetail::default()
                 },
             };

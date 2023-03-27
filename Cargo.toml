@@ -43,6 +43,7 @@ crates_io_api = { version = "0.8.1", optional = true }
 gag = { version = "1.0.0", optional = true }
 csv = { version = "1.2.1", optional = true }
 regex = { version = "1.7.3", optional = true }
+chrono = { version = "0.4.22", optional = true }
 
 [dev-dependencies]
 assert_cmd = "2.0"
@@ -51,7 +52,7 @@ lazy_static = "1.4.0"
 [features]
 default = ["vendored-openssl"]
 vendored-openssl = ["crates-index/vendored-openssl"]
-semver-crater = ["dep:crates_io_api", "dep:gag", "dep:csv", "dep:regex"]
+semver-crater = ["dep:crates_io_api", "dep:gag", "dep:csv", "dep:regex", "dep:chrono"]
 
 [[bin]]
 name = "semver-crater"
