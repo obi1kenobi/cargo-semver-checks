@@ -21,6 +21,15 @@ impl RequiredSemverUpdate {
     }
 }
 
+impl From<RequiredSemverUpdate> for ReleaseType {
+    fn from(value: RequiredSemverUpdate) -> Self {
+        match value {
+            RequiredSemverUpdate::Major => Self::Major,
+            RequiredSemverUpdate::Minor => Self::Minor,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum ActualSemverUpdate {
     Major,

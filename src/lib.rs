@@ -424,21 +424,25 @@ impl Check {
 #[non_exhaustive]
 #[derive(Debug)]
 pub struct CrateReport {
-    required_bump: Option<RequiredSemverUpdate>,
+    /// Minimum bump required to respect semver.
+    required_bump: ReleaseType,
 }
 
 impl CrateReport {
+    /// Construct a new `CrateReport` with a successful outcome.
     pub(crate) fn new_successful() -> Self {
         Self {
-            required_bump: None,
+            required_bump: ReleaseType::Patch,
         }
     }
 
+    /// `true` if the crate doesn't violate any semver rule.
     pub fn success(&self) -> bool {
-        self.required_bump.is_none()
+        self.required_bump != ReleaseType::Patch
     }
 
-    pub fn required_bump(&self) -> Option<RequiredSemverUpdate> {
+    /// Minimum bump required to respect semver.
+    pub fn required_bump(&self) -> ReleaseType {
         self.required_bump
     }
 }

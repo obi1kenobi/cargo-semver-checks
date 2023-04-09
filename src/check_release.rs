@@ -372,7 +372,7 @@ pub(super) fn run_check_release(
             .expect("print failed");
 
         Ok(CrateReport {
-            required_bump: Some(required_bump),
+            required_bump: required_bump.into(),
         })
     } else {
         config
