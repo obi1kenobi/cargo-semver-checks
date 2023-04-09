@@ -326,14 +326,14 @@ impl Check {
             | RustdocSource::Revision(_, _)
             | RustdocSource::VersionFromRegistry(_) => {
                 let names = match &self.scope.mode {
-                        ScopeMode::DenyList(_) =>
-                            match &self.current.source {
-                                RustdocSource::Rustdoc(_) =>
-                                    vec!["the-name-doesnt-matter-here".to_string()],
-                                _ => panic!("couldn't deduce crate name, specify one through the package allow list")
-                            }
-                        ScopeMode::AllowList(lst) => lst.clone(),
-                    };
+                    ScopeMode::DenyList(_) =>
+                        match &self.current.source {
+                            RustdocSource::Rustdoc(_) =>
+                                vec!["the-name-doesnt-matter-here".to_string()],
+                            _ => panic!("couldn't deduce crate name, specify one through the package allow list")
+                        }
+                    ScopeMode::AllowList(lst) => lst.clone(),
+                };
                 names
                     .into_iter()
                     .map(|name| {
