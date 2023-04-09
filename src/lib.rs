@@ -438,7 +438,7 @@ impl CrateReport {
 
     /// `true` if the crate doesn't violate any semver rule.
     pub fn success(&self) -> bool {
-        self.required_bump != ReleaseType::Patch
+        self.required_bump == ReleaseType::Patch
     }
 
     /// Minimum bump required to respect semver.
