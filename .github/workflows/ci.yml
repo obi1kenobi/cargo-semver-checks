@@ -1181,7 +1181,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            subject/target/semver-checks/local-ref_slice-1_2_2/
+            subject/target/semver-checks/local-ref_slice-1_2_1/
 
       - name: Run semver-checks
         continue-on-error: true
@@ -1199,7 +1199,7 @@ jobs:
       - name: Baseline is correct
         run: |
           cd semver
-          EXPECTED="$(echo -e "    Checking ref_slice v1.2.1 -> v1.2.2 (patch change)")"
+          EXPECTED="$(echo -e "    Checking ref_slice v1.2.1 -> v1.2.1 (no change)")"
           # Strip ANSI escapes for colors and bold text before comparing.
           RESULT="$(cat output | grep ' -> v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g")"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
@@ -1273,7 +1273,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            subject\target\semver-checks\local-ref_slice-1_2_2\
+            subject\target\semver-checks\local-ref_slice-1_2_1\
 
       - name: Run cargo-semver-checks
         continue-on-error: true
@@ -1293,15 +1293,15 @@ jobs:
           cd semver
           $EXPECTED = "    Checking ref_slice v1.2.1 -> v1.2.2 (patch change)"
           # Strip ANSI escapes for colors and bold text before comparing.
-          $RESULT = (cat output | grep 'ref_slice v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g") | Out-String
-          compare $RESULT $EXPECTED
+          cat output | grep ' -> v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g" | Out-File -FilePath check_line
+          grep "$EXPECTED" check_line
 
       - name: Semver break found
         run: |
           cd semver
           $EXPECTED = "--- failure function_missing: pub fn removed or renamed ---"
-          $RESULT = (cat output | grep failure)
-          compare $RESULT $EXPECTED
+          cat output | grep failure | Out-File -FilePath failure_line
+          grep "$EXPECTED" failure_line
           # Ensure the following fragment (not full line!) is in the output file:
           grep '  function ref_slice::ref_slice, previously in file' output
 
