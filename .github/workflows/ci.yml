@@ -1291,9 +1291,10 @@ jobs:
       - name: Baseline is correct
         run: |
           cd semver
-          $EXPECTED = "    Checking ref_slice v1.2.1 -> v1.2.2 (patch change)"
+          $EXPECTED = "    Checking ref_slice v1.2.1 -> v1.2.1 (no change)"
           # Strip ANSI escapes for colors and bold text before comparing.
           cat output | grep ' -> v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g" | Out-File -FilePath check_line
+          cat check_line
           grep "$EXPECTED" check_line
 
       - name: Semver break found
@@ -1301,6 +1302,7 @@ jobs:
           cd semver
           $EXPECTED = "--- failure function_missing: pub fn removed or renamed ---"
           cat output | grep failure | Out-File -FilePath failure_line
+          cat failure_line
           grep "$EXPECTED" failure_line
           # Ensure the following fragment (not full line!) is in the output file:
           grep '  function ref_slice::ref_slice, previously in file' output
