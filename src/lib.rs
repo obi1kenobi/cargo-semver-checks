@@ -442,6 +442,7 @@ impl CrateReport {
     }
 
     /// Minimum bump required to respect semver.
+    /// If semver is not violated, returns [`ReleaseType::Patch`].
     pub fn required_bump(&self) -> ReleaseType {
         self.required_bump
     }
