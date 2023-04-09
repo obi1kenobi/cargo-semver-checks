@@ -20,7 +20,6 @@ use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 use rustdoc_cmd::RustdocCommand;
 use semver::Version;
 use std::collections::{BTreeMap, HashSet};
-use std::fs;
 use std::path::{Path, PathBuf};
 
 pub use config::GlobalConfig;
