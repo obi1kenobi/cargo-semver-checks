@@ -458,6 +458,7 @@ pub struct Report {
 }
 
 impl Report {
+    /// `true` if none of the crates violate semver.
     pub fn success(&self) -> bool {
         self.crate_reports.values().all(|report| report.success())
     }
