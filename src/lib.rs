@@ -35,6 +35,7 @@ pub struct Check {
     baseline: Rustdoc,
     log_level: Option<log::Level>,
     release_type: Option<ReleaseType>,
+    feature_config: rustdoc_gen::FeatureConfig,
 }
 
 /// The kind of release we're making.
@@ -227,6 +228,7 @@ impl Check {
             baseline: Rustdoc::from_registry_latest_crate_version(),
             log_level: Default::default(),
             release_type: None,
+            feature_config: rustdoc_gen::FeatureConfig::new(),
         }
     }
 
@@ -252,6 +254,33 @@ impl Check {
 
     pub fn with_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
         self.release_type = Some(release_type);
+        self
+    }
+
+    pub fn with_default_features(&mut self) -> &mut Self {
+        self.feature_config.default_features = true;
+        self
+    }
+
+    pub fn without_implicit_features(&mut self) -> &mut Self {
+        self.feature_config.no_implicit_features = false;
+        self
+    }
+
+    pub fn with_feature(&mut self, feature: String) -> &mut Self {
+        self.feature_config.feature.push(feature);
+        self
+    }
+
+    pub fn with_features(&mut self, features: Vec<String>) -> &mut Self {
+        for f in features {
+            self.with_feature(f);
+        }
+        self
+    }
+
+    pub fn with_all_features(&mut self) -> &mut Self {
+        self.feature_config.all_features = true;
         self
     }
 
@@ -351,6 +380,7 @@ impl Check {
                             &*baseline_loader,
                             &name,
                             version,
+                            &self.feature_config,
                         )?;
 
                         let report = run_check_release(
@@ -396,6 +426,7 @@ impl Check {
                                 &*baseline_loader,
                                 crate_name,
                                 Some(version),
+                                &self.feature_config,
                             )?;
 
                             Ok((
@@ -513,6 +544,7 @@ fn generate_versioned_crates(
     baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
     crate_name: &str,
     version: Option<&Version>,
+    feature_config: &rustdoc_gen::FeatureConfig,
 ) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
     let current_path = current_loader.load_rustdoc(
         config,
@@ -520,14 +552,21 @@ fn generate_versioned_crates(
         rustdoc_gen::CrateDataForRustdoc {
             name: crate_name,
             crate_type: rustdoc_gen::CrateType::Current,
+            feature_config: feature_config,
         },
     )?;
     let current_crate = load_rustdoc(&current_path)?;
 
     let current_rustdoc_version = current_crate.version();
 
-    let baseline_path =
-        get_baseline_rustdoc_path(config, rustdoc_cmd, baseline_loader, crate_name, version)?;
+    let baseline_path = get_baseline_rustdoc_path(
+        config,
+        rustdoc_cmd,
+        baseline_loader,
+        crate_name,
+        version,
+        feature_config,
+    )?;
     let baseline_crate = {
         let mut baseline_crate = load_rustdoc(&baseline_path)?;
 
@@ -550,6 +589,7 @@ fn generate_versioned_crates(
                 baseline_loader,
                 crate_name,
                 version,
+                feature_config,
             )?;
             baseline_crate = load_rustdoc(&baseline_path)?;
 
@@ -573,6 +613,7 @@ fn get_baseline_rustdoc_path(
     baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
     crate_name: &str,
     version: Option<&Version>,
+    feature_config: &rustdoc_gen::FeatureConfig,
 ) -> anyhow::Result<PathBuf> {
     let baseline_path = baseline_loader.load_rustdoc(
         config,
@@ -582,6 +623,7 @@ fn get_baseline_rustdoc_path(
             crate_type: rustdoc_gen::CrateType::Baseline {
                 highest_allowed_version: version,
             },
+            feature_config,
         },
     )?;
     Ok(baseline_path)

@@ -110,6 +110,10 @@ impl<'a> CrateSource<'a> {
         all_crate_features.extend(self.regular_features());
         all_crate_features.into_iter().collect()
     }
+
+    pub(crate) fn feature_list_from_config(&self, _feature_config: &FeatureConfig) -> Vec<String> {
+        self.all_features()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -124,10 +128,29 @@ pub(crate) enum CrateType<'a> {
 }
 
 #[derive(Debug, Clone)]
+pub(crate) struct FeatureConfig {
+    pub(crate) default_features: bool,
+    pub(crate) no_implicit_features: bool,
+    pub(crate) feature: Vec<String>,
+    pub(crate) all_features: bool,
+}
+
+impl FeatureConfig {
+    pub fn new() -> Self {
+        Self {
+            default_features: false,
+            no_implicit_features: false,
+            feature: Vec::new(),
+            all_features: false,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) crate_type: CrateType<'a>,
     pub(crate) name: &'a str,
-    // TODO: pass an enum describing which features to enable
+    pub(crate) feature_config: &'a FeatureConfig,
 }
 
 impl<'a> CrateType<'a> {

@@ -11,6 +11,7 @@ fn main() -> anyhow::Result<()> {
     human_panic::setup_panic!();
 
     let Cargo::SemverChecks(args) = Cargo::parse();
+    dbg!(&args);
     if args.bugreport {
         use bugreport::{bugreport, collector::*, format::Markdown};
         bugreport!()
@@ -191,6 +192,26 @@ struct CheckRelease {
         group = "overrides"
     )]
     release_type: Option<ReleaseType>,
+
+    /// Use only the default features.
+    #[arg(
+        long,
+        help_heading = "Features",
+        conflicts_with_all = ["no_implicit_features", "all_features"],
+    )]
+    default_features: bool,
+
+    /// Use no features except of the explicitly mentioned ones.
+    #[arg(long, help_heading = "Features")]
+    no_implicit_features: bool,
+
+    /// Use the named feature.
+    #[arg(long, value_name = "NAME", help_heading = "Features")]
+    feature: Vec<String>,
+
+    /// Use all the features.
+    #[arg(long, help_heading = "Features", conflicts_with = "feature")]
+    all_features: bool,
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
