@@ -262,8 +262,8 @@ impl Check {
         self
     }
 
-    pub fn without_implicit_features(&mut self) -> &mut Self {
-        self.feature_config.no_implicit_features = false;
+    pub fn with_only_explicit_features(&mut self) -> &mut Self {
+        self.feature_config.only_explicit_features = true;
         self
     }
 

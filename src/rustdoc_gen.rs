@@ -111,8 +111,24 @@ impl<'a> CrateSource<'a> {
         all_crate_features.into_iter().collect()
     }
 
-    pub(crate) fn feature_list_from_config(&self, _feature_config: &FeatureConfig) -> Vec<String> {
-        self.all_features()
+    fn features_not_on_blacklist(&self) -> Vec<String> {
+        todo!()
+    }
+
+    pub(crate) fn feature_list_from_config(&self, feature_config: &FeatureConfig) -> Vec<String> {
+        if feature_config.default_features {
+            self.implicit_features().into_iter().collect()
+        } else if feature_config.all_features {
+            self.all_features()
+        } else {
+            let mut result = if feature_config.only_explicit_features {
+                Vec::new()
+            } else {
+                self.features_not_on_blacklist()
+            };
+            result.append(&mut feature_config.feature.clone());
+            result
+        }
     }
 }
 
@@ -130,7 +146,7 @@ pub(crate) enum CrateType<'a> {
 #[derive(Debug, Clone)]
 pub(crate) struct FeatureConfig {
     pub(crate) default_features: bool,
-    pub(crate) no_implicit_features: bool,
+    pub(crate) only_explicit_features: bool,
     pub(crate) feature: Vec<String>,
     pub(crate) all_features: bool,
 }
@@ -139,7 +155,7 @@ impl FeatureConfig {
     pub fn new() -> Self {
         Self {
             default_features: false,
-            no_implicit_features: false,
+            only_explicit_features: false,
             feature: Vec::new(),
             all_features: false,
         }

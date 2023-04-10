@@ -197,20 +197,24 @@ struct CheckRelease {
     #[arg(
         long,
         help_heading = "Features",
-        conflicts_with_all = ["no_implicit_features", "all_features"],
+        conflicts_with_all = ["feature", "only_explicit_features"]
     )]
     default_features: bool,
 
     /// Use no features except of the explicitly mentioned ones.
     #[arg(long, help_heading = "Features")]
-    no_implicit_features: bool,
+    only_explicit_features: bool,
 
     /// Use the named feature.
     #[arg(long, value_name = "NAME", help_heading = "Features")]
     feature: Vec<String>,
 
     /// Use all the features.
-    #[arg(long, help_heading = "Features", conflicts_with = "feature")]
+    #[arg(
+        long,
+        help_heading = "Features",
+        conflicts_with_all = ["default_features", "no_implicit_features", "feature"]
+    )]
     all_features: bool,
 
     #[command(flatten)]
@@ -280,6 +284,18 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         }
         if let Some(release_type) = value.release_type {
             check.with_release_type(release_type);
+        }
+        if value.default_features {
+            check.with_default_features();
+        }
+        if value.only_explicit_features {
+            check.with_only_explicit_features();
+        }
+        for feature in value.feature {
+            check.with_feature(feature);
+        }
+        if value.all_features {
+            check.with_all_features();
         }
 
         check
