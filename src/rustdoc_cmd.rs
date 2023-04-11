@@ -48,14 +48,12 @@ impl RustdocCommand {
             .manifest_path(manifest_path)
             .no_deps()
             .exec()?;
-        let manifest_target_directory = metadata
-            .target_directory
-            .as_path()
-            .as_std_path()
-            // HACK: Avoid potential errors when mixing toolchains
-            .join(crate::util::SCOPE)
-            .join("target");
-        let target_dir = manifest_target_directory.as_path();
+        let target_dir = metadata
+            .workspace_root
+            .ancestors()
+            .nth(2)
+            .unwrap()
+            .as_std_path();
 
         let stderr = if self.silence {
             std::process::Stdio::piped()
