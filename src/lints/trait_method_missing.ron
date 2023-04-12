@@ -1,0 +1,58 @@
+SemverQuery(
+    id: "trait_method_missing",
+    human_readable_name: "pub trait method removed or renamed",
+    description: "A trait method is no longer visible, or can no longer be accessed by its prior path.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#major-any-change-to-trait-item-signatures"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output
+
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        method {
+                            method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
+                            method_name: name @output @tag
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A publicly-visible trait method is no longer visible, or cannot be called by its prior path. A member, method, or item of the trait may have been renamed or removed entirely.",
+    per_result_error_template: Some("trait {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+)
