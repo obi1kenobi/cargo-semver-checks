@@ -17,8 +17,12 @@ SemverQuery(
                             path @output @tag
                         }
 
+                        span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+
                         method {
-                            method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                             method_name: name @output @tag
 
                             span_: span @optional {
@@ -38,11 +42,8 @@ SemverQuery(
                             path @filter(op: "=", value: ["%path"])
                         }
 
-                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            method {
-                                visibility_limit @filter(op: "=", value: ["$public"])
-                                name @filter(op: "=", value: ["%method_name"])
-                            }
+                        method @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%method_name"])
                         }
                     }
                 }
