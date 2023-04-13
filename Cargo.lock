@@ -1615,9 +1615,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall"
-version = "0.3.4"
+version = "0.4.0-beta.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d08b46bc8870b30f46d288a48cce399f30d08a39b36ab50489eacb851bb81c85"
+checksum = "6d327f64a9d7d5cbbffe6c147503c16dbee69a1f51ef9b36aa8503af50f7c512"
 dependencies = [
  "anyhow",
  "trustfall_core",
@@ -1626,9 +1626,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "21.6.0"
+version = "21.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd634746bf455c086acef8cdc7cd65264d22bc4bd3d3f78821c48aa797e6c61c"
+checksum = "5138eb135225ff393f809e3da3daa9ef3feec1e93ce5cbae541c13c76da17696"
 dependencies = [
  "rustdoc-types 0.17.0",
  "trustfall",
@@ -1636,9 +1636,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "22.6.0"
+version = "22.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6ddf10fe590c38e8c6d839738ef5f1b14c62b9953a93894cb049ef444639e44"
+checksum = "400162bc9ec62e5378b48cbe9a3c3b6e65fe00ae9253d5d86bf0a9717a8bde70"
 dependencies = [
  "rustdoc-types 0.18.0",
  "trustfall",
@@ -1646,9 +1646,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "23.3.0"
+version = "23.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72f3805f2ae0a845f1ea22f679940bd8f01d61d787eed28a6a3fb938c0590307"
+checksum = "b01353fb1f95d7e3c5648f6bc513a511a3892a7c030db7daa916c2280da6c733"
 dependencies = [
  "rustdoc-types 0.19.0",
  "trustfall",
@@ -1656,9 +1656,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "24.2.0"
+version = "24.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9f8cf64cd925bfc7aa00cb650d83ece2a8569a74d93c4d2a6d7b71d8e6ce4dc"
+checksum = "08fdb7ea6cf3937667985e5f69629aa109e6887424ecd2c51c2d92040283859b"
 dependencies = [
  "rustdoc-types 0.20.0",
  "trustfall",
@@ -1666,9 +1666,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall_core"
-version = "0.3.3"
+version = "0.4.0-beta.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7af71d1100b656a92610b4286ed59d06a1ec175f0933cbe208929456fb7854cb"
+checksum = "7a24fb8dfedc8c838389949a8657db5746b6a3a5d20b211cfa0320fe7e86b4d0"
 dependencies = [
  "async-graphql-parser",
  "async-graphql-value",
@@ -1696,18 +1696,18 @@ dependencies = [
 
 [[package]]
 name = "trustfall_rustdoc"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d3e12e817902acab5e6f4f252e1a0b9fca5fbbefb1c2217ce41e1b75d2686e6"
+checksum = "7623867d7201caab1caf6a144f4a88d836e93a6a40f3b63fc823355cfc42360d"
 dependencies = [
  "anyhow",
  "serde",
  "serde_json",
  "trustfall",
- "trustfall-rustdoc-adapter 21.6.0",
- "trustfall-rustdoc-adapter 22.6.0",
- "trustfall-rustdoc-adapter 23.3.0",
- "trustfall-rustdoc-adapter 24.2.0",
+ "trustfall-rustdoc-adapter 21.6.1",
+ "trustfall-rustdoc-adapter 22.6.1",
+ "trustfall-rustdoc-adapter 23.3.1",
+ "trustfall-rustdoc-adapter 24.2.1",
 ]
 
 [[package]]
