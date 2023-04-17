@@ -1135,8 +1135,8 @@ jobs:
     # This broke when a PR accidentally changed the default baseline behavior.
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/382
     #
-    # To perform this test, we forked a stable crate and made a semver-major change in
-    # an unreleased patch version (v1.2.2). In this test, we make sure that:
+    # To perform this test, we forked a stable crate and made a semver-major break
+    # with no version change (v1.2.1). In this test, we make sure that:
     # - v1.2.1 is chosen as the baseline, as the largest crates.io version,
     # - cargo-semver-checks detects the semver break we've manufactured.
     name: 'Semver: ref-slice fork'
@@ -1155,7 +1155,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
-          ref: 'major_change'
+          ref: '4d64380252c8fbda023cca58406fa40a27ad1177'  # branch major_change
           path: 'subject'
 
       - name: Install rust
@@ -1247,7 +1247,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
-          ref: 'major_change'
+          ref: '4d64380252c8fbda023cca58406fa40a27ad1177'  # branch major_change
           path: 'subject'
 
       - name: Install rust
