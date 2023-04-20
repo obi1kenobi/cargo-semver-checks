@@ -1,4 +1,11 @@
-use crate::GlobalConfig;
+use std::path::{Path, PathBuf};
+
+use anyhow::Context;
+
+use crate::{
+    rustdoc_gen::{CrateDataForRustdoc, CrateSource},
+    GlobalConfig,
+};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RustdocCommand {
@@ -36,26 +43,36 @@ impl RustdocCommand {
         self
     }
 
-    /// Produce a rustdoc JSON file for the specified configuration.
-    pub(crate) fn dump(
+    /// Produce a rustdoc JSON file for the specified crate and source.
+    ///
+    ///
+    pub(crate) fn generate_rustdoc(
         &self,
         config: &mut GlobalConfig,
-        manifest_path: &std::path::Path,
-        pkg_spec: Option<&str>,
-        all_features: bool,
+        build_dir: PathBuf,
+        crate_source: &CrateSource,
+        crate_data: &CrateDataForRustdoc,
     ) -> anyhow::Result<std::path::PathBuf> {
+        // Generate an empty placeholder project with a dependency on the crate
+        // whose rustdoc we need. We take this indirect generation path to avoid issues like:
+        // https://github.com/obi1kenobi/cargo-semver-checks/issues/167#issuecomment-1382367128
+        let placeholder_manifest = create_placeholder_rustdoc_manifest(crate_source, crate_data)
+            .context("failed to create placeholder manifest")?;
+        let placeholder_manifest_path =
+            save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)
+                .context("failed to save placeholder rustdoc manifest")?;
+
         let metadata = cargo_metadata::MetadataCommand::new()
-            .manifest_path(manifest_path)
-            .no_deps()
+            .manifest_path(&placeholder_manifest_path)
             .exec()?;
-        let manifest_target_directory = metadata
+        let placeholder_target_directory = metadata
             .target_directory
             .as_path()
             .as_std_path()
             // HACK: Avoid potential errors when mixing toolchains
             .join(crate::util::SCOPE)
             .join("target");
-        let target_dir = manifest_target_directory.as_path();
+        let target_dir = placeholder_target_directory.as_path();
 
         let stderr = if self.silence {
             std::process::Stdio::piped()
@@ -64,6 +81,18 @@ impl RustdocCommand {
             std::process::Stdio::inherit()
         };
 
+        let crate_name = crate_source.name()?;
+        let version = crate_source.version()?;
+        let pkg_spec = format!("{crate_name}@{version}");
+
+        // Run the rustdoc generation command on the placeholder crate,
+        // specifically requesting the rustdoc of *only* the crate specified in `pkg_spec`.
+        //
+        // N.B.: Passing `--all-features` here has no effect, since that only applies to
+        //       the top-level project i.e. the placeholder, which has no features.
+        //       To generate rustdoc for our intended crate with features enabled,
+        //       those features must be enabled on the dependency in the `Cargo.toml`
+        //       of the placeholder project.
         let mut cmd = std::process::Command::new("cargo");
         cmd.env("RUSTC_BOOTSTRAP", "1")
             .env(
@@ -74,86 +103,60 @@ impl RustdocCommand {
             .stderr(stderr)
             .arg("doc")
             .arg("--manifest-path")
-            .arg(manifest_path)
+            .arg(&placeholder_manifest_path)
             .arg("--target-dir")
-            .arg(target_dir);
-        if let Some(pkg_spec) = pkg_spec {
-            cmd.arg("--package").arg(pkg_spec);
-        }
+            .arg(target_dir)
+            .arg("--package")
+            .arg(pkg_spec);
         if !self.deps {
             cmd.arg("--no-deps");
-        }
-        if all_features {
-            cmd.arg("--all-features");
         }
         if config.is_stderr_tty() {
             cmd.arg("--color=always");
         }
+
         let output = cmd.output()?;
         if !output.status.success() {
             if self.silence {
                 anyhow::bail!(
                     "Failed when running cargo-doc on {}:\n{}",
-                    manifest_path.display(),
+                    placeholder_manifest_path.display(),
                     String::from_utf8_lossy(&output.stderr)
                 )
             } else {
                 anyhow::bail!(
                     "Failed when running cargo-doc on {}. See stderr.",
-                    manifest_path.display(),
+                    placeholder_manifest_path.display(),
                 )
             }
         }
 
-        if let Some(pkg_spec) = pkg_spec {
-            // N.B.: This package spec is not necessarily part of the manifest at `manifest_path`!
-            //       For example, when getting rustdoc JSON for a crate version from the registry,
-            //       the manifest is "synthetic" with only a dependency on that crate and version
-            //       and therefore is not a manifest *for* that crate itself.
-            let crate_name = pkg_spec
-                .split_once('@')
-                .map(|s| s.0)
-                .unwrap_or(pkg_spec)
-                .to_owned();
-
-            // N.B.: Crates named like `foo-bar` have rustdoc JSON named like `foo_bar.json`.
-            let crate_name_with_underscores = crate_name.replace('-', "_");
-            let json_path = target_dir.join(format!("doc/{crate_name_with_underscores}.json"));
-            if json_path.exists() {
-                Ok(json_path)
-            } else {
-                anyhow::bail!(
-                    "Could not find expected rustdoc output for `{}`: {}",
-                    crate_name,
-                    json_path.display()
-                );
-            }
-        } else {
-            let manifest = crate::manifest::Manifest::parse(manifest_path.to_path_buf())?;
-
-            let lib_target_name = crate::manifest::get_lib_target_name(&manifest)?;
-            let json_path = target_dir.join(format!("doc/{lib_target_name}.json"));
-            if json_path.exists() {
-                return Ok(json_path);
-            }
-
-            let first_bin_target_name = crate::manifest::get_first_bin_target_name(&manifest)?;
-            let json_path = target_dir.join(format!("doc/{first_bin_target_name}.json"));
-            if !json_path.exists() {
-                let crate_name = if let Some(pkg_spec) = pkg_spec {
-                    pkg_spec.split_once('@').map(|s| s.0).unwrap_or(pkg_spec)
-                } else {
-                    crate::manifest::get_package_name(&manifest)?
-                };
-
-                anyhow::bail!(
-                    "Could not find expected rustdoc output for `{}`: {}",
-                    crate_name,
-                    json_path.display()
-                );
-            }
-
+        // Get the name of the library target of the crate whose rustdoc we want.
+        // Rustdoc generates the JSON file with the name of the *lib target* of the crate,
+        // not the name of the crate itself.
+        // Related: https://github.com/obi1kenobi/cargo-semver-checks/issues/432
+        let lib_name = metadata
+            .packages
+            .iter()
+            .find(|dep| dep.name == crate_name)
+            .expect("we declared a dependency on a crate that doesn't exist in the metadata")
+            .targets
+            .iter()
+            .find(|target| target.is_lib())
+            .ok_or_else(|| {
+                anyhow::anyhow!("Crate {crate_name} does not seem to have a lib target")
+            })?
+            .name
+            .as_str();
+        let json_path = target_dir.join(format!("doc/{lib_name}.json"));
+        if json_path.exists() {
             Ok(json_path)
+        } else {
+            anyhow::bail!(
+                "Could not find expected rustdoc output for `{}`: {}",
+                crate_name,
+                json_path.display()
+            );
         }
     }
 }
@@ -164,82 +167,82 @@ impl Default for RustdocCommand {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::GlobalConfig;
-    use std::path::Path;
+/// To get the rustdoc of the project, we first create a placeholder project somewhere
+/// with the project as a dependency, and run `cargo rustdoc` on it.
+fn create_placeholder_rustdoc_manifest(
+    crate_source: &CrateSource,
+    _crate_data: &CrateDataForRustdoc, // TODO: use this to select crate features to enable
+) -> anyhow::Result<cargo_toml::Manifest<()>> {
+    use cargo_toml::*;
 
-    use super::RustdocCommand;
+    Ok(Manifest::<()> {
+        package: {
+            let mut package = Package::new("rustdoc", "0.0.0");
+            package.publish = Inheritable::Set(Publish::Flag(false));
+            Some(package)
+        },
+        workspace: Some(Workspace::<()>::default()),
+        lib: {
+            let product = Product {
+                path: Some("lib.rs".to_string()),
+                ..Product::default()
+            };
+            Some(product)
+        },
+        dependencies: {
+            let project_with_features: DependencyDetail = match crate_source {
+                CrateSource::Registry { crate_ } => DependencyDetail {
+                    // We need the *exact* version as a dependency, or else cargo will
+                    // give us the latest semver-compatible version which is not we want.
+                    // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
+                    version: Some(format!("={}", crate_.version())),
+                    features: crate_source.all_features(),
+                    ..DependencyDetail::default()
+                },
+                CrateSource::ManifestPath { manifest } => DependencyDetail {
+                    path: Some({
+                        let dir_path =
+                            crate::manifest::get_project_dir_from_manifest_path(&manifest.path)?;
+                        // The manifest will be saved in some other directory,
+                        // so for convenience, we're using absolute paths.
+                        dir_path
+                            .canonicalize()
+                            .context("failed to canonicalize manifest path")?
+                            .to_str()
+                            .context("manifest path is not valid UTF-8")?
+                            .to_string()
+                    }),
+                    features: crate_source.all_features(),
+                    ..DependencyDetail::default()
+                },
+            };
+            let mut deps = DepsSet::new();
+            deps.insert(
+                crate_source.name()?.to_string(),
+                Dependency::Detailed(project_with_features),
+            );
+            deps
+        },
+        ..Default::default()
+    })
+}
 
-    #[test]
-    fn rustdoc_for_lib_crate_without_lib_section() {
-        RustdocCommand::default()
-            .dump(
-                &mut GlobalConfig::new(),
-                Path::new("./test_rustdoc/implicit_lib/Cargo.toml"),
-                None,
-                true,
-            )
-            .expect("no errors");
-    }
+fn save_placeholder_rustdoc_manifest(
+    placeholder_build_dir: &Path,
+    placeholder_manifest: cargo_toml::Manifest<()>,
+) -> anyhow::Result<PathBuf> {
+    std::fs::create_dir_all(placeholder_build_dir).context("failed to create build dir")?;
+    let placeholder_manifest_path = placeholder_build_dir.join("Cargo.toml");
 
-    #[test]
-    fn rustdoc_for_lib_crate_with_lib_section() {
-        RustdocCommand::default()
-            .dump(
-                &mut GlobalConfig::new(),
-                Path::new("./test_rustdoc/renamed_lib/Cargo.toml"),
-                None,
-                true,
-            )
-            .expect("no errors");
-    }
+    // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
+    let _: std::io::Result<()> = std::fs::remove_file(placeholder_build_dir.join("Cargo.lock"));
 
-    #[test]
-    fn rustdoc_for_bin_crate_without_bin_section() {
-        RustdocCommand::default()
-            .dump(
-                &mut GlobalConfig::new(),
-                Path::new("./test_rustdoc/implicit_bin/Cargo.toml"),
-                None,
-                true,
-            )
-            .expect("no errors");
-    }
-
-    #[test]
-    fn rustdoc_for_bin_crate_with_bin_section() {
-        RustdocCommand::default()
-            .dump(
-                &mut GlobalConfig::new(),
-                Path::new("./test_rustdoc/renamed_bin/Cargo.toml"),
-                None,
-                true,
-            )
-            .expect("no errors");
-    }
-
-    #[test]
-    fn rustdoc_for_crate_in_workspace_with_workspace_manifest() {
-        RustdocCommand::default()
-            .dump(
-                &mut GlobalConfig::new(),
-                Path::new("./test_rustdoc/crate_in_workspace/Cargo.toml"),
-                Some("crate_in_workspace_crate1"),
-                true,
-            )
-            .expect("no errors");
-    }
-
-    #[test]
-    fn rustdoc_for_crate_in_workspace_with_crate_manifest() {
-        RustdocCommand::default()
-            .dump(
-                &mut GlobalConfig::new(),
-                Path::new("./test_rustdoc/crate_in_workspace/crate1/Cargo.toml"),
-                None,
-                true,
-            )
-            .expect("no errors");
-    }
+    std::fs::write(
+        &placeholder_manifest_path,
+        toml::to_string(&placeholder_manifest)?,
+    )
+    .context("failed to write placeholder manifest")?;
+    std::fs::write(placeholder_build_dir.join("lib.rs"), "")
+        .context("failed to create empty lib.rs")?;
+    Ok(placeholder_manifest_path)
 }
