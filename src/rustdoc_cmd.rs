@@ -44,8 +44,6 @@ impl RustdocCommand {
     }
 
     /// Produce a rustdoc JSON file for the specified crate and source.
-    ///
-    ///
     pub(crate) fn generate_rustdoc(
         &self,
         config: &mut GlobalConfig,
@@ -131,9 +129,10 @@ impl RustdocCommand {
             }
         }
 
-        // Get the name of the library target of the crate whose rustdoc we want.
-        // Rustdoc generates the JSON file with the name of the *lib target* of the crate,
-        // not the name of the crate itself.
+        // Figure out the name of the JSON file where rustdoc will produce the output we want.
+        // The name is:
+        // - the name of the *library target* of the crate, not the crate's name
+        // - but with all `-` chars replaced with `_` instead.
         // Related: https://github.com/obi1kenobi/cargo-semver-checks/issues/432
         let lib_name = metadata
             .packages
@@ -148,7 +147,9 @@ impl RustdocCommand {
             })?
             .name
             .as_str();
-        let json_path = target_dir.join(format!("doc/{lib_name}.json"));
+        let rustdoc_json_file_name = lib_name.replace('-', "_");
+
+        let json_path = target_dir.join(format!("doc/{rustdoc_json_file_name}.json"));
         if json_path.exists() {
             Ok(json_path)
         } else {
