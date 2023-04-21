@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "target-specific-dependencies"
+name = "target_specific_dependencies"
 version = "0.1.0"
 edition = "2021"
 
