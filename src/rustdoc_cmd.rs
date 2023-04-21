@@ -129,36 +129,54 @@ impl RustdocCommand {
             }
         }
 
+        let subject_crate = metadata
+            .packages
+            .iter()
+            .find(|dep| dep.name == crate_name)
+            .expect("we declared a dependency on a crate that doesn't exist in the metadata");
+
         // Figure out the name of the JSON file where rustdoc will produce the output we want.
         // The name is:
         // - the name of the *library target* of the crate, not the crate's name
         // - but with all `-` chars replaced with `_` instead.
         // Related: https://github.com/obi1kenobi/cargo-semver-checks/issues/432
-        let lib_name = metadata
-            .packages
-            .iter()
-            .find(|dep| dep.name == crate_name)
-            .expect("we declared a dependency on a crate that doesn't exist in the metadata")
-            .targets
-            .iter()
-            .find(|target| target.is_lib())
-            .ok_or_else(|| {
-                anyhow::anyhow!("Crate {crate_name} does not seem to have a lib target")
-            })?
-            .name
-            .as_str();
-        let rustdoc_json_file_name = lib_name.replace('-', "_");
+        if let Some(lib_target) = subject_crate.targets.iter().find(|target| target.is_lib()) {
+            let lib_name = lib_target.name.as_str();
+            let rustdoc_json_file_name = lib_name.replace('-', "_");
 
-        let json_path = target_dir.join(format!("doc/{rustdoc_json_file_name}.json"));
-        if json_path.exists() {
-            Ok(json_path)
-        } else {
-            anyhow::bail!(
-                "Could not find expected rustdoc output for `{}`: {}",
-                crate_name,
-                json_path.display()
-            );
+            let json_path = target_dir.join(format!("doc/{rustdoc_json_file_name}.json"));
+            if json_path.exists() {
+                return Ok(json_path);
+            } else {
+                anyhow::bail!(
+                    "Could not find expected rustdoc output for `{}`: {}",
+                    crate_name,
+                    json_path.display()
+                );
+            }
         }
+
+        // This crate does not have a lib target.
+        // For backward compatibility with older cargo-semver-checks versions,
+        // we currently preserve the old behavior of using the first bin target's rustdoc.
+        // At some future point, this is likely going to be deprecated and then become an error.
+        if let Some(bin_target) = subject_crate.targets.iter().find(|target| target.is_bin()) {
+            let bin_name = bin_target.name.as_str();
+            let rustdoc_json_file_name = bin_name.replace('-', "_");
+
+            let json_path = target_dir.join(format!("doc/{rustdoc_json_file_name}.json"));
+            if json_path.exists() {
+                return Ok(json_path);
+            } else {
+                anyhow::bail!(
+                    "Could not find expected rustdoc output for `{}`: {}",
+                    crate_name,
+                    json_path.display()
+                );
+            }
+        }
+
+        anyhow::bail!("No lib or bin targets so nothing to scan for crate {crate_name}")
     }
 }
 
