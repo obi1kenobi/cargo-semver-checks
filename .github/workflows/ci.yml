@@ -139,7 +139,7 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        toolchain: ["1.65", "1.66", "1.67", "stable", "beta"]
+        toolchain: ["1.65", "1.66", "1.67", "1.68", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
