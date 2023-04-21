@@ -24,6 +24,16 @@ fn lib_target_with_dashes() {
         .success();
 }
 
+/// Ensure that proc macro crates can be semver-checked correctly.
+#[test]
+fn proc_macro_target() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/proc_macro_crate")
+        .args(["semver-checks", "check-release", "--baseline-root=."])
+        .assert()
+        .success();
+}
+
 /// Ensure that crates whose lib targets have a different name can be semver-checked correctly.
 /// Rustdoc uses the lib target name with dashes replaced with underscores as the JSON file name.
 /// https://github.com/obi1kenobi/cargo-semver-checks/issues/432
