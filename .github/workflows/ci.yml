@@ -1376,7 +1376,9 @@ jobs:
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --verbose --release-type major 2>&1 | tee output
 
       - name: Assumed major changes
-        run: grep 'assume major change' output
+        run: |
+          cd semver
+          grep 'assume major change' output
 
       - name: Cleanup
         run: |
