@@ -85,14 +85,24 @@ fn release_type_flag_major() {
     // It should pass without errors because of `--release-type=major`.
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/enum_missing/new")
-        .args(["semver-checks", "check-release", "--baseline-root=../old", "--release-type=major"])
+        .args([
+            "semver-checks",
+            "check-release",
+            "--baseline-root=../old",
+            "--release-type=major",
+        ])
         .assert()
         .success();
 
     // Running the same command with `--release-type=minor` or without that flag fails both times.
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/enum_missing/new")
-        .args(["semver-checks", "check-release", "--baseline-root=../old", "--release-type=minor"])
+        .args([
+            "semver-checks",
+            "check-release",
+            "--baseline-root=../old",
+            "--release-type=minor",
+        ])
         .assert()
         .failure();
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
@@ -111,14 +121,24 @@ fn release_type_flag_minor() {
     // It should pass without errors because of `--release-type=minor`.
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/type_marked_deprecated/new")
-        .args(["semver-checks", "check-release", "--baseline-root=../old", "--release-type=minor"])
+        .args([
+            "semver-checks",
+            "check-release",
+            "--baseline-root=../old",
+            "--release-type=minor",
+        ])
         .assert()
         .success();
 
     // Running the same command with `--release-type=patch` or without that flag fails both times.
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/type_marked_deprecated/new")
-        .args(["semver-checks", "check-release", "--baseline-root=../old", "--release-type=patch"])
+        .args([
+            "semver-checks",
+            "check-release",
+            "--baseline-root=../old",
+            "--release-type=patch",
+        ])
         .assert()
         .failure();
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
