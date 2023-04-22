@@ -75,3 +75,55 @@ fn crate_in_workspace() {
         .assert()
         .success();
 }
+
+/// This test ensures that the `--release-type` flag works correctly,
+/// overriding autodetected version changes between the rustdoc JSON files.
+/// https://github.com/obi1kenobi/cargo-semver-checks/issues/438
+#[test]
+fn release_type_flag_major() {
+    // This run checks a crate with a major breaking change that doesn't bump the version.
+    // It should pass without errors because of `--release-type=major`.
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/enum_missing/new")
+        .args(["semver-checks", "check-release", "--baseline-root=../old", "--release-type=major"])
+        .assert()
+        .success();
+
+    // Running the same command with `--release-type=minor` or without that flag fails both times.
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/enum_missing/new")
+        .args(["semver-checks", "check-release", "--baseline-root=../old", "--release-type=minor"])
+        .assert()
+        .failure();
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/enum_missing/new")
+        .args(["semver-checks", "check-release", "--baseline-root=../old"])
+        .assert()
+        .failure();
+}
+
+/// This test ensures that the `--release-type` flag works correctly,
+/// overriding autodetected version changes between the rustdoc JSON files.
+/// https://github.com/obi1kenobi/cargo-semver-checks/issues/438
+#[test]
+fn release_type_flag_minor() {
+    // This run checks a crate with deprecations (semver-minor) that doesn't bump the version.
+    // It should pass without errors because of `--release-type=minor`.
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/type_marked_deprecated/new")
+        .args(["semver-checks", "check-release", "--baseline-root=../old", "--release-type=minor"])
+        .assert()
+        .success();
+
+    // Running the same command with `--release-type=patch` or without that flag fails both times.
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/type_marked_deprecated/new")
+        .args(["semver-checks", "check-release", "--baseline-root=../old", "--release-type=patch"])
+        .assert()
+        .failure();
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/type_marked_deprecated/new")
+        .args(["semver-checks", "check-release", "--baseline-root=../old"])
+        .assert()
+        .failure();
+}
