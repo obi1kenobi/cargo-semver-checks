@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use anyhow::Context;
 use crates_index::Crate;
@@ -10,29 +10,42 @@ use crate::util::slugify;
 use crate::GlobalConfig;
 
 #[derive(Debug, Clone)]
-enum CrateSource<'a> {
+pub(crate) enum CrateSource<'a> {
     Registry { crate_: &'a crates_index::Version },
     ManifestPath { manifest: &'a Manifest },
 }
 
 impl<'a> CrateSource<'a> {
-    fn name(&self) -> anyhow::Result<&str> {
+    pub(crate) fn name(&self) -> anyhow::Result<&str> {
         Ok(match self {
             Self::Registry { crate_ } => crate_.name(),
             Self::ManifestPath { manifest } => crate::manifest::get_package_name(manifest)?,
         })
     }
 
-    fn version(&self) -> anyhow::Result<&str> {
+    pub(crate) fn version(&self) -> anyhow::Result<&str> {
         Ok(match self {
             Self::Registry { crate_ } => crate_.version(),
             Self::ManifestPath { manifest } => crate::manifest::get_package_version(manifest)?,
         })
     }
 
+    /// A path-safe unique identifier that includes the crate's name, version, and source.
+    pub(crate) fn slug(&self) -> anyhow::Result<String> {
+        Ok(format!(
+            "{}-{}-{}",
+            match self {
+                CrateSource::Registry { .. } => "registry",
+                CrateSource::ManifestPath { .. } => "local",
+            },
+            slugify(self.name()?),
+            slugify(self.version()?)
+        ))
+    }
+
     /// Returns features listed in `[features]` section in the manifest
     /// <https://doc.rust-lang.org/cargo/reference/features.html#the-features-section>
-    fn regular_features(&self) -> Vec<String> {
+    pub(crate) fn regular_features(&self) -> Vec<String> {
         match self {
             Self::Registry { crate_ } => crate_.features().keys().cloned().collect(),
             Self::ManifestPath { manifest } => manifest.parsed.features.keys().cloned().collect(),
@@ -41,7 +54,7 @@ impl<'a> CrateSource<'a> {
 
     /// Returns features implicitly defined by optional dependencies
     /// <https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies>
-    fn implicit_features(&self) -> std::collections::BTreeSet<String> {
+    pub(crate) fn implicit_features(&self) -> std::collections::BTreeSet<String> {
         let mut implicit_features: std::collections::BTreeSet<_> = match self {
             Self::Registry { crate_ } => crate_
                 .dependencies()
@@ -90,92 +103,13 @@ impl<'a> CrateSource<'a> {
     /// By default, we want to generate rustdoc with `--all-features`,
     /// but that option isn't available outside of the current crate,
     /// so we have to implement it ourselves.
-    fn all_features(&self) -> Vec<String> {
+    pub(crate) fn all_features(&self) -> Vec<String> {
         // Implicit features from optional dependencies have to be added separately
         // from regular features: https://github.com/obi1kenobi/cargo-semver-checks/issues/265
         let mut all_crate_features = self.implicit_features();
         all_crate_features.extend(self.regular_features());
         all_crate_features.into_iter().collect()
     }
-}
-
-/// To get the rustdoc of the project, we first create a placeholder project somewhere
-/// with the project as a dependency, and run `cargo rustdoc` on it.
-fn create_placeholder_rustdoc_manifest(
-    crate_source: &CrateSource,
-) -> anyhow::Result<cargo_toml::Manifest<()>> {
-    use cargo_toml::*;
-
-    Ok(Manifest::<()> {
-        package: {
-            let mut package = Package::new("rustdoc", "0.0.0");
-            package.publish = Inheritable::Set(Publish::Flag(false));
-            Some(package)
-        },
-        workspace: Some(Workspace::<()>::default()),
-        lib: {
-            let product = Product {
-                path: Some("lib.rs".to_string()),
-                ..Product::default()
-            };
-            Some(product)
-        },
-        dependencies: {
-            let project_with_features: DependencyDetail = match crate_source {
-                CrateSource::Registry { crate_ } => DependencyDetail {
-                    // We need the *exact* version as a dependency, or else cargo will
-                    // give us the latest semver-compatible version which is not we want.
-                    // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
-                    version: Some(format!("={}", crate_.version())),
-                    features: crate_source.all_features(),
-                    ..DependencyDetail::default()
-                },
-                CrateSource::ManifestPath { manifest } => DependencyDetail {
-                    path: Some({
-                        let dir_path =
-                            crate::manifest::get_project_dir_from_manifest_path(&manifest.path)?;
-                        // The manifest will be saved in some other directory,
-                        // so for convenience, we're using absolute paths.
-                        dir_path
-                            .canonicalize()
-                            .context("failed to canonicalize manifest path")?
-                            .to_str()
-                            .context("manifest path is not valid UTF-8")?
-                            .to_string()
-                    }),
-                    features: crate_source.all_features(),
-                    ..DependencyDetail::default()
-                },
-            };
-            let mut deps = DepsSet::new();
-            deps.insert(
-                crate_source.name()?.to_string(),
-                Dependency::Detailed(project_with_features),
-            );
-            deps
-        },
-        ..Default::default()
-    })
-}
-
-fn save_placeholder_rustdoc_manifest(
-    placeholder_build_dir: &Path,
-    placeholder_manifest: cargo_toml::Manifest<()>,
-) -> anyhow::Result<PathBuf> {
-    std::fs::create_dir_all(placeholder_build_dir).context("failed to create build dir")?;
-    let placeholder_manifest_path = placeholder_build_dir.join("Cargo.toml");
-
-    // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
-    let _: std::io::Result<()> = std::fs::remove_file(placeholder_build_dir.join("Cargo.lock"));
-
-    std::fs::write(
-        &placeholder_manifest_path,
-        toml::to_string(&placeholder_manifest)?,
-    )
-    .context("failed to write placeholder manifest")?;
-    std::fs::write(placeholder_build_dir.join("lib.rs"), "")
-        .context("failed to create empty lib.rs")?;
-    Ok(placeholder_manifest_path)
 }
 
 #[derive(Debug, Clone)]
@@ -197,7 +131,7 @@ pub(crate) struct CrateDataForRustdoc<'a> {
 }
 
 impl<'a> CrateType<'a> {
-    fn type_name(&self) -> &'static str {
+    pub(crate) fn type_name(&self) -> &'static str {
         match self {
             CrateType::Current => "current",
             CrateType::Baseline { .. } => "baseline",
@@ -214,20 +148,8 @@ fn generate_rustdoc(
 ) -> anyhow::Result<PathBuf> {
     let name = crate_source.name()?;
     let version = crate_source.version()?;
+    let crate_identifier = crate_source.slug()?;
 
-    let crate_identifier = format!(
-        "{}-{}-{}",
-        match crate_source {
-            CrateSource::Registry { .. } => "registry",
-            // Identifiers of manifest-based crates cannot be used for caching,
-            // since they probably correspond to a specific (and unknown) gitrev and git state
-            // so cached entries cannot be checked to see if they are a match or not.
-            CrateSource::ManifestPath { .. } => "local",
-        },
-        slugify(name),
-        slugify(version)
-    );
-    let build_dir = target_root.join(&crate_identifier);
     let (cache_dir, cached_rustdoc) = match crate_source {
         CrateSource::Registry { .. } => {
             let cache_dir = target_root.join("cache");
@@ -248,26 +170,22 @@ fn generate_rustdoc(
 
             (Some(cache_dir), Some(cached_rustdoc))
         }
-        CrateSource::ManifestPath { .. } => (None, None),
+        CrateSource::ManifestPath { .. } => {
+            // Manifest-based crates cannot be cached since they correspond
+            // to a specific (and unknown) gitrev and git state which is not part of their slug.
+            // There's no way to check whether a cached entry is a match or not.
+            (None, None)
+        }
     };
-
-    let placeholder_manifest = create_placeholder_rustdoc_manifest(&crate_source)
-        .context("failed to create placeholder manifest")?;
-    let placeholder_manifest_path =
-        save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)
-            .context("failed to save placeholder rustdoc manifest")?;
 
     config.shell_status(
         "Parsing",
         format_args!("{name} v{version} ({})", crate_data.crate_type.type_name()),
     )?;
 
-    let rustdoc_path = rustdoc_cmd.dump(
-        config,
-        placeholder_manifest_path.as_path(),
-        Some(&format!("{name}@{version}")),
-        false,
-    )?;
+    let build_dir = target_root.join(&crate_identifier);
+    let rustdoc_path =
+        rustdoc_cmd.generate_rustdoc(config, build_dir.clone(), &crate_source, &crate_data)?;
 
     match crate_source {
         CrateSource::Registry { .. } => {
@@ -286,7 +204,7 @@ fn generate_rustdoc(
         }
         CrateSource::ManifestPath { .. } => {
             // We don't do any caching here -- since the crate is saved locally,
-            // it could be modified by the user since it was cached.
+            // it could be modified by the user after it was cached.
             Ok(rustdoc_path)
         }
     }

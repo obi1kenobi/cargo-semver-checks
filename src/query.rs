@@ -255,7 +255,7 @@ mod tests {
         );
 
         let mut actual_paths = actual_results[0]["path"]
-            .as_vec(|val| val.as_vec(FieldValue::as_str))
+            .as_vec_with(|val| val.as_vec_with(FieldValue::as_str))
             .expect("not a Vec<Vec<&str>>");
         actual_paths.sort_unstable();
 

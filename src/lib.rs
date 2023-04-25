@@ -329,7 +329,10 @@ impl Check {
                     ScopeMode::DenyList(_) =>
                         match &self.current.source {
                             RustdocSource::Rustdoc(_) =>
-                                vec!["the-name-doesnt-matter-here".to_string()],
+                                // This is a user-facing string.
+                                // For example, it appears when two pre-generated rustdoc files
+                                // are semver-checked against each other.
+                                vec!["<unknown>".to_string()],
                             _ => panic!("couldn't deduce crate name, specify one through the package allow list")
                         }
                     ScopeMode::AllowList(lst) => lst.clone(),
