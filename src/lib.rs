@@ -449,7 +449,7 @@ impl CrateReport {
             None => true,
             Some(required_bump) => {
                 match self.detected_bump {
-                    // If user bumped the major version, than any breaking change is accepted.
+                    // If user bumped the major version, any breaking change is accepted.
                     ActualSemverUpdate::Major => true,
                     ActualSemverUpdate::Minor => {
                         matches!(required_bump, ReleaseType::Minor | ReleaseType::Patch)
