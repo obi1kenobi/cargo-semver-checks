@@ -438,34 +438,33 @@ pub struct CrateReport {
     /// Minimum bump required to respect semver.
     /// For example, this is [`ReleaseType::Major`] if the crate contains
     /// breaking changes.
-    required_bump: ReleaseType,
+    /// It's [`Option::None`] if no bump is required.
+    required_bump: Option<ReleaseType>,
 }
 
 impl CrateReport {
-    /// Construct a new `CrateReport` with a successful outcome.
-    pub(crate) fn new(detected_bump: ActualSemverUpdate) -> Self {
-        Self {
-            detected_bump,
-            required_bump: ReleaseType::Patch,
-        }
-    }
-
     /// `true` if required bump <= detected bump.
     pub fn success(&self) -> bool {
-        match self.detected_bump {
-            // If user bumped the major version, than any breaking change is accepted.
-            ActualSemverUpdate::Major => true,
-            ActualSemverUpdate::Minor => {
-                matches!(self.required_bump, ReleaseType::Minor | ReleaseType::Patch)
-            }
-            ActualSemverUpdate::Patch | ActualSemverUpdate::NotChanged => {
-                self.required_bump == ReleaseType::Patch
+        match self.required_bump {
+            None => true,
+            Some(required_bump) => {
+                match self.detected_bump {
+                    // If user bumped the major version, than any breaking change is accepted.
+                    ActualSemverUpdate::Major => true,
+                    ActualSemverUpdate::Minor => {
+                        matches!(required_bump, ReleaseType::Minor | ReleaseType::Patch)
+                    }
+                    ActualSemverUpdate::Patch | ActualSemverUpdate::NotChanged => {
+                        required_bump == ReleaseType::Patch
+                    }
+                }
             }
         }
     }
 
     /// Minimum bump required to respect semver.
-    pub fn required_bump(&self) -> ReleaseType {
+    /// It's [`Option::None`] if no bump is required.
+    pub fn required_bump(&self) -> Option<ReleaseType> {
         self.required_bump
     }
 
