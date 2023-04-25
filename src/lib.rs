@@ -442,6 +442,7 @@ pub struct CrateReport {
 }
 
 impl CrateReport {
+    /// Check if the semver check was successful.
     /// `true` if required bump <= detected bump.
     pub fn success(&self) -> bool {
         match self.required_bump {
@@ -467,6 +468,7 @@ impl CrateReport {
         self.required_bump
     }
 
+    /// Bump between the current version and the baseline one.
     pub fn detected_bump(&self) -> ActualSemverUpdate {
         self.detected_bump
     }
