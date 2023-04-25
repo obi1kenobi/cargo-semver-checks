@@ -429,7 +429,7 @@ impl Check {
     }
 }
 
-/// A report for a single crate.
+/// Report of semver check of one crate.
 #[non_exhaustive]
 #[derive(Debug)]
 pub struct CrateReport {
