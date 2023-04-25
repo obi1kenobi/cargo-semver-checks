@@ -31,7 +31,7 @@ impl From<RequiredSemverUpdate> for ReleaseType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum ActualSemverUpdate {
+pub enum ActualSemverUpdate {
     Major,
     Minor,
     Patch,
