@@ -15,6 +15,7 @@ use clap::ValueEnum;
 use directories::ProjectDirs;
 
 use check_release::run_check_release;
+use query::ActualSemverUpdate;
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
 use rustdoc_cmd::RustdocCommand;
@@ -321,7 +322,10 @@ impl Check {
 
         // Create a report for each crate.
         // We want to run all the checks, even if one returns `Err`.
-        let all_outcomes: Vec<anyhow::Result<(String, CrateReport)>> = match &self.current.source {
+        let all_outcomes: Vec<anyhow::Result<(String, Option<CrateReport>)>> = match &self
+            .current
+            .source
+        {
             RustdocSource::Rustdoc(_)
             | RustdocSource::Revision(_, _)
             | RustdocSource::VersionFromRegistry(_) => {
@@ -357,7 +361,7 @@ impl Check {
                             baseline_crate,
                             self.release_type,
                         )?;
-                        Ok((name, report))
+                        Ok((name, Some(report)))
                     })
                     .collect()
             }
@@ -384,7 +388,7 @@ impl Check {
                                     format_args!("{crate_name} v{version} (current)"),
                                 )
                             })?;
-                            Ok((crate_name.clone(), CrateReport::new_successful()))
+                            Ok((crate_name.clone(), None))
                         } else {
                             let (current_crate, baseline_crate) = generate_versioned_crates(
                                 &mut config,
@@ -397,13 +401,13 @@ impl Check {
 
                             Ok((
                                 crate_name.clone(),
-                                run_check_release(
+                                Some(run_check_release(
                                     &mut config,
                                     crate_name,
                                     current_crate,
                                     baseline_crate,
                                     self.release_type,
-                                )?,
+                                )?),
                             ))
                         }
                     })
@@ -414,7 +418,9 @@ impl Check {
             let mut reports = BTreeMap::new();
             for outcome in all_outcomes {
                 let (name, outcome) = outcome?;
-                reports.insert(name, outcome);
+                if let Some(outcome) = outcome {
+                    reports.insert(name, outcome);
+                }
             }
             reports
         };
@@ -427,21 +433,35 @@ impl Check {
 #[non_exhaustive]
 #[derive(Debug)]
 pub struct CrateReport {
+    /// Bump between the current version and the baseline one
+    detected_bump: ActualSemverUpdate,
     /// Minimum bump required to respect semver.
+    /// For example, this is [`ReleaseType::Major`] if the crate contains
+    /// breaking changes.
     required_bump: ReleaseType,
 }
 
 impl CrateReport {
     /// Construct a new `CrateReport` with a successful outcome.
-    pub(crate) fn new_successful() -> Self {
+    pub(crate) fn new(detected_bump: ActualSemverUpdate) -> Self {
         Self {
+            detected_bump,
             required_bump: ReleaseType::Patch,
         }
     }
 
-    /// `true` if the crate doesn't violate any semver rule.
+    /// `true` if required bump <= detected bump.
     pub fn success(&self) -> bool {
-        self.required_bump == ReleaseType::Patch
+        match self.detected_bump {
+            // If user bumped the major version, than any breaking change is accepted.
+            ActualSemverUpdate::Major => true,
+            ActualSemverUpdate::Minor => {
+                matches!(self.required_bump, ReleaseType::Minor | ReleaseType::Patch)
+            }
+            ActualSemverUpdate::Patch | ActualSemverUpdate::NotChanged => {
+                self.required_bump == ReleaseType::Patch
+            }
+        }
     }
 
     /// Minimum bump required to respect semver.

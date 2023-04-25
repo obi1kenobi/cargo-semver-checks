@@ -373,6 +373,7 @@ pub(super) fn run_check_release(
 
         Ok(CrateReport {
             required_bump: required_bump.into(),
+            detected_bump: version_change,
         })
     } else {
         config
@@ -389,7 +390,7 @@ pub(super) fn run_check_release(
                 true,
             )
             .expect("print failed");
-        Ok(CrateReport::new_successful())
+        Ok(CrateReport::new(version_change))
     }
 }
 
