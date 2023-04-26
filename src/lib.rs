@@ -15,7 +15,6 @@ use clap::ValueEnum;
 use directories::ProjectDirs;
 
 use check_release::run_check_release;
-use query::ActualSemverUpdate;
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
 use rustdoc_cmd::RustdocCommand;
@@ -24,7 +23,7 @@ use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
 
 pub use config::GlobalConfig;
-pub use query::{RequiredSemverUpdate, SemverQuery};
+pub use query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery};
 
 /// Test a release for semver violations.
 #[non_exhaustive]
@@ -487,6 +486,10 @@ impl Report {
     /// `true` if none of the crates violate semver.
     pub fn success(&self) -> bool {
         self.crate_reports.values().all(|report| report.success())
+    }
+
+    pub fn crate_reports(&self) -> &BTreeMap<String, CrateReport> {
+        &self.crate_reports
     }
 }
 
