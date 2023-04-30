@@ -117,16 +117,16 @@ impl<'a> CrateSource<'a> {
 
     pub(crate) fn feature_list_from_config(&self, feature_config: &FeatureConfig) -> Vec<String> {
         match feature_config {
-            FeatureConfig::AllFeatures => self.all_features(),
-            FeatureConfig::HeuristicFeatures(extra) => {
+            FeatureConfig::All => self.all_features(),
+            FeatureConfig::Heuristic(extra) => {
                 [self.heuristically_included_features(), extra.clone()].concat()
             }
-            FeatureConfig::DefaultFeatures(extra) => [
+            FeatureConfig::Default(extra) => [
                 self.implicit_features().into_iter().collect(),
                 extra.clone(),
             ]
             .concat(),
-            FeatureConfig::ExplicitFeatures(features) => features.clone(),
+            FeatureConfig::Explicit(features) => features.clone(),
         }
     }
 }
@@ -144,16 +144,16 @@ pub(crate) enum CrateType<'a> {
 
 #[derive(Debug, Clone)]
 pub(crate) enum FeatureConfig {
-    AllFeatures,
-    DefaultFeatures(Vec<String>),
-    ExplicitFeatures(Vec<String>),
-    HeuristicFeatures(Vec<String>),
+    All,
+    Default(Vec<String>),
+    Explicit(Vec<String>),
+    Heuristic(Vec<String>),
 }
 
 impl FeatureConfig {
     // The default behaviour is the heuristic approach.
     pub fn default() -> Self {
-        Self::HeuristicFeatures(vec![])
+        Self::Heuristic(vec![])
     }
 }
 

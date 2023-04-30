@@ -265,9 +265,8 @@ impl Check {
         extra_current_features: Vec<String>,
     ) -> &mut Self {
         self.baseline_feature_config =
-            rustdoc_gen::FeatureConfig::ExplicitFeatures(extra_baseline_features);
-        self.current_feature_config =
-            rustdoc_gen::FeatureConfig::ExplicitFeatures(extra_current_features);
+            rustdoc_gen::FeatureConfig::Explicit(extra_baseline_features);
+        self.current_feature_config = rustdoc_gen::FeatureConfig::Explicit(extra_current_features);
         self
     }
 
@@ -276,10 +275,8 @@ impl Check {
         extra_baseline_features: Vec<String>,
         extra_current_features: Vec<String>,
     ) -> &mut Self {
-        self.baseline_feature_config =
-            rustdoc_gen::FeatureConfig::DefaultFeatures(extra_baseline_features);
-        self.current_feature_config =
-            rustdoc_gen::FeatureConfig::DefaultFeatures(extra_current_features);
+        self.baseline_feature_config = rustdoc_gen::FeatureConfig::Default(extra_baseline_features);
+        self.current_feature_config = rustdoc_gen::FeatureConfig::Default(extra_current_features);
         self
     }
 
@@ -289,15 +286,14 @@ impl Check {
         extra_current_features: Vec<String>,
     ) -> &mut Self {
         self.baseline_feature_config =
-            rustdoc_gen::FeatureConfig::HeuristicFeatures(extra_baseline_features);
-        self.current_feature_config =
-            rustdoc_gen::FeatureConfig::HeuristicFeatures(extra_current_features);
+            rustdoc_gen::FeatureConfig::Heuristic(extra_baseline_features);
+        self.current_feature_config = rustdoc_gen::FeatureConfig::Heuristic(extra_current_features);
         self
     }
 
     pub fn with_all_features(&mut self) -> &mut Self {
-        self.baseline_feature_config = rustdoc_gen::FeatureConfig::AllFeatures;
-        self.current_feature_config = rustdoc_gen::FeatureConfig::AllFeatures;
+        self.baseline_feature_config = rustdoc_gen::FeatureConfig::All;
+        self.current_feature_config = rustdoc_gen::FeatureConfig::All;
         self
     }
 

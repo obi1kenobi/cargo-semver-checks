@@ -220,7 +220,13 @@ struct CheckRelease {
     #[arg(
         long,
         help_heading = "Features",
-        conflicts_with_all = ["default_features", "only_explicit_features", "feature"]
+        conflicts_with_all = [
+            "default_features",
+            "only_explicit_features",
+            "feature",
+            "baseline_features",
+            "current_features",
+        ]
     )]
     all_features: bool,
 
