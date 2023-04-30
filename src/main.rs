@@ -200,7 +200,7 @@ struct CheckRelease {
     )]
     default_features: bool,
 
-    /// Use no features except of the explicitly mentioned ones.
+    /// Use no features except the explicitly mentioned ones.
     #[arg(long, help_heading = "Features")]
     only_explicit_features: bool,
 
