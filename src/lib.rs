@@ -35,7 +35,8 @@ pub struct Check {
     baseline: Rustdoc,
     log_level: Option<log::Level>,
     release_type: Option<ReleaseType>,
-    feature_config: rustdoc_gen::FeatureConfig,
+    baseline_feature_config: rustdoc_gen::FeatureConfig,
+    current_feature_config: rustdoc_gen::FeatureConfig,
 }
 
 /// The kind of release we're making.
@@ -228,7 +229,8 @@ impl Check {
             baseline: Rustdoc::from_registry_latest_crate_version(),
             log_level: Default::default(),
             release_type: None,
-            feature_config: rustdoc_gen::FeatureConfig::new(),
+            baseline_feature_config: rustdoc_gen::FeatureConfig::default(),
+            current_feature_config: rustdoc_gen::FeatureConfig::default(),
         }
     }
 
@@ -257,30 +259,45 @@ impl Check {
         self
     }
 
-    pub fn with_default_features(&mut self) -> &mut Self {
-        self.feature_config.default_features = true;
+    pub fn with_only_explicit_features(
+        &mut self,
+        extra_baseline_features: Vec<String>,
+        extra_current_features: Vec<String>,
+    ) -> &mut Self {
+        self.baseline_feature_config =
+            rustdoc_gen::FeatureConfig::ExplicitFeatures(extra_baseline_features);
+        self.current_feature_config =
+            rustdoc_gen::FeatureConfig::ExplicitFeatures(extra_current_features);
         self
     }
 
-    pub fn with_only_explicit_features(&mut self) -> &mut Self {
-        self.feature_config.only_explicit_features = true;
+    pub fn with_default_features(
+        &mut self,
+        extra_baseline_features: Vec<String>,
+        extra_current_features: Vec<String>,
+    ) -> &mut Self {
+        self.baseline_feature_config =
+            rustdoc_gen::FeatureConfig::DefaultFeatures(extra_baseline_features);
+        self.current_feature_config =
+            rustdoc_gen::FeatureConfig::DefaultFeatures(extra_current_features);
         self
     }
 
-    pub fn with_feature(&mut self, feature: String) -> &mut Self {
-        self.feature_config.feature.push(feature);
-        self
-    }
-
-    pub fn with_features(&mut self, features: Vec<String>) -> &mut Self {
-        for f in features {
-            self.with_feature(f);
-        }
+    pub fn with_heuristically_included_features(
+        &mut self,
+        extra_baseline_features: Vec<String>,
+        extra_current_features: Vec<String>,
+    ) -> &mut Self {
+        self.baseline_feature_config =
+            rustdoc_gen::FeatureConfig::HeuristicFeatures(extra_baseline_features);
+        self.current_feature_config =
+            rustdoc_gen::FeatureConfig::HeuristicFeatures(extra_current_features);
         self
     }
 
     pub fn with_all_features(&mut self) -> &mut Self {
-        self.feature_config.all_features = true;
+        self.baseline_feature_config = rustdoc_gen::FeatureConfig::AllFeatures;
+        self.current_feature_config = rustdoc_gen::FeatureConfig::AllFeatures;
         self
     }
 
@@ -380,7 +397,8 @@ impl Check {
                             &*baseline_loader,
                             &name,
                             version,
-                            &self.feature_config,
+                            &self.baseline_feature_config,
+                            &self.current_feature_config,
                         )?;
 
                         let report = run_check_release(
@@ -426,7 +444,8 @@ impl Check {
                                 &*baseline_loader,
                                 crate_name,
                                 Some(version),
-                                &self.feature_config,
+                                &self.baseline_feature_config,
+                                &self.current_feature_config,
                             )?;
 
                             Ok((
@@ -544,7 +563,8 @@ fn generate_versioned_crates(
     baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
     crate_name: &str,
     version: Option<&Version>,
-    feature_config: &rustdoc_gen::FeatureConfig,
+    baseline_feature_config: &rustdoc_gen::FeatureConfig,
+    current_feature_config: &rustdoc_gen::FeatureConfig,
 ) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
     let current_path = current_loader.load_rustdoc(
         config,
@@ -552,7 +572,7 @@ fn generate_versioned_crates(
         rustdoc_gen::CrateDataForRustdoc {
             name: crate_name,
             crate_type: rustdoc_gen::CrateType::Current,
-            feature_config: feature_config,
+            feature_config: current_feature_config,
         },
     )?;
     let current_crate = load_rustdoc(&current_path)?;
@@ -565,7 +585,7 @@ fn generate_versioned_crates(
         baseline_loader,
         crate_name,
         version,
-        feature_config,
+        baseline_feature_config,
     )?;
     let baseline_crate = {
         let mut baseline_crate = load_rustdoc(&baseline_path)?;
@@ -589,7 +609,7 @@ fn generate_versioned_crates(
                 baseline_loader,
                 crate_name,
                 version,
-                feature_config,
+                baseline_feature_config,
             )?;
             baseline_crate = load_rustdoc(&baseline_path)?;
 

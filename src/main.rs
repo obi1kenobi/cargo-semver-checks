@@ -11,7 +11,6 @@ fn main() -> anyhow::Result<()> {
     human_panic::setup_panic!();
 
     let Cargo::SemverChecks(args) = Cargo::parse();
-    dbg!(&args);
     if args.bugreport {
         use bugreport::{bugreport, collector::*, format::Markdown};
         bugreport!()
@@ -193,11 +192,11 @@ struct CheckRelease {
     )]
     release_type: Option<ReleaseType>,
 
-    /// Use only the default features.
+    /// Use only the default and explicitly added features.
     #[arg(
         long,
         help_heading = "Features",
-        conflicts_with_all = ["feature", "only_explicit_features"]
+        conflicts_with = "only_explicit_features"
     )]
     default_features: bool,
 
@@ -205,15 +204,23 @@ struct CheckRelease {
     #[arg(long, help_heading = "Features")]
     only_explicit_features: bool,
 
-    /// Use the named feature.
+    /// Use the named features.
     #[arg(long, value_name = "NAME", help_heading = "Features")]
-    feature: Vec<String>,
+    features: Vec<String>,
+
+    /// Use the named features only in the baseline version.
+    #[arg(long, value_name = "NAME", help_heading = "Features")]
+    baseline_features: Vec<String>,
+
+    /// Use the named features only in the current version.
+    #[arg(long, value_name = "NAME", help_heading = "Features")]
+    current_features: Vec<String>,
 
     /// Use all the features.
     #[arg(
         long,
         help_heading = "Features",
-        conflicts_with_all = ["default_features", "no_implicit_features", "feature"]
+        conflicts_with_all = ["default_features", "only_explicit_features", "feature"]
     )]
     all_features: bool,
 
@@ -285,17 +292,20 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         if let Some(release_type) = value.release_type {
             check.with_release_type(release_type);
         }
-        if value.default_features {
-            check.with_default_features();
-        }
-        if value.only_explicit_features {
-            check.with_only_explicit_features();
-        }
-        for feature in value.feature {
-            check.with_feature(feature);
-        }
+
+        let mut mutual_features = value.features;
+        let mut baseline_features = value.baseline_features;
+        let mut current_features = value.current_features;
+        baseline_features.append(&mut mutual_features.clone());
+        current_features.append(&mut mutual_features);
         if value.all_features {
             check.with_all_features();
+        } else if value.default_features {
+            check.with_default_features(baseline_features, current_features);
+        } else if value.only_explicit_features {
+            check.with_only_explicit_features(baseline_features, current_features);
+        } else {
+            check.with_heuristically_included_features(baseline_features, current_features);
         }
 
         check

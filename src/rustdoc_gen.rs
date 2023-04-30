@@ -111,23 +111,22 @@ impl<'a> CrateSource<'a> {
         all_crate_features.into_iter().collect()
     }
 
-    fn features_not_on_blacklist(&self) -> Vec<String> {
+    fn heuristically_included_features(&self) -> Vec<String> {
         todo!()
     }
 
     pub(crate) fn feature_list_from_config(&self, feature_config: &FeatureConfig) -> Vec<String> {
-        if feature_config.default_features {
-            self.implicit_features().into_iter().collect()
-        } else if feature_config.all_features {
-            self.all_features()
-        } else {
-            let mut result = if feature_config.only_explicit_features {
-                Vec::new()
-            } else {
-                self.features_not_on_blacklist()
-            };
-            result.append(&mut feature_config.feature.clone());
-            result
+        match feature_config {
+            FeatureConfig::AllFeatures => self.all_features(),
+            FeatureConfig::HeuristicFeatures(extra) => {
+                [self.heuristically_included_features(), extra.clone()].concat()
+            }
+            FeatureConfig::DefaultFeatures(extra) => [
+                self.implicit_features().into_iter().collect(),
+                extra.clone(),
+            ]
+            .concat(),
+            FeatureConfig::ExplicitFeatures(features) => features.clone(),
         }
     }
 }
@@ -144,21 +143,17 @@ pub(crate) enum CrateType<'a> {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct FeatureConfig {
-    pub(crate) default_features: bool,
-    pub(crate) only_explicit_features: bool,
-    pub(crate) feature: Vec<String>,
-    pub(crate) all_features: bool,
+pub(crate) enum FeatureConfig {
+    AllFeatures,
+    DefaultFeatures(Vec<String>),
+    ExplicitFeatures(Vec<String>),
+    HeuristicFeatures(Vec<String>),
 }
 
 impl FeatureConfig {
-    pub fn new() -> Self {
-        Self {
-            default_features: false,
-            only_explicit_features: false,
-            feature: Vec::new(),
-            all_features: false,
-        }
+    // The default behaviour is the heuristic approach.
+    pub fn default() -> Self {
+        Self::HeuristicFeatures(vec![])
     }
 }
 
