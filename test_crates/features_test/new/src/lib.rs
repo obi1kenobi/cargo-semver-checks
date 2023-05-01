@@ -1,2 +1,2 @@
 #[cfg(feature = "foo")]
-fn foo() {}
+pub fn foo() {}

@@ -29,12 +29,12 @@ impl CargoSemverChecks {
 }
 
 #[test]
-fn simple_no_implicit_features_test() {
+fn simple_only_explicit_features_test() {
     CargoSemverChecks::new(
         "test_crates/features_test/new/",
         "test_crates/features_test/old/Cargo.toml",
     )
-    .add_arg("--no-implicit-features")
+    .add_arg("--only-explicit-features")
     .run()
     .success();
 }
