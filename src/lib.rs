@@ -15,10 +15,10 @@ use clap::ValueEnum;
 use directories::ProjectDirs;
 
 use check_release::run_check_release;
+use rustdoc_gen::CrateDataForRustdoc;
 use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 
 use rustdoc_cmd::RustdocCommand;
-use semver::Version;
 use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
 
@@ -35,8 +35,8 @@ pub struct Check {
     baseline: Rustdoc,
     log_level: Option<log::Level>,
     release_type: Option<ReleaseType>,
-    baseline_feature_config: rustdoc_gen::FeatureConfig,
     current_feature_config: rustdoc_gen::FeatureConfig,
+    baseline_feature_config: rustdoc_gen::FeatureConfig,
 }
 
 /// The kind of release we're making.
@@ -229,8 +229,8 @@ impl Check {
             baseline: Rustdoc::from_registry_latest_crate_version(),
             log_level: Default::default(),
             release_type: None,
-            baseline_feature_config: rustdoc_gen::FeatureConfig::default(),
-            current_feature_config: rustdoc_gen::FeatureConfig::default(),
+            current_feature_config: rustdoc_gen::FeatureConfig::default(false),
+            baseline_feature_config: rustdoc_gen::FeatureConfig::default(true),
         }
     }
 
@@ -259,41 +259,37 @@ impl Check {
         self
     }
 
-    pub fn with_only_explicit_features(
-        &mut self,
-        extra_baseline_features: Vec<String>,
-        extra_current_features: Vec<String>,
-    ) -> &mut Self {
-        self.baseline_feature_config =
-            rustdoc_gen::FeatureConfig::Explicit(extra_baseline_features);
-        self.current_feature_config = rustdoc_gen::FeatureConfig::Explicit(extra_current_features);
+    pub fn with_only_explicit_features(&mut self) -> &mut Self {
+        self.current_feature_config.base_features = rustdoc_gen::BaseFeatures::None;
+        self.baseline_feature_config.base_features = rustdoc_gen::BaseFeatures::None;
         self
     }
 
-    pub fn with_default_features(
-        &mut self,
-        extra_baseline_features: Vec<String>,
-        extra_current_features: Vec<String>,
-    ) -> &mut Self {
-        self.baseline_feature_config = rustdoc_gen::FeatureConfig::Default(extra_baseline_features);
-        self.current_feature_config = rustdoc_gen::FeatureConfig::Default(extra_current_features);
+    pub fn with_default_features(&mut self) -> &mut Self {
+        self.current_feature_config.base_features = rustdoc_gen::BaseFeatures::Default;
+        self.baseline_feature_config.base_features = rustdoc_gen::BaseFeatures::Default;
         self
     }
 
-    pub fn with_heuristically_included_features(
-        &mut self,
-        extra_baseline_features: Vec<String>,
-        extra_current_features: Vec<String>,
-    ) -> &mut Self {
-        self.baseline_feature_config =
-            rustdoc_gen::FeatureConfig::Heuristic(extra_baseline_features);
-        self.current_feature_config = rustdoc_gen::FeatureConfig::Heuristic(extra_current_features);
+    pub fn with_heuristically_included_features(&mut self) -> &mut Self {
+        self.current_feature_config.base_features = rustdoc_gen::BaseFeatures::Heuristic;
+        self.baseline_feature_config.base_features = rustdoc_gen::BaseFeatures::Heuristic;
         self
     }
 
     pub fn with_all_features(&mut self) -> &mut Self {
-        self.baseline_feature_config = rustdoc_gen::FeatureConfig::All;
-        self.current_feature_config = rustdoc_gen::FeatureConfig::All;
+        self.current_feature_config.base_features = rustdoc_gen::BaseFeatures::All;
+        self.baseline_feature_config.base_features = rustdoc_gen::BaseFeatures::All;
+        self
+    }
+
+    pub fn with_extra_features(
+        &mut self,
+        extra_current_features: Vec<String>,
+        extra_baseline_features: Vec<String>,
+    ) -> &mut Self {
+        self.current_feature_config.extra_features = extra_current_features;
+        self.baseline_feature_config.extra_features = extra_baseline_features;
         self
     }
 
@@ -391,10 +387,18 @@ impl Check {
                             &rustdoc_cmd,
                             &*current_loader,
                             &*baseline_loader,
-                            &name,
-                            version,
-                            &self.baseline_feature_config,
-                            &self.current_feature_config,
+                            CrateDataForRustdoc {
+                                crate_type: rustdoc_gen::CrateType::Current,
+                                name: &name,
+                                feature_config: &self.current_feature_config,
+                            },
+                            CrateDataForRustdoc {
+                                crate_type: rustdoc_gen::CrateType::Baseline {
+                                    highest_allowed_version: version,
+                                },
+                                name: &name,
+                                feature_config: &self.baseline_feature_config,
+                            },
                         )?;
 
                         let report = run_check_release(
@@ -438,10 +442,18 @@ impl Check {
                                 &rustdoc_cmd,
                                 &*current_loader,
                                 &*baseline_loader,
-                                crate_name,
-                                Some(version),
-                                &self.baseline_feature_config,
-                                &self.current_feature_config,
+                                CrateDataForRustdoc {
+                                    crate_type: rustdoc_gen::CrateType::Current,
+                                    name: crate_name,
+                                    feature_config: &self.current_feature_config,
+                                },
+                                CrateDataForRustdoc {
+                                    crate_type: rustdoc_gen::CrateType::Baseline {
+                                        highest_allowed_version: Some(version),
+                                    },
+                                    name: crate_name,
+                                    feature_config: &self.baseline_feature_config,
+                                },
                             )?;
 
                             Ok((
@@ -557,20 +569,10 @@ fn generate_versioned_crates(
     rustdoc_cmd: &RustdocCommand,
     current_loader: &dyn rustdoc_gen::RustdocGenerator,
     baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
-    crate_name: &str,
-    version: Option<&Version>,
-    baseline_feature_config: &rustdoc_gen::FeatureConfig,
-    current_feature_config: &rustdoc_gen::FeatureConfig,
+    current_crate_data: rustdoc_gen::CrateDataForRustdoc,
+    baseline_crate_data: rustdoc_gen::CrateDataForRustdoc,
 ) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
-    let current_path = current_loader.load_rustdoc(
-        config,
-        rustdoc_cmd,
-        rustdoc_gen::CrateDataForRustdoc {
-            name: crate_name,
-            crate_type: rustdoc_gen::CrateType::Current,
-            feature_config: current_feature_config,
-        },
-    )?;
+    let current_path = current_loader.load_rustdoc(config, rustdoc_cmd, current_crate_data)?;
     let current_crate = load_rustdoc(&current_path)?;
 
     let current_rustdoc_version = current_crate.version();
@@ -579,9 +581,7 @@ fn generate_versioned_crates(
         config,
         rustdoc_cmd,
         baseline_loader,
-        crate_name,
-        version,
-        baseline_feature_config,
+        baseline_crate_data.clone(),
     )?;
     let baseline_crate = {
         let mut baseline_crate = load_rustdoc(&baseline_path)?;
@@ -594,6 +594,7 @@ fn generate_versioned_crates(
         //
         // Fix for: https://github.com/obi1kenobi/cargo-semver-checks/issues/415
         if baseline_crate.version() != current_rustdoc_version {
+            let crate_name = baseline_crate_data.name;
             config.shell_status(
                 "Removing",
                 format_args!("stale cached baseline rustdoc for {crate_name}"),
@@ -603,9 +604,7 @@ fn generate_versioned_crates(
                 config,
                 rustdoc_cmd,
                 baseline_loader,
-                crate_name,
-                version,
-                baseline_feature_config,
+                baseline_crate_data,
             )?;
             baseline_crate = load_rustdoc(&baseline_path)?;
 
@@ -627,21 +626,9 @@ fn get_baseline_rustdoc_path(
     config: &mut GlobalConfig,
     rustdoc_cmd: &RustdocCommand,
     baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
-    crate_name: &str,
-    version: Option<&Version>,
-    feature_config: &rustdoc_gen::FeatureConfig,
+    baseline_crate_data: rustdoc_gen::CrateDataForRustdoc,
 ) -> anyhow::Result<PathBuf> {
-    let baseline_path = baseline_loader.load_rustdoc(
-        config,
-        rustdoc_cmd,
-        rustdoc_gen::CrateDataForRustdoc {
-            name: crate_name,
-            crate_type: rustdoc_gen::CrateType::Baseline {
-                highest_allowed_version: version,
-            },
-            feature_config,
-        },
-    )?;
+    let baseline_path = baseline_loader.load_rustdoc(config, rustdoc_cmd, baseline_crate_data)?;
     Ok(baseline_path)
 }
 

@@ -223,7 +223,7 @@ struct CheckRelease {
         conflicts_with_all = [
             "default_features",
             "only_explicit_features",
-            "feature",
+            "features",
             "baseline_features",
             "current_features",
         ]
@@ -299,20 +299,21 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             check.with_release_type(release_type);
         }
 
-        let mut mutual_features = value.features;
-        let mut baseline_features = value.baseline_features;
-        let mut current_features = value.current_features;
-        baseline_features.append(&mut mutual_features.clone());
-        current_features.append(&mut mutual_features);
         if value.all_features {
             check.with_all_features();
         } else if value.default_features {
-            check.with_default_features(baseline_features, current_features);
+            check.with_default_features();
         } else if value.only_explicit_features {
-            check.with_only_explicit_features(baseline_features, current_features);
+            check.with_only_explicit_features();
         } else {
-            check.with_heuristically_included_features(baseline_features, current_features);
+            check.with_heuristically_included_features();
         }
+        let mut mutual_features = value.features;
+        let mut current_features = value.current_features;
+        let mut baseline_features = value.baseline_features;
+        current_features.append(&mut mutual_features);
+        baseline_features.append(&mut mutual_features.clone());
+        check.with_extra_features(current_features, baseline_features);
 
         check
     }

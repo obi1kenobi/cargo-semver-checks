@@ -111,23 +111,71 @@ impl<'a> CrateSource<'a> {
         all_crate_features.into_iter().collect()
     }
 
+    /// Some feature names usually mean, that the feature is breaking semver by design.
+    /// This function filters them out.
+    ///
+    /// Feature names not included by this function:
+    ///  - `unstable`
+    ///  - `nightly`
+    ///  - `bench`
+    ///  - `no_std`
+    ///  - features with prefix `__`
     fn heuristically_included_features(&self) -> Vec<String> {
-        todo!()
+        let features_ignored_by_default = std::collections::HashSet::from([
+            String::from("unstable"),
+            String::from("nightly"),
+            String::from("bench"),
+            String::from("no_std"),
+        ]);
+
+        let determine = |feature_name: &String| {
+            features_ignored_by_default.contains(feature_name) || feature_name.starts_with("__")
+        };
+
+        self.all_features().into_iter().filter(determine).collect()
     }
 
-    pub(crate) fn feature_list_from_config(&self, feature_config: &FeatureConfig) -> Vec<String> {
-        match feature_config {
-            FeatureConfig::All => self.all_features(),
-            FeatureConfig::Heuristic(extra) => {
-                [self.heuristically_included_features(), extra.clone()].concat()
-            }
-            FeatureConfig::Default(extra) => [
-                self.implicit_features().into_iter().collect(),
-                extra.clone(),
-            ]
-            .concat(),
-            FeatureConfig::Explicit(features) => features.clone(),
-        }
+    pub(crate) fn feature_list_from_config(
+        &self,
+        global_config: &mut GlobalConfig,
+        feature_config: &FeatureConfig,
+    ) -> Vec<String> {
+        let all_features: std::collections::HashSet<String> =
+            self.all_features().into_iter().collect();
+
+        let result = [
+            match feature_config.base_features {
+                BaseFeatures::All => self.all_features(),
+                BaseFeatures::Heuristic => self.heuristically_included_features(),
+                BaseFeatures::Default => {
+                    let default = String::from("default");
+                    if all_features.contains(&default) {
+                        vec![default]
+                    } else {
+                        vec![]
+                    }
+                }
+                BaseFeatures::None => vec![],
+            },
+            feature_config.extra_features.clone(),
+        ]
+        .concat();
+
+        result
+            .into_iter()
+            .filter(|feature_name| {
+                if !all_features.contains(feature_name) && feature_config.ignore_non_existing {
+                    global_config
+                        .shell_warn(format!(
+                            "Feature {feature_name} is not present in the baseline."
+                        ))
+                        .expect("print failed");
+                    false
+                } else {
+                    true
+                }
+            })
+            .collect()
     }
 }
 
@@ -143,17 +191,28 @@ pub(crate) enum CrateType<'a> {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) enum FeatureConfig {
+pub(crate) struct FeatureConfig {
+    pub(crate) base_features: BaseFeatures,
+    pub(crate) extra_features: Vec<String>,
+    pub(crate) ignore_non_existing: bool,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) enum BaseFeatures {
     All,
-    Default(Vec<String>),
-    Explicit(Vec<String>),
-    Heuristic(Vec<String>),
+    Default,
+    Heuristic,
+    None,
 }
 
 impl FeatureConfig {
     // The default behaviour is the heuristic approach.
-    pub fn default() -> Self {
-        Self::Heuristic(vec![])
+    pub fn default(is_baseline: bool) -> Self {
+        Self {
+            base_features: BaseFeatures::Heuristic,
+            extra_features: Vec::new(),
+            ignore_non_existing: is_baseline,
+        }
     }
 }
 
