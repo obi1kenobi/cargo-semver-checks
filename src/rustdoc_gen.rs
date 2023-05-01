@@ -147,15 +147,7 @@ impl<'a> CrateSource<'a> {
             match feature_config.base_features {
                 BaseFeatures::All => self.all_features(),
                 BaseFeatures::Heuristic => self.heuristically_included_features(),
-                BaseFeatures::Default => {
-                    let default = String::from("default");
-                    if all_features.contains(&default) {
-                        vec![default]
-                    } else {
-                        vec![]
-                    }
-                }
-                BaseFeatures::None => vec![],
+                BaseFeatures::Default | BaseFeatures::None => vec![],
             },
             feature_config.extra_features.clone(),
         ]

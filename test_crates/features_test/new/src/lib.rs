@@ -1,2 +1,2 @@
-#[cfg(feature = "a")]
+#[cfg(feature = "foo")]
 fn foo() {}

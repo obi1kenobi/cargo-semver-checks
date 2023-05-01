@@ -7,4 +7,5 @@ edition = "2021"
 [dependencies]
 
 [features]
-a = []
+default = ["foo"]
+foo = []

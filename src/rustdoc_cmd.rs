@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Context;
 
 use crate::{
-    rustdoc_gen::{CrateDataForRustdoc, CrateSource},
+    rustdoc_gen::{BaseFeatures, CrateDataForRustdoc, CrateSource},
     GlobalConfig,
 };
 
@@ -221,6 +221,10 @@ fn create_placeholder_rustdoc_manifest(
                     version: Some(format!("={}", crate_.version())),
                     features: crate_source
                         .feature_list_from_config(config, crate_data.feature_config),
+                    default_features: matches!(
+                        crate_data.feature_config.base_features,
+                        BaseFeatures::Default
+                    ),
                     ..DependencyDetail::default()
                 },
                 CrateSource::ManifestPath { manifest } => DependencyDetail {
@@ -238,6 +242,10 @@ fn create_placeholder_rustdoc_manifest(
                     }),
                     features: crate_source
                         .feature_list_from_config(config, crate_data.feature_config),
+                    default_features: matches!(
+                        crate_data.feature_config.base_features,
+                        BaseFeatures::Default
+                    ),
                     ..DependencyDetail::default()
                 },
             };
