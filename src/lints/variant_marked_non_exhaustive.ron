@@ -4,13 +4,7 @@ SemverQuery(
     description: "An exhaustive enum variant has been marked #[non_exhaustive].",
     reference: Some("An exhaustive enum variant has been marked #[non_exhaustive], preventing it from being constructed using a literal from outside its own crate."),
     required_update: Major,
-
-    // TODO: Change the reference link once this cargo docs PR merges:
-    // https://github.com/rust-lang/cargo/pull/10877
-    //
-    // Change to this link:
-    // https://doc.rust-lang.org/cargo/reference/semver.html#attr-adding-non-exhaustive
-    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#attr-adding-non-exhaustive"),
     query: r#"
     {
         CrateDiff {
