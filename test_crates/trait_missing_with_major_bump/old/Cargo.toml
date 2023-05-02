@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "trait_missing"
+name = "trait_missing_with_major_bump"
 version = "2.0.0"
 edition = "2021"
 
