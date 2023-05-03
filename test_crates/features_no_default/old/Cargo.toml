@@ -1,0 +1,11 @@
+[package]
+publish = false
+name = "features_no_default"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[features]
+A = []
+B = []

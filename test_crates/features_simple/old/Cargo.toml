@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "template"
+name = "features_simple"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,3 +9,8 @@ edition = "2021"
 [features]
 default = ["foo"]
 foo = []
+unstable = []
+nightly = []
+bench = []
+no_std = []
+__foo = []

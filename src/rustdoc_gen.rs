@@ -129,7 +129,7 @@ impl<'a> CrateSource<'a> {
         ]);
 
         let determine = |feature_name: &String| {
-            features_ignored_by_default.contains(feature_name) || feature_name.starts_with("__")
+            !features_ignored_by_default.contains(feature_name) && !feature_name.starts_with("__")
         };
 
         self.all_features().into_iter().filter(determine).collect()
@@ -182,14 +182,14 @@ pub(crate) enum CrateType<'a> {
     },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub(crate) struct FeatureConfig {
     pub(crate) base_features: BaseFeatures,
     pub(crate) extra_features: Vec<String>,
     pub(crate) ignore_non_existing: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub(crate) enum BaseFeatures {
     All,
     Default,
@@ -198,13 +198,20 @@ pub(crate) enum BaseFeatures {
 }
 
 impl FeatureConfig {
-    // The default behaviour is the heuristic approach.
-    pub fn default(is_baseline: bool) -> Self {
+    pub(crate) fn default(is_baseline: bool) -> Self {
+        // The default behaviour is the heuristic approach.
         Self {
             base_features: BaseFeatures::Heuristic,
             extra_features: Vec::new(),
             ignore_non_existing: is_baseline,
         }
+    }
+
+    /// Unique identifier, used to mark generated rustdoc files.
+    fn make_identifier(&self) -> String {
+        let mut s = std::collections::hash_map::DefaultHasher::new();
+        std::hash::Hash::hash(&self, &mut s);
+        format!("{:x}", std::hash::Hasher::finish(&s))
     }
 }
 
@@ -238,7 +245,11 @@ fn generate_rustdoc(
     let (cache_dir, cached_rustdoc) = match crate_source {
         CrateSource::Registry { .. } => {
             let cache_dir = target_root.join("cache");
-            let cached_rustdoc = cache_dir.join(format!("{crate_identifier}.json"));
+            let cached_rustdoc = cache_dir.join(format!(
+                "{}-{}.json",
+                crate_identifier,
+                crate_data.feature_config.make_identifier(),
+            ));
 
             // We assume that the generated rustdoc is untouched.
             // Users should run cargo-clean if they experience any anomalies.

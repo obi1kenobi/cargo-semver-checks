@@ -140,7 +140,15 @@ struct CheckRelease {
         alias = "current",
         value_name = "JSON_PATH",
         help_heading = "Current",
-        requires = "baseline_rustdoc"
+        requires = "baseline_rustdoc",
+        conflicts_with_all = [
+            "default_features",
+            "only_explicit_features",
+            "features",
+            "baseline_features",
+            "current_features",
+            "all_features",
+        ]
     )]
     current_rustdoc: Option<PathBuf>,
 
@@ -178,7 +186,15 @@ struct CheckRelease {
         alias = "baseline",
         value_name = "JSON_PATH",
         help_heading = "Baseline",
-        group = "baseline"
+        group = "baseline",
+        conflicts_with_all = [
+            "default_features",
+            "only_explicit_features",
+            "features",
+            "baseline_features",
+            "current_features",
+            "all_features",
+        ]
     )]
     baseline_rustdoc: Option<PathBuf>,
 
@@ -311,8 +327,8 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         let mut mutual_features = value.features;
         let mut current_features = value.current_features;
         let mut baseline_features = value.baseline_features;
-        current_features.append(&mut mutual_features);
-        baseline_features.append(&mut mutual_features.clone());
+        current_features.append(&mut mutual_features.clone());
+        baseline_features.append(&mut mutual_features);
         check.with_extra_features(current_features, baseline_features);
 
         check
