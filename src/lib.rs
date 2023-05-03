@@ -488,6 +488,7 @@ impl Report {
         self.crate_reports.values().all(|report| report.success())
     }
 
+    /// Reports of each crate checked, sorted by crate name.
     pub fn crate_reports(&self) -> &BTreeMap<String, CrateReport> {
         &self.crate_reports
     }
