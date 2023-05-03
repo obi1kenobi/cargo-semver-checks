@@ -240,16 +240,16 @@ fn generate_rustdoc(
 ) -> anyhow::Result<PathBuf> {
     let name = crate_source.name()?;
     let version = crate_source.version()?;
-    let crate_identifier = crate_source.slug()?;
+    let crate_identifier = format!(
+        "{}-{}",
+        crate_source.slug()?,
+        crate_data.feature_config.make_identifier(),
+    );
 
     let (cache_dir, cached_rustdoc) = match crate_source {
         CrateSource::Registry { .. } => {
             let cache_dir = target_root.join("cache");
-            let cached_rustdoc = cache_dir.join(format!(
-                "{}-{}.json",
-                crate_identifier,
-                crate_data.feature_config.make_identifier(),
-            ));
+            let cached_rustdoc = cache_dir.join(format!("{crate_identifier}.json"));
 
             // We assume that the generated rustdoc is untouched.
             // Users should run cargo-clean if they experience any anomalies.
