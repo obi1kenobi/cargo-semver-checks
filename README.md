@@ -18,7 +18,7 @@ $ cargo semver-checks check-release
 Or use as a [GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action) (used in .github/workflows/ci.yml in this repo):
 ```yaml
 - name: Check semver
-  uses: obi1kenobi/cargo-semver-checks-action@v1
+  uses: obi1kenobi/cargo-semver-checks-action@v2
 ```
 
 ![image](https://user-images.githubusercontent.com/2348618/180127698-240e4bed-5581-4cbd-9f47-038affbc4a3e.png)
