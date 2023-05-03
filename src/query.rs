@@ -30,6 +30,7 @@ impl From<RequiredSemverUpdate> for ReleaseType {
     }
 }
 
+/// Kind of semver update.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ActualSemverUpdate {
     Major,
