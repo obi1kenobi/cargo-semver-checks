@@ -462,7 +462,7 @@ impl CrateReport {
     }
 
     /// Minimum bump required to respect semver.
-    /// It's [`Option::None`] if no bump is required.
+    /// It's [`Option::None`] if no bump is required beyond the already-detected bump.
     pub fn required_bump(&self) -> Option<ReleaseType> {
         self.required_bump
     }
