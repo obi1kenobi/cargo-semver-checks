@@ -245,3 +245,24 @@ fn default_features_when_default_undefined() {
     .run()
     .failure();
 }
+
+#[test]
+fn feature_does_not_exist() {
+    CargoSemverChecks::new(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--features")
+    .add_arg("new_feature")
+    .run()
+    .success();
+
+    CargoSemverChecks::new(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--features")
+    .add_arg("feature_to_be_removed")
+    .run()
+    .failure();
+}
