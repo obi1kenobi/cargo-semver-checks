@@ -436,7 +436,7 @@ pub struct CrateReport {
     detected_bump: ActualSemverUpdate,
     /// Minimum additional bump (on top of `detected_bump`) required to respect semver.
     /// For example, if the crate contains breaking changes, this is [`Some(ReleaseType::Major)`].
-    /// If no bump is required, this is [`Option::None`].
+    /// If no additional bump beyond the already-detected one is required, this is [`Option::None`].
     required_bump: Option<ReleaseType>,
 }
 
