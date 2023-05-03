@@ -434,8 +434,8 @@ impl Check {
 pub struct CrateReport {
     /// Bump between the current version and the baseline one.
     detected_bump: ActualSemverUpdate,
-    /// Minimum bump required to respect semver.
-    /// For example, if the crate contains breaking changes, this is [`ReleaseType::Major`].
+    /// Minimum additional bump (on top of `detected_bump`) required to respect semver.
+    /// For example, if the crate contains breaking changes, this is [`Some(ReleaseType::Major)`].
     /// If no bump is required, this is [`Option::None`].
     required_bump: Option<ReleaseType>,
 }
