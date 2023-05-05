@@ -366,7 +366,7 @@ jobs:
           persist-credentials: false
           path: 'semver'
 
-      - name: Checkout rust-libp2p
+      - name: Checkout fork of serde
         uses: actions/checkout@v3
         with:
           persist-credentials: false
@@ -390,44 +390,44 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            subject/target/semver-checks/local-libp2p_core-0_37_0
+            subject/target/semver-checks/local-serde-1_0_162
 
-      # If we failed to set up the cache, set it up now.
+      # Run even if there was a cache hit, to make sure the check passes.
       - name: Run semver-checks
-        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           cd semver
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/core/Cargo.toml" --verbose
 
+      # Run cargo-semver-checks, enabling feature `unstable` this time.
       - name: Check with rustdoc for mismatching feature config cached
         continue-on-error: true
         run: |
-          # Use a separate workspace, to avoid contaminating the cache for Swatinem/rust-cache@v2
-          cp -R subject subject-new
-
-          # Run cargo-semver-checks, enabling feature `unstable` this time.
-          bins/cargo-semver-checks semver-checks check-release --manifest-path="subject-new/core/Cargo.toml" --verbose --feature unstable | tee output
+          cd semver
+          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/serde/Cargo.toml" --verbose --feature unstable | tee output
           touch unexpectedly_did_not_fail
 
       - name: Check whether it failed
         run: |
+          cd semver
           if [ -f unexpectedly_did_not_fail ]; then exit 1; else exit 0; fi
 
       - name: Check output
         run: |
+          cd semver
           EXPECTED="$(echo -e "--- failure struct_missing: pub struct removed or renamed ---")"
           RESULT="$(cat output | grep failure)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Cleanup
         run: |
+          cd semver
           rm output
           rm -f unexpectedly_did_not_fail
 
@@ -435,7 +435,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-rust-libp2p:
