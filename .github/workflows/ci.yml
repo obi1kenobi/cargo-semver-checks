@@ -414,7 +414,6 @@ jobs:
         continue-on-error: true
         run: |
           cd semver
-          rm unexpectedly_did_not_fail
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/serde/Cargo.toml" --verbose --features unstable | tee output
           touch unexpectedly_did_not_fail
 
