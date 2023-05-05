@@ -333,15 +333,13 @@ jobs:
           # Show what's in the cache.
           ls subject-new/target/semver-checks/cache/
 
-          if [[ "$(ls subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0-*.json | wc -l)" != "1" ]]; then
-            echo "multiple caches matching"
-            exit 1
-          fi
+          # Ensure the previous cached rustdoc file still exists.
+          [ -f "subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json" ] || { \
+            echo "could not find libp2p-core cache file"; \
+            exit 1;
+          }
 
-          # Find the cache file
-          export RUSTDOC_FILE="$(ls subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0-*.json)"
-
-          export OLD_RUSTDOC_VERSION="$(jq .format_version $RUSTDOC_FILE)"
+          export OLD_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
 
           # Run cargo-semver-checks with the older cached file.
           # In a prior step, we installed stable Rust, so we'll set that as the default
@@ -349,7 +347,7 @@ jobs:
           rustup override set stable
           bins/cargo-semver-checks semver-checks check-release --manifest-path="subject-new/core/Cargo.toml" --verbose
 
-          export NEW_RUSTDOC_VERSION="$(jq .format_version $RUSTDOC_FILE)"
+          export NEW_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
 
           # Ensure the cached rustdoc versions were indeed different before and after.
           set -x

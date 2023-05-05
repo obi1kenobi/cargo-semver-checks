@@ -209,6 +209,10 @@ impl FeatureConfig {
 
     /// Unique identifier, used to mark generated rustdoc files.
     fn make_identifier(&self) -> String {
+        if matches!(self.base_features, BaseFeatures::Heuristic) && self.extra_features.is_empty() {
+            // If using the default config, return empty identifier
+            return String::new();
+        }
         let mut s = std::collections::hash_map::DefaultHasher::new();
         std::hash::Hash::hash(&self, &mut s);
         format!("{:x}", std::hash::Hasher::finish(&s))
@@ -240,11 +244,16 @@ fn generate_rustdoc(
 ) -> anyhow::Result<PathBuf> {
     let name = crate_source.name()?;
     let version = crate_source.version()?;
-    let crate_identifier = format!(
-        "{}-{}",
-        crate_source.slug()?,
-        crate_data.feature_config.make_identifier(),
-    );
+    let feature_identifier = crate_data.feature_config.make_identifier();
+    let crate_identifier = if feature_identifier.is_empty() {
+        crate_source.slug()?
+    } else {
+        format!(
+            "{}-{}",
+            crate_source.slug()?,
+            crate_data.feature_config.make_identifier(),
+        )
+    };
 
     let (cache_dir, cached_rustdoc) = match crate_source {
         CrateSource::Registry { .. } => {
