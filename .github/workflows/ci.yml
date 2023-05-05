@@ -25,6 +25,7 @@ jobs:
       - lint
       - rust-tests
       - cross-version-caching
+      - cross-feature-caching
       - run-on-rust-libp2p
       - run-on-libp2p-dcutr-relay
       - run-on-libp2p-gossipsub-request-response
@@ -46,6 +47,7 @@ jobs:
           echo "lint: ${{ needs.lint.result }}"
           echo "rust-tests: ${{ needs.rust-tests.result }}"
           echo "cross-version-caching: ${{ needs.cross-version-caching.result }}"
+          echo "cross-feature-caching: ${{ needs.cross-feature-caching.result }}"
           echo "run-on-rust-libp2p: ${{ needs.run-on-rust-libp2p.result }}"
           echo "run-on-libp2p-dcutr-relay: ${{ needs.run-on-libp2p-dcutr-relay.result }}"
           echo "run-on-libp2p-gossipsub-request-response: ${{ needs.run-on-libp2p-gossipsub-request-response.result }}"
@@ -71,6 +73,8 @@ jobs:
       - if: ${{ needs.rust-tests.result != 'success' }}
         run: exit 1
       - if: ${{ needs.cross-version-caching.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.cross-feature-caching.result != 'success' }}
         run: exit 1
       - if: ${{ needs.run-on-rust-libp2p.result != 'success' }}
         run: exit 1
@@ -403,7 +407,7 @@ jobs:
       - name: Run semver-checks
         run: |
           cd semver
-          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/core/Cargo.toml" --verbose
+          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/serde/Cargo.toml" --verbose
 
       # Run cargo-semver-checks, enabling feature `unstable` this time.
       - name: Check with rustdoc for mismatching feature config cached
