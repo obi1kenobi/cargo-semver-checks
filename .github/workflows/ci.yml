@@ -374,10 +374,6 @@ jobs:
           ref: 'c479da812fd421260667c02049e6d11edd82c2dc'
           path: 'subject'
 
-      # rust-libp2p requires protobuf-compiler.
-      - name: Install protobuf-compiler
-        run: sudo apt install protobuf-compiler
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v3
@@ -388,7 +384,7 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@1stable
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Restore rustdoc
         id: cache
