@@ -316,6 +316,28 @@ impl Check {
             .deps(false)
             .silence(!config.is_verbose());
 
+        // If both the current and baseline rustdoc are given explicitly as a file path,
+        // we don't need to use the installed rustc, and this check can be skipped.
+        if !(matches!(self.current.source, RustdocSource::Rustdoc(_))
+            && matches!(self.baseline.source, RustdocSource::Rustdoc(_)))
+        {
+            let rustc_version_needed = rustc_version::Version::new(1, 65, 0);
+            match rustc_version::version() {
+                Ok(rustc_version) => {
+                    if rustc_version < rustc_version_needed {
+                        let help = "HELP: to use the latest rustc, run `rustup update stable && cargo +stable semver-checks <args>`";
+                        anyhow::bail!("rustc version is not high enough: >={rustc_version_needed} needed, got {rustc_version}\n\n{help}");
+                    }
+                }
+                Err(error) => {
+                    let help = format!("HELP: to avoid errors please ensure rustc >={rustc_version_needed} is used");
+                    config.shell_warn(format_args!(
+                        "failed to determine the current rustc version: {error}\n\n{help}"
+                    ))?;
+                }
+            };
+        }
+
         let current_loader = self.get_rustdoc_generator(&mut config, &self.current.source)?;
         let baseline_loader = self.get_rustdoc_generator(&mut config, &self.baseline.source)?;
 
