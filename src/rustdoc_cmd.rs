@@ -223,7 +223,7 @@ fn create_placeholder_rustdoc_manifest(
                         .feature_list_from_config(config, crate_data.feature_config),
                     default_features: matches!(
                         crate_data.feature_config.base_features,
-                        BaseFeatures::Default
+                        BaseFeatures::Default | BaseFeatures::Heuristic
                     ),
                     ..DependencyDetail::default()
                 },
@@ -244,7 +244,7 @@ fn create_placeholder_rustdoc_manifest(
                         .feature_list_from_config(config, crate_data.feature_config),
                     default_features: matches!(
                         crate_data.feature_config.base_features,
-                        BaseFeatures::Default
+                        BaseFeatures::Default | BaseFeatures::Heuristic
                     ),
                     ..DependencyDetail::default()
                 },
