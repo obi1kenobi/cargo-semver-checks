@@ -445,18 +445,30 @@ impl CrateReport {
     /// `true` if required bump <= detected bump.
     pub fn success(&self) -> bool {
         match self.required_bump {
+            // If `None`, no additional bump is required.
             None => true,
+            // If `Some`, additional bump is required, so the report is not successful.
             Some(required_bump) => {
+                // By design, `required_bump` should always be > `detected_bump`.
+                // Let's assert that.
                 match self.detected_bump {
                     // If user bumped the major version, any breaking change is accepted.
-                    ActualSemverUpdate::Major => true,
+                    // So `required_bump` should be `None`.
+                    ActualSemverUpdate::Major => panic!(
+                        "detected_bump is major, while required_bump is {:?}",
+                        required_bump
+                    ),
                     ActualSemverUpdate::Minor => {
-                        matches!(required_bump, ReleaseType::Minor | ReleaseType::Patch)
+                        assert_eq!(required_bump, ReleaseType::Major);
                     }
                     ActualSemverUpdate::Patch | ActualSemverUpdate::NotChanged => {
-                        required_bump == ReleaseType::Patch
+                        assert!(matches!(
+                            required_bump,
+                            ReleaseType::Major | ReleaseType::Minor
+                        ));
                     }
                 }
+                false
             }
         }
     }
