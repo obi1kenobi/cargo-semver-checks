@@ -202,6 +202,8 @@ pub(crate) enum CrateType<'a> {
     },
 }
 
+/// Configuration used to choose features to enable.
+/// Separate configs are used for baseline and current versions.
 #[derive(Debug, Clone, Hash)]
 pub(crate) struct FeatureConfig {
     /// Feature set chosen as the foundation.
