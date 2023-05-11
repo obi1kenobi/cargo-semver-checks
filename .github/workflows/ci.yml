@@ -430,6 +430,10 @@ jobs:
           RESULT="$(cat output | grep failure)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
+      - name: Verify cached rustdoc's hash
+        run: |
+          if [ -f subject/target/semver-checks/cache/registry-serde-1_0_162-e58a25d0d210ae84.json ]; then exit 0; else exit 1; fi
+
       - name: Cleanup
         run: |
           cd semver
