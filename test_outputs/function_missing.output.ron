@@ -1,10 +1,10 @@
 {
     "./test_crates/features_simple/": [
         {
-            "name": String("feature_dependant_function"),
+            "name": String("feature_dependent_function"),
             "path": List([
                 String("features_simple"),
-                String("feature_dependant_function"),
+                String("feature_dependent_function"),
             ]),
             "span_begin_line": Uint64(2),
             "span_filename": String("src/lib.rs"),

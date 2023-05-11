@@ -229,8 +229,8 @@ impl Check {
             baseline: Rustdoc::from_registry_latest_crate_version(),
             log_level: Default::default(),
             release_type: None,
-            current_feature_config: rustdoc_gen::FeatureConfig::default(false),
-            baseline_feature_config: rustdoc_gen::FeatureConfig::default(true),
+            current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
+            baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
         }
     }
 

@@ -224,15 +224,17 @@ struct CheckRelease {
     #[arg(long, value_name = "NAME", help_heading = "Features")]
     features: Vec<String>,
 
-    /// Use the named features only in the baseline version.
+    /// Use the named features in the baseline version only.
     #[arg(long, value_name = "NAME", help_heading = "Features")]
     baseline_features: Vec<String>,
 
-    /// Use the named features only in the current version.
+    /// Use the named features in the current version only.
     #[arg(long, value_name = "NAME", help_heading = "Features")]
     current_features: Vec<String>,
 
     /// Use all the features.
+    /// By default, features with names:
+    /// `unstable`, `nightly`, `bench`, `no_std` or starting with `__` are not used.
     #[arg(
         long,
         help_heading = "Features",

@@ -111,9 +111,23 @@ impl<'a> CrateSource<'a> {
         all_crate_features.into_iter().collect()
     }
 
-    /// Some feature names usually mean, that the feature is breaking semver by design.
-    /// This function filters them out.
+    /// Sometimes creates include features that are not meant for public use
+    /// or otherwise don't adhere to semver:
+    ///  - private features, like `bench` used for internal benchmarking only
+    ///  - nightly-only features, like `nightly`
+    ///  - unstable features containing experimental code, like `unstable`
     ///
+    /// To ensure the best possible out=of-the-box user experience,
+    /// this function attempts to heuristically exclude feature names like above.
+    ///
+    /// The heuristics is based on the name since cargo does not currently include
+    /// a mechanism for marking features as private/hidden/unstable. When such
+    /// mechanisms are available in cargo, we'll update this functionality to make
+    /// use of them. Relevant cargo issues:
+    /// - unstable/nightly-only features: https://github.com/rust-lang/cargo/issues/10881
+    /// - private/hidden features:        https://github.com/rust-lang/cargo/issues/10882
+    ///
+    /// This function tries to filter mentioned features out.
     /// Feature names not included by this function:
     ///  - `unstable`
     ///  - `nightly`
@@ -135,6 +149,12 @@ impl<'a> CrateSource<'a> {
         self.all_features().into_iter().filter(determine).collect()
     }
 
+    /// Returns features to explicitly enable. Does not fetch default features,
+    /// which are enabled separately.
+    ///
+    /// For baseline version, the extra features that do not exist are ignored,
+    /// because they could be just added to the current version.
+    /// A warning is issued in this case.
     pub(crate) fn feature_list_from_config(
         &self,
         global_config: &mut GlobalConfig,
@@ -156,10 +176,10 @@ impl<'a> CrateSource<'a> {
         result
             .into_iter()
             .filter(|feature_name| {
-                if !all_features.contains(feature_name) && feature_config.ignore_non_existing {
+                if !all_features.contains(feature_name) && feature_config.is_baseline {
                     global_config
                         .shell_warn(format!(
-                            "Feature {feature_name} is not present in the baseline."
+                            "Feature `{feature_name}` is not present in the baseline."
                         ))
                         .expect("print failed");
                     false
@@ -184,9 +204,11 @@ pub(crate) enum CrateType<'a> {
 
 #[derive(Debug, Clone, Hash)]
 pub(crate) struct FeatureConfig {
+    /// Feature set chosen as the foundation.
     pub(crate) base_features: BaseFeatures,
+    /// Explicitly enabled features.
     pub(crate) extra_features: Vec<String>,
-    pub(crate) ignore_non_existing: bool,
+    pub(crate) is_baseline: bool,
 }
 
 #[derive(Debug, Clone, Hash)]
@@ -198,12 +220,20 @@ pub(crate) enum BaseFeatures {
 }
 
 impl FeatureConfig {
-    pub(crate) fn default(is_baseline: bool) -> Self {
-        // The default behaviour is the heuristic approach.
+    pub(crate) fn default_for_current() -> Self {
+        // The default behaviour for both version is the heuristic approach.
         Self {
             base_features: BaseFeatures::Heuristic,
             extra_features: Vec::new(),
-            ignore_non_existing: is_baseline,
+            is_baseline: false,
+        }
+    }
+
+    pub(crate) fn default_for_baseline() -> Self {
+        Self {
+            base_features: BaseFeatures::Heuristic,
+            extra_features: Vec::new(),
+            is_baseline: true,
         }
     }
 
