@@ -125,8 +125,8 @@ impl<'a> CrateSource<'a> {
     /// a mechanism for marking features as private/hidden/unstable. When such
     /// mechanisms are available in cargo, we'll update this functionality to make
     /// use of them. Relevant cargo issues:
-    /// - unstable/nightly-only features: https://github.com/rust-lang/cargo/issues/10881
-    /// - private/hidden features:        https://github.com/rust-lang/cargo/issues/10882
+    /// - unstable/nightly-only features: <https://github.com/rust-lang/cargo/issues/10881>
+    /// - private/hidden features:        <https://github.com/rust-lang/cargo/issues/10882>
     ///
     /// This function tries to filter mentioned features out.
     /// Feature names not included by this function:
