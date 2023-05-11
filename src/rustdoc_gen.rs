@@ -1,3 +1,4 @@
+use std::num::Wrapping;
 use std::path::PathBuf;
 
 use anyhow::Context;
@@ -240,14 +241,36 @@ impl FeatureConfig {
     }
 
     /// Unique identifier, used to mark generated rustdoc files.
+    /// `is_baseline` is ignored there, as rustdoc is cached only for baseline.
     fn make_identifier(&self) -> String {
         if matches!(self.base_features, BaseFeatures::Heuristic) && self.extra_features.is_empty() {
             // If using the default config, return empty identifier
             return String::new();
         }
-        let mut s = std::collections::hash_map::DefaultHasher::new();
-        std::hash::Hash::hash(&self, &mut s);
-        format!("{:x}", std::hash::Hasher::finish(&s))
+
+        let mut extra_features = self.extra_features.clone();
+        // Sort the features, because the order is not revelant
+        extra_features.sort();
+
+        let unique_identifier = format!(
+            "{}{}",
+            match self.base_features {
+                BaseFeatures::All => "A",
+                BaseFeatures::Default => "D",
+                BaseFeatures::Heuristic => "H",
+                BaseFeatures::None => "N",
+            },
+            extra_features.join("@#$"), // separate features with some unusual symbols
+        );
+
+        // Calculate a rolling hash for the identifier, as it could end up too long.
+        let mut hash = Wrapping(0_u64);
+        let base = Wrapping(263_u64); // a hand-picked prime number
+        for b in unique_identifier.as_bytes() {
+            hash = hash * base + Wrapping(*b as u64);
+        }
+
+        format!("{:x}", hash)
     }
 }
 
