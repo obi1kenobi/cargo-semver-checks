@@ -358,7 +358,7 @@ jobs:
           [ "$OLD_RUSTDOC_VERSION" != "$NEW_RUSTDOC_VERSION" ] || exit 1
 
   cross-feature-caching:
-    # Ensure that cached rustdoc JSON files created with mismatched feature config is not used
+    # Ensure that cached rustdoc JSON files created with mismatched feature config is not used.
     name: 'Caching with feature config changed'
     runs-on: ubuntu-latest
     needs:
@@ -370,7 +370,7 @@ jobs:
           persist-credentials: false
           path: 'semver'
 
-      # This is a fork of serde, modified to make feature `unstable` break semver
+      # This is a fork of serde, modified to make feature `unstable` break semver.
       - name: Checkout fork of serde
         uses: actions/checkout@v3
         with:
