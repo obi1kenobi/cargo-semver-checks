@@ -39,6 +39,7 @@ jobs:
       - run-on-tokio-explicit
       - run-on-tokio-implicit
       - run-on-perf-event-open-sys2
+      - fails-on-1-64-rustc-rust-fnv
     if: ${{ success() || failure() }}  # Run this job even if a dependency has failed.
     steps:
       - name: Job outcomes
@@ -60,6 +61,7 @@ jobs:
           echo "run-on-tokio-explicit: ${{ needs.run-on-tokio-explicit.result }}"
           echo "run-on-tokio-implicit: ${{ needs.run-on-tokio-implicit.result }}"
           echo "run-on-perf-event-open-sys2: ${{ needs.run-on-perf-event-open-sys2.result }}"
+          echo "fails-on-1-64-rustc-rust-fnv: ${{ needs.fails-on-1-64-rustc-rust-fnv.result }}"
 
       # Fail this required job if any of its dependent jobs have failed.
       #
@@ -99,6 +101,8 @@ jobs:
       - if: ${{ needs.run-on-tokio-implicit.result != 'success' }}
         run: exit 1
       - if: ${{ needs.run-on-perf-event-open-sys2.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.fails-on-1-64-rustc-rust-fnv.result != 'success' }}
         run: exit 1
 
   lint:
@@ -1375,6 +1379,91 @@ jobs:
         run: |
           cd semver
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/perf-event-open-sys/Cargo.toml" --baseline-version 5.0.0 --verbose
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
+  fails-on-1-64-rustc-rust-fnv:
+    # cargo-semver-checks fails if the rustc version is not high enough
+    # because of rustdoc format incompatibilities. This test ensures that
+    # we have a good error message.
+    # https://github.com/obi1kenobi/cargo-semver-checks/issues/444
+    name: 'Check failure on 1.64'
+    runs-on: ubuntu-latest
+    needs:
+      - build-binary
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      # rust-fnv is very lightweight and quite stable.
+      - name: Checkout rust-fnv
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: "servo/rust-fnv"
+          ref: '94334357754a82f3ffb705dc387bd5f4c921e954'
+          path: 'subject'
+
+      - name: Install rust
+        id: toolchain
+        uses: dtolnay/rust-toolchain@1.64
+
+      - name: Restore binary
+        id: cache-binary
+        uses: actions/cache/restore@v3
+        with:
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-fnv-1_0_7/
+
+      - name: Run semver-checks
+        continue-on-error: true
+        id: semver_checks
+        run: |
+          cd semver
+          set -euo pipefail
+          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" 2>&1 | tee output
+          touch unexpectedly_did_not_fail
+
+      - name: Check whether it failed
+        if: steps.semver_checks.outcome != 'failure'
+        run: |
+          echo "Error! check-release should have failed because the rustc version is too old (1.64), but it has not."
+          exit 1
+
+      - name: Check output
+        run: |
+          cd semver
+          EXPECTED="$(echo -e "Error: rustc version is not high enough: >=1.65.0 needed, got 1.64.0")"
+          RESULT="$(cat output | grep Error)"
+          diff <(echo "$RESULT") <(echo "$EXPECTED")
+
+      - name: Cleanup
+        run: |
+          cd semver
+          rm output
+          rm -f unexpectedly_did_not_fail
 
       - name: Save rustdoc
         uses: actions/cache/save@v3
