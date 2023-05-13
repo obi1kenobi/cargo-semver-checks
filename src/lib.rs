@@ -260,26 +260,26 @@ impl Check {
     }
 
     pub fn with_only_explicit_features(&mut self) -> &mut Self {
-        self.current_feature_config.base_features = rustdoc_gen::BaseFeatures::None;
-        self.baseline_feature_config.base_features = rustdoc_gen::BaseFeatures::None;
+        self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::None;
+        self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::None;
         self
     }
 
     pub fn with_default_features(&mut self) -> &mut Self {
-        self.current_feature_config.base_features = rustdoc_gen::BaseFeatures::Default;
-        self.baseline_feature_config.base_features = rustdoc_gen::BaseFeatures::Default;
+        self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::Default;
+        self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::Default;
         self
     }
 
     pub fn with_heuristically_included_features(&mut self) -> &mut Self {
-        self.current_feature_config.base_features = rustdoc_gen::BaseFeatures::Heuristic;
-        self.baseline_feature_config.base_features = rustdoc_gen::BaseFeatures::Heuristic;
+        self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::Heuristic;
+        self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::Heuristic;
         self
     }
 
     pub fn with_all_features(&mut self) -> &mut Self {
-        self.current_feature_config.base_features = rustdoc_gen::BaseFeatures::All;
-        self.baseline_feature_config.base_features = rustdoc_gen::BaseFeatures::All;
+        self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::All;
+        self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::All;
         self
     }
 

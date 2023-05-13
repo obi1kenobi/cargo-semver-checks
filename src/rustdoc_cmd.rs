@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Context;
 
 use crate::{
-    rustdoc_gen::{BaseFeatures, CrateDataForRustdoc, CrateSource},
+    rustdoc_gen::{CrateDataForRustdoc, CrateSource, FeaturesGroup},
     GlobalConfig,
 };
 
@@ -222,8 +222,8 @@ fn create_placeholder_rustdoc_manifest(
                     features: crate_source
                         .feature_list_from_config(config, crate_data.feature_config),
                     default_features: matches!(
-                        crate_data.feature_config.base_features,
-                        BaseFeatures::Default | BaseFeatures::Heuristic
+                        crate_data.feature_config.features_group,
+                        FeaturesGroup::Default | FeaturesGroup::Heuristic
                     ),
                     ..DependencyDetail::default()
                 },
@@ -243,8 +243,8 @@ fn create_placeholder_rustdoc_manifest(
                     features: crate_source
                         .feature_list_from_config(config, crate_data.feature_config),
                     default_features: matches!(
-                        crate_data.feature_config.base_features,
-                        BaseFeatures::Default | BaseFeatures::Heuristic
+                        crate_data.feature_config.features_group,
+                        FeaturesGroup::Default | FeaturesGroup::Heuristic
                     ),
                     ..DependencyDetail::default()
                 },

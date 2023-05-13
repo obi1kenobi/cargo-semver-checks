@@ -370,6 +370,7 @@ jobs:
           persist-credentials: false
           path: 'semver'
 
+      # This is a fork of serde, modified to make feature `unstable` break semver
       - name: Checkout fork of serde
         uses: actions/checkout@v3
         with:
@@ -410,6 +411,9 @@ jobs:
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/serde/Cargo.toml" --verbose
 
       # Run cargo-semver-checks, enabling feature `unstable` this time.
+      # We expect this to fail.
+      # This run must not use the `serde` rustdoc without this feature as a baseline.
+      # If that happens, this check will unexpectedly pass -- and the test will fail.
       - name: Check with rustdoc for mismatching feature config cached
         continue-on-error: true
         run: |

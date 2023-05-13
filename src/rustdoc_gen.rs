@@ -112,24 +112,23 @@ impl<'a> CrateSource<'a> {
         all_crate_features.into_iter().collect()
     }
 
-    /// Sometimes creates include features that are not meant for public use
+    /// Sometimes crates include features that are not meant for public use
     /// or otherwise don't adhere to semver:
     ///  - private features, like `bench` used for internal benchmarking only
     ///  - nightly-only features, like `nightly`
     ///  - unstable features containing experimental code, like `unstable`
     ///
-    /// To ensure the best possible out=of-the-box user experience,
+    /// To ensure the best possible out-of-the-box user experience,
     /// this function attempts to heuristically exclude feature names like above.
     ///
-    /// The heuristics is based on the name since cargo does not currently include
+    /// The heuristics are based on the name since cargo does not currently include
     /// a mechanism for marking features as private/hidden/unstable. When such
     /// mechanisms are available in cargo, we'll update this functionality to make
     /// use of them. Relevant cargo issues:
     /// - unstable/nightly-only features: <https://github.com/rust-lang/cargo/issues/10881>
     /// - private/hidden features:        <https://github.com/rust-lang/cargo/issues/10882>
     ///
-    /// This function tries to filter mentioned features out.
-    /// Feature names not included by this function:
+    /// Because of the above, this function filters out features with names:
     ///  - `unstable`
     ///  - `nightly`
     ///  - `bench`
@@ -165,10 +164,10 @@ impl<'a> CrateSource<'a> {
             self.all_features().into_iter().collect();
 
         let result = [
-            match feature_config.base_features {
-                BaseFeatures::All => self.all_features(),
-                BaseFeatures::Heuristic => self.heuristically_included_features(),
-                BaseFeatures::Default | BaseFeatures::None => vec![],
+            match feature_config.features_group {
+                FeaturesGroup::All => self.all_features(),
+                FeaturesGroup::Heuristic => self.heuristically_included_features(),
+                FeaturesGroup::Default | FeaturesGroup::None => vec![],
             },
             feature_config.extra_features.clone(),
         ]
@@ -208,14 +207,14 @@ pub(crate) enum CrateType<'a> {
 #[derive(Debug, Clone, Hash)]
 pub(crate) struct FeatureConfig {
     /// Feature set chosen as the foundation.
-    pub(crate) base_features: BaseFeatures,
+    pub(crate) features_group: FeaturesGroup,
     /// Explicitly enabled features.
     pub(crate) extra_features: Vec<String>,
     pub(crate) is_baseline: bool,
 }
 
 #[derive(Debug, Clone, Hash)]
-pub(crate) enum BaseFeatures {
+pub(crate) enum FeaturesGroup {
     All,
     Default,
     Heuristic,
@@ -226,7 +225,7 @@ impl FeatureConfig {
     pub(crate) fn default_for_current() -> Self {
         // The default behaviour for both version is the heuristic approach.
         Self {
-            base_features: BaseFeatures::Heuristic,
+            features_group: FeaturesGroup::Heuristic,
             extra_features: Vec::new(),
             is_baseline: false,
         }
@@ -234,7 +233,7 @@ impl FeatureConfig {
 
     pub(crate) fn default_for_baseline() -> Self {
         Self {
-            base_features: BaseFeatures::Heuristic,
+            features_group: FeaturesGroup::Heuristic,
             extra_features: Vec::new(),
             is_baseline: true,
         }
@@ -243,7 +242,8 @@ impl FeatureConfig {
     /// Unique identifier, used to mark generated rustdoc files.
     /// `is_baseline` is ignored there, as rustdoc is cached only for baseline.
     fn make_identifier(&self) -> String {
-        if matches!(self.base_features, BaseFeatures::Heuristic) && self.extra_features.is_empty() {
+        if matches!(self.features_group, FeaturesGroup::Heuristic) && self.extra_features.is_empty()
+        {
             // If using the default config, return empty identifier
             return String::new();
         }
@@ -254,11 +254,11 @@ impl FeatureConfig {
 
         let unique_identifier = format!(
             "{}{}",
-            match self.base_features {
-                BaseFeatures::All => "A",
-                BaseFeatures::Default => "D",
-                BaseFeatures::Heuristic => "H",
-                BaseFeatures::None => "N",
+            match self.features_group {
+                FeaturesGroup::All => "A",
+                FeaturesGroup::Default => "D",
+                FeaturesGroup::Heuristic => "H",
+                FeaturesGroup::None => "N",
             },
             extra_features.join("@#$"), // separate features with some unusual symbols
         );
