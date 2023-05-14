@@ -321,10 +321,10 @@ impl Check {
         if !(matches!(self.current.source, RustdocSource::Rustdoc(_))
             && matches!(self.baseline.source, RustdocSource::Rustdoc(_)))
         {
-            let rustc_version_needed = rustc_version::Version::new(1, 65, 0);
+            let rustc_version_needed = config.minimum_rustc_version();
             match rustc_version::version() {
                 Ok(rustc_version) => {
-                    if rustc_version < rustc_version_needed {
+                    if rustc_version < *rustc_version_needed {
                         let help = "HELP: to use the latest rustc, run `rustup update stable && cargo +stable semver-checks <args>`";
                         anyhow::bail!("rustc version is not high enough: >={rustc_version_needed} needed, got {rustc_version}\n\n{help}");
                     }
