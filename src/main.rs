@@ -232,9 +232,9 @@ struct CheckRelease {
     #[arg(long, value_name = "NAME", help_heading = "Features")]
     current_features: Vec<String>,
 
-    /// Use all the features.
-    /// By default, features with names:
-    /// `unstable`, `nightly`, `bench`, `no_std` or starting with `__` are not used.
+    /// Use all the features, including features named
+    /// `unstable`, `nightly`, `bench`, `no_std` or starting with `__`,
+    /// that are disabled by default.
     #[arg(
         long,
         help_heading = "Features",

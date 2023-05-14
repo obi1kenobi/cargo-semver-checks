@@ -1,9 +1,10 @@
-use std::num::Wrapping;
 use std::path::PathBuf;
 
 use anyhow::Context;
 use crates_index::Crate;
 use itertools::Itertools;
+use serde::Serialize;
+use sha2::{Digest, Sha256};
 
 use crate::manifest::Manifest;
 use crate::rustdoc_cmd::RustdocCommand;
@@ -204,7 +205,7 @@ pub(crate) enum CrateType<'a> {
 
 /// Configuration used to choose features to enable.
 /// Separate configs are used for baseline and current versions.
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Clone, Serialize)]
 pub(crate) struct FeatureConfig {
     /// Feature set chosen as the foundation.
     pub(crate) features_group: FeaturesGroup,
@@ -213,7 +214,7 @@ pub(crate) struct FeatureConfig {
     pub(crate) is_baseline: bool,
 }
 
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Clone, Serialize)]
 pub(crate) enum FeaturesGroup {
     All,
     Default,
@@ -248,29 +249,25 @@ impl FeatureConfig {
             return String::new();
         }
 
-        let mut extra_features = self.extra_features.clone();
-        // Sort the features, because the order is not revelant
-        extra_features.sort();
+        // Sort the features, because the order is not revelant.
+        let mut to_serialize = self.clone();
+        to_serialize.extra_features.sort();
 
-        let unique_identifier = format!(
-            "{}{}",
-            match self.features_group {
-                FeaturesGroup::All => "A",
-                FeaturesGroup::Default => "D",
-                FeaturesGroup::Heuristic => "H",
-                FeaturesGroup::None => "N",
-            },
-            extra_features.join("@#$"), // separate features with some unusual symbols
-        );
+        // Serialize the whole struct. `The is_baseline` field is also serialized,
+        // as it changes the behaviour of the check. It has no negative effect
+        // on cache hitting, as only baseline crates are cached.
+        let serialized = serde_json::to_string(&to_serialize).unwrap();
+        let mut hasher = Sha256::new();
+        hasher.update(serialized.as_bytes());
 
-        // Calculate a rolling hash for the identifier, as it could end up too long.
-        let mut hash = Wrapping(0_u64);
-        let base = Wrapping(263_u64); // a hand-picked prime number
-        for b in unique_identifier.as_bytes() {
-            hash = hash * base + Wrapping(*b as u64);
-        }
+        // Store the hash as string with hex number (leading zeros added)
+        let mut hash = format!("{:0>64x}", hasher.finalize());
 
-        format!("{:x}", hash)
+        // First 16 characters is good enough for our use case.
+        // For birthday paradox to occur, single crate version must be run
+        // with an order of 2**32 feature configurations.
+        hash.truncate(16);
+        hash
     }
 }
 

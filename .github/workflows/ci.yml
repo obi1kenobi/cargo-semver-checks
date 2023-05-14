@@ -436,7 +436,7 @@ jobs:
 
       - name: Verify cached rustdoc's hash
         run: |
-          if [ -f subject/target/semver-checks/cache/registry-serde-1_0_162-e58a25d0d210ae84.json ]; then exit 0; else exit 1; fi
+          if [ -f subject/target/semver-checks/cache/registry-serde-1_0_162-bcb849e3b56d6e8d.json ]; then exit 0; else exit 1; fi
 
       - name: Cleanup
         run: |

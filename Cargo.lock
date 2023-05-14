@@ -274,6 +274,7 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
+ "sha2",
  "termcolor",
  "termcolor_output",
  "toml 0.5.11",
