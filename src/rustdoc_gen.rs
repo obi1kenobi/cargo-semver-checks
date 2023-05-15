@@ -249,7 +249,7 @@ impl FeatureConfig {
             return String::new();
         }
 
-        // Sort the features, because the order is not revelant.
+        // Sort the features to ensure a deterministic order.
         let mut to_serialize = self.clone();
         to_serialize.extra_features.sort();
 

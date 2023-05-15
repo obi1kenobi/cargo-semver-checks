@@ -208,7 +208,11 @@ struct CheckRelease {
     )]
     release_type: Option<ReleaseType>,
 
-    /// Use only the default and explicitly added features.
+    /// Use only the crate-defined default features, as well as any features
+    /// added explicitly via other flags.
+    ///
+    /// Using this flag disables the heuristic that enables all features
+    /// except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with `__`.
     #[arg(
         long,
         help_heading = "Features",
@@ -216,25 +220,32 @@ struct CheckRelease {
     )]
     default_features: bool,
 
-    /// Use no features except the explicitly mentioned ones.
+    /// Use no features except ones explicitly added by other flags.
+    ///
+    /// Using this flag disables the heuristic that enables all features
+    /// except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with `__`.
     #[arg(long, help_heading = "Features")]
     only_explicit_features: bool,
 
-    /// Use the named features.
+    /// Add a feature to the set of features being checked.
+    /// The feature will be used in both the baseline and the current version
+    /// of the crate.
     #[arg(long, value_name = "NAME", help_heading = "Features")]
     features: Vec<String>,
 
-    /// Use the named features in the baseline version only.
+    /// Add a feature to the set of features being checked.
+    /// The feature will be used in the baseline version of the crate only.
     #[arg(long, value_name = "NAME", help_heading = "Features")]
     baseline_features: Vec<String>,
 
-    /// Use the named features in the current version only.
+    /// Add a feature to the set of features being checked.
+    /// The feature will be used in the current version of the crate only.
     #[arg(long, value_name = "NAME", help_heading = "Features")]
     current_features: Vec<String>,
 
     /// Use all the features, including features named
     /// `unstable`, `nightly`, `bench`, `no_std` or starting with `__`,
-    /// that are disabled by default.
+    /// that are otherwise disabled by default.
     #[arg(
         long,
         help_heading = "Features",
