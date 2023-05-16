@@ -140,7 +140,15 @@ struct CheckRelease {
         alias = "current",
         value_name = "JSON_PATH",
         help_heading = "Current",
-        requires = "baseline_rustdoc"
+        requires = "baseline_rustdoc",
+        conflicts_with_all = [
+            "default_features",
+            "only_explicit_features",
+            "features",
+            "baseline_features",
+            "current_features",
+            "all_features",
+        ]
     )]
     current_rustdoc: Option<PathBuf>,
 
@@ -178,7 +186,15 @@ struct CheckRelease {
         alias = "baseline",
         value_name = "JSON_PATH",
         help_heading = "Baseline",
-        group = "baseline"
+        group = "baseline",
+        conflicts_with_all = [
+            "default_features",
+            "only_explicit_features",
+            "features",
+            "baseline_features",
+            "current_features",
+            "all_features",
+        ]
     )]
     baseline_rustdoc: Option<PathBuf>,
 
@@ -191,6 +207,57 @@ struct CheckRelease {
         group = "overrides"
     )]
     release_type: Option<ReleaseType>,
+
+    /// Use only the crate-defined default features, as well as any features
+    /// added explicitly via other flags.
+    ///
+    /// Using this flag disables the heuristic that enables all features
+    /// except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with `__`.
+    #[arg(
+        long,
+        help_heading = "Features",
+        conflicts_with = "only_explicit_features"
+    )]
+    default_features: bool,
+
+    /// Use no features except ones explicitly added by other flags.
+    ///
+    /// Using this flag disables the heuristic that enables all features
+    /// except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with `__`.
+    #[arg(long, help_heading = "Features")]
+    only_explicit_features: bool,
+
+    /// Add a feature to the set of features being checked.
+    /// The feature will be used in both the baseline and the current version
+    /// of the crate.
+    #[arg(long, value_name = "NAME", help_heading = "Features")]
+    features: Vec<String>,
+
+    /// Add a feature to the set of features being checked.
+    /// The feature will be used in the baseline version of the crate only.
+    #[arg(long, value_name = "NAME", help_heading = "Features")]
+    baseline_features: Vec<String>,
+
+    /// Add a feature to the set of features being checked.
+    /// The feature will be used in the current version of the crate only.
+    #[arg(long, value_name = "NAME", help_heading = "Features")]
+    current_features: Vec<String>,
+
+    /// Use all the features, including features named
+    /// `unstable`, `nightly`, `bench`, `no_std` or starting with `__`,
+    /// that are otherwise disabled by default.
+    #[arg(
+        long,
+        help_heading = "Features",
+        conflicts_with_all = [
+            "default_features",
+            "only_explicit_features",
+            "features",
+            "baseline_features",
+            "current_features",
+        ]
+    )]
+    all_features: bool,
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
@@ -260,6 +327,22 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         if let Some(release_type) = value.release_type {
             check.with_release_type(release_type);
         }
+
+        if value.all_features {
+            check.with_all_features();
+        } else if value.default_features {
+            check.with_default_features();
+        } else if value.only_explicit_features {
+            check.with_only_explicit_features();
+        } else {
+            check.with_heuristically_included_features();
+        }
+        let mut mutual_features = value.features;
+        let mut current_features = value.current_features;
+        let mut baseline_features = value.baseline_features;
+        current_features.append(&mut mutual_features.clone());
+        baseline_features.append(&mut mutual_features);
+        check.with_extra_features(current_features, baseline_features);
 
         check
     }
