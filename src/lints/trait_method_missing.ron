@@ -1,7 +1,7 @@
 SemverQuery(
     id: "trait_method_missing",
     human_readable_name: "pub trait method removed or renamed",
-    description: "A trait method is no longer visible, or can no longer be accessed by its prior path.",
+    description: "A trait method can no longer be called by its prior path.",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#major-any-change-to-trait-item-signatures"),
     query: r#"
@@ -17,11 +17,6 @@ SemverQuery(
                             path @output @tag
                         }
 
-                        span_: span @optional {
-                                filename @output
-                                begin_line @output
-                            }
-
                         method {
                             method_name: name @output @tag
 
@@ -33,7 +28,7 @@ SemverQuery(
                     }
                 }
             }
-            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+            current {
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"])
@@ -54,6 +49,6 @@ SemverQuery(
         "public": "public",
         "zero": 0,
     },
-    error_message: "A publicly-visible trait method is no longer visible, or cannot be called by its prior path. A member, method, or item of the trait may have been renamed or removed entirely.",
-    per_result_error_template: Some("trait {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A publicly-visible trait method is no longer callable. A method of the trait may have been renamed or removed entirely.",
+    per_result_error_template: Some("method {{method_name}} of trait {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
 )
