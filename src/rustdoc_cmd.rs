@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Context;
 
 use crate::{
-    rustdoc_gen::{CrateDataForRustdoc, CrateSource},
+    rustdoc_gen::{CrateDataForRustdoc, CrateSource, FeaturesGroup},
     GlobalConfig,
 };
 
@@ -54,8 +54,9 @@ impl RustdocCommand {
         // Generate an empty placeholder project with a dependency on the crate
         // whose rustdoc we need. We take this indirect generation path to avoid issues like:
         // https://github.com/obi1kenobi/cargo-semver-checks/issues/167#issuecomment-1382367128
-        let placeholder_manifest = create_placeholder_rustdoc_manifest(crate_source, crate_data)
-            .context("failed to create placeholder manifest")?;
+        let placeholder_manifest =
+            create_placeholder_rustdoc_manifest(config, crate_source, crate_data)
+                .context("failed to create placeholder manifest")?;
         let placeholder_manifest_path =
             save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)
                 .context("failed to save placeholder rustdoc manifest")?;
@@ -191,8 +192,9 @@ impl Default for RustdocCommand {
 /// To get the rustdoc of the project, we first create a placeholder project somewhere
 /// with the project as a dependency, and run `cargo rustdoc` on it.
 fn create_placeholder_rustdoc_manifest(
+    config: &mut GlobalConfig,
     crate_source: &CrateSource,
-    _crate_data: &CrateDataForRustdoc, // TODO: use this to select crate features to enable
+    crate_data: &CrateDataForRustdoc,
 ) -> anyhow::Result<cargo_toml::Manifest<()>> {
     use cargo_toml::*;
 
@@ -217,7 +219,12 @@ fn create_placeholder_rustdoc_manifest(
                     // give us the latest semver-compatible version which is not we want.
                     // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
                     version: Some(format!("={}", crate_.version())),
-                    features: crate_source.all_features(),
+                    features: crate_source
+                        .feature_list_from_config(config, crate_data.feature_config),
+                    default_features: matches!(
+                        crate_data.feature_config.features_group,
+                        FeaturesGroup::Default | FeaturesGroup::Heuristic | FeaturesGroup::All,
+                    ),
                     ..DependencyDetail::default()
                 },
                 CrateSource::ManifestPath { manifest } => DependencyDetail {
@@ -233,7 +240,12 @@ fn create_placeholder_rustdoc_manifest(
                             .context("manifest path is not valid UTF-8")?
                             .to_string()
                     }),
-                    features: crate_source.all_features(),
+                    features: crate_source
+                        .feature_list_from_config(config, crate_data.feature_config),
+                    default_features: matches!(
+                        crate_data.feature_config.features_group,
+                        FeaturesGroup::Default | FeaturesGroup::Heuristic | FeaturesGroup::All,
+                    ),
                     ..DependencyDetail::default()
                 },
             };

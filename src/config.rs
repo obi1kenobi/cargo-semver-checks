@@ -9,6 +9,10 @@ pub struct GlobalConfig {
     stdout: StandardStream,
     stderr: StandardStream,
     handlebars: handlebars::Handlebars<'static>,
+    /// Minimum rustc version supported.
+    ///
+    /// This will be used to print an error if the user's rustc version is not high enough.
+    minimum_rustc_version: semver::Version,
 }
 
 impl Default for GlobalConfig {
@@ -48,11 +52,16 @@ impl GlobalConfig {
                 }
             })),
             handlebars: make_handlebars_registry(),
+            minimum_rustc_version: semver::Version::new(1, 65, 0),
         }
     }
 
     pub fn handlebars(&self) -> &handlebars::Handlebars<'static> {
         &self.handlebars
+    }
+
+    pub fn minimum_rustc_version(&self) -> &semver::Version {
+        &self.minimum_rustc_version
     }
 
     pub fn set_level(mut self, level: Option<log::Level>) -> Self {

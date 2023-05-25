@@ -38,6 +38,8 @@ itertools = "0.10.5"
 cargo_toml = "0.15.2"
 toml = "0.5.9"
 directories = "4.0.1"
+sha2 = "0.10.6"
+rustc_version = "0.4.0"
 
 [dev-dependencies]
 assert_cmd = "2.0"

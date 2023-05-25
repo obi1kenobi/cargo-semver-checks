@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use anyhow::Context;
 use crates_index::Crate;
 use itertools::Itertools;
+use serde::Serialize;
+use sha2::{Digest, Sha256};
 
 use crate::manifest::Manifest;
 use crate::rustdoc_cmd::RustdocCommand;
@@ -110,6 +112,84 @@ impl<'a> CrateSource<'a> {
         all_crate_features.extend(self.regular_features());
         all_crate_features.into_iter().collect()
     }
+
+    /// Sometimes crates include features that are not meant for public use
+    /// or otherwise don't adhere to semver:
+    ///  - private features, like `bench` used for internal benchmarking only
+    ///  - nightly-only features, like `nightly`
+    ///  - unstable features containing experimental code, like `unstable`
+    ///
+    /// To ensure the best possible out-of-the-box user experience,
+    /// this function attempts to heuristically exclude feature names like above.
+    ///
+    /// The heuristics are based on the name since cargo does not currently include
+    /// a mechanism for marking features as private/hidden/unstable. When such
+    /// mechanisms are available in cargo, we'll update this functionality to make
+    /// use of them. Relevant cargo issues:
+    /// - unstable/nightly-only features: <https://github.com/rust-lang/cargo/issues/10881>
+    /// - private/hidden features:        <https://github.com/rust-lang/cargo/issues/10882>
+    ///
+    /// Because of the above, this function filters out features with names:
+    ///  - `unstable`
+    ///  - `nightly`
+    ///  - `bench`
+    ///  - `no_std`
+    ///  - features with prefix `__`
+    fn heuristically_included_features(&self) -> Vec<String> {
+        let features_ignored_by_default = std::collections::HashSet::from([
+            String::from("unstable"),
+            String::from("nightly"),
+            String::from("bench"),
+            String::from("no_std"),
+        ]);
+
+        let determine = |feature_name: &String| {
+            !features_ignored_by_default.contains(feature_name) && !feature_name.starts_with("__")
+        };
+
+        self.all_features().into_iter().filter(determine).collect()
+    }
+
+    /// Returns features to explicitly enable. Does not fetch default features,
+    /// which are enabled separately.
+    ///
+    /// For baseline version, the extra features that do not exist are ignored,
+    /// because they could be just added to the current version.
+    /// A warning is issued in this case.
+    pub(crate) fn feature_list_from_config(
+        &self,
+        global_config: &mut GlobalConfig,
+        feature_config: &FeatureConfig,
+    ) -> Vec<String> {
+        let all_features: std::collections::HashSet<String> =
+            self.all_features().into_iter().collect();
+
+        let result = [
+            match feature_config.features_group {
+                FeaturesGroup::All => self.all_features(),
+                FeaturesGroup::Heuristic => self.heuristically_included_features(),
+                FeaturesGroup::Default | FeaturesGroup::None => vec![],
+            },
+            feature_config.extra_features.clone(),
+        ]
+        .concat();
+
+        result
+            .into_iter()
+            .filter(|feature_name| {
+                if !all_features.contains(feature_name) && feature_config.is_baseline {
+                    global_config
+                        .shell_warn(format!(
+                            "Feature `{feature_name}` is not present in the baseline."
+                        ))
+                        .expect("print failed");
+                    false
+                } else {
+                    true
+                }
+            })
+            .collect()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -123,11 +203,79 @@ pub(crate) enum CrateType<'a> {
     },
 }
 
+/// Configuration used to choose features to enable.
+/// Separate configs are used for baseline and current versions.
+#[derive(Debug, Clone, Serialize)]
+pub(crate) struct FeatureConfig {
+    /// Feature set chosen as the foundation.
+    pub(crate) features_group: FeaturesGroup,
+    /// Explicitly enabled features.
+    pub(crate) extra_features: Vec<String>,
+    pub(crate) is_baseline: bool,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub(crate) enum FeaturesGroup {
+    All,
+    Default,
+    Heuristic,
+    None,
+}
+
+impl FeatureConfig {
+    pub(crate) fn default_for_current() -> Self {
+        // The default behaviour for both version is the heuristic approach.
+        Self {
+            features_group: FeaturesGroup::Heuristic,
+            extra_features: Vec::new(),
+            is_baseline: false,
+        }
+    }
+
+    pub(crate) fn default_for_baseline() -> Self {
+        Self {
+            features_group: FeaturesGroup::Heuristic,
+            extra_features: Vec::new(),
+            is_baseline: true,
+        }
+    }
+
+    /// Unique identifier, used to mark generated rustdoc files.
+    /// `is_baseline` is ignored there, as rustdoc is cached only for baseline.
+    fn make_identifier(&self) -> String {
+        if matches!(self.features_group, FeaturesGroup::Heuristic) && self.extra_features.is_empty()
+        {
+            // If using the default config, return empty identifier
+            return String::new();
+        }
+
+        // Sort the features to ensure a deterministic order.
+        let mut to_serialize = self.clone();
+        to_serialize.extra_features.sort();
+
+        // Serialize the whole struct. `The is_baseline` field is also serialized,
+        // as it changes the behaviour of the check. It has no negative effect
+        // on cache hitting, as only baseline crates are cached.
+        let serialized = serde_json::to_string(&to_serialize).unwrap();
+        let mut hasher = Sha256::new();
+        hasher.update(serialized.as_bytes());
+
+        // Store the hash as string with hex number (leading zeros added)
+        let mut hash = format!("{:0>64x}", hasher.finalize());
+
+        // First 16 characters is good enough for our use case.
+        // For birthday paradox to occur, single crate version must be run
+        // with an order of 2**32 feature configurations.
+        hash.truncate(16);
+        hash
+    }
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) crate_type: CrateType<'a>,
     pub(crate) name: &'a str,
-    // TODO: pass an enum describing which features to enable
+    pub(crate) feature_config: &'a FeatureConfig,
 }
 
 impl<'a> CrateType<'a> {
@@ -148,7 +296,16 @@ fn generate_rustdoc(
 ) -> anyhow::Result<PathBuf> {
     let name = crate_source.name()?;
     let version = crate_source.version()?;
-    let crate_identifier = crate_source.slug()?;
+    let feature_identifier = crate_data.feature_config.make_identifier();
+    let crate_identifier = if feature_identifier.is_empty() {
+        crate_source.slug()?
+    } else {
+        format!(
+            "{}-{}",
+            crate_source.slug()?,
+            crate_data.feature_config.make_identifier(),
+        )
+    };
 
     let (cache_dir, cached_rustdoc) = match crate_source {
         CrateSource::Registry { .. } => {

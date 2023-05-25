@@ -1,0 +1,16 @@
+[package]
+publish = false
+name = "features_simple"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[features]
+default = ["foo"]
+foo = []
+unstable = []
+nightly = []
+bench = []
+no_std = []
+__foo = []
