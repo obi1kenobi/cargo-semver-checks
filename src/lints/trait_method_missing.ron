@@ -49,6 +49,6 @@ SemverQuery(
         "public": "public",
         "zero": 0,
     },
-    error_message: "A publicly-visible trait method is no longer callable. A method of the trait may have been renamed or removed entirely.",
+    error_message: "A trait method is no longer callable, and may have been renamed or removed entirely.",
     per_result_error_template: Some("method {{method_name}} of trait {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
 )
