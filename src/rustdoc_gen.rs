@@ -586,7 +586,7 @@ impl RustdocFromRegistry {
         let mut index = crates_index::Index::new_cargo_default()?;
 
         config.shell_status("Updating", "index")?;
-        while need_retry(index.update())? {
+        while need_retry(index.update()).map_err(human_readable_message)? {
             config.shell_status("Blocking", "waiting for lock on registry index")?;
             std::thread::sleep(REGISTRY_BACKOFF);
         }
@@ -701,18 +701,35 @@ impl RustdocGenerator for RustdocFromRegistry {
 
 const REGISTRY_BACKOFF: std::time::Duration = std::time::Duration::from_secs(1);
 
+/// Change the error message to be more human readable.
+fn human_readable_message(err: crates_index::Error) -> anyhow::Error {
+    if let crates_index::Error::Git(ref err) = err {
+        if err.class() == git2::ErrorClass::Index && err.code() == git2::ErrorCode::NotFound {
+            return anyhow::anyhow!(
+                "{}. The registry is crates.io. \
+        Crates published on a custom registry cannot be checked \
+        using default settings, \
+        see https://github.com/obi1kenobi/cargo-semver-checks/issues/166",
+                err
+            );
+        }
+    }
+
+    err.into()
+}
+
 /// Check if we need to retry retrieving the Index.
-fn need_retry(res: Result<(), crates_index::Error>) -> anyhow::Result<bool> {
+fn need_retry(res: Result<(), crates_index::Error>) -> Result<bool, crates_index::Error> {
     match res {
         Ok(()) => Ok(false),
         Err(crates_index::Error::Git(err)) => {
             if err.class() == git2::ErrorClass::Index && err.code() == git2::ErrorCode::Locked {
                 Ok(true)
             } else {
-                Err(crates_index::Error::Git(err).into())
+                Err(crates_index::Error::Git(err))
             }
         }
-        Err(err) => Err(err.into()),
+        Err(err) => Err(err),
     }
 }
 
