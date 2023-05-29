@@ -660,10 +660,9 @@ impl RustdocGenerator for RustdocFromRegistry {
     ) -> anyhow::Result<PathBuf> {
         let crate_ = self.index.crate_(crate_data.name).with_context(|| {
             anyhow::format_err!(
-                "{} not found in registry. The registry is crates.io. \
-        Crates published on a custom registry cannot be checked \
-        using default settings, \
-        see https://github.com/obi1kenobi/cargo-semver-checks/issues/166",
+                "{} not found in registry (crates.io). \
+       For workarounds check \
+        https://github.com/obi1kenobi/cargo-semver-checks#does-the-crate-im-checking-have-to-be-published-on-cratesio",
                 crate_data.name
             )
         })?;
