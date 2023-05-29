@@ -661,7 +661,7 @@ impl RustdocGenerator for RustdocFromRegistry {
         let crate_ = self.index.crate_(crate_data.name).with_context(|| {
             anyhow::format_err!(
                 "{} not found in registry (crates.io). \
-       For workarounds check \
+        For workarounds check \
         https://github.com/obi1kenobi/cargo-semver-checks#does-the-crate-im-checking-have-to-be-published-on-cratesio",
                 crate_data.name
             )
