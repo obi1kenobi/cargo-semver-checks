@@ -658,10 +658,14 @@ impl RustdocGenerator for RustdocFromRegistry {
         rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        let crate_ = self
-            .index
-            .crate_(crate_data.name)
-            .with_context(|| anyhow::format_err!("{} not found in registry", crate_data.name))?;
+        let crate_ = self.index.crate_(crate_data.name).with_context(|| {
+            anyhow::format_err!(
+                "{} not found in registry (crates.io). \
+        For workarounds check \
+        https://github.com/obi1kenobi/cargo-semver-checks#does-the-crate-im-checking-have-to-be-published-on-cratesio",
+                crate_data.name
+            )
+        })?;
 
         let base_version = if let Some(base) = self.version.as_ref() {
             base.to_string()
