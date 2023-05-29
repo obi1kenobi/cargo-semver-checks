@@ -1,0 +1,15 @@
+{
+    "./test_crates/trait_method_missing/": [
+        {
+            "method_name": String("fooA"),
+            "name": String("RemovedTraitMethod"),
+            "path": List([
+                String("trait_method_missing"),
+                String("RemovedTraitMethod"),
+            ]),
+            "span_begin_line": Uint64(2),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}
