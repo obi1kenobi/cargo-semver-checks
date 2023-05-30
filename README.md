@@ -72,6 +72,49 @@ Custom registries are not currently supported
 ([#160](https://github.com/obi1kenobi/cargo-semver-check/issues/160)), so crates published on
 registries other than crates.io should use one of the other approaches of generating the baseline.
 
+### What features does `cargo-semver-checks` enable in the tested crates?
+
+By default, crates are built with all features excluding heuristically selected features that usually break semver. More precisely, features named `unstable`, `nightly`, `bench`, `no_std` or starting with `__` are disabled.
+
+The flags below can be used to select the checked features set:
+```
+--default-features
+    Use only the crate-defined default features, as well as any features added explicitly via other flags.
+
+    Using this flag disables the heuristic that enables all features except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with `__`.
+
+--only-explicit-features
+    Use no features except ones explicitly added by other flags.
+
+    Using this flag disables the heuristic that enables all features except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with `__`.
+
+--features <NAME>
+    Add a feature to the set of features being checked. The feature will be used in both the baseline and the current version of the crate
+
+--baseline-features <NAME>
+    Add a feature to the set of features being checked. The feature will be used in the baseline version of the crate only
+
+--current-features <NAME>
+    Add a feature to the set of features being checked. The feature will be used in the current version of the crate only
+
+--all-features
+    Use all the features, including features named `unstable`, `nightly`, `bench`, `no_std` or starting with `__`, that are otherwise disabled by default
+```
+
+Let's say we have a crate with the following features:
+- `default` - the only crate's default feature,
+- `non-default`,
+- `unstable`- a feature that possibly breaks semver.
+
+| used flags | selected feature set |
+|--|--|
+| none | `default`, `non-default`  |
+| `--features unstable` | `default`, `non-default`, `unstable` |
+| `--all-features` | `default`, `non-default`, `unstable` |
+| `--default-features` | `default` |
+|`--default-features --features non-default` | `default`, `non-default` |
+| `--only-explicit-features --features unstable` | `unstable` |
+
 ### Does `cargo-semver-checks` have false positives?
 
 "False positive" means that `cargo-semver-checks` reported a semver violation incorrectly.

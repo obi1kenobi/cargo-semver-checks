@@ -267,7 +267,7 @@ impl FeatureConfig {
         let mut to_serialize = self.clone();
         to_serialize.extra_features.sort();
 
-        // Serialize the whole struct. `The is_baseline` field is also serialized,
+        // Serialize the whole struct. The `is_baseline` field is also serialized,
         // as it changes the behaviour of the check. It has no negative effect
         // on cache hitting, as only baseline crates are cached.
         let serialized = serde_json::to_string(&to_serialize).unwrap();
