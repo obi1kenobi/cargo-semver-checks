@@ -6,12 +6,22 @@ struct CargoSemverChecks {
 }
 
 impl CargoSemverChecks {
-    fn new(current_path: &str, baseline_path: &str) -> Self {
+    fn new_with_check_release_subcommand(current_path: &str, baseline_path: &str) -> Self {
         Self {
             cmd: Command::cargo_bin("cargo-semver-checks").unwrap(),
             args: vec![
                 String::from("semver-checks"),
                 String::from("check-release"),
+                format!("--manifest-path={current_path}"),
+                format!("--baseline-root={baseline_path}"),
+            ],
+        }
+    }
+    fn new(current_path: &str, baseline_path: &str) -> Self {
+        Self {
+            cmd: Command::cargo_bin("cargo-semver-checks").unwrap(),
+            args: vec![
+                String::from("semver-checks"),
                 format!("--manifest-path={current_path}"),
                 format!("--baseline-root={baseline_path}"),
             ],
@@ -30,6 +40,14 @@ impl CargoSemverChecks {
 
 #[test]
 fn simple_only_explicit_feature() {
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/features_simple/new/",
+        "test_crates/features_simple/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .run()
+    .success();
+
     CargoSemverChecks::new(
         "test_crates/features_simple/new/",
         "test_crates/features_simple/old/Cargo.toml",
@@ -41,6 +59,14 @@ fn simple_only_explicit_feature() {
 
 #[test]
 fn simple_default_features() {
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/features_simple/new/",
+        "test_crates/features_simple/old/Cargo.toml",
+    )
+    .add_arg("--default-features")
+    .run()
+    .failure();
+
     CargoSemverChecks::new(
         "test_crates/features_simple/new/",
         "test_crates/features_simple/old/Cargo.toml",
@@ -52,6 +78,16 @@ fn simple_default_features() {
 
 #[test]
 fn simple_heuristic_features() {
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/features_simple/new/",
+        "test_crates/features_simple/old/Cargo.toml",
+    )
+    // make sure 'foo' is added to current
+    .add_arg("--baseline-features")
+    .add_arg("foo")
+    .run()
+    .success();
+
     CargoSemverChecks::new(
         "test_crates/features_simple/new/",
         "test_crates/features_simple/old/Cargo.toml",
@@ -65,6 +101,14 @@ fn simple_heuristic_features() {
 
 #[test]
 fn simple_all_features() {
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/features_simple/new/",
+        "test_crates/features_simple/old/Cargo.toml",
+    )
+    .add_arg("--all-features")
+    .run()
+    .failure();
+
     CargoSemverChecks::new(
         "test_crates/features_simple/new/",
         "test_crates/features_simple/old/Cargo.toml",
@@ -76,6 +120,60 @@ fn simple_all_features() {
 
 #[test]
 fn function_moved_only_explicit_features() {
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .run()
+    .success();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .add_arg("--baseline-features")
+    .add_arg("C")
+    .run()
+    .success();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .add_arg("--baseline-features")
+    .add_arg("A")
+    .add_arg("--current-features")
+    .add_arg("B")
+    .run()
+    .success();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .add_arg("--features")
+    .add_arg("B")
+    .run()
+    .failure();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .add_arg("--features")
+    .add_arg("A")
+    .add_arg("--features")
+    .add_arg("B")
+    .add_arg("--features")
+    .add_arg("C")
+    .run()
+    .success();
+
     CargoSemverChecks::new(
         "test_crates/function_feature_changed/new/",
         "test_crates/function_feature_changed/old/Cargo.toml",
@@ -133,6 +231,46 @@ fn function_moved_only_explicit_features() {
 
 #[test]
 fn function_moved_default_features() {
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--default-features")
+    .run()
+    .failure();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--default-features")
+    .add_arg("--current-features")
+    .add_arg("B")
+    .run()
+    .success();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--default-features")
+    .add_arg("--features")
+    .add_arg("B")
+    .run()
+    .failure();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--default-features")
+    .add_arg("--features")
+    .add_arg("B")
+    .add_arg("--current-features")
+    .add_arg("C")
+    .run()
+    .success();
+
     CargoSemverChecks::new(
         "test_crates/function_feature_changed/new/",
         "test_crates/function_feature_changed/old/Cargo.toml",
@@ -176,6 +314,13 @@ fn function_moved_default_features() {
 
 #[test]
 fn function_moved_heuristic_features() {
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .run()
+    .success();
+
     CargoSemverChecks::new(
         "test_crates/function_feature_changed/new/",
         "test_crates/function_feature_changed/old/Cargo.toml",
@@ -186,6 +331,14 @@ fn function_moved_heuristic_features() {
 
 #[test]
 fn function_moved_all_features() {
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--all-features")
+    .run()
+    .success();
+
     CargoSemverChecks::new(
         "test_crates/function_feature_changed/new/",
         "test_crates/function_feature_changed/old/Cargo.toml",
@@ -197,6 +350,54 @@ fn function_moved_all_features() {
 
 #[test]
 fn default_features_when_default_undefined() {
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/features_no_default/new/",
+        "test_crates/features_no_default/old/Cargo.toml",
+    )
+    .add_arg("--default-features")
+    .run()
+    .success();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/features_no_default/new/",
+        "test_crates/features_no_default/old/Cargo.toml",
+    )
+    .add_arg("--default-features")
+    .add_arg("--features")
+    .add_arg("A")
+    .run()
+    .success();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/features_no_default/new/",
+        "test_crates/features_no_default/old/Cargo.toml",
+    )
+    .add_arg("--default-features")
+    .add_arg("--baseline-features")
+    .add_arg("A")
+    .run()
+    .success();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/features_no_default/new/",
+        "test_crates/features_no_default/old/Cargo.toml",
+    )
+    .add_arg("--default-features")
+    .add_arg("--current-features")
+    .add_arg("B")
+    .run()
+    .success();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/features_no_default/new/",
+        "test_crates/features_no_default/old/Cargo.toml",
+    )
+    .add_arg("--default-features")
+    .add_arg("--features")
+    .add_arg("B")
+    .run()
+    .failure();
+
     CargoSemverChecks::new(
         "test_crates/features_no_default/new/",
         "test_crates/features_no_default/old/Cargo.toml",
@@ -248,6 +449,24 @@ fn default_features_when_default_undefined() {
 
 #[test]
 fn feature_does_not_exist() {
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--features")
+    .add_arg("new_feature")
+    .run()
+    .success();
+
+    CargoSemverChecks::new_with_check_release_subcommand(
+        "test_crates/function_feature_changed/new/",
+        "test_crates/function_feature_changed/old/Cargo.toml",
+    )
+    .add_arg("--features")
+    .add_arg("feature_to_be_removed")
+    .run()
+    .failure();
+
     CargoSemverChecks::new(
         "test_crates/function_feature_changed/new/",
         "test_crates/function_feature_changed/old/Cargo.toml",
