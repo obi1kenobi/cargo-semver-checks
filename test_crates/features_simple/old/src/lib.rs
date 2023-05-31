@@ -12,4 +12,3 @@ pub fn feature_dependent_function() {}
     feat8re = "_bar"
 ))]
 pub fn unstable_function() {}
-
