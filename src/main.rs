@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
             )?;
         }
 
-        let mut config = GlobalConfig::new().set_level(args.verbosity.log_level());
+        let mut config = GlobalConfig::new().set_level(args.check_release.verbosity.log_level());
         config.shell_note("Use `--explain <id>` to see more details")?;
         std::process::exit(0);
     } else if let Some(id) = args.explain.as_deref() {
@@ -75,19 +75,15 @@ fn main() -> anyhow::Result<()> {
         std::process::exit(0);
     }
 
-    match args.command {
-        Some(SemverChecksCommands::CheckRelease(args)) => {
-            let check: cargo_semver_checks::Check = args.into();
-            let report = check.check_release()?;
-            if report.success() {
-                std::process::exit(0)
-            } else {
-                std::process::exit(1);
-            }
-        }
-        None => {
-            anyhow::bail!("subcommand required");
-        }
+    let check: cargo_semver_checks::Check = match args.command {
+        Some(SemverChecksCommands::CheckRelease(args)) => args.into(),
+        None => args.check_release.into(),
+    };
+    let report = check.check_release()?;
+    if report.success() {
+        std::process::exit(0);
+    } else {
+        std::process::exit(1);
     }
 }
 
@@ -111,8 +107,8 @@ struct SemverChecks {
     #[arg(long, global = true, exclusive = true)]
     list: bool,
 
-    #[command(flatten)]
-    verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
+    #[clap(flatten)]
+    check_release: CheckRelease,
 
     #[command(subcommand)]
     command: Option<SemverChecksCommands>,
