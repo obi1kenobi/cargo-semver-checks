@@ -102,18 +102,18 @@ The flags below can be used to select the checked features set:
     Use all the features, including features named `unstable`, `nightly`, `bench`, `no_std` or starting with `__`, that are otherwise disabled by default
 ```
 
-Let's say we have a [crate](https://github.com/serde-rs/serde) with the following features:
+For example, consider crate [serde](https://github.com/serde-rs/serde), with the following features (per v1.0.163):
 - `std` - the only crate's default feature,
 - `alloc`, `derive`, `rc` - some optional features,
 - `unstable`- a feature that possibly breaks semver.
 
 | used flags | selected feature set |
 |--|--|
-| none | `std`, `non-default`  |
-| `--features unstable` | `std`, `non-default`, `unstable` |
-| `--all-features` | `std`, `non-default`, `unstable` |
+| none | `std`, `alloc`, `derive`, `rc`  |
+| `--features unstable` | `std`, `alloc`, `derive`, `rc`, `unstable` |
+| `--all-features` | `std`, `alloc`, `derive`, `rc`, `unstable` |
 | `--default-features` | `std` |
-| `--default-features --features non-default` | `std`, `non-default` |
+| `--default-features --features derive` | `std`, `derive` |
 | `--only-explicit-features --features unstable` | `unstable` |
 
 ### Does `cargo-semver-checks` have false positives?
