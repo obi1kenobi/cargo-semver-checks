@@ -1,3 +1,4 @@
+
 # cargo-semver-checks
 
 Lint your crate API changes for semver violations.
@@ -101,18 +102,18 @@ The flags below can be used to select the checked features set:
     Use all the features, including features named `unstable`, `nightly`, `bench`, `no_std` or starting with `__`, that are otherwise disabled by default
 ```
 
-Let's say we have a crate with the following features:
-- `default` - the only crate's default feature,
-- `non-default`,
+Let's say we have a [crate](https://github.com/serde-rs/serde) with the following features:
+- `std` - the only crate's default feature,
+- `alloc`, `derive`, `rc` - some optional features,
 - `unstable`- a feature that possibly breaks semver.
 
 | used flags | selected feature set |
 |--|--|
-| none | `default`, `non-default`  |
-| `--features unstable` | `default`, `non-default`, `unstable` |
-| `--all-features` | `default`, `non-default`, `unstable` |
-| `--default-features` | `default` |
-|`--default-features --features non-default` | `default`, `non-default` |
+| none | `std`, `non-default`  |
+| `--features unstable` | `std`, `non-default`, `unstable` |
+| `--all-features` | `std`, `non-default`, `unstable` |
+| `--default-features` | `std` |
+| `--default-features --features non-default` | `std`, `non-default` |
 | `--only-explicit-features --features unstable` | `unstable` |
 
 ### Does `cargo-semver-checks` have false positives?
