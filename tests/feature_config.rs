@@ -6,6 +6,7 @@ struct CargoSemverChecks {
 
 impl CargoSemverChecks {
     const SUBCOMMAND_ARGS_INDEX: usize = 1;
+
     fn new(current_path: &str, baseline_path: &str) -> Self {
         Self {
             args: vec![
