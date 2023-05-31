@@ -1,12 +1,11 @@
 use assert_cmd::{assert::Assert, Command};
 
-static SUBCOMMAND_ARGS_INDEX: usize = 1;
-
 struct CargoSemverChecks {
     args: Vec<String>,
 }
 
 impl CargoSemverChecks {
+    const SUBCOMMAND_ARGS_INDEX: usize = 1;
     fn new(current_path: &str, baseline_path: &str) -> Self {
         Self {
             args: vec![
@@ -27,17 +26,17 @@ impl CargoSemverChecks {
         self
     }
 
-    fn run_all(&mut self) -> Vec<Assert> {
+    fn run_all(&self) -> Vec<Assert> {
         vec![self.run_without_subcommand(), self.run_with_subcommand()]
     }
 
-    fn run_without_subcommand(&mut self) -> Assert {
+    fn run_without_subcommand(&self) -> Assert {
         let mut args = self.args.clone();
-        args.remove(SUBCOMMAND_ARGS_INDEX);
+        args.remove(Self::SUBCOMMAND_ARGS_INDEX);
         self.command().args(&args).assert()
     }
 
-    fn run_with_subcommand(&mut self) -> Assert {
+    fn run_with_subcommand(&self) -> Assert {
         self.command().args(&self.args).assert()
     }
 }
