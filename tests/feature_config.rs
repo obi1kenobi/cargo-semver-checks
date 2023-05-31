@@ -17,6 +17,7 @@ impl CargoSemverChecks {
             ],
         }
     }
+
     fn new(current_path: &str, baseline_path: &str) -> Self {
         Self {
             cmd: Command::cargo_bin("cargo-semver-checks").unwrap(),
