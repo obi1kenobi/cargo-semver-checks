@@ -146,11 +146,7 @@ impl<'a> CrateSource<'a> {
             String::from("no_std"),
         ]);
 
-        let prefix_ignored_by_default = vec![
-            String::from("_"),
-            String::from("unstable-"),
-            String::from("unstable_"),
-        ];
+        let prefix_ignored_by_default = vec!["_", "unstable-", "unstable_"];
 
         let filter_feature_names =
             |feature_name: &String| !features_ignored_by_default.contains(feature_name);
@@ -158,8 +154,7 @@ impl<'a> CrateSource<'a> {
         let filter_feature_prefix = |feature_name: &String| {
             !prefix_ignored_by_default
                 .iter()
-                .map(|p| feature_name.starts_with(p))
-                .any(|f| f)
+                .any(|p| feature_name.starts_with(p))
         };
 
         self.all_features()
