@@ -135,7 +135,7 @@ impl<'a> CrateSource<'a> {
     ///  - `bench`
     ///  - `no_std`
     ///  features with prefix:
-    /// -  `_`
+    /// - `_`
     /// - `unstable_`
     /// - `unstable-`
     fn heuristically_included_features(&self) -> Vec<String> {
