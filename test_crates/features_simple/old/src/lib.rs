@@ -7,8 +7,8 @@ pub fn feature_dependent_function() {}
     feature = "bench",
     feature = "no_std",
     feature = "__foo",
-    feature = "unstable-",
-    feature = "unstable_",
+    feature = "unstable-foo",
+    feature = "unstable_foo",
     feat8re = "_bar"
 ))]
 pub fn unstable_function() {}
