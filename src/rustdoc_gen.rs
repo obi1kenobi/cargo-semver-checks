@@ -134,7 +134,10 @@ impl<'a> CrateSource<'a> {
     ///  - `nightly`
     ///  - `bench`
     ///  - `no_std`
-    ///  - features with prefix `__`
+    ///  features with prefix:
+    /// - `_`
+    /// - `unstable_`
+    /// - `unstable-`
     fn heuristically_included_features(&self) -> Vec<String> {
         let features_ignored_by_default = std::collections::HashSet::from([
             String::from("unstable"),
@@ -143,11 +146,22 @@ impl<'a> CrateSource<'a> {
             String::from("no_std"),
         ]);
 
-        let determine = |feature_name: &String| {
-            !features_ignored_by_default.contains(feature_name) && !feature_name.starts_with("__")
+        let prefix_ignored_by_default = vec!["_", "unstable-", "unstable_"];
+
+        let filter_feature_names =
+            |feature_name: &String| !features_ignored_by_default.contains(feature_name);
+
+        let filter_feature_prefix = |feature_name: &String| {
+            !prefix_ignored_by_default
+                .iter()
+                .any(|p| feature_name.starts_with(p))
         };
 
-        self.all_features().into_iter().filter(determine).collect()
+        self.all_features()
+            .into_iter()
+            .filter(filter_feature_names)
+            .filter(filter_feature_prefix)
+            .collect()
     }
 
     /// Returns features to explicitly enable. Does not fetch default features,
