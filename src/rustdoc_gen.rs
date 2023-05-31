@@ -152,10 +152,10 @@ impl<'a> CrateSource<'a> {
             String::from("unstable_"),
         ];
 
-        let ignored_feature_names =
+        let filter_feature_names =
             |feature_name: &String| !features_ignored_by_default.contains(feature_name);
 
-        let ignored_feature_prefix = |feature_name: &String| {
+        let filter_feature_prefix = |feature_name: &String| {
             !prefix_ignored_by_default
                 .iter()
                 .map(|p| feature_name.starts_with(p))
@@ -164,8 +164,8 @@ impl<'a> CrateSource<'a> {
 
         self.all_features()
             .into_iter()
-            .filter(ignored_feature_names)
-            .filter(ignored_feature_prefix)
+            .filter(filter_feature_names)
+            .filter(filter_feature_prefix)
             .collect()
     }
 
