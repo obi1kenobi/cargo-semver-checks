@@ -75,25 +75,15 @@ fn main() -> anyhow::Result<()> {
         std::process::exit(0);
     }
 
-    match args.command {
-        Some(SemverChecksCommands::CheckRelease(args)) => {
-            let check: cargo_semver_checks::Check = args.into();
-            let report = check.check_release()?;
-            if report.success() {
-                std::process::exit(0)
-            } else {
-                std::process::exit(1);
-            }
-        }
-        None => {
-            let check: cargo_semver_checks::Check = args.check_release.into();
-            let report = check.check_release()?;
-            if report.success() {
-                std::process::exit(0)
-            } else {
-                std::process::exit(1);
-            }
-        }
+    let check: cargo_semver_checks::Check = match args.command {
+        Some(SemverChecksCommands::CheckRelease(args)) => args.into(),
+        None => args.check_release.into(),
+    };
+    let report = check.check_release()?;
+    if report.success() {
+        std::process::exit(0)
+    } else {
+        std::process::exit(1);
     }
 }
 
