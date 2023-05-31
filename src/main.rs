@@ -81,7 +81,7 @@ fn main() -> anyhow::Result<()> {
     };
     let report = check.check_release()?;
     if report.success() {
-        std::process::exit(0)
+        std::process::exit(0);
     } else {
         std::process::exit(1);
     }
