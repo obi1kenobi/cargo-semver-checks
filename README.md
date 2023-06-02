@@ -78,7 +78,7 @@ registries other than crates.io should use one of the other approaches of genera
 By default, crates are built with all features excluding heuristically selected features that usually break semver. More precisely, features named `unstable`, `nightly`, `bench`, `no_std` or starting with `__` are disabled.
 
 This behaviour can be overriden. Checked feature set can be changed to:
-- all the features, selected with `--all-features`,
+- *all* the features, selected with `--all-features`,
 - only the crate's default features, selected with `--default-features`,
 - empty set, selected with `--only-explicit-features`.
 
