@@ -208,7 +208,8 @@ struct CheckRelease {
     /// added explicitly via other flags.
     ///
     /// Using this flag disables the heuristic that enables all features
-    /// except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with `__`.
+    /// except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with prefixes
+    /// `_`, `unstable_`, `unstable-`.
     #[arg(
         long,
         help_heading = "Features",
@@ -219,7 +220,8 @@ struct CheckRelease {
     /// Use no features except ones explicitly added by other flags.
     ///
     /// Using this flag disables the heuristic that enables all features
-    /// except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with `__`.
+    /// except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with prefixes
+    /// `_`, `unstable_`, `unstable-`.
     #[arg(long, help_heading = "Features")]
     only_explicit_features: bool,
 
@@ -240,8 +242,8 @@ struct CheckRelease {
     current_features: Vec<String>,
 
     /// Use all the features, including features named
-    /// `unstable`, `nightly`, `bench`, `no_std` or starting with `__`,
-    /// that are otherwise disabled by default.
+    /// `unstable`, `nightly`, `bench`, `no_std` or starting with prefixes
+    /// `_`, `unstable_`, `unstable-` that are otherwise disabled by default.
     #[arg(
         long,
         help_heading = "Features",

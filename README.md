@@ -77,35 +77,17 @@ registries other than crates.io should use one of the other approaches of genera
 
 By default, crates are built with all features excluding heuristically selected features that usually break semver. More precisely, features named `unstable`, `nightly`, `bench`, `no_std` or starting with `__` are disabled.
 
-The flags below can be used to select the checked features set:
-```
---default-features
-    Use only the crate-defined default features, as well as any features added explicitly via other flags.
+This behaviour can be overriden. Checked feature set can be changed to:
+- all the features, selected with `--all-features`,
+- only the crate's default features, selected with `--default-features`,
+- empty set, selected with `--only-explicit-features`.
 
-    Using this flag disables the heuristic that enables all features except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with `__`.
-
---only-explicit-features
-    Use no features except ones explicitly added by other flags.
-
-    Using this flag disables the heuristic that enables all features except `unstable`, `nightly`, `bench`, `no_std`, and ones starting with `__`.
-
---features <NAME>
-    Add a feature to the set of features being checked. The feature will be used in both the baseline and the current version of the crate
-
---baseline-features <NAME>
-    Add a feature to the set of features being checked. The feature will be used in the baseline version of the crate only
-
---current-features <NAME>
-    Add a feature to the set of features being checked. The feature will be used in the current version of the crate only
-
---all-features
-    Use all the features, including features named `unstable`, `nightly`, `bench`, `no_std` or starting with `__`, that are otherwise disabled by default
-```
+Additionally, features can be enabled one-by-one, using flags `--features`, `--baseline-features` and `--current-features`.
 
 For example, consider crate [serde](https://github.com/serde-rs/serde), with the following features (per v1.0.163):
 - `std` - the only crate's default feature,
-- `alloc`, `derive`, `rc` - some optional features,
-- `unstable`- a feature that possibly breaks semver.
+- `alloc`, `derive`, `rc` - optional features,
+- `unstable` - a feature that possibly breaks semver.
 
 | used flags | selected feature set |
 |--|--|
