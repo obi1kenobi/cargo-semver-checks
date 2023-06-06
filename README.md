@@ -1,4 +1,3 @@
-
 # cargo-semver-checks
 
 Lint your crate API changes for semver violations.
@@ -75,7 +74,7 @@ registries other than crates.io should use one of the other approaches of genera
 
 ### What features does `cargo-semver-checks` enable in the tested crates?
 
-By default, crates are built with all features excluding heuristically selected features that usually break semver. More precisely, features named `unstable`, `nightly`, `bench`, `no_std` or starting with `__` are disabled.
+By default, checking is done on all features except features named `unstable`, `nightly`, `bench`, `no_std`, or ones with prefix `_`, `unstable-`, or `unstable_`, as such names are commonly used for private or unstable features.
 
 This behaviour can be overriden. Checked feature set can be changed to:
 - *all* the features, selected with `--all-features`,
@@ -85,7 +84,7 @@ This behaviour can be overriden. Checked feature set can be changed to:
 Additionally, features can be enabled one-by-one, using flags `--features`, `--baseline-features` and `--current-features`.
 
 For example, consider crate [serde](https://github.com/serde-rs/serde), with the following features (per v1.0.163):
-- `std` - the only crate's default feature,
+- `std` - the crate's only default feature,
 - `alloc`, `derive`, `rc` - optional features,
 - `unstable` - a feature that possibly breaks semver.
 
@@ -96,6 +95,7 @@ For example, consider crate [serde](https://github.com/serde-rs/serde), with the
 | `--all-features` | `std`, `alloc`, `derive`, `rc`, `unstable` |
 | `--default-features` | `std` |
 | `--default-features --features derive` | `std`, `derive` |
+| `--only-explicit-features` | none |
 | `--only-explicit-features --features unstable` | `unstable` |
 
 ### Does `cargo-semver-checks` have false positives?
