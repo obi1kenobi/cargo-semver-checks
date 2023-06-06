@@ -72,6 +72,32 @@ Custom registries are not currently supported
 ([#160](https://github.com/obi1kenobi/cargo-semver-check/issues/160)), so crates published on
 registries other than crates.io should use one of the other approaches of generating the baseline.
 
+### What features does `cargo-semver-checks` enable in the tested crates?
+
+By default, checking is done on all features except features named `unstable`, `nightly`, `bench`, `no_std`, or ones with prefix `_`, `unstable-`, or `unstable_`, as such names are commonly used for private or unstable features.
+
+This behaviour can be overriden. Checked feature set can be changed to:
+- *all* the features, selected with `--all-features`,
+- only the crate's default features, selected with `--default-features`,
+- empty set, selected with `--only-explicit-features`.
+
+Additionally, features can be enabled one-by-one, using flags `--features`, `--baseline-features` and `--current-features`.
+
+For example, consider crate [serde](https://github.com/serde-rs/serde), with the following features (per v1.0.163):
+- `std` - the crate's only default feature,
+- `alloc`, `derive`, `rc` - optional features,
+- `unstable` - a feature that possibly breaks semver.
+
+| used flags | selected feature set | explanation |
+|--|--|--|
+| none | `std`, `alloc`, `derive`, `rc`  | Feature `unstable` is excluded by the default heuristic. |
+| `--features unstable` | `std`, `alloc`, `derive`, `rc`, `unstable` | The flag explicitly adds `unstable` to the heuristic's selections. |
+| `--all-features` | `std`, `alloc`, `derive`, `rc`, `unstable` | All the features are used, disabling the default heuristic. |
+| `--default-features` | `std` | The crate has only one default feature. |
+| `--default-features --features derive` | `std`, `derive` | Feature `derive` is used along with crate's default features.
+| `--only-explicit-features` | none | No explicit features are passed. |
+| `--only-explicit-features --features unstable` | `unstable` | All features can be added explicitly, regardless of their name. |
+
 ### Does `cargo-semver-checks` have false positives?
 
 "False positive" means that `cargo-semver-checks` reported a semver violation incorrectly.
