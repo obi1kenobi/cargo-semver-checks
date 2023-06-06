@@ -88,15 +88,15 @@ For example, consider crate [serde](https://github.com/serde-rs/serde), with the
 - `alloc`, `derive`, `rc` - optional features,
 - `unstable` - a feature that possibly breaks semver.
 
-| used flags | selected feature set |
-|--|--|
-| none | `std`, `alloc`, `derive`, `rc`  |
-| `--features unstable` | `std`, `alloc`, `derive`, `rc`, `unstable` |
-| `--all-features` | `std`, `alloc`, `derive`, `rc`, `unstable` |
-| `--default-features` | `std` |
-| `--default-features --features derive` | `std`, `derive` |
-| `--only-explicit-features` | none |
-| `--only-explicit-features --features unstable` | `unstable` |
+| used flags | selected feature set | explanation |
+|--|--|--|
+| none | `std`, `alloc`, `derive`, `rc`  | Feature `unstable` is excluded by the default heuristic. |
+| `--features unstable` | `std`, `alloc`, `derive`, `rc`, `unstable` | The flag explicitly adds `unstable` to the heuristic's selections. |
+| `--all-features` | `std`, `alloc`, `derive`, `rc`, `unstable` | All the features are used, disabling the default heuristic. |
+| `--default-features` | `std` | The crate has only one default feature. |
+| `--default-features --features derive` | `std`, `derive` | Feature `derive` is used along with crate's default features.
+| `--only-explicit-features` | none | No explicit features are passed. |
+| `--only-explicit-features --features unstable` | `unstable` | All features can be added explicitly, regardless of their name. |
 
 ### Does `cargo-semver-checks` have false positives?
 
