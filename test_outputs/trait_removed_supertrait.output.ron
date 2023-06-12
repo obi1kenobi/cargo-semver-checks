@@ -1,0 +1,18 @@
+{
+    "./test_crates/trait_removed_supertrait/": [
+        {
+            "name": String("BaseTrait"),
+            "path": List([
+                String("trait_removed_supertrait"),
+                String("BaseTrait"),
+            ]),
+            "span_begin_line": Uint64(3),
+            "span_filename": String("src/lib.rs"),
+            "trait_path": List([
+                String("trait_removed_supertrait"),
+                String("SuperTrait"),
+            ]),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

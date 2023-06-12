@@ -1,0 +1,62 @@
+SemverQuery(
+    id: "trait_removed_supertrait",
+    human_readable_name: "supertrait removed or renamed",
+    description: "It is a breaking change to loosen generic bounds on a type since this can break users expecting the tightened bounds.",
+    required_update: Major,
+    reference_link: None,
+    query: r#"{
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        importable_path {
+                            path @output @tag
+                        }
+
+
+                        supertrait {
+                            trait {
+                                importable_path {
+                                    trait_path: path @output @tag
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        supertrait @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            trait {
+                                importable_path {
+                                    path @filter(op: "=", value: ["%trait_path"])
+                                }
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A supertrait was removed from a trait.",
+    per_result_error_template: Some("supertrait {{trait_path}} for trait {{name}} in file {{span_filename}}:{{span_begin_line}}"),
+)
