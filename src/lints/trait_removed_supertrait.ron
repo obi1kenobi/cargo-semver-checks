@@ -58,5 +58,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A supertrait was removed from a trait.",
-    per_result_error_template: Some("supertrait {{trait_path}} for trait {{name}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("supertrait {{join \"::\" trait_path}} of trait {{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
