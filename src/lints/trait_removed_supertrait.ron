@@ -47,7 +47,6 @@ SemverQuery(
                             filename @output
                             begin_line @output
                         }
-
                     }
                 }
             }
