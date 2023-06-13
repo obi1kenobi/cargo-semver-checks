@@ -13,8 +13,6 @@ SemverQuery(
                         importable_path {
                             path @output @tag
                         }
-
-
                         supertrait {
                             trait {
                                 importable_path {
