@@ -4,7 +4,8 @@ SemverQuery(
     description: "It is a breaking change to loosen generic bounds on a type since this can break users expecting the tightened bounds.",
     required_update: Major,
     reference_link: None,
-    query: r#"{
+    query: r#"
+    {
         CrateDiff {
             baseline {
                 item {
