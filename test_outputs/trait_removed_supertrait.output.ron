@@ -73,8 +73,8 @@
         {
             "name": String("RemovingMultiple"),
             "path": List([
-            String("trait_removed_supertrait"),
-            String("RemovingMultiple"),
+                String("trait_removed_supertrait"),
+                String("RemovingMultiple"),
             ]),
             "span_begin_line": Uint64(10),
             "span_filename": String("src/lib.rs"),
