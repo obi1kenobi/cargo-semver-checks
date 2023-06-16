@@ -1,7 +1,7 @@
 SemverQuery(
     id: "trait_removed_supertrait",
     human_readable_name: "supertrait removed or renamed",
-    description: "It is a breaking change to loosen generic bounds on a type since this can break users expecting the tightened bounds.",
+    description: "Removing a supertrait bound is a breaking change, since users of the trait can no longer assume it can also be used like its supertrait.",
     required_update: Major,
     reference_link: None,
     query: r#"
@@ -55,6 +55,6 @@ SemverQuery(
         "public": "public",
         "zero": 0,
     },
-    error_message: "A supertrait was removed from a trait.",
+    error_message: "A supertrait was removed from a trait, users of the trait can no longer assume it can also be used like its supertrait.",
     per_result_error_template: Some("supertrait {{join \"::\" trait_path}} of trait {{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
