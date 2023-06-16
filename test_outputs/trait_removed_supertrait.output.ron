@@ -93,8 +93,8 @@
             "span_begin_line": Uint64(10),
             "span_filename": String("src/lib.rs"),
             "trait_path": List([
-            String("trait_removed_supertrait"),
-            String("SuperTrait2"),
+                String("trait_removed_supertrait"),
+                String("SuperTrait2"),
             ]),
             "visibility_limit": String("public"),
         },
