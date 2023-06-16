@@ -4,9 +4,9 @@ pub trait GenericSuperTrait<T> {}
 
 // Lint should warn us about
 pub trait RemovingSingleTrait : SuperTrait {}
-pub trait RemovingOneTraitOfMultiple : SuperTrait + SuperTrait2  {}
-pub trait RemovingOneWithGenerics<T> : SuperTrait + SuperTrait2  {}
-pub trait RemovingOneWithGenericsOnTheSuperTrait<T> : SuperTrait + GenericSuperTrait<T>  {}
+pub trait RemovingOneTraitOfMultiple : SuperTrait + SuperTrait2 {}
+pub trait RemovingOneWithGenerics<T> : SuperTrait + SuperTrait2 {}
+pub trait RemovingOneWithGenericsOnTheSuperTrait<T> : SuperTrait + GenericSuperTrait<T> {}
 pub trait RemovingTraitAndLifetime<'a> : SuperTrait + SuperTrait2 + 'a {}
 pub trait RemovingMultiple: SuperTrait + SuperTrait2 {}
 
