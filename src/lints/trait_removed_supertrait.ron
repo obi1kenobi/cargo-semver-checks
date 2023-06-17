@@ -55,6 +55,6 @@ SemverQuery(
         "public": "public",
         "zero": 0,
     },
-    error_message: "A supertrait was removed from a trait, users of the trait can no longer assume it can also be used like its supertrait.",
+    error_message: "A supertrait was removed from a trait. Users of the trait can no longer assume it can also be used like its supertrait.",
     per_result_error_template: Some("supertrait {{join \"::\" trait_path}} of trait {{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
