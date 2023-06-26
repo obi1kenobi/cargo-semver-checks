@@ -162,16 +162,6 @@ like `cargo-semver-checks`, but focuses more on API diffing (showing which
 items has changed) and not API linting (explaining why they have changed and
 providing control over what counts).
 
-### Why is scanning massive crates slow?
-
-Crates that are ~100,000+ lines of Rust may currently experience scan times
-of a several minutes due to some missing optimizations.
-
-For implementation convenience, there's some `O(n^2)` scaling for `n` items in a few places.
-If your crate is negatively affected by this,
-[please let us know](https://github.com/obi1kenobi/cargo-semver-check/issues/new?assignees=&labels=C-bug&template=bug_report.yml)
-so we can best prioritize optimization versus feature work.
-
 ### Why is it sometimes `cargo-semver-check` and `cargo-semver-checks`?
 
 This crate was intended to be published under the name `cargo-semver-check`, and may indeed one
