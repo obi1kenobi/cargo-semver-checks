@@ -31,6 +31,7 @@ fn proc_macro_target() {
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/proc_macro_crate")
         .args(["semver-checks", "check-release", "--baseline-root=."])
+        .env_remove("RUST_BACKTRACE")
         .assert()
         .stderr("Error: no crates with library targets selected, nothing to semver-check\n")
         .failure();
@@ -89,6 +90,7 @@ fn crate_in_workspace() {
             "non_lib_crate",
             "--baseline-root=.",
         ])
+        .env_remove("RUST_BACKTRACE")
         .assert()
         .stderr("Error: no crates with library targets selected, nothing to semver-check\n")
         .failure();
