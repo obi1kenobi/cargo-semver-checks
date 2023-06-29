@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "crate_in_workspace_crate1"
+name = "lib_crate"
 version = { workspace = true }
 
 [dependencies]

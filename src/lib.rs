@@ -216,7 +216,11 @@ impl Scope {
 
         meta.packages
             .iter()
-            .filter(|&p| base_ids.contains(&p.id))
+            .filter(|&p| {
+                // The package has to not have been explicitly excluded,
+                // and also has to have a library target (an API we can check).
+                base_ids.contains(&p.id) && p.targets.iter().any(|target| target.is_lib())
+            })
             .collect()
     }
 }
@@ -437,6 +441,10 @@ impl Check {
             RustdocSource::Root(project_root) => {
                 let metadata = manifest_metadata(project_root)?;
                 let selected = self.scope.selected_packages(&metadata);
+                if selected.is_empty() {
+                    anyhow::bail!("no crates with library targets selected, nothing to semver-check");
+                }
+
                 selected
                     .iter()
                     .map(|selected| {
