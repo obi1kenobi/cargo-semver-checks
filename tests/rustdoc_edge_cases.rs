@@ -24,14 +24,16 @@ fn lib_target_with_dashes() {
         .success();
 }
 
-/// Ensure that proc macro crates can be semver-checked correctly.
+/// Ensure that proc macro crates without a lib target produce the correct error message
+/// since they have no library API and therefore nothing we can semver-check.
 #[test]
 fn proc_macro_target() {
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/proc_macro_crate")
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
-        .success();
+        .stderr("Error: no crates with library targets selected, nothing to semver-check\n")
+        .failure();
 }
 
 /// Ensure that crates whose lib targets have a different name can be semver-checked correctly.
@@ -69,11 +71,27 @@ fn crate_in_workspace() {
             "check-release",
             "--manifest-path=./Cargo.toml",
             "-p",
-            "crate1",
+            "lib_crate",
             "--baseline-root=.",
         ])
         .assert()
         .success();
+
+    // Run at workspace level then point out a crate without a lib target.
+    // This should produce an error and a non-zero exit code.
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/crate_in_workspace")
+        .args([
+            "semver-checks",
+            "check-release",
+            "--manifest-path=./Cargo.toml",
+            "-p",
+            "non_lib_crate",
+            "--baseline-root=.",
+        ])
+        .assert()
+        .stderr("Error: no crates with library targets selected, nothing to semver-check\n")
+        .failure();
 }
 
 /// This test ensures that the `--release-type` flag works correctly,
