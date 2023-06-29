@@ -442,7 +442,9 @@ impl Check {
                 let metadata = manifest_metadata(project_root)?;
                 let selected = self.scope.selected_packages(&metadata);
                 if selected.is_empty() {
-                    anyhow::bail!("no crates with library targets selected, nothing to semver-check");
+                    anyhow::bail!(
+                        "no crates with library targets selected, nothing to semver-check"
+                    );
                 }
 
                 selected
