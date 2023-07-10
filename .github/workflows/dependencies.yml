@@ -88,7 +88,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "${CARGO_COMMIT_MESSAGE}" > commit.txt
+          echo "${COMMIT_MESSAGE}" > commit.txt
           cat cargo_update.log >> commit.txt
 
           echo "${PR_MESSAGE}" > body.md
@@ -135,7 +135,7 @@ jobs:
             exit 1
           fi
 
-          gh pr edit "$BRANCH_NAME" --title "${MAIN_CARGO_PR_TITLE}" --body-file body.md --repo "$GITHUB_REPOSITORY"
+          gh pr edit "$BRANCH_NAME" --title "${PR_TITLE}" --body-file body.md --repo "$GITHUB_REPOSITORY"
 
       - name: open new pull request
         # Only run if there wasn't an existing PR
