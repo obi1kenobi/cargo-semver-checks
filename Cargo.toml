@@ -31,7 +31,7 @@ ignore = "0.4.18"
 clap-verbosity-flag = "2.0.0"
 log = "0.4.17"
 git2 = { version = "0.17.0", default-features = false }
-crates-index = { version = "0.19.10" }
+crates-index = { version = "0.19.10", features = ["sparse-http"] }
 human-panic = "1.0.3"
 bugreport = "0.5.0"
 itertools = "0.10.5"
@@ -40,6 +40,8 @@ toml = "0.5.9"
 directories = "4.0.1"
 sha2 = "0.10.6"
 rustc_version = "0.4.0"
+reqwest = { version = "0.11.18", features = ["blocking", "gzip"] }
+http = "0.2.9"
 
 [dev-dependencies]
 assert_cmd = "2.0"

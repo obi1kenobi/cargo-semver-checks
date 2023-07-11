@@ -37,6 +37,7 @@ pub struct Check {
     release_type: Option<ReleaseType>,
     current_feature_config: rustdoc_gen::FeatureConfig,
     baseline_feature_config: rustdoc_gen::FeatureConfig,
+    git: bool,
 }
 
 /// The kind of release we're making.
@@ -226,7 +227,7 @@ impl Scope {
 }
 
 impl Check {
-    pub fn new(current: Rustdoc) -> Self {
+    pub fn new(current: Rustdoc, git: bool) -> Self {
         Self {
             scope: Scope::default(),
             current,
@@ -235,6 +236,7 @@ impl Check {
             release_type: None,
             current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
+            git,
         }
     }
 
@@ -342,7 +344,12 @@ impl Check {
                 )?)
             }
             RustdocSource::VersionFromRegistry(version) => {
-                let mut registry = rustdoc_gen::RustdocFromRegistry::new(&target_dir, config)?;
+                let mut registry = if self.git {
+                    rustdoc_gen::RustdocFromRegistry::new_git(&target_dir, config)
+                } else {
+                    rustdoc_gen::RustdocFromRegistry::new(&target_dir)
+                }?;
+
                 if let Some(ver) = version {
                     let semver = semver::Version::parse(ver)?;
                     registry.set_version(semver);

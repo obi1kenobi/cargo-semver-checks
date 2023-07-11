@@ -121,6 +121,12 @@ enum SemverChecksCommands {
     CheckRelease(CheckRelease),
 }
 
+#[derive(Debug, Clone, clap::ValueEnum)]
+enum RegistryType {
+    Git,
+    Sparse,
+}
+
 #[derive(Debug, Args)]
 struct CheckRelease {
     #[command(flatten, next_help_heading = "Current")]
@@ -128,6 +134,9 @@ struct CheckRelease {
 
     #[command(flatten, next_help_heading = "Current")]
     pub workspace: clap_cargo::Workspace,
+
+    #[arg(long)]
+    registry_type: Option<RegistryType>,
 
     /// The current rustdoc json output to test for semver violations.
     #[arg(
@@ -279,7 +288,10 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             let project_root = std::env::current_dir().expect("can't determine current directory");
             (Rustdoc::from_root(&project_root), Some(project_root))
         };
-        let mut check = Self::new(current);
+        let mut check = Self::new(
+            current,
+            matches!(value.registry_type, Some(RegistryType::Git)),
+        );
         if value.workspace.all || value.workspace.workspace {
             // Specified explicit `--workspace` or `--all`.
             let mut selection = PackageSelection::new(ScopeSelection::Workspace);

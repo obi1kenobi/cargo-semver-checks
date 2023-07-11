@@ -579,10 +579,15 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
     std::ffi::OsStr::new(str::from_utf8(b).unwrap())
 }
 
+enum Index {
+    Git(crates_index::Index),
+    Sparse(crates_index::SparseIndex),
+}
+
 pub(crate) struct RustdocFromRegistry {
     target_root: PathBuf,
     version: Option<semver::Version>,
-    index: crates_index::Index,
+    index: Index,
 }
 
 impl core::fmt::Debug for RustdocFromRegistry {
@@ -596,7 +601,20 @@ impl core::fmt::Debug for RustdocFromRegistry {
 }
 
 impl RustdocFromRegistry {
-    pub fn new(target_root: &std::path::Path, config: &mut GlobalConfig) -> anyhow::Result<Self> {
+    pub fn new(target_root: &std::path::Path) -> anyhow::Result<Self> {
+        let index = crates_index::SparseIndex::new_cargo_default()?;
+
+        Ok(Self {
+            target_root: target_root.to_owned(),
+            version: None,
+            index: Index::Sparse(index),
+        })
+    }
+
+    pub fn new_git(
+        target_root: &std::path::Path,
+        config: &mut GlobalConfig,
+    ) -> anyhow::Result<Self> {
         let mut index = crates_index::Index::new_cargo_default()?;
 
         config.shell_status("Updating", "index")?;
@@ -608,7 +626,7 @@ impl RustdocFromRegistry {
         Ok(Self {
             target_root: target_root.to_owned(),
             version: None,
-            index,
+            index: Index::Git(index),
         })
     }
 
@@ -672,7 +690,26 @@ impl RustdocGenerator for RustdocFromRegistry {
         rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        let crate_ = self.index.crate_(crate_data.name).with_context(|| {
+        let crate_ = match &self.index {
+            Index::Git(index) => index.crate_(crate_data.name),
+            Index::Sparse(index) => match index.crate_from_cache(crate_data.name) {
+                Ok(crate_) => Some(crate_),
+                Err(_) => {
+                    config.shell_status("Fetching", crate_data.name)?;
+                    let req = index.make_cache_request(crate_data.name)?;
+                    let (parts, _) = req.into_parts();
+                    let req = http::Request::from_parts(parts, vec![]);
+
+                    let client = reqwest::blocking::Client::builder().gzip(true).build()?;
+                    let res = client.execute(req.try_into()?)?.error_for_status()?;
+
+                    let mut r = http::Response::builder().status(res.status()).version(res.version());
+                    r.headers_mut().unwrap().extend(res.headers().clone());
+                    let res = r.body(res.bytes()?.to_vec())?;
+                    index.parse_cache_response(crate_data.name, res, true)?
+                }
+            },
+        }.with_context(|| {
             anyhow::format_err!(
                 "{} not found in registry (crates.io). \
         For workarounds check \
