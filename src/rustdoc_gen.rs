@@ -581,7 +581,7 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
 
 enum Index {
     Git(crates_index::Index),
-    Sparse(crates_index::SparseIndex),
+    Sparse(crates_index::SparseIndex, reqwest::blocking::Client),
 }
 
 pub(crate) struct RustdocFromRegistry {
@@ -607,7 +607,10 @@ impl RustdocFromRegistry {
         Ok(Self {
             target_root: target_root.to_owned(),
             version: None,
-            index: Index::Sparse(index),
+            index: Index::Sparse(
+                index,
+                reqwest::blocking::Client::builder().gzip(true).build()?,
+            ),
         })
     }
 
@@ -692,7 +695,7 @@ impl RustdocGenerator for RustdocFromRegistry {
     ) -> anyhow::Result<PathBuf> {
         let crate_ = match &self.index {
             Index::Git(index) => index.crate_(crate_data.name),
-            Index::Sparse(index) => match index.crate_from_cache(crate_data.name) {
+            Index::Sparse(index, client) => match index.crate_from_cache(crate_data.name) {
                 Ok(crate_) => Some(crate_),
                 Err(_) => {
                     config.shell_status("Fetching", crate_data.name)?;
@@ -700,11 +703,10 @@ impl RustdocGenerator for RustdocFromRegistry {
                     let (parts, _) = req.into_parts();
                     let req = http::Request::from_parts(parts, vec![]);
 
-                    let client = reqwest::blocking::Client::builder().gzip(true).build()?;
                     let res = client.execute(req.try_into()?)?.error_for_status()?;
 
                     let mut r = http::Response::builder().status(res.status()).version(res.version());
-                    r.headers_mut().unwrap().extend(res.headers().clone());
+                    if let Some(h) = r.headers_mut() { h.extend(res.headers().clone()) }
                     let res = r.body(res.bytes()?.to_vec())?;
                     index.parse_cache_response(crate_data.name, res, true)?
                 }
