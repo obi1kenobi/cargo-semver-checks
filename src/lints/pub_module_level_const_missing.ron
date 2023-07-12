@@ -1,18 +1,39 @@
 SemverQuery(
     id: "pub_module_level_const_missing",
-    human_readable_name: "TODO",
+    human_readable_name: "pub module-level const is missing",
     description: "TODO",
     required_update: Major,  // TODO
-    reference_link: None,  // TODO
+    reference_link: Some("https://doc.rust-lang.org/reference/TBD"),
     query: r#"
     {
         CrateDiff {
-            # TODO
+            baseline {
+                item {
+                    ... on Const {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output @tag
+
+                        span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current {
+                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    ... on Const {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"]) @output
+                    }
+                }
+            }
         }
     }"#,
     arguments: {
-        // TODO
+        "public": "public",
+        "zero": 0,
     },
-    error_message: "TODO",
-    per_result_error_template: Some("TODO"),
+    error_message: "A publicly-visible const in a module is missing or renamed. It may have changed from const to static.",
+    per_result_error_template: Some("{{name}} in file {{filename}}:{{begin_line}}"),
 )
