@@ -1,0 +1,18 @@
+SemverQuery(
+    id: "pub_module_level_const_missing",
+    human_readable_name: "TODO",
+    description: "TODO",
+    required_update: Major,  // TODO
+    reference_link: None,  // TODO
+    query: r#"
+    {
+        CrateDiff {
+            # TODO
+        }
+    }"#,
+    arguments: {
+        // TODO
+    },
+    error_message: "TODO",
+    per_result_error_template: Some("TODO"),
+)
