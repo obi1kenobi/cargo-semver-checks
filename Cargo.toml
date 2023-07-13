@@ -44,6 +44,7 @@ rustc_version = "0.4.0"
 [dev-dependencies]
 assert_cmd = "2.0"
 lazy_static = "1.4.0"
+similar-asserts = { version = "1.4.2", features = ["serde"] }
 
 [features]
 default = ["vendored-openssl"]

@@ -71,7 +71,7 @@ impl<'a> CrateSource<'a> {
                     // This part is not relevant to `Self::Registry`, because
                     // it doesn't have a `target` field and doesn't differentiate dependencies
                     // between different targets.
-                    dependencies.extend(target.dependencies.clone().into_iter());
+                    dependencies.extend(target.dependencies.clone());
                 }
                 dependencies
                     .iter()
@@ -146,7 +146,7 @@ impl<'a> CrateSource<'a> {
             String::from("no_std"),
         ]);
 
-        let prefix_ignored_by_default = vec!["_", "unstable-", "unstable_"];
+        let prefix_ignored_by_default = ["_", "unstable-", "unstable_"];
 
         let filter_feature_names =
             |feature_name: &String| !features_ignored_by_default.contains(feature_name);
