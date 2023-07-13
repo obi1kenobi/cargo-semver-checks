@@ -146,6 +146,14 @@ Now it's time to fill in these files!
   removal of public fields were to report that a struct was removed.
   Struct removal has its own lint, so there's no reason to also report that
   the removed struct also had its fields removed.
+- Note that your lint must output `span_filename` and `span_begin_line` for it
+  to be a valid lint. The pattern we commonly use is:
+  ```
+  span_: span @optional {
+    filename @output
+    begin_line @output
+  }
+  ```
 - Re-run [`./scripts/regenerate_test_rustdocs.sh`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/scripts/regenerate_test_rustdocs.sh)
   to generate rustdoc JSON files for your new test crates.
 
@@ -184,6 +192,22 @@ Actual output:
     ],
 }
 ```
+
+If your lint fails with the following error:
+```
+---- query::tests_lints::struct_missing stdout ----
+thread 'query::tests_lints::struct_missing' panicked at 'a valid query must have span_filename', src/query.rs:390:22
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+It likely means that your lint does not specify the `span_filename` and `span_begin_line` of where the error occurs. To fix this, add the following to the part of query that catches the error:
+```
+span_: span @optional {
+  filename @output
+  begin_line @output
+}
+```
+
 
 Inspect the "actual" output:
 - Does it report the semver issue your lint was supposed to catch? If not, the lint query
