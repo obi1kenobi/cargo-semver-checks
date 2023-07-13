@@ -243,9 +243,9 @@ dependencies = [
 
 [[package]]
 name = "cargo-platform"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbdb825da8a5df079a43676dbe042702f1707b1109f713a01420fbb4cc71fa27"
+checksum = "2cfa25e60aea747ec7e1124f238816749faa93759c6ff5b31f1ccdda137f4479"
 dependencies = [
  "serde",
 ]
@@ -1536,9 +1536,9 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
-version = "0.19.12"
+version = "0.19.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c500344a19072298cd05a7224b3c0c629348b78692bf48466c5238656e315a78"
+checksum = "5f8751d9c1b03c6500c387e96f81f815a4f8e72d142d2d4a9ffa6fedd51ddee7"
 dependencies = [
  "indexmap 2.0.0",
  "serde",
@@ -1560,9 +1560,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "23.5.1"
+version = "23.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75fc11a396935a6031e5d7355a2e87cf7dc05d4aec61e075133caab97f9dc2c0"
+checksum = "b19987b6762478a8956e58a24a0895cd7233af6ff5ef7afb91578ba991c252b2"
 dependencies = [
  "rustdoc-types 0.19.0",
  "trustfall",
@@ -1570,9 +1570,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "24.4.1"
+version = "24.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13e0b8bed065f0ec0a604364ebab0aea9883f9ceffa99ab77ce7021d6c7c1bc0"
+checksum = "b33996548c8529fc96f94767aa14ed9a356f2ba47776eb517215474ca2c56373"
 dependencies = [
  "rustdoc-types 0.20.0",
  "trustfall",
@@ -1580,9 +1580,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "26.1.1"
+version = "26.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30861fc78e0fc9d71387ca7b317ef0d7f72801ab3e2af687ca8e779cc3140f5a"
+checksum = "8d66f0414c258969743f8caeff1dd5e292233f0b17e333aa16a3d5ead584052a"
 dependencies = [
  "rustdoc-types 0.22.0",
  "trustfall",
@@ -1628,9 +1628,9 @@ dependencies = [
  "serde",
  "serde_json",
  "trustfall",
- "trustfall-rustdoc-adapter 23.5.1",
- "trustfall-rustdoc-adapter 24.4.1",
- "trustfall-rustdoc-adapter 26.1.1",
+ "trustfall-rustdoc-adapter 23.5.3",
+ "trustfall-rustdoc-adapter 24.4.3",
+ "trustfall-rustdoc-adapter 26.1.3",
 ]
 
 [[package]]
@@ -1897,9 +1897,9 @@ checksum = "1a515f5799fe4961cb532f983ce2b23082366b898e52ffbce459c86f67c8378a"
 
 [[package]]
 name = "winnow"
-version = "0.4.9"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81a2094c43cc94775293eaa0e499fbc30048a6d824ac82c0351a8c0bf9112529"
+checksum = "81fac9742fd1ad1bd9643b991319f72dd031016d44b77039a26977eb667141e7"
 dependencies = [
  "memchr",
 ]
