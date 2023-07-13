@@ -13,7 +13,7 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @output @tag
 
-                        span @optional {
+                        span_: span @optional {
                             filename @output
                             begin_line @output
                         }
@@ -35,5 +35,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A publicly-visible const in a module is missing or renamed. It may have changed from const to static.",
-    per_result_error_template: Some("{{name}} in file {{filename}}:{{begin_line}}"),
+    per_result_error_template: Some("{{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
