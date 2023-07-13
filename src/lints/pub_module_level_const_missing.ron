@@ -24,7 +24,7 @@ SemverQuery(
                 item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                     ... on Constant {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"]) @output
+                        name @filter(op: "=", value: ["%name"])
                     }
                 }
             }
