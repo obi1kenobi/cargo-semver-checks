@@ -193,22 +193,6 @@ Actual output:
 }
 ```
 
-If your lint fails with the following error:
-```
----- query::tests_lints::struct_missing stdout ----
-thread 'query::tests_lints::struct_missing' panicked at 'a valid query must have span_filename', src/query.rs:390:22
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-```
-
-It likely means that your lint does not specify the `span_filename` and `span_begin_line` of where the error occurs. To fix this, add the following to the part of query that catches the error:
-```
-span_: span @optional {
-  filename @output
-  begin_line @output
-}
-```
-
-
 Inspect the "actual" output:
 - Does it report the semver issue your lint was supposed to catch? If not, the lint query
   or the test crates' code may need to be tweaked.
@@ -223,7 +207,24 @@ the "actual" output, then re-run `cargo test` and make sure everything passes.
 
 Congrats on the new lint!
 
-### Troubleshooting: Other lints' tests failed too
+### Troubleshooting
+#### A valid query must output span_filename and/or span_begin_line
+If your lint fails with an error similar to the following:
+```
+---- query::tests_lints::enum_missing stdout ----
+thread 'query::tests_lints::enum_missing' panicked at 'A valid query must output both span_filename and span_begin_line. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for how to do this.', src/query.rs:395:26
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+It likely means that your lint does not specify the `span_filename` and `span_begin_line` of where the error occurs. To fix this, add the following to the part of query that catches the error:
+```
+span_: span @optional {
+  filename @output
+  begin_line @output
+}
+```
+
+#### Other lints' tests failed too
 
 This is not always a problem! In process of testing a lint, it's frequently desirable to include
 test code that contains a related semver issue in order to ensure the lint differentiates between
