@@ -329,8 +329,9 @@ mod tests {
             // The query was ran on two identical crates (with the same rustdoc)
             // and it produced a non-empty output, which means that it found issues
             // in a crate pair that definitely has no semver breaks.
-            let actual_output_name =
-                Box::leak(Box::new(format!("Actual output ({crate_pair_name}/{crate_version})")));
+            let actual_output_name = Box::leak(Box::new(format!(
+                "actual ({crate_pair_name}/{crate_version})"
+            )));
             let output_difference = pretty_format_output_difference(
                 query_name,
                 "expected (empty)",
@@ -449,16 +450,12 @@ macro_rules! add_lints {
             )*
         }
 
-        // No way to avoid this lint -- the push() calls are macro-generated.
-        #[allow(clippy::vec_init_then_push)]
         fn get_query_text_contents() -> Vec<&'static str> {
-            let mut temp_vec = Vec::new();
-            $(
-                temp_vec.push(
-                    include_str!(concat!("lints/", stringify!($name), ".ron"))
-                );
-            )*
-            temp_vec
+            vec![
+                $(
+                    include_str!(concat!("lints/", stringify!($name), ".ron")),
+                )*
+            ]
         }
     }
 }
