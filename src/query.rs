@@ -385,12 +385,14 @@ mod tests {
         // nondeterminism in how the results are ordered.
         let sort_individual_outputs = |results: &mut TestOutput| {
             let key_func = |elem: &BTreeMap<String, FieldValue>| {
-                let filename = elem.get("span_filename")
+                let filename = elem
+                    .get("span_filename")
                     .and_then(|value| value.as_str())
                     .expect("a valid query must have span_filename");
-                let line = elem.get("span_begin_line")
+                let line = elem
+                    .get("span_begin_line")
                     .expect("a valid query must have span_begin_line");
-                    
+
                 (filename.to_owned(), line.as_usize())
             };
             for value in results.values_mut() {
