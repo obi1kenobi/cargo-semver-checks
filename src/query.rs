@@ -449,16 +449,12 @@ macro_rules! add_lints {
             )*
         }
 
-        // No way to avoid this lint -- the push() calls are macro-generated.
-        #[allow(clippy::vec_init_then_push)]
         fn get_query_text_contents() -> Vec<&'static str> {
-            let mut temp_vec = Vec::new();
-            $(
-                temp_vec.push(
-                    include_str!(concat!("lints/", stringify!($name), ".ron"))
-                );
-            )*
-            temp_vec
+            vec![
+                $(
+                    include_str!(concat!("lints/", stringify!($name), ".ron")),
+                )*
+            ]
         }
     }
 }
