@@ -138,6 +138,14 @@ We'll use the [`scripts/make_new_lint.sh`](https://github.com/obi1kenobi/cargo-s
 
 Now it's time to fill in these files!
 - Define the lint in `src/lints/<lint_name>.ron`.
+- Make sure your lint outputs `span_filename` and `span_begin_line` for it
+  to be a valid lint. The pattern we commonly use is:
+  ```
+  span_: span @optional {
+    filename @output
+    begin_line @output
+  }
+  ```
 - Demonstrate the semver issue your lint is looking for by adding suitable code in
   the `test_crates/<lint_name>/old` and `test_crates/<lint_name>/new` crates.
 - Add code to the test crates that aims to catch for false-positives
@@ -146,14 +154,6 @@ Now it's time to fill in these files!
   removal of public fields were to report that a struct was removed.
   Struct removal has its own lint, so there's no reason to also report that
   the removed struct also had its fields removed.
-- Note that your lint must output `span_filename` and `span_begin_line` for it
-  to be a valid lint. The pattern we commonly use is:
-  ```
-  span_: span @optional {
-    filename @output
-    begin_line @output
-  }
-  ```
 - Re-run [`./scripts/regenerate_test_rustdocs.sh`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/scripts/regenerate_test_rustdocs.sh)
   to generate rustdoc JSON files for your new test crates.
 
