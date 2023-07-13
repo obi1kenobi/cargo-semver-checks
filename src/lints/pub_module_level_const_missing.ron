@@ -1,9 +1,9 @@
 SemverQuery(
     id: "pub_module_level_const_missing",
     human_readable_name: "pub module-level const is missing",
-    description: "TODO",
-    required_update: Major,  // TODO
-    reference_link: Some("https://doc.rust-lang.org/reference/TBD"),
+    description: "A pub const is missing, renamed, or changed to static.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
     {
         CrateDiff {
@@ -34,6 +34,6 @@ SemverQuery(
         "public": "public",
         "zero": 0,
     },
-    error_message: "A publicly-visible const in a module is missing or renamed. It may have changed from const to static.",
+    error_message: "A public const is missing, renamed, or changed from const to static.",
     per_result_error_template: Some("{{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
