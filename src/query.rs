@@ -158,7 +158,7 @@ mod tests {
                 }
 
                 let mut test_crate_cargo_toml = dir_entry.path();
-                test_crate_cargo_toml.extend(["old", "Cargo.toml"].into_iter());
+                test_crate_cargo_toml.extend(["old", "Cargo.toml"]);
                 test_crate_cargo_toml.as_path().is_file()
             })
             .map(|dir_entry| {
@@ -271,23 +271,26 @@ mod tests {
 
     fn pretty_format_output_difference(
         query_name: &str,
-        output_name1: String,
+        output_name1: &'static str,
         output1: TestOutput,
-        output_name2: String,
+        output_name2: &'static str,
         output2: TestOutput,
     ) -> String {
-        let results_to_string = |name, results| {
-            format!(
-                "{name}:\n{}",
-                ron::ser::to_string_pretty(&results, ron::ser::PrettyConfig::default()).unwrap()
-            )
-        };
-        vec![
+        let output_ron1 =
+            ron::ser::to_string_pretty(&output1, ron::ser::PrettyConfig::default()).unwrap();
+        let output_ron2 =
+            ron::ser::to_string_pretty(&output2, ron::ser::PrettyConfig::default()).unwrap();
+        let diff = similar_asserts::SimpleDiff::from_str(
+            &output_ron1,
+            &output_ron2,
+            output_name1,
+            output_name2,
+        );
+        [
             format!("Query {query_name} produced incorrect output (./src/lints/{query_name}.ron)."),
-            results_to_string(output_name1, &output1),
-            results_to_string(output_name2, &output2),
-            "Note that the individual outputs might have been deliberately reordered.".to_string(),
-            "Also, remember about running ./scripts/regenerate_test_rustdocs.sh when needed."
+            diff.to_string(),
+            "Remember that result output order matters, and remember to re-run \
+            ./scripts/regenerate_test_rustdocs.sh when needed."
                 .to_string(),
         ]
         .join("\n\n")
@@ -326,12 +329,13 @@ mod tests {
             // The query was ran on two identical crates (with the same rustdoc)
             // and it produced a non-empty output, which means that it found issues
             // in a crate pair that definitely has no semver breaks.
-
+            let actual_output_name =
+                Box::leak(Box::new(format!("Actual output ({crate_pair_name}/{crate_version})")));
             let output_difference = pretty_format_output_difference(
                 query_name,
-                "Expected output (empty output)".to_string(),
+                "expected (empty)",
                 BTreeMap::new(),
-                format!("Actual output ({crate_pair_name}/{crate_version})"),
+                actual_output_name,
                 BTreeMap::from([(crate_pair_path, output)]),
             );
             panic!("The query produced a non-empty output when it compared two crates with the same rustdoc.\n{output_difference}\n");
@@ -402,9 +406,9 @@ mod tests {
                 "\n{}\n",
                 pretty_format_output_difference(
                     query_name,
-                    format!("Expected output (./test_outputs/{query_name}.output.ron)"),
+                    "expected",
                     expected_results,
-                    "Actual output".to_string(),
+                    "actual",
                     actual_results
                 )
             );
