@@ -9,7 +9,7 @@ SemverQuery(
         CrateDiff {
             baseline {
                 item {
-                    ... on Const {
+                    ... on Constant {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @output @tag
 
@@ -22,7 +22,7 @@ SemverQuery(
             }
             current {
                 item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                    ... on Const {
+                    ... on Constant {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%name"]) @output
                     }
