@@ -1,0 +1,43 @@
+SemverQuery(
+    id: "new_struct_added",
+    human_readable_name: "new struct added",
+    description: "A new public struct has been exposed.",
+    required_update: Minor,
+
+    // TODO: Change the reference link to point to the cargo semver reference
+    //       once it has a section on attribute #[must_use].
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Struct {
+                        name @tag(name: "new_crate_name") @output(name: "new_struct_added_name")
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        span_: span {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+
+            baseline {
+                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    ... on Struct {
+                        name @filter(op: "=", value: ["%new_crate_name"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A new struct has been added to externally exposed API, this requires a minor version bump.",
+    per_result_error_template: Some("struct {{new_struct_added_name}} in {{span_filename}}:{{span_begin_line}}"),
+)

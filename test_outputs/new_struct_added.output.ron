@@ -1,0 +1,66 @@
+{
+    "./test_crates/inherent_method_must_use_added/": [
+        {
+            "new_struct_added_name": String("EnumToStructWithMustUseMethods"),
+            "span_begin_line": Uint64(8),
+            "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+        },
+        {
+            "new_struct_added_name": String("UnionToStructWithMustUseMethods"),
+            "span_begin_line": Uint64(141),
+            "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+        },
+        {
+            "new_struct_added_name": String("NewStructWithMustUseMethods"),
+            "span_begin_line": Uint64(68),
+            "span_filename": String("src/struct_inherent_method_must_use_added.rs"),
+        },
+    ],
+    "./test_crates/method_moved_to_trait_must_use_added/": [
+        {
+            "new_struct_added_name": String("NewStructWithTraitMustUseMethods"),
+            "span_begin_line": Uint64(147),
+            "span_filename": String("src/struct_method_moved_to_trait_must_use_added.rs"),
+        },
+    ],
+    "./test_crates/move_item_and_reexport/": [
+        {
+            "new_struct_added_name": String("HasBeenRenamedTypedefReexport"),
+            "span_begin_line": Uint64(25),
+            "span_filename": String("src/lib.rs"),
+        },
+        {
+            "new_struct_added_name": String("HasBeenRenamedTypedefWithGenericsReexport"),
+            "span_begin_line": Uint64(27),
+            "span_filename": String("src/lib.rs"),
+        },
+    ],
+    "./test_crates/new_struct_added/": [
+        {
+            "new_struct_added_name": String("B"),
+            "span_begin_line": Uint64(2),
+            "span_filename": String("src/lib.rs"),
+        },
+    ],
+    "./test_crates/nonbreaking_item_rename/": [
+        {
+            "new_struct_added_name": String("NewName"),
+            "span_begin_line": Uint64(2),
+            "span_filename": String("src/lib.rs"),
+        },
+    ],
+    "./test_crates/struct_must_use_added/": [
+        {
+            "new_struct_added_name": String("MustUseNewStruct"),
+            "span_begin_line": Uint64(60),
+            "span_filename": String("src/lib.rs"),
+        },
+    ],
+    "./test_crates/type_marked_deprecated/": [
+        {
+            "new_struct_added_name": String("DeprecatedNewStruct"),
+            "span_begin_line": Uint64(57),
+            "span_filename": String("src/structs.rs"),
+        },
+    ],
+}

@@ -501,4 +501,5 @@ add_lints!(
     enum_tuple_variant_field_missing,
     enum_tuple_variant_field_added,
     trait_removed_supertrait,
+    new_struct_added,
 );
