@@ -1,37 +1,32 @@
-
-pub const pub_const_in_global: i32 = 0;
-pub const pub_const_in_global_is_renamed: i32 = 0;
-pub static pub_const_in_global_will_be_static: i32 = 0;
-const pub_const_in_global_will_be_private_const: i32 = 0;
-static pub_const_in_global_will_be_private_static: i32 = 0;
+pub const PUB_CONST_IN_GLOBAL: i32 = 0;
+pub const PUB_CONST_IN_GLOBAL_IS_RENAMED: i32 = 0;
+pub static PUB_CONST_IN_GLOBAL_WILL_BE_STATIC: i32 = 0;
+const PUB_CONST_IN_GLOBAL_WILL_BE_PRIVATE_CONST: i32 = 0;
+static PUB_CONST_IN_GLOBAL_WILL_BE_PRIVATE_STATIC: i32 = 0;
 
 mod re_exporter {
-    pub const special_const: i32 = 0;
-    pub static special_static: i32 = 0;
+    pub const SPECIAL_CONST: i32 = 0;
+    pub static SPECIAL_STATIC: i32 = 0;
 }
 
 pub mod my_module {
-    pub const pub_const_in_module: i32 = 0;
-    pub const pub_const_in_module_is_renamed: i32 = 0;
-    pub static pub_const_in_module_will_be_static: i32 = 0;
-    const pub_const_in_module_will_be_private_const: i32 = 0;
-    static pub_const_in_module_will_be_private_static: i32 = 0;
+    pub const PUB_CONST_IN_MODULE: i32 = 0;
+    pub const PUB_CONST_IN_MODULE_IS_RENAMED: i32 = 0;
+    pub static PUB_CONST_IN_MODULE_WILL_BE_STATIC: i32 = 0;
+    const PUB_CONST_IN_MODULE_WILL_BE_PRIVATE_CONST: i32 = 0;
+    static PUB_CONST_IN_MODULE_WILL_BE_PRIVATE_STATIC: i32 = 0;
 
-    pub use crate::re_exporter::special_const as 
-        pub_const_in_module_will_re_export;
-    pub use crate::re_exporter::special_static as 
-        pub_const_in_module_will_re_export_static;
+    pub use crate::re_exporter::SPECIAL_CONST as PUB_CONST_IN_MODULE_WILL_RE_EXPORT;
+    pub use crate::re_exporter::SPECIAL_STATIC as PUB_CONST_IN_MODULE_WILL_RE_EXPORT_STATIC;
 
     pub mod my_module_nested {
-        pub const pub_const_in_nested_module: i32 = 0;
-        static pub_const_in_nested_module_will_remove_const: i32 = 0;
-        pub const pub_const_in_nested_module_is_renamed: i32 = 0;
-        pub static pub_const_in_nested_module_will_be_static: i32 = 0;
-        const pub_const_in_nested_module_will_be_private: i32 = 0;
+        pub const PUB_CONST_IN_NESTED_MODULE: i32 = 0;
+        static PUB_CONST_IN_NESTED_MODULE_WILL_REMOVE_CONST: i32 = 0;
+        pub const PUB_CONST_IN_NESTED_MODULE_IS_RENAMED: i32 = 0;
+        pub static PUB_CONST_IN_NESTED_MODULE_WILL_BE_STATIC: i32 = 0;
+        const PUB_CONST_IN_NESTED_MODULE_WILL_BE_PRIVATE: i32 = 0;
 
-        pub use crate::re_exporter::special_const as 
-            pub_const_in_nested_module_will_re_export;
-        pub use crate::re_exporter::special_static as 
-            pub_const_in_nested_module_will_re_export_static;
+        pub use crate::re_exporter::SPECIAL_CONST as PUB_CONST_IN_NESTED_MODULE_WILL_RE_EXPORT;
+        pub use crate::re_exporter::SPECIAL_STATIC as PUB_CONST_IN_NESTED_MODULE_WILL_RE_EXPORT_STATIC;
     }
 }
