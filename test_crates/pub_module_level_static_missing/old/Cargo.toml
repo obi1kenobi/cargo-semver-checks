@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "pub_module_level_static_missing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
