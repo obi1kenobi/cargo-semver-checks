@@ -212,7 +212,7 @@ Congrats on the new lint!
 If your lint fails with an error similar to the following:
 ```
 ---- query::tests_lints::enum_missing stdout ----
-thread 'query::tests_lints::enum_missing' panicked at 'A valid query must output both span_filename and span_begin_line. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for how to do this.', src/query.rs:395:26
+thread 'query::tests_lints::enum_missing' panicked at 'A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for how to do this.', src/query.rs:395:26
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 ```
 
