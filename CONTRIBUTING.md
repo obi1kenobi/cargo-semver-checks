@@ -138,6 +138,14 @@ We'll use the [`scripts/make_new_lint.sh`](https://github.com/obi1kenobi/cargo-s
 
 Now it's time to fill in these files!
 - Define the lint in `src/lints/<lint_name>.ron`.
+- Make sure your lint outputs `span_filename` and `span_begin_line` for it
+  to be a valid lint. The pattern we commonly use is:
+  ```
+  span_: span @optional {
+    filename @output
+    begin_line @output
+  }
+  ```
 - Demonstrate the semver issue your lint is looking for by adding suitable code in
   the `test_crates/<lint_name>/old` and `test_crates/<lint_name>/new` crates.
 - Add code to the test crates that aims to catch for false-positives
@@ -199,7 +207,24 @@ the "actual" output, then re-run `cargo test` and make sure everything passes.
 
 Congrats on the new lint!
 
-### Troubleshooting: Other lints' tests failed too
+### Troubleshooting
+#### A valid query must output span_filename and/or span_begin_line
+If your lint fails with an error similar to the following:
+```
+---- query::tests_lints::enum_missing stdout ----
+thread 'query::tests_lints::enum_missing' panicked at 'A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for how to do this.', src/query.rs:395:26
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+It likely means that your lint does not specify the `span_filename` and `span_begin_line` of where the error occurs. To fix this, add the following to the part of query that catches the error:
+```
+span_: span @optional {
+  filename @output
+  begin_line @output
+}
+```
+
+#### Other lints' tests failed too
 
 This is not always a problem! In process of testing a lint, it's frequently desirable to include
 test code that contains a related semver issue in order to ensure the lint differentiates between

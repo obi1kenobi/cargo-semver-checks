@@ -390,10 +390,15 @@ mod tests {
         // nondeterminism in how the results are ordered.
         let sort_individual_outputs = |results: &mut TestOutput| {
             let key_func = |elem: &BTreeMap<String, FieldValue>| {
-                (
-                    elem["span_filename"].as_str().unwrap().to_owned(),
-                    elem["span_begin_line"].as_usize().unwrap(),
-                )
+                let filename = elem.get("span_filename").and_then(|value| value.as_str());
+                let line = elem.get("span_begin_line");
+
+                match (filename, line) {
+                    (Some(filename), Some(line)) => (filename.to_owned(), line.as_usize()),
+                    (Some(_filename), _) => panic!("A valid query must output `span_filename`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    (_, Some(_line)) => panic!("A valid query must output `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    _ => panic!("A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                }
             };
             for value in results.values_mut() {
                 value.sort_unstable_by_key(key_func);
