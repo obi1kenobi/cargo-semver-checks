@@ -1,9 +1,9 @@
 {
-    "./test_crates/pub_module_level_static_missing/": [
+    "./test_crates/pub_static_missing/": [
         {
             "name": String("PUB_STATIC_IN_GLOBAL_WILL_REMOVE"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("PUB_STATIC_IN_GLOBAL_WILL_REMOVE"),
             ]),
             "span_begin_line": Uint64(2),
@@ -13,7 +13,7 @@
         {
             "name": String("PUB_STATIC_IN_GLOBAL_WILL_RENAME"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("PUB_STATIC_IN_GLOBAL_WILL_RENAME"),
             ]),
             "span_begin_line": Uint64(3),
@@ -23,7 +23,7 @@
         {
             "name": String("PUB_STATIC_IN_GLOBAL_WILL_BE_PRIVATE_CONST"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("PUB_STATIC_IN_GLOBAL_WILL_BE_PRIVATE_CONST"),
             ]),
             "span_begin_line": Uint64(5),
@@ -33,7 +33,7 @@
         {
             "name": String("PUB_STATIC_IN_GLOBAL_WILL_BE_PRIVATE_STATIC"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("PUB_STATIC_IN_GLOBAL_WILL_BE_PRIVATE_STATIC"),
             ]),
             "span_begin_line": Uint64(6),
@@ -43,7 +43,7 @@
         {
             "name": String("PUB_STATIC_IN_MODULE_WILL_REMOVE"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("my_module"),
                 String("PUB_STATIC_IN_MODULE_WILL_REMOVE"),
             ]),
@@ -54,7 +54,7 @@
         {
             "name": String("PUB_STATIC_IN_MODULE_WILL_RENAME"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("my_module"),
                 String("PUB_STATIC_IN_MODULE_WILL_RENAME"),
             ]),
@@ -65,7 +65,7 @@
         {
             "name": String("PUB_STATIC_IN_MODULE_WILL_BE_PRIVATE_CONST"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("my_module"),
                 String("PUB_STATIC_IN_MODULE_WILL_BE_PRIVATE_CONST"),
             ]),
@@ -76,7 +76,7 @@
         {
             "name": String("PUB_STATIC_IN_MODULE_WILL_BE_PRIVATE_STATIC"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("my_module"),
                 String("PUB_STATIC_IN_MODULE_WILL_BE_PRIVATE_STATIC"),
             ]),
@@ -87,7 +87,7 @@
         {
             "name": String("PUB_STATIC_IN_NESTED_MODULE_WILL_REMOVE"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("my_module"),
                 String("my_module_nested"),
                 String("PUB_STATIC_IN_NESTED_MODULE_WILL_REMOVE"),
@@ -99,7 +99,7 @@
         {
             "name": String("PUB_STATIC_IN_NESTED_MODULE_WILL_RENAME"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("my_module"),
                 String("my_module_nested"),
                 String("PUB_STATIC_IN_NESTED_MODULE_WILL_RENAME"),
@@ -111,7 +111,7 @@
         {
             "name": String("PUB_STATIC_IN_NESTED_MODULE_WILL_BE_PRIVATE_CONST"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("my_module"),
                 String("my_module_nested"),
                 String("PUB_STATIC_IN_NESTED_MODULE_WILL_BE_PRIVATE_CONST"),
@@ -123,7 +123,7 @@
         {
             "name": String("PUB_STATIC_IN_NESTED_MODULE_WILL_BE_PRIVATE_STATIC"),
             "path": List([
-                String("pub_module_level_static_missing"),
+                String("pub_static_missing"),
                 String("my_module"),
                 String("my_module_nested"),
                 String("PUB_STATIC_IN_NESTED_MODULE_WILL_BE_PRIVATE_STATIC"),
