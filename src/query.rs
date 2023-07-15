@@ -512,4 +512,5 @@ add_lints!(
     enum_tuple_variant_field_added,
     trait_removed_supertrait,
     pub_module_level_const_missing,
+    pub_static_missing,
 );
