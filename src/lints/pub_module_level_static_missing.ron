@@ -26,6 +26,7 @@ SemverQuery(
             }
             current {
                 item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    # A GlobalValue is a supertype of Static and Const
                     ... on GlobalValue {
                         visibility_limit @filter(op: "=", value: ["$public"])
 
