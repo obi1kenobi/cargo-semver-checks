@@ -1,9 +1,9 @@
 SemverQuery(
     id: "pub_module_level_static_missing",
-    human_readable_name: "TODO",
-    description: "TODO",
-    required_update: Major,  // TODO
-    reference_link: None,  // TODO
+    human_readable_name: "pub module-level static is missing",
+    description: "A pub static is missing, renamed, or made private",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
     {
         CrateDiff {
@@ -42,6 +42,6 @@ SemverQuery(
         "public": "public",
         "zero": 0,
     },
-    error_message: "TODO",
-    per_result_error_template: Some("TODO"),
+    error_message: "A public static is missing, renamed, or made private.",
+    per_result_error_template: Some("{{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
