@@ -1,7 +1,7 @@
 SemverQuery(
     id: "trait_removed_associated_type",
     human_readable_name: "trait's associated type was removed",
-    description: "A trait's associated type was removed.",
+    description: "A trait's associated type was removed or renamed.",
     required_update: Major,
     reference_link: None,
     query: r#"
