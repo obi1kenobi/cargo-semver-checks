@@ -1,0 +1,15 @@
+{
+    "./test_crates/trait_associated_type_removed/": [
+        {
+            "associated_type": String("Bar"),
+            "path": List([
+                String("trait_associated_type_removed"),
+                String("Foo"),
+            ]),
+            "span_begin_line": Uint64(3),
+            "span_filename": String("src/lib.rs"),
+            "trait_name": String("Foo"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}
