@@ -19,6 +19,6 @@ trait PrivateTraitWithTypeRemoved {
 /// This trait should not be reported by the `trait_associated_type_removed` rule:
 /// it will be removed altogether, so the correct rule to catch it is
 /// the `trait_missing` rule and not the rule for missing types.
-trait RemovedTrait {
+pub trait RemovedTrait {
     type ATypeInARemovedTrait;
 }
