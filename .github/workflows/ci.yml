@@ -1556,7 +1556,7 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "Error: rustc version is not high enough: >=1.67.0 needed, got 1.66.0")"
+          EXPECTED="$(echo -e "Error: rustc version is not high enough: >=1.67.0 needed, got 1.66.1")"
           RESULT="$(cat output | grep Error)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
