@@ -1,10 +1,10 @@
 use std::path::PathBuf;
 
-use anyhow::Context;
-use crates_index::Crate;
+use anyhow::Context as _;
 use itertools::Itertools;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
+use tame_index::IndexKrate;
 
 use crate::manifest::Manifest;
 use crate::rustdoc_cmd::RustdocCommand;
@@ -13,21 +13,26 @@ use crate::GlobalConfig;
 
 #[derive(Debug, Clone)]
 pub(crate) enum CrateSource<'a> {
-    Registry { crate_: &'a crates_index::Version },
-    ManifestPath { manifest: &'a Manifest },
+    Registry {
+        crate_: &'a tame_index::IndexVersion,
+        version: String,
+    },
+    ManifestPath {
+        manifest: &'a Manifest,
+    },
 }
 
 impl<'a> CrateSource<'a> {
     pub(crate) fn name(&self) -> anyhow::Result<&str> {
         Ok(match self {
-            Self::Registry { crate_ } => crate_.name(),
+            Self::Registry { crate_, .. } => &crate_.name,
             Self::ManifestPath { manifest } => crate::manifest::get_package_name(manifest)?,
         })
     }
 
     pub(crate) fn version(&self) -> anyhow::Result<&str> {
         Ok(match self {
-            Self::Registry { crate_ } => crate_.version(),
+            Self::Registry { version, .. } => version.as_str(),
             Self::ManifestPath { manifest } => crate::manifest::get_package_version(manifest)?,
         })
     }
@@ -49,7 +54,7 @@ impl<'a> CrateSource<'a> {
     /// <https://doc.rust-lang.org/cargo/reference/features.html#the-features-section>
     pub(crate) fn regular_features(&self) -> Vec<String> {
         match self {
-            Self::Registry { crate_ } => crate_.features().keys().cloned().collect(),
+            Self::Registry { crate_, .. } => crate_.features().map(|(k, _v)| k).cloned().collect(),
             Self::ManifestPath { manifest } => manifest.parsed.features.keys().cloned().collect(),
         }
     }
@@ -58,11 +63,10 @@ impl<'a> CrateSource<'a> {
     /// <https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies>
     pub(crate) fn implicit_features(&self) -> std::collections::BTreeSet<String> {
         let mut implicit_features: std::collections::BTreeSet<_> = match self {
-            Self::Registry { crate_ } => crate_
+            Self::Registry { crate_, .. } => crate_
                 .dependencies()
                 .iter()
-                .filter_map(|dep| dep.is_optional().then_some(dep.name()))
-                .map(|x| x.to_string())
+                .filter_map(|dep| dep.is_optional().then(|| dep.name.to_string()))
                 .collect(),
             Self::ManifestPath { manifest } => {
                 let mut dependencies = manifest.parsed.dependencies.clone();
@@ -75,14 +79,13 @@ impl<'a> CrateSource<'a> {
                 }
                 dependencies
                     .iter()
-                    .filter_map(|(name, dep)| dep.optional().then_some(name))
-                    .map(|x| x.to_string())
+                    .filter_map(|(name, dep)| dep.optional().then(|| name.clone()))
                     .collect()
             }
         };
 
         let feature_defns: Vec<&String> = match self {
-            Self::Registry { crate_ } => crate_.features().values().flatten().collect(),
+            Self::Registry { crate_, .. } => crate_.features().flat_map(|(_k, v)| v).collect(),
             Self::ManifestPath { manifest } => {
                 manifest.parsed.features.values().flatten().collect()
             }
@@ -582,7 +585,7 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
 pub(crate) struct RustdocFromRegistry {
     target_root: PathBuf,
     version: Option<semver::Version>,
-    index: crates_index::Index,
+    index: tame_index::index::ComboIndex,
 }
 
 impl core::fmt::Debug for RustdocFromRegistry {
@@ -597,13 +600,56 @@ impl core::fmt::Debug for RustdocFromRegistry {
 
 impl RustdocFromRegistry {
     pub fn new(target_root: &std::path::Path, config: &mut GlobalConfig) -> anyhow::Result<Self> {
-        let mut index = crates_index::Index::new_cargo_default()?;
+        let index_url = tame_index::IndexUrl::crates_io(
+            // This is the config root, where .cargo/config.toml configuration files
+            // are crawled to determine if crates.io has been source replaced
+            // <https://doc.rust-lang.org/cargo/reference/source-replacement.html>
+            // if not specified it defaults to the current working directory,
+            // which is the same default that cargo uses, though note this can be
+            // extremely confusing if one can specify the manifest path of the
+            // crate from a different current working directory, though AFAICT
+            // this is not how this binary works
+            None,
+            // If set this overrides the CARGO_HOME that is used for both finding
+            // the "global" default config if not overriden during directory
+            // traversal to the root, as well as where the various registry
+            // indices/git sources are rooted. This is generally only useful
+            // for testing
+            None,
+            // If set, overrides the version of the cargo binary used, this is used
+            // as a fallback to determine if the version is 1.70.0+, which means
+            // the default crates.io registry to use is the sparse registry, else
+            // it is the old git registry
+            None,
+        )
+        .context("failed to obtain crates.io url")?;
 
-        config.shell_status("Updating", "index")?;
-        while need_retry(index.update())? {
-            config.shell_status("Blocking", "waiting for lock on registry index")?;
-            std::thread::sleep(REGISTRY_BACKOFF);
-        }
+        use tame_index::index::{self, ComboIndexCache};
+
+        let index_cache = ComboIndexCache::new(tame_index::IndexLocation::new(index_url))
+            .context("failed to open crates.io index cache")?;
+
+        let index: index::ComboIndex = match index_cache {
+            ComboIndexCache::Git(git) => {
+                let mut rgi = index::RemoteGitIndex::new(git)
+                    .context("failed to open crates.io git index")?;
+
+                config.shell_status("Updating", "index")?;
+                while need_retry(rgi.fetch())? {
+                    config.shell_status("Blocking", "waiting for lock on registry index")?;
+                    std::thread::sleep(REGISTRY_BACKOFF);
+                }
+
+                rgi.into()
+            }
+            ComboIndexCache::Sparse(sparse) => {
+                let client = tame_index::external::reqwest::blocking::Client::builder()
+                    .http2_prior_knowledge()
+                    .build()
+                    .context("failed to build HTTP client")?;
+                index::RemoteSparseIndex::new(sparse, client).into()
+            }
+        };
 
         Ok(Self {
             target_root: target_root.to_owned(),
@@ -618,21 +664,17 @@ impl RustdocFromRegistry {
 }
 
 fn choose_baseline_version(
-    crate_: &Crate,
+    crate_: &IndexKrate,
     version_current: Option<&semver::Version>,
-) -> anyhow::Result<String> {
+) -> anyhow::Result<semver::Version> {
     // Try to avoid pre-releases
     // - Breaking changes are allowed between them
     // - Most likely the user cares about the last official release
     if let Some(current) = version_current {
         let mut instances = crate_
-            .versions()
+            .versions
             .iter()
-            .filter_map(|i| {
-                semver::Version::parse(i.version())
-                    .map(|v| (v, i.is_yanked()))
-                    .ok()
-            })
+            .map(|iv| (iv.version.clone(), iv.is_yanked()))
             // For unpublished changes when the user doesn't increment the version
             // post-release, allow using the current version as a baseline.
             .filter(|(v, _)| v <= current)
@@ -643,7 +685,7 @@ fn choose_baseline_version(
             .rev()
             .find(|(v, yanked)| v.pre.is_empty() && !yanked)
             .or_else(|| instances.last())
-            .map(|(v, _)| v.to_string())
+            .map(|(v, _)| v.clone())
             .with_context(|| {
                 anyhow::format_err!(
                     "No available baseline versions for {}@{}",
@@ -660,8 +702,9 @@ fn choose_baseline_version(
                 // error, as there is still a chance that it is what the user expects.
                 crate_.highest_version()
             })
-            .version();
-        Ok(instance.to_owned())
+            .version
+            .clone();
+        Ok(instance)
     }
 }
 
@@ -672,7 +715,11 @@ impl RustdocGenerator for RustdocFromRegistry {
         rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        let crate_ = self.index.crate_(crate_data.name).with_context(|| {
+        let crate_ = self.index.krate(crate_data.name.try_into().expect("this should be impossible"), false)
+            .with_context(|| {
+                format!("failed to read index metadata for crate '{}'", crate_data.name)
+            })?
+            .with_context(|| {
             anyhow::format_err!(
                 "{} not found in registry (crates.io). \
         For workarounds check \
@@ -681,8 +728,8 @@ impl RustdocGenerator for RustdocFromRegistry {
             )
         })?;
 
-        let base_version = if let Some(base) = self.version.as_ref() {
-            base.to_string()
+        let base_version = if let Some(base) = &self.version {
+            base.clone()
         } else {
             choose_baseline_version(
                 &crate_,
@@ -696,9 +743,9 @@ impl RustdocGenerator for RustdocFromRegistry {
         };
 
         let crate_ = crate_
-            .versions()
+            .versions
             .iter()
-            .find(|v| v.version() == base_version)
+            .find(|v| v.version == base_version)
             .with_context(|| {
                 anyhow::format_err!(
                     "Version {} of crate {} not found in registry",
@@ -711,7 +758,10 @@ impl RustdocGenerator for RustdocFromRegistry {
             config,
             rustdoc_cmd,
             self.target_root.clone(),
-            CrateSource::Registry { crate_ },
+            CrateSource::Registry {
+                version: crate_.version.to_string(),
+                crate_,
+            },
             crate_data,
         )
     }
@@ -720,14 +770,14 @@ impl RustdocGenerator for RustdocFromRegistry {
 const REGISTRY_BACKOFF: std::time::Duration = std::time::Duration::from_secs(1);
 
 /// Check if we need to retry retrieving the Index.
-fn need_retry(res: Result<(), crates_index::Error>) -> anyhow::Result<bool> {
+fn need_retry(res: Result<(), tame_index::Error>) -> anyhow::Result<bool> {
     match res {
         Ok(()) => Ok(false),
-        Err(crates_index::Error::Git(err)) => {
-            if err.class() == git2::ErrorClass::Index && err.code() == git2::ErrorCode::Locked {
+        Err(tame_index::Error::Git(err)) => {
+            if err.is_spurious() || err.is_locked() {
                 Ok(true)
             } else {
-                Err(crates_index::Error::Git(err).into())
+                Err(tame_index::Error::Git(err).into())
             }
         }
         Err(err) => Err(err.into()),
@@ -736,29 +786,14 @@ fn need_retry(res: Result<(), crates_index::Error>) -> anyhow::Result<bool> {
 
 #[cfg(test)]
 mod tests {
-    use crates_index::{Crate, Version};
+    use tame_index::{IndexKrate, IndexVersion};
 
     use super::choose_baseline_version;
 
-    fn new_mock_version(version_name: &str, yanked: bool) -> Version {
-        // `crates_index::Version` cannot be created explicitly, as all its fields
-        // are private, so we use the fact that it can be deserialized.
-        serde_json::from_value(serde_json::json!({
-            "name": "test-crate",
-            "vers": version_name,
-            "deps": [],
-            "features": {},
-            "yanked": yanked,
-            "cksum": "00".repeat(32),
-        }))
-        .expect("hand-written JSON used to create mock crates_index::Version should be valid")
-    }
-
-    fn new_crate(versions: Vec<Version>) -> Crate {
-        // `crates_index::Crate` cannot be created explicitly, as its field
-        // is private, so we use the fact that it can be deserialized.
-        serde_json::from_value(serde_json::json!({ "versions": versions }))
-            .expect("hand-written JSON used to create mock crates_index::Crate should be valid")
+    fn new_mock_version(version: semver::Version, yanked: bool) -> IndexVersion {
+        let mut iv = IndexVersion::fake("test-crate", version);
+        iv.yanked = yanked;
+        iv
     }
 
     fn assert_correctly_picks_baseline_version(
@@ -766,19 +801,19 @@ mod tests {
         current_version_name: Option<&str>,
         expected: &str,
     ) {
-        let crate_ = new_crate(
-            versions
+        let crate_ = IndexKrate {
+            versions: versions
                 .into_iter()
-                .map(|(version, yanked)| new_mock_version(version, yanked))
+                .map(|(version, yanked)| new_mock_version(version.parse().unwrap(), yanked))
                 .collect(),
-        );
+        };
         let current_version = current_version_name.map(|version_name| {
             semver::Version::parse(version_name)
                 .expect("current_version_name used in assertion should encode a valid version")
         });
         let chosen_baseline = choose_baseline_version(&crate_, current_version.as_ref())
             .expect("choose_baseline_version should not return any error in the test case");
-        assert_eq!(chosen_baseline, expected.to_owned());
+        assert_eq!(chosen_baseline, expected.parse().unwrap());
     }
 
     #[test]

@@ -214,11 +214,11 @@ fn create_placeholder_rustdoc_manifest(
         },
         dependencies: {
             let project_with_features: DependencyDetail = match crate_source {
-                CrateSource::Registry { crate_ } => DependencyDetail {
+                CrateSource::Registry { version, .. } => DependencyDetail {
                     // We need the *exact* version as a dependency, or else cargo will
                     // give us the latest semver-compatible version which is not we want.
                     // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
-                    version: Some(format!("={}", crate_.version())),
+                    version: Some(format!("={version}")),
                     features: crate_source
                         .feature_list_from_config(config, crate_data.feature_config),
                     default_features: matches!(
