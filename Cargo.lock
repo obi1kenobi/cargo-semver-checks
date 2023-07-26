@@ -2845,7 +2845,7 @@ dependencies = [
 [[package]]
 name = "tame-index"
 version = "0.2.2"
-source = "git+https://github.com/EmbarkStudios/tame-index?branch=fix-git-fetch#f04375ee41d0ad02b3ed411a1ceda707496913cd"
+source = "git+https://github.com/EmbarkStudios/tame-index?branch=fix-git-fetch#f3d2058789e315937bbfa38b4e989d5b0965a1e3"
 dependencies = [
  "camino",
  "gix",
