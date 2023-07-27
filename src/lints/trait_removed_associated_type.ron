@@ -37,7 +37,7 @@ SemverQuery(
                             path @filter(op: "=", value: ["%path"])
                         }
 
-                        associated_type  @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                        associated_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             name @filter(op: "=", value: ["%associated_type"])
                         }
                     }
