@@ -50,5 +50,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A public trait's associated type was removed or renamed.",
-    per_result_error_template: Some("trait associated type {{trait_name}}::{{associated_type}}, previously at {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("associated type {{trait_name}}::{{associated_type}}, previously at {{span_filename}}:{{span_begin_line}}"),
 )
