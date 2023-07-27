@@ -52,7 +52,7 @@ impl GlobalConfig {
                 }
             })),
             handlebars: make_handlebars_registry(),
-            minimum_rustc_version: semver::Version::new(1, 65, 0),
+            minimum_rustc_version: semver::Version::new(1, 67, 0),
         }
     }
 
