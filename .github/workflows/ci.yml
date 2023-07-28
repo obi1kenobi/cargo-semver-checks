@@ -1250,6 +1250,9 @@ jobs:
     # - cargo-semver-checks detects the semver break we've manufactured.
     name: 'Semver: ref-slice fork'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        protocol: ["git", "sparse"]
     needs:
       - build-binary
     steps:
@@ -1294,6 +1297,8 @@ jobs:
 
       - name: Run semver-checks
         continue-on-error: true
+        env:
+          CARGO_REGISTRIES_CRATES_IO_PROTOCOL: ${{ matrix.protocol }}
         run: |
           cd semver
           set -euo pipefail
@@ -1342,6 +1347,9 @@ jobs:
     # (see https://github.com/frewsxcv/rust-crates-index/issues/97).
     name: 'Semver: ref-slice fork (Windows)'
     runs-on: windows-latest
+    strategy:
+      matrix:
+        protocol: ["git", "sparse"]
     needs:
       - build-binary-windows
     steps:
@@ -1387,6 +1395,8 @@ jobs:
       - name: Run cargo-semver-checks
         continue-on-error: true
         id: semver_checks
+        env:
+          CARGO_REGISTRIES_CRATES_IO_PROTOCOL: ${{ matrix.protocol }}
         run: |
           cd semver
           ..\bins\cargo-semver-checks.exe semver-checks check-release --manifest-path="..\subject\Cargo.toml" 2>&1 | tee output
