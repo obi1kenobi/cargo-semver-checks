@@ -2845,8 +2845,7 @@ dependencies = [
 [[package]]
 name = "tame-index"
 version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c96432f6f2bbdea54399f8149a2e82c4529e5d529ff214b891fbae2b34f590e"
+source = "git+https://github.com/EmbarkStudios/tame-index?branch=fix-committer#f7de2f6ccb4663bc1b4adcdfdf528795d164ee4f"
 dependencies = [
  "camino",
  "gix",

@@ -62,3 +62,6 @@ opt-level = 3
 debug-assertions = true
 overflow-checks = true
 codegen-units = 16
+
+[patch.crates-io]
+tame-index = { git = "https://github.com/EmbarkStudios/tame-index", branch = "fix-committer" }
