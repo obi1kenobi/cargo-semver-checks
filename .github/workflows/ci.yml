@@ -131,7 +131,7 @@ jobs:
       - uses: r7kamura/rust-problem-matchers@v1
 
       - name: cargo clippy
-        run: cargo clippy --manifest-path semver/Cargo.toml --workspace --all-features --all-targets -- -D warnings --allow deprecated
+        run: cargo clippy --manifest-path semver/Cargo.toml --workspace --all-features --all-targets --no-deps -- -D warnings --allow deprecated
 
       - name: cargo fmt
         run: cargo fmt --manifest-path semver/Cargo.toml -- --check
