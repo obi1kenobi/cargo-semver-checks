@@ -79,7 +79,13 @@ impl<'a> CrateSource<'a> {
                 }
                 dependencies
                     .iter()
-                    .filter_map(|(name, dep)| dep.optional().then(|| name.clone()))
+                    .filter_map(|(name, dep)| {
+                        if dep.optional() {
+                            Some(name.clone())
+                        } else {
+                            None
+                        }
+                    })
                     .collect()
             }
         };
