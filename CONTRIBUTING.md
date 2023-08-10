@@ -9,7 +9,7 @@
 
 Thanks for taking the time to contribute!
 The best starting point is adding a new lint.
-[Here is a list](https://github.com/obi1kenobi/cargo-semver-check/issues?q=is%3Aopen+label%3AE-mentor+label%3AA-lint)
+[Here is a list](https://github.com/obi1kenobi/cargo-semver-checks/issues?q=is%3Aopen+label%3AE-mentor+label%3AA-lint)
 of lints that have all their prerequisites met and are ready to be added,
 and which have mentorship available.
 Please make use of the mentorship opportunity by asking questions in the relevant GitHub issue!
@@ -85,7 +85,7 @@ This has several advantages:
 ### Future functionality made easier by the query-based approach
 
 In principle, `cargo-semver-checks` could be extended to
-[support running custom user-specified checks](https://github.com/obi1kenobi/cargo-semver-check/issues/38)
+[support running custom user-specified checks](https://github.com/obi1kenobi/cargo-semver-checks/issues/38)
 on top of the same rustdoc JSON + cargo manifest data it uses today.
 Checks are configuration, not code: the custom checks would just be a set of files that
 `cargo-semver-checks` is configured to run.
@@ -96,7 +96,7 @@ An example is removing the last private field of a `pub struct` that is not `#[n
 this would have the side-effect of adding to the public API the ability to construct the struct
 with a literal. If this change were published accidentally, undoing the change would be breaking
 and would require a new major version. More examples of such useful-but-not-semver checks are
-[here](https://github.com/obi1kenobi/cargo-semver-check/issues/5).
+[here](https://github.com/obi1kenobi/cargo-semver-checks/issues/5).
 
 ## Running `cargo test` for the first time
 

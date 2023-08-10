@@ -4,7 +4,7 @@ Lint your crate API changes for semver violations.
 
 - [Quick Start](#quick-start)
 - [FAQ](#faq)
-- [Contributing](https://github.com/obi1kenobi/cargo-semver-check/blob/main/CONTRIBUTING.md)
+- [Contributing](https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md)
 
 ## Quick Start
 
@@ -69,7 +69,7 @@ The following flags can be used to explicitly specify a baseline instead:
 ```
 
 Custom registries are not currently supported
-([#160](https://github.com/obi1kenobi/cargo-semver-check/issues/160)), so crates published on
+([#160](https://github.com/obi1kenobi/cargo-semver-checks/issues/160)), so crates published on
 registries other than crates.io should use one of the other approaches of generating the baseline.
 
 ### What features does `cargo-semver-checks` enable in the tested crates?
@@ -118,9 +118,9 @@ We'd be happy to look into it together with you to determine if it's a false pos
 
 No, it will not — not yet!
 There are many ways to break semver, and `cargo-semver-checks`
-[doesn't yet have lints for all of them](https://github.com/obi1kenobi/cargo-semver-check/issues/5).
+[doesn't yet have lints for all of them](https://github.com/obi1kenobi/cargo-semver-checks/issues/5).
 New lints are added frequently, and
-[we'd be happy to mentor you](https://github.com/obi1kenobi/cargo-semver-check/blob/main/CONTRIBUTING.md)
+[we'd be happy to mentor you](https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md)
 if you'd like to contribute new lints!
 
 Append `--verbose` when semver-checking your crate to see the full list of performed semver checks.
