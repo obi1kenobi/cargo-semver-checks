@@ -3178,8 +3178,6 @@ dependencies = [
 [[package]]
 name = "trustfall-rustdoc-adapter"
 version = "26.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c3b046aa70f7199223e1ef4dc46b2d904ce42f4a3fb726ee712c98ea44e782e"
 dependencies = [
  "rustdoc-types 0.22.0",
  "trustfall",
