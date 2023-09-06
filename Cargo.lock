@@ -47,23 +47,9 @@ dependencies = [
  "anstyle",
  "anstyle-parse",
  "anstyle-query",
- "anstyle-wincon 1.0.2",
+ "anstyle-wincon",
  "colorchoice",
  "is-terminal",
- "utf8parse",
-]
-
-[[package]]
-name = "anstream"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f58811cfac344940f1a400b6e6231ce35171f614f26439e80f8c1465c5cc0c"
-dependencies = [
- "anstyle",
- "anstyle-parse",
- "anstyle-query",
- "anstyle-wincon 2.1.0",
- "colorchoice",
  "utf8parse",
 ]
 
@@ -96,16 +82,6 @@ name = "anstyle-wincon"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c677ab05e09154296dd37acecd46420c17b9713e8366facafa8fc0885167cf4c"
-dependencies = [
- "anstyle",
- "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "anstyle-wincon"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58f54d10c6dfa51283a066ceab3ec1ab78d13fae00aa49243a45e4571fb79dfd"
 dependencies = [
  "anstyle",
  "windows-sys 0.48.0",
@@ -458,7 +434,7 @@ version = "4.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5ed2e96bc16d8d740f6f48d663eddf4b8a0983e79210fd55479b7bcd0a69860e"
 dependencies = [
- "anstream 0.3.2",
+ "anstream",
  "anstyle",
  "clap_lex",
  "once_cell",
@@ -1737,11 +1713,11 @@ checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
 
 [[package]]
 name = "human-panic"
-version = "1.2.0"
+version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb2df2fb4e13fa697d21d93061ebcbbd876f5ef643b48ff59cfab57a726ef140"
+checksum = "38a841f87949b0dd751864e769a870be79dc34abcee1cf31d737a61d498b22b6"
 dependencies = [
- "anstream 0.5.0",
+ "anstream",
  "anstyle",
  "backtrace",
  "os_info",
