@@ -166,7 +166,7 @@ providing control over what counts).
 
 This crate was intended to be published under the name `cargo-semver-check`, and may indeed one
 day be published under that name. Due to
-[an unfortunate mishap](https://github.com/rust-lang/crates.io/issues/728#issuecomment-118276095),
+[an unfortunate mishap](https://github.com/rust-lang/crates.io/issues/728#issuecomment-1182760954),
 it remains `cargo-semver-checks` for the time being.
 
 The `cargo_semver_check` name is reserved on crates.io but all its versions
