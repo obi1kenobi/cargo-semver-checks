@@ -12,7 +12,7 @@ Lint your crate API changes for semver violations.
 $ cargo install cargo-semver-checks --locked
 
 # Check whether it's safe to release the new version:
-$ cargo semver-checks check-release
+$ cargo semver-checks
 ```
 
 Or use as a [GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action) (used in .github/workflows/ci.yml in this repo):
