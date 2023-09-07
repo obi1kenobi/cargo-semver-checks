@@ -14,7 +14,7 @@ categories = ["command-line-utilities", "development-tools::cargo-plugins"]
 
 [dependencies]
 trustfall = "0.6.0"
-trustfall_rustdoc = { version = "0.13.0", features = ["v23", "v24", "v26"] }
+trustfall_rustdoc = { version = "0.13.1", features = ["v23", "v24", "v26", "v27"] }
 clap = { version = "4.0.0", features = ["derive", "cargo"] }
 serde_json = "1.0.82"
 anyhow = "1.0.58"
