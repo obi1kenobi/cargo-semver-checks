@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use anyhow::Context as _;
+use anyhow::{bail, Context as _};
 use itertools::Itertools;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
@@ -648,6 +648,7 @@ impl RustdocFromRegistry {
                     .context("failed to build HTTP client")?;
                 index::RemoteSparseIndex::new(sparse, client).into()
             }
+            _ => bail!("encountered unknown cache type"),
         };
 
         Ok(Self {
@@ -676,6 +677,7 @@ fn choose_baseline_version(
             .map(|iv| (iv.version.clone(), iv.is_yanked()))
             // For unpublished changes when the user doesn't increment the version
             // post-release, allow using the current version as a baseline.
+            .filter_map(|(v, yanked)| semver::Version::parse(v.as_str()).ok().map(|v| (v, yanked)))
             .filter(|(v, _)| v <= current)
             .collect::<Vec<_>>();
         instances.sort();
@@ -693,16 +695,18 @@ fn choose_baseline_version(
                 )
             })
     } else {
-        let instance = crate_
-            .highest_normal_version()
-            .unwrap_or_else(|| {
-                // If there is no normal version (not yanked and not a pre-release)
-                // choosing the latest one anyway is more reasonable than throwing an
-                // error, as there is still a chance that it is what the user expects.
-                crate_.highest_version()
-            })
-            .version
-            .clone();
+        let instance = semver::Version::parse(
+            crate_
+                .highest_normal_version()
+                .unwrap_or_else(|| {
+                    // If there is no normal version (not yanked and not a pre-release)
+                    // choosing the latest one anyway is more reasonable than throwing an
+                    // error, as there is still a chance that it is what the user expects.
+                    crate_.highest_version()
+                })
+                .version
+                .as_str(),
+        )?;
         Ok(instance)
     }
 }
@@ -744,7 +748,9 @@ impl RustdocGenerator for RustdocFromRegistry {
         let crate_ = crate_
             .versions
             .iter()
-            .find(|v| v.version == base_version)
+            .find(|v| {
+                semver::Version::parse(v.version.as_str()).ok().as_ref() == Some(&base_version)
+            })
             .with_context(|| {
                 anyhow::format_err!(
                     "Version {} of crate {} not found in registry",
@@ -790,7 +796,7 @@ mod tests {
     use super::choose_baseline_version;
 
     fn new_mock_version(version: semver::Version, yanked: bool) -> IndexVersion {
-        let mut iv = IndexVersion::fake("test-crate", version);
+        let mut iv = IndexVersion::fake("test-crate", version.to_string());
         iv.yanked = yanked;
         iv
     }
