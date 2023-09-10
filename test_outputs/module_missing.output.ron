@@ -1,0 +1,25 @@
+{
+    "./test_crates/module_missing/": [
+        {
+            "name": String("will_remove"),
+            "path": List([
+                String("module_missing"),
+                String("bb"),
+                String("will_remove"),
+            ]),
+            "span_begin_line": Uint64(10),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+	},
+	{
+            "name": String("will_make_private"),
+            "path": List([
+                String("module_missing"),
+                String("will_make_private"),
+            ]),
+            "span_begin_line": Uint64(14),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ]
+}

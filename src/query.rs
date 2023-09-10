@@ -514,4 +514,5 @@ add_lints!(
     pub_module_level_const_missing,
     pub_static_missing,
     trait_removed_associated_type,
+    module_missing,
 );
