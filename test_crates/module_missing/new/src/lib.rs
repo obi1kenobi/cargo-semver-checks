@@ -1,21 +1,18 @@
 // Removing this, but no warning should happen:
 // it isn't public.
 //
-// mod a {
-// }
+// mod a {}
 
 mod b {
     // Removing this, but no warning should happen:
     // it isn't visible.
-    // pub mod b {
-    // }
+    // pub mod b {}
 }
 
 pub mod bb {
     // Removing this should cause a warning.
     //
-    // pub mod will_remove {
-    // }
+    // pub mod will_remove {}
 }
 
 // Making this private should cause a warning
