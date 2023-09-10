@@ -21,5 +21,29 @@
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
-    ]
+    ],
+    "./test_crates/trait_missing/": [
+        {
+            "name": String("my_pub_mod"),
+           "path": List([
+                String("trait_missing"),
+                String("my_pub_mod"),
+            ]),
+            "span_begin_line": Uint64(5),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+    "./test_crates/trait_missing_with_major_bump/": [
+        {
+            "name": String("my_pub_mod"),
+            "path": List([
+                String("trait_missing_with_major_bump"),
+                String("my_pub_mod"),
+            ]),
+            "span_begin_line": Uint64(5),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
 }
