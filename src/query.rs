@@ -515,4 +515,5 @@ add_lints!(
     pub_static_missing,
     trait_removed_associated_type,
     module_missing,
+    trait_removed_associated_constant,
 );
