@@ -304,7 +304,7 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@1.67
+        uses: dtolnay/rust-toolchain@1.70  # Rust 1.70 uses rustdoc v24
 
       - name: Restore rustdoc
         id: cache
@@ -334,7 +334,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Install rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@stable  # Rust 1.72 uses rustdoc v26
 
       - name: Check with older rustdoc version cached
         run: |

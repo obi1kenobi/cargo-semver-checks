@@ -2915,9 +2915,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "23.6.0"
+version = "23.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99f8e47989facdc13cd06bea85e0c1a9d87a6f17a05ab9d1d9d8de8add1ba8e5"
+checksum = "ece63d2d0d19a07724d43f03dd9daea592ce3faed3ee12d0354c681c23a9f922"
 dependencies = [
  "rustdoc-types 0.19.0",
  "trustfall",
@@ -2925,9 +2925,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "24.5.0"
+version = "24.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb2158e9583a0487c2a77e372636819bd03fee25cedb048e580b788ae054cf5f"
+checksum = "8900ed1075c0fddef370e47b73920368b33562e0602019c37476f8abf0ff7a09"
 dependencies = [
  "rustdoc-types 0.20.0",
  "trustfall",
@@ -2935,9 +2935,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "26.2.0"
+version = "26.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c3b046aa70f7199223e1ef4dc46b2d904ce42f4a3fb726ee712c98ea44e782e"
+checksum = "f208dd20ab7220f9d54aee3c6082377376d224ae3b4d3d0b980c02f2070786e2"
 dependencies = [
  "rustdoc-types 0.22.0",
  "trustfall",
@@ -2945,9 +2945,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "27.0.0"
+version = "27.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9dd0afa66d619e0b540eac19b6cc6892fb4f5dd6a02e9c5171d3433e6f29cbb3"
+checksum = "437e8fadfb04a4b708e96552a3bb1232861a81df5d1a14ae488c6da62764496f"
 dependencies = [
  "rustdoc-types 0.23.0",
  "trustfall",
@@ -2992,10 +2992,10 @@ dependencies = [
  "serde",
  "serde_json",
  "trustfall",
- "trustfall-rustdoc-adapter 23.6.0",
- "trustfall-rustdoc-adapter 24.5.0",
- "trustfall-rustdoc-adapter 26.2.0",
- "trustfall-rustdoc-adapter 27.0.0",
+ "trustfall-rustdoc-adapter 23.6.1",
+ "trustfall-rustdoc-adapter 24.5.1",
+ "trustfall-rustdoc-adapter 26.2.1",
+ "trustfall-rustdoc-adapter 27.0.1",
 ]
 
 [[package]]
