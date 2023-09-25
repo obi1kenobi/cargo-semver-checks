@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use anyhow::Context as _;
+use anyhow::{bail, Context as _};
 use itertools::Itertools;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
@@ -515,45 +515,38 @@ impl RustdocFromGitRevision {
         config: &mut GlobalConfig,
     ) -> anyhow::Result<Self> {
         config.shell_status("Cloning", rev)?;
-        let repo = git2::Repository::discover(source)?;
+        let repo = gix::discover(source)?;
 
-        let rev = repo.revparse_single(rev)?;
-        let rev_dir = target.join(rev.id().to_string());
+        let tree_id = repo.rev_parse_single(&*format!("{rev}^{{tree}}"))?;
+        let tree_dir = target.join(tree_id.to_string());
 
-        std::fs::create_dir_all(&rev_dir)?;
-        let tree = rev.peel_to_tree()?;
-        extract_tree(&repo, tree, &rev_dir)?;
+        std::fs::create_dir_all(&tree_dir)?;
+        extract_tree(tree_id, &tree_dir)?;
 
-        let path = RustdocFromProjectRoot::new(&rev_dir, target)?;
+        let path = RustdocFromProjectRoot::new(&tree_dir, target)?;
         Ok(Self { path })
     }
 }
 
-fn extract_tree(
-    repo: &git2::Repository,
-    tree: git2::Tree<'_>,
-    target: &std::path::Path,
-) -> anyhow::Result<()> {
-    for entry in tree.iter() {
-        match entry.kind() {
-            Some(git2::ObjectType::Tree) => {
-                let object = entry.to_object(repo);
-                let tree = object.and_then(|o| o.peel_to_tree());
-                if let Ok(tree) = tree {
-                    let path = target.join(bytes2str(entry.name_bytes()));
-                    std::fs::create_dir_all(&path)?;
-                    extract_tree(repo, tree, &path)?;
-                }
+fn extract_tree(tree: gix::Id<'_>, target: &std::path::Path) -> anyhow::Result<()> {
+    for entry in tree.object()?.try_into_tree()?.iter() {
+        let entry = entry?;
+        match entry.mode() {
+            gix::object::tree::EntryMode::Tree => {
+                let path = target.join(bytes2str(entry.filename()));
+                std::fs::create_dir_all(&path)?;
+                extract_tree(entry.id(), &path)?;
             }
-            Some(git2::ObjectType::Blob) => {
-                let object = entry.to_object(repo);
-                let blob = object.and_then(|o| o.peel_to_blob());
-                if let Ok(blob) = blob {
-                    let path = target.join(bytes2str(entry.name_bytes()));
-                    let existing = std::fs::read(&path).ok();
-                    if existing.as_deref() != Some(blob.content()) {
-                        std::fs::write(&path, blob.content())?;
-                    }
+            gix::object::tree::EntryMode::Blob | gix::object::tree::EntryMode::BlobExecutable => {
+                let blob = entry.object()?;
+                assert!(
+                    blob.kind.is_blob(),
+                    "we are not working on a corrupted repository"
+                );
+                let path = target.join(bytes2str(entry.filename()));
+                let existing = std::fs::read(&path).ok();
+                if existing.as_deref() != Some(&blob.data) {
+                    std::fs::write(&path, &blob.data)?;
                 }
             }
             _ => {}
@@ -655,6 +648,7 @@ impl RustdocFromRegistry {
                     .context("failed to build HTTP client")?;
                 index::RemoteSparseIndex::new(sparse, client).into()
             }
+            _ => bail!("encountered unknown cache type"),
         };
 
         Ok(Self {
@@ -683,6 +677,7 @@ fn choose_baseline_version(
             .map(|iv| (iv.version.clone(), iv.is_yanked()))
             // For unpublished changes when the user doesn't increment the version
             // post-release, allow using the current version as a baseline.
+            .filter_map(|(v, yanked)| semver::Version::parse(v.as_str()).ok().map(|v| (v, yanked)))
             .filter(|(v, _)| v <= current)
             .collect::<Vec<_>>();
         instances.sort();
@@ -700,16 +695,18 @@ fn choose_baseline_version(
                 )
             })
     } else {
-        let instance = crate_
-            .highest_normal_version()
-            .unwrap_or_else(|| {
-                // If there is no normal version (not yanked and not a pre-release)
-                // choosing the latest one anyway is more reasonable than throwing an
-                // error, as there is still a chance that it is what the user expects.
-                crate_.highest_version()
-            })
-            .version
-            .clone();
+        let instance = semver::Version::parse(
+            crate_
+                .highest_normal_version()
+                .unwrap_or_else(|| {
+                    // If there is no normal version (not yanked and not a pre-release)
+                    // choosing the latest one anyway is more reasonable than throwing an
+                    // error, as there is still a chance that it is what the user expects.
+                    crate_.highest_version()
+                })
+                .version
+                .as_str(),
+        )?;
         Ok(instance)
     }
 }
@@ -751,7 +748,9 @@ impl RustdocGenerator for RustdocFromRegistry {
         let crate_ = crate_
             .versions
             .iter()
-            .find(|v| v.version == base_version)
+            .find(|v| {
+                semver::Version::parse(v.version.as_str()).ok().as_ref() == Some(&base_version)
+            })
             .with_context(|| {
                 anyhow::format_err!(
                     "Version {} of crate {} not found in registry",
@@ -797,7 +796,7 @@ mod tests {
     use super::choose_baseline_version;
 
     fn new_mock_version(version: semver::Version, yanked: bool) -> IndexVersion {
-        let mut iv = IndexVersion::fake("test-crate", version);
+        let mut iv = IndexVersion::fake("test-crate", version.to_string());
         iv.yanked = yanked;
         iv
     }
