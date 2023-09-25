@@ -12,19 +12,19 @@ SemverQuery(
                     ... on Trait {
                         trait_name: name @output
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
+
                         importable_path {
                             path @output @tag
                         }
 
                         associated_constant {
-                           associated_constant: name @output @tag
+                            associated_constant: name @output @tag
 
-                           span_: span {
-                              filename @output
-                              begin_line @output
-                          }
-
-                      }
+                            span_: span @optional {
+                               filename @output
+                               begin_line @output
+                            }
+                        }
                     }
                 }
             }
