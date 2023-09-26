@@ -81,4 +81,16 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/switch_to_reexport_as_underscore/": [
+        {
+            "name": String("Enum"),
+            "path": List([
+                String("switch_to_reexport_as_underscore"),
+                String("Enum"),
+            ]),
+            "span_begin_line": Uint64(6),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
 }
