@@ -172,6 +172,10 @@ it remains `cargo-semver-checks` for the time being.
 The `cargo_semver_check` name is reserved on crates.io but all its versions
 are intentionally yanked. Please use the `cargo-semver-checks` crate instead.
 
+### What is the MSRV policy with respect to semver?
+
+MSRV bumps are *not* considered major changes. The current MSRV is Rust 1.70.
+
 ### License
 
 Available under the Apache License (Version 2.0) or the MIT license, at your option.
