@@ -150,7 +150,7 @@ jobs:
         # IMPORTANT: When updating the versions here, make sure you also update
         #            the `fails-on-too-old-rustc` job and its error message to
         #            to account for the raised minimum required version.
-        toolchain: ["1.67", "1.68", "1.69", "1.70", "1.71", "stable", "beta"]
+        toolchain: ["1.70", "1.71", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -1525,7 +1525,7 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@1.66
+        uses: dtolnay/rust-toolchain@1.67
 
       - name: Restore binary
         id: cache-binary
@@ -1566,7 +1566,7 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "Error: rustc version is not high enough: >=1.67.0 needed, got 1.66.1")"
+          EXPECTED="$(echo -e "Error: rustc version is not high enough: >=1.68.0 needed, got 1.67.1")"
           RESULT="$(cat output | grep Error)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
