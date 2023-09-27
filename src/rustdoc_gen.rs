@@ -66,7 +66,8 @@ impl<'a> CrateSource<'a> {
             Self::Registry { crate_, .. } => crate_
                 .dependencies()
                 .iter()
-                .filter_map(|dep| dep.is_optional().then(|| dep.name.to_string()))
+                .filter(|dep| dep.is_optional())
+                .map(|dep| dep.name.to_string())
                 .collect(),
             Self::ManifestPath { manifest } => {
                 let mut dependencies = manifest.parsed.dependencies.clone();
