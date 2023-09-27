@@ -97,4 +97,17 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/switch_to_reexport_as_underscore/": [
+        {
+            "name": String("Struct"),
+            "path": List([
+                String("switch_to_reexport_as_underscore"),
+                String("Struct"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("plain"),
+            "visibility_limit": String("public"),
+        },
+    ],
 }
