@@ -3,8 +3,8 @@ SemverQuery(
     human_readable_name: "pub function changed ABI",
     description: "A public function changed its external ABI.",
     required_update: Major,
-    reference_link: Some("https://doc.rust-lang.org/reference/items/extern-crates.html"),
-query: r#"
+    reference_link: Some("https://doc.rust-lang.org/reference/items/external-blocks.html#abi"),
+    query: r#"
     {
         CrateDiff {
             baseline {
