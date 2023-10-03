@@ -10,8 +10,9 @@ SemverQuery(
             baseline {
                 item {
                     ... on Function {
-                        visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @output
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
                         importable_path {
                             path @output @tag
                         }
