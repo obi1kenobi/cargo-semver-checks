@@ -60,5 +60,17 @@
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
+        {
+            "abi_name": String("system"),
+            "name": String("system_function_becomes_c"),
+            "new_abi_name": String("C"),
+            "path": List([
+                String("pub_function_changed_abi"),
+                String("system_function_becomes_c"),
+            ]),
+            "span_begin_line": Uint64(15),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
     ],
 }
