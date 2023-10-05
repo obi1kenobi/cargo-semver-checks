@@ -15,3 +15,7 @@ pub extern "C" fn c_function_remains_c() -> () {}
 pub extern "C" fn system_function_becomes_c() -> () {}
 
 extern "Rust" fn private_c_function_becomes_rust() -> () {}
+
+pub extern "Rust" fn implicit_rust_function_becomes_rust() -> () {}
+
+pub fn rust_function_becomes_implicit_rust() -> () {}
