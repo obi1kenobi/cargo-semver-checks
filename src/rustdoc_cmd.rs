@@ -117,24 +117,52 @@ impl RustdocCommand {
         let output = cmd.output()?;
         if !output.status.success() {
             if self.silence {
+                let stderr_output = String::from_utf8_lossy(&output.stderr);
                 anyhow::bail!(
-                    "Failed when running cargo-doc on {}:\n{}",
+                    "running cargo-doc failed on {}:\n{stderr_output}",
                     placeholder_manifest_path.display(),
-                    String::from_utf8_lossy(&output.stderr)
                 )
             } else {
                 anyhow::bail!(
-                    "Failed when running cargo-doc on {}. See stderr.",
+                    "running cargo-doc failed on {}. See stderr.",
                     placeholder_manifest_path.display(),
                 )
             }
         }
 
+        // There's no great way to figure out whether that crate version has a lib target.
+        // We can't easily do it via the index, and we can't reliably do it via metadata.
+        // We're reduced to this heuristic:
+        // - the crate is not in the metadata (since it isn't a valid dependency -- no lib target),
+        // - and if we captured stderr, we saw the telltale error message (else, assume it happened)
+        // then it must have been lacking a lib target.
+        //
+        // In an ideal world, we would ignore crate versions without a lib target while
+        // choosing a baseline version, and raise this error sooner. Alas, until the index
+        // can give us that data more easily, we can't do that in a reasonable way.
+        let observed_stderr_but_lib_msg_not_present = if self.silence {
+            let stderr_output = String::from_utf8_lossy(&output.stderr);
+            !stderr_output.contains("ignoring invalid dependency ")
+                || !stderr_output.contains(" which is missing a lib target")
+        } else {
+            false
+        };
         let subject_crate = metadata
             .packages
             .iter()
             .find(|dep| dep.name == crate_name)
-            .expect("we declared a dependency on a crate that doesn't exist in the metadata");
+            .ok_or_else(|| {
+                if !observed_stderr_but_lib_msg_not_present {
+                    anyhow::anyhow!(
+                        "crate {crate_name} v{version} has no lib target, nothing to check"
+                    )
+                } else {
+                    panic!(
+                        "We declared a dependency on crate `{crate_name}`, but it doesn't exist \
+in the metadata and stderr didn't mention it was lacking a lib target. This is probably a bug.",
+                    );
+                }
+            })?;
 
         // Figure out the name of the JSON file where rustdoc will produce the output we want.
         // The name is:
