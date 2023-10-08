@@ -1,0 +1,53 @@
+SemverQuery(
+    id: "function_changed_abi",
+    human_readable_name: "pub function changed ABI",
+    description: "A public function changed its external ABI.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/external-blocks.html#abi"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Function {
+                        name @output
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @output @tag
+                        }
+                        
+                        abi_: abi {
+                            name @output @tag
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+
+                        new_abi_: abi {
+                            name @filter(op: "!=", value: ["%name"]) @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+    },
+    error_message: "A publicly-visible function changed its ABI.",
+    per_result_error_template: Some("{{join \"::\" path}} changed ABI from {{abi_name}} to {{new_abi_name}} in {{span_filename}}:{{span_begin_line}}"),
+)

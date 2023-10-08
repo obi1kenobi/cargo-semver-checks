@@ -516,4 +516,5 @@ add_lints!(
     trait_removed_associated_type,
     module_missing,
     trait_removed_associated_constant,
+    function_changed_abi,
 );
