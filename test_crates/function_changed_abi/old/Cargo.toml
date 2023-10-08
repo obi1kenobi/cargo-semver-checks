@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "pub_function_changed_abi"
+name = "function_changed_abi"
 version = "0.1.0"
 edition = "2021"
 

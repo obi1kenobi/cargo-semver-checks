@@ -1,11 +1,11 @@
 {
-    "./test_crates/pub_function_changed_abi/": [
+    "./test_crates/function_changed_abi/": [
         {
             "abi_name": String("C"),
             "name": String("c_function_becomes_rust"),
             "new_abi_name": String("Rust"),
             "path": List([
-                String("pub_function_changed_abi"),
+                String("function_changed_abi"),
                 String("c_function_becomes_rust"),
             ]),
             "span_begin_line": Uint64(1),
@@ -17,7 +17,7 @@
             "name": String("c_function_becomes_rust_implicitly"),
             "new_abi_name": String("Rust"),
             "path": List([
-                String("pub_function_changed_abi"),
+                String("function_changed_abi"),
                 String("c_function_becomes_rust_implicitly"),
             ]),
             "span_begin_line": Uint64(3),
@@ -29,7 +29,7 @@
             "name": String("rust_function_becomes_c"),
             "new_abi_name": String("C"),
             "path": List([
-                String("pub_function_changed_abi"),
+                String("function_changed_abi"),
                 String("rust_function_becomes_c"),
             ]),
             "span_begin_line": Uint64(5),
@@ -41,7 +41,7 @@
             "name": String("implicit_rust_function_becomes_c"),
             "new_abi_name": String("C"),
             "path": List([
-                String("pub_function_changed_abi"),
+                String("function_changed_abi"),
                 String("implicit_rust_function_becomes_c"),
             ]),
             "span_begin_line": Uint64(7),
@@ -53,7 +53,7 @@
             "name": String("implicit_c_function_becomes_rust"),
             "new_abi_name": String("Rust"),
             "path": List([
-                String("pub_function_changed_abi"),
+                String("function_changed_abi"),
                 String("implicit_c_function_becomes_rust"),
             ]),
             "span_begin_line": Uint64(9),
@@ -65,7 +65,7 @@
             "name": String("system_function_becomes_c"),
             "new_abi_name": String("C"),
             "path": List([
-                String("pub_function_changed_abi"),
+                String("function_changed_abi"),
                 String("system_function_becomes_c"),
             ]),
             "span_begin_line": Uint64(15),
