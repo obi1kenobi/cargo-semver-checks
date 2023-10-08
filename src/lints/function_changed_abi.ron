@@ -16,7 +16,7 @@ SemverQuery(
                         importable_path {
                             path @output @tag
                         }
-                        
+
                         abi_: abi {
                             name @output @tag
                         }
@@ -27,18 +27,18 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        
+
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                        }
+
+                        new_abi_: abi {
+                            name @filter(op: "!=", value: ["%name"]) @output
                         }
 
                         span_: span @optional {
                             filename @output
                             begin_line @output
-                        }
-
-                        new_abi_: abi {
-                            name @filter(op: "!=", value: ["%name"]) @output
                         }
                     }
                 }
