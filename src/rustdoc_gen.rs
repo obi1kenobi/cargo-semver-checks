@@ -631,14 +631,16 @@ impl RustdocFromRegistry {
 
         let index: index::ComboIndex = match index_cache {
             ComboIndexCache::Git(git) => {
-                let mut rgi = index::RemoteGitIndex::new(git)
+                let lock = acquire_cargo_global_package_lock(config)?;
+                let mut rgi = index::RemoteGitIndex::new(git, &lock)
                     .context("failed to open crates.io git index")?;
 
                 config.shell_status("Updating", "index")?;
-                while need_retry(rgi.fetch())? {
+                while need_retry(rgi.fetch(&lock))? {
                     config.shell_status("Blocking", "waiting for lock on registry index")?;
                     std::thread::sleep(REGISTRY_BACKOFF);
                 }
+                drop(lock);
 
                 rgi.into()
             }
@@ -719,7 +721,8 @@ impl RustdocGenerator for RustdocFromRegistry {
         rustdoc_cmd: &RustdocCommand,
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
-        let crate_ = self.index.krate(crate_data.name.try_into().expect("this should be impossible"), false)
+        let lock = acquire_cargo_global_package_lock(config)?;
+        let crate_ = self.index.krate(crate_data.name.try_into().expect("this should be impossible"), false, &lock)
             .with_context(|| {
                 format!("failed to read index metadata for crate '{}'", crate_data.name)
             })?
@@ -731,6 +734,7 @@ impl RustdocGenerator for RustdocFromRegistry {
                 crate_data.name
             )
         })?;
+        drop(lock);
 
         let base_version = if let Some(base) = &self.version {
             base.clone()
@@ -787,6 +791,20 @@ fn need_retry(res: Result<(), tame_index::Error>) -> anyhow::Result<bool> {
             }
         }
         Err(err) => Err(err.into()),
+    }
+}
+
+fn acquire_cargo_global_package_lock(
+    config: &mut GlobalConfig,
+) -> anyhow::Result<tame_index::index::FileLock> {
+    let lock_options = tame_index::utils::flock::LockOptions::cargo_package_lock(None)
+        .expect("failed to create the global cargo package lock, is $CARGO_HOME set?");
+    match lock_options.try_lock() {
+        Ok(lock) => Ok(lock),
+        Err(_) => {
+            config.shell_status("Blocking", "waiting for cargo global package lock")?;
+            Ok(lock_options.lock(|_| None)?)
+        }
     }
 }
 
