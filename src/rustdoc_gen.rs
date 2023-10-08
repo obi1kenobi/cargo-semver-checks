@@ -794,8 +794,11 @@ fn need_retry(res: Result<(), tame_index::Error>) -> anyhow::Result<bool> {
     }
 }
 
-fn acquire_cargo_global_package_lock(config: &mut GlobalConfig) -> anyhow::Result<tame_index::index::FileLock> {
-    let lock_options = tame_index::utils::flock::LockOptions::cargo_package_lock(None).expect("failed to create the global cargo package lock, is $CARGO_HOME set?");
+fn acquire_cargo_global_package_lock(
+    config: &mut GlobalConfig,
+) -> anyhow::Result<tame_index::index::FileLock> {
+    let lock_options = tame_index::utils::flock::LockOptions::cargo_package_lock(None)
+        .expect("failed to create the global cargo package lock, is $CARGO_HOME set?");
     match lock_options.try_lock() {
         Ok(lock) => Ok(lock),
         Err(_) => {
