@@ -114,21 +114,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: rustfmt, clippy
+          cache: false
+          rustflags: ""
 
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: 'semver'
-
-      - uses: r7kamura/rust-problem-matchers@v1
 
       - name: cargo clippy
         run: cargo clippy --manifest-path semver/Cargo.toml --workspace --all-features --all-targets --no-deps -- -D warnings --allow deprecated
@@ -157,16 +157,18 @@ jobs:
             experimental: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
+          rustflags: ""
+          cache: false
 
       - name: restore test rustdocs
         id: cache-test-rustdocs
@@ -184,8 +186,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: 'semver'
-
-      - uses: r7kamura/rust-problem-matchers@v1
 
       - name: compile
         run: |
@@ -206,13 +206,16 @@ jobs:
       RUSTC_WRAPPER: "sccache"
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          rustflags: ""
+          cache: false
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -220,8 +223,6 @@ jobs:
 
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.3
-
-      - uses: r7kamura/rust-problem-matchers@v1
 
       - name: build and cache
         run: |
@@ -255,13 +256,16 @@ jobs:
       RUSTC_WRAPPER: "sccache"
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          rustflags: ""
+          cache: false
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -269,8 +273,6 @@ jobs:
 
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.3
-
-      - uses: r7kamura/rust-problem-matchers@v1
 
       - name: build and cache
         run: |
@@ -299,13 +301,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -326,7 +328,11 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@1.70  # Rust 1.70 uses rustdoc v24
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: "1.70"  # Rust 1.70 uses rustdoc v24
+          rustflags: ""
+          cache: false
 
       - name: Restore rustdoc
         id: cache
@@ -355,8 +361,12 @@ jobs:
           key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@stable  # Rust 1.72 uses rustdoc v26
+      - name: Install newer rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: "1.72"  # Rust 1.72 uses rustdoc v26
+          rustflags: ""
+          cache: false
 
       - name: Check with older rustdoc version cached
         run: |
@@ -394,14 +404,14 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       # This is a fork of serde, modified to make feature `unstable` break semver.
       - name: Checkout fork of serde
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'staniewzki/serde'
@@ -418,7 +428,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       - name: Restore rustdoc
         id: cache
@@ -493,13 +506,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -508,7 +521,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -569,13 +585,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -584,7 +600,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -640,13 +659,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -655,7 +674,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -709,13 +731,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -724,7 +746,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -774,13 +799,13 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'servo/core-foundation-rs'
@@ -789,7 +814,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       # This job runs on macOS, not Linux like the rest.
       # It should save its cache, because no other job will save it in its place.
@@ -829,13 +857,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout bevy
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
@@ -844,7 +872,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -889,13 +920,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout bevy
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
@@ -904,7 +935,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -948,13 +982,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout sqllogictest
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'risinglightdb/sqllogictest-rs'
@@ -963,7 +997,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -1012,13 +1049,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout tokio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'tokio-rs/tokio'
@@ -1027,7 +1064,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
@@ -1087,13 +1127,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout tokio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'tokio-rs/tokio'
@@ -1102,7 +1142,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
@@ -1153,13 +1196,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout clap v3.2.0
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'clap-rs/clap'
@@ -1167,7 +1210,7 @@ jobs:
           path: 'subject-current'
 
       - name: Checkout clap v3.1.18
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'clap-rs/clap'
@@ -1176,7 +1219,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -1279,13 +1325,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: true
           path: 'semver'
 
       - name: Checkout ref-slice fork semver break
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
@@ -1294,7 +1340,12 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        env:
+          CARGO_REGISTRIES_CRATES_IO_PROTOCOL: ${{ matrix.protocol }}
+        with:
+          cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -1381,13 +1432,13 @@ jobs:
       - build-binary-windows
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: true
           path: semver
 
       - name: Checkout ref-slice fork semver break
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
@@ -1396,7 +1447,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -1480,13 +1534,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout bevy
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'phantomical/perf-event'
@@ -1495,7 +1549,10 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -1541,14 +1598,14 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       # rust-fnv is very lightweight and quite stable.
       - name: Checkout rust-fnv
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: "servo/rust-fnv"
@@ -1557,7 +1614,11 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@1.67
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: "1.67"
+          rustflags: ""
+          cache: false
 
       - name: Restore binary
         id: cache-binary
@@ -1636,13 +1697,15 @@ jobs:
       publish-tag: ${{ steps.tag.outputs.tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - uses: Swatinem/rust-cache@v2
 
@@ -1675,7 +1738,7 @@ jobs:
     if: needs.should-publish.outputs.is_new_version == 'yes'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
