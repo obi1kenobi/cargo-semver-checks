@@ -175,7 +175,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: semver/localdata/test_data/
-          key: test-rustdocs-${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/test_crates/**/*.rs') }}
+          key: test-rustdocs-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/test_crates/**/*.rs') }}
 
       - name: Regenerate test data
         if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
@@ -316,7 +316,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -336,7 +336,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Install newer rust
@@ -415,7 +415,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -468,7 +468,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-rust-libp2p:
@@ -520,7 +520,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -546,7 +546,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-libp2p-dcutr-relay:
@@ -599,7 +599,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -623,7 +623,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-libp2p-gossipsub-request-response:
@@ -673,7 +673,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -697,7 +697,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-libp2p-uds:
@@ -745,7 +745,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -763,7 +763,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-core-graphics:
@@ -810,7 +810,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Run semver-checks
@@ -822,7 +822,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-bevy-core:
@@ -867,7 +867,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -885,7 +885,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-bevy-gltf:
@@ -930,7 +930,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -948,7 +948,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-sqllogictest:
@@ -992,7 +992,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1015,7 +1015,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-tokio-explicit:
@@ -1069,7 +1069,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       # This test caught two bugs:
@@ -1093,7 +1093,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-tokio-implicit:
@@ -1147,7 +1147,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       # This test caught a bug where `publish = false` items in a workspace were semver-checked
@@ -1161,7 +1161,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-clap:
@@ -1214,7 +1214,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject-current/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1281,7 +1281,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject-current/target/semver-checks/cache
 
   run-on-ref-slice-fork:
@@ -1335,7 +1335,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1386,7 +1386,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-ref-slice-fork-windows:
@@ -1435,7 +1435,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject\target\semver-checks\cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1487,7 +1487,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject\target\semver-checks\cache
 
   run-on-perf-event-open-sys2:
@@ -1532,7 +1532,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1550,7 +1550,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   fails-on-too-old-rustc:
@@ -1598,7 +1598,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1639,7 +1639,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   init-release:
