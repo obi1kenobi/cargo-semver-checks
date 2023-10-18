@@ -1426,6 +1426,11 @@ jobs:
           CARGO_REGISTRIES_CRATES_IO_PROTOCOL: ${{ matrix.protocol }}
         run: |
           cd semver
+
+          # HACK: temporary workaround to unblock CI while I figure out a better fix for
+          #       https://github.com/EmbarkStudios/tame-index/issues/38
+          md C:\Users\runneradmin\.cargo\registry\index\github.com-1ecc6299db9ec823
+
           ..\bins\cargo-semver-checks.exe semver-checks check-release --manifest-path="..\subject\Cargo.toml" 2>&1 | tee output
 
       - name: Check whether it failed
