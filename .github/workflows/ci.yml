@@ -200,6 +200,10 @@ jobs:
   build-binary:
     name: Build binary
     runs-on: ubuntu-latest
+    env:
+      CARGO_INCREMENTAL: 0
+      SCCACHE_GHA_ENABLED: "true"
+      RUSTC_WRAPPER: "sccache"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -216,6 +220,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: 'semver'
+
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
 
       - name: build and cache
         run: |
@@ -239,6 +246,10 @@ jobs:
     # which would make whole CI last longer.
     name: Build binary (Windows)
     runs-on: windows-latest
+    env:
+      CARGO_INCREMENTAL: 0
+      SCCACHE_GHA_ENABLED: "true"
+      RUSTC_WRAPPER: "sccache"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -255,6 +266,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: 'semver'
+
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
 
       - name: build and cache
         run: |
