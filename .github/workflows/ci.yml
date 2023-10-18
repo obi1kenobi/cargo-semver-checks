@@ -120,15 +120,14 @@ jobs:
           path: 'semver'
 
       - name: Install rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: rustfmt, clippy
+          cache: false
 
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: 'semver'
-
-      - uses: r7kamura/rust-problem-matchers@v1
 
       - name: cargo clippy
         run: cargo clippy --manifest-path semver/Cargo.toml --workspace --all-features --all-targets --no-deps -- -D warnings --allow deprecated
@@ -185,8 +184,6 @@ jobs:
         with:
           workspaces: 'semver'
 
-      - uses: r7kamura/rust-problem-matchers@v1
-
       - name: compile
         run: |
           cd semver
@@ -215,8 +212,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: 'semver'
-
-      - uses: r7kamura/rust-problem-matchers@v1
 
       - name: build and cache
         run: |
@@ -255,8 +250,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: 'semver'
-
-      - uses: r7kamura/rust-problem-matchers@v1
 
       - name: build and cache
         run: |
