@@ -1324,6 +1324,11 @@ jobs:
         run: |
           cd semver
           set -euo pipefail
+
+          # HACK: temporary workaround to unblock CI while I figure out a better fix for
+          #       https://github.com/EmbarkStudios/tame-index/issues/38
+          mkdir -p /home/runner/.cargo/registry/index/github.com-1ecc6299db9ec823
+
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --verbose 2>&1 | tee output
           touch unexpectedly_did_not_fail
 
