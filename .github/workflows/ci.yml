@@ -124,6 +124,7 @@ jobs:
         with:
           components: rustfmt, clippy
           cache: false
+          rustflags: ""
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -166,6 +167,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
+          rustflags: ""
           cache: false
 
       - name: restore test rustdocs
@@ -208,6 +210,7 @@ jobs:
       - name: Install rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          rustflags: ""
           cache: false
 
       - uses: Swatinem/rust-cache@v2
@@ -246,6 +249,7 @@ jobs:
       - name: Install rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          rustflags: ""
           cache: false
 
       - uses: Swatinem/rust-cache@v2
@@ -305,6 +309,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: "1.70"  # Rust 1.70 uses rustdoc v24
+          rustflags: ""
           cache: false
 
       - name: Restore rustdoc
@@ -338,6 +343,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: "1.72"  # Rust 1.72 uses rustdoc v26
+          rustflags: ""
           cache: false
 
       - name: Check with older rustdoc version cached
@@ -403,6 +409,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       - name: Restore rustdoc
         id: cache
@@ -495,6 +502,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -573,6 +581,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -646,6 +655,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -717,6 +727,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -784,6 +795,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       # This job runs on macOS, not Linux like the rest.
       # It should save its cache, because no other job will save it in its place.
@@ -841,6 +853,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -903,6 +916,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -964,6 +978,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -1030,6 +1045,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
@@ -1107,6 +1123,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
@@ -1183,6 +1200,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -1303,6 +1321,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -1402,6 +1421,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -1498,6 +1518,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
+          rustflags: ""
 
       - name: Restore binary
         id: cache-binary
@@ -1562,6 +1583,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: "1.67"
+          rustflags: ""
           cache: false
 
       - name: Restore binary
