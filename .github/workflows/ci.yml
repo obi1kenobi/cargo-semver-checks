@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
@@ -157,7 +157,7 @@ jobs:
             experimental: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
@@ -173,7 +173,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: semver/localdata/test_data/
-          key: test-rustdocs-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/test_crates/**/*.rs') }}
+          key: test-rustdocs-${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/test_crates/**/*.rs') }}
 
       - name: Regenerate test data
         if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
@@ -202,13 +202,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -240,13 +242,15 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -277,13 +281,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -304,13 +308,16 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@1.70  # Rust 1.70 uses rustdoc v24
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: "1.70"  # Rust 1.70 uses rustdoc v24
+          cache: false
 
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -330,11 +337,14 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@stable  # Rust 1.72 uses rustdoc v26
+      - name: Install newer rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: "1.72"  # Rust 1.72 uses rustdoc v26
+          cache: false
 
       - name: Check with older rustdoc version cached
         run: |
@@ -372,14 +382,14 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       # This is a fork of serde, modified to make feature `unstable` break semver.
       - name: Checkout fork of serde
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'staniewzki/serde'
@@ -396,13 +406,15 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Restore rustdoc
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -455,7 +467,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-rust-libp2p:
@@ -471,13 +483,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -486,7 +498,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -504,7 +518,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -530,7 +544,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-libp2p-dcutr-relay:
@@ -547,13 +561,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -562,7 +576,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -580,7 +596,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -604,7 +620,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-libp2p-gossipsub-request-response:
@@ -618,13 +634,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -633,7 +649,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -651,7 +669,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -675,7 +693,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-libp2p-uds:
@@ -687,13 +705,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -702,7 +720,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -720,7 +740,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -738,7 +758,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-core-graphics:
@@ -752,13 +772,13 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'servo/core-foundation-rs'
@@ -767,7 +787,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       # This job runs on macOS, not Linux like the rest.
       # It should save its cache, because no other job will save it in its place.
@@ -782,7 +804,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Run semver-checks
@@ -794,7 +816,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-bevy-core:
@@ -807,13 +829,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout bevy
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
@@ -822,7 +844,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Restore binary
         id: cache-binary
@@ -836,7 +860,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -854,7 +878,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-bevy-gltf:
@@ -867,13 +891,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout bevy
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
@@ -882,7 +906,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Restore binary
         id: cache-binary
@@ -896,7 +922,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -914,7 +940,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-sqllogictest:
@@ -926,13 +952,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout sqllogictest
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'risinglightdb/sqllogictest-rs'
@@ -941,7 +967,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Restore binary
         id: cache-binary
@@ -955,7 +983,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -978,7 +1006,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-tokio-explicit:
@@ -990,13 +1018,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout tokio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'tokio-rs/tokio'
@@ -1005,7 +1033,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
@@ -1029,7 +1059,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       # This test caught two bugs:
@@ -1053,7 +1083,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-tokio-implicit:
@@ -1065,13 +1095,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout tokio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'tokio-rs/tokio'
@@ -1080,7 +1110,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
@@ -1104,7 +1136,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       # This test caught a bug where `publish = false` items in a workspace were semver-checked
@@ -1118,7 +1150,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-clap:
@@ -1131,13 +1163,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout clap v3.2.0
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'clap-rs/clap'
@@ -1145,7 +1177,7 @@ jobs:
           path: 'subject-current'
 
       - name: Checkout clap v3.1.18
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'clap-rs/clap'
@@ -1154,7 +1186,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Restore binary
         id: cache-binary
@@ -1168,7 +1202,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject-current/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1235,7 +1269,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject-current/target/semver-checks/cache
 
   run-on-ref-slice-fork:
@@ -1257,13 +1291,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: true
           path: 'semver'
 
       - name: Checkout ref-slice fork semver break
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
@@ -1272,7 +1306,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Restore binary
         id: cache-binary
@@ -1286,7 +1322,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1337,7 +1373,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   run-on-ref-slice-fork-windows:
@@ -1354,13 +1390,13 @@ jobs:
       - build-binary-windows
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: true
           path: semver
 
       - name: Checkout ref-slice fork semver break
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
@@ -1369,7 +1405,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Restore binary
         id: cache-binary
@@ -1383,7 +1421,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject\target\semver-checks\cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1435,7 +1473,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject\target\semver-checks\cache
 
   run-on-perf-event-open-sys2:
@@ -1448,13 +1486,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout bevy
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: 'phantomical/perf-event'
@@ -1463,7 +1501,9 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - name: Restore binary
         id: cache-binary
@@ -1477,7 +1517,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1495,7 +1535,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   fails-on-too-old-rustc:
@@ -1509,14 +1549,14 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: 'semver'
 
       # rust-fnv is very lightweight and quite stable.
       - name: Checkout rust-fnv
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           repository: "servo/rust-fnv"
@@ -1539,7 +1579,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v3
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -1580,7 +1620,7 @@ jobs:
         uses: actions/cache/save@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.rustc-version }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
   init-release:
@@ -1604,13 +1644,15 @@ jobs:
       publish-tag: ${{ steps.tag.outputs.tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
       - name: Install rust
         id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
 
       - uses: Swatinem/rust-cache@v2
 
@@ -1643,7 +1685,7 @@ jobs:
     if: needs.should-publish.outputs.is_new_version == 'yes'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
