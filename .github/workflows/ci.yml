@@ -1319,6 +1319,8 @@ jobs:
       - name: Install rust
         id: toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
+        env:
+          CARGO_REGISTRIES_CRATES_IO_PROTOCOL: ${{ matrix.protocol }}
         with:
           cache: false
           rustflags: ""
