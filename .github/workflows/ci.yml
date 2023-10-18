@@ -227,7 +227,11 @@ jobs:
       - name: build and cache
         run: |
           cd semver
+
+          sccache --zero-stats
           cargo build
+          sccache --show-stats
+
           mkdir ../bins
           mv target/debug/cargo-semver-checks ../bins/cargo-semver-checks
 
@@ -273,7 +277,11 @@ jobs:
       - name: build and cache
         run: |
           cd semver
+
+          sccache --zero-stats
           cargo build
+          sccache --show-stats
+
           mkdir ..\bins
           mv target\debug\cargo-semver-checks.exe ..\bins\cargo-semver-checks.exe
 
@@ -1472,6 +1480,11 @@ jobs:
           CARGO_REGISTRIES_CRATES_IO_PROTOCOL: ${{ matrix.protocol }}
         run: |
           cd semver
+
+          # HACK: temporary workaround to unblock CI while I figure out a better fix for
+          #       https://github.com/EmbarkStudios/tame-index/issues/38
+          md C:\Users\runneradmin\.cargo\registry\index\github.com-1ecc6299db9ec823
+
           ..\bins\cargo-semver-checks.exe semver-checks check-release --manifest-path="..\subject\Cargo.toml" 2>&1 | tee output
 
       - name: Check whether it failed
