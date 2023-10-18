@@ -214,6 +214,10 @@ jobs:
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
 
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: 'semver'
+
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.3
 
@@ -254,6 +258,10 @@ jobs:
 
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: 'semver'
 
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.3
