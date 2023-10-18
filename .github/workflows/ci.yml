@@ -1316,6 +1316,14 @@ jobs:
         run: |
           cd semver
           set -euo pipefail
+
+          # Run cargo check in order to create the git index directory.
+          # When the index doesn't exist, running cargo-semver-checks fails
+          # since tame-index assumes it exist and raises an error when it doesn't.
+          #
+          # Repro: https://github.com/obi1kenobi/cargo-semver-checks/pull/560
+          cargo check --manifest-path="../subject/Cargo.toml"
+
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --verbose 2>&1 | tee output
           touch unexpectedly_did_not_fail
 
