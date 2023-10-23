@@ -27,7 +27,7 @@ pub use query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery};
 
 /// Test a release for semver violations.
 #[non_exhaustive]
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Check {
     /// Which packages to analyze.
     scope: Scope,
@@ -52,7 +52,7 @@ pub enum ReleaseType {
 }
 
 #[non_exhaustive]
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Rustdoc {
     source: RustdocSource,
 }
@@ -102,7 +102,7 @@ impl Rustdoc {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 enum RustdocSource {
     /// Path to the Rustdoc json file.
     /// Use this option when you have already generated the rustdoc file.
@@ -120,12 +120,12 @@ enum RustdocSource {
 }
 
 /// Which packages to analyze.
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq, Eq)]
 struct Scope {
     mode: ScopeMode,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 enum ScopeMode {
     /// All packages except the excluded ones.
     DenyList(PackageSelection),
@@ -140,7 +140,7 @@ impl Default for ScopeMode {
 }
 
 #[non_exhaustive]
-#[derive(Default, Clone, Debug)]
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
 pub struct PackageSelection {
     selection: ScopeSelection,
     excluded_packages: Vec<String>,

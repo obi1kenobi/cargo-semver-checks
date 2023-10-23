@@ -229,7 +229,7 @@ pub(crate) enum CrateType<'a> {
 
 /// Configuration used to choose features to enable.
 /// Separate configs are used for baseline and current versions.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 pub(crate) struct FeatureConfig {
     /// Feature set chosen as the foundation.
     pub(crate) features_group: FeaturesGroup,
@@ -238,7 +238,7 @@ pub(crate) struct FeatureConfig {
     pub(crate) is_baseline: bool,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 pub(crate) enum FeaturesGroup {
     All,
     Default,

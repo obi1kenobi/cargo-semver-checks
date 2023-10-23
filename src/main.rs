@@ -121,7 +121,7 @@ enum SemverChecksCommands {
     CheckRelease(CheckRelease),
 }
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Clone)]
 struct CheckRelease {
     #[command(flatten, next_help_heading = "Current")]
     pub manifest: clap_cargo::Manifest,
@@ -340,8 +340,15 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         let mut baseline_features = value.baseline_features;
         current_features.append(&mut mutual_features.clone());
         baseline_features.append(&mut mutual_features);
-        check.with_extra_features(current_features, baseline_features);
 
+        // Treat --features="" as a no-op like cargo does
+        let trim_features = |features: &mut Vec<String>| {
+            features.retain(|feature| !feature.is_empty());
+        };
+        trim_features(&mut current_features);
+        trim_features(&mut baseline_features);
+
+        check.with_extra_features(current_features, baseline_features);
         check
     }
 }
@@ -350,4 +357,23 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
 fn verify_cli() {
     use clap::CommandFactory;
     Cargo::command().debug_assert()
+}
+
+#[test]
+fn features_empty_string_is_no_op() {
+    use cargo_semver_checks::Check;
+
+    let Cargo::SemverChecks(SemverChecks {
+        check_release: no_features,
+        ..
+    }) = Cargo::parse_from(["cargo", "semver-checks"]);
+
+    let empty_features = CheckRelease {
+        features: vec![String::new()],
+        current_features: vec![String::new(), String::new()],
+        baseline_features: vec![String::new()],
+        ..no_features.clone()
+    };
+
+    assert_eq!(Check::from(no_features), Check::from(empty_features));
 }
