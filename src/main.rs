@@ -362,10 +362,12 @@ fn verify_cli() {
 #[test]
 fn features_empty_string_is_no_op() {
     use cargo_semver_checks::Check;
-    use clap::{ArgMatches, FromArgMatches};
 
-    let no_args = ArgMatches::default();
-    let no_features = CheckRelease::from_arg_matches(&no_args).unwrap();
+    let Cargo::SemverChecks(SemverChecks {
+        check_release: no_features,
+        ..
+    }) = Cargo::parse_from(["cargo", "semver-checks"]);
+
     let empty_features = CheckRelease {
         features: vec![String::new()],
         current_features: vec![String::new(), String::new()],
