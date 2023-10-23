@@ -121,7 +121,7 @@ enum SemverChecksCommands {
     CheckRelease(CheckRelease),
 }
 
-#[derive(Debug, Args, Default)]
+#[derive(Debug, Args, Clone)]
 struct CheckRelease {
     #[command(flatten, next_help_heading = "Current")]
     pub manifest: clap_cargo::Manifest,
@@ -362,13 +362,16 @@ fn verify_cli() {
 #[test]
 fn features_empty_string_is_no_op() {
     use cargo_semver_checks::Check;
-    let without_features = CheckRelease::default();
-    let with_empty_features = CheckRelease {
-        features: vec!["".to_owned()],
-        ..CheckRelease::default()
+    use clap::{ArgMatches, FromArgMatches};
+
+    let no_args = ArgMatches::default();
+    let no_features = CheckRelease::from_arg_matches(&no_args).unwrap();
+    let empty_features = CheckRelease {
+        features: vec![String::new()],
+        current_features: vec![String::new(), String::new()],
+        baseline_features: vec![String::new()],
+        ..no_features.clone()
     };
-    assert_eq!(
-        Check::from(without_features),
-        Check::from(with_empty_features)
-    );
+
+    assert_eq!(Check::from(no_features), Check::from(empty_features));
 }
