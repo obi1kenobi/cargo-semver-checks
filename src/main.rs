@@ -336,16 +336,19 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             check.with_heuristically_included_features();
         }
         let mut mutual_features = value.features;
-        // Treat --features="" as a no-op like cargo does
-        if mutual_features == [""] {
-            mutual_features.clear();
-        }
         let mut current_features = value.current_features;
         let mut baseline_features = value.baseline_features;
         current_features.append(&mut mutual_features.clone());
         baseline_features.append(&mut mutual_features);
-        check.with_extra_features(current_features, baseline_features);
 
+        // Treat --features="" as a no-op like cargo does
+        let trim_features = |features: &mut Vec<String>| {
+            features.retain(|feature| !feature.is_empty());
+        };
+        trim_features(&mut current_features);
+        trim_features(&mut baseline_features);
+
+        check.with_extra_features(current_features, baseline_features);
         check
     }
 }
