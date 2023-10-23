@@ -29,7 +29,7 @@ termcolor_output = "1.0.1"
 cargo_metadata = "0.17.0"
 clap-cargo = { version = "0.10.0", features = ["cargo_metadata"] }
 ignore = "0.4.18"
-clap-verbosity-flag = { git = "https://github.com/HadrienG2/clap-verbosity-flag.git", branch = "implement-default" }
+clap-verbosity-flag = "2.0.0"
 log = "0.4.17"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
