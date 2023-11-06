@@ -15,6 +15,7 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {
@@ -41,12 +42,13 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {
                             ... on TupleVariant {
                                 name @filter(op: "=", value: ["%variant_name"])
-                                
+
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     name @filter(op: "=", value: ["%field_name"])
                                 }
@@ -59,6 +61,7 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
+        "true": true,
         "zero": 0,
     },
     error_message: "A field of a tuple variant in a pub enum has been removed.",

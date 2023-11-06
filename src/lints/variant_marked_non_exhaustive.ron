@@ -15,6 +15,7 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {
@@ -32,6 +33,7 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {
@@ -51,6 +53,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "non_exhaustive": "#[non_exhaustive]",
+        "true": true,
     },
     error_message: "A public enum's variant has been marked #[non_exhaustive], which will prevent it from being constructed using a literal outside of its crate.",
     per_result_error_template: Some("variant {{name}}:{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),

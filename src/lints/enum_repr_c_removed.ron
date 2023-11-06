@@ -28,6 +28,7 @@ SemverQuery(
 
                         importable_path {
                             path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
                         }
                     }
                 }
@@ -49,6 +50,7 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         span_: span @optional {
@@ -64,6 +66,7 @@ SemverQuery(
         "public": "public",
         "repr": "repr",
         "c": "C",
+        "true": true,
         "zero": 0,
     },
     error_message: "repr(C) was removed from an enum. This can cause its memory layout to change, breaking FFI use cases.",

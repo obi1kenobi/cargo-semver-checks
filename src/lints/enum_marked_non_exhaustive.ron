@@ -18,6 +18,7 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         span_: span @optional {
@@ -35,6 +36,7 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
                     }
                 }
@@ -44,6 +46,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "non_exhaustive": "#[non_exhaustive]",
+        "true": true,
     },
     error_message: "A public enum has been marked #[non_exhaustive]. Pattern-matching on it outside of its crate must now include a wildcard pattern like `_`, or it will fail to compile.",
     per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),

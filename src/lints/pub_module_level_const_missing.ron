@@ -15,6 +15,7 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         span_: span @optional {
@@ -40,6 +41,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "zero": 0,
+        "true": true,
     },
     error_message: "A public const is missing, renamed, or changed from const to static.",
     per_result_error_template: Some("{{name}} in file {{span_filename}}:{{span_begin_line}}"),

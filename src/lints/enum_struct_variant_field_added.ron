@@ -15,6 +15,7 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {
@@ -47,6 +48,7 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {
@@ -66,6 +68,7 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
+        "true": true,
         "zero": 0,
         "non_exhaustive": "#[non_exhaustive]",
     },

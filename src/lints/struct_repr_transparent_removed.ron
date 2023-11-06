@@ -82,6 +82,7 @@ To avoid false-positives, this query is restricted to checking only structs that
 
                         importable_path {
                             path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
                         }
                     }
                 }
@@ -103,6 +104,7 @@ To avoid false-positives, this query is restricted to checking only structs that
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         span_: span @optional {
@@ -119,6 +121,7 @@ To avoid false-positives, this query is restricted to checking only structs that
         "repr": "repr",
         "transparent": "transparent",
         "phantom_data": ["core::marker::PhantomData", "std::marker::PhantomData"],
+        "true": true,
         "one": 1,
         "zero": 0,
     },

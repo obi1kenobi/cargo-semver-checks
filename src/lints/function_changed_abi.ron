@@ -15,6 +15,7 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         abi_: abi {
@@ -30,6 +31,7 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         new_abi_: abi {
@@ -47,6 +49,7 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
+        "true": true,
     },
     error_message: "A publicly-visible function changed its ABI.",
     per_result_error_template: Some("{{join \"::\" path}} changed ABI from {{abi_name}} to {{new_abi_name}} in {{span_filename}}:{{span_begin_line}}"),
