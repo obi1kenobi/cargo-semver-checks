@@ -20,6 +20,7 @@ SemverQuery(
 
                         variant {
                             variant_name: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
                             attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
                         }
                     }
@@ -38,6 +39,7 @@ SemverQuery(
 
                         variant {
                             name @filter(op: "=", value: ["%variant_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
                             attrs @filter(op: "contains", value: ["$non_exhaustive"])
 
                             span_: span @optional {

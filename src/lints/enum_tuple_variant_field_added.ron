@@ -26,6 +26,12 @@ SemverQuery(
                                 # clearly stated that they don't consider it exhaustive anymore.
                                 attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
+                                # If the variant is newly marked `#[doc(hidden)]`,
+                                # that's already a breaking change with its own rule.
+                                # Don't report new field additions, since the programmer has
+                                # clearly stated they don't consider it public API anymore.
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
                                 variant_name: name @output @tag
 
                                 field {
@@ -56,6 +62,7 @@ SemverQuery(
                             ... on TupleVariant {
                                 name @filter(op: "=", value: ["%variant_name"])
                                 attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     name @filter(op: "=", value: ["%field_name"])

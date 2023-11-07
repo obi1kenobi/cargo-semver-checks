@@ -21,6 +21,7 @@ SemverQuery(
                         field {
                             field_name: name @output @tag
                             visibility_limit @filter(op: "=", value: ["$public"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
 
                             span_: span @optional {
                                 filename @output

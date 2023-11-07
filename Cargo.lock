@@ -2931,7 +2931,7 @@ dependencies = [
 [[package]]
 name = "trustfall-rustdoc-adapter"
 version = "27.0.3"
-source = "git+https://github.com/davidhewitt/trustfall-rustdoc-adapter.git?branch=public-api#00ca8b9373a4cc947470df096a874a0214e8a39f"
+source = "git+https://github.com/davidhewitt/trustfall-rustdoc-adapter.git?branch=public-api#6f82578d583232c725b62215d0e2042ed4cea234"
 dependencies = [
  "rustdoc-types",
  "trustfall",

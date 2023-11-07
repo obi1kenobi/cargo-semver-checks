@@ -26,6 +26,7 @@ SemverQuery(
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @tag @output
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 attribute {
                                     new_attr: raw_attribute @output
@@ -58,6 +59,7 @@ SemverQuery(
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     content {

@@ -13,17 +13,11 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
                         owner_type: __typename @tag @output
+                        deprecated @filter(op: "=", value: ["$true"])
 
                         importable_path {
                             path @tag @output
                             public_api @filter(op: "=", value: ["$true"])
-                        }
-
-                        attribute {
-                            new_attr: raw_attribute @output
-                            content {
-                                base @filter(op: "=", value: ["$deprecated"])
-                            }
                         }
 
                         span_: span @optional {
@@ -38,16 +32,11 @@ SemverQuery(
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         __typename @filter(op: "=", value: ["%owner_type"])
+                        deprecated @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
-                        }
-
-                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            content {
-                                base @filter(op: "=", value: ["$deprecated"])
-                            }
                         }
                     }
                 }

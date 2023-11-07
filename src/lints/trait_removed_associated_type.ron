@@ -21,6 +21,13 @@ SemverQuery(
                         associated_type {
                             associated_type: name @output @tag
 
+                            # TODO: Once we can check whether traits are sealed, split this lint:
+                            # - Sealed traits should ignore ineligible (~approx. `#[doc(hidden)]`)
+                            #   associated types since they are indeed never public API.
+                            # - Non-sealed traits cannot do so, because implementors
+                            #   of the trait have to set the type regardless of `#[doc(hidden)]`.
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
                             span_: span {
                                 filename @output
                                 begin_line @output

@@ -21,6 +21,7 @@ SemverQuery(
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 span_: span @optional {
                                     filename @output

@@ -21,6 +21,7 @@ SemverQuery(
                             trait {
                                 importable_path {
                                     trait_path: path @output @tag
+                                    public_api @filter(op: "=", value: ["$true"])
                                 }
                             }
                         }

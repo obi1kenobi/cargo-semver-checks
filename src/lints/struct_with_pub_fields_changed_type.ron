@@ -26,6 +26,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
                         # Ensure the struct has pub fields.
                         field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             visibility_limit @filter(op: "=", value: ["$public"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
                         }
 
                         importable_path {

@@ -21,6 +21,7 @@ SemverQuery(
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
                                 unsafe @filter(op: "!=", value: ["$true"])
 
                                 span_: span @optional {
@@ -59,6 +60,7 @@ SemverQuery(
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
                             }
                         }
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
@@ -66,6 +68,7 @@ SemverQuery(
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 unsafe @filter(op: "!=", value: ["$true"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
                             }
                         }
 
@@ -76,6 +79,7 @@ SemverQuery(
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 unsafe @filter(op: "=", value: ["$true"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 non_matching_span_: span @optional {
                                     filename @output

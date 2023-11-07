@@ -21,6 +21,7 @@ SemverQuery(
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters")
 
@@ -66,12 +67,14 @@ SemverQuery(
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
                             }
                         }
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 parameter @fold @transform(op: "count") @filter(op: "=", value: ["%parameters"])
                             }
@@ -83,6 +86,7 @@ SemverQuery(
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 current_parameter_: parameter @fold @transform(op: "count") @output
 

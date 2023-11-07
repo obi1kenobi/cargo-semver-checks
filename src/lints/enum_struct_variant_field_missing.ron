@@ -20,9 +20,12 @@ SemverQuery(
                         variant {
                             ... on StructVariant {
                                 variant_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 field {
                                     field_name: name @output @tag
+                                    public_api_eligible @filter(op: "=", value: ["$true"])
+
                                     span_: span @optional {
                                         filename @output
                                         begin_line @output
@@ -47,6 +50,7 @@ SemverQuery(
                         variant {
                             ... on StructVariant {
                                 name @filter(op: "=", value: ["%variant_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     name @filter(op: "=", value: ["%field_name"])
