@@ -18,6 +18,8 @@ SemverQuery(
                         }
 
                         inherent_impl {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @output @tag

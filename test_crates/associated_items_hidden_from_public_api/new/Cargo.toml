@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "associated_items_hidden_from_public_api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
