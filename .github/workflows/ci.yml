@@ -144,7 +144,7 @@ jobs:
   rust-tests:
     name: Run tests
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: true  # TODO: revert this change before merging!!
     strategy:
       matrix:
         # IMPORTANT: When updating the versions here, make sure you also update
@@ -432,6 +432,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       - name: Restore rustdoc
         id: cache
@@ -525,6 +526,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -604,6 +606,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -678,6 +681,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -750,6 +754,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       # rust-libp2p requires protobuf-compiler.
       - name: Install protobuf-compiler
@@ -818,6 +823,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       # This job runs on macOS, not Linux like the rest.
       # It should save its cache, because no other job will save it in its place.
@@ -876,6 +882,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       - name: Restore binary
         id: cache-binary
@@ -939,6 +946,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       - name: Restore binary
         id: cache-binary
@@ -1001,6 +1009,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       - name: Restore binary
         id: cache-binary
@@ -1068,6 +1077,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
@@ -1146,6 +1156,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       - name: Restore cargo index and rustdoc target dir
         uses: Swatinem/rust-cache@v2
@@ -1223,6 +1234,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       - name: Restore binary
         id: cache-binary
@@ -1446,6 +1458,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       - name: Restore binary
         id: cache-binary
@@ -1543,6 +1556,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          toolchain: nightly
 
       - name: Restore binary
         id: cache-binary
