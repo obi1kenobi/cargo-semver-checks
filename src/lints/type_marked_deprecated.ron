@@ -45,9 +45,7 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
-        "deprecated": "deprecated",
         "true": true,
-        "zero": 0,
     },
     error_message: "A type is now #[deprecated]. Downstream crates will get a compiler warning when using this type.",
     per_result_error_template: Some("{{owner_type}} {{name}} in {{span_filename}}:{{span_begin_line}}"),
