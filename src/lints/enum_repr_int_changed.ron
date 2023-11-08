@@ -29,6 +29,7 @@ SemverQuery(
 
                         importable_path {
                             path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
                         }
                     }
                 }
@@ -41,6 +42,7 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         # Check that there exists an attribute that:
@@ -71,6 +73,7 @@ SemverQuery(
         "public": "public",
         "repr": "repr",
         "repr_regex": "[ui](\\d+|size)",
+        "true": true,
         "zero": 0,
     },
     error_message: "The repr(u*) or repr(i*) attribute on an enum was changed to another integer type. This can cause its memory representation to change, breaking FFI use cases.",

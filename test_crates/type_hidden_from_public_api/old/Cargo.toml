@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "type_hidden_from_public_api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

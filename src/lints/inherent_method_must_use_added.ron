@@ -19,12 +19,14 @@ SemverQuery(
 
                         importable_path {
                             path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         inherent_impl {
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @tag @output
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 attribute {
                                     new_attr: raw_attribute @output
@@ -50,12 +52,14 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         inherent_impl {
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     content {
@@ -72,6 +76,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "must_use": "must_use",
+        "true": true,
         "zero": 0,
     },
     error_message: "An inherent method is now #[must_use]. Downstream crates that did not use its return value will get a compiler lint.",

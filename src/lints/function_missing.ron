@@ -15,6 +15,7 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         span_: span @optional {
@@ -40,6 +41,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "zero": 0,
+        "true": true,
     },
     error_message: "A publicly-visible function cannot be imported by its prior path. A `pub use` may have been removed, or the function itself may have been renamed or removed entirely.",
     per_result_error_template: Some("function {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),

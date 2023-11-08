@@ -2,7 +2,6 @@
     "./test_crates/type_marked_deprecated/": [
         {
             "name": String("EnumToDeprecatedEnum"),
-            "new_attr": String("#[deprecated]"),
             "owner_type": String("Enum"),
             "path": List([
                 String("type_marked_deprecated"),
@@ -15,7 +14,6 @@
         },
         {
             "name": String("EnumToDeprecatedMessageEnum"),
-            "new_attr": String("#[deprecated = \"This attribute was added\"]"),
             "owner_type": String("Enum"),
             "path": List([
                 String("type_marked_deprecated"),
@@ -28,7 +26,6 @@
         },
         {
             "name": String("StructToDeprecatedStruct"),
-            "new_attr": String("#[deprecated]"),
             "owner_type": String("Struct"),
             "path": List([
                 String("type_marked_deprecated"),
@@ -41,7 +38,6 @@
         },
         {
             "name": String("StructToDeprecatedMessageStruct"),
-            "new_attr": String("#[deprecated = \"This attribute was added\"]"),
             "owner_type": String("Struct"),
             "path": List([
                 String("type_marked_deprecated"),

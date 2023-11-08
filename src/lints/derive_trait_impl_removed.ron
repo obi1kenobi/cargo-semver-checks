@@ -16,6 +16,7 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         impl {
@@ -52,6 +53,7 @@ SemverQuery(
 
                         importable_path @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
@@ -87,6 +89,7 @@ SemverQuery(
         "public": "public",
         "zero": 0,
         "false": false,
+        "true": true,
         "structural_eq": ["core", "marker", "StructuralEq"],
     },
     error_message: "A public type has stopped deriving one or more traits. This can break downstream code that depends on those types implementing those traits.",

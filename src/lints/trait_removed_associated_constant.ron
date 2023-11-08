@@ -2,7 +2,7 @@ SemverQuery(
     id: "trait_removed_associated_constant",
     human_readable_name: "trait's associated constant was removed",
     description: "A trait's associated constant was removed or renamed",
-    required_update: Major, 
+    required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
     {
@@ -15,10 +15,19 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         associated_constant {
                             associated_constant: name @output @tag
+
+                            # TODO: Once we can check whether traits are sealed, split this lint:
+                            # - Sealed traits should ignore ineligible (~approx. `#[doc(hidden)]`)
+                            #   associated constants since they are indeed never public API.
+                            # - Non-sealed traits should only ignore ineligible constants
+                            #   if they have a default value; otherwise, implementors
+                            #   of the trait have to set the const regardless of `#[doc(hidden)]`.
+                            public_api_eligible @filter(op: "=", value: ["$true"])
 
                             span_: span @optional {
                                filename @output
@@ -35,18 +44,20 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
-                    
+
                         associated_constant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             name @filter(op: "=", value: ["%associated_constant"])
                         }
-                    }                
+                    }
                 }
             }
         }
     }"#,
     arguments: {
         "public": "public",
+        "true": true,
         "zero": 0,
     },
     error_message: "A public trait's associated constant was removed or renamed.",

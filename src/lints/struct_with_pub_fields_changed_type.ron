@@ -26,10 +26,12 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
                         # Ensure the struct has pub fields.
                         field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             visibility_limit @filter(op: "=", value: ["$public"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
                         }
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
                     }
                 }
@@ -44,6 +46,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         span_: span @optional {
@@ -57,6 +60,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
     }"#,
     arguments: {
         "public": "public",
+        "true": true,
         "zero": 0,
     },
     error_message: "A struct became an enum or union, breaking accesses to its public fields.",

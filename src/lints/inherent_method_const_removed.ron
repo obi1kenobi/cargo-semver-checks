@@ -14,6 +14,7 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         inherent_impl {
@@ -21,6 +22,7 @@ SemverQuery(
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @output @tag
                                 const @filter(op: "=", value: ["$true"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 span_: span @optional {
                                     filename @output
@@ -39,6 +41,7 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         # We use "impl" instead of "inherent_impl" here because moving
@@ -57,6 +60,7 @@ SemverQuery(
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
                             }
                         }
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
@@ -64,6 +68,7 @@ SemverQuery(
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 const @filter(op: "=", value: ["$true"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
                             }
                         }
 
@@ -74,6 +79,7 @@ SemverQuery(
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 const @filter(op: "!=", value: ["$true"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 non_matching_span_: span @optional {
                                     filename @output

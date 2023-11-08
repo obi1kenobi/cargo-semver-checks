@@ -14,14 +14,18 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {
                             ... on StructVariant {
                                 variant_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 field {
                                     field_name: name @output @tag
+                                    public_api_eligible @filter(op: "=", value: ["$true"])
+
                                     span_: span @optional {
                                         filename @output
                                         begin_line @output
@@ -40,11 +44,13 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {
                             ... on StructVariant {
                                 name @filter(op: "=", value: ["%variant_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     name @filter(op: "=", value: ["%field_name"])
@@ -58,6 +64,7 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
+        "true": true,
         "zero": 0,
     },
     error_message: "A publicly-visible enum has a struct variant whose field is no longer available under its prior name. It may have been renamed or removed entirely.",

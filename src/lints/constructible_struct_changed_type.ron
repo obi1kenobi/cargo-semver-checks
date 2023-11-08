@@ -36,6 +36,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
                     }
                 }
@@ -50,6 +51,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         span_: span @optional {
@@ -64,6 +66,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
     arguments: {
         "public": "public",
         "non_exhaustive": "#[non_exhaustive]",
+        "true": true,
         "zero": 0,
     },
     error_message: "A struct became an enum or union, and is no longer publicly constructible with a struct literal.",

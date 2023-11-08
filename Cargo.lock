@@ -669,9 +669,9 @@ checksum = "5443807d6dff69373d433ab9ef5378ad8df50ca6298caf15de6e52e24aaf54d5"
 
 [[package]]
 name = "errno"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac3e13f66a2f95e32a39eaa81f6b95d42878ca0e1db0c7543723dfe12557e860"
+checksum = "7c18ee0ed65a5f1f81cac6b1d213b69c35fa47d4252ad41f1486dbd8226fe36e"
 dependencies = [
  "libc",
  "windows-sys 0.48.0",
@@ -1671,9 +1671,9 @@ checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
 
 [[package]]
 name = "human-panic"
-version = "1.2.1"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b82da652938b83f94cfdaaf9ae7aaadb8430d84b0dfda226998416318727eac2"
+checksum = "7a79a67745be0cb8dd2771f03b24c2f25df98d5471fe7a595d668cfa2e6f843d"
 dependencies = [
  "anstream",
  "anstyle",
@@ -1681,7 +1681,7 @@ dependencies = [
  "os_info",
  "serde",
  "serde_derive",
- "toml 0.7.8",
+ "toml 0.8.8",
  "uuid",
 ]
 
@@ -2321,15 +2321,6 @@ dependencies = [
 
 [[package]]
 name = "rustdoc-types"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5f59b848e09e1631f0f8711fcdcb65d4481597b869372cca5d6755737b21501"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "rustdoc-types"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c7a12c7506980eaac5c9851a04e90e0062eb4417aa188a512bf7a64a1ef290f"
@@ -2432,18 +2423,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.190"
+version = "1.0.192"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91d3c334ca1ee894a2c6f6ad698fe8c435b76d504b13d436f0685d648d6d96f7"
+checksum = "bca2a08484b285dcb282d0f67b26cadc0df8b19f8c12502c13d966bf9482f001"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.190"
+version = "1.0.192"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67c5609f394e5c2bd7fc51efda478004ea80ef42fee983d5c67a65e34f32c0e3"
+checksum = "d6c7207fbec9faa48073f3e3074cbe553af6ea512d7c21ba46e434e70ea9fbc1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2686,7 +2677,7 @@ dependencies = [
  "smol_str",
  "thiserror",
  "tokio",
- "toml 0.8.6",
+ "toml 0.8.8",
  "twox-hash",
  "windows-targets 0.48.5",
 ]
@@ -2865,14 +2856,14 @@ dependencies = [
 
 [[package]]
 name = "toml"
-version = "0.8.6"
+version = "0.8.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ff9e3abce27ee2c9a37f9ad37238c1bdd4e789c84ba37df76aa4d528f5072cc"
+checksum = "a1a195ec8c9da26928f773888e0742ca3ca1040c6cd859c919c9f59c1954ab35"
 dependencies = [
  "serde",
  "serde_spanned",
  "toml_datetime",
- "toml_edit 0.20.7",
+ "toml_edit 0.21.0",
 ]
 
 [[package]]
@@ -2899,9 +2890,9 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
-version = "0.20.7"
+version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70f427fce4d84c72b5b732388bf4a9f4531b53f74e2887e3ecb2481f68f66d81"
+checksum = "d34d383cd00a163b4a5b85053df514d45bc330f6de7737edfe0a93311d1eaa03"
 dependencies = [
  "indexmap 2.1.0",
  "serde",
@@ -2948,19 +2939,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "24.5.3"
+version = "26.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f30381ee0ff2e13945afad2d599179f6ab8616a5a34b74bd342fc30e60f46f86"
-dependencies = [
- "rustdoc-types 0.20.0",
- "trustfall",
-]
-
-[[package]]
-name = "trustfall-rustdoc-adapter"
-version = "26.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fbdccb0145e51ed535c4b655c9f35b0705a0962f1bc6dca8ec864f09e8e4022"
+checksum = "62d7d1381a94d69dcdc6d0caefa08c48038d3850c94fd25bbb39702a6d7358c1"
 dependencies = [
  "rustdoc-types 0.22.0",
  "trustfall",
@@ -2968,9 +2949,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "27.0.3"
+version = "27.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31b1829e2634f001b423f7d4d9623b12ee1ac741ae24ca80deb44655c185c087"
+checksum = "cafe4e40c766c6c9b4fef59700601a43b97529db2a1848accc4fe81f93ec90c2"
 dependencies = [
  "rustdoc-types 0.23.0",
  "trustfall",
@@ -3015,9 +2996,8 @@ dependencies = [
  "serde",
  "serde_json",
  "trustfall",
- "trustfall-rustdoc-adapter 24.5.3",
- "trustfall-rustdoc-adapter 26.2.3",
- "trustfall-rustdoc-adapter 27.0.3",
+ "trustfall-rustdoc-adapter 26.2.4",
+ "trustfall-rustdoc-adapter 27.0.4",
 ]
 
 [[package]]

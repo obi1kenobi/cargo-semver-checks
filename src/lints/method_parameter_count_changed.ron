@@ -14,12 +14,14 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         inherent_impl {
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters")
 
@@ -40,6 +42,7 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         # We use "impl" instead of "inherent_impl" here because moving
@@ -64,12 +67,14 @@ SemverQuery(
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
                             }
                         }
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 parameter @fold @transform(op: "count") @filter(op: "=", value: ["%parameters"])
                             }
@@ -81,6 +86,7 @@ SemverQuery(
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 current_parameter_: parameter @fold @transform(op: "count") @output
 
@@ -98,6 +104,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "public_or_default": ["public", "default"],
+        "true": true,
         "zero": 0,
     },
     error_message: "A publicly-visible method now takes a different number of parameters.",

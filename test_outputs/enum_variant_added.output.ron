@@ -12,4 +12,17 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/enum_variant_hidden_from_public_api/": [
+        {
+            "enum_name": String("AddedVariant"),
+            "path": List([
+                String("enum_variant_hidden_from_public_api"),
+                String("AddedVariant"),
+            ]),
+            "span_begin_line": Uint64(16),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("Added"),
+            "visibility_limit": String("public"),
+        },
+    ],
 }

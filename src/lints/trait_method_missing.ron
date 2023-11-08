@@ -15,10 +15,19 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         method {
                             method_name: name @output @tag
+
+                            # TODO: Once we can check whether traits are sealed, split this lint:
+                            # - Sealed traits should ignore ineligible (~approx. `#[doc(hidden)]`)
+                            #   methods since they are indeed never public API.
+                            # - Non-sealed traits should only ignore ineligible methods
+                            #   if they have a default implementation; otherwise, implementors
+                            #   of the trait have to impl the method regardless of `#[doc(hidden)]`.
+                            public_api_eligible @filter(op: "=", value: ["$true"])
 
                             span_: span @optional {
                                 filename @output
@@ -35,6 +44,7 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         method @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
@@ -48,7 +58,12 @@ SemverQuery(
     arguments: {
         "public": "public",
         "zero": 0,
+        "true": true,
     },
+    // TODO: This has a false-positive edge case, because it assumes the trait method
+    //       was *previously* callable. This might not be the case for partially-sealed traits
+    //       which can make some methods uncallable. In that case, the method removal
+    //       is not a breaking change, since it could never have been called in the first place.
     error_message: "A trait method is no longer callable, and may have been renamed or removed entirely.",
     per_result_error_template: Some("method {{method_name}} of trait {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
 )

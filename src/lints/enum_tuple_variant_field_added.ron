@@ -15,6 +15,7 @@ SemverQuery(
 
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {
@@ -24,6 +25,12 @@ SemverQuery(
                                 # Don't also report new field additions, since the programmer has
                                 # clearly stated that they don't consider it exhaustive anymore.
                                 attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                                # If the variant is newly marked `#[doc(hidden)]`,
+                                # that's already a breaking change with its own rule.
+                                # Don't report new field additions, since the programmer has
+                                # clearly stated they don't consider it public API anymore.
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 variant_name: name @output @tag
 
@@ -48,12 +55,14 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {
                             ... on TupleVariant {
                                 name @filter(op: "=", value: ["%variant_name"])
                                 attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     name @filter(op: "=", value: ["%field_name"])
@@ -67,6 +76,7 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
+        "true": true,
         "zero": 0,
         "non_exhaustive": "#[non_exhaustive]",
     },

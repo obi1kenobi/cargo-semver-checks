@@ -25,6 +25,7 @@ Source: Rust for Rustaceans, Chapter 3, "Type Modifications", page 51
 
                         importable_path {
                             path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
                         }
                     }
                 }
@@ -39,6 +40,7 @@ Source: Rust for Rustaceans, Chapter 3, "Type Modifications", page 51
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         span_: span @optional {
@@ -55,6 +57,7 @@ Source: Rust for Rustaceans, Chapter 3, "Type Modifications", page 51
         "tuple": "tuple",
         "plain": "plain",
         "non_exhaustive": "#[non_exhaustive]",
+        "true": true,
         "zero": 0,
     },
     error_message: "A publicly-visible, exhaustive tuple struct with pub fields changed to normal (curly-braces) struct, which cannot be constructed using the same struct literal syntax.",
