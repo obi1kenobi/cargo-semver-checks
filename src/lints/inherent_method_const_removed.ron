@@ -99,5 +99,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A publicly-visible method or associated fn is no longer `const` and can no longer be used in a `const` context.",
-    per_result_error_template: Some("{{name}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{name}}::{{method_name}} in {{multiple_spans non_matching_span_filename non_matching_span_begin_line}}"),
 )
