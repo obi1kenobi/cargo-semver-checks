@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "counterexample_for_ignoring_doc_hidden_items"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
