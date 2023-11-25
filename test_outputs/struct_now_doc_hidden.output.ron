@@ -1,0 +1,46 @@
+{
+    "./test_crates/struct_now_doc_hidden/": [
+        {
+            "path": List([
+                String("struct_now_doc_hidden"),
+                String("Example"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("Example"),
+            "struct_type": String("unit"),
+        },
+    ],
+    "./test_crates/type_hidden_from_public_api/": [
+        {
+            "path": List([
+                String("type_hidden_from_public_api"),
+                String("ExamplePlainStruct"),
+            ]),
+            "span_begin_line": Uint64(2),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("ExamplePlainStruct"),
+            "struct_type": String("plain"),
+        },
+        {
+            "path": List([
+                String("type_hidden_from_public_api"),
+                String("ExampleTupleStruct"),
+            ]),
+            "span_begin_line": Uint64(7),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("ExampleTupleStruct"),
+            "struct_type": String("tuple"),
+        },
+        {
+            "path": List([
+                String("type_hidden_from_public_api"),
+                String("ExampleUnitStruct"),
+            ]),
+            "span_begin_line": Uint64(10),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("ExampleUnitStruct"),
+            "struct_type": String("unit"),
+        },
+    ],
+}
