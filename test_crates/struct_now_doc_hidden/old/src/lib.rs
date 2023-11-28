@@ -6,7 +6,13 @@ pub mod MyPublicMod {
     pub struct MyStruct;
 }
 
+pub struct MispelledDocHidden;
+
 pub struct Example;
+
+pub struct PublicStructHiddenField {
+    pub my_field: i8,
+}
 
 mod MyNestedNonPublicMod {
     pub mod PublicInnerStruct {

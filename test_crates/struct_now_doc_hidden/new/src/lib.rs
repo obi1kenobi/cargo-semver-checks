@@ -32,5 +32,16 @@ pub mod MyNestedPublicMod {
     }
 }
 
+#[doc(hide)]
+pub struct MispelledDocHidden;
+
 #[doc(hidden)]
 pub struct Example;
+
+pub struct PublicStructHiddenField {
+    // shouldn't flag `struct_now_doc_hidden` rule
+    // as this is a field that's hidden,
+    // not the entire struct
+    #[doc(hidden)]
+    pub my_field: i8,
+}
