@@ -1,0 +1,63 @@
+{
+    "./test_crates/struct_now_doc_hidden/": [
+        {
+            "path": List([
+                String("struct_now_doc_hidden"),
+                String("MyPublicMod"),
+                String("MyStruct"),
+            ]),
+            "span_begin_line": Uint64(13),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("MyStruct"),
+        },
+        {
+            "path": List([
+                String("struct_now_doc_hidden"),
+                String("MyNestedPublicMod"),
+                String("PublicInnerStruct"),
+                String("MyStruct"),
+            ]),
+            "span_begin_line": Uint64(31),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("MyStruct"),
+        },
+        {
+            "path": List([
+                String("struct_now_doc_hidden"),
+                String("Example"),
+            ]),
+            "span_begin_line": Uint64(40),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("Example"),
+        },
+    ],
+    "./test_crates/type_hidden_from_public_api/": [
+        {
+            "path": List([
+                String("type_hidden_from_public_api"),
+                String("ExamplePlainStruct"),
+            ]),
+            "span_begin_line": Uint64(2),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("ExamplePlainStruct"),
+        },
+        {
+            "path": List([
+                String("type_hidden_from_public_api"),
+                String("ExampleTupleStruct"),
+            ]),
+            "span_begin_line": Uint64(7),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("ExampleTupleStruct"),
+        },
+        {
+            "path": List([
+                String("type_hidden_from_public_api"),
+                String("ExampleUnitStruct"),
+            ]),
+            "span_begin_line": Uint64(10),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("ExampleUnitStruct"),
+        },
+    ],
+}

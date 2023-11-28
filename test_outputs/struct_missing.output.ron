@@ -84,6 +84,19 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/struct_now_doc_hidden/": [
+        {
+            "name": String("PublicStructThatGoesPrivate"),
+            "path": List([
+                String("struct_now_doc_hidden"),
+                String("PublicStructThatGoesPrivate"),
+            ]),
+            "span_begin_line": Uint64(29),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("unit"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/struct_pub_field_missing/": [
         {
             "name": String("StructRemoved"),

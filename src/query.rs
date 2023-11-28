@@ -495,6 +495,7 @@ add_lints!(
     struct_marked_non_exhaustive,
     struct_missing,
     struct_must_use_added,
+    struct_now_doc_hidden,
     struct_pub_field_missing,
     struct_repr_c_removed,
     struct_repr_transparent_removed,
