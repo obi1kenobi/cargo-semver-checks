@@ -45,3 +45,6 @@ pub struct PublicStructHiddenField {
     #[doc(hidden)]
     pub my_field: i8,
 }
+
+#[doc(hidden)]
+struct PublicStructThatGoesPrivate;
