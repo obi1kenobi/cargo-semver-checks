@@ -27,3 +27,5 @@ pub mod MyNestedPublicMod {
 }
 
 pub struct PublicStructThatGoesPrivate;
+
+pub struct PublicStructDocumentedWithStringHidden;

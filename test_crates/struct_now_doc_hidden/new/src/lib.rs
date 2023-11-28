@@ -48,3 +48,7 @@ pub struct PublicStructHiddenField {
 
 #[doc(hidden)]
 struct PublicStructThatGoesPrivate;
+
+#[doc = "hidden"] // this is just documented with the string "hidden",
+                  // it's not actually #[doc(hidden)]
+pub struct PublicStructDocumentedWithStringHidden;
