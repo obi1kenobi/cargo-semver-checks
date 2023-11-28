@@ -3,9 +3,19 @@
         {
             "path": List([
                 String("struct_now_doc_hidden"),
+                String("MyPublicMod"),
+                String("MyStruct"),
+            ]),
+            "span_begin_line": Uint64(13),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("MyStruct"),
+        },
+        {
+            "path": List([
+                String("struct_now_doc_hidden"),
                 String("Example"),
             ]),
-            "span_begin_line": Uint64(4),
+            "span_begin_line": Uint64(17),
             "span_filename": String("src/lib.rs"),
             "struct_name": String("Example"),
         },
