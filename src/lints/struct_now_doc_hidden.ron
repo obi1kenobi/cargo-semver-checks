@@ -44,5 +44,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A publicly visible struct is now hidden via #[doc(hidden)].",
-    per_result_error_template: Some("Struct {{struct_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("struct {{struct_name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
