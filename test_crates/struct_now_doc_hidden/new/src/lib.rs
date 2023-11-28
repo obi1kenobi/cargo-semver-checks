@@ -32,7 +32,7 @@ pub mod MyNestedPublicMod {
     }
 }
 
-#[doc(hide)]
+#[doc(hide)] // shouldn't flag, it should be #[doc(hidden)] not #[doc(hide)]
 pub struct MispelledDocHidden;
 
 #[doc(hidden)]
