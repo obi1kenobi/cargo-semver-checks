@@ -43,6 +43,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A publicly visible struct is now hidden via #[doc(hidden)].",
+    error_message: "A pub struct is now #[doc(hidden)], removing it from the crate's public API.",
     per_result_error_template: Some("struct {{struct_name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
