@@ -35,7 +35,7 @@ pub mod MyNestedPublicMod {
 #[doc(hide)] // shouldn't flag, it should be #[doc(hidden)] not #[doc(hide)]
 pub struct MispelledDocHidden;
 
-#[doc(hidden)]
+#[doc(hidden)] // should flag, this is the simplest case of adding #[doc(hidden)] to a pub struct.
 pub struct Example;
 
 pub struct PublicStructHiddenField {
