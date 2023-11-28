@@ -6,7 +6,7 @@ pub mod MyPublicMod {
     pub struct MyStruct;
 }
 
-pub struct MispelledDocHidden;
+pub struct AliasedAsDocHidden;
 
 pub struct Example;
 

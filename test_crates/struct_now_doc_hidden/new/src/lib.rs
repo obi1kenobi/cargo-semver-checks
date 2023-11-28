@@ -32,8 +32,9 @@ pub mod MyNestedPublicMod {
     }
 }
 
-#[doc(hide)] // shouldn't flag, it should be #[doc(hidden)] not #[doc(hide)]
-pub struct MispelledDocHidden;
+#[doc(alias = "hidden")] // shouldn't flag, this is just aliased as hidden,
+                         // but it should be #[doc(hidden)]
+pub struct AliasedAsDocHidden;
 
 #[doc(hidden)] // should flag, this is the simplest case of adding #[doc(hidden)] to a pub struct.
 pub struct Example;
@@ -49,6 +50,6 @@ pub struct PublicStructHiddenField {
 #[doc(hidden)]
 struct PublicStructThatGoesPrivate;
 
-#[doc = "hidden"] // this is just documented with the string "hidden",
+#[doc = "hidden"] // shouldn't flag, this is just documented with the string "hidden",
                   // it's not actually #[doc(hidden)]
 pub struct PublicStructDocumentedWithStringHidden;
