@@ -13,9 +13,20 @@
         {
             "path": List([
                 String("struct_now_doc_hidden"),
+                String("MyNestedPublicMod"),
+                String("PublicInnerStruct"),
+                String("MyStruct"),
+            ]),
+            "span_begin_line": Uint64(31),
+            "span_filename": String("src/lib.rs"),
+            "struct_name": String("MyStruct"),
+        },
+        {
+            "path": List([
+                String("struct_now_doc_hidden"),
                 String("Example"),
             ]),
-            "span_begin_line": Uint64(17),
+            "span_begin_line": Uint64(36),
             "span_filename": String("src/lib.rs"),
             "struct_name": String("Example"),
         },
