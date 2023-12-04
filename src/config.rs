@@ -13,6 +13,7 @@ pub struct GlobalConfig {
     ///
     /// This will be used to print an error if the user's rustc version is not high enough.
     minimum_rustc_version: semver::Version,
+    silent: bool,
 }
 
 impl Default for GlobalConfig {
@@ -53,6 +54,7 @@ impl GlobalConfig {
             })),
             handlebars: make_handlebars_registry(),
             minimum_rustc_version: semver::Version::new(1, 71, 0),
+            silent: false,
         }
     }
 
@@ -64,9 +66,18 @@ impl GlobalConfig {
         &self.minimum_rustc_version
     }
 
+    pub fn set_silent(mut self, silent: bool) -> Self {
+        self.silent = silent;
+        self
+    }
+
     pub fn set_level(mut self, level: Option<log::Level>) -> Self {
         self.level = level;
         self
+    }
+
+    pub fn is_info(&self) -> bool {
+        log::Level::Info <= self.level.unwrap_or(log::Level::Error)
     }
 
     pub fn is_verbose(&self) -> bool {
@@ -77,7 +88,7 @@ impl GlobalConfig {
         &mut self,
         callback: impl Fn(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
-        if self.is_verbose() {
+        if !self.silent && self.is_verbose() {
             callback(self)?;
         }
         Ok(())
@@ -91,7 +102,17 @@ impl GlobalConfig {
         &mut self,
         callback: impl Fn(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
-        if self.is_extra_verbose() {
+        if !self.silent && self.is_extra_verbose() {
+            callback(self)?;
+        }
+        Ok(())
+    }
+
+    pub fn log(
+        &mut self,
+        callback: impl Fn(&mut Self) -> anyhow::Result<()>,
+    ) -> anyhow::Result<()> {
+        if !self.silent && self.is_info() {
             callback(self)?;
         }
         Ok(())
@@ -117,25 +138,27 @@ impl GlobalConfig {
         color: termcolor::Color,
         justified: bool,
     ) -> anyhow::Result<()> {
-        use std::io::Write;
-        use termcolor::WriteColor;
+        if !self.silent {
+            use std::io::Write;
+            use termcolor::WriteColor;
 
-        self.stderr().set_color(
-            termcolor::ColorSpec::new()
-                .set_fg(Some(color))
-                .set_bold(true),
-        )?;
-        if justified {
-            write!(self.stderr(), "{status:>12}")?;
-        } else {
-            write!(self.stderr(), "{status}")?;
-            self.stderr()
-                .set_color(termcolor::ColorSpec::new().set_bold(true))?;
-            write!(self.stderr(), ":")?;
+            self.stderr().set_color(
+                termcolor::ColorSpec::new()
+                    .set_fg(Some(color))
+                    .set_bold(true),
+            )?;
+            if justified {
+                write!(self.stderr(), "{status:>12}")?;
+            } else {
+                write!(self.stderr(), "{status}")?;
+                self.stderr()
+                    .set_color(termcolor::ColorSpec::new().set_bold(true))?;
+                write!(self.stderr(), ":")?;
+            }
+            self.stderr().reset()?;
+
+            writeln!(self.stderr(), " {message}")?;
         }
-        self.stderr().reset()?;
-
-        writeln!(self.stderr(), " {message}")?;
 
         Ok(())
     }

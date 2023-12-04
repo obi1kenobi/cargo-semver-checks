@@ -251,17 +251,23 @@ pub(super) fn run_check_release(
         for query_with_results in queries_with_errors {
             let semver_query = &queries[query_with_results.name];
             required_versions.push(semver_query.required_update);
-            colored_ln(config.stdout(), |w| {
-                colored!(
-                    w,
-                    "\n--- failure {}: {} ---\n",
-                    &semver_query.id,
-                    &semver_query.human_readable_name,
-                )
-            })
-            .expect("print failed");
+            config
+                .log(|config| {
+                    colored_ln(config.stdout(), |w| {
+                        colored!(
+                            w,
+                            "\n--- failure {}: {} ---\n",
+                            &semver_query.id,
+                            &semver_query.human_readable_name,
+                        )
+                    })?;
+                    Ok(())
+                })
+                .expect("print failed");
 
             if let Some(ref_link) = semver_query.reference_link.as_deref() {
+                config
+                .log(|config| {
                 colored_ln(config.stdout(), |w| {
                     colored!(
                         w,
@@ -278,31 +284,41 @@ pub(super) fn run_check_release(
                             semver_query.id,
                         )
                     )
-                })
+                })?;
+                Ok(())
+            })
                 .expect("print failed");
             } else {
-                colored_ln(config.stdout(), |w| {
-                    colored!(
-                        w,
-                        "{}Description:{}\n{}\n{:>12} {}\n",
-                        bold!(true),
-                        reset!(),
-                        &semver_query.error_message,
-                        "impl:",
-                        format!(
-                            "https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
-                            crate_version!(),
-                            semver_query.id,
+                config
+                .log(|config| {
+                    colored_ln(config.stdout(), |w| {
+                        colored!(
+                            w,
+                            "{}Description:{}\n{}\n{:>12} {}\n",
+                            bold!(true),
+                            reset!(),
+                            &semver_query.error_message,
+                            "impl:",
+                            format!(
+                                "https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
+                                crate_version!(),
+                                semver_query.id,
+                            )
                         )
-                    )
+                    })?;
+                    Ok(())
                 })
                 .expect("print failed");
             }
 
-            colored_ln(config.stdout(), |w| {
-                colored!(w, "{}Failed in:{}", bold!(true), reset!(),)
-            })
-            .expect("print failed");
+            config
+                .log(|config| {
+                    colored_ln(config.stdout(), |w| {
+                        colored!(w, "{}Failed in:{}", bold!(true), reset!())
+                    })?;
+                    Ok(())
+                })
+                .expect("print failed");
 
             let start_instant = std::time::Instant::now();
             for semver_violation_result in query_with_results.results {
@@ -317,7 +333,11 @@ pub(super) fn run_check_release(
                         .render_template(template, &pretty_result)
                         .context("Error instantiating semver query template.")
                         .expect("could not materialize template");
-                    colored_ln(config.stdout(), |w| colored!(w, "  {}", message,))
+                    config
+                        .log(|config| {
+                            colored_ln(config.stdout(), |w| colored!(w, "  {}", message,))?;
+                            Ok(())
+                        })
                         .expect("print failed");
 
                     config
@@ -335,14 +355,20 @@ pub(super) fn run_check_release(
                         })
                         .expect("print failed");
                 } else {
-                    colored_ln(config.stdout(), |w| {
-                        colored!(
-                            w,
-                            "{}\n",
-                            serde_json::to_string_pretty(&pretty_result).expect("serde failed"),
-                        )
-                    })
-                    .expect("print failed");
+                    config
+                        .log(|config| {
+                            colored_ln(config.stdout(), |w| {
+                                colored!(
+                                    w,
+                                    "{}\n",
+                                    serde_json::to_string_pretty(&pretty_result)
+                                        .expect("serde failed"),
+                                )
+                            })
+                            .expect("print failed");
+                            Ok(())
+                        })
+                        .expect("print failed");
                 }
             }
             total_duration += start_instant.elapsed();

@@ -37,6 +37,7 @@ pub struct Check {
     release_type: Option<ReleaseType>,
     current_feature_config: rustdoc_gen::FeatureConfig,
     baseline_feature_config: rustdoc_gen::FeatureConfig,
+    silent: bool,
 }
 
 /// The kind of release we're making.
@@ -235,6 +236,7 @@ impl Check {
             release_type: None,
             current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
+            silent: false,
         }
     }
 
@@ -255,6 +257,11 @@ impl Check {
 
     pub fn with_log_level(&mut self, log_level: log::Level) -> &mut Self {
         self.log_level = Some(log_level);
+        self
+    }
+
+    pub fn with_silent(&mut self, silent: bool) -> &mut Self {
+        self.silent = silent;
         self
     }
 
@@ -353,7 +360,9 @@ impl Check {
     }
 
     pub fn check_release(&self) -> anyhow::Result<Report> {
-        let mut config = GlobalConfig::new().set_level(self.log_level);
+        let mut config = GlobalConfig::new()
+            .set_level(self.log_level)
+            .set_silent(self.silent);
         let rustdoc_cmd = RustdocCommand::new()
             .deps(false)
             .silence(!config.is_verbose());
