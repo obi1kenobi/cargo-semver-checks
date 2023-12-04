@@ -474,6 +474,7 @@ add_lints!(
     enum_marked_non_exhaustive,
     enum_missing,
     enum_must_use_added,
+    enum_now_doc_hidden,
     enum_repr_c_removed,
     enum_repr_int_changed,
     enum_repr_int_removed,
