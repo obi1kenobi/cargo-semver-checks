@@ -91,7 +91,7 @@
                 String("struct_now_doc_hidden"),
                 String("PublicStructThatGoesPrivate"),
             ]),
-            "span_begin_line": Uint64(29),
+            "span_begin_line": Uint64(34),
             "span_filename": String("src/lib.rs"),
             "struct_type": String("unit"),
             "visibility_limit": String("public"),
