@@ -14,7 +14,7 @@
             "path": List([
                 String("struct_now_doc_hidden"),
                 String("MyNestedPublicMod"),
-                String("PublicInnerStruct"),
+                String("PublicInnerMod"),
                 String("MyStruct"),
             ]),
             "span_begin_line": Uint64(31),

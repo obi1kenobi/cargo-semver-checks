@@ -15,13 +15,13 @@ pub struct PublicStructHiddenField {
 }
 
 mod MyNestedNonPublicMod {
-    pub mod PublicInnerStruct {
+    pub mod PublicInnerMod {
         pub struct MyStruct;
     }
 }
 
 pub mod MyNestedPublicMod {
-    pub mod PublicInnerStruct {
+    pub mod PublicInnerMod {
         pub struct MyStruct;
     }
 }

@@ -11,7 +11,7 @@ pub mod MyPublicMod {
 }
 
 mod MyNestedNonPublicMod {
-    pub mod PublicInnerStruct {
+    pub mod PublicInnerMod {
         pub enum MyEnum {
             A,
         }
@@ -19,7 +19,7 @@ mod MyNestedNonPublicMod {
 }
 
 pub mod MyNestedPublicMod {
-    pub mod PublicInnerStruct {
+    pub mod PublicInnerMod {
         pub enum MyEnum {
             A,
         }
