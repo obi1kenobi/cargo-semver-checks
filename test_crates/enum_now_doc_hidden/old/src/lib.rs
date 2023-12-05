@@ -10,6 +10,13 @@ pub mod MyPublicMod {
     }
 }
 
+#[doc(hidden)]
+pub mod MyTopLevelDocHiddenMod {
+    pub enum MyEnumThatIsNowDocHidden {
+        A,
+    }
+}
+
 mod MyNestedNonPublicMod {
     pub mod PublicInnerMod {
         pub enum MyEnum {

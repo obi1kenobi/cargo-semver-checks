@@ -17,6 +17,15 @@ pub mod MyPublicMod {
     }
 }
 
+#[doc(hidden)]
+pub mod MyTopLevelDocHiddenMod {
+    #[doc(hidden)] // this shouldn't flag, as it's a top level mod
+                   // was never part of the public api of the crate
+    pub enum MyEnumThatIsNowDocHidden {
+        A,
+    }
+}
+
 mod MyNestedNonPublicMod {
     pub mod PublicInnerMod {
         // despite adding #[doc(hidden)], this enum is in a

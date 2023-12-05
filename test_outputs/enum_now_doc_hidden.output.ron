@@ -18,7 +18,7 @@
                 String("PublicInnerMod"),
                 String("MyEnum"),
             ]),
-            "span_begin_line": Uint64(37),
+            "span_begin_line": Uint64(46),
             "span_filename": String("src/lib.rs"),
         },
         {
@@ -27,7 +27,7 @@
                 String("enum_now_doc_hidden"),
                 String("Example"),
             ]),
-            "span_begin_line": Uint64(50),
+            "span_begin_line": Uint64(59),
             "span_filename": String("src/lib.rs"),
         },
     ],
