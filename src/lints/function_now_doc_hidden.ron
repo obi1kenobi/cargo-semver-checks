@@ -23,7 +23,7 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        struct_name: name @output
+                        function_name: name @output
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -44,5 +44,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A pub function is now #[doc(hidden)], removing it from the crate's public API.",
-    per_result_error_template: Some("function {{struct_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("function {{function_name}} in file {{span_filename}}:{{span_begin_line}}"),
 )

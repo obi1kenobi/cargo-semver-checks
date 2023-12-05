@@ -8,7 +8,7 @@
             ]),
             "span_begin_line": Uint64(13),
             "span_filename": String("src/lib.rs"),
-            "struct_name": String("my_function"),
+            "function_name": String("my_function"),
         },
         {
             "path": List([
@@ -19,7 +19,7 @@
             ]),
             "span_begin_line": Uint64(38),
             "span_filename": String("src/lib.rs"),
-            "struct_name": String("my_function"),
+            "function_name": String("my_function"),
         },
         {
             "path": List([
@@ -28,7 +28,7 @@
             ]),
             "span_begin_line": Uint64(47),
             "span_filename": String("src/lib.rs"),
-            "struct_name": String("my_function"),
+            "function_name": String("my_function"),
         },
         {
             "path": List([
@@ -37,7 +37,7 @@
             ]),
             "span_begin_line": Uint64(50),
             "span_filename": String("src/lib.rs"),
-            "struct_name": String("my_function_with_types"),
+            "function_name": String("my_function_with_types"),
         },
     ],
 }
