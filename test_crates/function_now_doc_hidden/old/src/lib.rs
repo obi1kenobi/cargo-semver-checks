@@ -33,4 +33,12 @@ fn public_function_that_goes_private() {}
 
 pub fn public_function_documented_with_string_hidden() {}
 
-const MY_FN: fn() = || {};
+pub const MY_FN: fn() = || {};
+
+fn my_private_fn() {
+    fn my_public_inner_fn_inside_my_private_fn() {}
+}
+
+pub fn my_public_fn() {
+    fn my_public_inner_fn_inside_my_public_fn() {}
+}
