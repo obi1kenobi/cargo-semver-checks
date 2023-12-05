@@ -8,7 +8,7 @@ mod MyNonPublicMod {
 
 pub mod MyPublicMod {
     // added #[doc(hidden)], however this struct is in a
-    // public mod, so it is part of the crate's public api
+    // public mod, so it previously was part of the crate's public api
     #[doc(hidden)]
     pub struct MyStruct;
 }
@@ -26,7 +26,7 @@ mod MyNestedNonPublicMod {
 pub mod MyNestedPublicMod {
     pub mod PublicInnerMod {
         // added #[doc(hidden)], however this struct is in a
-        // public mod, so it is part of the crate's public api
+        // public mod, so it previously was part of the crate's public api
         #[doc(hidden)]
         pub struct MyStruct;
     }

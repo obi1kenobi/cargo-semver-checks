@@ -32,7 +32,7 @@ mod MyNestedNonPublicMod {
 pub mod MyNestedPublicMod {
     pub mod PublicInnerMod {
         // added #[doc(hidden)], however this enum is in a
-        // public mod, so it is part of the crate's public api
+        // public mod, so it previously was part of the crate's public api
         #[doc(hidden)]
         pub enum MyEnum {
             A,
