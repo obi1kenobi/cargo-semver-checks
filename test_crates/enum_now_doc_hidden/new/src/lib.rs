@@ -63,7 +63,7 @@ pub enum Example {
 pub enum PublicEnumHiddenVariant {
     // shouldn't flag `enum_now_doc_hidden` rule
     // as this is a field that's hidden,
-    // not the entire struct
+    // not the entire enum
     #[doc(hidden)]
     A,
     B,
@@ -71,7 +71,7 @@ pub enum PublicEnumHiddenVariant {
 
 pub enum PublicEnumHiddenStructFieldOnVariant {
     // shouldn't flag `enum_now_doc_hidden` rule
-    // as this is a field that's hidden on a struct variant,
+    // as this is a field that's hidden on a enum variant,
     // not the entire enum
     A {
         #[doc(hidden)]
