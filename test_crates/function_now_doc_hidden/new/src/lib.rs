@@ -62,10 +62,10 @@ pub const MY_FN: fn() = || {};
 
 fn my_private_fn() {
     #[doc(hidden)] // shouldn't flag because functions aren't hoisted out of nested scopes
-    fn my_public_inner_fn_inside_my_private_fn() {}
+    pub fn my_public_inner_fn_inside_my_private_fn() {}
 }
 
 pub fn my_public_fn() {
     #[doc(hidden)] // shouldn't flag because functions aren't hoisted out of nested scopes
-    fn my_public_inner_fn_inside_my_public_fn() {}
+    pub fn my_public_inner_fn_inside_my_public_fn() {}
 }
