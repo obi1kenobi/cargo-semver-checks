@@ -252,7 +252,7 @@ pub(super) fn run_check_release(
             let semver_query = &queries[query_with_results.name];
             required_versions.push(semver_query.required_update);
             config
-                .log(|config| {
+                .log_info(|config| {
                     colored_ln(config.stdout(), |w| {
                         colored!(
                             w,
@@ -267,7 +267,7 @@ pub(super) fn run_check_release(
 
             if let Some(ref_link) = semver_query.reference_link.as_deref() {
                 config
-                .log(|config| {
+                .log_info(|config| {
                 colored_ln(config.stdout(), |w| {
                     colored!(
                         w,
@@ -290,7 +290,7 @@ pub(super) fn run_check_release(
                 .expect("print failed");
             } else {
                 config
-                .log(|config| {
+                .log_info(|config| {
                     colored_ln(config.stdout(), |w| {
                         colored!(
                             w,
@@ -312,7 +312,7 @@ pub(super) fn run_check_release(
             }
 
             config
-                .log(|config| {
+                .log_info(|config| {
                     colored_ln(config.stdout(), |w| {
                         colored!(w, "{}Failed in:{}", bold!(true), reset!())
                     })?;
@@ -334,7 +334,7 @@ pub(super) fn run_check_release(
                         .context("Error instantiating semver query template.")
                         .expect("could not materialize template");
                     config
-                        .log(|config| {
+                        .log_info(|config| {
                             colored_ln(config.stdout(), |w| colored!(w, "  {}", message,))?;
                             Ok(())
                         })
@@ -356,7 +356,7 @@ pub(super) fn run_check_release(
                         .expect("print failed");
                 } else {
                     config
-                        .log(|config| {
+                        .log_info(|config| {
                             colored_ln(config.stdout(), |w| {
                                 colored!(
                                     w,

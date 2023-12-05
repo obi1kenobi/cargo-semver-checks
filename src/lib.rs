@@ -255,13 +255,8 @@ impl Check {
         self
     }
 
-    pub fn with_log_level(&mut self, log_level: log::Level) -> &mut Self {
-        self.log_level = Some(log_level);
-        self
-    }
-
-    pub fn with_silent(&mut self, silent: bool) -> &mut Self {
-        self.silent = silent;
+    pub fn with_log_level(&mut self, log_level: Option<log::Level>) -> &mut Self {
+        self.log_level = log_level;
         self
     }
 
@@ -360,9 +355,7 @@ impl Check {
     }
 
     pub fn check_release(&self) -> anyhow::Result<Report> {
-        let mut config = GlobalConfig::new()
-            .set_level(self.log_level)
-            .set_silent(self.silent);
+        let mut config = GlobalConfig::new().set_level(self.log_level);
         let rustdoc_cmd = RustdocCommand::new()
             .deps(false)
             .silence(!config.is_verbose());

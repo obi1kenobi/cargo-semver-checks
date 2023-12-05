@@ -13,7 +13,6 @@ pub struct GlobalConfig {
     ///
     /// This will be used to print an error if the user's rustc version is not high enough.
     minimum_rustc_version: semver::Version,
-    silent: bool,
 }
 
 impl Default for GlobalConfig {
@@ -54,7 +53,6 @@ impl GlobalConfig {
             })),
             handlebars: make_handlebars_registry(),
             minimum_rustc_version: semver::Version::new(1, 71, 0),
-            silent: false,
         }
     }
 
@@ -64,11 +62,6 @@ impl GlobalConfig {
 
     pub fn minimum_rustc_version(&self) -> &semver::Version {
         &self.minimum_rustc_version
-    }
-
-    pub fn set_silent(mut self, silent: bool) -> Self {
-        self.silent = silent;
-        self
     }
 
     pub fn set_level(mut self, level: Option<log::Level>) -> Self {
@@ -88,7 +81,7 @@ impl GlobalConfig {
         &mut self,
         callback: impl Fn(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
-        if !self.silent && self.is_verbose() {
+        if self.level.is_some() && self.is_verbose() {
             callback(self)?;
         }
         Ok(())
@@ -102,17 +95,17 @@ impl GlobalConfig {
         &mut self,
         callback: impl Fn(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
-        if !self.silent && self.is_extra_verbose() {
+        if self.level.is_some() && self.is_extra_verbose() {
             callback(self)?;
         }
         Ok(())
     }
 
-    pub fn log(
+    pub fn log_info(
         &mut self,
         callback: impl Fn(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
-        if !self.silent && self.is_info() {
+        if self.level.is_some() && self.is_info() {
             callback(self)?;
         }
         Ok(())
@@ -138,7 +131,7 @@ impl GlobalConfig {
         color: termcolor::Color,
         justified: bool,
     ) -> anyhow::Result<()> {
-        if !self.silent {
+        if self.level.is_some() {
             use std::io::Write;
             use termcolor::WriteColor;
 
