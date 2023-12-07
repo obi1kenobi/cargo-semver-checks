@@ -255,6 +255,8 @@ impl Check {
         self
     }
 
+    /// Set the log level.
+    /// If not set or set to `None`, logging is disabled.
     pub fn with_log_level(&mut self, log_level: Option<log::Level>) -> &mut Self {
         self.log_level = log_level;
         self
@@ -356,9 +358,7 @@ impl Check {
 
     pub fn check_release(&self) -> anyhow::Result<Report> {
         let mut config = GlobalConfig::new().set_level(self.log_level);
-        let rustdoc_cmd = RustdocCommand::new()
-            .deps(false)
-            .silence(!config.is_verbose());
+        let rustdoc_cmd = RustdocCommand::new().deps(false).silence(config.is_info());
 
         // If both the current and baseline rustdoc are given explicitly as a file path,
         // we don't need to use the installed rustc, and this check can be skipped.
@@ -463,7 +463,7 @@ impl Check {
                             && metadata.workspace_members.len() > 1
                             && selected.publish == Some(vec![]);
                         if is_implied {
-                            config.verbose(|config| {
+                            config.log_verbose(|config| {
                                 config.shell_status(
                                     "Skipping",
                                     format_args!("{crate_name} v{version} (current)"),

@@ -70,32 +70,32 @@ impl GlobalConfig {
     }
 
     pub fn is_info(&self) -> bool {
-        log::Level::Info <= self.level.unwrap_or(log::Level::Error)
+        self.level.is_some() && self.level.unwrap() >= log::Level::Info
     }
 
     pub fn is_verbose(&self) -> bool {
-        log::Level::Debug <= self.level.unwrap_or(log::Level::Error)
+        self.level.is_some() && self.level.unwrap() >= log::Level::Debug
     }
 
-    pub fn verbose(
+    pub fn is_extra_verbose(&self) -> bool {
+        self.level.is_some() && self.level.unwrap() >= log::Level::Trace
+    }
+
+    pub fn log_verbose(
         &mut self,
         callback: impl Fn(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
-        if self.level.is_some() && self.is_verbose() {
+        if self.is_verbose() {
             callback(self)?;
         }
         Ok(())
     }
 
-    pub fn is_extra_verbose(&self) -> bool {
-        log::Level::Trace <= self.level.unwrap_or(log::Level::Error)
-    }
-
-    pub fn extra_verbose(
+    pub fn log_extra_verbose(
         &mut self,
         callback: impl Fn(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
-        if self.level.is_some() && self.is_extra_verbose() {
+        if self.is_extra_verbose() {
             callback(self)?;
         }
         Ok(())
@@ -105,7 +105,7 @@ impl GlobalConfig {
         &mut self,
         callback: impl Fn(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
-        if self.level.is_some() && self.is_info() {
+        if self.is_info() {
             callback(self)?;
         }
         Ok(())
@@ -131,7 +131,7 @@ impl GlobalConfig {
         color: termcolor::Color,
         justified: bool,
     ) -> anyhow::Result<()> {
-        if self.level.is_some() {
+        if self.is_info() {
             use std::io::Write;
             use termcolor::WriteColor;
 
@@ -171,5 +171,50 @@ impl GlobalConfig {
 
     pub fn shell_warn(&mut self, message: impl std::fmt::Display) -> anyhow::Result<()> {
         self.shell_print("warning", message, termcolor::Color::Yellow, false)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_log_level_info() {
+        let mut config = GlobalConfig::new();
+        config = config.set_level(Some(log::Level::Info));
+
+        assert!(config.is_info());
+        assert!(!config.is_verbose());
+        assert!(!config.is_extra_verbose());
+    }
+
+    #[test]
+    fn test_log_level_debug() {
+        let mut config = GlobalConfig::new();
+        config = config.set_level(Some(log::Level::Debug));
+
+        assert!(config.is_info());
+        assert!(config.is_verbose());
+        assert!(!config.is_extra_verbose());
+    }
+
+    #[test]
+    fn test_log_level_trace() {
+        let mut config = GlobalConfig::new();
+        config = config.set_level(Some(log::Level::Trace));
+
+        assert!(config.is_info());
+        assert!(config.is_verbose());
+        assert!(config.is_extra_verbose());
+    }
+
+    #[test]
+    fn test_log_level_none() {
+        let mut config = GlobalConfig::new();
+        config = config.set_level(None);
+
+        assert!(!config.is_info());
+        assert!(!config.is_verbose());
+        assert!(!config.is_extra_verbose());
     }
 }

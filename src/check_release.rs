@@ -134,7 +134,7 @@ pub(super) fn run_check_release(
         ),
     )?;
     config
-        .verbose(|config| {
+        .log_verbose(|config| {
             config.shell_status(
                 "Starting",
                 format_args!(
@@ -153,7 +153,7 @@ pub(super) fn run_check_release(
             RequiredSemverUpdate::Minor => "minor",
         };
         config
-            .verbose(|config| {
+            .log_verbose(|config| {
                 if config.is_stderr_tty() {
                     colored!(
                         config.stderr(),
@@ -182,7 +182,7 @@ pub(super) fn run_check_release(
 
         if peeked.is_none() {
             config
-                .verbose(|config| {
+                .log_verbose(|config| {
                     if config.is_stderr_tty() {
                         write!(config.stderr(), "\r")?;
                     }
@@ -206,7 +206,7 @@ pub(super) fn run_check_release(
             queries_with_errors.push(QueryWithResults::new(query_id.as_str(), results_iter));
 
             config
-                .verbose(|config| {
+                .log_verbose(|config| {
                     if config.is_stderr_tty() {
                         write!(config.stderr(), "\r")?;
                     }
@@ -266,31 +266,29 @@ pub(super) fn run_check_release(
                 .expect("print failed");
 
             if let Some(ref_link) = semver_query.reference_link.as_deref() {
-                config
-                .log_info(|config| {
-                colored_ln(config.stdout(), |w| {
-                    colored!(
-                        w,
-                        "{}Description:{}\n{}\n{:>12} {}\n{:>12} {}\n",
-                        bold!(true),
-                        reset!(),
-                        &semver_query.error_message,
-                        "ref:",
-                        ref_link,
-                        "impl:",
-                        format!(
-                            "https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
-                            crate_version!(),
-                            semver_query.id,
+                config.log_info(|config| {
+                    colored_ln(config.stdout(), |w| {
+                        colored!(
+                            w,
+                            "{}Description:{}\n{}\n{:>12} {}\n{:>12} {}\n",
+                            bold!(true),
+                            reset!(),
+                            &semver_query.error_message,
+                            "ref:",
+                            ref_link,
+                            "impl:",
+                            format!(
+                                "https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
+                                crate_version!(),
+                                semver_query.id,
+                            )
                         )
-                    )
-                })?;
-                Ok(())
-            })
+                    })?;
+                    Ok(())
+                })
                 .expect("print failed");
             } else {
-                config
-                .log_info(|config| {
+                config.log_info(|config| {
                     colored_ln(config.stdout(), |w| {
                         colored!(
                             w,
@@ -341,7 +339,7 @@ pub(super) fn run_check_release(
                         .expect("print failed");
 
                     config
-                        .extra_verbose(|config| {
+                        .log_extra_verbose(|config| {
                             colored_ln(config.stdout(), |w| {
                                 let serde_pretty = serde_json::to_string_pretty(&pretty_result)
                                     .expect("serde failed");
