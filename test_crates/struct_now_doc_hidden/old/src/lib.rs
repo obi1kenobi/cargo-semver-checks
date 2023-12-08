@@ -14,14 +14,19 @@ pub struct PublicStructHiddenField {
     pub my_field: i8,
 }
 
+#[doc(hidden)]
+pub mod MyTopLevelDocHiddenMod {
+    pub struct MyStructThatIsNowDocHidden;
+}
+
 mod MyNestedNonPublicMod {
-    pub mod PublicInnerStruct {
+    pub mod PublicInnerMod {
         pub struct MyStruct;
     }
 }
 
 pub mod MyNestedPublicMod {
-    pub mod PublicInnerStruct {
+    pub mod PublicInnerMod {
         pub struct MyStruct;
     }
 }

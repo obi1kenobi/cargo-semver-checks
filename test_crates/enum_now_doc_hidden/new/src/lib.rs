@@ -1,62 +1,92 @@
 mod MyNonPublicMod {
-    // despite adding #[doc(hidden)], this struct is in a
+    // despite adding #[doc(hidden)], this enum is in a
     // private mod, so it isn't part of the crate's public
     // api
     #[doc(hidden)]
-    pub struct MyStruct;
+    pub enum MyEnum {
+        A,
+    }
 }
 
 pub mod MyPublicMod {
-    // added #[doc(hidden)], however this struct is in a
+    // added #[doc(hidden)], however this enum is in a
     // public mod, so it previously was part of the crate's public api
     #[doc(hidden)]
-    pub struct MyStruct;
+    pub enum MyEnum {
+        A,
+    }
 }
 
 #[doc(hidden)]
 pub mod MyTopLevelDocHiddenMod {
     #[doc(hidden)] // this shouldn't flag, as it's a top level mod
                    // was never part of the public api of the crate
-    pub struct MyStructThatIsNowDocHidden;
+    pub enum MyEnumThatIsNowDocHidden {
+        A,
+    }
 }
 
 mod MyNestedNonPublicMod {
     pub mod PublicInnerMod {
-        // despite adding #[doc(hidden)], this struct is in a
+        // despite adding #[doc(hidden)], this enum is in a
         // private outer mod, so it isn't part of the crate's public
         // api
         #[doc(hidden)]
-        pub struct MyStruct;
+        pub enum MyEnum {
+            A,
+        }
     }
 }
 
 pub mod MyNestedPublicMod {
     pub mod PublicInnerMod {
-        // added #[doc(hidden)], however this struct is in a
+        // added #[doc(hidden)], however this enum is in a
         // public mod, so it previously was part of the crate's public api
         #[doc(hidden)]
-        pub struct MyStruct;
+        pub enum MyEnum {
+            A,
+        }
     }
 }
 
 #[doc(alias = "hidden")] // shouldn't flag, this is just aliased as hidden,
                          // but it should be #[doc(hidden)]
-pub struct AliasedAsDocHidden;
+pub enum AliasedAsDocHidden {
+    A,
+}
 
-#[doc(hidden)] // should flag, this is the simplest case of adding #[doc(hidden)] to a pub struct.
-pub struct Example;
+#[doc(hidden)] // should flag, this is the simplest case of adding #[doc(hidden)] to a pub enum.
+pub enum Example {
+    A,
+}
 
-pub struct PublicStructHiddenField {
-    // shouldn't flag `struct_now_doc_hidden` rule
+pub enum PublicEnumHiddenVariant {
+    // shouldn't flag `enum_now_doc_hidden` rule
     // as this is a field that's hidden,
-    // not the entire struct
+    // not the entire enum
     #[doc(hidden)]
-    pub my_field: i8,
+    A,
+    B,
+}
+
+pub enum PublicEnumHiddenStructFieldOnVariant {
+    // shouldn't flag `enum_now_doc_hidden` rule
+    // as this is a field that's hidden on a enum variant,
+    // not the entire enum
+    A {
+        #[doc(hidden)]
+        a: u8,
+    },
+    B,
 }
 
 #[doc(hidden)]
-struct PublicStructThatGoesPrivate;
+enum PublicEnumThatGoesPrivate {
+    A,
+}
 
 #[doc = "hidden"] // shouldn't flag, this is just documented with the string "hidden",
                   // it's not actually #[doc(hidden)]
-pub struct PublicStructDocumentedWithStringHidden;
+pub enum PublicEnumDocumentedWithStringHidden {
+    A,
+}
