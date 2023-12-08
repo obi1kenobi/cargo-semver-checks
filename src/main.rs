@@ -319,9 +319,9 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         if let Some(baseline) = custom_baseline {
             check.with_baseline(baseline);
         }
-        if let Some(log_level) = value.verbosity.log_level() {
-            check.with_log_level(log_level);
-        }
+
+        check.with_log_level(value.verbosity.log_level());
+
         if let Some(release_type) = value.release_type {
             check.with_release_type(release_type);
         }
