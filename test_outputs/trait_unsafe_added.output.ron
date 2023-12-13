@@ -1,4 +1,16 @@
 {
+    "./test_crates/trait_method_unsafe_added/": [
+        {
+            "name": String("TraitBecomesUnsafe"),
+            "path": List([
+                String("trait_method_unsafe_added"),
+                String("TraitBecomesUnsafe"),
+            ]),
+            "span_begin_line": Uint64(23),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/trait_missing/": [
         {
             "name": String("TraitBecomesUnsafe"),
