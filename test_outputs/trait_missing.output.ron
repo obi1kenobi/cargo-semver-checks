@@ -47,6 +47,18 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/trait_method_unsafe_removed/": [
+        {
+            "name": String("TraitBecomesPrivate"),
+            "path": List([
+                String("trait_method_unsafe_removed"),
+                String("TraitBecomesPrivate"),
+            ]),
+            "span_begin_line": Uint64(17),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/trait_missing/": [
         {
             "name": String("RemovedTrait"),
