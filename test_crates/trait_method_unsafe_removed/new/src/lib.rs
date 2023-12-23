@@ -28,3 +28,12 @@ pub trait TraitBecomesSafe {
 trait PrivateTrait {
     fn becomes_safe();
 }
+
+// Method of sealed trait becomes unsafe, shouldn't get reported.
+pub trait SealedTrait: private::Sealed {
+    fn becomes_safe();
+}
+
+mod private {
+    pub trait Sealed {}
+}
