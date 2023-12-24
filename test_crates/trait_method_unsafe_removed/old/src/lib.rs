@@ -29,7 +29,7 @@ trait PrivateTrait {
     unsafe fn becomes_safe();
 }
 
-// Method of sealed trait becomes unsafe, shouldn't get reported.
+// Method of sealed trait becomes safe, shouldn't get reported.
 pub trait SealedTrait: private::Sealed {
     unsafe fn becomes_safe();
 }
