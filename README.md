@@ -78,8 +78,9 @@ For example, `cargo-semver-checks` v0.24
 ### What if my project needs stronger guarantees around supported Rust versions?
 
 If you'd like extended support for older Rust versions,
-or an SLA on supporting new `nightly` releases, we're happy to offer those on a commercial basis.
-It be a formal support contract, or something as simple as discussing expectations over email
+or an SLA on supporting new `nightly` releases, we're happy to offer those _on a commercial basis_.
+It could be in the form of a formal support contract,
+or something as simple as discussing expectations over email
 and setting up a recurring GitHub sponsorship for an agreed-upon amount.
 
 Please reach out at the email in the
