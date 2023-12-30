@@ -107,6 +107,9 @@ impl RustdocCommand {
             .arg(target_dir)
             .arg("--package")
             .arg(pkg_spec);
+        if let Some(target) = crate_data.target {
+            cmd.arg("--target").arg(target);
+        }
         if !self.deps {
             cmd.arg("--no-deps");
         }
@@ -130,36 +133,40 @@ impl RustdocCommand {
             }
         }
 
-        let target = {
-            let output = std::process::Command::new("cargo")
-                .env("RUSTC_BOOTSTRAP", "1")
-                .args([
-                    "config",
-                    "-Zunstable-options",
-                    "get",
-                    "--format=json-value",
-                    "build.target",
-                ])
-                .output()?;
-            if output.status.success() {
-                serde_json::from_slice::<Option<String>>(&output.stdout)?
-            } else if output
-                .stderr
-                .starts_with(b"error: config value `build.target` is not set")
-            {
-                None
-            } else {
-                anyhow::bail!(
-                    "running cargo-config failed:\n{}",
-                    String::from_utf8_lossy(&output.stderr),
-                )
-            }
-        };
-
-        let rustdoc_dir = if let Some(target) = target {
+        let rustdoc_dir = if let Some(target) = crate_data.target {
             target_dir.join(target).join("doc")
         } else {
-            target_dir.join("doc")
+            let target = {
+                let output = std::process::Command::new("cargo")
+                    .env("RUSTC_BOOTSTRAP", "1")
+                    .args([
+                        "config",
+                        "-Zunstable-options",
+                        "get",
+                        "--format=json-value",
+                        "build.target",
+                    ])
+                    .output()?;
+                if output.status.success() {
+                    serde_json::from_slice::<Option<String>>(&output.stdout)?
+                } else if output
+                    .stderr
+                    .starts_with(b"error: config value `build.target` is not set")
+                {
+                    None
+                } else {
+                    anyhow::bail!(
+                        "running cargo-config failed:\n{}",
+                        String::from_utf8_lossy(&output.stderr),
+                    )
+                }
+            };
+
+            if let Some(target) = target {
+                target_dir.join(target).join("doc")
+            } else {
+                target_dir.join("doc")
+            }
         };
 
         // There's no great way to figure out whether that crate version has a lib target.
