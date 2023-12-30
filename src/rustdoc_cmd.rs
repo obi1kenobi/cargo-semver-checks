@@ -130,6 +130,38 @@ impl RustdocCommand {
             }
         }
 
+        let target = {
+            let output = std::process::Command::new("cargo")
+                .env("RUSTC_BOOTSTRAP", "1")
+                .args([
+                    "config",
+                    "-Zunstable-options",
+                    "get",
+                    "--format=json-value",
+                    "build.target",
+                ])
+                .output()?;
+            if output.status.success() {
+                serde_json::from_slice::<Option<String>>(&output.stdout)?
+            } else if output
+                .stderr
+                .starts_with(b"error: config value `build.target` is not set")
+            {
+                None
+            } else {
+                anyhow::bail!(
+                    "running cargo-config failed:\n{}",
+                    String::from_utf8_lossy(&output.stderr),
+                )
+            }
+        };
+
+        let rustdoc_dir = if let Some(target) = target {
+            target_dir.join(target).join("doc")
+        } else {
+            target_dir.join("doc")
+        };
+
         // There's no great way to figure out whether that crate version has a lib target.
         // We can't easily do it via the index, and we can't reliably do it via metadata.
         // We're reduced to this heuristic:
@@ -175,7 +207,7 @@ in the metadata and stderr didn't mention it was lacking a lib target. This is p
             let lib_name = lib_target.name.as_str();
             let rustdoc_json_file_name = lib_name.replace('-', "_");
 
-            let json_path = target_dir.join(format!("doc/{rustdoc_json_file_name}.json"));
+            let json_path = rustdoc_dir.join(format!("{rustdoc_json_file_name}.json"));
             if json_path.exists() {
                 return Ok(json_path);
             } else {
@@ -195,7 +227,7 @@ in the metadata and stderr didn't mention it was lacking a lib target. This is p
             let bin_name = bin_target.name.as_str();
             let rustdoc_json_file_name = bin_name.replace('-', "_");
 
-            let json_path = target_dir.join(format!("doc/{rustdoc_json_file_name}.json"));
+            let json_path = rustdoc_dir.join(format!("{rustdoc_json_file_name}.json"));
             if json_path.exists() {
                 return Ok(json_path);
             } else {
