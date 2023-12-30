@@ -142,6 +142,7 @@ impl RustdocCommand {
                     .args([
                         "config",
                         "-Zunstable-options",
+                        "--color=never",
                         "get",
                         "--format=json-value",
                         "build.target",
@@ -149,9 +150,11 @@ impl RustdocCommand {
                     .output()?;
                 if output.status.success() {
                     serde_json::from_slice::<Option<String>>(&output.stdout)?
-                } else if output
-                    .stderr
-                    .starts_with(b"error: config value `build.target` is not set")
+                } else if std::str::from_utf8(&output.stderr)
+                    .context("non-utf8 cargo output")?
+                    // this is the only way to detect a not set config value currently:
+                    //      https://github.com/rust-lang/cargo/issues/13223
+                    .contains("config value `build.target` is not set")
                 {
                     None
                 } else {
