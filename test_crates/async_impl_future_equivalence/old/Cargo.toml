@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "async_impl_future_equivalence"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
