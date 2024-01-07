@@ -302,6 +302,7 @@ dependencies = [
  "itertools",
  "lazy_static",
  "log",
+ "rayon",
  "ron",
  "rustc_version",
  "semver",
