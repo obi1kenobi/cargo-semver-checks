@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, env, io::Write, iter::Peekable, sync::Arc, time::Instant};
+use std::{collections::BTreeMap, sync::Arc, time::Instant};
 
 use anyhow::Context;
 use clap::crate_version;
@@ -6,29 +6,13 @@ use itertools::Itertools;
 use rayon::prelude::*;
 use termcolor::Color;
 use termcolor_output::{colored, colored_ln};
-use trustfall::{FieldValue, TransparentValue};
+use trustfall::TransparentValue;
 use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
 use crate::{
     query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType,
 };
-
-type QueryResultItem = BTreeMap<Arc<str>, FieldValue>;
-
-struct QueryWithResults<'a> {
-    name: &'a str,
-    results: Peekable<Box<dyn Iterator<Item = QueryResultItem> + 'a>>,
-}
-
-impl<'a> QueryWithResults<'a> {
-    fn new(
-        name: &'a str,
-        results: Peekable<Box<dyn Iterator<Item = QueryResultItem> + 'a>>,
-    ) -> Self {
-        Self { name, results }
-    }
-}
 
 fn classify_semver_version_change(
     current_version: Option<&str>,
