@@ -29,11 +29,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("StructWithZeroSizedData"),
+            "name": String("StructStyleWithZeroSizedData"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("StructWithZeroSizedData"),
+                String("StructStyleWithZeroSizedData"),
             ]),
             "span_begin_line": Uint64(9),
             "span_filename": String("src/lib.rs"),
@@ -43,11 +43,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("TupleWithZeroSizedData"),
+            "name": String("TupleStyleWithZeroSizedData"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("TupleWithZeroSizedData"),
+                String("TupleStyleWithZeroSizedData"),
             ]),
             "span_begin_line": Uint64(16),
             "span_filename": String("src/lib.rs"),
@@ -57,11 +57,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("StructWithFoo"),
+            "name": String("StructStyleWithFoo"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("StructWithFoo"),
+                String("StructStyleWithFoo"),
             ]),
             "span_begin_line": Uint64(20),
             "span_filename": String("src/lib.rs"),
@@ -71,11 +71,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("TupleWithFoo"),
+            "name": String("TupleStyleWithFoo"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("TupleWithFoo"),
+                String("TupleStyleWithFoo"),
             ]),
             "span_begin_line": Uint64(27),
             "span_filename": String("src/lib.rs"),
@@ -85,11 +85,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("StructWithRef"),
+            "name": String("StructStyleWithRef"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("StructWithRef"),
+                String("StructStyleWithRef"),
             ]),
             "span_begin_line": Uint64(31),
             "span_filename": String("src/lib.rs"),
@@ -99,11 +99,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("TupleWithRef"),
+            "name": String("TupleStyleWithRef"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("TupleWithRef"),
+                String("TupleStyleWithRef"),
             ]),
             "span_begin_line": Uint64(38),
             "span_filename": String("src/lib.rs"),
@@ -113,11 +113,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("StructWithTuple"),
+            "name": String("StructStyleWithTupleStyle"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("StructWithTuple"),
+                String("StructStyleWithTupleStyle"),
             ]),
             "span_begin_line": Uint64(42),
             "span_filename": String("src/lib.rs"),
@@ -127,11 +127,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("TupleWithTuple"),
+            "name": String("TupleStyleWithTuple"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("TupleWithTuple"),
+                String("TupleStyleWithTuple"),
             ]),
             "span_begin_line": Uint64(49),
             "span_filename": String("src/lib.rs"),
@@ -141,11 +141,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("StructWithGeneric"),
+            "name": String("StructStyleWithGeneric"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("StructWithGeneric"),
+                String("StructStyleWithGeneric"),
             ]),
             "span_begin_line": Uint64(53),
             "span_filename": String("src/lib.rs"),
@@ -155,11 +155,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("TupleWithGeneric"),
+            "name": String("TupleStyleWithGeneric"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("TupleWithGeneric"),
+                String("TupleStyleWithGeneric"),
             ]),
             "span_begin_line": Uint64(60),
             "span_filename": String("src/lib.rs"),
@@ -169,11 +169,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("StructWithSpecificZeroSizedData"),
+            "name": String("StructStyleWithSpecificZeroSizedData"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("StructWithSpecificZeroSizedData"),
+                String("StructStyleWithSpecificZeroSizedData"),
             ]),
             "span_begin_line": Uint64(67),
             "span_filename": String("src/lib.rs"),
@@ -183,11 +183,11 @@
             "visibility_limit": String("public"),
         },
         {
-            "name": String("TupleWithSpecificZeroSizedData"),
+            "name": String("TupleStyleWithSpecificZeroSizedData"),
             "old_attr": String("#[repr(transparent)]"),
             "path": List([
                 String("enum_repr_transparent_removed"),
-                String("TupleWithSpecificZeroSizedData"),
+                String("TupleStyleWithSpecificZeroSizedData"),
             ]),
             "span_begin_line": Uint64(74),
             "span_filename": String("src/lib.rs"),

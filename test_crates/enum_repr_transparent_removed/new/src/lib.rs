@@ -6,83 +6,83 @@ pub enum Bar {
     Baz { quux: usize },
 }
 
-pub enum StructWithZeroSizedData<T> {
+pub enum StructStyleWithZeroSizedData<T> {
     Bar {
         bar: usize,
         _marker: std::marker::PhantomData<T>,
     },
 }
 
-pub enum TupleWithZeroSizedData<T> {
+pub enum TupleStyleWithZeroSizedData<T> {
     Bar(usize, core::marker::PhantomData<T>),
 }
 
-pub enum StructWithFoo {
+pub enum StructStyleWithFoo {
     Bar {
         bar: Foo,
         _marker: std::marker::PhantomData<&'static usize>,
     },
 }
 
-pub enum TupleWithFoo {
+pub enum TupleStyleWithFoo {
     Bar(Foo, std::marker::PhantomData<&'static usize>),
 }
 
-pub enum StructWithRef {
+pub enum StructStyleWithRef {
     Bar {
         bar: &'static usize,
         _marker: std::marker::PhantomData<&'static usize>,
     },
 }
 
-pub enum TupleWithRef {
+pub enum TupleStyleWithRef {
     Bar(&'static usize, std::marker::PhantomData<&'static usize>),
 }
 
-pub enum StructWithTuple {
+pub enum StructStyleWithTupleStyle {
     Bar {
         bar: (usize, i64),
         _marker: std::marker::PhantomData<&'static usize>,
     },
 }
 
-pub enum TupleWithTuple {
+pub enum TupleStyleWithTuple {
     Bar((usize, i64), std::marker::PhantomData<&'static usize>),
 }
 
-pub enum StructWithGeneric {
+pub enum StructStyleWithGeneric {
     Bar {
-        bar: StructWithZeroSizedData<usize>,
+        bar: StructStyleWithZeroSizedData<usize>,
         _marker: std::marker::PhantomData<&'static usize>,
     },
 }
 
-pub enum TupleWithGeneric {
+pub enum TupleStyleWithGeneric {
     Bar(
-        StructWithZeroSizedData<usize>,
+        StructStyleWithZeroSizedData<usize>,
         std::marker::PhantomData<&'static usize>,
     ),
 }
 
-pub enum StructWithSpecificZeroSizedData {
+pub enum StructStyleWithSpecificZeroSizedData {
     Bar {
         bar: usize,
         _marker: std::marker::PhantomData<&'static usize>,
     },
 }
 
-pub enum TupleWithSpecificZeroSizedData {
+pub enum TupleStyleWithSpecificZeroSizedData {
     Bar(usize, std::marker::PhantomData<&'static usize>),
 }
 
 // A trailing comma corner case - checks if attributes are parsed correctly.
 
 #[repr(transparent)]
-pub enum TrailingCommaTupleStyle {
+pub enum TupleStyleTrailingComma {
     Foo(usize),
 }
 
 #[repr(transparent)]
-pub enum TrailingCommaStructStyle {
+pub enum StructStyleTrailingComma {
     Foo { bar: usize },
 }

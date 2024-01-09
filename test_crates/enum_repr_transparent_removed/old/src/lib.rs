@@ -9,7 +9,7 @@ pub enum Bar {
 }
 
 #[repr(transparent)]
-pub enum StructWithZeroSizedData<T> {
+pub enum StructStyleWithZeroSizedData<T> {
     Bar {
         bar: usize,
         _marker: std::marker::PhantomData<T>,
@@ -17,12 +17,12 @@ pub enum StructWithZeroSizedData<T> {
 }
 
 #[repr(transparent)]
-pub enum TupleWithZeroSizedData<T> {
+pub enum TupleStyleWithZeroSizedData<T> {
     Bar(usize, core::marker::PhantomData<T>),
 }
 
 #[repr(transparent)]
-pub enum StructWithSpecificZeroSizedData {
+pub enum StructStyleWithSpecificZeroSizedData {
     Bar {
         bar: usize,
         _marker: std::marker::PhantomData<&'static usize>,
@@ -30,12 +30,12 @@ pub enum StructWithSpecificZeroSizedData {
 }
 
 #[repr(transparent)]
-pub enum TupleWithSpecificZeroSizedData {
+pub enum TupleStyleWithSpecificZeroSizedData {
     Bar(usize, std::marker::PhantomData<&'static usize>),
 }
 
 #[repr(transparent)]
-pub enum StructWithFoo {
+pub enum StructStyleWithFoo {
     Bar {
         bar: Foo,
         _marker: std::marker::PhantomData<&'static usize>,
@@ -43,12 +43,12 @@ pub enum StructWithFoo {
 }
 
 #[repr(transparent)]
-pub enum TupleWithFoo {
+pub enum TupleStyleWithFoo {
     Bar(Foo, std::marker::PhantomData<&'static usize>),
 }
 
 #[repr(transparent)]
-pub enum StructWithRef {
+pub enum StructStyleWithRef {
     Bar {
         bar: &'static usize,
         _marker: std::marker::PhantomData<&'static usize>,
@@ -56,12 +56,12 @@ pub enum StructWithRef {
 }
 
 #[repr(transparent)]
-pub enum TupleWithRef {
+pub enum TupleStyleWithRef {
     Bar(&'static usize, std::marker::PhantomData<&'static usize>),
 }
 
 #[repr(transparent)]
-pub enum StructWithTuple {
+pub enum StructStyleWithTupleStyle {
     Bar {
         bar: (usize, i64),
         _marker: std::marker::PhantomData<&'static usize>,
@@ -69,22 +69,22 @@ pub enum StructWithTuple {
 }
 
 #[repr(transparent)]
-pub enum TupleWithTuple {
+pub enum TupleStyleWithTuple {
     Bar((usize, i64), std::marker::PhantomData<&'static usize>),
 }
 
 #[repr(transparent)]
-pub enum StructWithGeneric {
+pub enum StructStyleWithGeneric {
     Bar {
-        bar: StructWithZeroSizedData<usize>,
+        bar: StructStyleWithZeroSizedData<usize>,
         _marker: std::marker::PhantomData<&'static usize>,
     },
 }
 
 #[repr(transparent)]
-pub enum TupleWithGeneric {
+pub enum TupleStyleWithGeneric {
     Bar(
-        StructWithZeroSizedData<usize>,
+        StructStyleWithZeroSizedData<usize>,
         std::marker::PhantomData<&'static usize>,
     ),
 }
@@ -92,11 +92,11 @@ pub enum TupleWithGeneric {
 // A trailing comma corner case - checks if attributes are parsed correctly.
 
 #[repr(transparent, )]
-pub enum TrailingCommaTupleStyle {
+pub enum TupleStyleTrailingComma {
     Foo(usize),
 }
 
 #[repr(transparent, )]
-pub enum TrailingCommaStructStyle {
+pub enum StructStyleTrailingComma {
     Foo { bar: usize },
 }
