@@ -27,9 +27,7 @@ To avoid false-positives, this query is restricted to checking only structs that
 "#),
     required_update: Major,
 
-    // TODO: Change the reference link to point to the cargo semver reference
-    //       once it has a section on repr(transparent).
-    reference_link: Some("https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent"),
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-transparent-remove"),
     query: r#"
     {
         CrateDiff {

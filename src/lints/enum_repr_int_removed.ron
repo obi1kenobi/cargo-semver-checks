@@ -5,9 +5,7 @@ SemverQuery(
     reference: Some("The repr(u*) or repr(i*) attribute was removed from an enum. This can cause its memory representation to change, breaking FFI use cases."),
     required_update: Major,
 
-    // TODO: Change the reference link to point to the cargo semver reference
-    //       once it has a section on repr(u*)/repr(i*).
-    reference_link: Some("https://doc.rust-lang.org/nomicon/other-reprs.html#repru-repri"),
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-int-enum-remove"),
     query: r#"
     {
         CrateDiff {
