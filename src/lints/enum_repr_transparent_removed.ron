@@ -1,0 +1,108 @@
+SemverQuery(
+    id: "enum_repr_transparent_removed",
+    human_readable_name: "enum repr(transparent) removed",
+    description: "A enum is no longer repr(transparent).",
+    reference: Some(r#"
+repr(transparent) was removed from an enum. This can cause its memory layout to change,
+breaking FFI use cases.
+
+Unlike with structs, repr(transparent) is always part of the ABI for enums since
+all variants inherit the visibility of their parent type. Note that 
+> [repr(transparent)] can only be used on single-variant enum with a single non-zero-sized field
+> (there may be additional zero-sized fields). [...]
+https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent
+
+cargo-semver-checks currently can't check whether a field is zero-sized or not.
+
+However, the most commonly-used kind of zero-sized field is core::marker::PhantomData,
+and we can hardcode its detection and proper handling.
+
+To avoid false-positives, this query is restricted to checking only enums that in the baseline:
+- are repr(transparent);
+- have exactly one variant
+- which has at most one non-PhantomData field
+"#),
+    required_update: Major,
+
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-transparent-remove"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        attribute {
+                            old_attr: raw_attribute @output
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$transparent"])
+                                }
+                            }
+                        }
+
+                        # To avoid false-positives (as described above), we check two things:
+                        # - this enum has one variant
+                        # - this variant has a total of one field that isn't PhantomData
+
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
+                            transparent_variant_name: name @output
+                            field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
+                                raw_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                    ... on ResolvedPathType {
+                                        name @filter(op: "one_of", value: ["$phantom_data"])
+                                    }
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$transparent"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "repr": "repr",
+        "transparent": "transparent",
+        "phantom_data": ["core::marker::PhantomData", "std::marker::PhantomData"],
+        "true": true,
+        "one": 1,
+        "zero": 0,
+    },
+    error_message: "repr(transparent) was removed from an enum. This can cause its memory layout to change, breaking FFI use cases.",
+    per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)

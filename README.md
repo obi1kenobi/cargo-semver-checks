@@ -35,6 +35,17 @@ and file location that are the cause of the problem, as well as a link
 to the implementation of that query in the current version of the tool.
 
 ## FAQ
+- [What Rust versions does `cargo-semver-checks` support?](#what-rust-versions-does-cargo-semver-checks-support)
+- [Can I use `cargo-semver-checks` with `nightly` Rust?](#can-i-use-cargo-semver-checks-with-nightly-rust)
+- [What if my project needs stronger guarantees around supported Rust versions?](#what-if-my-project-needs-stronger-guarantees-around-supported-rust-versions)
+- [Does the crate I'm checking have to be published on crates.io?](#does-the-crate-im-checking-have-to-be-published-on-cratesio)
+- [What features does `cargo-semver-checks` enable in the tested crates?](#what-features-does-cargo-semver-checks-enable-in-the-tested-crates)
+- [Does `cargo-semver-checks` have false positives?](#does-cargo-semver-checks-have-false-positives)
+- [Will `cargo-semver-checks` catch every semver violation?](#will-cargo-semver-checks-catch-every-semver-violation)
+- [If I really want a new feature to be implemented, can I sponsor its development?](#if-i-really-want-a-new-feature-to-be-implemented-can-i-sponsor-its-development)
+- [How is `cargo-semver-checks` similar to and different from other tools?](#how-is-cargo-semver-checks-similar-to-and-different-from-other-tools)
+- [Why is it sometimes `cargo-semver-check` and `cargo-semver-checks`?](#why-is-it-sometimes-cargo-semver-check-and-cargo-semver-checks)
+- [What is the MSRV policy with respect to semver?](#what-is-the-msrv-policy-with-respect-to-semver)
 
 ### What Rust versions does `cargo-semver-checks` support?
 
@@ -45,11 +56,41 @@ When each `cargo-semver-checks` version is released, it will at minimum include 
 for the then-current stable and beta Rust versions. It may, but is not guaranteed to,
 additionally support some nightly Rust versions.
 
-[The GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action) uses
+[The GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action) by default uses
 the most recent versions of both `cargo-semver-checks` and stable Rust,
 so it should be unaffected. Users using `cargo-semver-checks` in other ways
 are encouraged to update `cargo-semver-checks` when updating Rust versions
 to ensure continued compatibility.
+
+### Can I use `cargo-semver-checks` with `nightly` Rust?
+
+Support for `nightly` Rust versions is on a best-effort basis.
+It will work _often, but not always_. If you _must_ use `nightly`,
+it's strongly recommended to pin to a specific `nightly` version to avoid broken workflows.
+
+`cargo-semver-checks` relies on the rustdoc JSON format, which is unstable and changes often.
+After a new rustdoc JSON format version gets shipped in `nightly`, it usually takes
+several days to several weeks for it to be supported in a new `cargo-semver-checks`,
+during which time it is not possible to use `cargo-semver-checks` with those `nightly` versions.
+
+It's also possible that support for some `nightly` versions may be dropped even while older
+stable versions are still supported. This usually happens when a rustdoc format gets superseded by
+a newer version before becoming part of any stable Rust. In that case, we may drop support for
+that format to conserve maintenance bandwidth and speed up compile times.
+For example, `cargo-semver-checks` v0.24
+[supported](https://github.com/obi1kenobi/cargo-semver-checks/blob/93baddc2a65a5055117ca670fe156dc761403fa5/Cargo.toml#L18) rustdoc formats v24, v26, and v27, but did not support the nightly-only v25 format.
+
+### What if my project needs stronger guarantees around supported Rust versions?
+
+If you'd like extended support for older Rust versions,
+or an SLA on supporting new `nightly` releases, we're happy to offer those _on a commercial basis_.
+It could be in the form of a formal support contract,
+or something as simple as discussing expectations over email
+and setting up a recurring GitHub sponsorship for an agreed-upon amount.
+
+Please reach out at the email in the
+[Cargo.toml](https://github.com/obi1kenobi/cargo-semver-checks/blob/93baddc2a65a5055117ca670fe156dc761403fa5/Cargo.toml#L5)
+and let us know about what projects this is for and what their needs are.
 
 ### Does the crate I'm checking have to be published on crates.io?
 
@@ -139,19 +180,40 @@ Here are some example areas where `cargo-semver-checks` currently will not catch
 - breaking changes in generics or lifetimes
 - breaking changes that exist when only a subset of all crate features are activated
 
-### Why `cargo-semver-checks` instead of ...?
+### If I really want a new feature to be implemented, can I sponsor its development?
+
+Depending on the feature, possibly yes!
+
+Please reach out to us _ahead of time_
+[over email](https://github.com/obi1kenobi/cargo-semver-checks/blob/93baddc2a65a5055117ca670fe156dc761403fa5/Cargo.toml#L5)
+to discuss the scope of the feature and sponsorship.
+
+It's possible that the feature might be deemed out of scope, too complex to build or maintain,
+or otherwise unsuitable. In such cases we'd like to let you know that _before_ you've sent us money,
+since [there are no refunds on GitHub Sponsors](https://docs.github.com/en/billing/managing-billing-for-github-sponsors/downgrading-a-sponsorship#:~:text=When%20you%20downgrade%20or%20cancel,for%20payments%20for%20GitHub%20Sponsors.).
+
+If the feature is viable and the work involved in building is commensurate to
+the sponsorship amount, we'd be happy to build it.
+At your option, we'd also be happy to give you a shout-out for sponsoring the feature when
+it is announced in the release notes.
+
+### How is `cargo-semver-checks` similar to and different from other tools?
 
 [rust semverver](https://github.com/rust-lang/rust-semverver) builds on top of
 rustc internals to build rlib's and compare their metadata. This strips the
 code down to the basics for identifying changes. However, is tightly coupled
 to specific nightly compiler versions and [takes work to stay in
 sync](https://github.com/rust-lang/rust-semverver/search?q=Rustup+to&type=commits).
+As of April 17, 2023, it appears to be
+[deprecated and no longer maintained](https://github.com/rust-lang/rust-semverver/pull/390).
 
 [cargo breaking](https://github.com/iomentum/cargo-breaking) effectively runs
 `cargo expand` and re-parses the code using
 [`syn`](https://crates.io/crates/syn) which requires re-implementing large
 swaths of rust's semantics to then lint the API for changes.
 This is limited to the feature and target the crate was compiled for.
+As of November 22, 2022, it appears to be
+[archived and no longer maintained](https://github.com/iomentum/cargo-breaking).
 
 `cargo-semver-checks` sources its data from rustdoc's json output. While the
 json output format is unstable, the rate of change is fairly low, reducing the
