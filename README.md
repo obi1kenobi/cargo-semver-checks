@@ -263,7 +263,7 @@ Changes to the _compile MSRV_ may happen in any kind of version bump.
 As much as practically possible, we'll aim to make them
 simultaneously with _runtime MSRV_ bumps.
 
-### Contributors
+### Visual Design
 
 Logo by [NUMI](https://github.com/numi-hq/open-design):
 
