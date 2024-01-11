@@ -21,6 +21,7 @@ use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 use rustdoc_cmd::RustdocCommand;
 use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
+use std::time::Instant;
 
 pub use config::GlobalConfig;
 pub use query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery};
@@ -407,6 +408,7 @@ impl Check {
                 names
                     .into_iter()
                     .map(|name| {
+                        let start = std::time::Instant::now();
                         let version = None;
                         let (current_crate, baseline_crate) = generate_versioned_crates(
                             &mut config,
@@ -433,6 +435,10 @@ impl Check {
                             current_crate,
                             baseline_crate,
                             self.release_type,
+                        )?;
+                        config.shell_status(
+                            "Finished",
+                            format_args!("[{:>8.3}s] {name}", start.elapsed().as_secs_f32()),
                         )?;
                         Ok((name, Some(report)))
                     })
@@ -469,6 +475,7 @@ impl Check {
                             })?;
                             Ok((crate_name.clone(), None))
                         } else {
+                            let start = std::time::Instant::now();
                             let (current_crate, baseline_crate) = generate_versioned_crates(
                                 &mut config,
                                 &rustdoc_cmd,
@@ -488,7 +495,7 @@ impl Check {
                                 },
                             )?;
 
-                            Ok((
+                            let result = Ok((
                                 crate_name.clone(),
                                 Some(run_check_release(
                                     &mut config,
@@ -497,7 +504,15 @@ impl Check {
                                     baseline_crate,
                                     self.release_type,
                                 )?),
-                            ))
+                            ));
+                            config.shell_status(
+                                "Finished",
+                                format_args!(
+                                    "[{:>8.3}s] {crate_name}",
+                                    start.elapsed().as_secs_f32()
+                                ),
+                            )?;
+                            result
                         }
                     })
                     .collect()
@@ -604,11 +619,17 @@ fn generate_versioned_crates(
     current_crate_data: rustdoc_gen::CrateDataForRustdoc,
     baseline_crate_data: rustdoc_gen::CrateDataForRustdoc,
 ) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
+    let start = Instant::now();
     let current_path = current_loader.load_rustdoc(config, rustdoc_cmd, current_crate_data)?;
     let current_crate = load_rustdoc(&current_path)?;
+    config.shell_status(
+        "Parsed",
+        format_args!("[{:>8.3}s] (current)", start.elapsed().as_secs_f32()),
+    )?;
 
     let current_rustdoc_version = current_crate.version();
 
+    let start = Instant::now();
     let baseline_path = get_baseline_rustdoc_path(
         config,
         rustdoc_cmd,
@@ -650,6 +671,10 @@ fn generate_versioned_crates(
 
         baseline_crate
     };
+    config.shell_status(
+        "Parsed",
+        format_args!("[{:>8.3}s] (baseline)", start.elapsed().as_secs_f32()),
+    )?;
 
     Ok((current_crate, baseline_crate))
 }
