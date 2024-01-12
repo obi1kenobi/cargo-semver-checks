@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, env, io::Write, iter::Peekable, sync::Arc, time::Duration};
+use std::{collections::BTreeMap, env, io::Write, iter::Peekable, sync::Arc, time::Instant};
 
 use anyhow::Context;
 use clap::crate_version;
@@ -145,7 +145,7 @@ pub(super) fn run_check_release(
             )
         })
         .expect("print failed");
-    let mut total_duration = Duration::default();
+    let queries_start_instant = Instant::now();
 
     for (query_id, semver_query) in queries_to_run.iter().copied() {
         let category = match semver_query.required_update {
@@ -178,7 +178,6 @@ pub(super) fn run_check_release(
             .peekable();
         let peeked = results_iter.peek();
         let time_to_decide = start_instant.elapsed();
-        total_duration += time_to_decide;
 
         if peeked.is_none() {
             config
@@ -232,10 +231,10 @@ pub(super) fn run_check_release(
     if !queries_with_errors.is_empty() {
         config
             .shell_print(
-                "Completed",
+                "Checked",
                 format_args!(
                     "[{:>8.3}s] {} checks; {} passed, {} failed, {} unnecessary",
-                    total_duration.as_secs_f32(),
+                    queries_start_instant.elapsed().as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len() - queries_with_errors.len(),
                     queries_with_errors.len(),
@@ -318,7 +317,6 @@ pub(super) fn run_check_release(
                 })
                 .expect("print failed");
 
-            let start_instant = std::time::Instant::now();
             for semver_violation_result in query_with_results.results {
                 let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
                     .into_iter()
@@ -369,7 +367,6 @@ pub(super) fn run_check_release(
                         .expect("print failed");
                 }
             }
-            total_duration += start_instant.elapsed();
         }
 
         let required_bump = if required_versions.contains(&RequiredSemverUpdate::Major) {
@@ -382,13 +379,18 @@ pub(super) fn run_check_release(
 
         config
             .shell_print(
-                "Final",
+                "Summary",
                 format_args!(
-                    "[{:>8.3}s] semver requires new {} version: {} major and {} minor checks failed",
-                    total_duration.as_secs_f32(),
+                    "semver requires new {} version: {} major and {} minor checks failed",
                     required_bump.as_str(),
-                    required_versions.iter().filter(|x| *x == &RequiredSemverUpdate::Major).count(),
-                    required_versions.iter().filter(|x| *x == &RequiredSemverUpdate::Minor).count(),
+                    required_versions
+                        .iter()
+                        .filter(|x| *x == &RequiredSemverUpdate::Major)
+                        .count(),
+                    required_versions
+                        .iter()
+                        .filter(|x| *x == &RequiredSemverUpdate::Minor)
+                        .count(),
                 ),
                 Color::Red,
                 true,
@@ -402,10 +404,10 @@ pub(super) fn run_check_release(
     } else {
         config
             .shell_print(
-                "Completed",
+                "Checked",
                 format_args!(
                     "[{:>8.3}s] {} checks; {} passed, {} unnecessary",
-                    total_duration.as_secs_f32(),
+                    queries_start_instant.elapsed().as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len(),
                     skipped_queries,
