@@ -48,5 +48,29 @@
             "span_filename": String("src/structs.rs"),
             "visibility_limit": String("public"),
         },
+        {
+            "name": String("UnionToDeprecatedUnion"),
+            "owner_type": String("Union"),
+            "path": List([
+                String("type_marked_deprecated"),
+                String("unions"),
+                String("UnionToDeprecatedUnion"),
+            ]),
+            "span_begin_line": Uint64(5),
+            "span_filename": String("src/unions.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("UnionToDeprecatedMessageUnion"),
+            "owner_type": String("Union"),
+            "path": List([
+                String("type_marked_deprecated"),
+                String("unions"),
+                String("UnionToDeprecatedMessageUnion"),
+            ]),
+            "span_begin_line": Uint64(10),
+            "span_filename": String("src/unions.rs"),
+            "visibility_limit": String("public"),
+        },
     ]
 }
