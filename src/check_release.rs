@@ -95,17 +95,14 @@ pub(super) fn run_check_release(
         None => "",
     };
 
-    let queries = SemverQuery::all_queries();
-
     let current = VersionedIndexedCrate::new(&current_crate);
     let previous = VersionedIndexedCrate::new(&baseline_crate);
     let adapter = VersionedRustdocAdapter::new(&current, Some(&previous))?;
 
-    let queries_to_run: Vec<_> = queries
-        .iter()
-        .filter(|(_, query)| !version_change.supports_requirement(query.required_update))
-        .collect();
-    let skipped_queries = queries.len().saturating_sub(queries_to_run.len());
+    let (queries_to_run, queries_to_skip): (Vec<_>, _) = SemverQuery::all_queries()
+        .into_values()
+        .partition(|query| !version_change.supports_requirement(query.required_update));
+    let skipped_queries = queries_to_skip.len();
 
     config.shell_status(
         "Checking",
@@ -143,9 +140,9 @@ pub(super) fn run_check_release(
         .expect("print failed");
 
     let queries_start_instant = Instant::now();
-    let mut all_results = queries_to_run
+    let all_results = queries_to_run
         .par_iter()
-        .map(|&(query_id, semver_query)| {
+        .map(|semver_query| {
             let start_instant = std::time::Instant::now();
             // trustfall::execute_query(...) -> dyn Iterator (without Send)
             // thus the result must be collect()'ed
@@ -153,20 +150,15 @@ pub(super) fn run_check_release(
                 .run_query(&semver_query.query, semver_query.arguments.clone())?
                 .collect_vec();
             let time_to_decide = start_instant.elapsed();
-            Ok((
-                query_id.as_str(),
-                semver_query.required_update,
-                time_to_decide,
-                results,
-            ))
+            Ok((semver_query, time_to_decide, results))
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
 
-    // print PASS/FAIL summaries
-    all_results.retain(|(query_id, required_update, time_to_decide, results)| {
+    let mut results_with_errors = vec![];
+    for (semver_query, time_to_decide, results) in all_results {
         config
             .log_verbose(|config| {
-                let category = match required_update {
+                let category = match semver_query.required_update {
                     RequiredSemverUpdate::Major => "major",
                     RequiredSemverUpdate::Minor => "minor",
                 };
@@ -181,7 +173,7 @@ pub(super) fn run_check_release(
                             reset!(),
                             time_to_decide.as_secs_f32(),
                             category,
-                            query_id,
+                            semver_query.id,
                         )
                     })?;
                 } else {
@@ -195,17 +187,17 @@ pub(super) fn run_check_release(
                             reset!(),
                             time_to_decide.as_secs_f32(),
                             category,
-                            query_id,
+                            semver_query.id,
                         )
                     })?;
                 }
                 Ok(())
             })
             .expect("print failed");
-
-        !results.is_empty()
-    });
-    let results_with_errors = all_results;
+        if !results.is_empty() {
+            results_with_errors.push((semver_query, results));
+        }
+    }
 
     if !results_with_errors.is_empty() {
         config
@@ -226,8 +218,7 @@ pub(super) fn run_check_release(
 
         let mut required_versions = vec![];
 
-        for (query_id, _, _, results) in results_with_errors {
-            let semver_query = &queries[query_id];
+        for (semver_query, results) in results_with_errors {
             required_versions.push(semver_query.required_update);
             config
                 .log_info(|config| {
