@@ -1,33 +1,18 @@
-use std::{collections::BTreeMap, env, io::Write, iter::Peekable, sync::Arc, time::Instant};
+use std::{collections::BTreeMap, sync::Arc, time::Instant};
 
 use anyhow::Context;
 use clap::crate_version;
 use itertools::Itertools;
+use rayon::prelude::*;
 use termcolor::Color;
 use termcolor_output::{colored, colored_ln};
-use trustfall::{FieldValue, TransparentValue};
+use trustfall::TransparentValue;
 use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
 use crate::{
     query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType,
 };
-
-type QueryResultItem = BTreeMap<Arc<str>, FieldValue>;
-
-struct QueryWithResults<'a> {
-    name: &'a str,
-    results: Peekable<Box<dyn Iterator<Item = QueryResultItem> + 'a>>,
-}
-
-impl<'a> QueryWithResults<'a> {
-    fn new(
-        name: &'a str,
-        results: Peekable<Box<dyn Iterator<Item = QueryResultItem> + 'a>>,
-    ) -> Self {
-        Self { name, results }
-    }
-}
 
 fn classify_semver_version_change(
     current_version: Option<&str>,
@@ -110,18 +95,14 @@ pub(super) fn run_check_release(
         None => "",
     };
 
-    let queries = SemverQuery::all_queries();
-
     let current = VersionedIndexedCrate::new(&current_crate);
     let previous = VersionedIndexedCrate::new(&baseline_crate);
     let adapter = VersionedRustdocAdapter::new(&current, Some(&previous))?;
-    let mut queries_with_errors: Vec<QueryWithResults> = vec![];
 
-    let queries_to_run: Vec<_> = queries
-        .iter()
-        .filter(|(_, query)| !version_change.supports_requirement(query.required_update))
-        .collect();
-    let skipped_queries = queries.len().saturating_sub(queries_to_run.len());
+    let (queries_to_run, queries_to_skip): (Vec<_>, _) = SemverQuery::all_queries()
+        .into_values()
+        .partition(|query| !version_change.supports_requirement(query.required_update));
+    let skipped_queries = queries_to_skip.len();
 
     config.shell_status(
         "Checking",
@@ -135,56 +116,53 @@ pub(super) fn run_check_release(
     )?;
     config
         .log_verbose(|config| {
-            config.shell_status(
-                "Starting",
-                format_args!(
-                    "{} checks, {} unnecessary",
-                    queries_to_run.len(),
-                    skipped_queries
-                ),
-            )
+            let current_num_threads = rayon::current_num_threads();
+            if current_num_threads == 1 {
+                config.shell_status(
+                    "Starting",
+                    format_args!(
+                        "{} checks, {} unnecessary",
+                        queries_to_run.len(),
+                        skipped_queries
+                    ),
+                )
+            } else {
+                config.shell_status(
+                    "Starting",
+                    format_args!(
+                        "{} checks, {} unnecessary on {current_num_threads} threads",
+                        queries_to_run.len(),
+                        skipped_queries
+                    ),
+                )
+            }
         })
         .expect("print failed");
-    let queries_start_instant = Instant::now();
 
-    for (query_id, semver_query) in queries_to_run.iter().copied() {
-        let category = match semver_query.required_update {
-            RequiredSemverUpdate::Major => "major",
-            RequiredSemverUpdate::Minor => "minor",
-        };
+    let queries_start_instant = Instant::now();
+    let all_results = queries_to_run
+        .par_iter()
+        .map(|semver_query| {
+            let start_instant = std::time::Instant::now();
+            // trustfall::execute_query(...) -> dyn Iterator (without Send)
+            // thus the result must be collect()'ed
+            let results = adapter
+                .run_query(&semver_query.query, semver_query.arguments.clone())?
+                .collect_vec();
+            let time_to_decide = start_instant.elapsed();
+            Ok((semver_query, time_to_decide, results))
+        })
+        .collect::<anyhow::Result<Vec<_>>>()?;
+
+    let mut results_with_errors = vec![];
+    for (semver_query, time_to_decide, results) in all_results {
         config
             .log_verbose(|config| {
-                if config.is_stderr_tty() {
-                    colored!(
-                        config.stderr(),
-                        "{}{}{:>12}{} [{:9}] {:^18} {}",
-                        fg!(Some(Color::Cyan)),
-                        bold!(true),
-                        "Running",
-                        reset!(),
-                        "",
-                        category,
-                        query_id,
-                    )?;
-                    config.stderr().flush()?;
-                }
-                Ok(())
-            })
-            .expect("print failed");
-
-        let start_instant = std::time::Instant::now();
-        let mut results_iter = adapter
-            .run_query(&semver_query.query, semver_query.arguments.clone())?
-            .peekable();
-        let peeked = results_iter.peek();
-        let time_to_decide = start_instant.elapsed();
-
-        if peeked.is_none() {
-            config
-                .log_verbose(|config| {
-                    if config.is_stderr_tty() {
-                        write!(config.stderr(), "\r")?;
-                    }
+                let category = match semver_query.required_update {
+                    RequiredSemverUpdate::Major => "major",
+                    RequiredSemverUpdate::Minor => "minor",
+                };
+                if results.is_empty() {
                     colored_ln(config.stderr(), |w| {
                         colored!(
                             w,
@@ -195,20 +173,10 @@ pub(super) fn run_check_release(
                             reset!(),
                             time_to_decide.as_secs_f32(),
                             category,
-                            query_id,
+                            semver_query.id,
                         )
                     })?;
-                    Ok(())
-                })
-                .expect("print failed");
-        } else {
-            queries_with_errors.push(QueryWithResults::new(query_id.as_str(), results_iter));
-
-            config
-                .log_verbose(|config| {
-                    if config.is_stderr_tty() {
-                        write!(config.stderr(), "\r")?;
-                    }
+                } else {
                     colored_ln(config.stderr(), |w| {
                         colored!(
                             w,
@@ -219,16 +187,19 @@ pub(super) fn run_check_release(
                             reset!(),
                             time_to_decide.as_secs_f32(),
                             category,
-                            query_id,
+                            semver_query.id,
                         )
                     })?;
-                    Ok(())
-                })
-                .expect("print failed");
+                }
+                Ok(())
+            })
+            .expect("print failed");
+        if !results.is_empty() {
+            results_with_errors.push((semver_query, results));
         }
     }
 
-    if !queries_with_errors.is_empty() {
+    if !results_with_errors.is_empty() {
         config
             .shell_print(
                 "Checked",
@@ -236,8 +207,8 @@ pub(super) fn run_check_release(
                     "[{:>8.3}s] {} checks; {} passed, {} failed, {} unnecessary",
                     queries_start_instant.elapsed().as_secs_f32(),
                     queries_to_run.len(),
-                    queries_to_run.len() - queries_with_errors.len(),
-                    queries_with_errors.len(),
+                    queries_to_run.len() - results_with_errors.len(),
+                    results_with_errors.len(),
                     skipped_queries,
                 ),
                 Color::Red,
@@ -247,8 +218,7 @@ pub(super) fn run_check_release(
 
         let mut required_versions = vec![];
 
-        for query_with_results in queries_with_errors {
-            let semver_query = &queries[query_with_results.name];
+        for (semver_query, results) in results_with_errors {
             required_versions.push(semver_query.required_update);
             config
                 .log_info(|config| {
@@ -317,7 +287,7 @@ pub(super) fn run_check_release(
                 })
                 .expect("print failed");
 
-            for semver_violation_result in query_with_results.results {
+            for semver_violation_result in results {
                 let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
                     .into_iter()
                     .map(|(k, v)| (k, v.into()))
