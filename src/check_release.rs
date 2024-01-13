@@ -119,14 +119,26 @@ pub(super) fn run_check_release(
     )?;
     config
         .log_verbose(|config| {
-            config.shell_status(
-                "Starting",
-                format_args!(
-                    "{} checks, {} unnecessary",
-                    queries_to_run.len(),
-                    skipped_queries
-                ),
-            )
+            let current_num_threads = rayon::current_num_threads();
+            if current_num_threads == 1 {
+                config.shell_status(
+                    "Starting",
+                    format_args!(
+                        "{} checks, {} unnecessary",
+                        queries_to_run.len(),
+                        skipped_queries
+                    ),
+                )
+            } else {
+                config.shell_status(
+                    "Starting",
+                    format_args!(
+                        "{} checks, {} unnecessary on {current_num_threads} threads",
+                        queries_to_run.len(),
+                        skipped_queries
+                    ),
+                )
+            }
         })
         .expect("print failed");
 
