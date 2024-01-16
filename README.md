@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="semver-checks" src="./brand/banner.png" width="800" />
+</p>
+
 # cargo-semver-checks
 
 Lint your crate API changes for semver violations.
@@ -16,6 +20,7 @@ $ cargo semver-checks
 ```
 
 Or use as a [GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action) (used in .github/workflows/ci.yml in this repo):
+
 ```yaml
 - name: Check semver
   uses: obi1kenobi/cargo-semver-checks-action@v2
@@ -95,6 +100,7 @@ No, it does not have to be published anywhere. You'll just need to use a flag to
 By default, `cargo-semver-checks` uses crates.io to look up the previous version of the crate,
 which is used as the baseline for semver-checking the current version of the crate.
 The following flags can be used to explicitly specify a baseline instead:
+
 ```
 --baseline-version <X.Y.Z>
     Version from registry to lookup for a baseline
@@ -118,26 +124,28 @@ registries other than crates.io should use one of the other approaches of genera
 By default, checking is done on all features except features named `unstable`, `nightly`, `bench`, `no_std`, or ones with prefix `_`, `unstable-`, or `unstable_`, as such names are commonly used for private or unstable features.
 
 This behaviour can be overriden. Checked feature set can be changed to:
-- *all* the features, selected with `--all-features`,
+
+- _all_ the features, selected with `--all-features`,
 - only the crate's default features, selected with `--default-features`,
 - empty set, selected with `--only-explicit-features`.
 
 Additionally, features can be enabled one-by-one, using flags `--features`, `--baseline-features` and `--current-features`.
 
 For example, consider crate [serde](https://github.com/serde-rs/serde), with the following features (per v1.0.163):
+
 - `std` - the crate's only default feature,
 - `alloc`, `derive`, `rc` - optional features,
 - `unstable` - a feature that possibly breaks semver.
 
-| used flags | selected feature set | explanation |
-|--|--|--|
-| none | `std`, `alloc`, `derive`, `rc`  | Feature `unstable` is excluded by the default heuristic. |
-| `--features unstable` | `std`, `alloc`, `derive`, `rc`, `unstable` | The flag explicitly adds `unstable` to the heuristic's selections. |
-| `--all-features` | `std`, `alloc`, `derive`, `rc`, `unstable` | All the features are used, disabling the default heuristic. |
-| `--default-features` | `std` | The crate has only one default feature. |
-| `--default-features --features derive` | `std`, `derive` | Feature `derive` is used along with crate's default features.
-| `--only-explicit-features` | none | No explicit features are passed. |
-| `--only-explicit-features --features unstable` | `unstable` | All features can be added explicitly, regardless of their name. |
+| used flags                                     | selected feature set                       | explanation                                                        |
+| ---------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------ |
+| none                                           | `std`, `alloc`, `derive`, `rc`             | Feature `unstable` is excluded by the default heuristic.           |
+| `--features unstable`                          | `std`, `alloc`, `derive`, `rc`, `unstable` | The flag explicitly adds `unstable` to the heuristic's selections. |
+| `--all-features`                               | `std`, `alloc`, `derive`, `rc`, `unstable` | All the features are used, disabling the default heuristic.        |
+| `--default-features`                           | `std`                                      | The crate has only one default feature.                            |
+| `--default-features --features derive`         | `std`, `derive`                            | Feature `derive` is used along with crate's default features.      |
+| `--only-explicit-features`                     | none                                       | No explicit features are passed.                                   |
+| `--only-explicit-features --features unstable` | `unstable`                                 | All features can be added explicitly, regardless of their name.    |
 
 ### Does `cargo-semver-checks` have false positives?
 
@@ -167,6 +175,7 @@ if you'd like to contribute new lints!
 Append `--verbose` when semver-checking your crate to see the full list of performed semver checks.
 
 Here are some example areas where `cargo-semver-checks` currently will not catch semver violations:
+
 - breaking type changes, for example in the type of a field or function parameter
 - breaking changes in generics or lifetimes
 - breaking changes that exist when only a subset of all crate features are activated
@@ -191,8 +200,8 @@ it is announced in the release notes.
 ### How is `cargo-semver-checks` similar to and different from other tools?
 
 [rust semverver](https://github.com/rust-lang/rust-semverver) builds on top of
-rustc internals to build rlib's and compare their metadata.  This strips the
-code down to the basics for identifying changes.  However, is tightly coupled
+rustc internals to build rlib's and compare their metadata. This strips the
+code down to the basics for identifying changes. However, is tightly coupled
 to specific nightly compiler versions and [takes work to stay in
 sync](https://github.com/rust-lang/rust-semverver/search?q=Rustup+to&type=commits).
 As of April 17, 2023, it appears to be
@@ -206,11 +215,11 @@ This is limited to the feature and target the crate was compiled for.
 As of November 22, 2022, it appears to be
 [archived and no longer maintained](https://github.com/iomentum/cargo-breaking).
 
-`cargo-semver-checks` sources its data from rustdoc's json output.  While the
+`cargo-semver-checks` sources its data from rustdoc's json output. While the
 json output format is unstable, the rate of change is fairly low, reducing the
-churn in keeping up.  The lints are also written as queries for `trustfall`
+churn in keeping up. The lints are also written as queries for `trustfall`
 ["query everything" engine](https://github.com/obi1kenobi/trustfall), reducing
-the work for creating and maintaining them.  Because of the extra data that
+the work for creating and maintaining them. Because of the extra data that
 rustdoc includes, some level of feature/target awareness might be able to be
 introduced.
 
@@ -236,13 +245,14 @@ are intentionally yanked. Please use the `cargo-semver-checks` crate instead.
 
 ### What is the MSRV policy with respect to semver?
 
-MSRV bumps are *not* considered major changes.
+MSRV bumps are _not_ considered major changes.
 
 `cargo-semver-checks` has two Rust version bounds, since it depends on Rust
 both at compile-time and at runtime:
-- The MSRV for *compiling* `cargo-semver-checks` (_"compile MSRV"_) is currently Rust 1.70.
+
+- The MSRV for _compiling_ `cargo-semver-checks` (_"compile MSRV"_) is currently Rust 1.70.
   This is primarily determined by our dependencies' MSRVs.
-- The MSRV for *checking crates* (_"runtime MSRV"_) is currently Rust 1.71.
+- The MSRV for _checking crates_ (_"runtime MSRV"_) is currently Rust 1.71.
   This is determined based on the rustdoc JSON format versions and
   known bugs in older rustdoc versions.
 
@@ -252,6 +262,12 @@ of the _middle_ number in the version, e.g. `0.24.1 -> 0.25.0` or `1.2.3 -> 1.3.
 Changes to the _compile MSRV_ may happen in any kind of version bump.
 As much as practically possible, we'll aim to make them
 simultaneously with _runtime MSRV_ bumps.
+
+### Visual Design
+
+Logo by [NUMI](https://github.com/numi-hq/open-design):
+
+[<img src="https://raw.githubusercontent.com/numi-hq/open-design/main/assets/numi-lockup.png" alt="NUMI Logo" style="width: 200px;"/>](https://numi.tech/?ref=semver-checks)
 
 ### License
 
