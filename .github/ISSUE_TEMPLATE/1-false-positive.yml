@@ -1,7 +1,20 @@
-name: "Bug report"
-description: "Things didn't meet expectations"
-labels: ['C-bug']
+name: "False-positive lint report"
+description: "A lint incorrectly flags code that doesn't have the issue the lint claims."
+labels: ['C-bug', 'A-lint']
 body:
+  - type: textarea
+    attributes:
+      label: "Which lint or lints are the issue"
+      description: "e.g. `enum_missing` or `struct_marked_non_exhaustive`"
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: "Known issues that might be causing this"
+      description: "Please look through this list and ensure you aren't opening a duplicate issue"
+      options:
+        - label: "Is the flagged item defined in another crate, or a re-export of such an item? ([#638](https://github.com/obi1kenobi/cargo-semver-checks/issues/638))"
+          required: false
   - type: textarea
     attributes:
       label: "Steps to reproduce the bug with the above code"
@@ -18,6 +31,12 @@ body:
     attributes:
       label: "Expected Behaviour"
       description: "I think *this* should happen instead."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Verbose Lint Output"
+      description: "Add `--verbose` to your `cargo semver-checks` invocation and copy-paste the output here."
     validations:
       required: true
   - type: textarea

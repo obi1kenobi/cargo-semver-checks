@@ -1,0 +1,36 @@
+name: "Another kind of bug"
+description: "Things didn't meet expectations"
+labels: ['C-bug']
+body:
+  - type: textarea
+    attributes:
+      label: "Steps to reproduce the bug with the above code"
+      description: "e.g. a link to a repo with a commit hash and the command being run."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Actual Behaviour"
+      description: "When I do like *this*, *that* is happening and I think it shouldn't."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Expected Behaviour"
+      description: "I think *this* should happen instead."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Generated System Information"
+      description: "Run `cargo semver-checks --bugreport` and copy-paste the output here."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Build Configuration"
+      description: "Any local [Rust build configuration](https://doc.rust-lang.org/cargo/reference/config.html) in config.toml files, or in env vars prefixed with `CARGO_`? Paste them here, if you have any."
+  - type: textarea
+    attributes:
+      label: "Additional Context"
+      description: "Add any other context about the problem here."
