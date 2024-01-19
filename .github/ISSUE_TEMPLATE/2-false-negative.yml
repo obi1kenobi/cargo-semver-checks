@@ -1,0 +1,51 @@
+name: "False-negative lint report"
+description: "`cargo-semver-checks` finds no issues in code that has a detectable issue"
+labels: ['A-lint']
+body:
+  - type: textarea
+    attributes:
+      label: "Is this about an existing lint, or proposing a new one?"
+      description: "e.g. an existing lint like `enum_missing`; enter `new` if a new lint"
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: "Known issues that might be causing this"
+      description: "Please look through this list and ensure you aren't opening a duplicate issue"
+      options:
+        - label: "Is the item that should have been flagged originating from another crate, or from a re-export of such an item? ([#638](https://github.com/obi1kenobi/cargo-semver-checks/issues/638))"
+          required: false
+        - label: "Is the issue related to a change in the type of a field, function parameter, generic, or trait bound? ([#149](https://github.com/obi1kenobi/cargo-semver-checks/issues/149))"
+          required: false
+  - type: textarea
+    attributes:
+      label: "Steps to reproduce the bug with the above code"
+      description: "e.g. a link to a repo with a commit hash and the command being run."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Actual Behaviour"
+      description: "When I do like *this*, *that* is happening and I think it shouldn't."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Expected Behaviour"
+      description: "I think *this* should happen instead."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Generated System Information"
+      description: "Run `cargo semver-checks --bugreport` and copy-paste the output here."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Build Configuration"
+      description: "Any local [Rust build configuration](https://doc.rust-lang.org/cargo/reference/config.html) in config.toml files, or in env vars prefixed with `CARGO_`? Paste them here, if you have any."
+  - type: textarea
+    attributes:
+      label: "Additional Context"
+      description: "Add any other context about the problem here."
