@@ -64,7 +64,7 @@ It uses a datasource-agnostic query engine called
 [Trustfall](https://github.com/obi1kenobi/trustfall) to allow writing semver checks as
 [declarative strongly-typed queries](https://twitter.com/PredragGruevski/status/1550135974499438592)
 over a
-[schema](https://github.com/obi1kenobi/trustfall-rustdoc-adapter/blob/main/src/rustdoc_schema.graphql).
+[schema](https://github.com/obi1kenobi/trustfall-rustdoc-adapter/blob/rustdoc-v28/src/rustdoc_schema.graphql).
 A query playground, including example queries, [is available here](https://play.predr.ag/rustdoc).
 
 Adding a new semver check is as simple as adding a new file that specifies the query to run and
