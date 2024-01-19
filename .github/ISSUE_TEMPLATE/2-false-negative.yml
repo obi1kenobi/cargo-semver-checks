@@ -1,6 +1,6 @@
 name: "False-negative lint report"
-description: "`cargo-semver-checks` finds no issues in code that has a detectable issue"
-labels: ['A-lint']
+description: "cargo-semver-checks finds no issues in code that has a detectable issue"
+labels: ['A-lint', 'C-enhancement']
 body:
   - type: textarea
     attributes:
@@ -17,6 +17,7 @@ body:
           required: false
         - label: "Is the issue related to a change in the type of a field, function parameter, generic, or trait bound? ([#149](https://github.com/obi1kenobi/cargo-semver-checks/issues/149))"
           required: false
+        - label: "If you're proposing a new lint, is it already part of our lint wishlist? ([#5](https://github.com/obi1kenobi/cargo-semver-checks/issues/5))"
   - type: textarea
     attributes:
       label: "Steps to reproduce the bug with the above code"
