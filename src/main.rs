@@ -257,6 +257,11 @@ struct CheckRelease {
     )]
     all_features: bool,
 
+    /// Which target to build the crate for, to check platform-specific APIs, e.g.
+    /// `x86_64-unknown-linux-gnu`.
+    #[arg(long = "target")]
+    build_target: Option<String>,
+
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 }
@@ -349,6 +354,11 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         trim_features(&mut baseline_features);
 
         check.with_extra_features(current_features, baseline_features);
+
+        if let Some(build_target) = value.build_target {
+            check.with_build_target(build_target);
+        }
+
         check
     }
 }

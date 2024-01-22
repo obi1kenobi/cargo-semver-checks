@@ -300,6 +300,7 @@ pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) crate_type: CrateType<'a>,
     pub(crate) name: &'a str,
     pub(crate) feature_config: &'a FeatureConfig,
+    pub(crate) build_target: Option<&'a str>,
 }
 
 impl<'a> CrateType<'a> {

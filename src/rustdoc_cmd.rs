@@ -107,6 +107,9 @@ impl RustdocCommand {
             .arg(target_dir)
             .arg("--package")
             .arg(pkg_spec);
+        if let Some(build_target) = crate_data.build_target {
+            cmd.arg("--target").arg(build_target);
+        }
         if !self.deps {
             cmd.arg("--no-deps");
         }
@@ -129,6 +132,48 @@ impl RustdocCommand {
                 )
             }
         }
+
+        let rustdoc_dir = if let Some(build_target) = crate_data.build_target {
+            target_dir.join(build_target).join("doc")
+        } else {
+            // If not passing an explicit `--target` flag, cargo may still pick a target to use
+            // instead of the "host" target, based on its config files and environment variables.
+
+            let build_target = {
+                let output = std::process::Command::new("cargo")
+                    .env("RUSTC_BOOTSTRAP", "1")
+                    .args([
+                        "config",
+                        "-Zunstable-options",
+                        "--color=never",
+                        "get",
+                        "--format=json-value",
+                        "build.target",
+                    ])
+                    .output()?;
+                if output.status.success() {
+                    serde_json::from_slice::<Option<String>>(&output.stdout)?
+                } else if std::str::from_utf8(&output.stderr)
+                    .context("non-utf8 cargo output")?
+                    // this is the only way to detect a not set config value currently:
+                    //      https://github.com/rust-lang/cargo/issues/13223
+                    .contains("config value `build.target` is not set")
+                {
+                    None
+                } else {
+                    anyhow::bail!(
+                        "running cargo-config failed:\n{}",
+                        String::from_utf8_lossy(&output.stderr),
+                    )
+                }
+            };
+
+            if let Some(build_target) = build_target {
+                target_dir.join(build_target).join("doc")
+            } else {
+                target_dir.join("doc")
+            }
+        };
 
         // There's no great way to figure out whether that crate version has a lib target.
         // We can't easily do it via the index, and we can't reliably do it via metadata.
@@ -175,7 +220,7 @@ in the metadata and stderr didn't mention it was lacking a lib target. This is p
             let lib_name = lib_target.name.as_str();
             let rustdoc_json_file_name = lib_name.replace('-', "_");
 
-            let json_path = target_dir.join(format!("doc/{rustdoc_json_file_name}.json"));
+            let json_path = rustdoc_dir.join(format!("{rustdoc_json_file_name}.json"));
             if json_path.exists() {
                 return Ok(json_path);
             } else {
@@ -195,7 +240,7 @@ in the metadata and stderr didn't mention it was lacking a lib target. This is p
             let bin_name = bin_target.name.as_str();
             let rustdoc_json_file_name = bin_name.replace('-', "_");
 
-            let json_path = target_dir.join(format!("doc/{rustdoc_json_file_name}.json"));
+            let json_path = rustdoc_dir.join(format!("{rustdoc_json_file_name}.json"));
             if json_path.exists() {
                 return Ok(json_path);
             } else {
