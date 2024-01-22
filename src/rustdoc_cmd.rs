@@ -107,8 +107,8 @@ impl RustdocCommand {
             .arg(target_dir)
             .arg("--package")
             .arg(pkg_spec);
-        if let Some(target) = crate_data.target {
-            cmd.arg("--target").arg(target);
+        if let Some(build_target) = crate_data.build_target {
+            cmd.arg("--target").arg(build_target);
         }
         if !self.deps {
             cmd.arg("--no-deps");
@@ -133,10 +133,10 @@ impl RustdocCommand {
             }
         }
 
-        let rustdoc_dir = if let Some(target) = crate_data.target {
-            target_dir.join(target).join("doc")
+        let rustdoc_dir = if let Some(build_target) = crate_data.build_target {
+            target_dir.join(build_target).join("doc")
         } else {
-            let target = {
+            let build_target = {
                 let output = std::process::Command::new("cargo")
                     .env("RUSTC_BOOTSTRAP", "1")
                     .args([
@@ -165,8 +165,8 @@ impl RustdocCommand {
                 }
             };
 
-            if let Some(target) = target {
-                target_dir.join(target).join("doc")
+            if let Some(build_target) = build_target {
+                target_dir.join(build_target).join("doc")
             } else {
                 target_dir.join("doc")
             }

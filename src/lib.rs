@@ -38,7 +38,7 @@ pub struct Check {
     release_type: Option<ReleaseType>,
     current_feature_config: rustdoc_gen::FeatureConfig,
     baseline_feature_config: rustdoc_gen::FeatureConfig,
-    target: Option<String>,
+    build_target: Option<String>,
 }
 
 /// The kind of release we're making.
@@ -237,7 +237,7 @@ impl Check {
             release_type: None,
             current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
-            target: None,
+            build_target: None,
         }
     }
 
@@ -302,8 +302,8 @@ impl Check {
         self
     }
 
-    pub fn with_target(&mut self, target: String) -> &mut Self {
-        self.target = Some(target);
+    pub fn with_build_target(&mut self, build_target: String) -> &mut Self {
+        self.build_target = Some(build_target);
         self
     }
 
@@ -426,7 +426,7 @@ impl Check {
                                 crate_type: rustdoc_gen::CrateType::Current,
                                 name: &name,
                                 feature_config: &self.current_feature_config,
-                                target: self.target.as_deref(),
+                                build_target: self.build_target.as_deref(),
                             },
                             CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Baseline {
@@ -434,7 +434,7 @@ impl Check {
                                 },
                                 name: &name,
                                 feature_config: &self.baseline_feature_config,
-                                target: self.target.as_deref(),
+                                build_target: self.build_target.as_deref(),
                             },
                         )?;
 
@@ -494,7 +494,7 @@ impl Check {
                                     crate_type: rustdoc_gen::CrateType::Current,
                                     name: crate_name,
                                     feature_config: &self.current_feature_config,
-                                    target: self.target.as_deref(),
+                                    build_target: self.build_target.as_deref(),
                                 },
                                 CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Baseline {
@@ -502,7 +502,7 @@ impl Check {
                                     },
                                     name: crate_name,
                                     feature_config: &self.baseline_feature_config,
-                                    target: self.target.as_deref(),
+                                    build_target: self.build_target.as_deref(),
                                 },
                             )?;
 
