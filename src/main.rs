@@ -257,7 +257,8 @@ struct CheckRelease {
     )]
     all_features: bool,
 
-    /// Which target to build the crate for, to check platform-specific APIs.
+    /// Which target to build the crate for, to check platform-specific APIs, e.g.
+    /// `x86_64-unknown-linux-gnu`.
     #[arg(long = "target")]
     build_target: Option<String>,
 
