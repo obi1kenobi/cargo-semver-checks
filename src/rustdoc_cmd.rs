@@ -136,6 +136,9 @@ impl RustdocCommand {
         let rustdoc_dir = if let Some(build_target) = crate_data.build_target {
             target_dir.join(build_target).join("doc")
         } else {
+            // If not passing an explicit `--target` flag, cargo may still pick a target to use
+            // instead of the "host" target, based on its config files and environment variables.
+
             let build_target = {
                 let output = std::process::Command::new("cargo")
                     .env("RUSTC_BOOTSTRAP", "1")

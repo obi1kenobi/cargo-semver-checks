@@ -38,6 +38,7 @@ pub struct Check {
     release_type: Option<ReleaseType>,
     current_feature_config: rustdoc_gen::FeatureConfig,
     baseline_feature_config: rustdoc_gen::FeatureConfig,
+    /// Which `--target` to use, if unset pass no flag
     build_target: Option<String>,
 }
 
@@ -302,6 +303,8 @@ impl Check {
         self
     }
 
+    /// Set what `--target` to build the documentation with, by default will not pass any flag
+    /// relying on the users cargo configuration.
     pub fn with_build_target(&mut self, build_target: String) -> &mut Self {
         self.build_target = Some(build_target);
         self
