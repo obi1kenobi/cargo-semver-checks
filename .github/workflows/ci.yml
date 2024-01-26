@@ -30,6 +30,7 @@ jobs:
       - run-on-libp2p-dcutr-relay
       - run-on-libp2p-gossipsub-request-response
       - run-on-libp2p-uds
+      - run-on-libp2p-whose-dependency-has-warnings
       - run-on-core-graphics
       - run-on-bevy-core
       - run-on-bevy-gltf
@@ -53,6 +54,7 @@ jobs:
           echo "run-on-libp2p-dcutr-relay: ${{ needs.run-on-libp2p-dcutr-relay.result }}"
           echo "run-on-libp2p-gossipsub-request-response: ${{ needs.run-on-libp2p-gossipsub-request-response.result }}"
           echo "run-on-libp2p-uds: ${{ needs.run-on-libp2p-uds.result }}"
+          echo "run-on-libp2p-whose-dependency-has-warnings: ${{ needs.run-on-libp2p-whose-dependency-has-warnings.result }}"
           echo "run-on-core-graphics: ${{ needs.run-on-core-graphics.result }}"
           echo "run-on-bevy-core: ${{ needs.run-on-bevy-core.result }}"
           echo "run-on-bevy-gltf: ${{ needs.run-on-bevy-gltf.result }}"
@@ -85,6 +87,8 @@ jobs:
       - if: ${{ needs.run-on-libp2p-gossipsub-request-response.result != 'success' }}
         run: exit 1
       - if: ${{ needs.run-on-libp2p-uds.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-libp2p-whose-dependency-has-warnings.result != 'success' }}
         run: exit 1
       - if: ${{ needs.run-on-core-graphics.result != 'success' }}
         run: exit 1
@@ -1517,6 +1521,76 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject\target\semver-checks\cache
+
+  run-on-libp2p-whose-dependency-has-warnings:
+    # cargo-semver-checks failed to generate rustdoc JSON for a commit near libp2p v0.53.1 because:
+    # - RUSTFLAGS was set to "-Dwarning" by default by a GitHub Action
+    # - libp2p has a dependency (libp2p-yamux) whose dependency (yamux) released a newer version,
+    #   which deprecated an item that libp2p-yamux uses
+    # - cargo-semver-checks added "--cap-lints" to RUSTDOCFLAGS but not RUSTFLAGS
+    # - generating rustdoc JSON for libp2p involves a rustc check of its dependency, and that
+    #   check obeys RUSTFLAGS, not RUSTDOCFLAGS
+    #
+    # https://github.com/obi1kenobi/cargo-semver-checks/issues/589
+    name: 'Semver: dependency has warnings with "-Dwarnings" (libp2p v0.53.1)'
+    runs-on: ubuntu-latest
+    needs:
+      - build-binary
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      - name: Checkout libp2p
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: 'libp2p/rust-libp2p'
+          ref: '4759ba8244242628164b7ec9e7dc99d67269e39f'
+          path: 'subject'
+
+      - name: Install rust
+        id: toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: "-Dwarnings"  # set explicitly, to ensure we trigger the bug described above
+
+      - name: Restore binary
+        id: cache-binary
+        uses: actions/cache/restore@v3
+        with:
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v3
+        with:
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-libp2p-0_53_1
+
+      - name: Run semver-checks
+        run: |
+          cd semver
+          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" -p libp2p --verbose
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
 
   run-on-perf-event-open-sys2:
     # cargo-semver-checks failed to find the generated rustdoc JSON
