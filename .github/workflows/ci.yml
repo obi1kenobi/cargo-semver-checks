@@ -1607,7 +1607,7 @@ jobs:
           persist-credentials: false
           path: 'semver'
 
-      - name: Checkout bevy
+      - name: Checkout phantomical/perf-event
         uses: actions/checkout@v4
         with:
           persist-credentials: false
