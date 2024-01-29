@@ -17,6 +17,7 @@ fn with_default() {
 }
 
 #[test]
+#[cfg(target_arch = "x86_64")]
 fn with_env_var() {
     base()
         .env("CARGO_BUILD_TARGET", "x86_64-unknown-linux-gnu")
@@ -25,6 +26,7 @@ fn with_env_var() {
 }
 
 #[test]
+#[cfg(target_arch = "x86_64")]
 fn with_flag() {
     base()
         .env_remove("CARGO_BUILD_TARGET")
