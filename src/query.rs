@@ -527,4 +527,5 @@ add_lints!(
     function_changed_abi,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
+    struct_pub_field_now_doc_hidden,
 );
