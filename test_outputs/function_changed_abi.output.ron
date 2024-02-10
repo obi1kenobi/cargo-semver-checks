@@ -2,11 +2,11 @@
     "./test_crates/exported_function_changed_abi/": [
         {
             "abi_name": String("Rust"),
-            "name": String("public_null_export_name_func"),
+            "name": String("public_null_export_name_func_will_become_c"),
             "new_abi_name": String("C"),
             "path": List([
                 String("exported_function_changed_abi"),
-                String("public_null_export_name_func"),
+                String("public_null_export_name_func_will_become_c"),
             ]),
             "span_begin_line": Uint64(2),
             "span_filename": String("src/lib.rs"),

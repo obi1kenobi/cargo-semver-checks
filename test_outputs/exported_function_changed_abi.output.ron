@@ -2,8 +2,8 @@
     "./test_crates/exported_function_changed_abi/": [
         {
             "abi_raw_name": String("Rust"),
-            "export_name": String("public_null_export_name_func"),
-            "name": String("public_null_export_name_func"),
+            "export_name": String("public_null_export_name_func_will_become_c"),
+            "name": String("public_null_export_name_func_will_become_c"),
             "new_abi_raw_name": String("C"),
             "span_begin_line": Uint64(2),
             "span_filename": String("src/lib.rs"),
