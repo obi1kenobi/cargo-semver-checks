@@ -17,7 +17,7 @@ fn with_default() {
 }
 
 #[test]
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_os = "linux", target_arch = "x86_64"))]
 fn with_env_var() {
     base()
         .env("CARGO_BUILD_TARGET", "x86_64-unknown-linux-gnu")
@@ -26,11 +26,30 @@ fn with_env_var() {
 }
 
 #[test]
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_os = "linux", target_arch = "riscv64"))]
+fn with_env_var() {
+    base()
+        .env("CARGO_BUILD_TARGET", "riscv64gc-unknown-linux-gnu")
+        .assert()
+        .success();
+}
+
+#[test]
+#[cfg(all(target_os = "linux", target_arch = "x86_64"))]
 fn with_flag() {
     base()
         .env_remove("CARGO_BUILD_TARGET")
         .arg("--target=x86_64-unknown-linux-gnu")
+        .assert()
+        .success();
+}
+
+#[test]
+#[cfg(all(target_os = "linux", target_arch = "riscv64"))]
+fn with_flag() {
+    base()
+        .env_remove("CARGO_BUILD_TARGET")
+        .arg("--target=riscv64gc-unknown-linux-gnu")
         .assert()
         .success();
 }

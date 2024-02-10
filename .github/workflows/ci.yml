@@ -154,7 +154,7 @@ jobs:
         # IMPORTANT: When updating the versions here, make sure you also update
         #            the `fails-on-too-old-rustc` job and its error message to
         #            to account for the raised minimum required version.
-        toolchain: ["1.71", "1.72", "1.73", "1.74", "stable", "beta"]
+        toolchain: ["1.71", "1.72", "1.73", "1.74", "1.75", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
