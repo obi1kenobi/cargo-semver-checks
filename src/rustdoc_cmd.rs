@@ -2,6 +2,7 @@ use std::io::Write as _;
 use std::path::{Path, PathBuf};
 
 use anyhow::Context;
+use itertools::Itertools as _;
 
 use crate::{
     rustdoc_gen::{CrateDataForRustdoc, CrateSource, FeaturesGroup},
@@ -134,16 +135,57 @@ impl RustdocCommand {
         let output = cmd.output()?;
         if !output.status.success() {
             if self.silence {
-                let stderr_output = String::from_utf8_lossy(&output.stderr);
+                config.log_error(|config| {
+                    let features = crate_source
+                        .feature_list_from_config(config, crate_data.feature_config);
+                    let stderr = config.stderr();
+                    let delimiter = "-----";
+                    writeln!(
+                        stderr,
+                        "error: running cargo-doc on crate {crate_name} failed with output:"
+                    )?;
+                    writeln!(
+                        stderr,
+                        "{delimiter}\n{}\n{delimiter}\n",
+                        String::from_utf8_lossy(&output.stderr)
+                    )?;
+                    writeln!(stderr, "error: failed to build rustdoc for crate {crate_name} v{version}\n")?;
+                    writeln!(stderr, "note: this is usually due to a compilation error in the crate")?;
+                    writeln!(stderr, "note: running the following command on the crate should reproduce the error:")?;
+
+                    writeln!(
+                        stderr,
+                        "    cargo build --no-default-features --features {}",
+                        features.into_iter().join(","),
+                    )?;
+                    Ok(())
+                })?;
                 anyhow::bail!(
-                    "running cargo-doc failed on {}:\n{stderr_output}",
-                    placeholder_manifest_path.display(),
-                )
+                    "aborting due to failure to build rustdoc for crate {crate_name} v{version}"
+                );
             } else {
+                config.log_error(|config| {
+                    let features = crate_source
+                        .feature_list_from_config(config, crate_data.feature_config);
+                    let stderr = config.stderr();
+                    writeln!(
+                        stderr,
+                        "error: running cargo-doc on crate {crate_name} v{version} failed, see stderr output above"
+                    )?;
+                    writeln!(stderr, "note: this is usually due to a compilation error in the crate,")?;
+                    writeln!(stderr, "      and is unlikely to be a bug in cargo-semver-checks")?;
+                    writeln!(stderr, "note: running the following command on the crate should reproduce the error:")?;
+
+                    writeln!(
+                        stderr,
+                        "    cargo build --no-default-features --features {}",
+                        features.into_iter().join(","),
+                    )?;
+                    Ok(())
+                })?;
                 anyhow::bail!(
-                    "running cargo-doc failed on {}. See stderr.",
-                    placeholder_manifest_path.display(),
-                )
+                    "aborting due to failure to build rustdoc for crate {crate_name} v{version}"
+                );
             }
         }
 
@@ -184,12 +226,23 @@ impl RustdocCommand {
                         )?;
                         writeln!(
                             stderr,
-                            "{delimiter}\n{}\n{delimiter}",
+                            "{delimiter}\n{}\n{delimiter}\n",
                             String::from_utf8_lossy(&output.stderr)
+                        )?;
+
+                        writeln!(stderr, "error: unexpected cargo config output for crate {crate_name} v{version}\n")?;
+                        writeln!(stderr, "note: this may be a bug in cargo, or a bug in cargo-semver-checks;")?;
+                        writeln!(stderr, "      if unsure, feel free to open a GitHub issue on cargo-semver-checks")?;
+                        writeln!(stderr, "note: running the following command on the crate should reproduce the error:")?;
+                        writeln!(
+                            stderr,
+                            "    cargo config -Zunstable-options get --format=json-value build.target",
                         )?;
                         Ok(())
                     })?;
-                    anyhow::bail!("running cargo-config on crate {crate_name} failed",)
+                    anyhow::bail!(
+                        "aborting due to cargo-config failure on crate {crate_name} v{version}"
+                    )
                 }
             };
 
