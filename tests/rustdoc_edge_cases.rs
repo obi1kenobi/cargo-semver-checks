@@ -33,7 +33,7 @@ fn proc_macro_target() {
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .env_remove("RUST_BACKTRACE")
         .assert()
-        .stderr("Error: no crates with library targets selected, nothing to semver-check\n")
+        .stderr("error: no crates with library targets selected, nothing to semver-check\n")
         .failure();
 }
 
@@ -92,7 +92,7 @@ fn crate_in_workspace() {
         ])
         .env_remove("RUST_BACKTRACE")
         .assert()
-        .stderr("Error: no crates with library targets selected, nothing to semver-check\n")
+        .stderr("error: no crates with library targets selected, nothing to semver-check\n")
         .failure();
 }
 
