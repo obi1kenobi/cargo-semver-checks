@@ -7,7 +7,7 @@ use cargo_semver_checks::{
 };
 use clap::{Args, Parser, Subcommand};
 
-fn main() -> anyhow::Result<()> {
+fn main() {
     human_panic::setup_panic!();
 
     let Cargo::SemverChecks(args) = Cargo::parse();
@@ -22,56 +22,62 @@ fn main() -> anyhow::Result<()> {
             .print::<Markdown>();
         std::process::exit(0);
     } else if args.list {
-        let queries = SemverQuery::all_queries();
-        let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
-        for query in queries.values() {
-            rows.push([
-                query.id.as_str(),
-                query.required_update.as_str(),
-                query.description.as_str(),
-            ]);
-        }
-        let mut widths = [0; 3];
-        for row in &rows {
-            widths[0] = widths[0].max(row[0].len());
-            widths[1] = widths[1].max(row[1].len());
-            widths[2] = widths[2].max(row[2].len());
-        }
-        let stdout = std::io::stdout();
-        let mut stdout = stdout.lock();
-        for row in rows {
-            use std::io::Write;
-            writeln!(
-                stdout,
-                "{0:<1$} {2:<3$} {4:<5$}",
-                row[0], widths[0], row[1], widths[1], row[2], widths[2]
-            )?;
-        }
+        exit_on_error(true, || {
+            let mut config =
+                GlobalConfig::new().set_level(args.check_release.verbosity.log_level());
+            let queries = SemverQuery::all_queries();
+            let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
+            for query in queries.values() {
+                rows.push([
+                    query.id.as_str(),
+                    query.required_update.as_str(),
+                    query.description.as_str(),
+                ]);
+            }
+            let mut widths = [0; 3];
+            for row in &rows {
+                widths[0] = widths[0].max(row[0].len());
+                widths[1] = widths[1].max(row[1].len());
+                widths[2] = widths[2].max(row[2].len());
+            }
+            let stdout = std::io::stdout();
+            let mut stdout = stdout.lock();
+            for row in rows {
+                use std::io::Write;
+                writeln!(
+                    stdout,
+                    "{0:<1$} {2:<3$} {4:<5$}",
+                    row[0], widths[0], row[1], widths[1], row[2], widths[2]
+                )?;
+            }
 
-        let mut config = GlobalConfig::new().set_level(args.check_release.verbosity.log_level());
-        config.shell_note("Use `--explain <id>` to see more details")?;
+            config.shell_note("Use `--explain <id>` to see more details")
+        });
         std::process::exit(0);
     } else if let Some(id) = args.explain.as_deref() {
-        let queries = SemverQuery::all_queries();
-        let query = queries.get(id).ok_or_else(|| {
-            let ids = queries.keys().cloned().collect::<Vec<_>>();
-            anyhow::format_err!(
-                "Unknown id `{}`, available id's:\n  {}",
-                id,
-                ids.join("\n  ")
-            )
-        })?;
-        println!(
-            "{}",
-            query
-                .reference
-                .as_deref()
-                .unwrap_or(query.description.as_str())
-        );
-        if let Some(link) = &query.reference_link {
-            println!();
-            println!("See also {link}");
-        }
+        exit_on_error(true, || {
+            let queries = SemverQuery::all_queries();
+            let query = queries.get(id).ok_or_else(|| {
+                let ids = queries.keys().cloned().collect::<Vec<_>>();
+                anyhow::format_err!(
+                    "Unknown id `{}`, available id's:\n  {}",
+                    id,
+                    ids.join("\n  ")
+                )
+            })?;
+            println!(
+                "{}",
+                query
+                    .reference
+                    .as_deref()
+                    .unwrap_or(query.description.as_str())
+            );
+            if let Some(link) = &query.reference_link {
+                println!();
+                println!("See also {link}");
+            }
+            Ok(())
+        });
         std::process::exit(0);
     }
 
@@ -79,11 +85,23 @@ fn main() -> anyhow::Result<()> {
         Some(SemverChecksCommands::CheckRelease(args)) => args.into(),
         None => args.check_release.into(),
     };
-    let report = check.check_release()?;
+    let report = exit_on_error(check.log_level().is_some(), || check.check_release());
     if report.success() {
         std::process::exit(0);
     } else {
         std::process::exit(1);
+    }
+}
+
+fn exit_on_error<T>(log_errors: bool, inner: impl Fn() -> anyhow::Result<T>) -> T {
+    match inner() {
+        Ok(x) => x,
+        Err(err) => {
+            if log_errors {
+                eprintln!("error: {err:?}");
+            }
+            std::process::exit(1)
+        }
     }
 }
 

@@ -1,3 +1,4 @@
+use std::io::Write as _;
 use std::path::{Path, PathBuf};
 
 use anyhow::Context;
@@ -174,10 +175,21 @@ impl RustdocCommand {
                 {
                     None
                 } else {
-                    anyhow::bail!(
-                        "running cargo-config failed:\n{}",
-                        String::from_utf8_lossy(&output.stderr),
-                    )
+                    config.log_error(|config| {
+                        let stderr = config.stderr();
+                        let delimiter = "-----";
+                        writeln!(
+                            stderr,
+                            "error: running cargo-config on crate {crate_name} failed with output:"
+                        )?;
+                        writeln!(
+                            stderr,
+                            "{delimiter}\n{}\n{delimiter}",
+                            String::from_utf8_lossy(&output.stderr)
+                        )?;
+                        Ok(())
+                    })?;
+                    anyhow::bail!("running cargo-config on crate {crate_name} failed",)
                 }
             };
 
@@ -238,7 +250,7 @@ in the metadata and stderr didn't mention it was lacking a lib target. This is p
                 return Ok(json_path);
             } else {
                 anyhow::bail!(
-                    "Could not find expected rustdoc output for `{}`: {}",
+                    "could not find expected rustdoc output for `{}`: {}",
                     crate_name,
                     json_path.display()
                 );
@@ -258,14 +270,14 @@ in the metadata and stderr didn't mention it was lacking a lib target. This is p
                 return Ok(json_path);
             } else {
                 anyhow::bail!(
-                    "Could not find expected rustdoc output for `{}`: {}",
+                    "could not find expected rustdoc output for `{}`: {}",
                     crate_name,
                     json_path.display()
                 );
             }
         }
 
-        anyhow::bail!("No lib or bin targets so nothing to scan for crate {crate_name}")
+        anyhow::bail!("no lib or bin targets so nothing to scan for crate {crate_name}")
     }
 }
 
