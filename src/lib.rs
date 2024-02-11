@@ -264,6 +264,13 @@ impl Check {
         self
     }
 
+    /// Get the current log level.
+    /// If set to `None`, logging is disabled.
+    #[inline]
+    pub fn log_level(&self) -> Option<&log::Level> {
+        self.log_level.as_ref()
+    }
+
     pub fn with_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
         self.release_type = Some(release_type);
         self
