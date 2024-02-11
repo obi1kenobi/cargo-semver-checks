@@ -13,6 +13,7 @@ localdata/
 
 # Editor-local configuration
 .vscode/
+.idea
 
 # Unnecessary test data
 test_crates/**/Cargo.lock
