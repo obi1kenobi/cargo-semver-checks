@@ -524,4 +524,5 @@ add_lints!(
     function_changed_abi,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
+    trait_no_longer_object_safe,
 );

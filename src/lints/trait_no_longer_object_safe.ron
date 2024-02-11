@@ -1,0 +1,21 @@
+SemverQuery(
+    id: "trait_no_longer_object_safe",
+    human_readable_name: "trait no longer object safe",
+    description: "A trait is no longer object safe",
+    required_update: Major,  // TODO
+    reference_link: Some("https://doc.rust-lang.org/stable/reference/items/traits.html?highlight=object#object-safety"),
+    query: r#"
+    {
+        CrateDiff {
+                span_: span @optional {
+                    filename @output
+                    begin_line @output
+                }
+        }
+    }"#,
+    arguments: {
+        // TODO
+    },
+    error_message: "TODO",
+    per_result_error_template: Some("TODO"),
+)
