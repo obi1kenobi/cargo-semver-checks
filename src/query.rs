@@ -463,11 +463,9 @@ macro_rules! add_lints {
             ]
         }
     }
-    ($($name:ident),*) => {
-        compile_error!("A trailing comma is required after each lint identifier in `add_lints!` macro.");
-    }
 }
 
+// A trailing comma is required after each lint identifier in `add_lints!` macro
 add_lints!(
     auto_trait_impl_removed,
     constructible_struct_adds_field,
@@ -526,5 +524,5 @@ add_lints!(
     trait_removed_associated_constant,
     function_changed_abi,
     trait_method_unsafe_added,
-    trait_method_unsafe_removed,
+    trait_method_unsafe_removed
 );
