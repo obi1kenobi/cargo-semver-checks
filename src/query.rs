@@ -464,7 +464,7 @@ macro_rules! add_lints {
         }
     }
     ($($name:ident),*) => {
-        compile_error!("A trailing comma is required after each lint identifier in `add_lints!` macro.");
+        compile_error!("Please add a trailing comma after each lint identifier. This ensures our scripts like 'make_new_lint.sh' can safely edit invocations of this macro as needed.");
     }
 }
 
