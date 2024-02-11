@@ -149,13 +149,10 @@ impl RustdocCommand {
                     )?;
                     writeln!(
                         stderr,
-                        "error: failed to build rustdoc for crate {crate_name} v{version}\n"
+                        "error: failed to build rustdoc for crate {crate_name} v{version}"
                     )?;
                     Ok(())
                 })?;
-                anyhow::bail!(
-                    "aborting due to failure to build rustdoc for crate {crate_name} v{version}"
-                );
             } else {
                 config.log_error(|config| {
                     let stderr = config.stderr();
