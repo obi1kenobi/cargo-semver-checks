@@ -444,7 +444,7 @@ mod tests {
 }
 
 macro_rules! add_lints {
-    ($($name:ident,)*) => {
+    ($($name:ident,)+) => {
         #[cfg(test)]
         mod tests_lints {
             $(
@@ -462,6 +462,9 @@ macro_rules! add_lints {
                 )*
             ]
         }
+    }
+    ($($name:ident),*) => {
+        compile_error!("A trailing comma is required after each lint identifier in `add_lints!` macro.");
     }
 }
 
