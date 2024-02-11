@@ -136,8 +136,6 @@ impl RustdocCommand {
         if !output.status.success() {
             if self.silence {
                 config.log_error(|config| {
-                    let features = crate_source
-                        .feature_list_from_config(config, crate_data.feature_config);
                     let stderr = config.stderr();
                     let delimiter = "-----";
                     writeln!(
@@ -149,14 +147,9 @@ impl RustdocCommand {
                         "{delimiter}\n{}\n{delimiter}\n",
                         String::from_utf8_lossy(&output.stderr)
                     )?;
-                    writeln!(stderr, "error: failed to build rustdoc for crate {crate_name} v{version}\n")?;
-                    writeln!(stderr, "note: this is usually due to a compilation error in the crate")?;
-                    writeln!(stderr, "note: running the following command on the crate should reproduce the error:")?;
-
                     writeln!(
                         stderr,
-                        "    cargo build --no-default-features --features {}",
-                        features.into_iter().join(","),
+                        "error: failed to build rustdoc for crate {crate_name} v{version}\n"
                     )?;
                     Ok(())
                 })?;
@@ -165,28 +158,41 @@ impl RustdocCommand {
                 );
             } else {
                 config.log_error(|config| {
-                    let features = crate_source
-                        .feature_list_from_config(config, crate_data.feature_config);
                     let stderr = config.stderr();
                     writeln!(
                         stderr,
                         "error: running cargo-doc on crate {crate_name} v{version} failed, see stderr output above"
                     )?;
-                    writeln!(stderr, "note: this is usually due to a compilation error in the crate,")?;
-                    writeln!(stderr, "      and is unlikely to be a bug in cargo-semver-checks")?;
-                    writeln!(stderr, "note: running the following command on the crate should reproduce the error:")?;
-
-                    writeln!(
-                        stderr,
-                        "    cargo build --no-default-features --features {}",
-                        features.into_iter().join(","),
-                    )?;
                     Ok(())
                 })?;
-                anyhow::bail!(
-                    "aborting due to failure to build rustdoc for crate {crate_name} v{version}"
-                );
             }
+            config.log_error(|config| {
+                let features =
+                    crate_source.feature_list_from_config(config, crate_data.feature_config);
+                let stderr = config.stderr();
+                writeln!(
+                    stderr,
+                    "note: this is usually due to a compilation error in the crate,"
+                )?;
+                writeln!(
+                    stderr,
+                    "      and is unlikely to be a bug in cargo-semver-checks"
+                )?;
+                writeln!(
+                    stderr,
+                    "note: running the following command on the crate should reproduce the error:"
+                )?;
+
+                writeln!(
+                    stderr,
+                    "      cargo build --no-default-features --features {}",
+                    features.into_iter().join(","),
+                )?;
+                Ok(())
+            })?;
+            anyhow::bail!(
+                "aborting due to failure to build rustdoc for crate {crate_name} v{version}"
+            );
         }
 
         let rustdoc_dir = if let Some(build_target) = crate_data.build_target {
@@ -236,7 +242,7 @@ impl RustdocCommand {
                         writeln!(stderr, "note: running the following command on the crate should reproduce the error:")?;
                         writeln!(
                             stderr,
-                            "    cargo config -Zunstable-options get --format=json-value build.target",
+                            "      cargo config -Zunstable-options get --format=json-value build.target",
                         )?;
                         Ok(())
                     })?;
