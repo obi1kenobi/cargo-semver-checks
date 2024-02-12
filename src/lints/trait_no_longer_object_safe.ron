@@ -2,20 +2,50 @@ SemverQuery(
     id: "trait_no_longer_object_safe",
     human_readable_name: "trait no longer object safe",
     description: "A trait is no longer object safe",
-    required_update: Major,  // TODO
+    required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/stable/reference/items/traits.html?highlight=object#object-safety"),
     query: r#"
     {
         CrateDiff {
-                span_: span @optional {
-                    filename @output
-                    begin_line @output
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        object_safe @filter(op: "=", value: ["$true"])
+
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
                 }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        object_safe @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
         }
     }"#,
     arguments: {
-        // TODO
+        "public": "public",
+        "true": true
     },
-    error_message: "TODO",
+    error_message: "Trait is no longer object safe.",
     per_result_error_template: Some("TODO"),
 )
