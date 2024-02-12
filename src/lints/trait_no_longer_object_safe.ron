@@ -3,7 +3,7 @@ SemverQuery(
     human_readable_name: "trait no longer object safe",
     description: "A trait is no longer object safe, meaning it can no longer be used as `dyn Trait`.",
     required_update: Major,
-    reference_link: Some("https://doc.rust-lang.org/stable/reference/items/traits.html?highlight=object#object-safety"),
+    reference_link: Some("https://doc.rust-lang.org/stable/reference/items/traits.html#object-safety"),
     query: r#"
     {
         CrateDiff {
