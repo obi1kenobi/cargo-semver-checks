@@ -509,7 +509,6 @@ add_lints!(
     trait_method_missing,
     trait_missing,
     trait_must_use_added,
-    trait_no_longer_object_safe,
     trait_now_doc_hidden,
     trait_unsafe_added,
     trait_unsafe_removed,
