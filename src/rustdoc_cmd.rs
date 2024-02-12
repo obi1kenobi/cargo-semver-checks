@@ -182,7 +182,7 @@ impl RustdocCommand {
 
                 writeln!(
                     stderr,
-                    "      cargo build --no-default-features --features {}",
+                    "      cargo build --no-default-features --features {}\n",
                     features.into_iter().join(","),
                 )?;
                 Ok(())
@@ -239,7 +239,7 @@ impl RustdocCommand {
                         writeln!(stderr, "note: running the following command on the crate should reproduce the error:")?;
                         writeln!(
                             stderr,
-                            "      cargo config -Zunstable-options get --format=json-value build.target",
+                            "      cargo config -Zunstable-options get --format=json-value build.target\n",
                         )?;
                         Ok(())
                     })?;
