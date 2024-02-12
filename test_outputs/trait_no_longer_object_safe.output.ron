@@ -1,34 +1,5 @@
 {
-    "./test_crates/trait_now_doc_hidden/": [
-        {
-            "name": String("AliasedAsDocHidden"),
-            "path": List([
-                String("trait_now_doc_hidden"),
-                String("AliasedAsDocHidden"),
-            ]),
-            "span_begin_line": Uint64(44),
-            "span_filename": String("src/lib.rs"),
-            "visibility_limit": String("public"),
-        },
-        {
-            "name": String("PublicTraitDocumentedWithStringHidden"),
-            "path": List([
-                String("trait_now_doc_hidden"),
-                String("PublicTraitDocumentedWithStringHidden"),
-            ]),
-            "span_begin_line": Uint64(62),
-            "span_filename": String("src/lib.rs"),
-            "visibility_limit": String("public"),
-        },
-        {
-            "name": String("PublicTraitHiddenVariant"),
-            "path": List([
-                String("trait_now_doc_hidden"),
-                String("PublicTraitHiddenVariant"),
-            ]),
-            "span_begin_line": Uint64(49),
-            "span_filename": String("src/lib.rs"),
-            "visibility_limit": String("public"),
-        },
-    ],
+    "./test_crates/trait_no_longer_object_safe/": [
+        // TODO
+    ]
 }
