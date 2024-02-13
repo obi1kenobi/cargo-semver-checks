@@ -121,7 +121,8 @@ impl RustdocCommand {
             .arg("--target-dir")
             .arg(target_dir)
             .arg("--package")
-            .arg(pkg_spec);
+            .arg(pkg_spec)
+            .arg("--lib");
         if let Some(build_target) = crate_data.build_target {
             cmd.arg("--target").arg(build_target);
         }
@@ -315,27 +316,10 @@ in the metadata and stderr didn't mention it was lacking a lib target. This is p
             }
         }
 
-        // This crate does not have a lib target.
-        // For backward compatibility with older cargo-semver-checks versions,
-        // we currently preserve the old behavior of using the first bin target's rustdoc.
-        // At some future point, this is likely going to be deprecated and then become an error.
-        if let Some(bin_target) = subject_crate.targets.iter().find(|target| target.is_bin()) {
-            let bin_name = bin_target.name.as_str();
-            let rustdoc_json_file_name = bin_name.replace('-', "_");
-
-            let json_path = rustdoc_dir.join(format!("{rustdoc_json_file_name}.json"));
-            if json_path.exists() {
-                return Ok(json_path);
-            } else {
-                anyhow::bail!(
-                    "could not find expected rustdoc output for `{}`: {}",
-                    crate_name,
-                    json_path.display()
-                );
-            }
-        }
-
-        anyhow::bail!("no lib or bin targets so nothing to scan for crate {crate_name}")
+        anyhow::bail!(
+            "aborting since crate {crate_name} v{} has no lib target, so there's nothing to check",
+            crate_source.version()?
+        )
     }
 }
 
