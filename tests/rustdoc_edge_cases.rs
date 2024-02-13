@@ -50,6 +50,17 @@ fn bin_target_only() {
         .failure();
 }
 
+/// Ensure that crates whose library target is `doc = false` can still be semver-checked.
+#[test]
+fn doc_false_lib_target() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/doc_false_lib_target")
+        .args(["semver-checks", "check-release", "--baseline-root=."])
+        .env_remove("RUST_BACKTRACE")
+        .assert()
+        .success();
+}
+
 /// Ensure that crates whose lib target has `crate-type = ["rlib"]`
 /// can be semver-checked correctly.
 #[test]

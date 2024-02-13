@@ -1,0 +1,9 @@
+[package]
+name = "doc_false_lib_target"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+doc = false
+
+[dependencies]
