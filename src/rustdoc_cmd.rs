@@ -292,12 +292,14 @@ in the metadata and stderr didn't mention it was lacking a lib target. This is p
 
         // Figure out the name of the JSON file where rustdoc will produce the output we want.
         // The name is:
-        // - the name of the *library or proc-macro target* of the crate, not the crate's name
+        // - the name of the library-like target of the crate, not the crate's name
         // - but with all `-` chars replaced with `_` instead.
         // Related: https://github.com/obi1kenobi/cargo-semver-checks/issues/432
-        if let Some(lib_target) = subject_crate.targets.iter().find(|target| {
-            target.is_lib() || target.kind.iter().any(|k| k.as_str() == "proc-macro")
-        }) {
+        if let Some(lib_target) = subject_crate
+            .targets
+            .iter()
+            .find(|target| super::is_lib_like_checkable_target(target))
+        {
             let lib_name = lib_target.name.as_str();
             let rustdoc_json_file_name = lib_name.replace('-', "_");
 
