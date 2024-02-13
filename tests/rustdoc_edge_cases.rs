@@ -37,6 +37,39 @@ fn proc_macro_target() {
         .failure();
 }
 
+/// Ensure that crates whose lib target has `crate-type = ["rlib"]`
+/// can be semver-checked correctly.
+#[test]
+fn rlib_target() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/rlib_target")
+        .args(["semver-checks", "check-release", "--baseline-root=."])
+        .assert()
+        .success();
+}
+
+/// Ensure that crates whose lib target has `crate-type = ["staticlib"]`
+/// can be semver-checked correctly.
+#[test]
+fn staticlib_target() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/staticlib_target")
+        .args(["semver-checks", "check-release", "--baseline-root=."])
+        .assert()
+        .success();
+}
+
+/// Ensure that crates whose lib target has `crate-type = ["dylib"]`
+/// can be semver-checked correctly.
+#[test]
+fn dylib_target() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/dylib_target")
+        .args(["semver-checks", "check-release", "--baseline-root=."])
+        .assert()
+        .success();
+}
+
 /// Ensure that crates whose lib targets have a different name can be semver-checked correctly.
 /// Rustdoc uses the lib target name with dashes replaced with underscores as the JSON file name.
 /// https://github.com/obi1kenobi/cargo-semver-checks/issues/432
