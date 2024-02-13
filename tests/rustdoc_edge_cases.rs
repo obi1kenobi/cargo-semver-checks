@@ -37,6 +37,19 @@ fn proc_macro_target() {
         .failure();
 }
 
+/// Ensure that crates with only a bin target (so, no lib target) produce the correct error message
+/// since they have no library API and therefore nothing we can semver-check.
+#[test]
+fn bin_target_only() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/bin_target_only")
+        .args(["semver-checks", "check-release", "--baseline-root=."])
+        .env_remove("RUST_BACKTRACE")
+        .assert()
+        .stderr("error: no crates with library targets selected, nothing to semver-check\n")
+        .failure();
+}
+
 /// Ensure that crates whose lib target has `crate-type = ["rlib"]`
 /// can be semver-checked correctly.
 #[test]
