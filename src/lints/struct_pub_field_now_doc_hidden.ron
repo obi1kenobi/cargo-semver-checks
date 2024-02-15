@@ -30,6 +30,16 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
                         struct_name: name @output
 
+                        # It's possible that both the struct and its field became `#[doc(hidden)]`.
+                        # This is a rare case where we don't consider the lint on the field
+                        # to be a duplicate lint of the one on the struct.
+                        #
+                        # Doc-hiddenness on the struct means we can't legally *name* it
+                        # (i.e. import & use it). But if an existing public API returns this struct,
+                        # its pub fields can still be public API without naming the struct's type.
+                        #
+                        # This is why we don't check whether the struct's path is `public_api`
+                        # in this branch of the query.
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
                         }
