@@ -1,3 +1,5 @@
+use std::convert::AsRef;
+
 // Method of public trait becomes safe, should get reported.
 pub trait PubTrait {
     unsafe fn becomes_safe();
@@ -49,6 +51,17 @@ pub trait UnsealedTrait: Unsealed {
 // This trait has multiple supertraits, one of which is a sealing supertrait, so
 // it shouldn't get reported.
 pub trait SealedAndUnsealedTrait: private::Sealed + Unsealed {
+    unsafe fn becomes_safe();
+}
+
+// This trait has a supertrait, but it isn't a sealing supertrait, so it should
+// get reported.
+pub trait TraitWithStdSupertrait: AsRef<()> {
+    unsafe fn becomes_safe();
+}
+
+// Method of sealed trait becomes safe, shouldn't get reported.
+pub trait SealedTraitWithStdSupertrait: AsRef<()> + private::Sealed {
     unsafe fn becomes_safe();
 }
 
