@@ -42,7 +42,7 @@
                 String("trait_method_unsafe_removed"),
                 String("TraitBecomesSafe"),
             ]),
-            "span_begin_line": Uint64(23),
+            "span_begin_line": Uint64(25),
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },

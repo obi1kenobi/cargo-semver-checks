@@ -1,3 +1,5 @@
+use std::convert::AsRef;
+
 // Method of public trait becomes safe, should get reported.
 pub trait PubTrait {
     unsafe fn becomes_safe();
@@ -28,3 +30,48 @@ pub unsafe trait TraitBecomesSafe {
 trait PrivateTrait {
     unsafe fn becomes_safe();
 }
+
+// Method of sealed trait becomes safe, shouldn't get reported.
+pub trait PrivModSealedTrait: private::Sealed {
+    unsafe fn becomes_safe();
+}
+
+// Method of sealed trait becomes safe, shouldn't get reported.
+#[allow(private_bounds)]
+pub trait PrivTraitSealedTrait: Sealed {
+    unsafe fn becomes_safe();
+}
+
+// This trait has a supertrait, but it isn't a sealing supertrait, so it should
+// get reported.
+pub trait UnsealedTrait: Unsealed {
+    unsafe fn becomes_safe();
+}
+
+// This trait has multiple supertraits, one of which is a sealing supertrait, so
+// it shouldn't get reported.
+pub trait SealedAndUnsealedTrait: private::Sealed + Unsealed {
+    unsafe fn becomes_safe();
+}
+
+// This trait has a supertrait, but it isn't a sealing supertrait, so it should
+// get reported.
+pub trait TraitWithStdSupertrait: AsRef<()> {
+    unsafe fn becomes_safe();
+}
+
+// Method of sealed trait becomes safe, shouldn't get reported.
+pub trait SealedTraitWithStdSupertrait: AsRef<()> + private::Sealed {
+    unsafe fn becomes_safe();
+}
+
+mod private {
+    pub trait Sealed {}
+}
+
+trait Sealed {}
+
+pub trait Unsealed {}
+
+// TODO: Try a sealed trait using a private supertrait
+// https://github.com/rust-lang/rust/issues/119280#issuecomment-1868582786
