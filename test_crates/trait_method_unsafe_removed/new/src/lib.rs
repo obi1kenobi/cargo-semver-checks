@@ -30,7 +30,13 @@ trait PrivateTrait {
 }
 
 // Method of sealed trait becomes safe, shouldn't get reported.
-pub trait SealedTrait: private::Sealed {
+pub trait PrivModSealedTrait: private::Sealed {
+    fn becomes_safe();
+}
+
+// Method of sealed trait becomes safe, shouldn't get reported.
+#[allow(private_bounds)]
+pub trait PrivTraitSealedTrait: Sealed {
     fn becomes_safe();
 }
 
@@ -50,4 +56,9 @@ mod private {
     pub trait Sealed {}
 }
 
+trait Sealed {}
+
 pub trait Unsealed {}
+
+// TODO: Try a sealed trait using a private supertrait
+// https://github.com/rust-lang/rust/issues/119280#issuecomment-1868582786
