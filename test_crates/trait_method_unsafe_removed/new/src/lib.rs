@@ -34,6 +34,20 @@ pub trait SealedTrait: private::Sealed {
     fn becomes_safe();
 }
 
+// This trait has a supertrait, but it isn't a sealing supertrait, so it should
+// get reported.
+pub trait UnsealedTrait: Unsealed {
+    fn becomes_safe();
+}
+
+// This trait has multiple supertraits, one of which is a sealing supertrait, so
+// it shouldn't get reported.
+pub trait SealedAndUnsealedTrait: private::Sealed + Unsealed {
+    fn becomes_safe();
+}
+
 mod private {
     pub trait Sealed {}
 }
+
+pub trait Unsealed {}

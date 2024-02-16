@@ -19,6 +19,16 @@
             "span_begin_line": Uint64(24),
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
-        }
+        },
+        {
+            "method_name": String("becomes_safe"),
+            "path": List([
+                String("trait_method_unsafe_removed"),
+                String("UnsealedTrait"),
+            ]),
+            "span_begin_line": Uint64(40),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
     ],
 }
