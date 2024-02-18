@@ -1,0 +1,72 @@
+SemverQuery(
+    id: "repr_packed_removed",
+    human_readable_name: "repr(packed) removed",
+    description: "A struct or union that used to be repr(packed) is no longer repr(packed).",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-packed-remove"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        type: __typename @filter(op: "one_of", value: ["$types"]) @output @tag
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$packed"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        __typename @filter(op: "=", value: ["%type"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$packed"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "packed": "packed",
+        "repr": "repr",
+        "true": true,
+        "types": ["Struct", "Union"],
+        "zero": 0,
+    },
+    error_message: "repr(packed) was removed from a struct or union. This can break code that depends on the type's alignment or layout.",
+    per_result_error_template: Some("{{lowercase type}} {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)
