@@ -1727,8 +1727,8 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "Error: rustc version is not high enough: >=1.71.0 needed, got 1.70.0")"
-          RESULT="$(cat output | grep 'Error: rustc version')"
+          EXPECTED="$(echo -e "error: rustc version is not high enough: >=1.71.0 needed, got 1.70.0")"
+          RESULT="$(cat output | grep 'error: rustc version')"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Cleanup

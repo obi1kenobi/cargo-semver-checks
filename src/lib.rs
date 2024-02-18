@@ -222,10 +222,22 @@ impl Scope {
             .filter(|&p| {
                 // The package has to not have been explicitly excluded,
                 // and also has to have a library target (an API we can check).
-                base_ids.contains(&p.id) && p.targets.iter().any(|target| target.is_lib())
+                base_ids.contains(&p.id) && p.targets.iter().any(is_lib_like_checkable_target)
             })
             .collect()
     }
+}
+
+/// Is the specified target able to be semver-checked as a library, of any sort.
+///
+/// This is a broader definition than cargo's own "lib" definition, since we can also
+/// semver-check rlib, dylib, and staticlib targets as well.
+fn is_lib_like_checkable_target(target: &cargo_metadata::Target) -> bool {
+    target.is_lib()
+        || target
+            .kind
+            .iter()
+            .any(|kind| matches!(kind.as_str(), "rlib" | "dylib" | "staticlib"))
 }
 
 impl Check {
@@ -262,6 +274,13 @@ impl Check {
     pub fn with_log_level(&mut self, log_level: Option<log::Level>) -> &mut Self {
         self.log_level = log_level;
         self
+    }
+
+    /// Get the current log level.
+    /// If set to `None`, logging is disabled.
+    #[inline]
+    pub fn log_level(&self) -> Option<&log::Level> {
+        self.log_level.as_ref()
     }
 
     pub fn with_release_type(&mut self, release_type: ReleaseType) -> &mut Self {

@@ -444,7 +444,7 @@ mod tests {
 }
 
 macro_rules! add_lints {
-    ($($name:ident,)*) => {
+    ($($name:ident,)+) => {
         #[cfg(test)]
         mod tests_lints {
             $(
@@ -462,6 +462,9 @@ macro_rules! add_lints {
                 )*
             ]
         }
+    };
+    ($($name:ident),*) => {
+        compile_error!("Please add a trailing comma after each lint identifier. This ensures our scripts like 'make_new_lint.sh' can safely edit invocations of this macro as needed.");
     }
 }
 
@@ -524,5 +527,8 @@ add_lints!(
     function_changed_abi,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
+    struct_pub_field_now_doc_hidden,
+    repr_packed_added,
+    repr_packed_removed,
     exported_function_changed_abi,
 );
