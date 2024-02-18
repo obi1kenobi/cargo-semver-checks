@@ -1,7 +1,7 @@
 SemverQuery(
     id: "repr_packed_removed",
     human_readable_name: "repr(packed) removed",
-    description: "A struct or union that used to be repr(packed) is no longer repr(packed).",
+    description: "A struct or union that used to be #[repr(packed)] is no longer #[repr(packed)].",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-packed-remove"),
     query: r#"
@@ -67,6 +67,6 @@ SemverQuery(
         "types": ["Struct", "Union"],
         "zero": 0,
     },
-    error_message: "repr(packed) was removed from a struct or union. This can break code that depends on the type's alignment or layout.",
+    error_message: "repr(packed) was removed from a type. This can break code that depends on the type's alignment or layout.",
     per_result_error_template: Some("{{lowercase type}} {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )
