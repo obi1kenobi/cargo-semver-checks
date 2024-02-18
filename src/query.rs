@@ -530,4 +530,5 @@ add_lints!(
     struct_pub_field_now_doc_hidden,
     repr_packed_added,
     repr_packed_removed,
+    exported_function_changed_abi,
 );
