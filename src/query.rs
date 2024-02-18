@@ -528,4 +528,6 @@ add_lints!(
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
     struct_pub_field_now_doc_hidden,
+    repr_packed_added,
+    repr_packed_removed,
 );

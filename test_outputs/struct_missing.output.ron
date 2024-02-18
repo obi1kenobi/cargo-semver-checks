@@ -45,6 +45,30 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/repr_packed_added_removed/": [
+        {
+            "name": String("StructBecomesPackedAndPrivate"),
+            "path": List([
+                String("repr_packed_added_removed"),
+                String("StructBecomesPackedAndPrivate"),
+            ]),
+            "span_begin_line": Uint64(9),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("unit"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("StructBecomesUnpackedAndPrivate"),
+            "path": List([
+                String("repr_packed_added_removed"),
+                String("StructBecomesUnpackedAndPrivate"),
+            ]),
+            "span_begin_line": Uint64(13),
+            "span_filename": String("src/lib.rs"),
+            "struct_type": String("unit"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/struct_missing/": [
         {
             "name": String("WillBeRemovedStruct"),
