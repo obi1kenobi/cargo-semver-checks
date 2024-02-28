@@ -178,13 +178,29 @@ impl RustdocCommand {
                 )?;
                 writeln!(
                     stderr,
-                    "note: running the following command on the crate should reproduce the error:"
+                    "note: the following command can be used to reproduce the compilation error:"
                 )?;
-
+                let selector = match crate_source {
+                    CrateSource::Registry { version, .. } => format!("{crate_name}@={version}"),
+                    CrateSource::ManifestPath { manifest } => format!(
+                        "--path {}",
+                        manifest
+                            .path
+                            .parent()
+                            .expect("source Cargo.toml had no parent path")
+                            .to_str()
+                            .expect("failed to create path string")
+                    ),
+                };
+                let feature_list = features.into_iter().join(",");
                 writeln!(
                     stderr,
-                    "      cargo build --no-default-features --features {}\n",
-                    features.into_iter().join(","),
+                    "      \
+cargo new --lib example &&
+          cd example &&
+          echo '[workspace]' >> Cargo.toml &&
+          cargo add {selector} --no-default-features --features {feature_list} &&
+          cargo check\n"
                 )?;
                 Ok(())
             })?;
