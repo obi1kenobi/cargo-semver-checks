@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "struct_repr_c_removed"
+name = "repr_c_removed"
 version = "0.1.0"
 edition = "2021"
 

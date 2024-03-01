@@ -1,8 +1,8 @@
 SemverQuery(
-    id: "enum_repr_c_removed",
-    human_readable_name: "enum repr(C) removed",
-    description: "An enum that used to be repr(C) is no longer repr(C).",
-    reference: Some("An enum that used to be repr(C) is no longer repr(C). This can cause its memory layout to change, breaking FFI use cases."),
+    id: "repr_c_removed",
+    human_readable_name: "repr(C) removed",
+    description: "A type that used to be repr(C) is no longer repr(C).",
+    reference: Some("A type that used to be repr(C) is no longer repr(C). This can cause its memory layout to change, breaking FFI use cases."),
     required_update: Major,
 
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-c-remove"),
@@ -11,7 +11,8 @@ SemverQuery(
         CrateDiff {
             baseline {
                 item {
-                    ... on Enum {
+                    ... on ImplOwner {
+                        owner_type: __typename @tag @output
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
 
                         attribute {
@@ -33,7 +34,8 @@ SemverQuery(
             }
             current {
                 item {
-                    ... on Enum {
+                    ... on ImplOwner {
+                        __typename @filter(op: "=", value: ["%owner_type"])
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
 
@@ -67,6 +69,6 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "repr(C) was removed from an enum. This can cause its memory layout to change, breaking FFI use cases.",
-    per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "repr(C) was removed from a type. This can cause its memory layout to change, breaking FFI use cases.",
+    per_result_error_template: Some("{{owner_type}} {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )
