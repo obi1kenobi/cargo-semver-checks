@@ -3,16 +3,19 @@ pub union UnionWithMustUseMethods {
 }
 
 impl UnionWithMustUseMethods {
-
     // These methods did not have the #[must_use] attribute in the old version.
     // Addition of the attribute should be reported.
+    #[must_use]
+    pub fn AssociatedFnToMustUse() {}
+
+    #[must_use = "Foo"]
+    pub fn AssociatedFnToMustUseMessage() {}
 
     #[must_use]
     pub fn MethodToMustUseMethod(&self) {}
 
     #[must_use = "Foo"]
     pub fn MethodToMustUseMessageMethod(&self) {}
-
 
     // These methods had the #[must_use] attribute in the old version. Changes of
     // the attribute, including deletion, should not be reported.
@@ -21,7 +24,6 @@ impl UnionWithMustUseMethods {
 
     #[must_use = "Foo"]
     pub fn MustUseMethodToMustUseMessageMethod(&self) {}
-
 
     // These methods had the #[must_use] attribute in the old version.
     // They also included the user-defined warning message. Changes of
@@ -36,7 +38,6 @@ impl UnionWithMustUseMethods {
     pub fn MustUseMessageMethodToMustUseMessageMethod(&self) {}
 }
 
-
 // This public union's inherent method did not have the #[must_use] attribute
 // in the old version. Because the method is private, adding the attribute
 // should NOT be reported.
@@ -46,11 +47,9 @@ pub union UnionWithPrivateMustUseMethods {
 }
 
 impl UnionWithPrivateMustUseMethods {
-
     #[must_use]
     fn PrivateMethodToPrivateMustUseMethod(&self) {}
 }
-
 
 // This union is private and adding #[must_use] to its inherent method
 // should NOT be reported.
@@ -60,11 +59,9 @@ union PrivateUnionWithMustUseMethods {
 }
 
 impl PrivateUnionWithMustUseMethods {
-
     #[must_use]
     fn PrivateUnionMethodToPrivateUnionMustUseMethod(&self) {}
 }
-
 
 // This union and its inherent method were added in the new version of the
 // crate, together with the method's attribute.
@@ -76,6 +73,8 @@ pub union NewUnionWithMustUseMethods {
 }
 
 impl NewUnionWithMustUseMethods {
+    #[must_use]
+    pub fn NewUnionMustUseAssociatedFn() {}
 
     #[must_use]
     pub fn NewUnionMustUseMethod(&self) {}
