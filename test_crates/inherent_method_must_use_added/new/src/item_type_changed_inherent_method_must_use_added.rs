@@ -8,6 +8,11 @@
 pub struct EnumToStructWithMustUseMethods {}
 
 impl EnumToStructWithMustUseMethods {
+    #[must_use]
+    pub fn AssociatedFnToMustUse() {}
+
+    #[must_use = "Foo"]
+    pub fn AssociatedFnToMustUseMessage() {}
 
     #[must_use]
     pub fn MethodToMustUseMethod(&self) {}
@@ -28,13 +33,17 @@ impl EnumToStructWithMustUseMethods {
     #[must_use = "Baz"]
     pub fn MustUseMessageMethodToMustUseMessageMethod(&self) {}
 }
-
 
 pub union EnumToUnionWithMustUseMethods {
     bar: usize,
 }
 
 impl EnumToUnionWithMustUseMethods {
+    #[must_use]
+    pub fn AssociatedFnToMustUse() {}
+
+    #[must_use = "Foo"]
+    pub fn AssociatedFnToMustUseMessage() {}
 
     #[must_use]
     pub fn MethodToMustUseMethod(&self) {}
@@ -55,13 +64,17 @@ impl EnumToUnionWithMustUseMethods {
     #[must_use = "Baz"]
     pub fn MustUseMessageMethodToMustUseMessageMethod(&self) {}
 }
-
 
 pub enum StructToEnumWithMustUseMethods {
     Bar,
 }
 
 impl StructToEnumWithMustUseMethods {
+    #[must_use]
+    pub fn AssociatedFnToMustUse() {}
+
+    #[must_use = "Foo"]
+    pub fn AssociatedFnToMustUseMessage() {}
 
     #[must_use]
     pub fn MethodToMustUseMethod(&self) {}
@@ -82,13 +95,17 @@ impl StructToEnumWithMustUseMethods {
     #[must_use = "Baz"]
     pub fn MustUseMessageMethodToMustUseMessageMethod(&self) {}
 }
-
 
 pub union StructToUnionWithMustUseMethods {
     bar: usize,
 }
 
 impl StructToUnionWithMustUseMethods {
+    #[must_use]
+    pub fn AssociatedFnToMustUse() {}
+
+    #[must_use = "Foo"]
+    pub fn AssociatedFnToMustUseMessage() {}
 
     #[must_use]
     pub fn MethodToMustUseMethod(&self) {}
@@ -109,13 +126,17 @@ impl StructToUnionWithMustUseMethods {
     #[must_use = "Baz"]
     pub fn MustUseMessageMethodToMustUseMessageMethod(&self) {}
 }
-
 
 pub enum UnionToEnumWithMustUseMethods {
     Bar,
 }
 
 impl UnionToEnumWithMustUseMethods {
+    #[must_use]
+    pub fn AssociatedFnToMustUse() {}
+
+    #[must_use = "Foo"]
+    pub fn AssociatedFnToMustUseMessage() {}
 
     #[must_use]
     pub fn MethodToMustUseMethod(&self) {}
@@ -137,10 +158,14 @@ impl UnionToEnumWithMustUseMethods {
     pub fn MustUseMessageMethodToMustUseMessageMethod(&self) {}
 }
 
-
 pub struct UnionToStructWithMustUseMethods {}
 
 impl UnionToStructWithMustUseMethods {
+    #[must_use]
+    pub fn AssociatedFnToMustUse() {}
+
+    #[must_use = "Foo"]
+    pub fn AssociatedFnToMustUseMessage() {}
 
     #[must_use]
     pub fn MethodToMustUseMethod(&self) {}
