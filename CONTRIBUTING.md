@@ -252,7 +252,7 @@ expected output files to include the new items, and you can get back on track.
 While cargo-semver-checks is cross platform, the development task automation scripts in the scripts
 directory are not. In particular, they require
 
-- GNU command line tools (coreutils, grep, etc.)
+- GNU command line tools (coreutils, grep, sed, etc.)
 - a relatively modern `bash` (at least version 4.0)
 - `curl`
 - [`jq`](https://jqlang.github.io/jq/)
