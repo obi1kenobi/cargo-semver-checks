@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+# check for bash using maximum compatibility sh syntax
+if [ -z "$BASH_VERSION" ]; then
+    >&2 printf 'This script must be run using the bash shell.\n'
+    exit 1
+fi
+
+# have bash, check version
+if (( BASH_VERSINFO[0] < 4 )); then
+    >&2 printf 'This script requires bash version 4.0 or greater.\n'
+    exit 1
+fi
+
 # Fail on first error, on undefined variables, and on failures in pipelines.
 set -euo pipefail
 

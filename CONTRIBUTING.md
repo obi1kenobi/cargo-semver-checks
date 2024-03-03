@@ -4,6 +4,7 @@
 - [Design goals](#design-goals)
 - [Running `cargo test` for the first time](#running-cargo-test-for-the-first-time)
 - [Adding a new lint](#adding-a-new-lint)
+- [Development Environment](#development-environment)
 
 ## Making your first contribution
 
@@ -18,6 +19,8 @@ After choosing a lint to implement, try to identify a related lint that is alrea
 and relies on similar information.
 For example, if implementing a lint that uses information about attributes,
 find other lints that check attribute information and use them as guides as you write your lint.
+
+Make sure to check the ["Development Environment"](#development-environment) section, especially if you are using Mac or Windows.
 
 The ["Adding a new lint"](#adding-a-new-lint) section of this document has a walkthrough for
 defining and testing new lints.
@@ -243,3 +246,19 @@ So if you added code to a test crate and it caused other lints to report new fin
 
 If the answer to all is yes, then everything is fine! Just edit those other lints'
 expected output files to include the new items, and you can get back on track.
+
+## Development Environment
+
+While cargo-semver-checks is cross platform, the development task automation scripts in the scripts
+directory are not. In particular, they require
+
+- GNU command line tools (coreutils, grep, sed, etc.)
+- a relatively modern `bash` (at least version 4.0)
+- `curl`
+- [`jq`](https://jqlang.github.io/jq/)
+
+Linux users likely have all of these already installed or available via their package manager.
+Windows users can get a bash + GNU command line environment via WSL or git bash.
+Mac users can install GNU tools via homebrew. The scripts will not work
+correctly using the default bash and BSD command line utilities that come with
+Mac OS.
