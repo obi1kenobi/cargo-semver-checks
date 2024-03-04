@@ -250,15 +250,9 @@ expected output files to include the new items, and you can get back on track.
 ## Development Environment
 
 While cargo-semver-checks is cross platform, the development task automation scripts in the scripts
-directory are not. In particular, they require
+directory are not. In particular, a relatively modern `bash` (at least version 4.0) is required.
 
-- GNU command line tools (coreutils, grep, sed, etc.)
-- a relatively modern `bash` (at least version 4.0)
-- `curl`
-- [`jq`](https://jqlang.github.io/jq/)
-
-Linux users likely have all of these already installed or available via their package manager.
+Linux users likely have bash 5+ already installed or available via their package manager.
 Windows users can get a bash + GNU command line environment via WSL or git bash.
-Mac users can install GNU tools via homebrew. The scripts will not work
-correctly using the default bash and BSD command line utilities that come with
-Mac OS.
+Mac users can install an updated bash via homebrew. The scripts will not work
+correctly using the default version of bash that comes with Mac OS.
