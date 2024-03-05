@@ -78,19 +78,21 @@ fi
 
 # Add the new lint to the `add_lints!()` macro.
 echo -n "Registering lint in src/query.rs ..."
-set +e
-# -E = extended regex mode, which behaves more similarly to regex in most programming languages.
-# -z = use \0 as separators instead of \n, so that we can do multi-line matches.
-grep -Ez --regexp "add_lints\!\\([^)]+[ ]+$NEW_LINT_NAME," "$SRC_QUERY_FILE" >/dev/null
-OUTPUT="$?"
-set -e
-if [[ "$OUTPUT" == "0" ]]; then
-    echo ' already exists.'
+if awk -v lint_name="$NEW_LINT_NAME" '
+    /^add_lints!\(/ { searching = 1 }
+    searching && $0 ~ "[[:space:]]" lint_name "," { found = 1; exit }
+    END { if (found) { exit 0 } else { exit 1 } }
+' "$SRC_QUERY_FILE"; then
+    printf ' already exists.\n'
 else
-    # -E = extended regex mode, which behaves more similarly to regex in most programming languages.
-    # -z = use \0 as separators instead of \n, so that we can do multi-line matches.
-    sed -i'' -Ez "s/add_lints\!\\(([^)]+)\\)/add_lints\!(\\1    $NEW_LINT_NAME,\n)/" "$SRC_QUERY_FILE"
-    echo ' done!'
+    tmp="${SRC_QUERY_FILE}.tmp"
+    sed -e '/^add_lints!($/ a\'"
+    $NEW_LINT_NAME," "$SRC_QUERY_FILE" > "$tmp" && mv -- "$tmp" "$SRC_QUERY_FILE" || {
+        code=$?
+        rm -f "$tmp"
+        exit "$code"
+    }
+    printf ' done!\n'
 fi
 
 echo ''
