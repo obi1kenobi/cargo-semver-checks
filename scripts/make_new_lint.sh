@@ -85,7 +85,7 @@ if awk -v lint_name="$NEW_LINT_NAME" '
 ' "$SRC_QUERY_FILE"; then
     printf ' already exists.\n'
 else
-    tmp=${SRC_QUERY_FILE}.tmp
+    tmp="${SRC_QUERY_FILE}.tmp"
     sed -e '/^add_lints!($/ a\'"
     $NEW_LINT_NAME," "$SRC_QUERY_FILE" > "$tmp" && mv -- "$tmp" "$SRC_QUERY_FILE" || {
         code=$?
