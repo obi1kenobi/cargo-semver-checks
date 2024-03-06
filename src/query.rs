@@ -469,6 +469,7 @@ macro_rules! add_lints {
 }
 
 add_lints!(
+    trait_method_now_doc_hidden,
     auto_trait_impl_removed,
     constructible_struct_adds_field,
     constructible_struct_adds_private_field,
