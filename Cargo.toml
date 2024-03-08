@@ -48,6 +48,7 @@ rayon = "1.8.0"
 
 [dev-dependencies]
 assert_cmd = "2.0"
+insta = { version = "1.36.1", features = ["yaml"] }
 lazy_static = "1.4.0"
 similar-asserts = { version = "1.4.2", features = ["serde"] }
 
