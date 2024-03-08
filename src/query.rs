@@ -469,6 +469,7 @@ macro_rules! add_lints {
 }
 
 add_lints!(
+    enum_tuple_variant_field_now_doc_hidden,
     trait_method_now_doc_hidden,
     auto_trait_impl_removed,
     constructible_struct_adds_field,
