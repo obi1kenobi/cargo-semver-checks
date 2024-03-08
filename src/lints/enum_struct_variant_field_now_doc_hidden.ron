@@ -66,6 +66,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A field of a pub enum tuple variant is now marked #[doc(hidden)] and is no longer part of the public API.",
+    error_message: "A field of a pub enum struct variant is now marked #[doc(hidden)] and is no longer part of the public API.",
     per_result_error_template: Some("field {{enum_name}}.{{field_name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
