@@ -36,7 +36,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        enum_name: name @output
+                        name @filter(op: "=", value: ["%enum_name"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -66,6 +66,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A pub field of a pub enum tuple variant is now marked #[doc(hidden)] and is no longer part of the public API.",
+    error_message: "A field of a pub enum tuple variant is now marked #[doc(hidden)] and is no longer part of the public API.",
     per_result_error_template: Some("field {{enum_name}}.{{field_name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
