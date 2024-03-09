@@ -469,6 +469,7 @@ macro_rules! add_lints {
 }
 
 add_lints!(
+    public_module_level_constant_now_doc_hidden,
     enum_struct_variant_field_now_doc_hidden,
     enum_tuple_variant_field_now_doc_hidden,
     trait_method_now_doc_hidden,
