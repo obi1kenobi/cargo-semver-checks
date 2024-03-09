@@ -1,0 +1,28 @@
+---
+source: src/query.rs
+expression: output_snap
+---
+{
+    "./test_crates/type_hidden_from_public_api/": [
+        {
+            "path": List([
+                String("type_hidden_from_public_api"),
+                String("ExampleUnion"),
+            ]),
+            "span_begin_line": Uint64(19),
+            "span_filename": String("src/lib.rs"),
+            "union_name": String("ExampleUnion"),
+        },
+    ],
+    "./test_crates/union_now_doc_hidden/": [
+        {
+            "path": List([
+                String("union_now_doc_hidden"),
+                String("MyUnion"),
+            ]),
+            "span_begin_line": Uint64(2),
+            "span_filename": String("src/lib.rs"),
+            "union_name": String("MyUnion"),
+        },
+    ],
+}

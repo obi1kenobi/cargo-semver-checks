@@ -1,0 +1,32 @@
+---
+source: src/query.rs
+expression: output_snap
+---
+{
+    "./test_crates/enum_struct_field_hidden_from_public_api/": [
+        {
+            "enum_name": String("AddedVariantField"),
+            "field_name": String("y"),
+            "path": List([
+                String("enum_struct_field_hidden_from_public_api"),
+                String("AddedVariantField"),
+            ]),
+            "span_begin_line": Uint64(38),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("StructVariant"),
+        },
+    ],
+    "./test_crates/enum_struct_variant_field_added/": [
+        {
+            "enum_name": String("PubEnum"),
+            "field_name": String("y"),
+            "path": List([
+                String("enum_struct_variant_field_added"),
+                String("PubEnum"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("Foo"),
+        },
+    ],
+}

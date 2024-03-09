@@ -407,6 +407,10 @@ mod tests {
         sort_individual_outputs(&mut expected_results);
         sort_individual_outputs(&mut actual_results);
 
+        let output_snap =
+            ron::ser::to_string_pretty(&expected_results, ron::ser::PrettyConfig::default()).unwrap();
+        insta::assert_snapshot!(query_name, output_snap);
+
         if expected_results != actual_results {
             panic!(
                 "\n{}\n",
