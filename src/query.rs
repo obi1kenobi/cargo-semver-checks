@@ -534,4 +534,5 @@ add_lints!(
     repr_packed_removed,
     exported_function_changed_abi,
     union_now_doc_hidden,
+    unwind_function_missing,
 );

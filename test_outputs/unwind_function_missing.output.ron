@@ -1,0 +1,12 @@
+{
+    "./test_crates/unwind_function_missing/": [
+        {
+            "abi_raw_name": String("C-unwind"),
+            "name": String("unwind_function_becomes_without_unwind"),
+            "new_abi_raw_name": String("C"),
+            "span_begin_line": Uint64(1),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

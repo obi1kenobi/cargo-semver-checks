@@ -1,0 +1,1 @@
+pub extern "C-unwind" fn unwind_function_becomes_without_unwind() -> () {}
