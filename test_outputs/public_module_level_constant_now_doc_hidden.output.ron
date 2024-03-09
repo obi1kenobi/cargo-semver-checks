@@ -7,7 +7,7 @@
                 String("MY_FN"),
             ]),
             "span_begin_line": Uint64(61),
-            "span_filename": String("src\\lib.rs"),
+            "span_filename": String("src/lib.rs"),
         },
     ],
     "./test_crates/public_module_level_constant_now_doc_hidden/": [
@@ -18,7 +18,7 @@
                 String("GlobalConstantB"),
             ]),
             "span_begin_line": Uint64(4),
-            "span_filename": String("src\\lib.rs"),
+            "span_filename": String("src/lib.rs"),
         },
         {
             "constant_name": String("PublicModuleConstantB"),
@@ -28,7 +28,7 @@
                 String("PublicModuleConstantB"),
             ]),
             "span_begin_line": Uint64(18),
-            "span_filename": String("src\\lib.rs"),
+            "span_filename": String("src/lib.rs"),
         },
     ],
 }
