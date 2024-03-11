@@ -408,7 +408,7 @@ fn create_placeholder_rustdoc_manifest(
             let mut deps = DepsSet::new();
             deps.insert(
                 crate_source.name()?.to_string(),
-                Dependency::Detailed(project_with_features),
+                Dependency::Detailed(Box::new(project_with_features)),
             );
             deps
         },
