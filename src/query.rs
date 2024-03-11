@@ -118,6 +118,7 @@ Failed to parse a query: {e}
 
 #[cfg(test)]
 mod tests {
+    use std::sync::OnceLock;
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
@@ -129,15 +130,21 @@ mod tests {
     use crate::query::SemverQuery;
     use crate::templating::make_handlebars_registry;
 
-    lazy_static::lazy_static! {
-        static ref TEST_CRATE_NAMES: Vec<String> = get_test_crate_names();
+    static TEST_CRATE_NAMES: OnceLock<Vec<String>> = OnceLock::new();
 
-        /// Mapping test crate (pair) name -> (old rustdoc, new rustdoc).
-        static ref TEST_CRATE_RUSTDOCS: BTreeMap<String, (VersionedCrate, VersionedCrate)> =
-            get_test_crate_rustdocs();
+    /// Mapping test crate (pair) name -> (old rustdoc, new rustdoc).
+    static TEST_CRATE_RUSTDOCS: OnceLock<BTreeMap<String, (VersionedCrate, VersionedCrate)>> =
+        OnceLock::new();
+
+    fn get_test_crate_names() -> &'static [String] {
+        TEST_CRATE_NAMES.get_or_init(initialize_test_crate_names)
     }
 
-    fn get_test_crate_names() -> Vec<String> {
+    fn get_test_crate_rustdocs(test_crate: &str) -> &'static (VersionedCrate, VersionedCrate) {
+        &TEST_CRATE_RUSTDOCS.get_or_init(initialize_test_crate_rustdocs)[test_crate]
+    }
+
+    fn initialize_test_crate_names() -> Vec<String> {
         std::fs::read_dir("./test_crates/")
             .expect("directory test_crates/ not found")
             .map(|dir_entry| dir_entry.expect("failed to list test_crates/"))
@@ -178,8 +185,8 @@ mod tests {
             .collect()
     }
 
-    fn get_test_crate_rustdocs() -> BTreeMap<String, (VersionedCrate, VersionedCrate)> {
-        TEST_CRATE_NAMES
+    fn initialize_test_crate_rustdocs() -> BTreeMap<String, (VersionedCrate, VersionedCrate)> {
+        get_test_crate_names()
             .iter()
             .map(|crate_pair| {
                 let old_rustdoc = load_pregenerated_rustdoc(crate_pair.as_str(), "old");
@@ -199,7 +206,7 @@ mod tests {
 
     #[test]
     fn all_queries_are_valid() {
-        let (_baseline_crate, current_crate) = &TEST_CRATE_RUSTDOCS["template"];
+        let (_baseline_crate, current_crate) = get_test_crate_rustdocs("template");
         let indexed_crate = VersionedIndexedCrate::new(current_crate);
 
         let adapter = VersionedRustdocAdapter::new(&indexed_crate, Some(&indexed_crate))
@@ -213,7 +220,7 @@ mod tests {
 
     #[test]
     fn pub_use_handling() {
-        let (_baseline_crate, current_crate) = &TEST_CRATE_RUSTDOCS["pub_use_handling"];
+        let (_baseline_crate, current_crate) = get_test_crate_rustdocs("pub_use_handling");
         let current = VersionedIndexedCrate::new(current_crate);
 
         let query = r#"
@@ -354,10 +361,10 @@ mod tests {
         let mut expected_results: TestOutput = ron::from_str(&expected_result_text)
             .expect("could not parse expected outputs as ron format");
 
-        let mut actual_results: TestOutput = TEST_CRATE_NAMES
+        let mut actual_results: TestOutput = get_test_crate_names()
             .iter()
             .map(|crate_pair_name| {
-                let (crate_old, crate_new) = &TEST_CRATE_RUSTDOCS[crate_pair_name];
+                let (crate_old, crate_new) = get_test_crate_rustdocs(crate_pair_name);
                 let indexed_crate_old = VersionedIndexedCrate::new(crate_old);
                 let indexed_crate_new = VersionedIndexedCrate::new(crate_new);
 
@@ -470,6 +477,7 @@ macro_rules! add_lints {
 
 add_lints!(
     function_abi_no_longer_unwind,
+    pub_module_level_const_now_doc_hidden,
     enum_struct_variant_field_now_doc_hidden,
     enum_tuple_variant_field_now_doc_hidden,
     trait_method_now_doc_hidden,
