@@ -10,11 +10,11 @@
             "span_filename": String("src/lib.rs"),
         },
     ],
-    "./test_crates/public_module_level_constant_now_doc_hidden/": [
+    "./test_crates/pub_module_level_const_now_doc_hidden/": [
         {
             "constant_name": String("GlobalConstantB"),
             "path": List([
-                String("public_module_level_constant_now_doc_hidden"),
+                String("pub_module_level_const_now_doc_hidden"),
                 String("GlobalConstantB"),
             ]),
             "span_begin_line": Uint64(4),
@@ -23,7 +23,7 @@
         {
             "constant_name": String("PublicModuleConstantB"),
             "path": List([
-                String("public_module_level_constant_now_doc_hidden"),
+                String("pub_module_level_const_now_doc_hidden"),
                 String("PublicModule"),
                 String("PublicModuleConstantB"),
             ]),

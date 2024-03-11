@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "public_module_level_constant_now_doc_hidden"
+name = "pub_module_level_const_now_doc_hidden"
 version = "0.1.0"
 edition = "2021"
 
