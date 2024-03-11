@@ -49,7 +49,7 @@ rayon = "1.8.0"
 [dev-dependencies]
 assert_cmd = "2.0"
 lazy_static = "1.4.0"
-similar-asserts = { version = "1.4.2", features = ["serde"] }
+similar-asserts = { version = "1.5.0", features = ["serde"] }
 
 # In dev and test profiles, compile all dependencies with optimizations enabled,
 # but still checking debug assertions and overflows.
