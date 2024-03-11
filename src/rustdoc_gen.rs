@@ -533,25 +533,22 @@ impl RustdocFromGitRevision {
 fn extract_tree(tree: gix::Id<'_>, target: &std::path::Path) -> anyhow::Result<()> {
     for entry in tree.object()?.try_into_tree()?.iter() {
         let entry = entry?;
-        match entry.mode() {
-            gix::object::tree::EntryMode::Tree => {
-                let path = target.join(bytes2str(entry.filename()));
-                std::fs::create_dir_all(&path)?;
-                extract_tree(entry.id(), &path)?;
+        let mode = entry.mode();
+        if mode.is_tree() {
+            let path = target.join(bytes2str(entry.filename()));
+            std::fs::create_dir_all(&path)?;
+            extract_tree(entry.id(), &path)?;
+        } else if mode.is_blob() {
+            let blob = entry.object()?;
+            assert!(
+                blob.kind.is_blob(),
+                "we are not working on a corrupted repository"
+            );
+            let path = target.join(bytes2str(entry.filename()));
+            let existing = std::fs::read(&path).ok();
+            if existing.as_deref() != Some(&blob.data) {
+                std::fs::write(&path, &blob.data)?;
             }
-            gix::object::tree::EntryMode::Blob | gix::object::tree::EntryMode::BlobExecutable => {
-                let blob = entry.object()?;
-                assert!(
-                    blob.kind.is_blob(),
-                    "we are not working on a corrupted repository"
-                );
-                let path = target.join(bytes2str(entry.filename()));
-                let existing = std::fs::read(&path).ok();
-                if existing.as_deref() != Some(&blob.data) {
-                    std::fs::write(&path, &blob.data)?;
-                }
-            }
-            _ => {}
         }
     }
 
