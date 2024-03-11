@@ -3,7 +3,7 @@ SemverQuery(
     human_readable_name: "unwind function missing",
     description: "pub fn changed from an unwind-capable ABI to the same-named ABI without unwind: \"C-unwind\" to \"C\"",
     required_update: Major,
-    reference_link: None,
+    reference_link: Some("https://rust-lang.github.io/rfcs/2945-c-unwind-abi.html"),
     query: r#"
     {
         CrateDiff {
