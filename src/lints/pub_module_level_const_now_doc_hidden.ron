@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "public_module_level_constant_now_doc_hidden",
+    id: "pub_module_level_const_now_doc_hidden",
     human_readable_name: "pub module-level const is now #[doc(hidden)]",
     description: "A pub const is now marked #[doc(hidden)] and is thus no longer part of the public API.",
     required_update: Major,
@@ -11,7 +11,7 @@ SemverQuery(
                 item {
                     ... on Constant {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        
+
                         importable_path {
                             path @output @tag
                             public_api @filter(op: "=", value: ["$true"])
