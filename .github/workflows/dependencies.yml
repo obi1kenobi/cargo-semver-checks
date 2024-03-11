@@ -76,11 +76,11 @@ jobs:
           persist-credentials: true
 
       - name: download Cargo.lock from update job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Cargo-lock
       - name: download cargo-update log from update job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cargo-updates
 
