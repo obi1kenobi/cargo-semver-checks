@@ -133,7 +133,8 @@ mod tests {
     static TEST_CRATE_NAMES: OnceLock<Vec<String>> = OnceLock::new();
 
     /// Mapping test crate (pair) name -> (old rustdoc, new rustdoc).
-    static TEST_CRATE_RUSTDOCS: OnceLock<BTreeMap<String, (VersionedCrate, VersionedCrate)>> = OnceLock::new();
+    static TEST_CRATE_RUSTDOCS: OnceLock<BTreeMap<String, (VersionedCrate, VersionedCrate)>> =
+        OnceLock::new();
 
     fn get_test_crate_names() -> &'static [String] {
         TEST_CRATE_NAMES.get_or_init(initialize_test_crate_names)
