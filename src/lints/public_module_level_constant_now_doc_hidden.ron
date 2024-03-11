@@ -1,7 +1,7 @@
 SemverQuery(
-    id: "pub_module_level_constant_now_doc_hidden",
-    human_readable_name: "a public module level constant is marked #[doc(hidden)]",
-    description: "a public module level constant is now marked #[doc(hidden)] and is thus not a part of public API",
+    id: "public_module_level_constant_now_doc_hidden",
+    human_readable_name: "pub module-level const is now #[doc(hidden)]",
+    description: "A pub const is now marked #[doc(hidden)] and is thus no longer part of the public API.",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html#hidden"),
     query: r#"
@@ -43,6 +43,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A public module level constant is now marked #[doc(hidden)], removing it from the crate's public API.",
-    per_result_error_template: Some("constant {{constant_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A public const is now marked #[doc(hidden)], removing it from the crate's public API.",
+    per_result_error_template: Some("{{constant_name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
