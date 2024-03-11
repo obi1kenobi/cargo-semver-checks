@@ -476,6 +476,7 @@ macro_rules! add_lints {
 }
 
 add_lints!(
+    function_abi_no_longer_unwind,
     pub_module_level_const_now_doc_hidden,
     enum_struct_variant_field_now_doc_hidden,
     enum_tuple_variant_field_now_doc_hidden,
