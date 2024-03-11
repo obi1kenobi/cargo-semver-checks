@@ -33,8 +33,8 @@ clap-verbosity-flag = "2.0.0"
 log = "0.4.17"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
-gix = { version = "0.55.2", default-features = false, features = ["max-performance", "revision"] }
-tame-index = { version = "0.8", features = ["git", "sparse"] }
+gix = { version = "0.58", default-features = false, features = ["max-performance", "revision"] }
+tame-index = { version = "0.9", features = ["git", "sparse"] }
 
 human-panic = "1.0.3"
 bugreport = "0.5.0"
