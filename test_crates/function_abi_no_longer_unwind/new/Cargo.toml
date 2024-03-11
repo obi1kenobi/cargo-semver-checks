@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "unwind_function_missing"
+name = "function_abi_no_longer_unwind"
 version = "0.1.0"
 edition = "2021"
 

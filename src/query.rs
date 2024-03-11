@@ -469,6 +469,7 @@ macro_rules! add_lints {
 }
 
 add_lints!(
+    function_abi_no_longer_unwind,
     enum_struct_variant_field_now_doc_hidden,
     enum_tuple_variant_field_now_doc_hidden,
     trait_method_now_doc_hidden,
@@ -534,5 +535,4 @@ add_lints!(
     repr_packed_removed,
     exported_function_changed_abi,
     union_now_doc_hidden,
-    unwind_function_missing,
 );
