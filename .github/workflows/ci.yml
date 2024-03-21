@@ -346,7 +346,7 @@ jobs:
         id: toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: ${{ steps.vars.outputs.OLDER_RUST }}
+          toolchain: ${{ steps.vars.outputs.older-rust }}
           rustflags: ""
           cache: false
 
@@ -380,7 +380,7 @@ jobs:
       - name: Install newer rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: ${{ steps.vars.outputs.NEWER_RUST }}
+          toolchain: ${{ steps.vars.outputs.newer-rust }}
           rustflags: ""
           cache: false
 
