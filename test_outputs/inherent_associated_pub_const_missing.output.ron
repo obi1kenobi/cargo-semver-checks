@@ -8,7 +8,7 @@
                 String("StructA"),
             ]),
             "span_begin_line": Uint64(4),
-            "span_filename": String("src\\lib.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
        },
         {
@@ -19,7 +19,7 @@
                 String("StructA"),
             ]),
             "span_begin_line": Uint64(7),
-            "span_filename": String("src\\lib.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
     ],
