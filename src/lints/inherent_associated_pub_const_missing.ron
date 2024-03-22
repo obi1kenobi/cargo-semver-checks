@@ -1,0 +1,64 @@
+SemverQuery(
+    id: "inherent_associated_pub_const_missing",
+    human_readable_name: "inherent impl's associated pub const removed",
+    description: "An inherent impl's associated public const removed or renamed",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            
+                            associated_constant {
+                                associated_constant: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
+                            }    
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            associated_constant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%associated_constant"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "An inherent impl's associated public constant is removed or renamed",
+    per_result_error_template: Some("{{name}}::{{associated_constant}}, previously at {{span_filename}}:{{span_begin_line}}"),
+)
