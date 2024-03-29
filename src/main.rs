@@ -25,7 +25,7 @@ fn main() {
         exit_on_error(true, || {
             let mut config =
                 GlobalConfig::new().set_level(args.check_release.verbosity.log_level());
-            
+
             // we don't want to set auto if the choice is not set because it would overwrite
             // the value if the CARGO_TERM_COLOR env var read in GlobalConfig::new() if it is set
             if let Some(choice) = args.check_release.color_choice {
@@ -289,14 +289,14 @@ struct CheckRelease {
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
-    
+
     #[arg(value_enum, long = "color")]
     /// Whether to print colors to the terminal:
     /// always, alwaysansi (always use only ANSI color codes),
     /// auto (based on whether output is a tty), and never
-    /// 
+    ///
     /// Default is auto (use colors if output is a TTY, otherwise don't use colors)
-    color_choice: Option<termcolor::ColorChoice>
+    color_choice: Option<termcolor::ColorChoice>,
 }
 
 impl From<CheckRelease> for cargo_semver_checks::Check {
@@ -381,7 +381,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         baseline_features.append(&mut mutual_features);
 
         // Treat --features="" as a no-op like cargo does
-        let trim_features= |features: &mut Vec<String>| {
+        let trim_features = |features: &mut Vec<String>| {
             features.retain(|feature| !(feature.is_empty() || feature == "\"\""));
         };
         trim_features(&mut current_features);

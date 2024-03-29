@@ -284,7 +284,7 @@ impl Check {
     pub fn log_level(&self) -> Option<&log::Level> {
         self.log_level.as_ref()
     }
-    
+
     /// Set the termcolor [color choice](termcolor::ColorChoice)
     /// If `None`, the use of colors will be determined automatically by
     /// CARGO_TERM_COLOR env var and tty type of output`
@@ -292,7 +292,7 @@ impl Check {
         self.color_choice = choice;
         self
     }
-    
+
     /// Get the current color choice.  If `None`, the use of colors is determined
     /// by the `CARGO_TERM_COLOR` env var and whether the output is a tty
     #[inline]
