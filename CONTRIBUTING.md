@@ -121,7 +121,7 @@ Each lint is defined in its own file
 in [`src/lints`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/src/lints).
 
 Lints are tested by running them on a series of test crates defined in
-the [`test_crates` directory](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/test_outputs).
+the [`test_crates` directory](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/test_crates).
 Each test crate comes in two versions: `old` which represents the semver baseline,
 and `new` which represents a semver patch-level update to the crate.
 
