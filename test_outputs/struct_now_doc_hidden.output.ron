@@ -5,7 +5,7 @@
                 String("inherent_associated_pub_const_missing"),
                 String("StructF"),
             ]),
-            "span_begin_line": Uint64(46),
+            "span_begin_line": Uint64(41),
             "span_filename": String("src/lib.rs"),
             "struct_name": String("StructF"),
         },

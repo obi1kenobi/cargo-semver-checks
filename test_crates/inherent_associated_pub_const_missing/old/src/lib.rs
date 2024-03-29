@@ -43,10 +43,6 @@ impl StructD {
 // Test Cases where #[doc(hidden)] is added
 pub struct StructE {}
 
-impl StructE {
-    // This const will be #[doc(hidden)]
-    pub const PublicConstantG: i32 = 0;
-}
 // This impl block will be #[doc(hidden)]
 impl StructE {
     pub const PublicConstantH: i32 = 0;
