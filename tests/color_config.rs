@@ -31,6 +31,8 @@ fn run_on_crate_diff(
 
     if let Some(color_env) = color_env_var {
         cmd.env("CARGO_TERM_COLOR", color_env);
+    } else {
+        cmd.env_remove("CARGO_TERM_COLOR");
     }
 
     let pred = predicates::str::contains("\u{1b}[");

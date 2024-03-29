@@ -290,12 +290,12 @@ struct CheckRelease {
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 
-    #[arg(value_enum, long = "color")]
     /// Whether to print colors to the terminal:
     /// always, alwaysansi (always use only ANSI color codes),
     /// auto (based on whether output is a tty), and never
     ///
     /// Default is auto (use colors if output is a TTY, otherwise don't use colors)
+    #[arg(value_enum, long = "color")]
     color_choice: Option<termcolor::ColorChoice>,
 }
 
