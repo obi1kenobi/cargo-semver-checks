@@ -287,7 +287,7 @@ impl Check {
 
     /// Set the termcolor [color choice](termcolor::ColorChoice)
     /// If `None`, the use of colors will be determined automatically by
-    /// CARGO_TERM_COLOR env var and tty type of output`
+    /// the `CARGO_TERM_COLOR` env var and tty type of output
     pub fn with_color_choice(&mut self, choice: Option<termcolor::ColorChoice>) -> &mut Self {
         self.color_choice = choice;
         self
