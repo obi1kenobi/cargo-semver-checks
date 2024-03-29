@@ -6,14 +6,14 @@ if [ -z "$BASH_VERSION" ]; then
     exit 1
 fi
 
-# have bash, check version
-if (( BASH_VERSINFO[0] < 4 )); then
-    >&2 printf 'This script requires bash version 4.0 or greater.\n'
-    exit 1
-fi
-
 # Fail on first error, on undefined variables, and on failures in pipelines.
 set -euo pipefail
+
+dir_is_newer_than_file() {
+    local dir="$1"
+    local file="$2"
+    [[ ! -e $file ]] || [[ $(find "$dir" -newer "$file" -exec sh -c 'printf found; kill "$PPID"' \;) ]]
+}
 
 export CARGO_TARGET_DIR=/tmp/test_crates
 RUSTDOC_OUTPUT_DIR="$CARGO_TARGET_DIR/doc"
@@ -32,19 +32,6 @@ echo "Generating rustdoc with: $(cargo $TOOLCHAIN --version)"
 RUSTDOC_CMD="cargo $TOOLCHAIN rustdoc"
 
 # Run rustdoc on test_crates/*/{new,old}/
-shopt -s globstar
-dir_is_newer_than_file() {
-    local dir=$1
-    local file=$2
-    local f
-    for f in "$dir"/**; do
-        if [[ $f -nt $file ]]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
 if [[ $# -eq 0 ]]; then
     set -- "$TOPLEVEL/test_crates/"*/
     always_update=

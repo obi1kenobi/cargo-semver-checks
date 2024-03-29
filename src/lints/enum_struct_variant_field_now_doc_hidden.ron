@@ -1,0 +1,71 @@
+SemverQuery(
+    id: "enum_struct_variant_field_now_doc_hidden",
+    human_readable_name: "pub enum struct variant's field is now #[doc(hidden)]",
+    description: "An enum's struct variant has a field that is now marked #[doc(hidden)] and is thus no longer part of the public API.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html#hidden"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        enum_name: name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            ... on StructVariant {
+                                variant_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                field {
+                                    field_name: name @output @tag
+                                    public_api_eligible @filter(op: "=", value: ["$true"])
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%enum_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        variant {
+                            ... on StructVariant {
+                                name @filter(op: "=", value: ["%variant_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                field {
+                                    public_api_eligible @filter(op: "!=", value: ["$true"])
+                                    name @filter(op: "=", value: ["%field_name"])
+                                    span_: span @optional {
+                                        filename @output
+                                        begin_line @output
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A field of a pub enum struct variant is now marked #[doc(hidden)] and is no longer part of the public API.",
+    per_result_error_template: Some("field {{enum_name}}.{{field_name}} in file {{span_filename}}:{{span_begin_line}}"),
+)

@@ -20,7 +20,7 @@ and relies on similar information.
 For example, if implementing a lint that uses information about attributes,
 find other lints that check attribute information and use them as guides as you write your lint.
 
-Make sure to check the ["Development Environment"](#development-environment) section, especially if you are using Mac or Windows.
+Make sure to check the ["Development Environment"](#development-environment) section, especially if you are using Windows.
 
 The ["Adding a new lint"](#adding-a-new-lint) section of this document has a walkthrough for
 defining and testing new lints.
@@ -121,7 +121,7 @@ Each lint is defined in its own file
 in [`src/lints`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/src/lints).
 
 Lints are tested by running them on a series of test crates defined in
-the [`test_crates` directory](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/test_outputs).
+the [`test_crates` directory](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/test_crates).
 Each test crate comes in two versions: `old` which represents the semver baseline,
 and `new` which represents a semver patch-level update to the crate.
 
@@ -250,9 +250,7 @@ expected output files to include the new items, and you can get back on track.
 ## Development Environment
 
 While cargo-semver-checks is cross platform, the development task automation scripts in the scripts
-directory are not. In particular, a relatively modern `bash` (at least version 4.0) is required.
+directory require a `bash` shell to run.
 
-Linux users likely have bash 5+ already installed or available via their package manager.
 Windows users can get a bash + GNU command line environment via WSL or git bash.
-Mac users can install an updated bash via homebrew. The scripts will not work
-correctly using the default version of bash that comes with Mac OS.
+Linux and Mac OS typically have bash installed by default.
