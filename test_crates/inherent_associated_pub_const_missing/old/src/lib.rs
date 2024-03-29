@@ -31,7 +31,9 @@ impl StructD {
     pub const PublicConstantH: i32 = 0;
 }
 pub struct StructE {}
+//this impl block will be #[doc(hidden)]
 impl StructE {
     pub const PublicConstantI: i32 = 0;
+    //this will be removed
     pub const PublicConstantJ: i32 = 0;
 }

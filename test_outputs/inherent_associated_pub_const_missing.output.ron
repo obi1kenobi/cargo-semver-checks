@@ -22,5 +22,16 @@
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
+        {
+            "associated_constant": String("PublicConstantJ"),
+            "name": String("StructE"),
+            "path": List([
+                String("inherent_associated_pub_const_missing"),
+                String("StructE"),
+            ]),
+            "span_begin_line": Uint64(38),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
     ],
 }
