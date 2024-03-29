@@ -25,6 +25,13 @@ fn main() {
         exit_on_error(true, || {
             let mut config =
                 GlobalConfig::new().set_level(args.check_release.verbosity.log_level());
+
+            // we don't want to set auto if the choice is not set because it would overwrite
+            // the value if the CARGO_TERM_COLOR env var read in GlobalConfig::new() if it is set
+            if let Some(choice) = args.check_release.color_choice {
+                config = config.set_color_choice(choice);
+            }
+
             let queries = SemverQuery::all_queries();
             let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
             for query in queries.values() {
@@ -282,6 +289,14 @@ struct CheckRelease {
 
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
+
+    /// Whether to print colors to the terminal:
+    /// always, alwaysansi (always use only ANSI color codes),
+    /// auto (based on whether output is a tty), and never
+    ///
+    /// Default is auto (use colors if output is a TTY, otherwise don't use colors)
+    #[arg(value_enum, long = "color")]
+    color_choice: Option<termcolor::ColorChoice>,
 }
 
 impl From<CheckRelease> for cargo_semver_checks::Check {
@@ -344,6 +359,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         }
 
         check.with_log_level(value.verbosity.log_level());
+        check.with_color_choice(value.color_choice);
 
         if let Some(release_type) = value.release_type {
             check.with_release_type(release_type);

@@ -137,6 +137,12 @@ impl GlobalConfig {
         &mut self.stderr
     }
 
+    pub fn set_color_choice(mut self, choice: ColorChoice) -> Self {
+        self.stdout = StandardStream::stdout(choice);
+        self.stderr = StandardStream::stderr(choice);
+        self
+    }
+
     /// Print a message with a colored title in the style of Cargo shell messages.
     pub fn shell_print(
         &mut self,
