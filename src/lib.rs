@@ -35,6 +35,7 @@ pub struct Check {
     current: Rustdoc,
     baseline: Rustdoc,
     log_level: Option<log::Level>,
+    color_choice: Option<termcolor::ColorChoice>,
     release_type: Option<ReleaseType>,
     current_feature_config: rustdoc_gen::FeatureConfig,
     baseline_feature_config: rustdoc_gen::FeatureConfig,
@@ -247,6 +248,7 @@ impl Check {
             current,
             baseline: Rustdoc::from_registry_latest_crate_version(),
             log_level: Default::default(),
+            color_choice: None,
             release_type: None,
             current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
@@ -281,6 +283,21 @@ impl Check {
     #[inline]
     pub fn log_level(&self) -> Option<&log::Level> {
         self.log_level.as_ref()
+    }
+    
+    /// Set the termcolor [color choice](termcolor::ColorChoice)
+    /// If `None`, the use of colors will be determined automatically by
+    /// CARGO_TERM_COLOR env var and tty type of output`
+    pub fn with_color_choice(&mut self, choice: Option<termcolor::ColorChoice>) -> &mut Self {
+        self.color_choice = choice;
+        self
+    }
+    
+    /// Get the current color choice.  If `None`, the use of colors is determined
+    /// by the `CARGO_TERM_COLOR` env var and whether the output is a tty
+    #[inline]
+    pub fn color_choice(&self) -> Option<&termcolor::ColorChoice> {
+        self.color_choice.as_ref()
     }
 
     pub fn with_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
@@ -386,6 +403,12 @@ impl Check {
 
     pub fn check_release(&self) -> anyhow::Result<Report> {
         let mut config = GlobalConfig::new().set_level(self.log_level);
+        // we don't want to set auto if the choice is not set because it would overwrite
+        // the value if the CARGO_TERM_COLOR env var read in GlobalConfig::new() if it is set
+        if let Some(choice) = self.color_choice {
+            config = config.set_color_choice(choice);
+        }
+
         let rustdoc_cmd = RustdocCommand::new().deps(false).silence(config.is_info());
 
         // If both the current and baseline rustdoc are given explicitly as a file path,
