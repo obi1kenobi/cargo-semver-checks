@@ -3,6 +3,8 @@ impl StructA {
     //Basic Test case should be caught
     pub const PublicConstantA: i32 = 0;
     pub const PublicConstantB: i32 = 0;
+    //Should not be caught on marking #[doc(hidden)]
+    pub const PublicConstantE: i32 = 0;
     // Should Be caught on renaming
     pub const PublicConstantRenameA: i32 = 0;
     //Should not be caught on removing since its not pub
@@ -15,4 +17,21 @@ impl StructB {
     pub const PublicConstantD: i32 = 0;
     pub const PublicConstantRenameB: i32 = 0;
     const ConstantB: i32 = 0;
+}
+#[doc(hidden)]
+pub struct StructC {}
+impl StructC {
+    // should not be caught on removing since the struct #[doc(hidden)]
+    pub const PublicConstantF: i32 = 0;
+}
+//should not be caught by this lint on marking #[doc(hidden)]
+pub struct StructD {}
+impl StructD {
+    pub const PublicConstantG: i32 = 0;
+    pub const PublicConstantH: i32 = 0;
+}
+pub struct StructE {}
+impl StructE {
+    pub const PublicConstantI: i32 = 0;
+    pub const PublicConstantJ: i32 = 0;
 }

@@ -18,7 +18,7 @@
                 String("inherent_associated_pub_const_missing"),
                 String("StructA"),
             ]),
-            "span_begin_line": Uint64(7),
+            "span_begin_line": Uint64(9),
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
