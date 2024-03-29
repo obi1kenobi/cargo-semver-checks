@@ -1,39 +1,84 @@
+// Test Cases where #[doc(hidden)] is neither added or removed
 pub struct StructA {}
+
 impl StructA {
-    //Basic Test case should be caught
+    // Basic Test case should be caught
     pub const PublicConstantA: i32 = 0;
     pub const PublicConstantB: i32 = 0;
-    //Should not be caught on marking #[doc(hidden)]
-    pub const PublicConstantE: i32 = 0;
+    // Const that was #[doc(hidden)] will be removed
+    #[doc(hidden)]
+    pub const DocHiddenConstantA: i32 = 0;
     // Should Be caught on renaming
     pub const PublicConstantRenameA: i32 = 0;
-    //Should not be caught on removing since its not pub
+    // Should not be caught on removing since its not pub
     const ConstantA: i32 = 0;
 }
+
 struct StructB {}
+
 impl StructB {
-    //should not be caught since StructB is not pub
+    // Should not be caught since StructB is not pub
     pub const PublicConstantC: i32 = 0;
-    pub const PublicConstantD: i32 = 0;
     pub const PublicConstantRenameB: i32 = 0;
     const ConstantB: i32 = 0;
 }
+
 #[doc(hidden)]
 pub struct StructC {}
+
 impl StructC {
-    // should not be caught on removing since the struct #[doc(hidden)]
+    // Should not be caught on removing or renaming since the struct #[doc(hidden)]
+    pub const PublicConstantD: i32 = 0;
+    pub const PublicConstantRenameC: i32 = 0;
+}
+
+pub struct StructD {}
+
+#[doc(hidden)]
+impl StructD {
+    pub const PublicConstantE: i32 = 0;
     pub const PublicConstantF: i32 = 0;
 }
-//should not be caught by this lint on marking #[doc(hidden)]
-pub struct StructD {}
-impl StructD {
-    pub const PublicConstantG: i32 = 0;
-    pub const PublicConstantH: i32 = 0;
-}
+
+// Test Cases where #[doc(hidden)] is added
 pub struct StructE {}
-//this impl block will be #[doc(hidden)]
+
 impl StructE {
+    // This const will be #[doc(hidden)]
+    pub const PublicConstantG: i32 = 0;
+}
+// This impl block will be #[doc(hidden)]
+impl StructE {
+    pub const PublicConstantH: i32 = 0;
+    // This will be removed
     pub const PublicConstantI: i32 = 0;
-    //this will be removed
+}
+
+// This struct will be #[doc(hidden)]
+pub struct StructF {}
+
+impl StructF {
     pub const PublicConstantJ: i32 = 0;
+    // This const will be removed
+    pub const PublicConstantK: i32 = 0;
+}
+
+// Test cases where #[doc(hidden)] is removed
+#[doc(hidden)]
+pub struct DocHiddenStruct {}
+
+impl DocHiddenStruct {
+    // This const will be removed
+    #[doc(hidden)]
+    pub const DocHiddenConstantB: i32 = 0;
+    pub const PublicConstantL: i32 = 0;
+    // This const will be removed
+    pub const PublicConstantM: i32 = 0;
+}
+
+#[doc(hidden)]
+impl DocHiddenStruct {
+    // This const will be removed
+    pub const PublicConstantN: i32 = 0;
+    pub const PublicConstantO: i32 = 0;
 }

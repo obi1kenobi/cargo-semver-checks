@@ -3,11 +3,11 @@
         {
             "path": List([
                 String("inherent_associated_pub_const_missing"),
-                String("StructD"),
+                String("StructF"),
             ]),
-            "span_begin_line": Uint64(18),
+            "span_begin_line": Uint64(46),
             "span_filename": String("src/lib.rs"),
-            "struct_name": String("StructD"),
+            "struct_name": String("StructF"),
         },
     ],
     "./test_crates/struct_now_doc_hidden/": [
