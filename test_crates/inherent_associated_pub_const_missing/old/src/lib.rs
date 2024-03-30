@@ -78,3 +78,13 @@ impl DocHiddenStruct {
     pub const PublicConstantN: i32 = 0;
     pub const PublicConstantO: i32 = 0;
 }
+
+pub trait Trait {}
+
+pub struct Example;
+
+impl Example {
+    pub const N: i64 = 0;
+}
+
+impl Trait for Example {}
