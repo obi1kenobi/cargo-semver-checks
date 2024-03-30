@@ -1,0 +1,67 @@
+SemverQuery(
+    id: "union_field_missing",
+    human_readable_name: "pub union pub field is removed or renamed",
+    description: "pub union pub field is removed or renamed. No longer present under it's previous name, by whatever cause.",
+    required_update: Major, 
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        union_name: name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        field {
+                            field_name: name @output @tag
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%union_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+            
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                            name @filter(op: "=", value: ["%field_name"])
+                            
+                        }
+
+                        
+
+                    
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A pub field in a pub union  has been removed.",
+    per_result_error_template: Some("union {{union_name}} in file {{span_filename}}:{{span_begin_line}} missing field {{field_name}}"),
+)
