@@ -476,6 +476,7 @@ macro_rules! add_lints {
 }
 
 add_lints!(
+    function_export_name_changed,
     pub_static_now_doc_hidden,
     function_abi_no_longer_unwind,
     pub_module_level_const_now_doc_hidden,
