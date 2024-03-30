@@ -192,14 +192,18 @@ impl RustdocCommand {
                             .expect("failed to create path string")
                     ),
                 };
-                let feature_list = features.into_iter().join(",");
+                let feature_list = if features.is_empty() {
+                    "".to_string()
+                } else {
+                    format!("--features {} ", features.into_iter().join(","))
+                };
                 writeln!(
                     stderr,
                     "      \
 cargo new --lib example &&
           cd example &&
           echo '[workspace]' >> Cargo.toml &&
-          cargo add {selector} --no-default-features --features {feature_list} &&
+          cargo add {selector} --no-default-features {feature_list}&&
           cargo check\n"
                 )?;
                 Ok(())
