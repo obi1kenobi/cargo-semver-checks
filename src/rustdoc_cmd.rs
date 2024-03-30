@@ -405,6 +405,17 @@ fn create_placeholder_rustdoc_manifest(
                     ..DependencyDetail::default()
                 },
             };
+            config.log_verbose(|config| {
+                if project_with_features.features.is_empty() {
+                    return Ok(());
+                }
+                writeln!(
+                    config.stderr(),
+                    "             Features: {}",
+                    project_with_features.features.join(","),
+                )?;
+                Ok(())
+            })?;
             let mut deps = DepsSet::new();
             deps.insert(
                 crate_source.name()?.to_string(),
