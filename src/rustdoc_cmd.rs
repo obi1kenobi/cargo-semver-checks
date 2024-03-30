@@ -192,14 +192,18 @@ impl RustdocCommand {
                             .expect("failed to create path string")
                     ),
                 };
-                let feature_list = features.into_iter().join(",");
+                let feature_list = if features.is_empty() {
+                    "".to_string()
+                } else {
+                    format!("--features {} ", features.into_iter().join(","))
+                };
                 writeln!(
                     stderr,
                     "      \
 cargo new --lib example &&
           cd example &&
           echo '[workspace]' >> Cargo.toml &&
-          cargo add {selector} --no-default-features --features {feature_list} &&
+          cargo add {selector} --no-default-features {feature_list}&&
           cargo check\n"
                 )?;
                 Ok(())
@@ -405,6 +409,17 @@ fn create_placeholder_rustdoc_manifest(
                     ..DependencyDetail::default()
                 },
             };
+            config.log_verbose(|config| {
+                if project_with_features.features.is_empty() {
+                    return Ok(());
+                }
+                writeln!(
+                    config.stderr(),
+                    "             Features: {}",
+                    project_with_features.features.join(","),
+                )?;
+                Ok(())
+            })?;
             let mut deps = DepsSet::new();
             deps.insert(
                 crate_source.name()?.to_string(),
