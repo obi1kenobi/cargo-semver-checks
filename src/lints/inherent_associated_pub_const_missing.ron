@@ -44,7 +44,7 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]){
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]){
                             associated_constant {
                             name @filter(op: "=", value: ["%associated_constant"])
                             }
