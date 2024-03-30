@@ -79,12 +79,24 @@ impl DocHiddenStruct {
     pub const PublicConstantO: i32 = 0;
 }
 
-pub trait Trait {}
+// Test for when an inherent const is implemented as trait's const
+pub trait TraitA {}
 
-pub struct Example;
+pub struct ExampleA;
 
-impl Example {
-    pub const N: i64 = 0;
+impl ExampleA {
+    pub const N_A: i64 = 0;
 }
 
-impl Trait for Example {}
+impl TraitA for ExampleA {}
+
+// Test for when an inherent const is implemented as trait's const but given a value in impl
+pub trait TraitB {}
+
+pub struct ExampleB;
+
+impl ExampleB {
+    pub const N_B: i64 = 0;
+}
+
+impl TraitB for ExampleB {}
