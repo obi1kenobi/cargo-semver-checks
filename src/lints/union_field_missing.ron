@@ -41,17 +41,11 @@ SemverQuery(
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
                         }
-
-            
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             visibility_limit @filter(op: "=", value: ["$public"])
                             name @filter(op: "=", value: ["%field_name"])
                             
                         }
-
-                        
-
-                    
                     }
                 }
             }
@@ -62,6 +56,6 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "A pub field in a pub union  has been removed.",
-    per_result_error_template: Some("union {{union_name}} in file {{span_filename}}:{{span_begin_line}} missing field {{field_name}}"),
+    error_message: "A pub field in a pub union has been removed or renamed.",
+    per_result_error_template: Some("field {{union_name}}.{{field_name}} previously in file {{span_filename}}:{{span_begin_line}}"),
 )
