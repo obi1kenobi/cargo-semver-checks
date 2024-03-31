@@ -1,7 +1,7 @@
 SemverQuery(
     id: "function_export_name_changed",
-    human_readable_name: "function's export name has changed",
-    description: "A function's ABI name with #[no_mangle] or #[export_name = \"name\"] has changed",
+    human_readable_name: "function's export name has changed or been removed",
+    description: "A function's ABI name with #[no_mangle] or #[export_name = \"name\"] has changed or been removed",
     required_update: Major,  // Not specified in rust semver doc? most similar is for #[repr] changes: https://doc.rust-lang.org/cargo/reference/semver.html#type-layout
     reference_link: Some("https://doc.rust-lang.org/reference/abi.html#the-no_mangle-attribute"),  // TODO
     query: r#"
@@ -14,7 +14,7 @@ SemverQuery(
                             path @output @tag
                         }
 
-                        export_name @output @tag
+                        export_name @output @tag @filter(op: "is_not_null")
                     }
                 }
             }
@@ -24,7 +24,7 @@ SemverQuery(
                     ... on Function {
                         name @output
 
-                        export_name @filter(op: "!=", value: ["%export_name"]) @filter(op: "!=", value: ["$null"])
+                        export_name @filter(op: "!=", value: ["%export_name"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -36,20 +36,12 @@ SemverQuery(
                         }
                     }
                 }
-                
-                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                    ... on Function {
-                        export_name @filter(op: "=", value: ["%export_name"])
-                    }
-                }
             }
         }
     }"#,
     arguments: {
-        "zero": 0,
-        "null": null,
     },
-    error_message: "the ABI export name of a function has been changed through #[no_mangle] or #[export_name]",
-    per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    error_message: "the ABI export name of a function has been changed or been removed through the #[no_mangle] or #[export_name] attributes",
+    per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}} with old export name {{export_name}}"),
 )
 

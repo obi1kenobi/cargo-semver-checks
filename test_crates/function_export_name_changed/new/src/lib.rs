@@ -18,17 +18,19 @@ pub fn no_mangle_changed_to_same_export_name() {}
 #[no_mangle]
 pub fn export_name_changed_to_same_no_mangle() {}
 
-/// negative test - a function's export name is removed
-/// this is a breaking change,  but it's not this lint
+/// positive test - a function's no_mangle is removed
+pub fn no_mangle_removed() {}
+
+/// positive test - a function's export_name is removed
 pub fn export_name_removed() {}
 
 /// positive test - a non-public function changes export name
 #[export_name = "private_export_name_changed_new"]
 pub fn private_export_name_changed() {}
 
-/// negative test - export name on one function gets moved to the other
-/// this is not necessarily a breaking change, as long as the ABIs are the same
-/// but that is a different lint
+/// positive test - export name on one function gets moved to the other
+/// this is still a breaking change because a call to `export_name_moved_1` in the API
+/// is no longer equivalent to a call to `export_name_moved` in the ABI
 pub mod export_name_moved {
     pub fn export_name_moved_1() {}
     
@@ -36,3 +38,6 @@ pub mod export_name_moved {
     pub fn export_name_moved_2() {}
 }
 
+/// negative test - a function's export name is added
+#[export_name = "export_name_added"]
+pub fn export_name_added() {}

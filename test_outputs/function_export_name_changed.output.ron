@@ -31,14 +31,45 @@
             "span_filename": String("src/lib.rs"),
         },
         {
+            "export_name": String("no_mangle_removed"),
+            "name": String("no_mangle_removed"),
+            "path": List([
+                String("function_export_name_changed"),
+                String("no_mangle_removed"),
+            ]),
+            "span_begin_line": Uint64(22),
+            "span_filename": String("src/lib.rs"),
+        },
+        {
+            "export_name": String("export_name_removed"),
+            "name": String("export_name_removed"),
+            "path": List([
+                String("function_export_name_changed"),
+                String("export_name_removed"),
+            ]),
+            "span_begin_line": Uint64(25),
+            "span_filename": String("src/lib.rs"),
+        },
+        {
             "export_name": String("private_export_name_changed_old"),
             "name": String("private_export_name_changed"),
             "path": List([
                 String("function_export_name_changed"),
                 String("private_export_name_changed"),
             ]),
-            "span_begin_line": Uint64(27),
+            "span_begin_line": Uint64(29),
             "span_filename": String("src/lib.rs"),
-        }
+        },
+        {
+            "export_name": String("export_name_moved"),
+            "name": String("export_name_moved_1"),
+            "path": List([
+                String("function_export_name_changed"),
+                String("export_name_moved"),
+                String("export_name_moved_1"),
+            ]),
+            "span_begin_line": Uint64(35),
+            "span_filename": String("src/lib.rs"),
+        },
     ]
 }
