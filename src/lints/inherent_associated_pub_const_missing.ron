@@ -46,7 +46,7 @@ SemverQuery(
 
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]){
                             associated_constant {
-                            name @filter(op: "=", value: ["%associated_constant"])
+                                name @filter(op: "=", value: ["%associated_constant"])
                             }
                         }
                     }
