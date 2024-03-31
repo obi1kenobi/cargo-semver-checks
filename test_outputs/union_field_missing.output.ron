@@ -1,0 +1,24 @@
+{
+    "./test_crates/union_field_missing/": [
+        {
+            "field_name": String("f2"),
+            "path": List([
+                String("union_field_missing"),
+                String("PubUnionPubFieldRenamed"),
+            ]),
+            "span_begin_line": Uint64(18),
+            "span_filename": String("src/lib.rs"),
+            "union_name": String("PubUnionPubFieldRenamed"),
+        },
+        {
+            "field_name": String("f2"),
+            "path": List([
+                String("union_field_missing"),
+                String("PubUnionPubFieldRemoved"),
+            ]),
+            "span_begin_line": Uint64(24),
+            "span_filename": String("src/lib.rs"),
+            "union_name": String("PubUnionPubFieldRemoved"),
+        },       
+    ]
+}
