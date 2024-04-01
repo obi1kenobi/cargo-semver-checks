@@ -2,8 +2,8 @@ SemverQuery(
     id: "function_export_name_changed",
     human_readable_name: "function's export name has changed or been removed",
     description: "A function's ABI name with #[no_mangle] or #[export_name = \"name\"] has changed or been removed",
-    required_update: Major,  // Not specified in rust semver doc? most similar is for #[repr] changes: https://doc.rust-lang.org/cargo/reference/semver.html#type-layout
-    reference_link: Some("https://doc.rust-lang.org/reference/abi.html#the-no_mangle-attribute"),  // TODO
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/reference/abi.html#the-no_mangle-attribute"),
     query: r#"
     {
         CrateDiff {
