@@ -476,6 +476,7 @@ macro_rules! add_lints {
 }
 
 add_lints!(
+    union_missing,
     function_export_name_changed,
     union_field_missing,
     pub_static_now_doc_hidden,
