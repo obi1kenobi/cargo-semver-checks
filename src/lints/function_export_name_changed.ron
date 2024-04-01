@@ -24,7 +24,7 @@ SemverQuery(
                     ... on Function {
                         name @output
 
-                        export_name @filter(op: "!=", value: ["%export_name"])
+                        new_export_name: export_name @filter(op: "!=", value: ["%export_name"]) @output
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -41,7 +41,7 @@ SemverQuery(
     }"#,
     arguments: {
     },
-    error_message: "the ABI export name of a function has been changed or been removed through the #[no_mangle] or #[export_name] attributes",
-    per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}} with old export name {{export_name}}"),
+    error_message: "The ABI export name of a function has been changed or removed through the #[no_mangle] or #[export_name] attributes.",
+    per_result_error_template: Some("function {{join \"::\" path}} no longer has ABI name {{export_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
 
