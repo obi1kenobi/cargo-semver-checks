@@ -5,12 +5,17 @@ use std::path::PathBuf;
 use cargo_semver_checks::{
     GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
 };
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
+use serde::Serialize;
 
 fn main() {
     human_panic::setup_panic!();
 
     let Cargo::SemverChecks(args) = Cargo::parse();
+    // TODO: handle CARGO_TERM_COLOR env var again
+    if let Some(color_choice) = args.check_release.color_choice {
+        anstream::ColorChoice::write_global(color_choice.into());
+    }
     if args.bugreport {
         use bugreport::{bugreport, collector::*, format::Markdown};
         bugreport!()
@@ -25,12 +30,6 @@ fn main() {
         exit_on_error(true, || {
             let mut config =
                 GlobalConfig::new().set_level(args.check_release.verbosity.log_level());
-
-            // we don't want to set auto if the choice is not set because it would overwrite
-            // the value if the CARGO_TERM_COLOR env var read in GlobalConfig::new() if it is set
-            if let Some(choice) = args.check_release.color_choice {
-                config = config.set_color_choice(choice);
-            }
 
             let queries = SemverQuery::all_queries();
             let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
@@ -108,6 +107,37 @@ fn exit_on_error<T>(log_errors: bool, inner: impl Fn() -> anyhow::Result<T>) -> 
                 eprintln!("error: {err:?}");
             }
             std::process::exit(1)
+        }
+    }
+}
+
+/// helper enum to derive [`clap::ValueEnum`] on [`anstream::ColorChoice`]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, ValueEnum)]
+pub(crate) enum ColorChoice {
+    Auto,
+    AlwaysAnsi,
+    Always,
+    Never,
+}
+
+impl From<anstream::ColorChoice> for ColorChoice {
+    fn from(value: anstream::ColorChoice) -> Self {
+        match value {
+            anstream::ColorChoice::Always => Self::Always,
+            anstream::ColorChoice::AlwaysAnsi => Self::AlwaysAnsi,
+            anstream::ColorChoice::Auto => Self::Auto,
+            anstream::ColorChoice::Never => Self::Never,
+        }
+    }
+}
+
+impl From<ColorChoice> for anstream::ColorChoice {
+    fn from(value: ColorChoice) -> Self {
+        match value {
+            ColorChoice::Always => Self::Always,
+            ColorChoice::AlwaysAnsi => Self::AlwaysAnsi,
+            ColorChoice::Auto => Self::Auto,
+            ColorChoice::Never => Self::Never,
         }
     }
 }
@@ -296,7 +326,7 @@ struct CheckRelease {
     ///
     /// Default is auto (use colors if output is a TTY, otherwise don't use colors)
     #[arg(value_enum, long = "color")]
-    color_choice: Option<termcolor::ColorChoice>,
+    color_choice: Option<ColorChoice>,
 }
 
 impl From<CheckRelease> for cargo_semver_checks::Check {
@@ -359,7 +389,6 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         }
 
         check.with_log_level(value.verbosity.log_level());
-        check.with_color_choice(value.color_choice);
 
         if let Some(release_type) = value.release_type {
             check.with_release_type(release_type);

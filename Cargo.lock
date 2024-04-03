@@ -65,6 +65,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "anstyle-termcolor"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11c3d1411f1f4c8a7b177caec3c71b51290f9e8ad9f99124fd3fe9aa96e56834"
+dependencies = [
+ "anstyle",
+ "termcolor",
+]
+
+[[package]]
 name = "anstyle-wincon"
 version = "3.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -285,6 +295,9 @@ dependencies = [
 name = "cargo-semver-checks"
 version = "0.30.0"
 dependencies = [
+ "anstream",
+ "anstyle",
+ "anstyle-termcolor",
  "anyhow",
  "assert_cmd",
  "atty",

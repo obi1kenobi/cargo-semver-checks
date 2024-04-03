@@ -285,21 +285,6 @@ impl Check {
         self.log_level.as_ref()
     }
 
-    /// Set the termcolor [color choice](termcolor::ColorChoice).
-    /// If `None`, the use of colors will be determined automatically by
-    /// the `CARGO_TERM_COLOR` env var and tty type of output.
-    pub fn with_color_choice(&mut self, choice: Option<termcolor::ColorChoice>) -> &mut Self {
-        self.color_choice = choice;
-        self
-    }
-
-    /// Get the current color choice.  If `None`, the use of colors is determined
-    /// by the `CARGO_TERM_COLOR` env var and whether the output is a tty
-    #[inline]
-    pub fn color_choice(&self) -> Option<&termcolor::ColorChoice> {
-        self.color_choice.as_ref()
-    }
-
     pub fn with_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
         self.release_type = Some(release_type);
         self
@@ -403,11 +388,6 @@ impl Check {
 
     pub fn check_release(&self) -> anyhow::Result<Report> {
         let mut config = GlobalConfig::new().set_level(self.log_level);
-        // we don't want to set auto if the choice is not set because it would overwrite
-        // the value if the CARGO_TERM_COLOR env var read in GlobalConfig::new() if it is set
-        if let Some(choice) = self.color_choice {
-            config = config.set_color_choice(choice);
-        }
 
         let rustdoc_cmd = RustdocCommand::new().deps(false).silence(config.is_info());
 

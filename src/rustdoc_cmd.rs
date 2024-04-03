@@ -1,6 +1,6 @@
-use std::io::Write as _;
 use std::path::{Path, PathBuf};
 
+use anstream::ColorChoice;
 use anyhow::Context;
 use itertools::Itertools as _;
 
@@ -129,57 +129,48 @@ impl RustdocCommand {
         if !self.deps {
             cmd.arg("--no-deps");
         }
-        if config.is_stderr_tty() {
-            cmd.arg("--color=always");
-        }
+
+        // TODO
+        let color_choice = match anstream::stderr().current_choice() {
+            ColorChoice::Always | ColorChoice::AlwaysAnsi => "--color=always",
+            ColorChoice::Auto if anstream::stderr().is_terminal() => "--color=always",
+            ColorChoice::Auto | ColorChoice::Never => "--color=never",
+        };
+
+        cmd.arg(color_choice);
+        // if config.is_stderr_tty() {
+        //    cmd.arg("--color=always");
+        // }
 
         let output = cmd.output()?;
         if !output.status.success() {
             if self.silence {
                 config.log_error(|config| {
-                    let stderr = config.stderr();
                     let delimiter = "-----";
-                    writeln!(
-                        stderr,
-                        "error: running cargo-doc on crate {crate_name} failed with output:"
-                    )?;
-                    writeln!(
-                        stderr,
+                    eprintln!("error: running cargo-doc on crate {crate_name} failed with output:");
+                    eprintln!(
                         "{delimiter}\n{}\n{delimiter}\n",
                         String::from_utf8_lossy(&output.stderr)
-                    )?;
-                    writeln!(
-                        stderr,
-                        "error: failed to build rustdoc for crate {crate_name} v{version}"
-                    )?;
+                    );
+                    eprintln!("error: failed to build rustdoc for crate {crate_name} v{version}");
                     Ok(())
                 })?;
             } else {
                 config.log_error(|config| {
-                    let stderr = config.stderr();
-                    writeln!(
-                        stderr,
+                    eprintln!(
                         "error: running cargo-doc on crate {crate_name} v{version} failed, see stderr output above"
-                    )?;
+                    );
                     Ok(())
                 })?;
             }
             config.log_error(|config| {
                 let features =
                     crate_source.feature_list_from_config(config, crate_data.feature_config);
-                let stderr = config.stderr();
-                writeln!(
-                    stderr,
-                    "note: this is usually due to a compilation error in the crate,"
-                )?;
-                writeln!(
-                    stderr,
-                    "      and is unlikely to be a bug in cargo-semver-checks"
-                )?;
-                writeln!(
-                    stderr,
+                eprintln!("note: this is usually due to a compilation error in the crate,");
+                eprintln!("      and is unlikely to be a bug in cargo-semver-checks");
+                eprintln!(
                     "note: the following command can be used to reproduce the compilation error:"
-                )?;
+                );
                 let selector = match crate_source {
                     CrateSource::Registry { version, .. } => format!("{crate_name}@={version}"),
                     CrateSource::ManifestPath { manifest } => format!(
@@ -197,15 +188,14 @@ impl RustdocCommand {
                 } else {
                     format!("--features {} ", features.into_iter().join(","))
                 };
-                writeln!(
-                    stderr,
+                eprintln!(
                     "      \
 cargo new --lib example &&
           cd example &&
           echo '[workspace]' >> Cargo.toml &&
           cargo add {selector} --no-default-features {feature_list}&&
           cargo check\n"
-                )?;
+                );
                 Ok(())
             })?;
             anyhow::bail!(
@@ -242,26 +232,22 @@ cargo new --lib example &&
                     None
                 } else {
                     config.log_error(|config| {
-                        let stderr = config.stderr();
                         let delimiter = "-----";
-                        writeln!(
-                            stderr,
+                        eprintln!(
                             "error: running cargo-config on crate {crate_name} failed with output:"
-                        )?;
-                        writeln!(
-                            stderr,
+                        );
+                        eprintln!(
                             "{delimiter}\n{}\n{delimiter}\n",
                             String::from_utf8_lossy(&output.stderr)
-                        )?;
+                        );
 
-                        writeln!(stderr, "error: unexpected cargo config output for crate {crate_name} v{version}\n")?;
-                        writeln!(stderr, "note: this may be a bug in cargo, or a bug in cargo-semver-checks;")?;
-                        writeln!(stderr, "      if unsure, feel free to open a GitHub issue on cargo-semver-checks")?;
-                        writeln!(stderr, "note: running the following command on the crate should reproduce the error:")?;
-                        writeln!(
-                            stderr,
+                        eprintln!("error: unexpected cargo config output for crate {crate_name} v{version}\n");
+                        eprintln!("note: this may be a bug in cargo, or a bug in cargo-semver-checks;");
+                        eprintln!("      if unsure, feel free to open a GitHub issue on cargo-semver-checks");
+                        eprintln!("note: running the following command on the crate should reproduce the error:");
+                        eprintln!(
                             "      cargo config -Zunstable-options get --format=json-value build.target\n",
-                        )?;
+                        );
                         Ok(())
                     })?;
                     anyhow::bail!(
@@ -413,11 +399,10 @@ fn create_placeholder_rustdoc_manifest(
                 if project_with_features.features.is_empty() {
                     return Ok(());
                 }
-                writeln!(
-                    config.stderr(),
+                eprintln!(
                     "             Features: {}",
                     project_with_features.features.join(","),
-                )?;
+                );
                 Ok(())
             })?;
             let mut deps = DepsSet::new();

@@ -1,13 +1,11 @@
-use termcolor::{ColorChoice, StandardStream};
+use anstream::{eprint, eprintln};
+use anstyle::{AnsiColor, Color, Reset, Style};
 
 use crate::templating::make_handlebars_registry;
 
 #[allow(dead_code)]
 pub struct GlobalConfig {
     level: Option<log::Level>,
-    is_stderr_tty: bool,
-    stdout: StandardStream,
-    stderr: StandardStream,
     handlebars: handlebars::Handlebars<'static>,
     /// Minimum rustc version supported.
     ///
@@ -23,34 +21,8 @@ impl Default for GlobalConfig {
 
 impl GlobalConfig {
     pub fn new() -> Self {
-        let is_stdout_tty = atty::is(atty::Stream::Stdout);
-        let is_stderr_tty = atty::is(atty::Stream::Stderr);
-
-        let color_choice = match std::env::var("CARGO_TERM_COLOR").as_deref() {
-            Ok("always") => Some(ColorChoice::Always),
-            Ok("alwaysansi") => Some(ColorChoice::AlwaysAnsi),
-            Ok("auto") => Some(ColorChoice::Auto),
-            Ok("never") => Some(ColorChoice::Never),
-            Ok(_) | Err(..) => None,
-        };
-
         Self {
             level: None,
-            is_stderr_tty,
-            stdout: StandardStream::stdout(color_choice.unwrap_or({
-                if is_stdout_tty {
-                    ColorChoice::Auto
-                } else {
-                    ColorChoice::Never
-                }
-            })),
-            stderr: StandardStream::stderr(color_choice.unwrap_or({
-                if is_stderr_tty {
-                    ColorChoice::Auto
-                } else {
-                    ColorChoice::Never
-                }
-            })),
             handlebars: make_handlebars_registry(),
             minimum_rustc_version: semver::Version::new(1, 74, 0),
         }
@@ -125,52 +97,23 @@ impl GlobalConfig {
         Ok(())
     }
 
-    pub fn is_stderr_tty(&self) -> bool {
-        self.is_stderr_tty
-    }
-
-    pub fn stdout(&mut self) -> &mut StandardStream {
-        &mut self.stdout
-    }
-
-    pub fn stderr(&mut self) -> &mut StandardStream {
-        &mut self.stderr
-    }
-
-    pub fn set_color_choice(mut self, choice: ColorChoice) -> Self {
-        self.stdout = StandardStream::stdout(choice);
-        self.stderr = StandardStream::stderr(choice);
-        self
-    }
-
     /// Print a message with a colored title in the style of Cargo shell messages.
     pub fn shell_print(
         &mut self,
         status: impl std::fmt::Display,
         message: impl std::fmt::Display,
-        color: termcolor::Color,
+        color: anstyle::Color,
         justified: bool,
     ) -> anyhow::Result<()> {
         if self.is_info() {
-            use std::io::Write;
-            use termcolor::WriteColor;
-
-            self.stderr().set_color(
-                termcolor::ColorSpec::new()
-                    .set_fg(Some(color))
-                    .set_bold(true),
-            )?;
+            eprint!("{}", Style::new().fg_color(Some(color)).bold());
             if justified {
-                write!(self.stderr(), "{status:>12}")?;
+                eprint!("{status:>12}");
             } else {
-                write!(self.stderr(), "{status}")?;
-                self.stderr()
-                    .set_color(termcolor::ColorSpec::new().set_bold(true))?;
-                write!(self.stderr(), ":")?;
+                eprint!("{status}{}{}:", Reset, Style::new().bold());
             }
-            self.stderr().reset()?;
 
-            writeln!(self.stderr(), " {message}")?;
+            eprintln!("{} {message}", Reset);
         }
 
         Ok(())
@@ -182,15 +125,15 @@ impl GlobalConfig {
         action: impl std::fmt::Display,
         message: impl std::fmt::Display,
     ) -> anyhow::Result<()> {
-        self.shell_print(action, message, termcolor::Color::Green, true)
+        self.shell_print(action, message, Color::Ansi(AnsiColor::Green), true)
     }
 
     pub fn shell_note(&mut self, message: impl std::fmt::Display) -> anyhow::Result<()> {
-        self.shell_print("note", message, termcolor::Color::Cyan, false)
+        self.shell_print("note", message, Color::Ansi(AnsiColor::Cyan), false)
     }
 
     pub fn shell_warn(&mut self, message: impl std::fmt::Display) -> anyhow::Result<()> {
-        self.shell_print("warning", message, termcolor::Color::Yellow, false)
+        self.shell_print("warning", message, Color::Ansi(AnsiColor::Yellow), false)
     }
 }
 
