@@ -3,7 +3,6 @@
         {
             "associated_constant": String("PublicConstantA"),
             "name": String("StructA"),
-            "orname": String("StructA"),
             "path": List([
                 String("inherent_associated_pub_const_missing"),
                 String("StructA"),
@@ -15,7 +14,6 @@
         {
             "associated_constant": String("PublicConstantRenameA"),
             "name": String("StructA"),
-            "orname": String("StructA"),
             "path": List([
                 String("inherent_associated_pub_const_missing"),
                 String("StructA"),
@@ -27,7 +25,6 @@
         {
             "associated_constant": String("PublicConstantI"),
             "name": String("StructE"),
-            "orname": String("StructE"),
             "path": List([
                 String("inherent_associated_pub_const_missing"),
                 String("StructE"),

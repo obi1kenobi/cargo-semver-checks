@@ -44,25 +44,14 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]){
+                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             associated_constant {
                                 name @filter(op: "=", value: ["%associated_constant"])
                             }
                         }
-                    }
-                }
-                or:
-                    item {
-                    ... on ImplOwner {
-                        visibility_limit @filter(op: "=", value: ["$public"])
-                        name @output
-
-                        importable_path {
-                            path @filter(op: "=", value: ["%path"])
-                            public_api @filter(op: "=", value: ["$true"])
-                        }
-
-                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]){
+                        
+                        or:
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             implemented_trait {
                                 trait {
                                     associated_constant {
