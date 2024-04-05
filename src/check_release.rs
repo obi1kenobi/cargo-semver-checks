@@ -158,7 +158,7 @@ pub(super) fn run_check_release(
     let mut results_with_errors = vec![];
     for (semver_query, time_to_decide, results) in all_results {
         config
-            .log_verbose(|config| {
+            .log_verbose(|_| {
                 let category = match semver_query.required_update {
                     RequiredSemverUpdate::Major => "major",
                     RequiredSemverUpdate::Minor => "minor",

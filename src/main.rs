@@ -5,17 +5,17 @@ use std::path::PathBuf;
 use cargo_semver_checks::{
     GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
 };
-use clap::{Args, Parser, Subcommand, ValueEnum};
-use serde::Serialize;
+use clap::{builder::PossibleValue, Args, Parser, Subcommand, ValueEnum};
 
 fn main() {
     human_panic::setup_panic!();
 
     let Cargo::SemverChecks(args) = Cargo::parse();
-    // TODO: handle CARGO_TERM_COLOR env var again
+
     if let Some(color_choice) = args.check_release.color_choice {
-        anstream::ColorChoice::write_global(color_choice.into());
+        color_choice.0.write_global();
     }
+
     if args.bugreport {
         use bugreport::{bugreport, collector::*, format::Markdown};
         bugreport!()
@@ -112,33 +112,25 @@ fn exit_on_error<T>(log_errors: bool, inner: impl Fn() -> anyhow::Result<T>) -> 
 }
 
 /// helper enum to derive [`clap::ValueEnum`] on [`anstream::ColorChoice`]
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, ValueEnum)]
-pub(crate) enum ColorChoice {
-    Auto,
-    AlwaysAnsi,
-    Always,
-    Never,
-}
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct ColorChoice(pub(crate) anstream::ColorChoice);
 
-impl From<anstream::ColorChoice> for ColorChoice {
-    fn from(value: anstream::ColorChoice) -> Self {
-        match value {
-            anstream::ColorChoice::Always => Self::Always,
-            anstream::ColorChoice::AlwaysAnsi => Self::AlwaysAnsi,
-            anstream::ColorChoice::Auto => Self::Auto,
-            anstream::ColorChoice::Never => Self::Never,
-        }
+impl ValueEnum for ColorChoice {
+    fn value_variants<'a>() -> &'a [Self] {
+        use anstream::ColorChoice::*;
+        &[Self(Always), Self(AlwaysAnsi), Self(Auto), Self(Never)]
     }
-}
 
-impl From<ColorChoice> for anstream::ColorChoice {
-    fn from(value: ColorChoice) -> Self {
-        match value {
-            ColorChoice::Always => Self::Always,
-            ColorChoice::AlwaysAnsi => Self::AlwaysAnsi,
-            ColorChoice::Auto => Self::Auto,
-            ColorChoice::Never => Self::Never,
-        }
+    fn to_possible_value(&self) -> Option<PossibleValue> {
+        use anstream::ColorChoice::*;
+        let name = match self.0 {
+            Always => "always",
+            AlwaysAnsi => "always-ansi",
+            Auto => "auto",
+            Never => "never",
+        };
+
+        Some(PossibleValue::new(name))
     }
 }
 
@@ -321,7 +313,7 @@ struct CheckRelease {
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 
     /// Whether to print colors to the terminal:
-    /// always, alwaysansi (always use only ANSI color codes),
+    /// always, always-ansi (always use only ANSI color codes),
     /// auto (based on whether output is a tty), and never
     ///
     /// Default is auto (use colors if output is a TTY, otherwise don't use colors)

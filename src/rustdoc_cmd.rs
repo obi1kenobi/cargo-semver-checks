@@ -145,7 +145,7 @@ impl RustdocCommand {
         let output = cmd.output()?;
         if !output.status.success() {
             if self.silence {
-                config.log_error(|config| {
+                config.log_error(|_| {
                     let delimiter = "-----";
                     eprintln!("error: running cargo-doc on crate {crate_name} failed with output:");
                     eprintln!(
@@ -156,7 +156,7 @@ impl RustdocCommand {
                     Ok(())
                 })?;
             } else {
-                config.log_error(|config| {
+                config.log_error(|_| {
                     eprintln!(
                         "error: running cargo-doc on crate {crate_name} v{version} failed, see stderr output above"
                     );
@@ -231,7 +231,7 @@ cargo new --lib example &&
                 {
                     None
                 } else {
-                    config.log_error(|config| {
+                    config.log_error(|_| {
                         let delimiter = "-----";
                         eprintln!(
                             "error: running cargo-config on crate {crate_name} failed with output:"
@@ -395,7 +395,7 @@ fn create_placeholder_rustdoc_manifest(
                     ..DependencyDetail::default()
                 },
             };
-            config.log_verbose(|config| {
+            config.log_verbose(|_| {
                 if project_with_features.features.is_empty() {
                     return Ok(());
                 }

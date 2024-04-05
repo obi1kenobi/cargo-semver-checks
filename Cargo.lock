@@ -65,16 +65,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anstyle-termcolor"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11c3d1411f1f4c8a7b177caec3c71b51290f9e8ad9f99124fd3fe9aa96e56834"
-dependencies = [
- "anstyle",
- "termcolor",
-]
-
-[[package]]
 name = "anstyle-wincon"
 version = "3.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -297,7 +287,6 @@ version = "0.30.0"
 dependencies = [
  "anstream",
  "anstyle",
- "anstyle-termcolor",
  "anyhow",
  "assert_cmd",
  "atty",
@@ -324,8 +313,6 @@ dependencies = [
  "sha2",
  "similar-asserts",
  "tame-index",
- "termcolor",
- "termcolor_output",
  "toml",
  "trustfall",
  "trustfall_rustdoc",
@@ -2667,31 +2654,6 @@ dependencies = [
  "rustix",
  "windows-sys 0.52.0",
 ]
-
-[[package]]
-name = "termcolor"
-version = "1.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06794f8f6c5c898b3275aebefa6b8a1cb24cd2c6c79397ab15774837a0bc5755"
-dependencies = [
- "winapi-util",
-]
-
-[[package]]
-name = "termcolor_output"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0363afbf20990ea53a69c03b71800480aaf90e8f49f6fd5385ecc302062895ff"
-dependencies = [
- "termcolor",
- "termcolor_output_impl",
-]
-
-[[package]]
-name = "termcolor_output_impl"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f34dde0bb841eb3762b42bdff8db11bbdbc0a3bd7b32012955f5ce1d081f86c1"
 
 [[package]]
 name = "termtree"
