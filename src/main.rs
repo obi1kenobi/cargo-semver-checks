@@ -5,16 +5,14 @@ use std::path::PathBuf;
 use cargo_semver_checks::{
     GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
 };
-use clap::{builder::PossibleValue, Args, Parser, Subcommand, ValueEnum};
+use clap::{Args, Parser, Subcommand};
 
 fn main() {
     human_panic::setup_panic!();
 
     let Cargo::SemverChecks(args) = Cargo::parse();
 
-    if let Some(color_choice) = args.check_release.color_choice {
-        color_choice.0.write_global();
-    }
+    args.check_release.color_choice.write_global();
 
     if args.bugreport {
         use bugreport::{bugreport, collector::*, format::Markdown};
@@ -108,29 +106,6 @@ fn exit_on_error<T>(log_errors: bool, inner: impl Fn() -> anyhow::Result<T>) -> 
             }
             std::process::exit(1)
         }
-    }
-}
-
-/// helper enum to derive [`clap::ValueEnum`] on [`anstream::ColorChoice`]
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub(crate) struct ColorChoice(pub(crate) anstream::ColorChoice);
-
-impl ValueEnum for ColorChoice {
-    fn value_variants<'a>() -> &'a [Self] {
-        use anstream::ColorChoice::*;
-        &[Self(Always), Self(AlwaysAnsi), Self(Auto), Self(Never)]
-    }
-
-    fn to_possible_value(&self) -> Option<PossibleValue> {
-        use anstream::ColorChoice::*;
-        let name = match self.0 {
-            Always => "always",
-            AlwaysAnsi => "always-ansi",
-            Auto => "auto",
-            Never => "never",
-        };
-
-        Some(PossibleValue::new(name))
     }
 }
 
@@ -317,8 +292,8 @@ struct CheckRelease {
     /// auto (based on whether output is a tty), and never
     ///
     /// Default is auto (use colors if output is a TTY, otherwise don't use colors)
-    #[arg(value_enum, long = "color")]
-    color_choice: Option<ColorChoice>,
+    #[command(flatten)]
+    color_choice: colorchoice_clap::Color,
 }
 
 impl From<CheckRelease> for cargo_semver_checks::Check {
