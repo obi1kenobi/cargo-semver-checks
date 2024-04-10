@@ -98,7 +98,7 @@ pub struct SemverQuery {
 impl SemverQuery {
     pub fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
-        for query_text in get_query_text_contents() {
+        for (id, query_text) in get_queries() {
             let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
                 panic!(
                     "\
@@ -108,7 +108,7 @@ Failed to parse a query: {e}
 ```"
                 );
             });
-            let id_conflict = queries.insert(query.id.clone(), query);
+            let id_conflict = queries.insert(id.clone(), query);
             assert!(id_conflict.is_none(), "{id_conflict:?}");
         }
 
@@ -462,10 +462,10 @@ macro_rules! add_lints {
             )*
         }
 
-        fn get_query_text_contents() -> Vec<&'static str> {
+        fn get_queries() -> Vec<&'static str, &'static str)> {
             vec![
                 $(
-                    include_str!(concat!("lints/", stringify!($name), ".ron")),
+                    (stringify!($name), include_str!(concat!("lints/", stringify!($name), ".ron"))),
                 )*
             ]
         }

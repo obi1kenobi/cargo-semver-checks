@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "trait_must_use_added",
     human_readable_name: "trait #[must_use] added",
     description: "A trait has been marked with #[must_use].",
     required_update: Minor,

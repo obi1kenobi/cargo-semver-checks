@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "struct_now_doc_hidden",
     human_readable_name: "pub struct is now #[doc(hidden)]",
     description: "A pub struct is now marked #[doc(hidden)] and is thus no longer part of the public API.",
     required_update: Major,

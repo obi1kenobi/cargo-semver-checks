@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "enum_tuple_variant_field_added",
     human_readable_name: "pub enum tuple variant field added",
     description: "An enum's exhaustive tuple variant has a new field.",
     required_update: Major,

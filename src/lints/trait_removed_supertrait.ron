@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "trait_removed_supertrait",
     human_readable_name: "supertrait removed or renamed",
     description: "Removing a supertrait bound is a breaking change, since users of the trait can no longer assume it can also be used like its supertrait.",
     required_update: Major,

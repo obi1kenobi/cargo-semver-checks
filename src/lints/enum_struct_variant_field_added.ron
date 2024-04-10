@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "enum_struct_variant_field_added",
     human_readable_name: "pub enum struct variant field added",
     description: "An enum's exhaustive struct variant has a new field.",
     required_update: Major,

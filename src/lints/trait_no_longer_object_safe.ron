@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "trait_no_longer_object_safe",
     human_readable_name: "trait no longer object safe",
     description: "A trait is no longer object safe, meaning it can no longer be used as `dyn Trait`.",
     required_update: Major,

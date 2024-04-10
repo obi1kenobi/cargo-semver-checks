@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "struct_repr_transparent_removed",
     human_readable_name: "struct repr(transparent) removed",
     description: "A struct is no longer repr(transparent).",
     reference: Some(r#"

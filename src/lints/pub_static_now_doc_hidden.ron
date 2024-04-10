@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "pub_static_now_doc_hidden",
     human_readable_name: "pub static is now #[doc(hidden)]",
     description: "A pub static is now marked #[doc(hidden)] and is thus no longer part of the public API.",
     required_update: Major,

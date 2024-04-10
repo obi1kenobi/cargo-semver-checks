@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "enum_repr_transparent_removed",
     human_readable_name: "enum repr(transparent) removed",
     description: "A enum is no longer repr(transparent).",
     reference: Some(r#"
@@ -7,7 +6,7 @@ repr(transparent) was removed from an enum. This can cause its memory layout to 
 breaking FFI use cases.
 
 Unlike with structs, repr(transparent) is always part of the ABI for enums since
-all variants inherit the visibility of their parent type. Note that 
+all variants inherit the visibility of their parent type. Note that
 > [repr(transparent)] can only be used on single-variant enum with a single non-zero-sized field
 > (there may be additional zero-sized fields). [...]
 https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent

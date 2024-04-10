@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "inherent_method_const_removed",
     human_readable_name: "pub method is no longer const",
     description: "A method or associated fn can no longer be called in a const context.",
     required_update: Major,

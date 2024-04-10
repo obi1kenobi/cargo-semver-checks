@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "function_must_use_added",
     human_readable_name: "function #[must_use] added",
     description: "A function has been marked with #[must_use].",
     required_update: Minor,

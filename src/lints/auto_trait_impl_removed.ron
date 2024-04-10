@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "auto_trait_impl_removed",
     human_readable_name: "auto trait no longer implemented",
     description: "A type has stopped implementing one or more auto traits.",
     required_update: Major,

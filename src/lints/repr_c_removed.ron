@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "repr_c_removed",
     human_readable_name: "repr(C) removed",
     description: "A type that used to be repr(C) is no longer repr(C).",
     reference: Some("A type that used to be repr(C) is no longer repr(C). This can cause its memory layout to change, breaking FFI use cases."),

@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "inherent_method_missing",
     human_readable_name: "pub method removed or renamed",
     description: "A method or associated fn is no longer available under its prior name.",
     required_update: Major,

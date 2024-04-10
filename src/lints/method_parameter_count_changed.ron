@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "method_parameter_count_changed",
     human_readable_name: "pub method parameter count changed",
     description: "Parameter count of a method has changed.",
     required_update: Major,

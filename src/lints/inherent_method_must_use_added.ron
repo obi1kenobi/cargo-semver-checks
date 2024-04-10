@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "inherent_method_must_use_added",
     human_readable_name: "inherent method #[must_use] added",
     description: "An inherent method or associated fn has been marked #[must_use].",
     required_update: Minor,

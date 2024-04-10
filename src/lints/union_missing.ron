@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "union_missing",
     human_readable_name: "pub union removed or renamed",
     description: "A union can no longer be imported by its prior path.",
     required_update: Major,

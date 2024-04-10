@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "unit_struct_changed_kind",
     human_readable_name: "unit struct changed kind",
     description: "A struct changed from a unit struct to a plain struct.",
     reference: Some("A public struct that was previously a unit struct is now a plain struct. The unit struct was not marked #[non_exhaustive], so it could be constructed outside of the defining crate. Plain structs cannot be constructed using the syntax allowed for unit structs, so this is a major breaking change for code that depends on it."),
