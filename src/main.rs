@@ -12,7 +12,7 @@ fn main() {
 
     let Cargo::SemverChecks(args) = Cargo::parse();
 
-    args.check_release.color_choice.write_global();
+    args.color_choice.write_global();
 
     if args.bugreport {
         use bugreport::{bugreport, collector::*, format::Markdown};
@@ -134,6 +134,10 @@ struct SemverChecks {
 
     #[command(subcommand)]
     command: Option<SemverChecksCommands>,
+
+    // docstring for help is on the `colorchoice_clap::Color` struct itself
+    #[command(flatten)]
+    color_choice: colorchoice_clap::Color,
 }
 
 /// Check your crate for semver violations.
@@ -284,16 +288,9 @@ struct CheckRelease {
     #[arg(long = "target")]
     build_target: Option<String>,
 
+    // docstring for help is on the `clap_verbosity_flag::Verbosity` struct itself
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
-
-    /// Whether to print colors to the terminal:
-    /// always, always-ansi (always use only ANSI color codes),
-    /// auto (based on whether output is a tty), and never
-    ///
-    /// Default is auto (use colors if output is a TTY, otherwise don't use colors)
-    #[command(flatten)]
-    color_choice: colorchoice_clap::Color,
 }
 
 impl From<CheckRelease> for cargo_semver_checks::Check {

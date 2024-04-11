@@ -1,6 +1,6 @@
+use std::io::Write as _;
 use std::{collections::BTreeMap, sync::Arc, time::Instant};
 
-use anstream::{eprintln, println};
 use anstyle::{AnsiColor, Color, Reset, Style};
 
 use anyhow::Context;
@@ -158,13 +158,14 @@ pub(super) fn run_check_release(
     let mut results_with_errors = vec![];
     for (semver_query, time_to_decide, results) in all_results {
         config
-            .log_verbose(|_| {
+            .log_verbose(|config| {
                 let category = match semver_query.required_update {
                     RequiredSemverUpdate::Major => "major",
                     RequiredSemverUpdate::Minor => "minor",
                 };
                 if results.is_empty() {
-                    eprintln!(
+                    writeln!(
+                        config.stderr(),
                         "{}{:>12}{} [{:8.3}s] {:^18} {}",
                         Style::new()
                             .fg_color(Some(Color::Ansi(AnsiColor::Green)))
@@ -174,9 +175,10 @@ pub(super) fn run_check_release(
                         time_to_decide.as_secs_f32(),
                         category,
                         semver_query.id
-                    );
+                    )?;
                 } else {
-                    eprintln!(
+                    writeln!(
+                        config.stderr(),
                         "{}{:>12}{} [{:>8.3}s] {:^18} {}",
                         Style::new()
                             .fg_color(Some(Color::Ansi(AnsiColor::Red)))
@@ -186,7 +188,7 @@ pub(super) fn run_check_release(
                         time_to_decide.as_secs_f32(),
                         category,
                         semver_query.id
-                    );
+                    )?;
                 }
                 Ok(())
             })
@@ -218,18 +220,20 @@ pub(super) fn run_check_release(
         for (semver_query, results) in results_with_errors {
             required_versions.push(semver_query.required_update);
             config
-                .log_info(|_| {
-                    println!(
+                .log_info(|config| {
+                    writeln!(
+                        config.stdout(),
                         "\n--- failure {}: {} ---\n",
-                        &semver_query.id, &semver_query.human_readable_name
-                    );
+                        &semver_query.id,
+                        &semver_query.human_readable_name
+                    )?;
                     Ok(())
                 })
                 .expect("print failed");
 
             if let Some(ref_link) = semver_query.reference_link.as_deref() {
-                config.log_info(|_| {
-                    println!("{}Description:{}\n{}\n{:>12} {}\n{:>12} {}\n",
+                config.log_info(|config| {
+                    writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} {}\n",
                         Style::new().bold(), Reset,
                         &semver_query.error_message,
                         "ref:",
@@ -240,13 +244,14 @@ pub(super) fn run_check_release(
                             crate_version!(),
                             semver_query.id,
                         )
-                    );
+                    )?;
                     Ok(())
                 })
                 .expect("print failed");
             } else {
-                config.log_info(|_| {
-                    println!(
+                config.log_info(|config| {
+                    writeln!(
+                        config.stdout(),
                         "{}Description:{}\n{}\n{:>12} {}\n",
                         Style::new().bold(),
                         Reset,
@@ -257,15 +262,20 @@ pub(super) fn run_check_release(
                             crate_version!(),
                             semver_query.id,
                         )
-                    );
+                    )?;
                     Ok(())
                 })
                 .expect("print failed");
             }
 
             config
-                .log_info(|_| {
-                    println!("{}Failed in:{}", Style::new().bold(), Reset);
+                .log_info(|config| {
+                    writeln!(
+                        config.stdout(),
+                        "{}Failed in:{}",
+                        Style::new().bold(),
+                        Reset
+                    )?;
                     Ok(())
                 })
                 .expect("print failed");
@@ -283,28 +293,36 @@ pub(super) fn run_check_release(
                         .context("Error instantiating semver query template.")
                         .expect("could not materialize template");
                     config
-                        .log_info(|_| {
-                            println!("  {}", message);
+                        .log_info(|config| {
+                            writeln!(config.stdout(), "  {}", message)?;
                             Ok(())
                         })
                         .expect("print failed");
 
                     config
-                        .log_extra_verbose(|_| {
+                        .log_extra_verbose(|config| {
                             let serde_pretty =
                                 serde_json::to_string_pretty(&pretty_result).expect("serde failed");
                             let indented_serde = serde_pretty
                                 .split('\n')
                                 .map(|line| format!("    {line}"))
                                 .join("\n");
-                            println!("\tlint rule output values:\n{}", indented_serde);
+                            writeln!(
+                                config.stdout(),
+                                "\tlint rule output values:\n{}",
+                                indented_serde
+                            )?;
                             Ok(())
                         })
                         .expect("print failed");
                 } else {
                     config
-                        .log_info(|_| {
-                            println!("{}\n", serde_json::to_string_pretty(&pretty_result)?);
+                        .log_info(|config| {
+                            writeln!(
+                                config.stdout(),
+                                "{}\n",
+                                serde_json::to_string_pretty(&pretty_result)?
+                            )?;
                             Ok(())
                         })
                         .expect("print failed");

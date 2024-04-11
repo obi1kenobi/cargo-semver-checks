@@ -1,7 +1,12 @@
-use anstream::{eprint, eprintln};
+use anstream::AutoStream;
 use anstyle::{AnsiColor, Color, Reset, Style};
+use std::io::Write;
 
 use crate::templating::make_handlebars_registry;
+
+// re-export this so users don't have to add the `anstream` crate directly
+// just to set color choice
+pub use anstream::ColorChoice;
 
 #[allow(dead_code)]
 pub struct GlobalConfig {
@@ -11,6 +16,8 @@ pub struct GlobalConfig {
     ///
     /// This will be used to print an error if the user's rustc version is not high enough.
     minimum_rustc_version: semver::Version,
+    stdout: AutoStream<Box<dyn Write + 'static>>,
+    stderr: AutoStream<Box<dyn Write + 'static>>,
 }
 
 impl Default for GlobalConfig {
@@ -21,10 +28,15 @@ impl Default for GlobalConfig {
 
 impl GlobalConfig {
     pub fn new() -> Self {
+        let stdout_choice = anstream::stdout().current_choice();
+        let stderr_choice = anstream::stdout().current_choice();
+
         Self {
             level: None,
             handlebars: make_handlebars_registry(),
             minimum_rustc_version: semver::Version::new(1, 74, 0),
+            stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
+            stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
         }
     }
 
@@ -106,14 +118,14 @@ impl GlobalConfig {
         justified: bool,
     ) -> anyhow::Result<()> {
         if self.is_info() {
-            eprint!("{}", Style::new().fg_color(Some(color)).bold());
+            write!(self.stderr, "{}", Style::new().fg_color(Some(color)).bold())?;
             if justified {
-                eprint!("{status:>12}");
+                write!(self.stderr, "{status:>12}")?;
             } else {
-                eprint!("{status}{}{}:", Reset, Style::new().bold());
+                write!(self.stderr, "{status}{}{}:", Reset, Style::new().bold())?;
             }
 
-            eprintln!("{} {message}", Reset);
+            writeln!(self.stderr, "{Reset} {message}")?;
         }
 
         Ok(())
@@ -134,6 +146,91 @@ impl GlobalConfig {
 
     pub fn shell_warn(&mut self, message: impl std::fmt::Display) -> anyhow::Result<()> {
         self.shell_print("warning", message, Color::Ansi(AnsiColor::Yellow), false)
+    }
+
+    /// Gets the color-supporting `stdout` that the crate will use.
+    ///
+    /// See [`GlobalConfig::set_stdout`] and [`GlobalConfig::set_out_color_choice`] to
+    /// configure this stream
+    #[must_use]
+    #[inline]
+    pub fn stdout(&mut self) -> impl Write + '_ {
+        &mut self.stdout
+    }
+
+    /// Gets the color-supporting `stderr` that the crate will use.
+    ///
+    /// See [`GlobalConfig::set_stderr`] and [`GlobalConfig::set_err_color_choice`] to
+    /// configure this stream
+    #[must_use]
+    #[inline]
+    pub fn stderr(&mut self) -> impl Write + '_ {
+        &mut self.stderr
+    }
+
+    /// Sets the stderr output stream
+    ///
+    /// Defaults to the global color choice setting in [`ColorChoice::global`].
+    /// Call [`GlobalConfig::set_err_color_choice`] to customize the color choice
+    pub fn set_stderr(&mut self, err: Box<dyn Write + 'static>) {
+        self.stderr = AutoStream::new(err, ColorChoice::global());
+    }
+
+    /// Sets the stderr output stream
+    ///
+    /// Defaults to the global color choice setting in [`ColorChoice::global`].
+    /// Call [`GlobalConfig::set_err_color_choice`] to customize the color choice
+    pub fn set_stdout(&mut self, out: Box<dyn Write + 'static>) {
+        self.stdout = AutoStream::new(out, ColorChoice::global());
+    }
+
+    /// Individually set the color choice setting for [`GlobalConfig::stderr`]
+    ///
+    /// Defaults to the global color choice in [`ColorChoice::global`], which can be set
+    /// in [`ColorChoice::write_global`] if you are using the `anstream` crate.
+    ///
+    /// See also [`GlobalConfig::set_out_color_choice`] and [`GlobalConfig::set_color_choice`]
+    pub fn set_err_color_choice(&mut self, choice: ColorChoice) {
+        // TODO - `anstream` doesn't have a good mechanism to set color choice (on one stream)
+        // without making a new object, so we have to make a new autostream, but since we need
+        // to move the `RawStream` inner, we temporarily replace it with /dev/null
+        let stderr = std::mem::replace(
+            &mut self.stderr,
+            AutoStream::never(Box::new(std::io::sink())),
+        );
+        self.stderr = AutoStream::new(stderr.into_inner(), choice);
+    }
+
+    /// Individually set the color choice setting for [`GlobalConfig::stdout`]
+    ///
+    /// Defaults to the global color choice in [`ColorChoice::global`], which can be set
+    /// in [`ColorChoice::write_global`] if you are using the `anstream` crate.
+    ///
+    /// See also [`GlobalConfig::set_err_color_choice`] and [`GlobalConfig::set_color_choice`]
+    pub fn set_out_color_choice(&mut self, choice: ColorChoice) {
+        // TODO - `anstream` doesn't have a good mechanism to set color choice (on one stream)
+        // without making a new object, so we have to make a new autostream, but since we need
+        // to move the `RawStream` inner, we temporarily replace it with /dev/null
+        let stdout = std::mem::replace(
+            &mut self.stdout,
+            AutoStream::never(Box::new(std::io::sink())),
+        );
+        self.stdout = AutoStream::new(stdout.into_inner(), choice);
+    }
+
+    /// Sets the color choice for both [`GlobalConfig::stderr`] and [`GlobalConfig::stdout`]
+    ///
+    /// Defaults to the global color choice in [`ColorChoice::global`], which can be set
+    /// in [`ColorChoice::write_global`] if you are using the `anstream` crate.
+    ///
+    /// Prefer to use [`ColorChoice::write_global`] to avoid creating new stream objects if you
+    /// don't need to configure `cargo-semver-checks` colors differently than other crates
+    /// that use `anstream` for outputting colors.
+    ///
+    /// See also [`GlobalConfig::set_err_color_choice`] and [`GlobalConfig::set_out_color_choice`]
+    pub fn set_color_choice(&mut self, choice: ColorChoice) {
+        self.set_err_color_choice(choice);
+        self.set_out_color_choice(choice);
     }
 }
 
