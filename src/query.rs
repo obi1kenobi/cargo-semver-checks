@@ -462,7 +462,7 @@ macro_rules! add_lints {
             )*
         }
 
-        fn get_queries() -> Vec<&'static str, &'static str)> {
+        fn get_queries() -> Vec<(&'static str, &'static str)> {
             vec![
                 $(
                     (stringify!($name), include_str!(concat!("lints/", stringify!($name), ".ron"))),
