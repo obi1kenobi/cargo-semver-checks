@@ -176,10 +176,10 @@ impl GlobalConfig {
         self.stderr = AutoStream::new(err, ColorChoice::global());
     }
 
-    /// Sets the stderr output stream
+    /// Sets the stdout output stream
     ///
     /// Defaults to the global color choice setting in [`ColorChoice::global`].
-    /// Call [`GlobalConfig::set_err_color_choice`] to customize the color choice
+    /// Call [`GlobalConfig::set_out_color_choice`] to customize the color choice
     pub fn set_stdout(&mut self, out: Box<dyn Write + 'static>) {
         self.stdout = AutoStream::new(out, ColorChoice::global());
     }
@@ -236,7 +236,60 @@ impl GlobalConfig {
 
 #[cfg(test)]
 mod tests {
+    use std::{
+        io::{Cursor, Read, Seek},
+        rc::Rc,
+        sync::Mutex,
+    };
+
     use super::*;
+    use ColorChoice::*;
+
+    /// helper struct to implement `Write + 'static` while keeping
+    /// view access to an underlying buffer
+    ///
+    /// Uses [`Mutex::try_lock`] so no calls should block even though it is a mutex
+    #[derive(Debug, Clone, Default)]
+    struct SharedBuffer(Rc<Mutex<Cursor<Vec<u8>>>>);
+
+    impl SharedBuffer {
+        fn new() -> Self {
+            Default::default()
+        }
+    }
+
+    impl Write for SharedBuffer {
+        fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+            self.0.try_lock().expect("mutex locked").write(buf)
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            self.0.try_lock().expect("mutex locked").flush()
+        }
+    }
+
+    /// asserts that there must be color/no color, based on the truth of `COLOR`,
+    /// in the given stream, given a copy of the buffer it links to
+    fn expect_color<const COLOR: bool>(mut stream: impl Write, buf: SharedBuffer) {
+        let expected: &[u8] = if COLOR {
+            b"\x1b[1mcolor!\x1b[0m"
+        } else {
+            b"color!"
+        };
+
+        write!(stream, "{}color!{}", Style::new().bold(), Reset).expect("error writing");
+        let mut grd = buf.0.try_lock().expect("mutex locked");
+
+        grd.rewind().expect("error rewinding");
+        let mut data = Vec::new();
+        grd.read_to_end(&mut data).expect("error reading");
+
+        assert_eq!(
+            data, expected,
+            "expected color: {}; found color: {}",
+            COLOR, !COLOR
+        );
+    }
 
     #[test]
     fn test_log_level_info() {
@@ -276,5 +329,67 @@ mod tests {
         assert!(!config.is_info());
         assert!(!config.is_verbose());
         assert!(!config.is_extra_verbose());
+    }
+
+    #[test]
+    fn test_set_color_choice() {
+        fn assert_set_color<const COLOR: bool>(choice: ColorChoice) {
+            let mut config = GlobalConfig::new();
+
+            let out = SharedBuffer::new();
+            let err = SharedBuffer::new();
+            config.set_stdout(Box::new(out.clone()));
+            config.set_stderr(Box::new(err.clone()));
+
+            config.set_color_choice(choice);
+
+            expect_color::<COLOR>(config.stdout(), out);
+            expect_color::<COLOR>(config.stderr(), err);
+        }
+
+        assert_set_color::<true>(Always);
+        assert_set_color::<true>(AlwaysAnsi);
+        // a SharedBuffer is not a tty, so it should default to no colors.
+        // TODO: is this test sound?
+        assert_set_color::<false>(Auto);
+        assert_set_color::<false>(Never);
+    }
+
+    #[test]
+    fn test_set_out_color_choice() {
+        fn assert_set_out_color<const COLOR: bool>(choice: ColorChoice) {
+            let mut config = GlobalConfig::new();
+
+            let out = SharedBuffer::new();
+            config.set_stdout(Box::new(out.clone()));
+
+            config.set_color_choice(choice);
+
+            expect_color::<COLOR>(config.stdout(), out);
+        }
+
+        assert_set_out_color::<true>(Always);
+        assert_set_out_color::<true>(AlwaysAnsi);
+        assert_set_out_color::<false>(Auto);
+        assert_set_out_color::<false>(Never);
+    }
+
+    #[test]
+    fn test_set_err_color_choice() {
+        fn assert_set_err_color<const COLOR: bool>(choice: ColorChoice) {
+            let mut config = GlobalConfig::new();
+
+            let err = SharedBuffer::new();
+            config.set_stderr(Box::new(err.clone()));
+
+            config.set_color_choice(choice);
+
+            expect_color::<COLOR>(config.stderr(), err);
+        }
+
+        assert_set_err_color::<true>(Always);
+        assert_set_err_color::<true>(AlwaysAnsi);
+        assert_set_err_color::<false>(Auto);
+        assert_set_err_color::<false>(Never);
     }
 }
