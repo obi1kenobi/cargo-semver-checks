@@ -233,17 +233,14 @@ pub(super) fn run_check_release(
 
             if let Some(ref_link) = semver_query.reference_link.as_deref() {
                 config.log_info(|config| {
-                    writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} {}\n",
+                    writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
                         Style::new().bold(), Reset,
                         &semver_query.error_message,
                         "ref:",
                         ref_link,
                         "impl:",
-                        format!(
-                            "https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
-                            crate_version!(),
-                            semver_query.id,
-                        )
+                        crate_version!(),
+                        semver_query.id,
                     )?;
                     Ok(())
                 })
@@ -252,16 +249,13 @@ pub(super) fn run_check_release(
                 config.log_info(|config| {
                     writeln!(
                         config.stdout(),
-                        "{}Description:{}\n{}\n{:>12} {}\n",
+                        "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
                         Style::new().bold(),
                         Reset,
                         &semver_query.error_message,
                         "impl:",
-                        format!(
-                            "https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
-                            crate_version!(),
-                            semver_query.id,
-                        )
+                        crate_version!(),
+                        semver_query.id,
                     )?;
                     Ok(())
                 })
