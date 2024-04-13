@@ -33,7 +33,12 @@ fn proc_macro_target() {
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .env_remove("RUST_BACKTRACE")
         .assert()
-        .stderr("error: no crates with library targets selected, nothing to semver-check\n")
+        .stderr(
+            "\
+error: no crates with library targets selected, nothing to semver-check
+note: only library targets contain an API surface that can be checked for semver
+note: skipped the following crates since they have no library target: proc_macro_crate\n",
+        )
         .failure();
 }
 
@@ -46,7 +51,12 @@ fn bin_target_only() {
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .env_remove("RUST_BACKTRACE")
         .assert()
-        .stderr("error: no crates with library targets selected, nothing to semver-check\n")
+        .stderr(
+            "\
+error: no crates with library targets selected, nothing to semver-check
+note: only library targets contain an API surface that can be checked for semver
+note: skipped the following crates since they have no library target: bin_target_only\n",
+        )
         .failure();
 }
 
@@ -149,7 +159,12 @@ fn crate_in_workspace() {
         ])
         .env_remove("RUST_BACKTRACE")
         .assert()
-        .stderr("error: no crates with library targets selected, nothing to semver-check\n")
+        .stderr(
+            "\
+error: no crates with library targets selected, nothing to semver-check
+note: only library targets contain an API surface that can be checked for semver
+note: skipped the following crates since they have no library target: non_lib_crate\n",
+        )
         .failure();
 }
 
