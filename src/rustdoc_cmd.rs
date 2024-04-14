@@ -131,17 +131,12 @@ impl RustdocCommand {
             cmd.arg("--no-deps");
         }
 
-        // TODO
-        let color_choice = match anstream::stderr().current_choice() {
-            ColorChoice::Always | ColorChoice::AlwaysAnsi => "--color=always",
-            ColorChoice::Auto if anstream::stderr().is_terminal() => "--color=always",
-            ColorChoice::Auto | ColorChoice::Never => "--color=never",
-        };
-
-        cmd.arg(color_choice);
-        // if config.is_stderr_tty() {
-        //    cmd.arg("--color=always");
-        // }
+        // since we write the stderr of the process to our stderr,
+        // our color preferences will be automatically applied when we write
+        // the process's stderr to our stderr, as long as we have color
+        // i.e., if we set no color output in `GlobalConfig`, when we write
+        // the child stderr to ours, its colors will be automatically stripped
+        cmd.arg("--color=always");
 
         let output = cmd.output()?;
         if !output.status.success() {
