@@ -13,6 +13,7 @@ use anyhow::Context;
 use cargo_metadata::PackageId;
 use clap::ValueEnum;
 use directories::ProjectDirs;
+use itertools::Itertools;
 
 use check_release::run_check_release;
 use rustdoc_gen::CrateDataForRustdoc;
@@ -174,10 +175,14 @@ pub enum ScopeSelection {
 }
 
 impl Scope {
+    /// Returns `(selected, skipped)` packages
     fn selected_packages<'m>(
         &self,
         meta: &'m cargo_metadata::Metadata,
-    ) -> Vec<&'m cargo_metadata::Package> {
+    ) -> (
+        Vec<&'m cargo_metadata::Package>,
+        Vec<&'m cargo_metadata::Package>,
+    ) {
         let workspace_members: HashSet<&PackageId> = meta.workspace_members.iter().collect();
         let base_ids: HashSet<&PackageId> = match &self.mode {
             ScopeMode::DenyList(PackageSelection {
@@ -220,11 +225,10 @@ impl Scope {
         meta.packages
             .iter()
             .filter(|&p| {
-                // The package has to not have been explicitly excluded,
-                // and also has to have a library target (an API we can check).
-                base_ids.contains(&p.id) && p.targets.iter().any(is_lib_like_checkable_target)
+                // The package has to not have been explicitly excluded
+                base_ids.contains(&p.id)
             })
-            .collect()
+            .partition(|&p| p.targets.iter().any(is_lib_like_checkable_target))
     }
 }
 
@@ -478,10 +482,20 @@ impl Check {
             }
             RustdocSource::Root(project_root) => {
                 let metadata = manifest_metadata(project_root)?;
-                let selected = self.scope.selected_packages(&metadata);
+                let (selected, skipped) = self.scope.selected_packages(&metadata);
                 if selected.is_empty() {
+                    let help = if skipped.is_empty() {
+                        "".to_string()
+                    } else {
+                        let skipped = skipped.iter().map(|&p| &p.name).join(", ");
+                        format!(
+                            "
+note: only library targets contain an API surface that can be checked for semver
+note: skipped the following crates since they have no library target: {skipped}"
+                        )
+                    };
                     anyhow::bail!(
-                        "no crates with library targets selected, nothing to semver-check"
+                        "no crates with library targets selected, nothing to semver-check{help}"
                     );
                 }
 

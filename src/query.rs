@@ -506,6 +506,7 @@ add_lints!(
     function_now_doc_hidden,
     function_parameter_count_changed,
     function_unsafe_added,
+    inherent_associated_pub_const_missing,
     inherent_method_const_removed,
     inherent_method_missing,
     inherent_method_must_use_added,
