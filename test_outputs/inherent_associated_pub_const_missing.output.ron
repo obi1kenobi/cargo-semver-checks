@@ -29,7 +29,7 @@
                 String("inherent_associated_pub_const_missing"),
                 String("StructE"),
             ]),
-            "span_begin_line": Uint64(50),
+            "span_begin_line": Uint64(52),
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },

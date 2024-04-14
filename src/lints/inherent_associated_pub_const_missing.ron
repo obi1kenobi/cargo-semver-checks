@@ -50,7 +50,6 @@ SemverQuery(
                             }
                         }
                         
-                        or:
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             implemented_trait {
                                 trait {

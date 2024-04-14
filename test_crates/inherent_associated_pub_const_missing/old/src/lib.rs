@@ -34,6 +34,8 @@ impl StructC {
 
 pub struct StructD {}
 
+// The constants in this block shouldn't be flagged as removed,
+// since they are `#[doc(hidden)]` as a result of the block itself.
 #[doc(hidden)]
 impl StructD {
     pub const PublicConstantE: i32 = 0;
