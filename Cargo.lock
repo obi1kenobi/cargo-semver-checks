@@ -296,7 +296,6 @@ dependencies = [
  "clap",
  "clap-cargo",
  "clap-verbosity-flag",
- "colorchoice-clap",
  "directories",
  "gix",
  "handlebars",
@@ -436,16 +435,6 @@ name = "colorchoice"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acbf1af155f9b9ef647e42cdc158db4b64a1b61f743629225fde6f3e0be2a7c7"
-
-[[package]]
-name = "colorchoice-clap"
-version = "1.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6fe9ad5d064caf028aeb50818a5c7857c28f746ad04111652b85d9bca8b0d0be"
-dependencies = [
- "clap",
- "colorchoice",
-]
 
 [[package]]
 name = "console"

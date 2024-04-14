@@ -2,7 +2,6 @@
 
 use std::{env, path::PathBuf};
 
-use anstream::ColorChoice;
 use cargo_semver_checks::{
     GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
 };
@@ -13,7 +12,7 @@ fn main() {
 
     let Cargo::SemverChecks(args) = Cargo::parse();
 
-    configure_color(args.color_choice.as_choice());
+    configure_color(args.color_choice);
 
     if args.bugreport {
         use bugreport::{bugreport, collector::*, format::Markdown};
@@ -112,25 +111,29 @@ fn exit_on_error<T>(log_errors: bool, inner: impl Fn() -> anyhow::Result<T>) -> 
 
 /// helper function to determine whether to use colors based on the (passed) `--color` flag
 /// and the value of the `CARGO_TERM_COLOR` variable.
-fn configure_color(cli_choice: ColorChoice) {
-    // if the --color flag is explicitly set to something other than `auto`,
-    // this takes precedence over the environment variable, so we write that
-    if cli_choice != ColorChoice::Auto {
-        cli_choice.write_global();
-    } else {
+///
+/// If the `--color` flag is set to something valid, it overrides anything in
+/// the `CARGO_TERM_COLOR` environment variable
+fn configure_color(cli_choice: Option<clap::ColorChoice>) {
+    use anstream::ColorChoice as AnstreamChoice;
+    use clap::ColorChoice as ClapChoice;
+    let choice = match cli_choice {
+        Some(ClapChoice::Always) => AnstreamChoice::Always,
+        Some(ClapChoice::Auto) => AnstreamChoice::Auto,
+        Some(ClapChoice::Never) => AnstreamChoice::Never,
         // we match the behavior of cargo in
         // https://doc.rust-lang.org/cargo/reference/config.html#termcolor
         // note that [`ColorChoice::AlwaysAnsi`] is not supported by cargo.
-        match env::var("CARGO_TERM_COLOR").as_deref() {
-            Ok("always") => ColorChoice::Always.write_global(),
-            Ok("never") => ColorChoice::Never.write_global(),
-            // note: the default global color value is `Auto`
-            Ok("auto") => ColorChoice::Auto.write_global(),
-            // ignore invalid or not set environment variables,
-            // color choice will default to `Auto`
-            _ => (),
-        };
-    }
+        None => match env::var("CARGO_TERM_COLOR").as_deref() {
+            Ok("always") => AnstreamChoice::Always,
+            Ok("never") => AnstreamChoice::Never,
+            // if `auto` is set, or the env var is invalid
+            // or both the env var and flag are not set, we set the choice to auto
+            _ => AnstreamChoice::Auto,
+        },
+    };
+
+    choice.write_global();
 }
 
 #[derive(Debug, Parser)]
@@ -159,9 +162,11 @@ struct SemverChecks {
     #[command(subcommand)]
     command: Option<SemverChecksCommands>,
 
-    // docstring for help is on the `colorchoice_clap::Color` struct itself
-    #[command(flatten)]
-    color_choice: colorchoice_clap::Color,
+    // we need to use clap::ColorChoice instead of anstream::ColorChoice
+    // because ValueEnum is implemented for it.
+    /// Choose whether to output colors
+    #[arg(long = "color", global = true, value_name = "WHEN", value_enum)]
+    color_choice: Option<clap::ColorChoice>,
 }
 
 /// Check your crate for semver violations.

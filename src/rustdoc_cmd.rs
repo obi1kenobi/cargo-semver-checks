@@ -1,7 +1,6 @@
 use std::io::Write as _;
 use std::path::{Path, PathBuf};
 
-use anstream::ColorChoice;
 use anyhow::Context;
 use itertools::Itertools as _;
 
