@@ -1,12 +1,8 @@
-use anstream::AutoStream;
+use anstream::{AutoStream, ColorChoice};
 use anstyle::{AnsiColor, Color, Reset, Style};
 use std::io::Write;
 
 use crate::templating::make_handlebars_registry;
-
-// re-export this so users don't have to add the `anstream` crate directly
-// just to set color choice
-pub use anstream::ColorChoice;
 
 #[allow(dead_code)]
 pub struct GlobalConfig {
@@ -27,6 +23,11 @@ impl Default for GlobalConfig {
 }
 
 impl GlobalConfig {
+    /// Creates a new `GlobalConfig` instance.
+    ///
+    /// Reads color choice from the value set by [`ColorChoice::write_global`] at the time
+    /// of creation; see [`GlobalConfig::set_color_choice`] for finer-grained control over
+    /// `cargo-semver-checks`'s color output
     pub fn new() -> Self {
         let stdout_choice = anstream::stdout().current_choice();
         let stderr_choice = anstream::stdout().current_choice();
@@ -170,18 +171,20 @@ impl GlobalConfig {
 
     /// Sets the stderr output stream
     ///
-    /// Defaults to the global color choice setting in [`ColorChoice::global`].
-    /// Call [`GlobalConfig::set_err_color_choice`] to customize the color choice
+    /// Defaults to the global color choice setting set by [`ColorChoice::write_global`]
+    /// *at the time of calling `set_stderr`*.
+    /// Call [`GlobalConfig::set_err_color_choice`] to customize the color choice after if needed.
     pub fn set_stderr(&mut self, err: Box<dyn Write + 'static>) {
-        self.stderr = AutoStream::new(err, ColorChoice::global());
+        self.stderr = AutoStream::auto(err);
     }
 
     /// Sets the stdout output stream
     ///
-    /// Defaults to the global color choice setting in [`ColorChoice::global`].
-    /// Call [`GlobalConfig::set_out_color_choice`] to customize the color choice
+    /// Defaults to the global color choice setting set by [`ColorChoice::write_global`].
+    /// *at the time of calling `set_stdout`*.
+    /// Call [`GlobalConfig::set_out_color_choice`] to customize the color choice after if needed.
     pub fn set_stdout(&mut self, out: Box<dyn Write + 'static>) {
-        self.stdout = AutoStream::new(out, ColorChoice::global());
+        self.stdout = AutoStream::auto(out);
     }
 
     /// Individually set the color choice setting for [`GlobalConfig::stderr`]
@@ -190,7 +193,7 @@ impl GlobalConfig {
     /// in [`ColorChoice::write_global`] if you are using the `anstream` crate.
     ///
     /// See also [`GlobalConfig::set_out_color_choice`] and [`GlobalConfig::set_color_choice`]
-    pub fn set_err_color_choice(&mut self, choice: ColorChoice) {
+    pub fn set_err_color_choice(&mut self, use_color: bool) {
         // TODO - `anstream` doesn't have a good mechanism to set color choice (on one stream)
         // without making a new object, so we have to make a new autostream, but since we need
         // to move the `RawStream` inner, we temporarily replace it with /dev/null
@@ -198,7 +201,14 @@ impl GlobalConfig {
             &mut self.stderr,
             AutoStream::never(Box::new(std::io::sink())),
         );
-        self.stderr = AutoStream::new(stderr.into_inner(), choice);
+        self.stderr = AutoStream::new(
+            stderr.into_inner(),
+            if use_color {
+                ColorChoice::Always
+            } else {
+                ColorChoice::Never
+            },
+        );
     }
 
     /// Individually set the color choice setting for [`GlobalConfig::stdout`]
@@ -207,7 +217,7 @@ impl GlobalConfig {
     /// in [`ColorChoice::write_global`] if you are using the `anstream` crate.
     ///
     /// See also [`GlobalConfig::set_err_color_choice`] and [`GlobalConfig::set_color_choice`]
-    pub fn set_out_color_choice(&mut self, choice: ColorChoice) {
+    pub fn set_out_color_choice(&mut self, use_color: bool) {
         // TODO - `anstream` doesn't have a good mechanism to set color choice (on one stream)
         // without making a new object, so we have to make a new autostream, but since we need
         // to move the `RawStream` inner, we temporarily replace it with /dev/null
@@ -215,22 +225,25 @@ impl GlobalConfig {
             &mut self.stdout,
             AutoStream::never(Box::new(std::io::sink())),
         );
-        self.stdout = AutoStream::new(stdout.into_inner(), choice);
+        self.stdout = AutoStream::new(
+            stdout.into_inner(),
+            if use_color {
+                ColorChoice::Always
+            } else {
+                ColorChoice::Never
+            },
+        );
     }
 
     /// Sets the color choice for both [`GlobalConfig::stderr`] and [`GlobalConfig::stdout`]
     ///
-    /// Defaults to the global color choice in [`ColorChoice::global`], which can be set
-    /// in [`ColorChoice::write_global`] if you are using the `anstream` crate.
-    ///
-    /// Prefer to use [`ColorChoice::write_global`] to avoid creating new stream objects if you
-    /// don't need to configure `cargo-semver-checks` colors differently than other crates
-    /// that use `anstream` for outputting colors.
+    /// If not set, defaults to the value in [`ColorChoice::global`] at the time the streams
+    /// are set using [`GlobalConfig::set_stdout`] and `err`, which can be set beforehand
     ///
     /// See also [`GlobalConfig::set_err_color_choice`] and [`GlobalConfig::set_out_color_choice`]
-    pub fn set_color_choice(&mut self, choice: ColorChoice) {
-        self.set_err_color_choice(choice);
-        self.set_out_color_choice(choice);
+    pub fn set_color_choice(&mut self, use_color: bool) {
+        self.set_err_color_choice(use_color);
+        self.set_out_color_choice(use_color);
     }
 }
 
@@ -243,7 +256,6 @@ mod tests {
     };
 
     use super::*;
-    use ColorChoice::*;
 
     /// helper struct to implement `Write + 'static` while keeping
     /// view access to an underlying buffer
@@ -254,7 +266,7 @@ mod tests {
 
     impl SharedBuffer {
         fn new() -> Self {
-            Default::default()
+            Self::default()
         }
     }
 
@@ -268,10 +280,10 @@ mod tests {
         }
     }
 
-    /// asserts that there must be color/no color, based on the truth of `COLOR`,
+    /// asserts that there must be color/no color, based on the truth of `color`,
     /// in the given stream, given a copy of the buffer it links to
-    fn expect_color<const COLOR: bool>(mut stream: impl Write, buf: SharedBuffer) {
-        let expected: &[u8] = if COLOR {
+    fn expect_color(mut stream: impl Write, buf: SharedBuffer, color: bool) {
+        let expected: &[u8] = if color {
             b"\x1b[1mcolor!\x1b[0m"
         } else {
             b"color!"
@@ -287,8 +299,31 @@ mod tests {
         assert_eq!(
             data, expected,
             "expected color: {}; found color: {}",
-            COLOR, !COLOR
+            color, !color
         );
+    }
+
+    fn assert_color_choice(
+        make_choice: impl Fn(&mut GlobalConfig),
+        stdout_color: Option<bool>,
+        stderr_color: Option<bool>,
+    ) {
+        let mut config = GlobalConfig::new();
+
+        let out = SharedBuffer::new();
+        let err = SharedBuffer::new();
+        config.set_stdout(Box::new(out.clone()));
+        config.set_stderr(Box::new(err.clone()));
+
+        make_choice(&mut config);
+
+        if let Some(stdout_color) = stdout_color {
+            expect_color(config.stdout(), out, stdout_color);
+        }
+
+        if let Some(stderr_color) = stderr_color {
+            expect_color(config.stderr(), err, stderr_color);
+        }
     }
 
     #[test]
@@ -333,63 +368,50 @@ mod tests {
 
     #[test]
     fn test_set_color_choice() {
-        fn assert_set_color<const COLOR: bool>(choice: ColorChoice) {
-            let mut config = GlobalConfig::new();
-
-            let out = SharedBuffer::new();
-            let err = SharedBuffer::new();
-            config.set_stdout(Box::new(out.clone()));
-            config.set_stderr(Box::new(err.clone()));
-
-            config.set_color_choice(choice);
-
-            expect_color::<COLOR>(config.stdout(), out);
-            expect_color::<COLOR>(config.stderr(), err);
-        }
-
-        assert_set_color::<true>(Always);
-        assert_set_color::<true>(AlwaysAnsi);
-        // a SharedBuffer is not a tty, so it should default to no colors.
-        // TODO: is this test sound?
-        assert_set_color::<false>(Auto);
-        assert_set_color::<false>(Never);
+        assert_color_choice(
+            |config| config.set_color_choice(false),
+            Some(false),
+            Some(false),
+        );
+        assert_color_choice(
+            |config| config.set_color_choice(true),
+            Some(true),
+            Some(true),
+        );
     }
 
     #[test]
     fn test_set_out_color_choice() {
-        fn assert_set_out_color<const COLOR: bool>(choice: ColorChoice) {
-            let mut config = GlobalConfig::new();
-
-            let out = SharedBuffer::new();
-            config.set_stdout(Box::new(out.clone()));
-
-            config.set_color_choice(choice);
-
-            expect_color::<COLOR>(config.stdout(), out);
-        }
-
-        assert_set_out_color::<true>(Always);
-        assert_set_out_color::<true>(AlwaysAnsi);
-        assert_set_out_color::<false>(Auto);
-        assert_set_out_color::<false>(Never);
+        assert_color_choice(
+            |config| config.set_out_color_choice(false),
+            Some(false),
+            None,
+        );
+        assert_color_choice(|config| config.set_out_color_choice(true), Some(true), None);
     }
 
     #[test]
     fn test_set_err_color_choice() {
-        fn assert_set_err_color<const COLOR: bool>(choice: ColorChoice) {
-            let mut config = GlobalConfig::new();
+        assert_color_choice(
+            |config| config.set_err_color_choice(false),
+            None,
+            Some(false),
+        );
+        assert_color_choice(|config| config.set_err_color_choice(true), None, Some(true));
+    }
 
-            let err = SharedBuffer::new();
-            config.set_stderr(Box::new(err.clone()));
+    #[test]
+    fn test_set_global_color_choice() {
+        ColorChoice::Always.write_global();
+        assert_color_choice(|_| (), Some(true), Some(true));
 
-            config.set_color_choice(choice);
+        ColorChoice::AlwaysAnsi.write_global();
+        assert_color_choice(|_| (), Some(true), Some(true));
 
-            expect_color::<COLOR>(config.stderr(), err);
-        }
+        ColorChoice::Never.write_global();
+        assert_color_choice(|_| (), Some(false), Some(false));
 
-        assert_set_err_color::<true>(Always);
-        assert_set_err_color::<true>(AlwaysAnsi);
-        assert_set_err_color::<false>(Auto);
-        assert_set_err_color::<false>(Never);
+        // we don't test `ColorChoice::Auto` because it's not the most sound, as it depends on the
+        // tty status of the output.
     }
 }
