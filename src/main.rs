@@ -13,7 +13,7 @@ fn main() {
 
     let Cargo::SemverChecks(args) = Cargo::parse();
 
-    configure_color(args.color_choice);
+    configure_color(args.color_choice.as_choice());
 
     if args.bugreport {
         use bugreport::{bugreport, collector::*, format::Markdown};
@@ -112,20 +112,24 @@ fn exit_on_error<T>(log_errors: bool, inner: impl Fn() -> anyhow::Result<T>) -> 
 
 /// helper function to determine whether to use colors based on the (passed) `--color` flag
 /// and the value of the `CARGO_TERM_COLOR` variable.
-fn configure_color(cli_choice: colorchoice_clap::Color) {
-    cli_choice.write_global();
-    // if it is still auto (i.e., user passed `--color=auto` or omitted the flag entirely),
-    // we check the env var.  otherwise, the flag takes precedence over whatever the env var is
-    if ColorChoice::global() == ColorChoice::Auto {
+fn configure_color(cli_choice: ColorChoice) {
+    // if the --color flag is explicitly set to something other than `auto`,
+    // this takes precedence over the environment variable, so we write that
+    if cli_choice != ColorChoice::Auto {
+        cli_choice.write_global();
+    } else {
+        // we match the behavior of cargo in
         // https://doc.rust-lang.org/cargo/reference/config.html#termcolor
-        // we don't need to support `always-ansi`; that is more of an implementation detail
-        // and it is not recognized by cargo proper either.
+        // note that [`ColorChoice::AlwaysAnsi`] is not supported by cargo.
         match env::var("CARGO_TERM_COLOR").as_deref() {
             Ok("always") => ColorChoice::Always.write_global(),
             Ok("never") => ColorChoice::Never.write_global(),
-            // we don't need to test for `Auto`, since it is already set
+            // note: the default global color value is `Auto`
+            Ok("auto") => ColorChoice::Auto.write_global(),
+            // ignore invalid or not set environment variables,
+            // color choice will default to `Auto`
             _ => (),
-        }
+        };
     }
 }
 
