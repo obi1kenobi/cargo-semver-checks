@@ -194,7 +194,7 @@ impl GlobalConfig {
     ///
     /// See also [`GlobalConfig::set_out_color_choice`] and [`GlobalConfig::set_color_choice`]
     pub fn set_err_color_choice(&mut self, use_color: bool) {
-        // TODO - `anstream` doesn't have a good mechanism to set color choice (on one stream)
+        // `anstream` doesn't have a good mechanism to set color choice (on one stream)
         // without making a new object, so we have to make a new autostream, but since we need
         // to move the `RawStream` inner, we temporarily replace it with /dev/null
         let stderr = std::mem::replace(
@@ -218,7 +218,7 @@ impl GlobalConfig {
     ///
     /// See also [`GlobalConfig::set_err_color_choice`] and [`GlobalConfig::set_color_choice`]
     pub fn set_out_color_choice(&mut self, use_color: bool) {
-        // TODO - `anstream` doesn't have a good mechanism to set color choice (on one stream)
+        // `anstream` doesn't have a good mechanism to set color choice (on one stream)
         // without making a new object, so we have to make a new autostream, but since we need
         // to move the `RawStream` inner, we temporarily replace it with /dev/null
         let stdout = std::mem::replace(
@@ -411,7 +411,7 @@ mod tests {
         ColorChoice::Never.write_global();
         assert_color_choice(|_| (), Some(false), Some(false));
 
-        // we don't test `ColorChoice::Auto` because it's not the most sound, as it depends on the
-        // tty status of the output.
+        // We don't test `ColorChoice::Auto` because it depends on the tty status of the output,
+        // which could lead to a flaky test depending on where and how the test is executed.
     }
 }
