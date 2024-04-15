@@ -1,0 +1,194 @@
+# Automatically add Rust minor versions to our test matrix as they are released.
+#
+# Note: we use `stable` to refer to the most recent stable Rust release.
+# This means that when a new Rust minor version is released, this job will add
+# the *previous* (already-existing) minor version to the test matrix. The newly-released
+# version is `stable` so it's automatically part of the test matrix.
+
+---
+name: Add next Rust minor to test matrix
+on:
+  schedule:
+    # Run weekly early in the morning on Mondays.
+    - cron: '37 03 * * MON'
+  workflow_dispatch:
+    # Needed so we can run it manually
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+env:
+  PR_TITLE: Add next Rust minor to test matrix
+  PR_MESSAGE: |
+    Automation to ensure we test on all supported Rust versions as new stable Rust versions are released.
+
+    The following is the output from `git diff`:
+
+jobs:
+  update-ci-yml:
+    if: github.repository_owner == 'obi1kenobi'
+    name: update Rust version matrix
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout the source code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: download yq
+        env:
+          VERSION: "v4.43.1"
+        run: |
+          set -euxo pipefail
+          wget "https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_linux_amd64" -O yq &&\
+            chmod +x ./yq
+
+      - name: check if the new Rust release is out
+        run: |
+          set -euxo pipefail
+          UPCOMING="$(yq '.jobs.rust-tests.strategy.matrix.toolchain as $versions |
+              [$versions[] | select(. != "beta" and . != "stable")] as $numerical_versions |
+              [$versions[] | select(. == "beta" or . == "stable")] as $non_numerical_versions |
+              (
+                  [$numerical_versions[] | sub("\d+\.(\d+)(?:\.\d+)?", "${1}") | to_number]
+                  | sort
+                  | .[-1]
+              ) as $max_named_minor |
+              "1.\($max_named_minor + 2).0"
+            ' .github/workflows/ci.yml)"
+
+          # This line will fail if that release isn't out yet.
+          wget "https://github.com/rust-lang/rust/releases/tag/${UPCOMING}" --server-response -O /dev/null
+
+      - name: add next minor to test matrix
+        run: |
+          set -euxo pipefail
+
+          yq '.jobs.rust-tests.strategy.matrix.toolchain' .github/workflows/ci.yml -o json | \
+            python -m json.tool --compact | \
+            sed 's/,/, /g' \
+            >.current_versions
+
+          yq '.jobs.rust-tests.strategy.matrix.toolchain as $versions |
+              [$versions[] | select(. != "beta" and . != "stable")] as $numerical_versions |
+              [$versions[] | select(. == "beta" or . == "stable")] as $non_numerical_versions |
+              (
+                  [$numerical_versions[] | sub("\d+\.(\d+)(?:\.\d+)?", "${1}") | to_number]
+                  | sort
+                  | .[-1]
+              ) as $max_named_minor |
+              [$numerical_versions[], "1.\($max_named_minor + 1)", $non_numerical_versions[]] as $next_versions |
+              $next_versions
+            ' .github/workflows/ci.yml -o json | \
+            python -m json.tool --compact | \
+            sed 's/,/, /g' \
+            >.next_versions
+
+          CURRENT="$(cat .current_versions | sed 's/^/\\/g' | sed 's/\]/\\]/g')"
+          NEXT="$(cat .next_versions)"
+
+          sed -i "s/$CURRENT/$NEXT/g" .github/workflows/ci.yml
+
+      - name: upload ci.yml artifact for use in PR
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci.yml
+          path: .github/workflows/ci.yml
+          retention-days: 1
+
+  pr-ci-yml:
+    if: github.repository_owner == 'obi1kenobi'
+    name: open or amend PR
+    needs: update-ci-yml
+    runs-on: ubuntu-latest
+    env:
+      BRANCH_NAME: add_new_rust_to_matrix
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: checkout the source code
+        uses: actions/checkout@v4
+        with:
+          # We have to use a Personal Access Token (PAT) here.
+          # We are going to open a PR with changes to workflows, which requires a special permission
+          # that normal GitHub Actions runs don't have.
+          token: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
+          persist-credentials: true
+
+      - name: download ci.yml from update job
+        uses: actions/download-artifact@v4
+        with:
+          name: ci.yml
+          path: .github/workflows/
+
+      - name: craft PR body and commit message
+        run: |
+          set -euo pipefail
+
+          DIFF="$(git diff)"
+
+          echo "${PR_MESSAGE}" > body.md
+          echo '```diff' >> body.md
+          echo "$DIFF" >> body.md
+          echo '```' >> body.md
+
+      - name: commit
+        run: |
+          set -euxo pipefail
+
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git switch --force-create "$BRANCH_NAME"
+          git add ./.github/workflows/ci.yml
+          DIFF="$(git diff --staged)"
+          if [[ "$DIFF" == "" ]]; then
+            echo >2 "./.github/workflows/ci.yml was not changed, bailing out and not making a PR"
+            exit 1
+          fi
+          git commit --no-verify --file=body.md
+
+      - name: push
+        run: |
+          set -euo pipefail
+          git push --no-verify --force --set-upstream origin "$BRANCH_NAME"
+
+      - name: edit existing open pull request
+        id: edit
+        # Don't fail job if we need to open new PR
+        continue-on-error: true
+        env:
+          # We have to use a Personal Access Token (PAT) here.
+          # PRs opened from a workflow using the standard `GITHUB_TOKEN` in GitHub Actions
+          # do not automatically trigger more workflows:
+          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+          GITHUB_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Exit with error if PR is closed
+          STATE="$(gh pr view "$BRANCH_NAME" --repo "$GITHUB_REPOSITORY" --json state --jq '.state')"
+          if [[ "$STATE" != "OPEN" ]]; then
+            exit 1
+          fi
+
+          gh pr edit "$BRANCH_NAME" --title "${PR_TITLE}" --body-file body.md --repo "$GITHUB_REPOSITORY"
+
+      - name: open new pull request
+        # Only run if there wasn't an existing PR
+        if: steps.edit.outcome != 'success'
+        env:
+          # We have to use a Personal Access Token (PAT) here.
+          # PRs opened from a workflow using the standard `GITHUB_TOKEN` in GitHub Actions
+          # do not automatically trigger more workflows:
+          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+          GITHUB_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh pr create --title "${PR_TITLE}" --body-file body.md --repo "$GITHUB_REPOSITORY"
+
+      # - name: set PR to auto-merge
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: gh pr merge --squash --auto --delete-branch
