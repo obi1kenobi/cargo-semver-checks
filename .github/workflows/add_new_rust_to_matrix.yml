@@ -39,10 +39,10 @@ jobs:
 
       - name: download yq
         env:
-          VERSION: "v4.2.0"
+          VERSION: "v4.43.1"
         run: |
           set -euxo pipefail
-          wget "https://github.com/mikefarah/yq/releases/${VERSION}/download/yq_linux_amd64" -O yq &&\
+          wget "https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_linux_amd64" -O yq &&\
             chmod +x ./yq
 
       - name: add next minor to test matrix
