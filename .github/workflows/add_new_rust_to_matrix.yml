@@ -130,6 +130,10 @@ jobs:
           git commit --no-verify --file=body.md
 
       - name: push
+        env:
+          # We have to use a Personal Access Token (PAT) here.
+          # Pushing a branch that changes workflow files requires the `workflows` PAT permission.
+          GITHUB_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           git push --no-verify --force --set-upstream origin "$BRANCH_NAME"
