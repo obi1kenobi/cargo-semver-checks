@@ -101,6 +101,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ci.yml
+          path: .github/workflows/ci.yml
 
       - name: craft PR body and commit message
         run: |
@@ -115,7 +116,7 @@ jobs:
 
       - name: commit
         run: |
-          set -euo pipefail
+          set -euxo pipefail
 
           git config user.name github-actions
           git config user.email github-actions@github.com
