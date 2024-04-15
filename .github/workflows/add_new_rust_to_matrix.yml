@@ -135,7 +135,7 @@ jobs:
       - name: push
         run: |
           set -euo pipefail
-          git push "https://${USERNAME}:${GITHUB_TOKEN}@github.com/obi1kenobi/cargo-semver-checks.git" --no-verify --force "$BRANCH_NAME"
+          git push --no-verify --force --set-upstream origin "$BRANCH_NAME"
 
       - name: edit existing open pull request
         id: edit
