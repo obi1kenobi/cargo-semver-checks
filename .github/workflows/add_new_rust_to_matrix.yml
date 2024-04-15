@@ -95,7 +95,7 @@ jobs:
       - name: checkout the source code
         uses: actions/checkout@v4
         with:
-          persist-credentials: true
+          persist-credentials: false
 
       - name: download ci.yml from update job
         uses: actions/download-artifact@v4
