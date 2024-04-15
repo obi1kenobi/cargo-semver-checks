@@ -95,7 +95,11 @@ jobs:
       - name: checkout the source code
         uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          # We have to use a Personal Access Token (PAT) here.
+          # We are going to open a PR with changes to workflows, which requires a special permission
+          # that normal GitHub Actions runs don't have.
+          token: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
+          persist-credentials: true
 
       - name: download ci.yml from update job
         uses: actions/download-artifact@v4
@@ -130,11 +134,6 @@ jobs:
           git commit --no-verify --file=body.md
 
       - name: push
-        env:
-          # We have to use a Personal Access Token (PAT) here.
-          # Pushing a branch that changes workflow files requires the `workflows` PAT permission.
-          USERNAME: obi1kenobi
-          GITHUB_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           git push "https://${USERNAME}:${GITHUB_TOKEN}@github.com/obi1kenobi/cargo-semver-checks.git" --no-verify --force "$BRANCH_NAME"
