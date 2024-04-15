@@ -101,7 +101,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ci.yml
-          path: .github/workflows/ci.yml
+          path: .github/workflows/
 
       - name: craft PR body and commit message
         run: |
