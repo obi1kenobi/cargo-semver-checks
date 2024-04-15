@@ -49,7 +49,7 @@ jobs:
         run: |
           set -euxo pipefail
 
-          yq '.jobs.rust-tests.strategy.matrix.toolchain' -o json | \
+          yq '.jobs.rust-tests.strategy.matrix.toolchain' .github/workflows/ci.yml -o json | \
             python -m json.tool --compact | \
             sed 's/,/, /g' \
             >.current_versions
@@ -69,7 +69,7 @@ jobs:
             sed 's/,/, /g' \
             >.next_versions
 
-          CURRENT="$(cat .current_versions | sed 's/^/^\/g' | sed 's/\]/\\]/g')"
+          CURRENT="$(cat .current_versions | sed 's/^/\\/g' | sed 's/\]/\\]/g')"
           NEXT="$(cat .next_versions)"
 
           sed -i "s/$CURRENT/$NEXT/g" .github/workflows/ci.yml
