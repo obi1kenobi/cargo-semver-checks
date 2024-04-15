@@ -1,10 +1,9 @@
-# Automatically run `cargo update` periodically.
+# Automatically add Rust minor versions to our test matrix as they are released.
 #
-# Originally based on
-# [Rust's own dependency-upgrading workflow](https://github.com/rust-lang/rust/blob/master/.github/workflows/dependencies.yml)
-# and subsequently adapted to the needs of this project.
-# Rust source code may be used under the terms of the MIT or Apache 2.0 licenses,
-# which we do here.
+# Note: we use `stable` to refer to the most recent stable Rust release.
+# This means that when a new Rust minor version is released, this job will add
+# the *previous* (already-existing) minor version to the test matrix. The newly-released
+# version is `stable` so it's automatically part of the test matrix.
 
 ---
 name: Add next Rust minor to test matrix
