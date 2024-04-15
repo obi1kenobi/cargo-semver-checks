@@ -45,6 +45,23 @@ jobs:
           wget "https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_linux_amd64" -O yq &&\
             chmod +x ./yq
 
+      - name: check if the new Rust release is out
+        run: |
+          set -euxo pipefail
+          UPCOMING="$(yq '.jobs.rust-tests.strategy.matrix.toolchain as $versions |
+              [$versions[] | select(. != "beta" and . != "stable")] as $numerical_versions |
+              [$versions[] | select(. == "beta" or . == "stable")] as $non_numerical_versions |
+              (
+                  [$numerical_versions[] | sub("\d+\.(\d+)(?:\.\d+)?", "${1}") | to_number]
+                  | sort
+                  | .[-1]
+              ) as $max_named_minor |
+              "1.\($max_named_minor + 2).0"
+            ' .github/workflows/ci.yml)"
+
+          # This line will fail if that release isn't out yet.
+          wget "https://github.com/rust-lang/rust/releases/tag/${UPCOMING}" --server-response -O /dev/null
+
       - name: add next minor to test matrix
         run: |
           set -euxo pipefail
