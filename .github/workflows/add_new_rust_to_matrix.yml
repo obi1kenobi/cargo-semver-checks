@@ -133,10 +133,11 @@ jobs:
         env:
           # We have to use a Personal Access Token (PAT) here.
           # Pushing a branch that changes workflow files requires the `workflows` PAT permission.
+          USERNAME: obi1kenobi
           GITHUB_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          git push --no-verify --force --set-upstream origin "$BRANCH_NAME"
+          git push "https://${USERNAME}:${GITHUB_TOKEN}@github.com/obi1kenobi/cargo-semver-checks.git" --no-verify --force "$BRANCH_NAME"
 
       - name: edit existing open pull request
         id: edit
