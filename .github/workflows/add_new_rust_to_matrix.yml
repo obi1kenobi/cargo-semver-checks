@@ -7,7 +7,7 @@
 # which we do here.
 
 ---
-name: Bump dependencies in Cargo.lock
+name: Add next Rust minor to test matrix
 on:
   schedule:
     # Run weekly early in the morning on Mondays.
