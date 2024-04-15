@@ -85,11 +85,18 @@ fn main() {
         std::process::exit(0);
     }
 
-    let check: cargo_semver_checks::Check = match args.command {
-        Some(SemverChecksCommands::CheckRelease(args)) => args.into(),
-        None => args.check_release.into(),
+    let check_release = match args.command {
+        Some(SemverChecksCommands::CheckRelease(c)) => c,
+        None => args.check_release,
     };
-    let report = exit_on_error(check.log_level().is_some(), || check.check_release());
+
+    let mut config = GlobalConfig::new();
+
+    config = config.set_level(check_release.verbosity.log_level());
+
+    let check: cargo_semver_checks::Check = check_release.into();
+
+    let report = exit_on_error(config.is_error(), || check.check_release(&mut config));
     if report.success() {
         std::process::exit(0);
     } else {
@@ -97,7 +104,7 @@ fn main() {
     }
 }
 
-fn exit_on_error<T>(log_errors: bool, inner: impl Fn() -> anyhow::Result<T>) -> T {
+fn exit_on_error<T>(log_errors: bool, mut inner: impl FnMut() -> anyhow::Result<T>) -> T {
     match inner() {
         Ok(x) => x,
         Err(err) => {
@@ -380,8 +387,6 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         if let Some(baseline) = custom_baseline {
             check.with_baseline(baseline);
         }
-
-        check.with_log_level(value.verbosity.log_level());
 
         if let Some(release_type) = value.release_type {
             check.with_release_type(release_type);
