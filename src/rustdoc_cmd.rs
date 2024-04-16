@@ -130,12 +130,12 @@ impl RustdocCommand {
             cmd.arg("--no-deps");
         }
 
-        // since we write the stderr of the process to our stderr,
-        // our color preferences will be automatically applied when we write
-        // the process's stderr to our stderr, as long as we have color
-        // i.e., if we set no color output in `GlobalConfig`, when we write
-        // the child stderr to ours, its colors will be automatically stripped
-        cmd.arg("--color=always");
+        // respect our configured color choice
+        cmd.arg(if config.err_color_choice() {
+            "--color=always"
+        } else {
+            "--color=never"
+        });
 
         let output = cmd.output()?;
         if !output.status.success() {

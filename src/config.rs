@@ -245,6 +245,36 @@ impl GlobalConfig {
         self.set_err_color_choice(use_color);
         self.set_out_color_choice(use_color);
     }
+
+    /// Gets the color choice (i.e., whether to output colors) for the configured stderr
+    ///
+    /// See also [`GlobalConfig::set_err_color_choice`]
+    #[must_use]
+    #[inline]
+    pub fn err_color_choice(&self) -> bool {
+        match &self.stderr.current_choice() {
+            ColorChoice::Always | ColorChoice::AlwaysAnsi => true,
+            // note: the `auto` branch is unreachable, as [`AutoStream::current_choice`]
+            // returns the *currently active* choice, not the initially-configured choice
+            // so an initial choice of `Auto` would be converted into either `Always` or `Never`.
+            ColorChoice::Never | ColorChoice::Auto => false,
+        }
+    }
+
+    /// Gets the color choice (i.e., whether to output colors) for the configured stdout
+    ///
+    /// See also [`GlobalConfig::set_out_color_choice`]
+    #[must_use]
+    #[inline]
+    pub fn out_color_choice(&self) -> bool {
+        match &self.stdout.current_choice() {
+            ColorChoice::Always | ColorChoice::AlwaysAnsi => true,
+            // note: the `auto` branch is unreachable, as [`AutoStream::current_choice`]
+            // returns the *currently active* choice, not the initially-configured choice
+            // so an initial choice of `Auto` would be converted into either `Always` or `Never`.
+            ColorChoice::Never | ColorChoice::Auto => false,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -413,5 +443,27 @@ mod tests {
 
         // We don't test `ColorChoice::Auto` because it depends on the tty status of the output,
         // which could lead to a flaky test depending on where and how the test is executed.
+    }
+
+    #[test]
+    fn test_get_color_choice() {
+        let mut config = GlobalConfig::new();
+        config.set_color_choice(true);
+        assert!(config.err_color_choice());
+        assert!(config.out_color_choice());
+
+        config.set_out_color_choice(false);
+        assert!(!config.out_color_choice());
+
+        config.set_color_choice(false);
+        config.set_err_color_choice(true);
+        assert!(config.err_color_choice());
+
+        ColorChoice::AlwaysAnsi.write_global();
+        // we have to instantiate a new GlobalConfig here for it to read
+        // the color choice
+        config = GlobalConfig::new();
+        assert!(config.err_color_choice());
+        assert!(config.out_color_choice());
     }
 }
