@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use std::path::PathBuf;
+use std::{env, path::PathBuf};
 
 use cargo_semver_checks::{
     GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
@@ -11,6 +11,9 @@ fn main() {
     human_panic::setup_panic!();
 
     let Cargo::SemverChecks(args) = Cargo::parse();
+
+    configure_color(args.color_choice);
+
     if args.bugreport {
         use bugreport::{bugreport, collector::*, format::Markdown};
         bugreport!()
@@ -25,12 +28,6 @@ fn main() {
         exit_on_error(true, || {
             let mut config =
                 GlobalConfig::new().set_level(args.check_release.verbosity.log_level());
-
-            // we don't want to set auto if the choice is not set because it would overwrite
-            // the value if the CARGO_TERM_COLOR env var read in GlobalConfig::new() if it is set
-            if let Some(choice) = args.check_release.color_choice {
-                config = config.set_color_choice(choice);
-            }
 
             let queries = SemverQuery::all_queries();
             let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
@@ -88,11 +85,18 @@ fn main() {
         std::process::exit(0);
     }
 
-    let check: cargo_semver_checks::Check = match args.command {
-        Some(SemverChecksCommands::CheckRelease(args)) => args.into(),
-        None => args.check_release.into(),
+    let check_release = match args.command {
+        Some(SemverChecksCommands::CheckRelease(c)) => c,
+        None => args.check_release,
     };
-    let report = exit_on_error(check.log_level().is_some(), || check.check_release());
+
+    let mut config = GlobalConfig::new();
+
+    config = config.set_level(check_release.verbosity.log_level());
+
+    let check: cargo_semver_checks::Check = check_release.into();
+
+    let report = exit_on_error(config.is_error(), || check.check_release(&mut config));
     if report.success() {
         std::process::exit(0);
     } else {
@@ -100,7 +104,7 @@ fn main() {
     }
 }
 
-fn exit_on_error<T>(log_errors: bool, inner: impl Fn() -> anyhow::Result<T>) -> T {
+fn exit_on_error<T>(log_errors: bool, mut inner: impl FnMut() -> anyhow::Result<T>) -> T {
     match inner() {
         Ok(x) => x,
         Err(err) => {
@@ -110,6 +114,33 @@ fn exit_on_error<T>(log_errors: bool, inner: impl Fn() -> anyhow::Result<T>) -> 
             std::process::exit(1)
         }
     }
+}
+
+/// helper function to determine whether to use colors based on the (passed) `--color` flag
+/// and the value of the `CARGO_TERM_COLOR` variable.
+///
+/// If the `--color` flag is set to something valid, it overrides anything in
+/// the `CARGO_TERM_COLOR` environment variable
+fn configure_color(cli_choice: Option<clap::ColorChoice>) {
+    use anstream::ColorChoice as AnstreamChoice;
+    use clap::ColorChoice as ClapChoice;
+    let choice = match cli_choice {
+        Some(ClapChoice::Always) => AnstreamChoice::Always,
+        Some(ClapChoice::Auto) => AnstreamChoice::Auto,
+        Some(ClapChoice::Never) => AnstreamChoice::Never,
+        // we match the behavior of cargo in
+        // https://doc.rust-lang.org/cargo/reference/config.html#termcolor
+        // note that [`ColorChoice::AlwaysAnsi`] is not supported by cargo.
+        None => match env::var("CARGO_TERM_COLOR").as_deref() {
+            Ok("always") => AnstreamChoice::Always,
+            Ok("never") => AnstreamChoice::Never,
+            // if `auto` is set, or the env var is invalid
+            // or both the env var and flag are not set, we set the choice to auto
+            _ => AnstreamChoice::Auto,
+        },
+    };
+
+    choice.write_global();
 }
 
 #[derive(Debug, Parser)]
@@ -137,6 +168,12 @@ struct SemverChecks {
 
     #[command(subcommand)]
     command: Option<SemverChecksCommands>,
+
+    // we need to use clap::ColorChoice instead of anstream::ColorChoice
+    // because ValueEnum is implemented for it.
+    /// Choose whether to output colors
+    #[arg(long = "color", global = true, value_name = "WHEN", value_enum)]
+    color_choice: Option<clap::ColorChoice>,
 }
 
 /// Check your crate for semver violations.
@@ -287,16 +324,9 @@ struct CheckRelease {
     #[arg(long = "target")]
     build_target: Option<String>,
 
+    // docstring for help is on the `clap_verbosity_flag::Verbosity` struct itself
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
-
-    /// Whether to print colors to the terminal:
-    /// always, alwaysansi (always use only ANSI color codes),
-    /// auto (based on whether output is a tty), and never
-    ///
-    /// Default is auto (use colors if output is a TTY, otherwise don't use colors)
-    #[arg(value_enum, long = "color")]
-    color_choice: Option<termcolor::ColorChoice>,
 }
 
 impl From<CheckRelease> for cargo_semver_checks::Check {
@@ -357,9 +387,6 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         if let Some(baseline) = custom_baseline {
             check.with_baseline(baseline);
         }
-
-        check.with_log_level(value.verbosity.log_level());
-        check.with_color_choice(value.color_choice);
 
         if let Some(release_type) = value.release_type {
             check.with_release_type(release_type);

@@ -1,11 +1,12 @@
+use std::io::Write as _;
 use std::{collections::BTreeMap, sync::Arc, time::Instant};
+
+use anstyle::{AnsiColor, Color, Reset, Style};
 
 use anyhow::Context;
 use clap::crate_version;
 use itertools::Itertools;
 use rayon::prelude::*;
-use termcolor::Color;
-use termcolor_output::{colored, colored_ln};
 use trustfall::TransparentValue;
 use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
@@ -163,33 +164,31 @@ pub(super) fn run_check_release(
                     RequiredSemverUpdate::Minor => "minor",
                 };
                 if results.is_empty() {
-                    colored_ln(config.stderr(), |w| {
-                        colored!(
-                            w,
-                            "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
-                            fg!(Some(Color::Green)),
-                            bold!(true),
-                            "PASS",
-                            reset!(),
-                            time_to_decide.as_secs_f32(),
-                            category,
-                            semver_query.id,
-                        )
-                    })?;
+                    writeln!(
+                        config.stderr(),
+                        "{}{:>12}{} [{:8.3}s] {:^18} {}",
+                        Style::new()
+                            .fg_color(Some(Color::Ansi(AnsiColor::Green)))
+                            .bold(),
+                        "PASS",
+                        Reset,
+                        time_to_decide.as_secs_f32(),
+                        category,
+                        semver_query.id
+                    )?;
                 } else {
-                    colored_ln(config.stderr(), |w| {
-                        colored!(
-                            w,
-                            "{}{}{:>12}{} [{:>8.3}s] {:^18} {}",
-                            fg!(Some(Color::Red)),
-                            bold!(true),
-                            "FAIL",
-                            reset!(),
-                            time_to_decide.as_secs_f32(),
-                            category,
-                            semver_query.id,
-                        )
-                    })?;
+                    writeln!(
+                        config.stderr(),
+                        "{}{:>12}{} [{:>8.3}s] {:^18} {}",
+                        Style::new()
+                            .fg_color(Some(Color::Ansi(AnsiColor::Red)))
+                            .bold(),
+                        "FAIL",
+                        Reset,
+                        time_to_decide.as_secs_f32(),
+                        category,
+                        semver_query.id
+                    )?;
                 }
                 Ok(())
             })
@@ -211,7 +210,7 @@ pub(super) fn run_check_release(
                     results_with_errors.len(),
                     skipped_queries,
                 ),
-                Color::Red,
+                Color::Ansi(AnsiColor::Red),
                 true,
             )
             .expect("print failed");
@@ -222,57 +221,42 @@ pub(super) fn run_check_release(
             required_versions.push(semver_query.required_update);
             config
                 .log_info(|config| {
-                    colored_ln(config.stdout(), |w| {
-                        colored!(
-                            w,
-                            "\n--- failure {}: {} ---\n",
-                            &semver_query.id,
-                            &semver_query.human_readable_name,
-                        )
-                    })?;
+                    writeln!(
+                        config.stdout(),
+                        "\n--- failure {}: {} ---\n",
+                        &semver_query.id,
+                        &semver_query.human_readable_name
+                    )?;
                     Ok(())
                 })
                 .expect("print failed");
 
             if let Some(ref_link) = semver_query.reference_link.as_deref() {
                 config.log_info(|config| {
-                    colored_ln(config.stdout(), |w| {
-                        colored!(
-                            w,
-                            "{}Description:{}\n{}\n{:>12} {}\n{:>12} {}\n",
-                            bold!(true),
-                            reset!(),
-                            &semver_query.error_message,
-                            "ref:",
-                            ref_link,
-                            "impl:",
-                            format!(
-                                "https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
-                                crate_version!(),
-                                semver_query.id,
-                            )
-                        )
-                    })?;
+                    writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
+                        Style::new().bold(), Reset,
+                        &semver_query.error_message,
+                        "ref:",
+                        ref_link,
+                        "impl:",
+                        crate_version!(),
+                        semver_query.id,
+                    )?;
                     Ok(())
                 })
                 .expect("print failed");
             } else {
                 config.log_info(|config| {
-                    colored_ln(config.stdout(), |w| {
-                        colored!(
-                            w,
-                            "{}Description:{}\n{}\n{:>12} {}\n",
-                            bold!(true),
-                            reset!(),
-                            &semver_query.error_message,
-                            "impl:",
-                            format!(
-                                "https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
-                                crate_version!(),
-                                semver_query.id,
-                            )
-                        )
-                    })?;
+                    writeln!(
+                        config.stdout(),
+                        "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
+                        Style::new().bold(),
+                        Reset,
+                        &semver_query.error_message,
+                        "impl:",
+                        crate_version!(),
+                        semver_query.id,
+                    )?;
                     Ok(())
                 })
                 .expect("print failed");
@@ -280,9 +264,12 @@ pub(super) fn run_check_release(
 
             config
                 .log_info(|config| {
-                    colored_ln(config.stdout(), |w| {
-                        colored!(w, "{}Failed in:{}", bold!(true), reset!())
-                    })?;
+                    writeln!(
+                        config.stdout(),
+                        "{}Failed in:{}",
+                        Style::new().bold(),
+                        Reset
+                    )?;
                     Ok(())
                 })
                 .expect("print failed");
@@ -301,37 +288,35 @@ pub(super) fn run_check_release(
                         .expect("could not materialize template");
                     config
                         .log_info(|config| {
-                            colored_ln(config.stdout(), |w| colored!(w, "  {}", message,))?;
+                            writeln!(config.stdout(), "  {}", message)?;
                             Ok(())
                         })
                         .expect("print failed");
 
                     config
                         .log_extra_verbose(|config| {
-                            colored_ln(config.stdout(), |w| {
-                                let serde_pretty = serde_json::to_string_pretty(&pretty_result)
-                                    .expect("serde failed");
-                                let indented_serde = serde_pretty
-                                    .split('\n')
-                                    .map(|line| format!("    {line}"))
-                                    .join("\n");
-                                colored!(w, "    lint rule output values:\n{}", indented_serde)
-                            })
-                            .map_err(|e| e.into())
+                            let serde_pretty =
+                                serde_json::to_string_pretty(&pretty_result).expect("serde failed");
+                            let indented_serde = serde_pretty
+                                .split('\n')
+                                .map(|line| format!("    {line}"))
+                                .join("\n");
+                            writeln!(
+                                config.stdout(),
+                                "\tlint rule output values:\n{}",
+                                indented_serde
+                            )?;
+                            Ok(())
                         })
                         .expect("print failed");
                 } else {
                     config
                         .log_info(|config| {
-                            colored_ln(config.stdout(), |w| {
-                                colored!(
-                                    w,
-                                    "{}\n",
-                                    serde_json::to_string_pretty(&pretty_result)
-                                        .expect("serde failed"),
-                                )
-                            })
-                            .expect("print failed");
+                            writeln!(
+                                config.stdout(),
+                                "{}\n",
+                                serde_json::to_string_pretty(&pretty_result)?
+                            )?;
                             Ok(())
                         })
                         .expect("print failed");
@@ -362,7 +347,7 @@ pub(super) fn run_check_release(
                         .filter(|x| *x == &RequiredSemverUpdate::Minor)
                         .count(),
                 ),
-                Color::Red,
+                Color::Ansi(AnsiColor::Red),
                 true,
             )
             .expect("print failed");
@@ -382,7 +367,7 @@ pub(super) fn run_check_release(
                     queries_to_run.len(),
                     skipped_queries,
                 ),
-                Color::Green,
+                Color::Ansi(AnsiColor::Green),
                 true,
             )
             .expect("print failed");

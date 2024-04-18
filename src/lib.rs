@@ -35,8 +35,6 @@ pub struct Check {
     scope: Scope,
     current: Rustdoc,
     baseline: Rustdoc,
-    log_level: Option<log::Level>,
-    color_choice: Option<termcolor::ColorChoice>,
     release_type: Option<ReleaseType>,
     current_feature_config: rustdoc_gen::FeatureConfig,
     baseline_feature_config: rustdoc_gen::FeatureConfig,
@@ -251,8 +249,6 @@ impl Check {
             scope: Scope::default(),
             current,
             baseline: Rustdoc::from_registry_latest_crate_version(),
-            log_level: Default::default(),
-            color_choice: None,
             release_type: None,
             current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
@@ -273,35 +269,6 @@ impl Check {
     pub fn with_baseline(&mut self, baseline: Rustdoc) -> &mut Self {
         self.baseline = baseline;
         self
-    }
-
-    /// Set the log level.
-    /// If not set or set to `None`, logging is disabled.
-    pub fn with_log_level(&mut self, log_level: Option<log::Level>) -> &mut Self {
-        self.log_level = log_level;
-        self
-    }
-
-    /// Get the current log level.
-    /// If set to `None`, logging is disabled.
-    #[inline]
-    pub fn log_level(&self) -> Option<&log::Level> {
-        self.log_level.as_ref()
-    }
-
-    /// Set the termcolor [color choice](termcolor::ColorChoice).
-    /// If `None`, the use of colors will be determined automatically by
-    /// the `CARGO_TERM_COLOR` env var and tty type of output.
-    pub fn with_color_choice(&mut self, choice: Option<termcolor::ColorChoice>) -> &mut Self {
-        self.color_choice = choice;
-        self
-    }
-
-    /// Get the current color choice.  If `None`, the use of colors is determined
-    /// by the `CARGO_TERM_COLOR` env var and whether the output is a tty
-    #[inline]
-    pub fn color_choice(&self) -> Option<&termcolor::ColorChoice> {
-        self.color_choice.as_ref()
     }
 
     pub fn with_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
@@ -405,14 +372,7 @@ impl Check {
         })
     }
 
-    pub fn check_release(&self) -> anyhow::Result<Report> {
-        let mut config = GlobalConfig::new().set_level(self.log_level);
-        // we don't want to set auto if the choice is not set because it would overwrite
-        // the value if the CARGO_TERM_COLOR env var read in GlobalConfig::new() if it is set
-        if let Some(choice) = self.color_choice {
-            config = config.set_color_choice(choice);
-        }
-
+    pub fn check_release(&self, config: &mut GlobalConfig) -> anyhow::Result<Report> {
         let rustdoc_cmd = RustdocCommand::new().deps(false).silence(config.is_info());
 
         // If both the current and baseline rustdoc are given explicitly as a file path,
@@ -437,8 +397,8 @@ impl Check {
             };
         }
 
-        let current_loader = self.get_rustdoc_generator(&mut config, &self.current.source)?;
-        let baseline_loader = self.get_rustdoc_generator(&mut config, &self.baseline.source)?;
+        let current_loader = self.get_rustdoc_generator(config, &self.current.source)?;
+        let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
 
         // Create a report for each crate.
         // We want to run all the checks, even if one returns `Err`.
@@ -467,7 +427,7 @@ impl Check {
                         let start = std::time::Instant::now();
                         let version = None;
                         let (current_crate, baseline_crate) = generate_versioned_crates(
-                            &mut config,
+                            config,
                             &rustdoc_cmd,
                             &*current_loader,
                             &*baseline_loader,
@@ -488,7 +448,7 @@ impl Check {
                         )?;
 
                         let report = run_check_release(
-                            &mut config,
+                            config,
                             &name,
                             current_crate,
                             baseline_crate,
@@ -545,7 +505,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                         } else {
                             let start = std::time::Instant::now();
                             let (current_crate, baseline_crate) = generate_versioned_crates(
-                                &mut config,
+                                config,
                                 &rustdoc_cmd,
                                 &*current_loader,
                                 &*baseline_loader,
@@ -568,7 +528,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                             let result = Ok((
                                 crate_name.clone(),
                                 Some(run_check_release(
-                                    &mut config,
+                                    config,
                                     crate_name,
                                     current_crate,
                                     baseline_crate,
