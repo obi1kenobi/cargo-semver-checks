@@ -74,3 +74,17 @@ pub struct ExampleB;
 impl TraitB for ExampleB {
     const N_B: i64 = 0;
 }
+
+// Test for when an inherent const is implemented as trait's const,
+// but the `impl Trait` block is not public API. In this case, we report the lint
+// since falling back to the trait implementation would require using non-public API.
+pub trait TraitC {
+    const N_C: i64;
+}
+
+pub struct ExampleC;
+
+#[doc(hidden)]
+impl TraitC for ExampleC {
+    const N_C: i64 = 0;
+}
