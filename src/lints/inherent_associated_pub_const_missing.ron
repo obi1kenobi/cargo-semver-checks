@@ -19,7 +19,7 @@ SemverQuery(
 
                         inherent_impl {
                             public_api_eligible @filter(op: "=", value: ["$true"])
-                            
+
                             associated_constant {
                                 associated_constant: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
@@ -28,7 +28,7 @@ SemverQuery(
                                     filename @output
                                     begin_line @output
                                 }
-                            }    
+                            }
                         }
                     }
                 }
@@ -49,8 +49,12 @@ SemverQuery(
                                 name @filter(op: "=", value: ["%associated_constant"])
                             }
                         }
-                        
+
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            # We only consider falling back to a trait impl's constant
+                            # if the impl of that trait is public API.
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
                             implemented_trait {
                                 trait {
                                     associated_constant {
