@@ -49,7 +49,7 @@ impl GlobalConfig {
         &self.minimum_rustc_version
     }
 
-    pub fn set_level(mut self, level: Option<log::Level>) -> Self {
+    pub fn set_log_level(&mut self, level: Option<log::Level>) -> &mut Self {
         self.level = level;
         self
     }
@@ -174,8 +174,9 @@ impl GlobalConfig {
     /// Defaults to the global color choice setting set by [`ColorChoice::write_global`]
     /// *at the time of calling `set_stderr`*.
     /// Call [`GlobalConfig::set_err_color_choice`] to customize the color choice after if needed.
-    pub fn set_stderr(&mut self, err: Box<dyn Write + 'static>) {
+    pub fn set_stderr(&mut self, err: Box<dyn Write + 'static>) -> &mut Self {
         self.stderr = AutoStream::auto(err);
+        self
     }
 
     /// Sets the stdout output stream
@@ -183,8 +184,9 @@ impl GlobalConfig {
     /// Defaults to the global color choice setting set by [`ColorChoice::write_global`].
     /// *at the time of calling `set_stdout`*.
     /// Call [`GlobalConfig::set_out_color_choice`] to customize the color choice after if needed.
-    pub fn set_stdout(&mut self, out: Box<dyn Write + 'static>) {
+    pub fn set_stdout(&mut self, out: Box<dyn Write + 'static>) -> &mut Self {
         self.stdout = AutoStream::auto(out);
+        self
     }
 
     /// Individually set the color choice setting for [`GlobalConfig::stderr`]
@@ -193,7 +195,7 @@ impl GlobalConfig {
     /// in [`ColorChoice::write_global`] if you are using the `anstream` crate.
     ///
     /// See also [`GlobalConfig::set_out_color_choice`] and [`GlobalConfig::set_color_choice`]
-    pub fn set_err_color_choice(&mut self, use_color: bool) {
+    pub fn set_err_color_choice(&mut self, use_color: bool) -> &mut Self {
         // `anstream` doesn't have a good mechanism to set color choice (on one stream)
         // without making a new object, so we have to make a new autostream, but since we need
         // to move the `RawStream` inner, we temporarily replace it with /dev/null
@@ -209,6 +211,7 @@ impl GlobalConfig {
                 ColorChoice::Never
             },
         );
+        self
     }
 
     /// Individually set the color choice setting for [`GlobalConfig::stdout`]
@@ -217,7 +220,7 @@ impl GlobalConfig {
     /// in [`ColorChoice::write_global`] if you are using the `anstream` crate.
     ///
     /// See also [`GlobalConfig::set_err_color_choice`] and [`GlobalConfig::set_color_choice`]
-    pub fn set_out_color_choice(&mut self, use_color: bool) {
+    pub fn set_out_color_choice(&mut self, use_color: bool) -> &mut Self {
         // `anstream` doesn't have a good mechanism to set color choice (on one stream)
         // without making a new object, so we have to make a new autostream, but since we need
         // to move the `RawStream` inner, we temporarily replace it with /dev/null
@@ -233,6 +236,7 @@ impl GlobalConfig {
                 ColorChoice::Never
             },
         );
+        self
     }
 
     /// Sets the color choice for both [`GlobalConfig::stderr`] and [`GlobalConfig::stdout`]
@@ -241,9 +245,10 @@ impl GlobalConfig {
     /// are set using [`GlobalConfig::set_stdout`] and `err`, which can be set beforehand
     ///
     /// See also [`GlobalConfig::set_err_color_choice`] and [`GlobalConfig::set_out_color_choice`]
-    pub fn set_color_choice(&mut self, use_color: bool) {
+    pub fn set_color_choice(&mut self, use_color: bool) -> &mut Self {
         self.set_err_color_choice(use_color);
         self.set_out_color_choice(use_color);
+        self
     }
 
     /// Gets the color choice (i.e., whether to output colors) for the configured stderr
@@ -359,7 +364,7 @@ mod tests {
     #[test]
     fn test_log_level_info() {
         let mut config = GlobalConfig::new();
-        config = config.set_level(Some(log::Level::Info));
+        config.set_log_level(Some(log::Level::Info));
 
         assert!(config.is_info());
         assert!(!config.is_verbose());
@@ -369,7 +374,7 @@ mod tests {
     #[test]
     fn test_log_level_debug() {
         let mut config = GlobalConfig::new();
-        config = config.set_level(Some(log::Level::Debug));
+        config.set_log_level(Some(log::Level::Debug));
 
         assert!(config.is_info());
         assert!(config.is_verbose());
@@ -379,7 +384,7 @@ mod tests {
     #[test]
     fn test_log_level_trace() {
         let mut config = GlobalConfig::new();
-        config = config.set_level(Some(log::Level::Trace));
+        config.set_log_level(Some(log::Level::Trace));
 
         assert!(config.is_info());
         assert!(config.is_verbose());
@@ -389,7 +394,7 @@ mod tests {
     #[test]
     fn test_log_level_none() {
         let mut config = GlobalConfig::new();
-        config = config.set_level(None);
+        config.set_log_level(None);
 
         assert!(!config.is_info());
         assert!(!config.is_verbose());
@@ -399,12 +404,16 @@ mod tests {
     #[test]
     fn test_set_color_choice() {
         assert_color_choice(
-            |config| config.set_color_choice(false),
+            |config| {
+                config.set_color_choice(false);
+            },
             Some(false),
             Some(false),
         );
         assert_color_choice(
-            |config| config.set_color_choice(true),
+            |config| {
+                config.set_color_choice(true);
+            },
             Some(true),
             Some(true),
         );
@@ -413,21 +422,37 @@ mod tests {
     #[test]
     fn test_set_out_color_choice() {
         assert_color_choice(
-            |config| config.set_out_color_choice(false),
+            |config| {
+                config.set_out_color_choice(false);
+            },
             Some(false),
             None,
         );
-        assert_color_choice(|config| config.set_out_color_choice(true), Some(true), None);
+        assert_color_choice(
+            |config| {
+                config.set_out_color_choice(true);
+            },
+            Some(true),
+            None,
+        );
     }
 
     #[test]
     fn test_set_err_color_choice() {
         assert_color_choice(
-            |config| config.set_err_color_choice(false),
+            |config| {
+                config.set_err_color_choice(false);
+            },
             None,
             Some(false),
         );
-        assert_color_choice(|config| config.set_err_color_choice(true), None, Some(true));
+        assert_color_choice(
+            |config| {
+                config.set_err_color_choice(true);
+            },
+            None,
+            Some(true),
+        );
     }
 
     #[test]

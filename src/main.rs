@@ -26,8 +26,8 @@ fn main() {
         std::process::exit(0);
     } else if args.list {
         exit_on_error(true, || {
-            let mut config =
-                GlobalConfig::new().set_level(args.check_release.verbosity.log_level());
+            let mut config = GlobalConfig::new();
+            config.set_log_level(args.check_release.verbosity.log_level());
 
             let queries = SemverQuery::all_queries();
             let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
@@ -92,7 +92,7 @@ fn main() {
 
     let mut config = GlobalConfig::new();
 
-    config = config.set_level(check_release.verbosity.log_level());
+    config.set_log_level(check_release.verbosity.log_level());
 
     let check: cargo_semver_checks::Check = check_release.into();
 
@@ -351,18 +351,18 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         if value.workspace.all || value.workspace.workspace {
             // Specified explicit `--workspace` or `--all`.
             let mut selection = PackageSelection::new(ScopeSelection::Workspace);
-            selection.with_excluded_packages(value.workspace.exclude);
-            check.with_package_selection(selection);
+            selection.set_excluded_packages(value.workspace.exclude);
+            check.set_package_selection(selection);
         } else if !value.workspace.package.is_empty() {
             // Specified explicit `--package`.
-            check.with_packages(value.workspace.package);
+            check.set_packages(value.workspace.package);
         } else if !value.workspace.exclude.is_empty() {
             // Specified `--exclude` without `--workspace/--all`.
             // Leave the scope selection to the default ("workspace if the manifest is a workspace")
             // while excluding any specified packages.
             let mut selection = PackageSelection::new(ScopeSelection::DefaultMembers);
-            selection.with_excluded_packages(value.workspace.exclude);
-            check.with_package_selection(selection);
+            selection.set_excluded_packages(value.workspace.exclude);
+            check.set_package_selection(selection);
         }
         let custom_baseline = {
             if let Some(baseline_version) = value.baseline_version {
@@ -385,11 +385,11 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             }
         };
         if let Some(baseline) = custom_baseline {
-            check.with_baseline(baseline);
+            check.set_baseline(baseline);
         }
 
         if let Some(release_type) = value.release_type {
-            check.with_release_type(release_type);
+            check.set_release_type(release_type);
         }
 
         if value.all_features {
@@ -414,10 +414,10 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         trim_features(&mut current_features);
         trim_features(&mut baseline_features);
 
-        check.with_extra_features(current_features, baseline_features);
+        check.set_extra_features(current_features, baseline_features);
 
         if let Some(build_target) = value.build_target {
-            check.with_build_target(build_target);
+            check.set_build_target(build_target);
         }
 
         check
