@@ -393,13 +393,13 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         }
 
         if value.all_features {
-            check.set_all_features();
+            check.with_all_features();
         } else if value.default_features {
-            check.set_default_features();
+            check.with_default_features();
         } else if value.only_explicit_features {
-            check.set_only_explicit_features();
+            check.with_only_explicit_features();
         } else {
-            check.set_heuristically_included_features();
+            check.with_heuristically_included_features();
         }
         let mut mutual_features = value.features;
         let mut current_features = value.current_features;

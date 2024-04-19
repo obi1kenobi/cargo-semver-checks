@@ -276,25 +276,25 @@ impl Check {
         self
     }
 
-    pub fn set_only_explicit_features(&mut self) -> &mut Self {
+    pub fn with_only_explicit_features(&mut self) -> &mut Self {
         self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::None;
         self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::None;
         self
     }
 
-    pub fn set_default_features(&mut self) -> &mut Self {
+    pub fn with_default_features(&mut self) -> &mut Self {
         self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::Default;
         self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::Default;
         self
     }
 
-    pub fn set_heuristically_included_features(&mut self) -> &mut Self {
+    pub fn with_heuristically_included_features(&mut self) -> &mut Self {
         self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::Heuristic;
         self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::Heuristic;
         self
     }
 
-    pub fn set_all_features(&mut self) -> &mut Self {
+    pub fn with_all_features(&mut self) -> &mut Self {
         self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::All;
         self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::All;
         self
