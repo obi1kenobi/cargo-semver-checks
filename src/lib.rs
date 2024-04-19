@@ -157,7 +157,7 @@ impl PackageSelection {
         }
     }
 
-    pub fn with_excluded_packages(&mut self, packages: Vec<String>) -> &mut Self {
+    pub fn set_excluded_packages(&mut self, packages: Vec<String>) -> &mut Self {
         self.excluded_packages = packages;
         self
     }
@@ -256,51 +256,51 @@ impl Check {
         }
     }
 
-    pub fn with_package_selection(&mut self, selection: PackageSelection) -> &mut Self {
+    pub fn set_package_selection(&mut self, selection: PackageSelection) -> &mut Self {
         self.scope.mode = ScopeMode::DenyList(selection);
         self
     }
 
-    pub fn with_packages(&mut self, packages: Vec<String>) -> &mut Self {
+    pub fn set_packages(&mut self, packages: Vec<String>) -> &mut Self {
         self.scope.mode = ScopeMode::AllowList(packages);
         self
     }
 
-    pub fn with_baseline(&mut self, baseline: Rustdoc) -> &mut Self {
+    pub fn set_baseline(&mut self, baseline: Rustdoc) -> &mut Self {
         self.baseline = baseline;
         self
     }
 
-    pub fn with_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
+    pub fn set_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
         self.release_type = Some(release_type);
         self
     }
 
-    pub fn with_only_explicit_features(&mut self) -> &mut Self {
+    pub fn set_only_explicit_features(&mut self) -> &mut Self {
         self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::None;
         self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::None;
         self
     }
 
-    pub fn with_default_features(&mut self) -> &mut Self {
+    pub fn set_default_features(&mut self) -> &mut Self {
         self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::Default;
         self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::Default;
         self
     }
 
-    pub fn with_heuristically_included_features(&mut self) -> &mut Self {
+    pub fn set_heuristically_included_features(&mut self) -> &mut Self {
         self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::Heuristic;
         self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::Heuristic;
         self
     }
 
-    pub fn with_all_features(&mut self) -> &mut Self {
+    pub fn set_all_features(&mut self) -> &mut Self {
         self.current_feature_config.features_group = rustdoc_gen::FeaturesGroup::All;
         self.baseline_feature_config.features_group = rustdoc_gen::FeaturesGroup::All;
         self
     }
 
-    pub fn with_extra_features(
+    pub fn set_extra_features(
         &mut self,
         extra_current_features: Vec<String>,
         extra_baseline_features: Vec<String>,
@@ -312,7 +312,7 @@ impl Check {
 
     /// Set what `--target` to build the documentation with, by default will not pass any flag
     /// relying on the users cargo configuration.
-    pub fn with_build_target(&mut self, build_target: String) -> &mut Self {
+    pub fn set_build_target(&mut self, build_target: String) -> &mut Self {
         self.build_target = Some(build_target);
         self
     }
