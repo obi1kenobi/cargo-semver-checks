@@ -157,7 +157,7 @@ jobs:
         #
         #            Also make sure to update the MSRV in the cargo-semver-checks-action CI:
         #            https://github.com/obi1kenobi/cargo-semver-checks-action/blob/main/.github/workflows/test-action.yml#L18
-        toolchain: ["1.74", "1.75", "stable", "beta"]
+        toolchain: ["1.74", "1.75", "1.76", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -307,12 +307,12 @@ jobs:
     needs:
       - build-binary
     env:
-      OLDER_RUST: "1.74"    # Rust 1.74 uses rustdoc v27
-      NEWER_RUST: "nightly" # Rust 1.78-nightly uses rustdoc v28
+      OLDER_RUST: "1.74"  # Rust 1.74 uses rustdoc v27
+      NEWER_RUST: "1.77"  # Rust 1.77 uses rustdoc v28
     steps:
       - name: Put env vars in outputs
         id: vars
-        run:
+        run: |
           echo "older-rust=$OLDER_RUST" >> $GITHUB_OUTPUT
           echo "newer-rust=$NEWER_RUST" >> $GITHUB_OUTPUT
 
@@ -346,7 +346,7 @@ jobs:
         id: toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: ${{ steps.vars.outputs.OLDER_RUST }}
+          toolchain: ${{ steps.vars.outputs.older-rust }}
           rustflags: ""
           cache: false
 
@@ -380,12 +380,15 @@ jobs:
       - name: Install newer rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: ${{ steps.vars.outputs.NEWER_RUST }}
+          toolchain: ${{ steps.vars.outputs.newer-rust }}
           rustflags: ""
           cache: false
 
       - name: Check with older rustdoc version cached
         run: |
+          # Echo commands to make debugging this script easier.
+          set -x
+
           # Use a separate workspace, to avoid contaminating the cache for Swatinem/rust-cache@v2
           cp -R subject subject-new
 
@@ -409,7 +412,6 @@ jobs:
           export NEW_RUSTDOC_VERSION="$(jq .format_version subject-new/target/semver-checks/cache/registry-libp2p_core-0_37_0.json)"
 
           # Ensure the cached rustdoc versions were indeed different before and after.
-          set -x
           [ "$OLD_RUSTDOC_VERSION" != "$NEW_RUSTDOC_VERSION" ] || exit 1
 
   cross-feature-caching:

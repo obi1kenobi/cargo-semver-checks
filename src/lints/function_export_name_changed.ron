@@ -1,0 +1,47 @@
+SemverQuery(
+    id: "function_export_name_changed",
+    human_readable_name: "function's export name has changed or been removed",
+    description: "A function's ABI name with #[no_mangle] or #[export_name = \"name\"] has changed or been removed",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/reference/abi.html#the-no_mangle-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Function {
+                        importable_path {
+                            path @output @tag
+                        }
+
+                        export_name @output @tag @filter(op: "is_not_null")
+                    }
+                }
+            }
+            
+            current {
+                item {
+                    ... on Function {
+                        name @output
+
+                        new_export_name: export_name @filter(op: "!=", value: ["%export_name"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+    },
+    error_message: "The ABI export name of a function has been changed or removed through the #[no_mangle] or #[export_name] attributes.",
+    per_result_error_template: Some("function {{join \"::\" path}} no longer has ABI name {{export_name}} in {{span_filename}}:{{span_begin_line}}"),
+)
+

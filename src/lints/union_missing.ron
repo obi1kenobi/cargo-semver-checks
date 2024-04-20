@@ -1,0 +1,51 @@
+SemverQuery(
+    id: "union_missing",
+    human_readable_name: "pub union removed or renamed",
+    description: "A union can no longer be imported by its prior path.",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    # We coerce to `ImplOwner` here, not `Union`, because it's sometimes possible
+                    # to change a union into an enum or struct without causing a breaking change.
+                    # More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+        "true": true,
+    },
+    error_message: "A publicly-visible union cannot be imported by its prior path. A `pub use` may have been removed, or the union itself may have been renamed or removed entirely.",
+    per_result_error_template: Some("union {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+)

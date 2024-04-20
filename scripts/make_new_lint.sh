@@ -78,21 +78,42 @@ fi
 
 # Add the new lint to the `add_lints!()` macro.
 echo -n "Registering lint in src/query.rs ..."
-if awk -v lint_name="$NEW_LINT_NAME" '
-    /^add_lints!\(/ { searching = 1 }
-    searching && $0 ~ "[[:space:]]" lint_name "," { found = 1; exit }
-    END { if (found) { exit 0 } else { exit 1 } }
-' "$SRC_QUERY_FILE"; then
-    printf ' already exists.\n'
-else
-    tmp="${SRC_QUERY_FILE}.tmp"
-    sed -e '/^add_lints!($/ a\'"
-    $NEW_LINT_NAME," "$SRC_QUERY_FILE" > "$tmp" && mv -- "$tmp" "$SRC_QUERY_FILE" || {
-        code=$?
-        rm -f "$tmp"
-        exit "$code"
+# Requirements on $SRC_QUERY_FILE:
+# - one lint per line, with leading indent (a nonzero amount of whitespace)
+# - lint lines must be sorted
+# - lints begin with a line that begins with add_lints!(
+# - lints end with a line that begins with )
+if updated_text=$(awk -v lint="$NEW_LINT_NAME" '
+    BEGIN {
+        lint = "" lint
     }
+
+    searching {
+        current_lint = "" $2
+        if (lint == current_lint) {
+            searching = 0
+        } else if ($0 ~ /^\)/ || lint < current_lint) {
+            printf("    %s,\n", lint)
+            inserted = 1
+            searching = 0
+        }
+    }
+
+    { print }
+
+    /^add_lints!\(/ {
+        searching = 1
+        FS = "[,[:space:]]+"
+    }
+
+    END {
+        exit !inserted
+    }
+' "$SRC_QUERY_FILE"); then
+    printf '%s\n' "$updated_text" > "$SRC_QUERY_FILE"
     printf ' done!\n'
+else
+    printf ' already exists.\n'
 fi
 
 echo ''
