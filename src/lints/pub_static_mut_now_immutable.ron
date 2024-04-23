@@ -1,7 +1,7 @@
 SemverQuery(
     id: "pub_static_mut_now_immutable",
     human_readable_name: "pub static mut is now immutable",
-    description: "A mutable static became immutable  and thus can no longer be assigned to",
+    description: "A mutable static became immutable and thus can no longer be assigned to",
     required_update: Major,
     reference_link: Some("https://doc.rust-lang.org/reference/items/static-items.html"),
     query: r#"
