@@ -129,15 +129,19 @@ impl RustdocCommand {
         if !self.deps {
             cmd.arg("--no-deps");
         }
-        if config.is_stderr_tty() {
-            cmd.arg("--color=always");
-        }
+
+        // respect our configured color choice
+        cmd.arg(if config.err_color_choice() {
+            "--color=always"
+        } else {
+            "--color=never"
+        });
 
         let output = cmd.output()?;
         if !output.status.success() {
             if self.silence {
                 config.log_error(|config| {
-                    let stderr = config.stderr();
+                    let mut stderr = config.stderr();
                     let delimiter = "-----";
                     writeln!(
                         stderr,
@@ -156,9 +160,8 @@ impl RustdocCommand {
                 })?;
             } else {
                 config.log_error(|config| {
-                    let stderr = config.stderr();
                     writeln!(
-                        stderr,
+                        config.stderr(),
                         "error: running cargo-doc on crate {crate_name} v{version} failed, see stderr output above"
                     )?;
                     Ok(())
@@ -167,7 +170,7 @@ impl RustdocCommand {
             config.log_error(|config| {
                 let features =
                     crate_source.feature_list_from_config(config, crate_data.feature_config);
-                let stderr = config.stderr();
+                let mut stderr = config.stderr();
                 writeln!(
                     stderr,
                     "note: this is usually due to a compilation error in the crate,"
@@ -192,14 +195,18 @@ impl RustdocCommand {
                             .expect("failed to create path string")
                     ),
                 };
-                let feature_list = features.into_iter().join(",");
+                let feature_list = if features.is_empty() {
+                    "".to_string()
+                } else {
+                    format!("--features {} ", features.into_iter().join(","))
+                };
                 writeln!(
                     stderr,
                     "      \
 cargo new --lib example &&
           cd example &&
           echo '[workspace]' >> Cargo.toml &&
-          cargo add {selector} --no-default-features --features {feature_list} &&
+          cargo add {selector} --no-default-features {feature_list}&&
           cargo check\n"
                 )?;
                 Ok(())
@@ -238,8 +245,8 @@ cargo new --lib example &&
                     None
                 } else {
                     config.log_error(|config| {
-                        let stderr = config.stderr();
                         let delimiter = "-----";
+                        let mut stderr = config.stderr();
                         writeln!(
                             stderr,
                             "error: running cargo-config on crate {crate_name} failed with output:"
@@ -254,8 +261,7 @@ cargo new --lib example &&
                         writeln!(stderr, "note: this may be a bug in cargo, or a bug in cargo-semver-checks;")?;
                         writeln!(stderr, "      if unsure, feel free to open a GitHub issue on cargo-semver-checks")?;
                         writeln!(stderr, "note: running the following command on the crate should reproduce the error:")?;
-                        writeln!(
-                            stderr,
+                        writeln!(stderr,
                             "      cargo config -Zunstable-options get --format=json-value build.target\n",
                         )?;
                         Ok(())
@@ -405,6 +411,17 @@ fn create_placeholder_rustdoc_manifest(
                     ..DependencyDetail::default()
                 },
             };
+            config.log_verbose(|config| {
+                if project_with_features.features.is_empty() {
+                    return Ok(());
+                }
+                writeln!(
+                    config.stderr(),
+                    "             Features: {}",
+                    project_with_features.features.join(","),
+                )?;
+                Ok(())
+            })?;
             let mut deps = DepsSet::new();
             deps.insert(
                 crate_source.name()?.to_string(),

@@ -1,0 +1,50 @@
+SemverQuery(
+    id: "pub_static_mut_now_immutable",
+    human_readable_name: "pub static mut is now immutable",
+    description: "A mutable static became immutable and thus can no longer be assigned to",
+    required_update: Major,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/static-items.html"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Static {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        mutable @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Static {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        mutable @filter(op: "!=", value: ["$true"])
+                        static_name: name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A mutable static is now immutable and thus can no longer be assigned to",
+    per_result_error_template: Some("{{static_name}} in file {{span_filename}}:{{span_begin_line}}"),
+)

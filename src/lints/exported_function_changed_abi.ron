@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "function_changed_export_name",
+    id: "exported_function_changed_abi",
     human_readable_name: "exported function changed ABI",
     description: "A function marked `#[no_mangle]` or assigned an explicit `#[export_name]` changed its external ABI.",
     required_update: Major,
