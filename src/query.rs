@@ -516,6 +516,7 @@ add_lints!(
     pub_module_level_const_missing,
     pub_module_level_const_now_doc_hidden,
     pub_static_missing,
+    pub_static_mut_now_immutable,
     pub_static_now_doc_hidden,
     repr_c_removed,
     repr_packed_added,

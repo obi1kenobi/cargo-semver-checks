@@ -133,4 +133,16 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/pub_static_mut_now_immutable/": [
+        {
+            "name": String("STATIC_RENAME"),
+            "path": List([
+                String("pub_static_mut_now_immutable"),
+                String("STATIC_RENAME"),
+            ]),
+            "span_begin_line": Uint64(13),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
 }
