@@ -9,8 +9,9 @@
 name: Add next Rust minor to test matrix
 on:
   schedule:
-    # Run weekly early in the morning on Mondays.
-    - cron: '37 03 * * MON'
+    # Rust releases are every 6 weeks, but cron doesn't seem to support 6-week intervals.
+    # Run weekly on Thursday afternoons: 5/6ths of the runs won't find a new release.
+    - cron: '37 18 * * THU'
   workflow_dispatch:
     # Needed so we can run it manually
 permissions:
@@ -188,7 +189,7 @@ jobs:
           set -euo pipefail
           gh pr create --title "${PR_TITLE}" --body-file body.md --repo "$GITHUB_REPOSITORY"
 
-      # - name: set PR to auto-merge
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: gh pr merge --squash --auto --delete-branch
+      - name: set PR to auto-merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge --squash --auto --delete-branch
