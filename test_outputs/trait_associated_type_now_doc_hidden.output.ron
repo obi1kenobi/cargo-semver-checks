@@ -1,0 +1,14 @@
+{
+    "./test_crates/trait_associated_type_now_doc_hidden/": [
+        {
+            "associated_type": String("TYPE_A"),
+            "path": List([
+                String("trait_associated_type_now_doc_hidden"),
+                String("PUB_TRAIT_A"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "trait_name": String("PUB_TRAIT_A"),
+        },
+    ],
+}
