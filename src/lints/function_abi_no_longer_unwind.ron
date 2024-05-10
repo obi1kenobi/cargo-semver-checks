@@ -7,19 +7,6 @@ SemverQuery(
     query: r#"
     {
         CrateDiff {
-            baseline {
-                item {
-                    ... on Function {
-                        visibility_limit @filter(op: "=", value: ["$public"])
-
-                        abi_: abi {
-                            name @tag
-                            raw_name @output
-                            unwind @filter(op: "=", value: ["$true"])
-                        }
-                    }
-                }
-            }
             current {
                 item {
                     ... on Function {
@@ -28,7 +15,7 @@ SemverQuery(
                         name @output
 
                         new_abi_: abi {
-                            name @filter(op: "=", value: ["%name"])
+                            name @tag
                             raw_name @output
                             unwind @filter(op: "!=", value: ["$true"])
                         }
@@ -36,6 +23,19 @@ SemverQuery(
                         span_: span @optional {
                             filename @output
                             begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        abi_: abi {
+                            name @filter(op: "=", value: ["%name"])
+                            raw_name @output
+                            unwind @filter(op: "=", value: ["$true"])
                         }
                     }
                 }
