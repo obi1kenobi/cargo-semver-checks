@@ -1,38 +1,38 @@
 // Basic test case
-pub trait PUB_TRAIT_A {
+pub trait PubTraitA {
     #[doc(hidden)]
-    type TYPE_A;
+    type TypeA;
     // Should not flag already #[doc(hidden)] type
     #[doc(hidden)]
-    type DOC_HIDDEN_TYPE;
+    type DocHiddenType;
 }
 
 // Trait is private so it should not trigger the lint
-trait TRAIT_A {
+trait TraitA {
     #[doc(hidden)]
-    type TYPE_B;
+    type TypeB;
 }
 
 // Trait is #[doc(hidden)] along with the type, only trait_now_doc_hidden should be triggered
 #[doc(hidden)]
-pub trait PUB_TRAIT_B {
+pub trait PubTraitB {
     #[doc(hidden)]
-    type TYPE_C;
+    type TypeC;
 }
 
 // Test cases when trait is #[doc(hidden)]
 #[doc(hidden)]
-pub trait DOC_HIDDEN_TRAIT {
+pub trait DocHiddenTrait {
     #[doc(hidden)]
-    type TYPE_D;
+    type TypeD;
     #[doc(hidden)]
-    type TYPE_E;
+    type TypeE;
 }
 
 // Test cases when #[doc(hidden)] from trait is removed
-pub trait PUB_TRAIT_C {
+pub trait PubTraitC {
     #[doc(hidden)]
-    type TYPE_F;
+    type TypeF;
     #[doc(hidden)]
-    type TYPE_G;
+    type TypeG;
 }
