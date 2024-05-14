@@ -530,6 +530,7 @@ add_lints!(
     struct_pub_field_now_doc_hidden,
     struct_repr_transparent_removed,
     struct_with_pub_fields_changed_type,
+    trait_associated_const_now_doc_hidden,
     trait_associated_type_now_doc_hidden,
     trait_method_missing,
     trait_method_now_doc_hidden,
