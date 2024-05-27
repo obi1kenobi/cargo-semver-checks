@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "trait_method_unsafe_removed",
     human_readable_name: "pub trait method became safe",
     description: "A method in a public trait became safe",
     required_update: Major,

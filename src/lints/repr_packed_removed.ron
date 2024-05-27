@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "repr_packed_removed",
     human_readable_name: "repr(packed) removed",
     description: "A struct or union that used to be #[repr(packed)] is no longer #[repr(packed)].",
     required_update: Major,

@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "struct_missing",
     human_readable_name: "pub struct removed or renamed",
     description: "A struct can no longer be imported by its prior path.",
     required_update: Major,

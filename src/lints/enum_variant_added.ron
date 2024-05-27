@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "enum_variant_added",
     human_readable_name: "enum variant added on exhaustive enum",
     description: "An exhaustive enum has a new variant.",
     required_update: Major,

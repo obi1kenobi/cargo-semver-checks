@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "enum_variant_missing",
     human_readable_name: "pub enum variant removed or renamed",
     description: "An enum variant is no longer available under its prior name.",
     required_update: Major,

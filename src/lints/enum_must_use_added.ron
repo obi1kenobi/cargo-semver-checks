@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "enum_must_use_added",
     human_readable_name: "enum #[must_use] added",
     description: "An enum has been marked with #[must_use].",
     required_update: Minor,

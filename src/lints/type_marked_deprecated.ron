@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "type_marked_deprecated",
     human_readable_name: "#[deprecated] added on type",
     description: "A type has been newly marked with #[deprecated].",
     required_update: Minor,

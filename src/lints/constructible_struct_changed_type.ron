@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "constructible_struct_changed_type",
     human_readable_name: "struct constructible with literal became an enum or union",
     description: "A struct was converted into an enum or union, breaking struct literals.",
     required_update: Major,

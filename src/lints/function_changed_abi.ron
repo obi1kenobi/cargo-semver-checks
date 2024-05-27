@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "function_changed_abi",
     human_readable_name: "pub function changed ABI",
     description: "A public function changed its external ABI.",
     required_update: Major,

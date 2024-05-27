@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "pub_static_missing",
     human_readable_name: "pub static is missing",
     description: "A pub static is missing, renamed, or made private",
     required_update: Major,

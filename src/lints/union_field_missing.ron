@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "union_field_missing",
     human_readable_name: "pub union pub field is removed or renamed",
     description: "pub union pub field is removed or renamed. No longer present under it's previous name, by whatever cause.",
     required_update: Major, 

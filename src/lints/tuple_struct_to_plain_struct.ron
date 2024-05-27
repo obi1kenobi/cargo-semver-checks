@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "tuple_struct_to_plain_struct",
     human_readable_name: "tuple struct changed to plain struct",
     description: "A struct changed from a tuple struct to plain struct",
     reference: Some(r#"

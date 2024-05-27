@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "enum_marked_non_exhaustive",
     human_readable_name: "enum marked #[non_exhaustive]",
     description: "An exhaustive enum has been marked #[non_exhaustive].",
     reference: Some("An exhaustive enum has been marked #[non_exhaustive]. Pattern-matching on it outside of its crate must now include a wildcard pattern like `_`, or it will fail to compile."),

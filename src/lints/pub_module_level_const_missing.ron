@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "pub_module_level_const_missing",
     human_readable_name: "pub module-level const is missing",
     description: "A pub const is missing, renamed, or changed to static.",
     required_update: Major,

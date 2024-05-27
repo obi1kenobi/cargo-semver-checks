@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "struct_pub_field_missing",
     human_readable_name: "pub struct's pub field removed or renamed",
     description: "A struct field is no longer available under its prior name.",
     required_update: Major,

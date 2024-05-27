@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "function_parameter_count_changed",
     human_readable_name: "pub fn parameter count changed",
     description: "Parameter count of a function has changed.",
     required_update: Major,

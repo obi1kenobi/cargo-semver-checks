@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "struct_must_use_added",
     human_readable_name: "struct #[must_use] added",
     description: "A struct has been marked with #[must_use].",
     required_update: Minor,

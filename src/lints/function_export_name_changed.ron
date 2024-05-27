@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "function_export_name_changed",
     human_readable_name: "function's export name has changed or been removed",
     description: "A function's ABI name with #[no_mangle] or #[export_name = \"name\"] has changed or been removed",
     required_update: Major,

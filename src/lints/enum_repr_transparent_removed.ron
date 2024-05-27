@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "enum_repr_transparent_removed",
     human_readable_name: "enum repr(transparent) removed",
     description: "A enum is no longer repr(transparent).",
     reference: Some(r#"

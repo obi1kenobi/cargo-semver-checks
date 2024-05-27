@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "function_missing",
     human_readable_name: "pub fn removed or renamed",
     description: "A function can no longer be imported by its prior path.",
     required_update: Major,

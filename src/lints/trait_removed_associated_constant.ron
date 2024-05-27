@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "trait_removed_associated_constant",
     human_readable_name: "trait's associated constant was removed",
     description: "A trait's associated constant was removed or renamed",
     required_update: Major,

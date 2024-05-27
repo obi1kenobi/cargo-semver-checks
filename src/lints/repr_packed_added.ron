@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "repr_packed_added",
     human_readable_name: "repr(packed) added",
     description: "A struct or union has been marked with #[repr(packed)].",
     required_update: Major,

@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "trait_associated_const_now_doc_hidden",
     human_readable_name: "trait associated const is now #[doc(hidden)]",
     description: "A public trait associated const is now marked as #[doc(hidden)] and has thus been removed from the public API",
     required_update: Major,

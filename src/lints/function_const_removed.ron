@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "function_const_removed",
     human_readable_name: "pub fn is no longer const",
     description: "A function can no longer be called in a const context.",
     required_update: Major,

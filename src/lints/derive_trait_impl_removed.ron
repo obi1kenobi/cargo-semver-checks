@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "derive_trait_impl_removed",
     human_readable_name: "built-in derived trait no longer implemented",
     description: "A type has stopped implementing a built-in trait that used to be derived.",
     required_update: Major,

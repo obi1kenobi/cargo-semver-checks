@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "struct_with_pub_fields_changed_type",
     human_readable_name: "struct with pub fields became an enum or union",
     description: "A struct was converted into an enum or union, breaking accesses to its fields.",
     required_update: Major,

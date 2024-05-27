@@ -65,6 +65,8 @@ impl From<ReleaseType> for ActualSemverUpdate {
 #[non_exhaustive]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SemverQuery {
+    // this should be populated with the file name and not serialized
+    #[serde(skip)]
     pub id: String,
 
     pub(crate) human_readable_name: String,
@@ -98,8 +100,8 @@ pub struct SemverQuery {
 impl SemverQuery {
     pub fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
-        for query_text in get_query_text_contents() {
-            let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
+        for (id, query_text) in get_queries() {
+            let mut query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
                 panic!(
                     "\
 Failed to parse a query: {e}
@@ -108,6 +110,7 @@ Failed to parse a query: {e}
 ```"
                 );
             });
+            query.id = id.to_string();
             let id_conflict = queries.insert(query.id.clone(), query);
             assert!(id_conflict.is_none(), "{id_conflict:?}");
         }
@@ -462,10 +465,13 @@ macro_rules! add_lints {
             )*
         }
 
-        fn get_query_text_contents() -> Vec<&'static str> {
+        fn get_queries() -> Vec<(&'static str, &'static str)> {
             vec![
                 $(
-                    include_str!(concat!("lints/", stringify!($name), ".ron")),
+                    (
+                        stringify!($name),
+                        include_str!(concat!("lints/", stringify!($name), ".ron")),
+                    ),
                 )*
             ]
         }
@@ -475,6 +481,8 @@ macro_rules! add_lints {
     }
 }
 
+// The following add_lints! invocation is programmatically edited by scripts/make_new_lint.sh
+// If you must manually edit it, be sure to read the "Requirements" comments in that script first
 add_lints!(
     auto_trait_impl_removed,
     constructible_struct_adds_field,

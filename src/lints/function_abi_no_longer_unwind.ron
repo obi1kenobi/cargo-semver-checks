@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "function_abi_no_longer_unwind",
     human_readable_name: "function abi no longer unwind",
     description: "A pub fn changed from an unwind-capable ABI to the same-named ABI without unwind. If that function causes an unwind (e.g. by panicking), its behavior is now undefined.",
     required_update: Major,

@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "inherent_associated_pub_const_missing",
     human_readable_name: "inherent impl's associated pub const removed",
     description: "An inherent impl's associated public const removed or renamed",
     required_update: Major,

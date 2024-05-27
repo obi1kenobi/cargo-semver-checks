@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "struct_marked_non_exhaustive",
     human_readable_name: "struct marked #[non_exhaustive]",
     description: "An exhaustive struct has been marked #[non_exhaustive].",
     reference: Some("An exhaustive struct has been marked #[non_exhaustive] making it no longer constructible using a struct literal outside its crate."),

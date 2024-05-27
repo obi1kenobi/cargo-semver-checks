@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "constructible_struct_adds_field",
     human_readable_name: "externally-constructible struct adds field",
     description: "A struct constructible with a struct literal added a new pub field.",
     required_update: Major,

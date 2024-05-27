@@ -1,5 +1,4 @@
 SemverQuery(
-    id: "sized_impl_removed",
     human_readable_name: "Sized no longer implemented",
     description: "A type is no longer `Sized`.",
     required_update: Major,
