@@ -100,7 +100,7 @@ pub struct ManifestGitRevision {
 
     /// If we failed to use the git repo and check out the revision.
     /// For example, if the repo path is incorrect or the specified revision doesn't exist.
-    if_failed_to_check_out_rev: OnUnexpectedOutcome
+    if_failed_to_check_out_rev: OnUnexpectedOutcome,
 
     /// If we failed to open, read, or parse the root manifest file at the specified path.
     if_failed_to_read_root_manifest: OnUnexpectedOutcome,
