@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "auto trait no longer implemented",
     description: "A type has stopped implementing one or more auto traits.",
     required_update: Major,
+    lint_level: Deny,
     // TODO: Add a better reference link once the cargo semver reference has a section on auto traits.
     reference_link: Some("https://doc.rust-lang.org/reference/special-types-and-traits.html#auto-traits"),
     query: r#"

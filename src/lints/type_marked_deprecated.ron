@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "#[deprecated] added on type",
     description: "A type has been newly marked with #[deprecated].",
     required_update: Minor,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-deprecated-attribute"),
     query: r#"
     {

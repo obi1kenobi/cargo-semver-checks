@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "struct no longer constructible due to new private field",
     description: "A struct is no longer constructible with a struct literal due to a new private field.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/expressions/struct-expr.html"),
     query: r#"
     {

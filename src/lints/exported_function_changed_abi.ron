@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "exported function changed ABI",
     description: "A function marked `#[no_mangle]` or assigned an explicit `#[export_name]` changed its external ABI.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/items/external-blocks.html#abi"),
     query: r#"{
     CrateDiff {

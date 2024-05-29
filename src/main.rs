@@ -3,7 +3,8 @@
 use std::{env, path::PathBuf};
 
 use cargo_semver_checks::{
-    GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
+    GlobalConfig, PackageSelection, QueryOverride, ReleaseType, Rustdoc, ScopeSelection,
+    SemverQuery,
 };
 use clap::{Args, Parser, Subcommand};
 
@@ -29,12 +30,16 @@ fn main() {
             let mut config = GlobalConfig::new();
             config.set_log_level(args.check_release.verbosity.log_level());
 
-            let queries = SemverQuery::all_queries();
-            let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
+            let queries = config.all_queries()?;
+            let mut rows = vec![
+                ["id", "type", "level", "description"],
+                ["==", "====", "=====", "==========="],
+            ];
             for query in queries.values() {
                 rows.push([
                     query.id.as_str(),
                     query.required_update.as_str(),
+                    query.lint_level.as_str(),
                     query.description.as_str(),
                 ]);
             }

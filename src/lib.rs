@@ -25,7 +25,7 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 pub use config::GlobalConfig;
-pub use query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery};
+pub use query::{ActualSemverUpdate, LintLevel, QueryOverride, RequiredSemverUpdate, SemverQuery};
 
 /// Test a release for semver violations.
 #[non_exhaustive]

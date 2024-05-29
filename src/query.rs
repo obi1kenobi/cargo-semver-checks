@@ -6,10 +6,10 @@ use trustfall::TransparentValue;
 use crate::ReleaseType;
 
 #[non_exhaustive]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum RequiredSemverUpdate {
-    Major,
     Minor,
+    Major,
 }
 
 impl RequiredSemverUpdate {
@@ -60,6 +60,35 @@ impl From<ReleaseType> for ActualSemverUpdate {
     }
 }
 
+/// The level of intensity of error when a lint occurs
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub enum LintLevel {
+    /// If this lint occurs, do nothing
+    Allow,
+    /// If this lint occurs, print a warning
+    Warn,
+    /// If this lint occurs, raise an error
+    Deny,
+}
+
+impl LintLevel {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            LintLevel::Allow => "allow",
+            LintLevel::Warn => "warn",
+            LintLevel::Deny => "deny",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct QueryOverride {
+    /// the required version bump for this lint; see [`SemverQuery`].required_update
+    pub required_update: Option<RequiredSemverUpdate>,
+    /// the lint level for the query; see [`SemverQuery`].lint_level
+    pub lint_level: Option<LintLevel>,
+}
+
 /// A query that can be executed on a pair of rustdoc output files,
 /// returning instances of a particular kind of semver violation.
 #[non_exhaustive]
@@ -72,6 +101,9 @@ pub struct SemverQuery {
     pub description: String,
 
     pub required_update: RequiredSemverUpdate,
+
+    /// The error level for when this lint procs (allow, warn, or deny)
+    pub lint_level: LintLevel,
 
     #[serde(default)]
     pub reference: Option<String>,
@@ -114,6 +146,16 @@ Failed to parse a query: {e}
         }
 
         queries
+    }
+
+    pub fn apply_override(&mut self, query_override: &QueryOverride) {
+        if let Some(lint_level) = query_override.lint_level {
+            self.lint_level = lint_level;
+        }
+
+        if let Some(required_update) = query_override.required_update {
+            self.required_update = required_update;
+        }
     }
 }
 
