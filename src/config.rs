@@ -302,7 +302,6 @@ impl GlobalConfig {
         &self.query_overrides
     }
 
-    #[must_use]
     pub fn all_queries(&self) -> anyhow::Result<BTreeMap<String, SemverQuery>> {
         let mut queries = SemverQuery::all_queries();
         for (name, overrides) in &self.query_overrides {

@@ -3,8 +3,7 @@
 use std::{env, path::PathBuf};
 
 use cargo_semver_checks::{
-    GlobalConfig, PackageSelection, QueryOverride, ReleaseType, Rustdoc, ScopeSelection,
-    SemverQuery,
+    GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
 };
 use clap::{Args, Parser, Subcommand};
 

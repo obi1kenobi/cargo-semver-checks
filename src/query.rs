@@ -81,11 +81,18 @@ impl LintLevel {
     }
 }
 
+/// Configured values for a [`SemverQuery`] that differ from the lint's default.
 #[derive(Debug, Clone, Default)]
 pub struct QueryOverride {
-    /// the required version bump for this lint; see [`SemverQuery`].required_update
+    /// The required version bump for this lint; see [`SemverQuery`].`required_update`.
+    ///
+    /// If this is `None`, use the default `required_update` for the lint when calculating
+    /// the effective required version bump.
     pub required_update: Option<RequiredSemverUpdate>,
-    /// the lint level for the query; see [`SemverQuery`].lint_level
+    /// The lint level for the query; see [`SemverQuery`].`lint_level`.
+    ///
+    /// If this is `None`, use the default `required_update` for the lint when calculating
+    /// the effective lint level.
     pub lint_level: Option<LintLevel>,
 }
 
@@ -102,7 +109,7 @@ pub struct SemverQuery {
 
     pub required_update: RequiredSemverUpdate,
 
-    /// The error level for when this lint procs (allow, warn, or deny)
+    /// The error level for when this lint occurs (allow, warn, or deny).
     pub lint_level: LintLevel,
 
     #[serde(default)]
