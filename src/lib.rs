@@ -22,10 +22,14 @@ use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 use rustdoc_cmd::RustdocCommand;
 use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::time::Instant;
 
 pub use config::GlobalConfig;
-pub use query::{ActualSemverUpdate, LintLevel, QueryOverride, RequiredSemverUpdate, SemverQuery};
+pub use query::{
+    ActualSemverUpdate, LintLevel, QueryOverride, QueryOverrideList, QueryOverrides,
+    RequiredSemverUpdate, SemverQuery,
+};
 
 /// Test a release for semver violations.
 #[non_exhaustive]
@@ -40,6 +44,13 @@ pub struct Check {
     baseline_feature_config: rustdoc_gen::FeatureConfig,
     /// Which `--target` to use, if unset pass no flag
     build_target: Option<String>,
+    /// Workspace-level configuration overrides to apply to all packages if
+    /// running in workspace scope.  Package-level overrides for a given
+    /// crate in `package_overrides take precedence over this member if both are set.
+    workspace_overrides: Option<Arc<QueryOverrides>>,
+    /// A mapping of package name to package-level configuration overrides for
+    /// that package.  Takes precedence over `workspace_overrides` if both are set.
+    package_overrides: BTreeMap<String, Arc<QueryOverrides>>,
 }
 
 /// The kind of release we're making.
@@ -253,6 +264,8 @@ impl Check {
             current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
             build_target: None,
+            workspace_overrides: None,
+            package_overrides: BTreeMap::new(),
         }
     }
 
@@ -372,6 +385,22 @@ impl Check {
         })
     }
 
+    /// Helper function to get the configured workspace-level overrides if set and
+    /// running in workspace scope, otherwise return an empty list.
+    #[must_use]
+    fn workspace_overrides(&self) -> Vec<Arc<QueryOverrides>> {
+        if let ScopeMode::DenyList(PackageSelection {
+            selection: ScopeSelection::Workspace,
+            ..
+        }) = self.scope.mode
+        {
+            if let Some(wksp) = &self.workspace_overrides {
+                return vec![Arc::clone(wksp)];
+            }
+        }
+        vec![]
+    }
+
     pub fn check_release(&self, config: &mut GlobalConfig) -> anyhow::Result<Report> {
         let rustdoc_cmd = RustdocCommand::new().deps(false).silence(config.is_info());
 
@@ -447,12 +476,19 @@ impl Check {
                             },
                         )?;
 
+                        let mut overrides = self.workspace_overrides();
+
+                        if let Some(pkg) = self.package_overrides.get(&name) {
+                            overrides.push(Arc::clone(pkg));
+                        }
+
                         let report = run_check_release(
                             config,
                             &name,
                             current_crate,
                             baseline_crate,
                             self.release_type,
+                            overrides.into(),
                         )?;
                         config.shell_status(
                             "Finished",
@@ -525,6 +561,11 @@ note: skipped the following crates since they have no library target: {skipped}"
                                 },
                             )?;
 
+                            let mut overrides = self.workspace_overrides();
+                            if let Some(pkg) = self.package_overrides.get(&selected.name) {
+                                overrides.push(Arc::clone(pkg));
+                            }
+
                             let result = Ok((
                                 crate_name.clone(),
                                 Some(run_check_release(
@@ -533,6 +574,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                                     current_crate,
                                     baseline_crate,
                                     self.release_type,
+                                    overrides.into(),
                                 )?),
                             ));
                             config.shell_status(

@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::Arc};
 
 use serde::{Deserialize, Serialize};
 use trustfall::TransparentValue;
@@ -82,7 +82,7 @@ impl LintLevel {
 }
 
 /// Configured values for a [`SemverQuery`] that differ from the lint's default.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct QueryOverride {
     /// The required version bump for this lint; see [`SemverQuery`].`required_update`.
     ///
@@ -94,6 +94,59 @@ pub struct QueryOverride {
     /// If this is `None`, use the default `required_update` for the lint when calculating
     /// the effective lint level.
     pub lint_level: Option<LintLevel>,
+}
+
+/// A mapping of lint level name to values to override that lint's defaults with.
+pub type QueryOverrides = BTreeMap<String, QueryOverride>;
+
+/// Stores a list of [`QueryOverride`] references.
+///
+/// Items later in the list (with higher indices) have *higher* precedence,
+/// so e.g., store package-level overrides at index 1 and workspace-level
+/// overrides at index 0 for package-level overrides to take priority over
+/// workspace-level ones if both are set.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct QueryOverrideList(Vec<Arc<QueryOverrides>>);
+
+impl QueryOverrideList {
+    /// Creates a new empty [`QueryOverrideList`] instance.
+    #[must_use]
+    pub fn new() -> Self {
+        Self(Vec::new())
+    }
+
+    /// Inserts the given element at the end of the list.
+    /// The inserted parameter `overrides` will take precedence over all
+    /// previous overrides in the list, if both set.
+    pub fn push(&mut self, overrides: Arc<QueryOverrides>) {
+        self.0.push(overrides);
+    }
+
+    #[must_use]
+    pub fn effective_lint_level(&self, query: &SemverQuery) -> LintLevel {
+        self.0
+            .iter()
+            .rev()
+            .filter_map(|x| x.get(&query.id).and_then(|y| y.lint_level))
+            .next()
+            .unwrap_or(query.lint_level)
+    }
+
+    #[must_use]
+    pub fn effective_required_update(&self, query: &SemverQuery) -> RequiredSemverUpdate {
+        self.0
+            .iter()
+            .rev()
+            .filter_map(|x| x.get(&query.id).and_then(|y| y.required_update))
+            .next()
+            .unwrap_or(query.required_update)
+    }
+}
+
+impl From<Vec<Arc<QueryOverrides>>> for QueryOverrideList {
+    fn from(value: Vec<Arc<QueryOverrides>>) -> Self {
+        Self(value)
+    }
 }
 
 /// A query that can be executed on a pair of rustdoc output files,
@@ -168,7 +221,7 @@ Failed to parse a query: {e}
 
 #[cfg(test)]
 mod tests {
-    use std::sync::OnceLock;
+    use std::sync::{Arc, OnceLock};
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
@@ -177,7 +230,10 @@ mod tests {
         load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
     };
 
-    use crate::query::SemverQuery;
+    use super::{
+        LintLevel, QueryOverride, QueryOverrideList, QueryOverrides, RequiredSemverUpdate,
+        SemverQuery,
+    };
     use crate::templating::make_handlebars_registry;
 
     static TEST_CRATE_NAMES: OnceLock<Vec<String>> = OnceLock::new();
@@ -497,6 +553,115 @@ mod tests {
                     .expect("could not materialize template");
             }
         }
+    }
+
+    #[must_use]
+    fn make_blank_query(
+        id: String,
+        lint_level: LintLevel,
+        required_update: RequiredSemverUpdate,
+    ) -> SemverQuery {
+        SemverQuery {
+            id,
+            lint_level,
+            required_update,
+            human_readable_name: String::new(),
+            description: String::new(),
+            reference: None,
+            reference_link: None,
+            query: String::new(),
+            arguments: BTreeMap::new(),
+            error_message: String::new(),
+            per_result_error_template: None,
+        }
+    }
+
+    #[test]
+    fn test_overrides() {
+        let qo: QueryOverrides = [(
+            "query1".into(),
+            QueryOverride {
+                lint_level: Some(crate::LintLevel::Deny),
+                required_update: Some(crate::RequiredSemverUpdate::Major),
+            },
+        )]
+        .into_iter()
+        .collect();
+
+        let mut list = QueryOverrideList::new();
+        list.push(Arc::new(qo));
+
+        let query1 = make_blank_query(
+            "query1".into(),
+            LintLevel::Allow,
+            RequiredSemverUpdate::Minor,
+        );
+
+        let query2 = make_blank_query(
+            "query2".into(),
+            LintLevel::Allow,
+            RequiredSemverUpdate::Minor,
+        );
+
+        // Overrides should apply on query 1.
+        assert_eq!(list.effective_lint_level(&query1), LintLevel::Deny);
+        assert_eq!(
+            list.effective_required_update(&query1),
+            RequiredSemverUpdate::Major
+        );
+
+        // But query 2 does not have overrides, so it should return the defaults.
+        assert_eq!(list.effective_lint_level(&query2), LintLevel::Allow);
+        assert_eq!(
+            list.effective_required_update(&query2),
+            RequiredSemverUpdate::Minor
+        );
+    }
+
+    #[test]
+    fn test_override_precedence() {
+        let mut list = QueryOverrideList::new();
+
+        // Since this one is pushed first, it has lower precedence than the following set of overrides.
+        list.push(Arc::new(
+            [(
+                "query1".into(),
+                QueryOverride {
+                    lint_level: Some(LintLevel::Warn),
+                    required_update: Some(RequiredSemverUpdate::Major),
+                },
+            )]
+            .into_iter()
+            .collect(),
+        ));
+
+        list.push(Arc::new(
+            [(
+                "query1".into(),
+                QueryOverride {
+                    lint_level: Some(LintLevel::Deny),
+                    required_update: None,
+                },
+            )]
+            .into_iter()
+            .collect(),
+        ));
+
+        let query1 = make_blank_query(
+            "query1".into(),
+            LintLevel::Allow,
+            RequiredSemverUpdate::Minor,
+        );
+
+        // Since both overrides are set on its lint level, the later one should take precedence.
+        assert_eq!(list.effective_lint_level(&query1), LintLevel::Deny);
+
+        // Since only the lower-precedence override is set for version, it should return that one,
+        // not the query's default.
+        assert_eq!(
+            list.effective_required_update(&query1),
+            RequiredSemverUpdate::Major
+        );
     }
 }
 

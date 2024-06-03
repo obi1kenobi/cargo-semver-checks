@@ -11,7 +11,7 @@ use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
 use crate::{
-    query::{ActualSemverUpdate, LintLevel, RequiredSemverUpdate, SemverQuery},
+    query::{ActualSemverUpdate, LintLevel, QueryOverrideList, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType,
 };
 
@@ -160,8 +160,9 @@ pub(super) fn run_check_release(
     current_crate: VersionedCrate,
     baseline_crate: VersionedCrate,
     release_type: Option<ReleaseType>,
+    overrides: QueryOverrideList,
 ) -> anyhow::Result<CrateReport> {
-    let queries = config.all_queries()?;
+    let queries = SemverQuery::all_queries();
 
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
@@ -193,8 +194,8 @@ pub(super) fn run_check_release(
     let adapter = VersionedRustdocAdapter::new(&current, Some(&previous))?;
 
     let (queries_to_run, queries_to_skip): (Vec<_>, _) = queries.values().partition(|query| {
-        !version_change.supports_requirement(query.required_update)
-            && query.lint_level >= LintLevel::Warn
+        !version_change.supports_requirement(overrides.effective_required_update(query))
+            && overrides.effective_lint_level(query) >= LintLevel::Warn
     });
     let skipped_queries = queries_to_skip.len();
 
@@ -253,7 +254,7 @@ pub(super) fn run_check_release(
     for (semver_query, time_to_decide, results) in all_results {
         config
             .log_verbose(|config| {
-                let category = match semver_query.required_update {
+                let category = match overrides.effective_required_update(semver_query) {
                     RequiredSemverUpdate::Major => "major",
                     RequiredSemverUpdate::Minor => "minor",
                 };
@@ -288,7 +289,7 @@ pub(super) fn run_check_release(
             })
             .expect("print failed");
         if !results.is_empty() {
-            if semver_query.lint_level == LintLevel::Deny {
+            if overrides.effective_lint_level(semver_query) == LintLevel::Deny {
                 error_results.push((semver_query, results));
             } else {
                 warning_results.push((semver_query, results));
@@ -317,26 +318,26 @@ pub(super) fn run_check_release(
         let mut warnings = BTreeMap::new();
         let mut errors = BTreeMap::new();
         // print errors before warnings like clippy does
-        for (semver_query, results) in warning_results {
-            warnings
-                .entry(semver_query.required_update)
+        for (semver_query, results) in error_results {
+            errors
+                .entry(overrides.effective_required_update(semver_query))
                 .and_modify(|e| *e += 1)
                 .or_insert(1);
 
-            config.shell_warn(format!(
+            config.shell_error(format!(
                 "{}: {}",
                 &semver_query.id, &semver_query.human_readable_name
             ))?;
             print_lint_failure(config, semver_query, results)?;
         }
 
-        for (semver_query, results) in error_results {
-            errors
-                .entry(semver_query.required_update)
+        for (semver_query, results) in warning_results {
+            warnings
+                .entry(overrides.effective_required_update(semver_query))
                 .and_modify(|e| *e += 1)
                 .or_insert(1);
 
-            config.shell_error(format!(
+            config.shell_warn(format!(
                 "{}: {}",
                 &semver_query.id, &semver_query.human_readable_name
             ))?;

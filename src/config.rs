@@ -1,8 +1,8 @@
 use anstream::{AutoStream, ColorChoice};
 use anstyle::{AnsiColor, Color, Reset, Style};
-use std::{collections::BTreeMap, io::Write};
+use std::io::Write;
 
-use crate::{query::QueryOverride, templating::make_handlebars_registry, SemverQuery};
+use crate::templating::make_handlebars_registry;
 
 #[allow(dead_code)]
 pub struct GlobalConfig {
@@ -14,9 +14,6 @@ pub struct GlobalConfig {
     minimum_rustc_version: semver::Version,
     stdout: AutoStream<Box<dyn Write + 'static>>,
     stderr: AutoStream<Box<dyn Write + 'static>>,
-    /// A mapping of lint names to values to override that lint's defaults,
-    /// such as its lint level and required semver bump.
-    query_overrides: BTreeMap<String, QueryOverride>,
 }
 
 impl Default for GlobalConfig {
@@ -41,7 +38,6 @@ impl GlobalConfig {
             minimum_rustc_version: semver::Version::new(1, 74, 0),
             stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
             stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
-            query_overrides: BTreeMap::new(),
         }
     }
 
@@ -287,31 +283,6 @@ impl GlobalConfig {
             // so an initial choice of `Auto` would be converted into either `Always` or `Never`.
             ColorChoice::Never | ColorChoice::Auto => false,
         }
-    }
-
-    pub fn set_query_overrides(
-        &mut self,
-        query_overrides: BTreeMap<String, QueryOverride>,
-    ) -> &mut Self {
-        self.query_overrides = query_overrides;
-        self
-    }
-
-    #[must_use]
-    pub fn query_overrides(&self) -> &BTreeMap<String, QueryOverride> {
-        &self.query_overrides
-    }
-
-    pub fn all_queries(&self) -> anyhow::Result<BTreeMap<String, SemverQuery>> {
-        let mut queries = SemverQuery::all_queries();
-        for (name, overrides) in &self.query_overrides {
-            if let Some(query) = queries.get_mut(name) {
-                query.apply_override(overrides);
-            } else {
-                anyhow::bail!("Can't configure lint with unknown name `{name}`.");
-            }
-        }
-        Ok(queries)
     }
 }
 

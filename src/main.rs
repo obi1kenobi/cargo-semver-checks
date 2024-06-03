@@ -29,7 +29,8 @@ fn main() {
             let mut config = GlobalConfig::new();
             config.set_log_level(args.check_release.verbosity.log_level());
 
-            let queries = config.all_queries()?;
+            // TODO: do we want this to respect configuration in the current directory?
+            let queries = SemverQuery::all_queries();
             let mut rows = vec![
                 ["id", "type", "level", "description"],
                 ["==", "====", "=====", "==========="],
