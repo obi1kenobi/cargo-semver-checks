@@ -149,6 +149,10 @@ impl GlobalConfig {
         self.shell_print("warning", message, Color::Ansi(AnsiColor::Yellow), false)
     }
 
+    pub fn shell_error(&mut self, message: impl std::fmt::Display) -> anyhow::Result<()> {
+        self.shell_print("error", message, Color::Ansi(AnsiColor::Red), false)
+    }
+
     /// Gets the color-supporting `stdout` that the crate will use.
     ///
     /// See [`GlobalConfig::set_stdout`] and [`GlobalConfig::set_out_color_choice`] to

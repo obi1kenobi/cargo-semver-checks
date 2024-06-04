@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "struct with pub fields became an enum or union",
     description: "A struct was converted into an enum or union, breaking accesses to its fields.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://github.com/obi1kenobi/cargo-semver-checks/issues/297#issuecomment-1399099659"),
     reference: Some(
         r#"\

@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub enum struct variant's field removed or renamed" ,
     description: "An enum's struct variant has a field that is no longer available under its prior name.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
     {

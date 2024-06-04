@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "function's export name has changed or been removed",
     description: "A function's ABI name with #[no_mangle] or #[export_name = \"name\"] has changed or been removed",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/abi.html#the-no_mangle-attribute"),
     query: r#"
     {

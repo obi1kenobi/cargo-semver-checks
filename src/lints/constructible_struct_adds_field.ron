@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "externally-constructible struct adds field",
     description: "A struct constructible with a struct literal added a new pub field.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/expressions/struct-expr.html"),
     query: r#"
     {

@@ -30,6 +30,27 @@ impl From<RequiredSemverUpdate> for ReleaseType {
     }
 }
 
+/// The level of intensity of the error when a lint occurs.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub enum LintLevel {
+    /// If this lint occurs, do nothing.
+    Allow,
+    /// If this lint occurs, print a warning.
+    Warn,
+    /// If this lint occurs, raise an error.
+    Deny,
+}
+
+impl LintLevel {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            LintLevel::Allow => "allow",
+            LintLevel::Warn => "warn",
+            LintLevel::Deny => "deny",
+        }
+    }
+}
+
 /// Kind of semver update.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ActualSemverUpdate {
@@ -72,6 +93,9 @@ pub struct SemverQuery {
     pub description: String,
 
     pub required_update: RequiredSemverUpdate,
+
+    /// The default lint level for when this lint occurs.
+    pub lint_level: LintLevel,
 
     #[serde(default)]
     pub reference: Option<String>,

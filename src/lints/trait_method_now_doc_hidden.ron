@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub trait method is now #[doc(hidden)]",
     description: "A public trait method is now marked as #[doc(hidden)] and has thus been removed from the public API",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html#hidden"),
     query: r#"
     {

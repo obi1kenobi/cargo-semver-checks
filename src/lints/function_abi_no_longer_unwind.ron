@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "function abi no longer unwind",
     description: "A pub fn changed from an unwind-capable ABI to the same-named ABI without unwind. If that function causes an unwind (e.g. by panicking), its behavior is now undefined.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://rust-lang.github.io/rfcs/2945-c-unwind-abi.html"),
     query: r#"
     {

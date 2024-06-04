@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "enum variant added on exhaustive enum",
     description: "An exhaustive enum has a new variant.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#enum-variant-new"),
     query: r#"
     {

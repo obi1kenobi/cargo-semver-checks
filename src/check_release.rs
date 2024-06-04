@@ -7,7 +7,7 @@ use anyhow::Context;
 use clap::crate_version;
 use itertools::Itertools;
 use rayon::prelude::*;
-use trustfall::TransparentValue;
+use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
 use crate::{
@@ -62,6 +62,97 @@ fn classify_semver_version_change(
     } else {
         None
     }
+}
+
+/// Helper function to print an error message about a failed lint.
+fn print_failed_lint(
+    config: &mut GlobalConfig,
+    semver_query: &SemverQuery,
+    results: Vec<BTreeMap<Arc<str>, FieldValue>>,
+) -> anyhow::Result<()> {
+    if let Some(ref_link) = semver_query.reference_link.as_deref() {
+        config.log_info(|config| {
+            writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
+                Style::new().bold(), Reset,
+                &semver_query.error_message,
+                "ref:",
+                ref_link,
+                "impl:",
+                crate_version!(),
+                semver_query.id,
+            )?;
+            Ok(())
+        })?;
+    } else {
+        config.log_info(|config| {
+            writeln!(
+                config.stdout(),
+                "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
+                Style::new().bold(),
+                Reset,
+                &semver_query.error_message,
+                "impl:",
+                crate_version!(),
+                semver_query.id,
+            )?;
+            Ok(())
+        })?;
+    }
+
+    config.log_info(|config| {
+        writeln!(
+            config.stdout(),
+            "{}Failed in:{}",
+            Style::new().bold(),
+            Reset
+        )?;
+        Ok(())
+    })?;
+
+    for semver_violation_result in results {
+        let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
+            .into_iter()
+            .map(|(k, v)| (k, v.into()))
+            .collect();
+
+        if let Some(template) = semver_query.per_result_error_template.as_deref() {
+            let message = config
+                .handlebars()
+                .render_template(template, &pretty_result)
+                .context("Error instantiating semver query template.")
+                .expect("could not materialize template");
+            config.log_info(|config| {
+                writeln!(config.stdout(), "  {}", message)?;
+                Ok(())
+            })?;
+
+            config.log_extra_verbose(|config| {
+                let serde_pretty =
+                    serde_json::to_string_pretty(&pretty_result).expect("serde failed");
+                let indented_serde = serde_pretty
+                    .split('\n')
+                    .map(|line| format!("    {line}"))
+                    .join("\n");
+                writeln!(
+                    config.stdout(),
+                    "\tlint rule output values:\n{}",
+                    indented_serde
+                )?;
+                Ok(())
+            })?;
+        } else {
+            config.log_info(|config| {
+                writeln!(
+                    config.stdout(),
+                    "{}\n",
+                    serde_json::to_string_pretty(&pretty_result)?
+                )?;
+                Ok(())
+            })?;
+        }
+    }
+
+    Ok(())
 }
 
 pub(super) fn run_check_release(
@@ -219,109 +310,17 @@ pub(super) fn run_check_release(
 
         for (semver_query, results) in results_with_errors {
             required_versions.push(semver_query.required_update);
-            config
-                .log_info(|config| {
-                    writeln!(
-                        config.stdout(),
-                        "\n--- failure {}: {} ---\n",
-                        &semver_query.id,
-                        &semver_query.human_readable_name
-                    )?;
-                    Ok(())
-                })
-                .expect("print failed");
+            config.log_info(|config| {
+                writeln!(
+                    config.stdout(),
+                    "\n--- failure {}: {} ---\n",
+                    &semver_query.id,
+                    &semver_query.human_readable_name
+                )?;
+                Ok(())
+            })?;
 
-            if let Some(ref_link) = semver_query.reference_link.as_deref() {
-                config.log_info(|config| {
-                    writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
-                        Style::new().bold(), Reset,
-                        &semver_query.error_message,
-                        "ref:",
-                        ref_link,
-                        "impl:",
-                        crate_version!(),
-                        semver_query.id,
-                    )?;
-                    Ok(())
-                })
-                .expect("print failed");
-            } else {
-                config.log_info(|config| {
-                    writeln!(
-                        config.stdout(),
-                        "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
-                        Style::new().bold(),
-                        Reset,
-                        &semver_query.error_message,
-                        "impl:",
-                        crate_version!(),
-                        semver_query.id,
-                    )?;
-                    Ok(())
-                })
-                .expect("print failed");
-            }
-
-            config
-                .log_info(|config| {
-                    writeln!(
-                        config.stdout(),
-                        "{}Failed in:{}",
-                        Style::new().bold(),
-                        Reset
-                    )?;
-                    Ok(())
-                })
-                .expect("print failed");
-
-            for semver_violation_result in results {
-                let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
-                    .into_iter()
-                    .map(|(k, v)| (k, v.into()))
-                    .collect();
-
-                if let Some(template) = semver_query.per_result_error_template.as_deref() {
-                    let message = config
-                        .handlebars()
-                        .render_template(template, &pretty_result)
-                        .context("Error instantiating semver query template.")
-                        .expect("could not materialize template");
-                    config
-                        .log_info(|config| {
-                            writeln!(config.stdout(), "  {}", message)?;
-                            Ok(())
-                        })
-                        .expect("print failed");
-
-                    config
-                        .log_extra_verbose(|config| {
-                            let serde_pretty =
-                                serde_json::to_string_pretty(&pretty_result).expect("serde failed");
-                            let indented_serde = serde_pretty
-                                .split('\n')
-                                .map(|line| format!("    {line}"))
-                                .join("\n");
-                            writeln!(
-                                config.stdout(),
-                                "\tlint rule output values:\n{}",
-                                indented_serde
-                            )?;
-                            Ok(())
-                        })
-                        .expect("print failed");
-                } else {
-                    config
-                        .log_info(|config| {
-                            writeln!(
-                                config.stdout(),
-                                "{}\n",
-                                serde_json::to_string_pretty(&pretty_result)?
-                            )?;
-                            Ok(())
-                        })
-                        .expect("print failed");
-                }
-            }
+            print_failed_lint(config, semver_query, results)?;
         }
 
         let required_bump = if required_versions.contains(&RequiredSemverUpdate::Major) {

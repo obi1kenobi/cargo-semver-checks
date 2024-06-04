@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub static is missing",
     description: "A pub static is missing, renamed, or made private",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
     {
