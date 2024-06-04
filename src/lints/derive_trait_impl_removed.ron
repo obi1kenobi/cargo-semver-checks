@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "built-in derived trait no longer implemented",
     description: "A type has stopped implementing a built-in trait that used to be derived.",
     required_update: Major,
+    lint_level: Deny,
     // TODO: Find a better reference than the definition of #[derive(...)].
     //       The cargo semver reference doesn't say that no longer deriving a pub trait is breaking.
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/derive.html#derive"),

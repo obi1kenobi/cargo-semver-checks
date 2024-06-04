@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub trait became unsafe",
     description: "A public trait became unsafe.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#implementing-an-unsafe-trait"),
     query: r#"
     {

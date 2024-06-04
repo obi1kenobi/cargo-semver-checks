@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub trait method removed or renamed",
     description: "A trait method can no longer be called by its prior path.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#major-any-change-to-trait-item-signatures"),
     query: r#"
     {

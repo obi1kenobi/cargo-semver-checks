@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "Sized no longer implemented",
     description: "A type is no longer `Sized`.",
     required_update: Major,
+    lint_level: Deny,
     // TODO: Add a better reference link once the cargo semver reference has a section on Sized.
     reference_link: Some("https://doc.rust-lang.org/reference/special-types-and-traits.html#sized"),
     query: r#"

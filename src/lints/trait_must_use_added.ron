@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "trait #[must_use] added",
     description: "A trait has been marked with #[must_use].",
     required_update: Minor,
+    lint_level: Deny,
 
     // TODO: Change the reference link to point to the cargo semver reference
     //       once it has a section on attribute #[must_use].

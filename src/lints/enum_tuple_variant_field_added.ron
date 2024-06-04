@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub enum tuple variant field added",
     description: "An enum's exhaustive tuple variant has a new field.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
     query: r#"
     {

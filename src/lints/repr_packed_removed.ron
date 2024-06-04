@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "repr(packed) removed",
     description: "A struct or union that used to be #[repr(packed)] is no longer #[repr(packed)].",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-packed-remove"),
     query: r#"
     {

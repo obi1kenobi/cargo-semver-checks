@@ -7,6 +7,7 @@ This is breaking even if the fields have the same names, because tuple struct pa
 Source: Rust for Rustaceans, Chapter 3, "Type Modifications", page 51
 "#),
     required_update: Major,
+    lint_level: Deny,
     reference_link: None,
     query: r#"
     {

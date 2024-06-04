@@ -26,6 +26,7 @@ To avoid false-positives, this query is restricted to checking only structs that
 - that one field is public.
 "#),
     required_update: Major,
+    lint_level: Deny,
 
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-transparent-remove"),
     query: r#"

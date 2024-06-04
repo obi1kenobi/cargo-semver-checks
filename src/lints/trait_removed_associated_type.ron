@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "trait's associated type was removed",
     description: "A trait's associated type was removed or renamed.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
     {
