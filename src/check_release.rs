@@ -68,7 +68,7 @@ fn classify_semver_version_change(
 fn print_failed_lint(
     config: &mut GlobalConfig,
     semver_query: &SemverQuery,
-    results: &[BTreeMap<Arc<str>, FieldValue>],
+    results: Vec<BTreeMap<Arc<str>, FieldValue>>,
 ) -> anyhow::Result<()> {
     if let Some(ref_link) = semver_query.reference_link.as_deref() {
         config.log_info(|config| {
@@ -320,7 +320,7 @@ pub(super) fn run_check_release(
                 Ok(())
             })?;
 
-            print_failed_lint(config, semver_query, &results)?;
+            print_failed_lint(config, semver_query, results)?;
         }
 
         let required_bump = if required_versions.contains(&RequiredSemverUpdate::Major) {
