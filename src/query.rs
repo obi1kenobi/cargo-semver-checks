@@ -223,11 +223,10 @@ mod tests {
         load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
     };
 
-    use crate::query::SemverQuery;
+    use crate::query::{
+        LintLevel, OverrideStack, QueryOverride, RequiredSemverUpdate, SemverQuery,
+    };
     use crate::templating::make_handlebars_registry;
-    use crate::RequiredSemverUpdate;
-
-    use super::{LintLevel, OverrideStack, QueryOverride};
 
     static TEST_CRATE_NAMES: OnceLock<Vec<String>> = OnceLock::new();
 
