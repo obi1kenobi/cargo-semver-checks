@@ -161,8 +161,9 @@ pub struct QueryOverride {
 pub type OverrideMap = BTreeMap<String, QueryOverride>;
 
 /// Stores a stack of [`OverrideMap`] references such that items towards the top of
-/// the stack have *higher* precedence and override items lower in the stack if both
-/// are set.
+/// the stack (later in the backing `Vec`) have *higher* precedence and override items lower in the stack.
+/// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
+/// at the top of the stack will be used to calculate the effective lint level or required version update.  
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct OverrideStack(Vec<Arc<OverrideMap>>);
 
@@ -176,7 +177,7 @@ impl OverrideStack {
     /// Inserts the given element at the top of the stack.
     ///
     /// The inserted overrides will take precedence over any lower item in the stack,
-    /// if both are set.
+    /// if both maps have a not-`None` entry for a given lint.
     pub fn push(&mut self, item: Arc<OverrideMap>) {
         self.0.push(item);
     }
