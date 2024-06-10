@@ -15,7 +15,7 @@ rust-version = "1.74"
 
 [dependencies]
 trustfall = "0.7.1"
-trustfall_rustdoc = { version = "0.15.0", default-features = false, features = ["v27", "v28", "v29"] }
+trustfall_rustdoc = { version = "0.15.1", default-features = false, features = ["v27", "v28", "v29", "v30"] }
 clap = { version = "4.0.0", features = ["derive", "cargo"] }
 serde_json = "1.0.82"
 anyhow = "1.0.58"
@@ -31,12 +31,12 @@ clap-verbosity-flag = "2.0.0"
 log = "0.4.17"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
-gix = { version = "0.58", default-features = false, features = ["max-performance", "revision"] }
-tame-index = { version = "0.9", features = ["git", "sparse"] }
+gix = { version = "0.63", default-features = false, features = ["max-performance", "revision"] }
+tame-index = { version = "0.12", features = ["git", "sparse"] }
 
 human-panic = "1.0.3"
 bugreport = "0.5.0"
-itertools = "0.12.0"
+itertools = "0.13.0"
 cargo_toml = "0.19.2"
 toml = "0.8.10"
 directories = "5.0.1"
