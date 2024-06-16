@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::Arc};
 
 use serde::{Deserialize, Serialize};
 use trustfall::TransparentValue;
@@ -141,9 +141,81 @@ Failed to parse a query: {e}
     }
 }
 
+/// Configured values for a [`SemverQuery`] that differ from the lint's defaults.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct QueryOverride {
+    /// The required version bump for this lint; see [`SemverQuery`].`required_update`.
+    ///
+    /// If this is `None`, use the query's default `required_update` when calculating
+    /// the effective required version bump.
+    pub required_update: Option<RequiredSemverUpdate>,
+
+    /// The lint level for this lint; see [`SemverQuery`].`lint_level`.
+    ///
+    /// If this is `None`, use the query's default `lint_level` when calculating
+    /// the effective lint level.
+    pub lint_level: Option<LintLevel>,
+}
+
+/// A mapping of lint ids to configured values that override that lint's defaults.
+pub type OverrideMap = BTreeMap<String, QueryOverride>;
+
+/// Stores a stack of [`OverrideMap`] references such that items towards the top of
+/// the stack (later in the backing `Vec`) have *higher* precedence and override items lower in the stack.
+/// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
+/// at the top of the stack will be used to calculate the effective lint level or required version update.  
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct OverrideStack(Vec<Arc<OverrideMap>>);
+
+impl OverrideStack {
+    /// Creates a new, empty [`OverrideStack`] instance.
+    #[must_use]
+    pub fn new() -> Self {
+        Self(Vec::new())
+    }
+
+    /// Inserts the given element at the top of the stack.
+    ///
+    /// The inserted overrides will take precedence over any lower item in the stack,
+    /// if both maps have a not-`None` entry for a given lint.
+    pub fn push(&mut self, item: Arc<OverrideMap>) {
+        self.0.push(item);
+    }
+
+    /// Calculates the *effective* lint level of this query, by searching for an override
+    /// mapped to this query's id from the top of the stack first, returning the query's default
+    /// lint level if not overridden.
+    #[must_use]
+    pub fn effective_lint_level(&self, query: &SemverQuery) -> LintLevel {
+        self.0
+            .iter()
+            .rev()
+            .find_map(|x| x.get(&query.id).and_then(|y| y.lint_level))
+            .unwrap_or(query.lint_level)
+    }
+
+    /// Calculates the *effective* required version bump of this query, by searching for an override
+    /// mapped to this query's id from the top of the stack first, returning the query's default
+    /// required version bump if not overridden.
+    #[must_use]
+    pub fn effective_required_update(&self, query: &SemverQuery) -> RequiredSemverUpdate {
+        self.0
+            .iter()
+            .rev()
+            .find_map(|x| x.get(&query.id).and_then(|y| y.required_update))
+            .unwrap_or(query.required_update)
+    }
+}
+
+impl From<Vec<Arc<OverrideMap>>> for OverrideStack {
+    fn from(value: Vec<Arc<OverrideMap>>) -> Self {
+        Self(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use std::sync::OnceLock;
+    use std::sync::{Arc, OnceLock};
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
@@ -152,7 +224,9 @@ mod tests {
         load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
     };
 
-    use crate::query::SemverQuery;
+    use crate::query::{
+        LintLevel, OverrideStack, QueryOverride, RequiredSemverUpdate, SemverQuery,
+    };
     use crate::templating::make_handlebars_registry;
 
     static TEST_CRATE_NAMES: OnceLock<Vec<String>> = OnceLock::new();
@@ -472,6 +546,145 @@ mod tests {
                     .expect("could not materialize template");
             }
         }
+    }
+
+    /// Helper function to construct a blank query with a given id, lint level, and required
+    /// version bump.
+    #[must_use]
+    fn make_blank_query(
+        id: String,
+        lint_level: LintLevel,
+        required_update: RequiredSemverUpdate,
+    ) -> SemverQuery {
+        SemverQuery {
+            id,
+            lint_level,
+            required_update,
+            human_readable_name: String::new(),
+            description: String::new(),
+            reference: None,
+            reference_link: None,
+            query: String::new(),
+            arguments: BTreeMap::new(),
+            error_message: String::new(),
+            per_result_error_template: None,
+        }
+    }
+
+    #[test]
+    fn test_overrides() {
+        let mut stack = OverrideStack::new();
+        stack.push(Arc::new(
+            [
+                (
+                    "query1".into(),
+                    QueryOverride {
+                        lint_level: Some(LintLevel::Allow),
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                    },
+                ),
+                (
+                    "query2".into(),
+                    QueryOverride {
+                        lint_level: None,
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                    },
+                ),
+            ]
+            .into_iter()
+            .collect(),
+        ));
+
+        let q1 = make_blank_query(
+            "query1".into(),
+            LintLevel::Deny,
+            RequiredSemverUpdate::Major,
+        );
+        let q2 = make_blank_query(
+            "query2".into(),
+            LintLevel::Warn,
+            RequiredSemverUpdate::Major,
+        );
+
+        // Should pick overridden values.
+        assert_eq!(stack.effective_lint_level(&q1), LintLevel::Allow);
+        assert_eq!(
+            stack.effective_required_update(&q1),
+            RequiredSemverUpdate::Minor
+        );
+
+        // Should pick overridden value for semver and fall back to default lint level
+        // which is not overridden
+        assert_eq!(stack.effective_lint_level(&q2), LintLevel::Warn);
+        assert_eq!(
+            stack.effective_required_update(&q2),
+            RequiredSemverUpdate::Minor
+        );
+    }
+
+    #[test]
+    fn test_override_precedence() {
+        let mut stack = OverrideStack::new();
+        stack.push(Arc::new(
+            [
+                (
+                    "query1".into(),
+                    QueryOverride {
+                        lint_level: Some(LintLevel::Allow),
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                    },
+                ),
+                (
+                    "query2".into(),
+                    QueryOverride {
+                        lint_level: None,
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                    },
+                ),
+            ]
+            .into_iter()
+            .collect(),
+        ));
+
+        stack.push(Arc::new(
+            [(
+                "query1".into(),
+                QueryOverride {
+                    required_update: None,
+                    lint_level: Some(LintLevel::Warn),
+                },
+            )]
+            .into_iter()
+            .collect(),
+        ));
+
+        let q1 = make_blank_query(
+            "query1".into(),
+            LintLevel::Deny,
+            RequiredSemverUpdate::Major,
+        );
+        let q2 = make_blank_query(
+            "query2".into(),
+            LintLevel::Warn,
+            RequiredSemverUpdate::Major,
+        );
+
+        // Should choose overridden value at the top of the stack
+        assert_eq!(stack.effective_lint_level(&q1), LintLevel::Warn);
+        // Should fall back to a configured value lower in the stack because
+        // top is not set.
+        assert_eq!(
+            stack.effective_required_update(&q1),
+            RequiredSemverUpdate::Minor
+        );
+
+        // Should pick overridden value for semver and fall back to default lint level
+        // which is not overridden
+        assert_eq!(stack.effective_lint_level(&q2), LintLevel::Warn);
+        assert_eq!(
+            stack.effective_required_update(&q2),
+            RequiredSemverUpdate::Minor
+        );
     }
 }
 
