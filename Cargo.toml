@@ -37,7 +37,7 @@ tame-index = { version = "0.12", features = ["git", "sparse"] }
 human-panic = "1.0.3"
 bugreport = "0.5.0"
 itertools = "0.13.0"
-cargo_toml = "0.19.2"
+cargo_toml = "0.20.2"
 toml = "0.8.10"
 directories = "5.0.1"
 sha2 = "0.10.6"
