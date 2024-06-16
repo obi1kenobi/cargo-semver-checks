@@ -140,11 +140,11 @@ impl<'a> CrateSource<'a> {
     /// - private/hidden features:        <https://github.com/rust-lang/cargo/issues/10882>
     ///
     /// Because of the above, this function filters out features with names:
-    ///  - `unstable`
-    ///  - `nightly`
-    ///  - `bench`
-    ///  - `no_std`
-    ///  features with prefix:
+    /// - `unstable`
+    /// - `nightly`
+    /// - `bench`
+    /// - `no_std`
+    ///   and any features with prefix:
     /// - `_`
     /// - `unstable_`
     /// - `unstable-`
