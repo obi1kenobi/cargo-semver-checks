@@ -63,6 +63,8 @@ pub(crate) fn get_project_dir_from_manifest_path(
     Ok(dir_path.to_path_buf())
 }
 
+/// A [package.metadata] or [workspace.metadata] table with
+/// `cargo-semver-checks` lint entries stored in `config`
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct LintTable {
     #[serde(rename = "cargo-semver-checks")]
@@ -79,11 +81,21 @@ impl From<LintTable> for OverrideMap {
     }
 }
 
+/// Different valid representations of a [`QueryOverride`] in the Cargo.toml configuration table
 #[derive(Debug, Clone, Deserialize)]
 #[serde(untagged, rename_all = "kebab-case")]
 pub(crate) enum OverrideConfig {
+    /// Specify members by name, e.g.
+    /// `lint_name = { lint-level = "deny", required-update = "major" }
+    /// Any omitted members will default to `None`
     Structure(QueryOverride),
+    /// Shorthand for specifying just a lint level and leaving
+    /// the other members as default: e.g.,
+    /// `lint_name = "deny"`
     LintLevel(LintLevel),
+    /// Shorthand for specifying just a required version bump and leaving
+    /// the other members as default: e.g.,
+    /// `lint_name = "allow"`
     RequiredUpdate(RequiredSemverUpdate),
 }
 
