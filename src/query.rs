@@ -8,7 +8,9 @@ use crate::ReleaseType;
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RequiredSemverUpdate {
+    #[serde(alias = "major")]
     Major,
+    #[serde(alias = "minor")]
     Minor,
 }
 
@@ -34,10 +36,13 @@ impl From<RequiredSemverUpdate> for ReleaseType {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum LintLevel {
     /// If this lint occurs, do nothing.
+    #[serde(alias = "allow")]
     Allow,
     /// If this lint occurs, print a warning.
+    #[serde(alias = "warn")]
     Warn,
     /// If this lint occurs, raise an error.
+    #[serde(alias = "deny")]
     Deny,
 }
 
@@ -142,18 +147,21 @@ Failed to parse a query: {e}
 }
 
 /// Configured values for a [`SemverQuery`] that differ from the lint's defaults.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct QueryOverride {
     /// The required version bump for this lint; see [`SemverQuery`].`required_update`.
     ///
     /// If this is `None`, use the query's default `required_update` when calculating
     /// the effective required version bump.
+    #[serde(default)]
     pub required_update: Option<RequiredSemverUpdate>,
 
     /// The lint level for this lint; see [`SemverQuery`].`lint_level`.
     ///
     /// If this is `None`, use the query's default `lint_level` when calculating
     /// the effective lint level.
+    #[serde(default)]
     pub lint_level: Option<LintLevel>,
 }
 
