@@ -93,7 +93,7 @@ pub(crate) enum OverrideConfig {
     LintLevel(LintLevel),
     /// Shorthand for specifying just a required version bump and leaving
     /// the other members as default: e.g.,
-    /// `lint_name = "allow"`
+    /// `lint_name = "minor"`
     RequiredUpdate(RequiredSemverUpdate),
 }
 
