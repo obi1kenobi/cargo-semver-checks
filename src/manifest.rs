@@ -67,17 +67,15 @@ pub(crate) fn get_project_dir_from_manifest_path(
 /// `cargo-semver-checks` lint entries stored in `config`
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct LintTable {
-    #[serde(rename = "cargo-semver-checks")]
-    pub(crate) config: BTreeMap<String, OverrideConfig>,
+    #[serde(default, rename = "cargo-semver-checks")]
+    pub(crate) config: Option<BTreeMap<String, OverrideConfig>>,
 }
 
-impl From<LintTable> for OverrideMap {
-    fn from(value: LintTable) -> Self {
-        value
-            .config
-            .into_iter()
-            .map(|(k, v)| (k, v.into()))
-            .collect()
+impl LintTable {
+    #[allow(dead_code)] // TODO: remove when integrated
+    pub fn into_overrides(self) -> Option<OverrideMap> {
+        self.config
+            .map(|config| config.into_iter().map(|(k, v)| (k, v.into())).collect())
     }
 }
 
@@ -156,8 +154,12 @@ mod tests {
             .metadata
             .expect("Workspace metadata should be present");
 
-        let pkg = package_metadata.config;
-        let wks = workspace_metadata.config;
+        let pkg = package_metadata
+            .config
+            .expect("Lint table should be present");
+        let wks = workspace_metadata
+            .config
+            .expect("Lint table should be present");
         assert!(
             matches!(pkg.get("one"), Some(&RequiredUpdate(Major))),
             "got {:?}",
