@@ -113,6 +113,16 @@ impl From<OverrideConfig> for QueryOverride {
     }
 }
 
+/// Helper function to deserialize an optional lint table from a [`serde_json::Value`]
+/// into a [`OverrideMap`].  Returns an `Err` if the `cargo-semver-checks` table is present
+/// but invalid.  Returns `Ok(None)` if the table is not present.
+pub(crate) fn deserialize_lint_table(
+    metadata: serde_json::Value,
+) -> anyhow::Result<Option<OverrideMap>> {
+    let table: Option<LintTable> = serde_json::from_value(metadata)?;
+    Ok(table.map(LintTable::into_overrides).flatten())
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{manifest::OverrideConfig, QueryOverride};
