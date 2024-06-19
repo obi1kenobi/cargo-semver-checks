@@ -486,8 +486,8 @@ note: skipped the following crates since they have no library target: {skipped}"
                 }
 
                 let workspace_overrides =
-                    manifest::deserialize_lint_table(metadata.workspace_metadata.clone())
-                        .context("[workspace.metadata.cargo-semver-checks] table is incorrect")?
+                    manifest::deserialize_lint_table(&metadata.workspace_metadata)
+                        .context("[workspace.metadata.cargo-semver-checks] table is invalid")?
                         .map(Arc::new);
 
                 selected
@@ -513,11 +513,12 @@ note: skipped the following crates since they have no library target: {skipped}"
                             Ok((crate_name.clone(), None))
                         } else {
                             let package_overrides =
-                                manifest::deserialize_lint_table(selected.metadata.clone())
+                                manifest::deserialize_lint_table(&selected.metadata)
                                     .with_context(|| {
                                         format!(
-                                    "{} [package.metadata.cargo-semver-checks] table is incorrect",
-                                    selected.name
+                                    "package `{}`'s [package.metadata.cargo-semver-checks] table is invalid (at {})",
+                                    selected.name,
+                                    selected.manifest_path,
                                 )
                                     })?;
 

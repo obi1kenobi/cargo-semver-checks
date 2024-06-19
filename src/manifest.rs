@@ -117,9 +117,9 @@ impl From<OverrideConfig> for QueryOverride {
 /// into a [`OverrideMap`].  Returns an `Err` if the `cargo-semver-checks` table is present
 /// but invalid.  Returns `Ok(None)` if the table is not present.
 pub(crate) fn deserialize_lint_table(
-    metadata: serde_json::Value,
+    metadata: &serde_json::Value,
 ) -> anyhow::Result<Option<OverrideMap>> {
-    let table: Option<LintTable> = serde_json::from_value(metadata)?;
+    let table = Option::<LintTable>::deserialize(metadata)?;
     Ok(table.and_then(LintTable::into_overrides))
 }
 
