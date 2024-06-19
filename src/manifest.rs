@@ -120,7 +120,7 @@ pub(crate) fn deserialize_lint_table(
     metadata: serde_json::Value,
 ) -> anyhow::Result<Option<OverrideMap>> {
     let table: Option<LintTable> = serde_json::from_value(metadata)?;
-    Ok(table.map(LintTable::into_overrides).flatten())
+    Ok(table.and_then(LintTable::into_overrides))
 }
 
 #[cfg(test)]
