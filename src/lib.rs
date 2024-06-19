@@ -22,6 +22,7 @@ use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 use rustdoc_cmd::RustdocCommand;
 use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::time::Instant;
 
 pub use config::GlobalConfig;
@@ -484,6 +485,11 @@ note: skipped the following crates since they have no library target: {skipped}"
                     );
                 }
 
+                let workspace_overrides =
+                    manifest::deserialize_lint_table(&metadata.workspace_metadata)
+                        .context("[workspace.metadata.cargo-semver-checks] table is invalid")?
+                        .map(Arc::new);
+
                 selected
                     .iter()
                     .map(|selected| {
@@ -506,6 +512,24 @@ note: skipped the following crates since they have no library target: {skipped}"
                             })?;
                             Ok((crate_name.clone(), None))
                         } else {
+                            let package_overrides =
+                                manifest::deserialize_lint_table(&selected.metadata)
+                                    .with_context(|| {
+                                        format!(
+                                    "package `{}`'s [package.metadata.cargo-semver-checks] table is invalid (at {})",
+                                    selected.name,
+                                    selected.manifest_path,
+                                )
+                                    })?;
+
+                            let mut overrides = OverrideStack::new();
+                            if let Some(workspace) = &workspace_overrides {
+                                overrides.push(Arc::clone(workspace));
+                            }
+                            if let Some(package) = package_overrides {
+                                overrides.push(Arc::new(package));
+                            }
+
                             let start = std::time::Instant::now();
                             let (current_crate, baseline_crate) = generate_versioned_crates(
                                 config,
