@@ -11,7 +11,7 @@ use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
 use crate::{
-    query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery},
+    query::{ActualSemverUpdate, OverrideStack, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType,
 };
 
@@ -161,6 +161,7 @@ pub(super) fn run_check_release(
     current_crate: VersionedCrate,
     baseline_crate: VersionedCrate,
     release_type: Option<ReleaseType>,
+    overrides: OverrideStack,
 ) -> anyhow::Result<CrateReport> {
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
@@ -191,9 +192,10 @@ pub(super) fn run_check_release(
     let previous = VersionedIndexedCrate::new(&baseline_crate);
     let adapter = VersionedRustdocAdapter::new(&current, Some(&previous))?;
 
-    let (queries_to_run, queries_to_skip): (Vec<_>, _) = SemverQuery::all_queries()
-        .into_values()
-        .partition(|query| !version_change.supports_requirement(query.required_update));
+    let (queries_to_run, queries_to_skip): (Vec<_>, _) =
+        SemverQuery::all_queries().into_values().partition(|query| {
+            !version_change.supports_requirement(overrides.effective_required_update(&query))
+        });
     let skipped_queries = queries_to_skip.len();
 
     config.shell_status(
@@ -250,7 +252,7 @@ pub(super) fn run_check_release(
     for (semver_query, time_to_decide, results) in all_results {
         config
             .log_verbose(|config| {
-                let category = match semver_query.required_update {
+                let category = match overrides.effective_required_update(semver_query) {
                     RequiredSemverUpdate::Major => "major",
                     RequiredSemverUpdate::Minor => "minor",
                 };
@@ -309,7 +311,7 @@ pub(super) fn run_check_release(
         let mut required_versions = vec![];
 
         for (semver_query, results) in results_with_errors {
-            required_versions.push(semver_query.required_update);
+            required_versions.push(overrides.effective_required_update(semver_query));
             config.log_info(|config| {
                 writeln!(
                     config.stdout(),

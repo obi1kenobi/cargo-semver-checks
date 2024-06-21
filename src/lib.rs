@@ -457,6 +457,7 @@ impl Check {
                             current_crate,
                             baseline_crate,
                             self.release_type,
+                            OverrideStack::new(),
                         )?;
                         config.shell_status(
                             "Finished",
@@ -560,6 +561,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                                     current_crate,
                                     baseline_crate,
                                     self.release_type,
+                                    overrides,
                                 )?),
                             ));
                             config.shell_status(

@@ -1,0 +1,11 @@
+[package]
+name = "pkg"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[package.metadata.cargo-semver-checks]
+# overrides workspace
+function_missing = "deny"
+module_missing = { required-update = "major", lint-level = "warn" }
