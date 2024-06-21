@@ -161,7 +161,7 @@ pub(super) fn run_check_release(
     current_crate: VersionedCrate,
     baseline_crate: VersionedCrate,
     release_type: Option<ReleaseType>,
-    overrides: OverrideStack,
+    overrides: &OverrideStack,
 ) -> anyhow::Result<CrateReport> {
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
