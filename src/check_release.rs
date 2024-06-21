@@ -194,7 +194,7 @@ pub(super) fn run_check_release(
 
     let (queries_to_run, queries_to_skip): (Vec<_>, _) =
         SemverQuery::all_queries().into_values().partition(|query| {
-            !version_change.supports_requirement(overrides.effective_required_update(&query))
+            !version_change.supports_requirement(overrides.effective_required_update(query))
         });
     let skipped_queries = queries_to_skip.len();
 
