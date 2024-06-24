@@ -7,13 +7,14 @@ fn test_workspace_config() {
     let mut cmd = Command::cargo_bin("cargo-semver-checks")
         .expect("cargo semver-checks command should exist");
 
-    cmd.current_dir("test_crates/workspace_overrides").args([
-        "semver-checks",
-        "--baseline-root",
-        "baseline",
-        "--manifest-path",
-        "current/pkg/Cargo.toml",
-    ]);
+    cmd.current_dir("test_crates/manifest_tests/workspace_overrides")
+        .args([
+            "semver-checks",
+            "--baseline-root",
+            "old", // should be the workspace root, not package root
+            "--manifest-path",
+            "new/pkg/Cargo.toml",
+        ]);
 
     let assert = cmd.assert();
 
