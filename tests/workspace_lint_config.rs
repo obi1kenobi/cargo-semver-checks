@@ -20,7 +20,6 @@ fn test_workspace_config() {
 
     // 1 minor: function_missing, overridden in workspace and not overridden in package
     // 1 major: module_missing, overridden in workspace (minor) then overridden in package (major)
-    //
     let pred =
         predicates::str::contains("semver requires new major version: 1 major and 1 minor check");
     assert.stderr(pred);
