@@ -8,7 +8,7 @@ use crate::{LintLevel, OverrideMap, QueryOverride, RequiredSemverUpdate};
 #[derive(Debug, Clone)]
 pub(crate) struct Manifest {
     pub(crate) path: std::path::PathBuf,
-    pub(crate) parsed: cargo_toml::Manifest<LintTable>,
+    pub(crate) parsed: cargo_toml::Manifest<MetadataTable>,
 }
 
 impl Manifest {
@@ -64,17 +64,29 @@ pub(crate) fn get_project_dir_from_manifest_path(
 }
 
 /// A [package.metadata] or [workspace.metadata] table with
-/// `cargo-semver-checks` lint entries stored in `config`
+/// `cargo-semver-checks` config entries stored in the `config` field below.
 #[derive(Debug, Clone, Deserialize)]
-pub(crate) struct LintTable {
+pub(crate) struct MetadataTable {
+    /// Holds the `cargo-semver-checks` table, if it is declared.
     #[serde(default, rename = "cargo-semver-checks")]
-    pub(crate) config: Option<BTreeMap<String, OverrideConfig>>,
+    pub(crate) config: Option<SemverChecksTable>,
 }
 
-impl LintTable {
-    pub fn into_overrides(self) -> Option<OverrideMap> {
-        self.config
-            .map(|config| config.into_iter().map(|(k, v)| (k, v.into())).collect())
+/// A `[cargo-semver-checks]` config table in `[package.metadata]`
+/// or `[workspace.metadata]`.
+#[derive(Debug, Clone, Deserialize)]
+#[non_exhaustive]
+pub(crate) struct SemverChecksTable {
+    /// Holds the `lints` table, if it is declared.
+    pub(crate) lints: Option<LintTable>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub(crate) struct LintTable(BTreeMap<String, OverrideConfig>);
+
+impl From<LintTable> for OverrideMap {
+    fn from(value: LintTable) -> OverrideMap {
+        value.0.into_iter().map(|(k, v)| (k, v.into())).collect()
     }
 }
 
@@ -118,15 +130,19 @@ impl From<OverrideConfig> for QueryOverride {
 pub(crate) fn deserialize_lint_table(
     metadata: &serde_json::Value,
 ) -> anyhow::Result<Option<OverrideMap>> {
-    let table = Option::<LintTable>::deserialize(metadata)?;
-    Ok(table.and_then(LintTable::into_overrides))
+    let table = Option::<MetadataTable>::deserialize(metadata)?;
+    Ok(table.and_then(|table| {
+        table
+            .config
+            .and_then(|config| config.lints.map(OverrideMap::from))
+    }))
 }
 
 #[cfg(test)]
 mod tests {
     use crate::{manifest::OverrideConfig, QueryOverride};
 
-    use super::LintTable;
+    use super::MetadataTable;
 
     #[test]
     fn test_deserialize_config() {
@@ -138,20 +154,20 @@ mod tests {
             version = "1.2.3"
             edition = "2021"
 
-            [package.metadata.cargo-semver-checks]
+            [package.metadata.cargo-semver-checks.lints]
             one = "major"
             two = "deny"
             three = { lint-level = "warn" }
             four = { required-update = "major" }
             five = { required-update = "minor", lint-level = "allow" }
 
-            [workspace.metadata.cargo-semver-checks]
+            [workspace.metadata.cargo-semver-checks.lints]
             six = "allow"
             "#;
 
         let parsed = cargo_toml::Manifest::from_slice_with_metadata(manifest.as_bytes())
             .expect("Cargo.toml should be valid");
-        let package_metadata: LintTable = parsed
+        let package_metadata: MetadataTable = parsed
             .package
             .expect("Cargo.toml should contain a package")
             .metadata
@@ -165,10 +181,16 @@ mod tests {
 
         let pkg = package_metadata
             .config
-            .expect("Lint table should be present");
+            .expect("Semver checks table should be present")
+            .lints
+            .expect("Lint table should be present")
+            .0;
         let wks = workspace_metadata
             .config
-            .expect("Lint table should be present");
+            .expect("Semver checks table should be present")
+            .lints
+            .expect("Lint table should be present")
+            .0;
         assert!(
             matches!(pkg.get("one"), Some(&RequiredUpdate(Major))),
             "got {:?}",
