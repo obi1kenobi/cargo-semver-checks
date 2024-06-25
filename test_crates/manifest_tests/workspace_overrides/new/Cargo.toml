@@ -2,7 +2,7 @@
 resolver = "2"
 members = ["pkg"]
 
-[workspace.metadata.cargo-semver-checks]
+[workspace.metadata.cargo-semver-checks.lints]
 # required-update is not overridden in [package.metadata], but lint-level is
 function_missing = { required-update = "minor", lint-level = "warn" }
 # required-update and lint-level should be overridden in package.metadata
