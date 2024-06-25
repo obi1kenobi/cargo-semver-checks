@@ -72,7 +72,7 @@ pub(crate) struct MetadataTable {
     pub(crate) config: Option<SemverChecksTable>,
 }
 
-/// A `[cargo-semver-checks]` config table in `[package.metadata]` 
+/// A `[cargo-semver-checks]` config table in `[package.metadata]`
 /// or `[workspace.metadata]`.
 #[derive(Debug, Clone, Deserialize)]
 #[non_exhaustive]
