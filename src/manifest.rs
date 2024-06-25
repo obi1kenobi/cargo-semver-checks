@@ -64,7 +64,7 @@ pub(crate) fn get_project_dir_from_manifest_path(
 }
 
 /// A [package.metadata] or [workspace.metadata] table with
-/// `cargo-semver-checks` config entries stored in `config`
+/// `cargo-semver-checks` config entries stored in the `config` field below.
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct MetadataTable {
     /// Holds the `cargo-semver-checks` table, if it is declared.
@@ -72,7 +72,8 @@ pub(crate) struct MetadataTable {
     pub(crate) config: Option<SemverChecksTable>,
 }
 
-/// A [cargo-semver-checks] config table in [package or [workspace.metadata].
+/// A `[cargo-semver-checks]` config table in `[package.metadata]` 
+/// or `[workspace.metadata]`.
 #[derive(Debug, Clone, Deserialize)]
 #[non_exhaustive]
 pub(crate) struct SemverChecksTable {
@@ -81,7 +82,7 @@ pub(crate) struct SemverChecksTable {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct LintTable(BTreeMap<String, OverrideConfig>);
+pub(crate) struct LintTable(BTreeMap<String, OverrideConfig>);
 
 impl From<LintTable> for OverrideMap {
     fn from(value: LintTable) -> OverrideMap {
