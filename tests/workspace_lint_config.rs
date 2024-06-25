@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use predicates::boolean::PredicateBooleanExt;
 
 #[test]
 fn test_workspace_config() {
@@ -14,13 +15,18 @@ fn test_workspace_config() {
             "old", // should be the workspace root, not package root
             "--manifest-path",
             "new/pkg/Cargo.toml",
+            "-v", // needed to show pass/fail of individual lints
         ]);
 
     let assert = cmd.assert();
 
     // 1 minor: function_missing, overridden in workspace and not overridden in package
+    let function_missing_predicate = predicates::str::is_match("FAIL(.*)minor(.*)function_missing")
+        .expect("function_missing regex should be valid");
+
     // 1 major: module_missing, overridden in workspace (minor) then overridden in package (major)
-    let pred =
-        predicates::str::contains("semver requires new major version: 1 major and 1 minor check");
-    assert.stderr(pred);
+    let module_missing_predicate = predicates::str::is_match("FAIL(.*)major(.*)module_missing")
+        .expect("module_missing regex should be valid");
+
+    assert.stderr(function_missing_predicate.and(module_missing_predicate));
 }
