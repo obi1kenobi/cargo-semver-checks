@@ -72,7 +72,6 @@ pub(crate) struct LintTable {
 }
 
 impl LintTable {
-    #[allow(dead_code)] // TODO: remove when integrated
     pub fn into_overrides(self) -> Option<OverrideMap> {
         self.config
             .map(|config| config.into_iter().map(|(k, v)| (k, v.into())).collect())
