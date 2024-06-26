@@ -1,5 +1,4 @@
 use assert_cmd::Command;
-use predicates::boolean::PredicateBooleanExt;
 
 #[test]
 fn test_workspace_config() {
@@ -42,11 +41,10 @@ fn test_workspace_config() {
     // errors only require a minor bump.
     let suggested_bump = predicates::str::contains("warning checks suggest new major version");
 
-    assert.stderr(
-        function_missing_predicate
-            .and(module_missing_predicate)
-            .and(only_two_failures)
-            .and(required_bump)
-            .and(suggested_bump),
-    );
+    assert
+        .stderr(function_missing_predicate)
+        .stderr(module_missing_predicate)
+        .stderr(only_two_failures)
+        .stderr(required_bump)
+        .stderr(suggested_bump);
 }
