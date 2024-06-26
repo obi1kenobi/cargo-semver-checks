@@ -250,6 +250,7 @@ pub(super) fn run_check_release(
         .collect::<anyhow::Result<Vec<_>>>()?;
 
     let mut results_with_errors = vec![];
+    let mut results_with_warnings = vec![];
     for (semver_query, time_to_decide, results) in all_results {
         config
             .log_verbose(|config| {
@@ -292,8 +293,13 @@ pub(super) fn run_check_release(
                 Ok(())
             })
             .expect("print failed");
+
         if !results.is_empty() {
-            results_with_errors.push((semver_query, results));
+            match overrides.effective_lint_level(semver_query) {
+                LintLevel::Deny => results_with_errors.push((semver_query, results)),
+                LintLevel::Warn => results_with_warnings.push((semver_query, results)),
+                _ => (),
+            };
         }
     }
 
@@ -305,8 +311,8 @@ pub(super) fn run_check_release(
                     "[{:>8.3}s] {} checks; {} passed, {} failed, {} unnecessary",
                     queries_start_instant.elapsed().as_secs_f32(),
                     queries_to_run.len(),
-                    queries_to_run.len() - results_with_errors.len(),
-                    results_with_errors.len(),
+                    queries_to_run.len() - results_with_errors.len() - results_with_warnings.len(),
+                    results_with_errors.len() + results_with_warnings.len(),
                     skipped_queries,
                 ),
                 Color::Ansi(AnsiColor::Red),
