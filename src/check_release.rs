@@ -360,7 +360,7 @@ pub(super) fn run_check_release(
             // only print warning version if it is greater than the required version bump
             if required_bump.map_or(true, |required_bump| required_bump < suggested_bump) {
                 config.shell_warn(format_args!(
-                    "warning checks suggest a new {} version",
+                    "warning checks suggest new {} version",
                     suggested_bump.as_str()
                 ))?;
             }
