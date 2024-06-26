@@ -6,12 +6,12 @@ use trustfall::TransparentValue;
 use crate::ReleaseType;
 
 #[non_exhaustive]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum RequiredSemverUpdate {
-    #[serde(alias = "major")]
-    Major,
     #[serde(alias = "minor")]
     Minor,
+    #[serde(alias = "major")]
+    Major,
 }
 
 impl RequiredSemverUpdate {
