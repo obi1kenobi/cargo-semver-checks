@@ -257,10 +257,13 @@ pub(super) fn run_check_release(
                     RequiredSemverUpdate::Major => "major",
                     RequiredSemverUpdate::Minor => "minor",
                 };
+
+                let lint_level = overrides.effective_lint_level(semver_query).as_str();
+
                 if results.is_empty() {
                     writeln!(
                         config.stderr(),
-                        "{}{:>12}{} [{:8.3}s] {:^18} {}",
+                        "{}{:>12}{} [{:8.3}s] {:^18} {:^12} {}",
                         Style::new()
                             .fg_color(Some(Color::Ansi(AnsiColor::Green)))
                             .bold(),
@@ -268,12 +271,13 @@ pub(super) fn run_check_release(
                         Reset,
                         time_to_decide.as_secs_f32(),
                         category,
+                        lint_level,
                         semver_query.id
                     )?;
                 } else {
                     writeln!(
                         config.stderr(),
-                        "{}{:>12}{} [{:>8.3}s] {:^18} {}",
+                        "{}{:>12}{} [{:>8.3}s] {:^18} {:^12} {}",
                         Style::new()
                             .fg_color(Some(Color::Ansi(AnsiColor::Red)))
                             .bold(),
@@ -281,6 +285,7 @@ pub(super) fn run_check_release(
                         Reset,
                         time_to_decide.as_secs_f32(),
                         category,
+                        lint_level,
                         semver_query.id
                     )?;
                 }
