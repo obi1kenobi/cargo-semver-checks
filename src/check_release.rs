@@ -11,7 +11,7 @@ use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
 use crate::{
-    query::{ActualSemverUpdate, OverrideStack, RequiredSemverUpdate, SemverQuery},
+    query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType,
 };
 
@@ -195,6 +195,7 @@ pub(super) fn run_check_release(
     let (queries_to_run, queries_to_skip): (Vec<_>, _) =
         SemverQuery::all_queries().into_values().partition(|query| {
             !version_change.supports_requirement(overrides.effective_required_update(query))
+                && overrides.effective_lint_level(query) >= LintLevel::Warn
         });
     let skipped_queries = queries_to_skip.len();
 
