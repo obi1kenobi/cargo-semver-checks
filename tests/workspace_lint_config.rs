@@ -20,13 +20,33 @@ fn test_workspace_config() {
 
     let assert = cmd.assert();
 
-    // 1 minor: function_missing, overridden in workspace and not overridden in package
-    let function_missing_predicate = predicates::str::is_match("FAIL(.*)minor(.*)function_missing")
-        .expect("function_missing regex should be valid");
+    // minor: function_missing, overridden in workspace and not overridden in package
+    // deny: overriden as warn in workspace then re-overridden as deny in package
+    let function_missing_predicate =
+        predicates::str::is_match("FAIL(.*)minor(.*)deny(.*)function_missing")
+            .expect("function_missing regex should be valid");
 
-    // 1 major: module_missing, overridden in workspace (minor) then overridden in package (major)
-    let module_missing_predicate = predicates::str::is_match("FAIL(.*)major(.*)module_missing")
-        .expect("module_missing regex should be valid");
+    // major: module_missing, overridden in workspace (minor) then overridden in package (major)
+    // warn: overridden as allow in workspace then re-overridden as warn in package
+    let module_missing_predicate =
+        predicates::str::is_match("FAIL(.*)major(.*)warn(.*)module_missing")
+            .expect("module_missing regex should be valid");
 
-    assert.stderr(function_missing_predicate.and(module_missing_predicate));
+    // those two lints should be the only ones that fail
+    let only_two_failures =
+        predicates::function::function(|x: &str| x.matches("FAIL").count() == 2);
+
+    // since function_missing is deny and minor, we need a new minor bump
+    let required_bump = predicates::str::contains("semver requires new minor version");
+    // since module_missing is major and warn, it should suggest a new major bump since
+    // errors only require a minor bump.
+    let suggested_bump = predicates::str::contains("warning checks suggest new major version");
+
+    assert.stderr(
+        function_missing_predicate
+            .and(module_missing_predicate)
+            .and(only_two_failures)
+            .and(required_bump)
+            .and(suggested_bump),
+    );
 }
