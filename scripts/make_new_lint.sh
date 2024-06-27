@@ -39,6 +39,7 @@ SemverQuery(
     human_readable_name: "TODO",
     description: "TODO",
     required_update: Major,  // TODO
+    lint_level: Deny,  // TODO
     reference_link: None,  // TODO
     query: r#"
     {
