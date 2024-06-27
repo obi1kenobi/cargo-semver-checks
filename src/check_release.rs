@@ -11,7 +11,7 @@ use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
 use crate::{
-    query::{ActualSemverUpdate, OverrideStack, RequiredSemverUpdate, SemverQuery},
+    query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType,
 };
 
@@ -195,6 +195,7 @@ pub(super) fn run_check_release(
     let (queries_to_run, queries_to_skip): (Vec<_>, _) =
         SemverQuery::all_queries().into_values().partition(|query| {
             !version_change.supports_requirement(overrides.effective_required_update(query))
+                && overrides.effective_lint_level(query) > LintLevel::Allow
         });
     let skipped_queries = queries_to_skip.len();
 
@@ -249,6 +250,7 @@ pub(super) fn run_check_release(
         .collect::<anyhow::Result<Vec<_>>>()?;
 
     let mut results_with_errors = vec![];
+    let mut results_with_warnings = vec![];
     for (semver_query, time_to_decide, results) in all_results {
         config
             .log_verbose(|config| {
@@ -256,10 +258,13 @@ pub(super) fn run_check_release(
                     RequiredSemverUpdate::Major => "major",
                     RequiredSemverUpdate::Minor => "minor",
                 };
+
+                let lint_level = overrides.effective_lint_level(semver_query).as_str();
+
                 if results.is_empty() {
                     writeln!(
                         config.stderr(),
-                        "{}{:>12}{} [{:8.3}s] {:^18} {}",
+                        "{}{:>12}{} [{:8.3}s] {:^18} {:^12} {}",
                         Style::new()
                             .fg_color(Some(Color::Ansi(AnsiColor::Green)))
                             .bold(),
@@ -267,12 +272,13 @@ pub(super) fn run_check_release(
                         Reset,
                         time_to_decide.as_secs_f32(),
                         category,
+                        lint_level,
                         semver_query.id
                     )?;
                 } else {
                     writeln!(
                         config.stderr(),
-                        "{}{:>12}{} [{:>8.3}s] {:^18} {}",
+                        "{}{:>12}{} [{:>8.3}s] {:^18} {:^12} {}",
                         Style::new()
                             .fg_color(Some(Color::Ansi(AnsiColor::Red)))
                             .bold(),
@@ -280,14 +286,20 @@ pub(super) fn run_check_release(
                         Reset,
                         time_to_decide.as_secs_f32(),
                         category,
+                        lint_level,
                         semver_query.id
                     )?;
                 }
                 Ok(())
             })
             .expect("print failed");
+
         if !results.is_empty() {
-            results_with_errors.push((semver_query, results));
+            match overrides.effective_lint_level(semver_query) {
+                LintLevel::Deny => results_with_errors.push((semver_query, results)),
+                LintLevel::Warn => results_with_warnings.push((semver_query, results)),
+                _ => (),
+            };
         }
     }
 
@@ -299,8 +311,8 @@ pub(super) fn run_check_release(
                     "[{:>8.3}s] {} checks; {} passed, {} failed, {} unnecessary",
                     queries_start_instant.elapsed().as_secs_f32(),
                     queries_to_run.len(),
-                    queries_to_run.len() - results_with_errors.len(),
-                    results_with_errors.len(),
+                    queries_to_run.len() - results_with_errors.len() - results_with_warnings.len(),
+                    results_with_errors.len() + results_with_warnings.len(),
                     skipped_queries,
                 ),
                 Color::Ansi(AnsiColor::Red),
@@ -309,6 +321,7 @@ pub(super) fn run_check_release(
             .expect("print failed");
 
         let mut required_versions = vec![];
+        let mut suggested_versions = vec![];
 
         for (semver_query, results) in results_with_errors {
             required_versions.push(overrides.effective_required_update(semver_query));
@@ -325,16 +338,48 @@ pub(super) fn run_check_release(
             print_failed_lint(config, semver_query, results)?;
         }
 
-        let required_bump = if required_versions.contains(&RequiredSemverUpdate::Major) {
-            RequiredSemverUpdate::Major
-        } else if required_versions.contains(&RequiredSemverUpdate::Minor) {
-            RequiredSemverUpdate::Minor
-        } else {
-            unreachable!("{:?}", required_versions)
-        };
+        for (semver_query, results) in results_with_warnings {
+            suggested_versions.push(overrides.effective_required_update(semver_query));
+            config.log_info(|config| {
+                writeln!(
+                    config.stdout(),
+                    "\n--- warning: {}: {} ---\n",
+                    semver_query.id,
+                    semver_query.human_readable_name
+                )?;
+                Ok(())
+            })?;
 
-        config
-            .shell_print(
+            print_failed_lint(config, semver_query, results)?;
+        }
+
+        let required_bump = required_versions.iter().max().copied();
+        let suggested_bump = suggested_versions.iter().max().copied();
+
+        if let Some(suggested_bump) = suggested_bump {
+            // only print warning version if it is greater than the required version bump
+            if required_bump.map_or(true, |required_bump| required_bump < suggested_bump) {
+                config.shell_warn(format_args!(
+                    "warning checks suggest new {} version",
+                    suggested_bump.as_str()
+                ))?;
+            }
+
+            config.shell_warn(format_args!(
+                "{} major and {} minor warning checks failed",
+                suggested_versions
+                    .iter()
+                    .filter(|x| *x == &RequiredSemverUpdate::Major)
+                    .count(),
+                suggested_versions
+                    .iter()
+                    .filter(|x| *x == &RequiredSemverUpdate::Minor)
+                    .count(),
+            ))?;
+        }
+
+        if let Some(required_bump) = required_bump {
+            config.shell_print(
                 "Summary",
                 format_args!(
                     "semver requires new {} version: {} major and {} minor checks failed",
@@ -350,11 +395,11 @@ pub(super) fn run_check_release(
                 ),
                 Color::Ansi(AnsiColor::Red),
                 true,
-            )
-            .expect("print failed");
+            )?;
+        }
 
         Ok(CrateReport {
-            required_bump: Some(required_bump.into()),
+            required_bump: required_bump.map(ReleaseType::from),
             detected_bump: version_change,
         })
     } else {
