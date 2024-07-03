@@ -306,7 +306,7 @@ pub(super) fn run_check_release(
             .shell_print(
                 "Checked",
                 format_args!(
-                    "[{:>8.3}s] {} checks; {} passed, {} failed, {} warnings, {} skipped",
+                    "[{:>8.3}s] {} checks; {} pass, {} fail, {} warn, {} skip",
                     queries_start_instant.elapsed().as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len() - results_with_errors.len() - results_with_warnings.len(),
@@ -356,6 +356,7 @@ pub(super) fn run_check_release(
         let suggested_bump = suggested_versions.iter().max().copied();
 
         if let Some(required_bump) = required_bump {
+            writeln!(config.stderr(), "")?;
             config.shell_print(
                 "Summary",
                 format_args!(
@@ -374,6 +375,7 @@ pub(super) fn run_check_release(
                 true,
             )?;
         } else {
+            writeln!(config.stderr(), "")?;
             config.shell_print(
                 "Summary",
                 "no semver update required",
@@ -419,7 +421,7 @@ pub(super) fn run_check_release(
             .shell_print(
                 "Checked",
                 format_args!(
-                    "[{:>8.3}s] {} checks; {} passed, {} skipped",
+                    "[{:>8.3}s] {} checks; {} pass, {} skip",
                     queries_start_instant.elapsed().as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len(),
@@ -429,6 +431,14 @@ pub(super) fn run_check_release(
                 true,
             )
             .expect("print failed");
+
+        config.shell_print(
+            "Summary",
+            "no semver update required",
+            Color::Ansi(AnsiColor::Green),
+            true,
+        )?;
+
         Ok(CrateReport {
             detected_bump: version_change,
             required_bump: None,
