@@ -374,7 +374,7 @@ pub(super) fn run_check_release(
                 Color::Ansi(AnsiColor::Red),
                 true,
             )?;
-        } else {
+        } else if produced_warnings {
             writeln!(config.stderr())?;
             config.shell_print(
                 "Summary",
@@ -382,6 +382,8 @@ pub(super) fn run_check_release(
                 Color::Ansi(AnsiColor::Green),
                 true,
             )?;
+        } else {
+            unreachable!();
         }
 
         if let Some(suggested_bump) = suggested_bump {
