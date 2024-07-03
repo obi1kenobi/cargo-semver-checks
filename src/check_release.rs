@@ -356,7 +356,7 @@ pub(super) fn run_check_release(
         let suggested_bump = suggested_versions.iter().max().copied();
 
         if let Some(required_bump) = required_bump {
-            writeln!(config.stderr(), "")?;
+            writeln!(config.stderr())?;
             config.shell_print(
                 "Summary",
                 format_args!(
@@ -375,7 +375,7 @@ pub(super) fn run_check_release(
                 true,
             )?;
         } else {
-            writeln!(config.stderr(), "")?;
+            writeln!(config.stderr())?;
             config.shell_print(
                 "Summary",
                 "no semver update required",
