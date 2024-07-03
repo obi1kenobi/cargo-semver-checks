@@ -306,7 +306,7 @@ pub(super) fn run_check_release(
             .shell_print(
                 "Checked",
                 format_args!(
-                    "[{:>8.3}s] {} checks; {} pass, {} fail, {} warn, {} skip",
+                    "[{:>8.3}s] {} checks: {} pass, {} fail, {} warn, {} skip",
                     queries_start_instant.elapsed().as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len() - results_with_errors.len() - results_with_warnings.len(),
@@ -421,7 +421,7 @@ pub(super) fn run_check_release(
             .shell_print(
                 "Checked",
                 format_args!(
-                    "[{:>8.3}s] {} checks; {} pass, {} skip",
+                    "[{:>8.3}s] {} checks: {} pass, {} skip",
                     queries_start_instant.elapsed().as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len(),
