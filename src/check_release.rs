@@ -64,8 +64,8 @@ fn classify_semver_version_change(
     }
 }
 
-/// Helper function to print an error message about a failed lint.
-fn print_failed_lint(
+/// Helper function to print details about a triggered lint.
+fn print_triggered_lint(
     config: &mut GlobalConfig,
     semver_query: &SemverQuery,
     results: Vec<BTreeMap<Arc<str>, FieldValue>>,
@@ -334,7 +334,7 @@ pub(super) fn run_check_release(
                 Ok(())
             })?;
 
-            print_failed_lint(config, semver_query, results)?;
+            print_triggered_lint(config, semver_query, results)?;
         }
 
         for (semver_query, results) in results_with_warnings {
@@ -349,7 +349,7 @@ pub(super) fn run_check_release(
                 Ok(())
             })?;
 
-            print_failed_lint(config, semver_query, results)?;
+            print_triggered_lint(config, semver_query, results)?;
         }
 
         let required_bump = required_versions.iter().max().copied();
