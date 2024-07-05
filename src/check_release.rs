@@ -266,7 +266,9 @@ pub(super) fn run_check_release(
                     (true, _) => ("PASS", AnsiColor::Green),
                     (false, LintLevel::Deny) => ("FAIL", AnsiColor::Red),
                     (false, LintLevel::Warn) => ("WARN", AnsiColor::Yellow),
-                    (false, LintLevel::Allow) => unreachable!(),
+                    (false, LintLevel::Allow) => unreachable!(
+                        "`LintLevel::Allow` lint was unexpectedly not skipped: {semver_query:?}"
+                    ),
                 };
 
                 writeln!(
@@ -289,7 +291,9 @@ pub(super) fn run_check_release(
             match overrides.effective_lint_level(semver_query) {
                 LintLevel::Deny => results_with_errors.push((semver_query, results)),
                 LintLevel::Warn => results_with_warnings.push((semver_query, results)),
-                _ => (),
+                LintLevel::Allow => unreachable!(
+                    "`LintLevel::Allow` lint was unexpectedly not skipped: {semver_query:?}"
+                ),
             };
         }
     }
@@ -383,7 +387,7 @@ pub(super) fn run_check_release(
                 true,
             )?;
         } else {
-            unreachable!();
+            unreachable!("Expected either warnings or errors to be produced.");
         }
 
         if let Some(suggested_bump) = suggested_bump {
