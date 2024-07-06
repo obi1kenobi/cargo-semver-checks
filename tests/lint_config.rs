@@ -1,6 +1,22 @@
 use assert_cmd::Command;
 use predicates::boolean::PredicateBooleanExt;
 
+fn command_for_crate(crate_name: &'static str) -> Command {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks")
+        .expect("cargo semver-checks command should exist");
+
+    cmd.current_dir(format!("test_crates/manifest_tests/{crate_name}"))
+        .args([
+            "semver-checks",
+            "--baseline-root",
+            "old",
+            "--manifest-path",
+            "new/",
+            "-v", // needed to show pass/fail of individual lints
+        ]);
+    cmd
+}
+
 #[test]
 fn test_workspace_config() {
     let mut cmd = Command::cargo_bin("cargo-semver-checks")
@@ -44,20 +60,7 @@ fn test_workspace_config() {
 
 #[test]
 fn test_only_warnings() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks")
-        .expect("cargo semver-checks command should exist");
-
-    cmd.current_dir("test_crates/manifest_tests/only_warnings")
-        .args([
-            "semver-checks",
-            "--baseline-root",
-            "old",
-            "--manifest-path",
-            "new/",
-            "-v", // needed to show pass/fail of individual lints
-        ]);
-
-    let assert = cmd.assert();
+    let assert = command_for_crate("only_warnings").assert();
 
     let is_warn = predicates::str::is_match("WARN(.*)major(.*)function_missing")
         .expect("regex should be valid");
@@ -70,5 +73,17 @@ fn test_only_warnings() {
         .stderr(is_warn)
         .stderr(no_failures)
         .stderr(suggests_major)
+        .success();
+}
+
+#[test]
+fn test_allow_skipped() {
+    // there is an instance of module_missing in the test crate, but
+    // we have set `module_missing = "allow"`, so the lint should
+    // not even run, and `cargo-semver-checks` should not require a
+    // semver upgrade.
+    let assert = command_for_crate("allow").assert();
+    assert
+        .stderr(predicates::str::contains("module_missing").not())
         .success();
 }
