@@ -106,11 +106,7 @@ pub(crate) struct LintTable {
 
 impl From<LintTable> for OverrideMap {
     fn from(value: LintTable) -> OverrideMap {
-        value
-            .inner
-            .into_iter()
-            .map(|(k, v)| (k, v.into()))
-            .collect()
+        value.inner
     }
 }
 
