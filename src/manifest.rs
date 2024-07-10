@@ -96,7 +96,6 @@ pub(crate) struct LintTable {
     /// `[workspace.metadata.*]` for now, this could be the case.  If either this
     /// field is true or `lints.workspace` is set, we should read the workspace
     /// lint config.
-    #[allow(dead_code)]
     #[serde(default)]
     pub(crate) workspace: bool,
     /// individual `lint_name = ...` entries
