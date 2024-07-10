@@ -1,0 +1,3 @@
+[workspace]
+resolver = "2"
+members = ["metadata_true", "cargo_true", "both_missing"]

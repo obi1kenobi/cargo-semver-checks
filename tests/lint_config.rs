@@ -17,22 +17,25 @@ fn command_for_crate(crate_name: &'static str) -> Command {
     cmd
 }
 
-#[test]
-fn test_workspace_config() {
+fn command_for_workspace(workspace: &str, package: &str) -> Command {
     let mut cmd = Command::cargo_bin("cargo-semver-checks")
         .expect("cargo semver-checks command should exist");
 
-    cmd.current_dir("test_crates/manifest_tests/workspace_overrides")
+    cmd.current_dir(format!("test_crates/manifest_tests/{workspace}"))
         .args([
             "semver-checks",
             "--baseline-root",
-            "old", // should be the workspace root, not package root
+            "old",
             "--manifest-path",
-            "new/pkg/Cargo.toml",
+            &format!("new/{package}"),
             "-v", // needed to show pass/fail of individual lints
         ]);
+    cmd
+}
 
-    let assert = cmd.assert();
+#[test]
+fn test_workspace_config() {
+    let assert = command_for_workspace("workspace_overrides", "pkg").assert();
 
     // minor: function_missing, overridden in workspace and not overridden in package
     // deny: overriden as warn in workspace then re-overridden as deny in package
@@ -86,4 +89,42 @@ fn test_allow_skipped() {
     assert
         .stderr(predicates::str::contains("module_missing").not())
         .success();
+}
+
+/// Helper function to assert whether the `struct_missing` lint has been triggered
+/// for testing workspace overrides in the `workspace_key` workspace.
+fn test_workspace_key_overrided(package: &str, should_succeed: bool) {
+    let assert = command_for_workspace("workspace_key_override", package).assert();
+    let struct_missing =
+        predicates::str::is_match("FAIL(.*)struct_missing").expect("regex should be valid");
+
+    if should_succeed {
+        assert.success().stderr(struct_missing.not());
+    } else {
+        assert.failure().stderr(struct_missing);
+    }
+}
+
+/// Tests that workspace overrides are applied when the
+/// `package.metadata.cargo-semver-checks.lints.workspace = true`
+/// key is set for a package.
+#[test]
+fn test_workspace_key_metadata_true() {
+    test_workspace_key_overrided("metadata_true", true);
+}
+
+/// Tests that workspace overrides are applied when the
+/// `lints.workspace = true`
+/// key is set for a package.
+#[test]
+fn test_workspace_key_cargo_true() {
+    test_workspace_key_overrided("cargo_true", true);
+}
+
+/// Tests that workspace overrides are not applied when both the
+/// `package.metadata.cargo-semver-checks.lints.workspace = true`
+/// and `lints.workspace = true` keys are not set for a package.
+#[test]
+fn test_workspace_key_both_missing() {
+    test_workspace_key_overrided("both_missing", false);
 }

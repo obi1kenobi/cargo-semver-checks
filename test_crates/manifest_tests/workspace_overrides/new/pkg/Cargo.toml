@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 
 [package.metadata.cargo-semver-checks.lints]
+workspace = true
 # overrides workspace
 function_missing = "deny"
 module_missing = { required-update = "major", lint-level = "warn" }
