@@ -82,11 +82,31 @@ pub(crate) struct SemverChecksTable {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub(crate) struct LintTable(BTreeMap<String, OverrideConfig>);
+pub(crate) struct LintTable {
+    /// Optional key to indicate whether to opt-in to reading
+    /// workspace lint configuration.  If not set in the TOML as
+    /// `package.metadata.cargo-semver-checks.lints.workspace = true`,
+    /// this field is set to `false. (note that setting the key in the
+    /// TOML to false explicitly is invalid behavior and will be interpreted
+    /// as just a missing field)
+    ///
+    /// Currently, we also read `lints.workspace`, but having this key
+    /// in a Cargo.toml manifest is invalid if there is no `[workspace.lints]
+    /// table in the workspace manifest.  Since we are storing our lint config in
+    /// `[workspace.metadata.*]` for now, this could be the case.  If either this
+    /// field is true or `lints.workspace` is set, we should read the workspace
+    /// lint config.
+    #[allow(dead_code)]
+    #[serde(default)]
+    pub(crate) workspace: bool,
+    /// individual `lint_name = ...` entries
+    #[serde(flatten, deserialize_with = "deserialize_into_overridemap")]
+    pub(crate) inner: OverrideMap,
+}
 
 impl From<LintTable> for OverrideMap {
     fn from(value: LintTable) -> OverrideMap {
-        value.0.into_iter().map(|(k, v)| (k, v.into())).collect()
+        value.inner
     }
 }
 
@@ -124,37 +144,44 @@ impl From<OverrideConfig> for QueryOverride {
     }
 }
 
+/// Lets serde deserialize a `BTreeMap<String, OverrideConfig>` into an [`OverrideMap`]
+fn deserialize_into_overridemap<'de, D>(de: D) -> Result<OverrideMap, D::Error>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    BTreeMap::<String, OverrideConfig>::deserialize(de)
+        .map(|x| x.into_iter().map(|(k, v)| (k, v.into())).collect())
+}
+
 /// Helper function to deserialize an optional lint table from a [`serde_json::Value`]
-/// into a [`OverrideMap`].  Returns an `Err` if the `cargo-semver-checks` table is present
+/// holding a `[package/workspace.metadata]` table holding a `cargo-semver-checks.lints` table
+///
+/// Returns an `Err` if the `cargo-semver-checks` table is present
 /// but invalid.  Returns `Ok(None)` if the table is not present.
 pub(crate) fn deserialize_lint_table(
     metadata: &serde_json::Value,
-) -> anyhow::Result<Option<OverrideMap>> {
+) -> anyhow::Result<Option<LintTable>> {
     let table = Option::<MetadataTable>::deserialize(metadata)?;
-    Ok(table.and_then(|table| {
-        table
-            .config
-            .and_then(|config| config.lints.map(OverrideMap::from))
-    }))
+    Ok(table.and_then(|table| table.config.and_then(|config| config.lints)))
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{manifest::OverrideConfig, QueryOverride};
-
     use super::MetadataTable;
+    use crate::QueryOverride;
 
     #[test]
     fn test_deserialize_config() {
         use crate::LintLevel::*;
         use crate::RequiredSemverUpdate::*;
-        use OverrideConfig::*;
+
         let manifest = r#"[package]
             name = "cargo-semver-checks"
             version = "1.2.3"
             edition = "2021"
 
             [package.metadata.cargo-semver-checks.lints]
+            workspace = true
             one = "major"
             two = "deny"
             three = { lint-level = "warn" }
@@ -179,26 +206,44 @@ mod tests {
             .metadata
             .expect("Workspace metadata should be present");
 
-        let pkg = package_metadata
+        let pkg_table = package_metadata
             .config
             .expect("Semver checks table should be present")
             .lints
-            .expect("Lint table should be present")
-            .0;
+            .expect("Lint table should be present");
+
+        assert!(
+            pkg_table.workspace,
+            "Package lints table should contain `workspace = true`"
+        );
+        let pkg = pkg_table.inner;
+
         let wks = workspace_metadata
             .config
             .expect("Semver checks table should be present")
             .lints
             .expect("Lint table should be present")
-            .0;
+            .inner;
         assert!(
-            matches!(pkg.get("one"), Some(&RequiredUpdate(Major))),
+            matches!(
+                pkg.get("one"),
+                Some(&QueryOverride {
+                    required_update: Some(Major),
+                    lint_level: None
+                })
+            ),
             "got {:?}",
             pkg.get("one")
         );
 
         assert!(
-            matches!(pkg.get("two"), Some(&LintLevel(Deny))),
+            matches!(
+                pkg.get("two"),
+                Some(&QueryOverride {
+                    lint_level: Some(Deny),
+                    required_update: None,
+                })
+            ),
             "got {:?}",
             pkg.get("two")
         );
@@ -206,10 +251,10 @@ mod tests {
         assert!(
             matches!(
                 pkg.get("three"),
-                Some(&Structure(QueryOverride {
+                Some(&QueryOverride {
                     required_update: None,
                     lint_level: Some(Warn)
-                }))
+                })
             ),
             "got {:?}",
             pkg.get("three")
@@ -218,10 +263,10 @@ mod tests {
         assert!(
             matches!(
                 pkg.get("four"),
-                Some(&Structure(QueryOverride {
+                Some(&QueryOverride {
                     required_update: Some(Major),
                     lint_level: None,
-                }))
+                })
             ),
             "got {:?}",
             pkg.get("four")
@@ -231,17 +276,23 @@ mod tests {
         assert!(
             matches!(
                 pkg.get("five"),
-                Some(&Structure(QueryOverride {
+                Some(&QueryOverride {
                     required_update: Some(Minor),
                     lint_level: Some(Allow)
-                }))
+                })
             ),
             "got {:?}",
             pkg.get("five")
         );
 
         assert!(
-            matches!(wks.get("six"), Some(&LintLevel(Allow))),
+            matches!(
+                wks.get("six"),
+                Some(&QueryOverride {
+                    lint_level: Some(Allow),
+                    required_update: None
+                })
+            ),
             "got {:?}",
             wks.get("six")
         );

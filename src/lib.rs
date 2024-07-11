@@ -489,7 +489,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                 let workspace_overrides =
                     manifest::deserialize_lint_table(&metadata.workspace_metadata)
                         .context("[workspace.metadata.cargo-semver-checks] table is invalid")?
-                        .map(Arc::new);
+                        .map(|table| Arc::new(table.inner));
 
                 selected
                     .iter()
@@ -528,7 +528,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                                 overrides.push(Arc::clone(workspace));
                             }
                             if let Some(package) = package_overrides {
-                                overrides.push(Arc::new(package));
+                                overrides.push(Arc::new(package.inner));
                             }
 
                             let start = std::time::Instant::now();
