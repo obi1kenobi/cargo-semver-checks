@@ -524,9 +524,18 @@ note: skipped the following crates since they have no library target: {skipped}"
                                     })?;
 
                             let mut overrides = OverrideStack::new();
-                            if let Some(workspace) = &workspace_overrides {
-                                overrides.push(Arc::clone(workspace));
+
+                            let selected_manifest = manifest::Manifest::parse(selected.manifest_path.clone().into_std_path_buf())?;
+                            // the key `lints.workspace` for the Cargo lints table
+                            let lint_workspace_key = selected_manifest.parsed.lints.is_some_and(|x| x.workspace);
+                            let metadata_workspace_key = package_overrides.as_ref().is_some_and(|x| x.workspace);
+
+                            if lint_workspace_key || metadata_workspace_key {
+                                if let Some(workspace) = &workspace_overrides {
+                                    overrides.push(Arc::clone(workspace));
+                                }
                             }
+
                             if let Some(package) = package_overrides {
                                 overrides.push(Arc::new(package.inner));
                             }
