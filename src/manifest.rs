@@ -96,7 +96,7 @@ pub(crate) struct LintTable {
     /// `[workspace.metadata.*]` for now, this could be the case.  If either this
     /// field is true or `lints.workspace` is set, we should read the workspace
     /// lint config.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_workspace_key")]
     pub(crate) workspace: bool,
     /// individual `lint_name = ...` entries
     #[serde(flatten, deserialize_with = "deserialize_into_overridemap")]
@@ -152,6 +152,23 @@ where
         .map(|x| x.into_iter().map(|(k, v)| (k, v.into())).collect())
 }
 
+/// Deserializes the `workspace` key as an `Option<bool>`, raising
+/// a hard error if `workspace = false` is explicity set, which is
+/// an invalid configuration.  Returns a `bool` whether the workspace
+/// key was explicitly set (`workspace = true`, return true) or omitted (false).
+fn deserialize_workspace_key<'de, D>(de: D) -> Result<bool, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let option = Option::<bool>::deserialize(de)?;
+
+    match option {
+        Some(true) => Ok(true),
+        None => Ok(false),
+        Some(false) => Err(serde::de::Error::custom("`lints.workspace = false` is not valid configuration.  Either set `lints.workspace = true` or omit the key entirely.")),
+    }
+}
+
 /// Helper function to deserialize an optional lint table from a [`serde_json::Value`]
 /// holding a `[package/workspace.metadata]` table holding a `cargo-semver-checks.lints` table
 ///
@@ -166,7 +183,8 @@ pub(crate) fn deserialize_lint_table(
 
 #[cfg(test)]
 mod tests {
-    use super::MetadataTable;
+
+    use super::{LintTable, MetadataTable};
     use crate::QueryOverride;
 
     #[test]
@@ -295,5 +313,21 @@ mod tests {
             "got {:?}",
             wks.get("six")
         );
+    }
+
+    #[test]
+    fn workspace_key_false_is_error() {
+        serde_json::from_value::<LintTable>(serde_json::json! {{
+            "workspace": false
+        }})
+        .expect_err("`workspace = false` should not be accepted");
+    }
+
+    #[test]
+    fn workspace_key_omitted_is_false() {
+        let table = serde_json::from_value::<LintTable>(serde_json::json! {{
+        }})
+        .expect("this should be a valid lint table");
+        assert!(!table.workspace, "table.workspace should be false");
     }
 }
