@@ -128,3 +128,15 @@ fn test_workspace_key_cargo_true() {
 fn test_workspace_key_both_missing() {
     test_workspace_key_overrided("both_missing", false);
 }
+
+/// Tests that config overrides are only read from the new/current
+/// manifest and not the old/baseline manifest.  In `old/Cargo.toml`,
+/// `struct_missing` is configured to allow, but this should not apply
+/// and the lint should still be triggered.
+#[test]
+fn test_only_read_config_from_new_manifest() {
+    let assert = command_for_crate("only_read_new_manifest").assert();
+    assert
+        .stderr(predicates::str::is_match("FAIL(.*)struct_missing").expect("regex should be valid"))
+        .failure();
+}

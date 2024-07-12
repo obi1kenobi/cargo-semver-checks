@@ -1,0 +1,10 @@
+[package]
+publish = false
+name = "only-read-new-manifest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[package.metadata.cargo-semver-checks.lints]
+struct_missing = "allow"
