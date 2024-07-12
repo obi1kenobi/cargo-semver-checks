@@ -165,7 +165,7 @@ where
     match option {
         Some(true) => Ok(true),
         None => Ok(false),
-        Some(false) => Err(serde::de::Error::custom("`lints.workspace = false` is not valid configuration.  Either set `lints.workspace = true` or omit the key entirely.")),
+        Some(false) => Err(serde::de::Error::custom("`lints.workspace = false` is not valid configuration. Either set `lints.workspace = true` or omit the key entirely.")),
     }
 }
 
