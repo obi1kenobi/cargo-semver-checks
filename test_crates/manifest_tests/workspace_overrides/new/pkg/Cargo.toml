@@ -9,4 +9,4 @@ edition = "2021"
 workspace = true
 # overrides workspace
 function_missing = "deny"
-module_missing = { required-update = "major", lint-level = "warn" }
+module_missing = { required-update = "major", level = "warn" }

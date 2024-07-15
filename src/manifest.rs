@@ -111,33 +111,37 @@ impl From<LintTable> for OverrideMap {
 
 /// Different valid representations of a [`QueryOverride`] in the Cargo.toml configuration table
 #[derive(Debug, Clone, Deserialize)]
-#[serde(untagged, rename_all = "kebab-case")]
+#[serde(untagged)]
 pub(crate) enum OverrideConfig {
     /// Specify members by name, e.g.
-    /// `lint_name = { lint-level = "deny", required-update = "major" }
+    /// `lint_name = { level = "deny", required-update = "major" }
     /// Any omitted members will default to `None`
-    Structure(QueryOverride),
+    #[serde(rename_all = "kebab-case")]
+    Structure {
+        #[serde(default)]
+        level: Option<LintLevel>,
+        #[serde(default)]
+        required_update: Option<RequiredSemverUpdate>,
+    },
     /// Shorthand for specifying just a lint level and leaving
     /// the other members as default: e.g.,
     /// `lint_name = "deny"`
     LintLevel(LintLevel),
-    /// Shorthand for specifying just a required version bump and leaving
-    /// the other members as default: e.g.,
-    /// `lint_name = "minor"`
-    RequiredUpdate(RequiredSemverUpdate),
 }
 
 impl From<OverrideConfig> for QueryOverride {
     fn from(value: OverrideConfig) -> Self {
         match value {
-            OverrideConfig::Structure(x) => x,
+            OverrideConfig::Structure {
+                level,
+                required_update,
+            } => Self {
+                lint_level: level,
+                required_update,
+            },
             OverrideConfig::LintLevel(lint_level) => Self {
                 lint_level: Some(lint_level),
                 required_update: None,
-            },
-            OverrideConfig::RequiredUpdate(required_update) => Self {
-                lint_level: None,
-                required_update: Some(required_update),
             },
         }
     }
@@ -199,11 +203,10 @@ mod tests {
 
             [package.metadata.cargo-semver-checks.lints]
             workspace = true
-            one = "major"
             two = "deny"
-            three = { lint-level = "warn" }
+            three = { level = "warn" }
             four = { required-update = "major" }
-            five = { required-update = "minor", lint-level = "allow" }
+            five = { required-update = "minor", level = "allow" }
 
             [workspace.metadata.cargo-semver-checks.lints]
             six = "allow"
@@ -241,17 +244,6 @@ mod tests {
             .lints
             .expect("Lint table should be present")
             .inner;
-        assert!(
-            matches!(
-                pkg.get("one"),
-                Some(&QueryOverride {
-                    required_update: Some(Major),
-                    lint_level: None
-                })
-            ),
-            "got {:?}",
-            pkg.get("one")
-        );
 
         assert!(
             matches!(
