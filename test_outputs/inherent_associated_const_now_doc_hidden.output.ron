@@ -10,7 +10,6 @@
             "span_begin_line": Uint64(7),
             "span_filename": String("src/lib.rs"),
         },
-
         {
             "associated_constant": String("DocHiddenConstantA"),
             "name": String("EnumA"),
@@ -21,7 +20,6 @@
             "span_begin_line": Uint64(27),
             "span_filename": String("src/lib.rs"),
         },
-
         {
             "associated_constant": String("DocHiddenConstantA"),
             "name": String("UnionA"),
