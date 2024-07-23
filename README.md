@@ -304,7 +304,7 @@ function_changed_abi = { required-update = "minor" } # leaves level as default
 
 This table should be placed in the current/new `Cargo.toml` manifest, not the baseline/old manifest.  (this defaults to `./Cargo.toml` in the directory that `cargo-semver-checks` was invoked on, and can be configured to a different path with the `--manifest-path` CLI option).
 
-#### configuring a workspace
+#### Configuring a workspace
 
 It may also be helpful to configure these checks at the workspace level for multiple different crates in the same Cargo workspace. To do this, in the workspace root `Cargo.toml`, add a similar configuration table:
 
@@ -329,7 +329,7 @@ workspace = true
 
 Either of these is acceptable to indicate to read the `[workspace.metadata.cargo-semver-checks.lints]` table for this package.  Using the `lints.workspace` key can be helpful to indicate this behavior for other linters (e.g., cargo and clippy), but will cause a cargo error if it is set and there is no `[workspace.lints]` table in the workspace Cargo.toml.  To solve this, we added the `package.metadata.cargo-semver-checks.lints.workspace` key for compatibility. Note that setting `workspace = false` is not valid configuration for either of these keys.  To indicate not to read workspace configuration for a crate, simply omit both keys entirely from the package's Cargo.toml.
 
-#### overriding workspace configuration
+#### Overriding workspace configuration
 
 When `workspace = true` is set, it is possible to override individual lint configuration lines in a package.  For example, if we have in the *workspace* Cargo.toml:
 
@@ -350,7 +350,7 @@ trait_now_doc_hidden = { required-update = "major" }
 
 Fields set in the package configuration override the workspace configuration.  Thus, the lint level for `function_missing` will be overridden to `deny`, and the workspace default `required-update` of `minor` will be used because it is not configured in the package.  Similarly, the lint level for `trait_now_doc_hidden` will be the workspace's `warn`, but the required update will be overridden in the package to a `major` version bump.
 
-#### limitations
+#### Limitations
 
 Currently, the configuration can only be read from the new version of the checked crate's Cargo.toml.  If this manifest isn't used (for example, when using the `--current-rustdoc` to use a preexisting rustdoc output instead, it is not possible to configure lints.  Configuration through other means (e.g., CLI flags) could be added in the future if there is a strong demand for them.
 
