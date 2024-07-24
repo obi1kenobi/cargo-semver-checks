@@ -13,6 +13,7 @@ use anyhow::Context;
 use cargo_metadata::PackageId;
 use clap::ValueEnum;
 use directories::ProjectDirs;
+use itertools::Itertools;
 
 use check_release::run_check_release;
 use rustdoc_gen::CrateDataForRustdoc;
@@ -21,10 +22,14 @@ use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 use rustdoc_cmd::RustdocCommand;
 use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::time::Instant;
 
 pub use config::GlobalConfig;
-pub use query::{ActualSemverUpdate, RequiredSemverUpdate, SemverQuery};
+pub use query::{
+    ActualSemverUpdate, LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate,
+    SemverQuery,
+};
 
 /// Test a release for semver violations.
 #[non_exhaustive]
@@ -34,7 +39,6 @@ pub struct Check {
     scope: Scope,
     current: Rustdoc,
     baseline: Rustdoc,
-    log_level: Option<log::Level>,
     release_type: Option<ReleaseType>,
     current_feature_config: rustdoc_gen::FeatureConfig,
     baseline_feature_config: rustdoc_gen::FeatureConfig,
@@ -157,7 +161,7 @@ impl PackageSelection {
         }
     }
 
-    pub fn with_excluded_packages(&mut self, packages: Vec<String>) -> &mut Self {
+    pub fn set_excluded_packages(&mut self, packages: Vec<String>) -> &mut Self {
         self.excluded_packages = packages;
         self
     }
@@ -174,10 +178,14 @@ pub enum ScopeSelection {
 }
 
 impl Scope {
+    /// Returns `(selected, skipped)` packages
     fn selected_packages<'m>(
         &self,
         meta: &'m cargo_metadata::Metadata,
-    ) -> Vec<&'m cargo_metadata::Package> {
+    ) -> (
+        Vec<&'m cargo_metadata::Package>,
+        Vec<&'m cargo_metadata::Package>,
+    ) {
         let workspace_members: HashSet<&PackageId> = meta.workspace_members.iter().collect();
         let base_ids: HashSet<&PackageId> = match &self.mode {
             ScopeMode::DenyList(PackageSelection {
@@ -220,11 +228,10 @@ impl Scope {
         meta.packages
             .iter()
             .filter(|&p| {
-                // The package has to not have been explicitly excluded,
-                // and also has to have a library target (an API we can check).
-                base_ids.contains(&p.id) && p.targets.iter().any(is_lib_like_checkable_target)
+                // The package has to not have been explicitly excluded
+                base_ids.contains(&p.id)
             })
-            .collect()
+            .partition(|&p| p.targets.iter().any(is_lib_like_checkable_target))
     }
 }
 
@@ -246,7 +253,6 @@ impl Check {
             scope: Scope::default(),
             current,
             baseline: Rustdoc::from_registry_latest_crate_version(),
-            log_level: Default::default(),
             release_type: None,
             current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
@@ -254,36 +260,22 @@ impl Check {
         }
     }
 
-    pub fn with_package_selection(&mut self, selection: PackageSelection) -> &mut Self {
+    pub fn set_package_selection(&mut self, selection: PackageSelection) -> &mut Self {
         self.scope.mode = ScopeMode::DenyList(selection);
         self
     }
 
-    pub fn with_packages(&mut self, packages: Vec<String>) -> &mut Self {
+    pub fn set_packages(&mut self, packages: Vec<String>) -> &mut Self {
         self.scope.mode = ScopeMode::AllowList(packages);
         self
     }
 
-    pub fn with_baseline(&mut self, baseline: Rustdoc) -> &mut Self {
+    pub fn set_baseline(&mut self, baseline: Rustdoc) -> &mut Self {
         self.baseline = baseline;
         self
     }
 
-    /// Set the log level.
-    /// If not set or set to `None`, logging is disabled.
-    pub fn with_log_level(&mut self, log_level: Option<log::Level>) -> &mut Self {
-        self.log_level = log_level;
-        self
-    }
-
-    /// Get the current log level.
-    /// If set to `None`, logging is disabled.
-    #[inline]
-    pub fn log_level(&self) -> Option<&log::Level> {
-        self.log_level.as_ref()
-    }
-
-    pub fn with_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
+    pub fn set_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
         self.release_type = Some(release_type);
         self
     }
@@ -312,7 +304,7 @@ impl Check {
         self
     }
 
-    pub fn with_extra_features(
+    pub fn set_extra_features(
         &mut self,
         extra_current_features: Vec<String>,
         extra_baseline_features: Vec<String>,
@@ -324,7 +316,7 @@ impl Check {
 
     /// Set what `--target` to build the documentation with, by default will not pass any flag
     /// relying on the users cargo configuration.
-    pub fn with_build_target(&mut self, build_target: String) -> &mut Self {
+    pub fn set_build_target(&mut self, build_target: String) -> &mut Self {
         self.build_target = Some(build_target);
         self
     }
@@ -384,8 +376,7 @@ impl Check {
         })
     }
 
-    pub fn check_release(&self) -> anyhow::Result<Report> {
-        let mut config = GlobalConfig::new().set_level(self.log_level);
+    pub fn check_release(&self, config: &mut GlobalConfig) -> anyhow::Result<Report> {
         let rustdoc_cmd = RustdocCommand::new().deps(false).silence(config.is_info());
 
         // If both the current and baseline rustdoc are given explicitly as a file path,
@@ -410,8 +401,8 @@ impl Check {
             };
         }
 
-        let current_loader = self.get_rustdoc_generator(&mut config, &self.current.source)?;
-        let baseline_loader = self.get_rustdoc_generator(&mut config, &self.baseline.source)?;
+        let current_loader = self.get_rustdoc_generator(config, &self.current.source)?;
+        let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
 
         // Create a report for each crate.
         // We want to run all the checks, even if one returns `Err`.
@@ -440,7 +431,7 @@ impl Check {
                         let start = std::time::Instant::now();
                         let version = None;
                         let (current_crate, baseline_crate) = generate_versioned_crates(
-                            &mut config,
+                            config,
                             &rustdoc_cmd,
                             &*current_loader,
                             &*baseline_loader,
@@ -461,11 +452,12 @@ impl Check {
                         )?;
 
                         let report = run_check_release(
-                            &mut config,
+                            config,
                             &name,
                             current_crate,
                             baseline_crate,
                             self.release_type,
+                            &OverrideStack::new(),
                         )?;
                         config.shell_status(
                             "Finished",
@@ -477,12 +469,27 @@ impl Check {
             }
             RustdocSource::Root(project_root) => {
                 let metadata = manifest_metadata(project_root)?;
-                let selected = self.scope.selected_packages(&metadata);
+                let (selected, skipped) = self.scope.selected_packages(&metadata);
                 if selected.is_empty() {
+                    let help = if skipped.is_empty() {
+                        "".to_string()
+                    } else {
+                        let skipped = skipped.iter().map(|&p| &p.name).join(", ");
+                        format!(
+                            "
+note: only library targets contain an API surface that can be checked for semver
+note: skipped the following crates since they have no library target: {skipped}"
+                        )
+                    };
                     anyhow::bail!(
-                        "no crates with library targets selected, nothing to semver-check"
+                        "no crates with library targets selected, nothing to semver-check{help}"
                     );
                 }
+
+                let workspace_overrides =
+                    manifest::deserialize_lint_table(&metadata.workspace_metadata)
+                        .context("[workspace.metadata.cargo-semver-checks] table is invalid")?
+                        .map(|table| Arc::new(table.inner));
 
                 selected
                     .iter()
@@ -506,9 +513,36 @@ impl Check {
                             })?;
                             Ok((crate_name.clone(), None))
                         } else {
+                            let package_overrides =
+                                manifest::deserialize_lint_table(&selected.metadata)
+                                    .with_context(|| {
+                                        format!(
+                                    "package `{}`'s [package.metadata.cargo-semver-checks] table is invalid (at {})",
+                                    selected.name,
+                                    selected.manifest_path,
+                                )
+                                    })?;
+
+                            let mut overrides = OverrideStack::new();
+
+                            let selected_manifest = manifest::Manifest::parse(selected.manifest_path.clone().into_std_path_buf())?;
+                            // the key `lints.workspace` for the Cargo lints table
+                            let lint_workspace_key = selected_manifest.parsed.lints.is_some_and(|x| x.workspace);
+                            let metadata_workspace_key = package_overrides.as_ref().is_some_and(|x| x.workspace);
+
+                            if lint_workspace_key || metadata_workspace_key {
+                                if let Some(workspace) = &workspace_overrides {
+                                    overrides.push(Arc::clone(workspace));
+                                }
+                            }
+
+                            if let Some(package) = package_overrides {
+                                overrides.push(Arc::new(package.inner));
+                            }
+
                             let start = std::time::Instant::now();
                             let (current_crate, baseline_crate) = generate_versioned_crates(
-                                &mut config,
+                                config,
                                 &rustdoc_cmd,
                                 &*current_loader,
                                 &*baseline_loader,
@@ -531,11 +565,12 @@ impl Check {
                             let result = Ok((
                                 crate_name.clone(),
                                 Some(run_check_release(
-                                    &mut config,
+                                    config,
                                     crate_name,
                                     current_crate,
                                     baseline_crate,
                                     self.release_type,
+                                    &overrides,
                                 )?),
                             ));
                             config.shell_status(

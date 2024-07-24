@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub method became unsafe",
     description: "A method or associated fn became unsafe to call.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#calling-an-unsafe-function-or-method"),
     query: r#"
     {

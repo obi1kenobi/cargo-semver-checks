@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub fn removed or renamed",
     description: "A function can no longer be imported by its prior path.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
     {

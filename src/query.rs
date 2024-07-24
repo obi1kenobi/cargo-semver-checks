@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::Arc};
 
 use serde::{Deserialize, Serialize};
 use trustfall::TransparentValue;
@@ -6,10 +6,12 @@ use trustfall::TransparentValue;
 use crate::ReleaseType;
 
 #[non_exhaustive]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum RequiredSemverUpdate {
-    Major,
+    #[serde(alias = "minor")]
     Minor,
+    #[serde(alias = "major")]
+    Major,
 }
 
 impl RequiredSemverUpdate {
@@ -26,6 +28,30 @@ impl From<RequiredSemverUpdate> for ReleaseType {
         match value {
             RequiredSemverUpdate::Major => Self::Major,
             RequiredSemverUpdate::Minor => Self::Minor,
+        }
+    }
+}
+
+/// The level of intensity of the error when a lint occurs.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub enum LintLevel {
+    /// If this lint occurs, do nothing.
+    #[serde(alias = "allow")]
+    Allow,
+    /// If this lint occurs, print a warning.
+    #[serde(alias = "warn")]
+    Warn,
+    /// If this lint occurs, raise an error.
+    #[serde(alias = "deny")]
+    Deny,
+}
+
+impl LintLevel {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            LintLevel::Allow => "allow",
+            LintLevel::Warn => "warn",
+            LintLevel::Deny => "deny",
         }
     }
 }
@@ -73,6 +99,9 @@ pub struct SemverQuery {
 
     pub required_update: RequiredSemverUpdate,
 
+    /// The default lint level for when this lint occurs.
+    pub lint_level: LintLevel,
+
     #[serde(default)]
     pub reference: Option<String>,
 
@@ -98,7 +127,7 @@ pub struct SemverQuery {
 impl SemverQuery {
     pub fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
-        for query_text in get_query_text_contents() {
+        for (id, query_text) in get_queries() {
             let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
                 panic!(
                     "\
@@ -108,6 +137,7 @@ Failed to parse a query: {e}
 ```"
                 );
             });
+            assert_eq!(id, query.id, "Query id must match file name");
             let id_conflict = queries.insert(query.id.clone(), query);
             assert!(id_conflict.is_none(), "{id_conflict:?}");
         }
@@ -116,8 +146,84 @@ Failed to parse a query: {e}
     }
 }
 
+/// Configured values for a [`SemverQuery`] that differ from the lint's defaults.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct QueryOverride {
+    /// The required version bump for this lint; see [`SemverQuery`].`required_update`.
+    ///
+    /// If this is `None`, use the query's default `required_update` when calculating
+    /// the effective required version bump.
+    #[serde(default)]
+    pub required_update: Option<RequiredSemverUpdate>,
+
+    /// The lint level for this lint; see [`SemverQuery`].`lint_level`.
+    ///
+    /// If this is `None`, use the query's default `lint_level` when calculating
+    /// the effective lint level.
+    #[serde(default)]
+    pub lint_level: Option<LintLevel>,
+}
+
+/// A mapping of lint ids to configured values that override that lint's defaults.
+pub type OverrideMap = BTreeMap<String, QueryOverride>;
+
+/// Stores a stack of [`OverrideMap`] references such that items towards the top of
+/// the stack (later in the backing `Vec`) have *higher* precedence and override items lower in the stack.
+/// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
+/// at the top of the stack will be used to calculate the effective lint level or required version update.  
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct OverrideStack(Vec<Arc<OverrideMap>>);
+
+impl OverrideStack {
+    /// Creates a new, empty [`OverrideStack`] instance.
+    #[must_use]
+    pub fn new() -> Self {
+        Self(Vec::new())
+    }
+
+    /// Inserts the given element at the top of the stack.
+    ///
+    /// The inserted overrides will take precedence over any lower item in the stack,
+    /// if both maps have a not-`None` entry for a given lint.
+    pub fn push(&mut self, item: Arc<OverrideMap>) {
+        self.0.push(item);
+    }
+
+    /// Calculates the *effective* lint level of this query, by searching for an override
+    /// mapped to this query's id from the top of the stack first, returning the query's default
+    /// lint level if not overridden.
+    #[must_use]
+    pub fn effective_lint_level(&self, query: &SemverQuery) -> LintLevel {
+        self.0
+            .iter()
+            .rev()
+            .find_map(|x| x.get(&query.id).and_then(|y| y.lint_level))
+            .unwrap_or(query.lint_level)
+    }
+
+    /// Calculates the *effective* required version bump of this query, by searching for an override
+    /// mapped to this query's id from the top of the stack first, returning the query's default
+    /// required version bump if not overridden.
+    #[must_use]
+    pub fn effective_required_update(&self, query: &SemverQuery) -> RequiredSemverUpdate {
+        self.0
+            .iter()
+            .rev()
+            .find_map(|x| x.get(&query.id).and_then(|y| y.required_update))
+            .unwrap_or(query.required_update)
+    }
+}
+
+impl From<Vec<Arc<OverrideMap>>> for OverrideStack {
+    fn from(value: Vec<Arc<OverrideMap>>) -> Self {
+        Self(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::sync::{Arc, OnceLock};
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
@@ -126,18 +232,26 @@ mod tests {
         load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
     };
 
-    use crate::query::SemverQuery;
+    use crate::query::{
+        LintLevel, OverrideStack, QueryOverride, RequiredSemverUpdate, SemverQuery,
+    };
     use crate::templating::make_handlebars_registry;
 
-    lazy_static::lazy_static! {
-        static ref TEST_CRATE_NAMES: Vec<String> = get_test_crate_names();
+    static TEST_CRATE_NAMES: OnceLock<Vec<String>> = OnceLock::new();
 
-        /// Mapping test crate (pair) name -> (old rustdoc, new rustdoc).
-        static ref TEST_CRATE_RUSTDOCS: BTreeMap<String, (VersionedCrate, VersionedCrate)> =
-            get_test_crate_rustdocs();
+    /// Mapping test crate (pair) name -> (old rustdoc, new rustdoc).
+    static TEST_CRATE_RUSTDOCS: OnceLock<BTreeMap<String, (VersionedCrate, VersionedCrate)>> =
+        OnceLock::new();
+
+    fn get_test_crate_names() -> &'static [String] {
+        TEST_CRATE_NAMES.get_or_init(initialize_test_crate_names)
     }
 
-    fn get_test_crate_names() -> Vec<String> {
+    fn get_test_crate_rustdocs(test_crate: &str) -> &'static (VersionedCrate, VersionedCrate) {
+        &TEST_CRATE_RUSTDOCS.get_or_init(initialize_test_crate_rustdocs)[test_crate]
+    }
+
+    fn initialize_test_crate_names() -> Vec<String> {
         std::fs::read_dir("./test_crates/")
             .expect("directory test_crates/ not found")
             .map(|dir_entry| dir_entry.expect("failed to list test_crates/"))
@@ -178,8 +292,8 @@ mod tests {
             .collect()
     }
 
-    fn get_test_crate_rustdocs() -> BTreeMap<String, (VersionedCrate, VersionedCrate)> {
-        TEST_CRATE_NAMES
+    fn initialize_test_crate_rustdocs() -> BTreeMap<String, (VersionedCrate, VersionedCrate)> {
+        get_test_crate_names()
             .iter()
             .map(|crate_pair| {
                 let old_rustdoc = load_pregenerated_rustdoc(crate_pair.as_str(), "old");
@@ -199,7 +313,7 @@ mod tests {
 
     #[test]
     fn all_queries_are_valid() {
-        let (_baseline_crate, current_crate) = &TEST_CRATE_RUSTDOCS["template"];
+        let (_baseline_crate, current_crate) = get_test_crate_rustdocs("template");
         let indexed_crate = VersionedIndexedCrate::new(current_crate);
 
         let adapter = VersionedRustdocAdapter::new(&indexed_crate, Some(&indexed_crate))
@@ -213,7 +327,7 @@ mod tests {
 
     #[test]
     fn pub_use_handling() {
-        let (_baseline_crate, current_crate) = &TEST_CRATE_RUSTDOCS["pub_use_handling"];
+        let (_baseline_crate, current_crate) = get_test_crate_rustdocs("pub_use_handling");
         let current = VersionedIndexedCrate::new(current_crate);
 
         let query = r#"
@@ -354,10 +468,10 @@ mod tests {
         let mut expected_results: TestOutput = ron::from_str(&expected_result_text)
             .expect("could not parse expected outputs as ron format");
 
-        let mut actual_results: TestOutput = TEST_CRATE_NAMES
+        let mut actual_results: TestOutput = get_test_crate_names()
             .iter()
             .map(|crate_pair_name| {
-                let (crate_old, crate_new) = &TEST_CRATE_RUSTDOCS[crate_pair_name];
+                let (crate_old, crate_new) = get_test_crate_rustdocs(crate_pair_name);
                 let indexed_crate_old = VersionedIndexedCrate::new(crate_old);
                 let indexed_crate_new = VersionedIndexedCrate::new(crate_new);
 
@@ -441,6 +555,145 @@ mod tests {
             }
         }
     }
+
+    /// Helper function to construct a blank query with a given id, lint level, and required
+    /// version bump.
+    #[must_use]
+    fn make_blank_query(
+        id: String,
+        lint_level: LintLevel,
+        required_update: RequiredSemverUpdate,
+    ) -> SemverQuery {
+        SemverQuery {
+            id,
+            lint_level,
+            required_update,
+            human_readable_name: String::new(),
+            description: String::new(),
+            reference: None,
+            reference_link: None,
+            query: String::new(),
+            arguments: BTreeMap::new(),
+            error_message: String::new(),
+            per_result_error_template: None,
+        }
+    }
+
+    #[test]
+    fn test_overrides() {
+        let mut stack = OverrideStack::new();
+        stack.push(Arc::new(
+            [
+                (
+                    "query1".into(),
+                    QueryOverride {
+                        lint_level: Some(LintLevel::Allow),
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                    },
+                ),
+                (
+                    "query2".into(),
+                    QueryOverride {
+                        lint_level: None,
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                    },
+                ),
+            ]
+            .into_iter()
+            .collect(),
+        ));
+
+        let q1 = make_blank_query(
+            "query1".into(),
+            LintLevel::Deny,
+            RequiredSemverUpdate::Major,
+        );
+        let q2 = make_blank_query(
+            "query2".into(),
+            LintLevel::Warn,
+            RequiredSemverUpdate::Major,
+        );
+
+        // Should pick overridden values.
+        assert_eq!(stack.effective_lint_level(&q1), LintLevel::Allow);
+        assert_eq!(
+            stack.effective_required_update(&q1),
+            RequiredSemverUpdate::Minor
+        );
+
+        // Should pick overridden value for semver and fall back to default lint level
+        // which is not overridden
+        assert_eq!(stack.effective_lint_level(&q2), LintLevel::Warn);
+        assert_eq!(
+            stack.effective_required_update(&q2),
+            RequiredSemverUpdate::Minor
+        );
+    }
+
+    #[test]
+    fn test_override_precedence() {
+        let mut stack = OverrideStack::new();
+        stack.push(Arc::new(
+            [
+                (
+                    "query1".into(),
+                    QueryOverride {
+                        lint_level: Some(LintLevel::Allow),
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                    },
+                ),
+                (
+                    "query2".into(),
+                    QueryOverride {
+                        lint_level: None,
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                    },
+                ),
+            ]
+            .into_iter()
+            .collect(),
+        ));
+
+        stack.push(Arc::new(
+            [(
+                "query1".into(),
+                QueryOverride {
+                    required_update: None,
+                    lint_level: Some(LintLevel::Warn),
+                },
+            )]
+            .into_iter()
+            .collect(),
+        ));
+
+        let q1 = make_blank_query(
+            "query1".into(),
+            LintLevel::Deny,
+            RequiredSemverUpdate::Major,
+        );
+        let q2 = make_blank_query(
+            "query2".into(),
+            LintLevel::Warn,
+            RequiredSemverUpdate::Major,
+        );
+
+        // Should choose overridden value at the top of the stack
+        assert_eq!(stack.effective_lint_level(&q1), LintLevel::Warn);
+        // Should fall back to a configured value lower in the stack because
+        // top is not set.
+        assert_eq!(
+            stack.effective_required_update(&q1),
+            RequiredSemverUpdate::Minor
+        );
+
+        // Should pick overridden value for semver and fall back to default lint level
+        // which is not overridden
+        assert_eq!(stack.effective_lint_level(&q2), LintLevel::Warn);
+        assert_eq!(
+            stack.effective_required_update(&q2),
+            RequiredSemverUpdate::Minor
+        );
+    }
 }
 
 macro_rules! add_lints {
@@ -455,10 +708,13 @@ macro_rules! add_lints {
             )*
         }
 
-        fn get_query_text_contents() -> Vec<&'static str> {
+        fn get_queries() -> Vec<(&'static str, &'static str)> {
             vec![
                 $(
-                    include_str!(concat!("lints/", stringify!($name), ".ron")),
+                    (
+                        stringify!($name),
+                        include_str!(concat!("lints/", stringify!($name), ".ron")),
+                    ),
                 )*
             ]
         }
@@ -468,6 +724,8 @@ macro_rules! add_lints {
     }
 }
 
+// The following add_lints! invocation is programmatically edited by scripts/make_new_lint.sh
+// If you must manually edit it, be sure to read the "Requirements" comments in that script first
 add_lints!(
     auto_trait_impl_removed,
     constructible_struct_adds_field,
@@ -478,53 +736,71 @@ add_lints!(
     enum_missing,
     enum_must_use_added,
     enum_now_doc_hidden,
-    enum_repr_c_removed,
     enum_repr_int_changed,
     enum_repr_int_removed,
     enum_repr_transparent_removed,
     enum_struct_variant_field_added,
     enum_struct_variant_field_missing,
+    enum_struct_variant_field_now_doc_hidden,
+    enum_tuple_variant_field_added,
+    enum_tuple_variant_field_missing,
+    enum_tuple_variant_field_now_doc_hidden,
     enum_variant_added,
     enum_variant_missing,
+    exported_function_changed_abi,
+    function_abi_no_longer_unwind,
+    function_changed_abi,
     function_const_removed,
+    function_export_name_changed,
     function_missing,
     function_must_use_added,
     function_now_doc_hidden,
     function_parameter_count_changed,
     function_unsafe_added,
+    inherent_associated_const_now_doc_hidden,
+    inherent_associated_pub_const_missing,
     inherent_method_const_removed,
     inherent_method_missing,
     inherent_method_must_use_added,
     inherent_method_unsafe_added,
     method_parameter_count_changed,
+    module_missing,
+    pub_module_level_const_missing,
+    pub_module_level_const_now_doc_hidden,
+    pub_static_missing,
+    pub_static_mut_now_immutable,
+    pub_static_now_doc_hidden,
+    repr_c_removed,
+    repr_packed_added,
+    repr_packed_removed,
     sized_impl_removed,
     struct_marked_non_exhaustive,
     struct_missing,
     struct_must_use_added,
     struct_now_doc_hidden,
     struct_pub_field_missing,
-    struct_repr_c_removed,
+    struct_pub_field_now_doc_hidden,
     struct_repr_transparent_removed,
     struct_with_pub_fields_changed_type,
+    trait_associated_const_now_doc_hidden,
+    trait_associated_type_now_doc_hidden,
     trait_method_missing,
+    trait_method_now_doc_hidden,
+    trait_method_unsafe_added,
+    trait_method_unsafe_removed,
     trait_missing,
     trait_must_use_added,
     trait_now_doc_hidden,
+    trait_removed_associated_constant,
+    trait_removed_associated_type,
+    trait_removed_supertrait,
     trait_unsafe_added,
     trait_unsafe_removed,
     tuple_struct_to_plain_struct,
     type_marked_deprecated,
+    union_field_missing,
+    union_missing,
+    union_now_doc_hidden,
     unit_struct_changed_kind,
     variant_marked_non_exhaustive,
-    enum_tuple_variant_field_missing,
-    enum_tuple_variant_field_added,
-    trait_removed_supertrait,
-    pub_module_level_const_missing,
-    pub_static_missing,
-    trait_removed_associated_type,
-    module_missing,
-    trait_removed_associated_constant,
-    function_changed_abi,
-    trait_method_unsafe_added,
-    trait_method_unsafe_removed,
 );

@@ -3,14 +3,15 @@ pub union UnionWithMustUseMethods {
 }
 
 impl UnionWithMustUseMethods {
-
     // These methods did not have the #[must_use] attribute in the old version.
     // Addition of the attribute should be reported.
+    pub fn AssociatedFnToMustUse() {}
+
+    pub fn AssociatedFnToMustUseMessage() {}
 
     pub fn MethodToMustUseMethod(&self) {}
 
     pub fn MethodToMustUseMessageMethod(&self) {}
-
 
     // These methods had the #[must_use] attribute in the old version. Changes
     // of the attribute, including deletion, should not be reported.
@@ -20,7 +21,6 @@ impl UnionWithMustUseMethods {
 
     #[must_use]
     pub fn MustUseMethodToMustUseMessageMethod(&self) {}
-
 
     // These methods had the #[must_use] attribute in the old version.
     // They also included the user-defined warning message. Changes of
@@ -36,7 +36,6 @@ impl UnionWithMustUseMethods {
     pub fn MustUseMessageMethodToMustUseMessageMethod(&self) {}
 }
 
-
 // This public union's inherent method did not have the #[must_use] attribute
 // in the old version. Because the method is private, adding the attribute
 // should NOT be reported.
@@ -46,10 +45,8 @@ pub union UnionWithPrivateMustUseMethods {
 }
 
 impl UnionWithPrivateMustUseMethods {
-
     fn PrivateMethodToPrivateMustUseMethod(&self) {}
 }
-
 
 // This union is private and adding #[must_use] to its inherent method
 // should NOT be reported.
@@ -59,6 +56,5 @@ union PrivateUnionWithMustUseMethods {
 }
 
 impl PrivateUnionWithMustUseMethods {
-
     fn PrivateUnionMethodToPrivateUnionMustUseMethod(&self) {}
 }

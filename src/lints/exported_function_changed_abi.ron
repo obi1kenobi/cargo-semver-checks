@@ -1,0 +1,43 @@
+SemverQuery(
+    id: "exported_function_changed_abi",
+    human_readable_name: "exported function changed ABI",
+    description: "A function marked `#[no_mangle]` or assigned an explicit `#[export_name]` changed its external ABI.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/external-blocks.html#abi"),
+    query: r#"{
+    CrateDiff {
+        baseline {
+            item {
+                ... on Function {
+                    export_name @filter(op: "is_not_null") @tag
+                    abi_: abi {
+                        raw_name @tag @output
+                    }
+                }
+            }
+        }
+        current {
+            item {
+                ... on Function {
+                    name @output
+                    export_name @filter(op: "=", value: ["%export_name"]) @output
+                    new_abi_: abi {
+                        raw_name @filter(op: "!=", value: ["%raw_name"]) @output
+                    }
+
+                    span_: span @optional {
+                        filename @output
+                        begin_line @output
+                    }
+                }
+            }
+        }
+    }
+}"#,
+    arguments: {
+        // No arguments!
+    },
+    error_message: "A function with an export_name has changed ABI.",
+    per_result_error_template: Some("fn {{name}} with export_name {{export_name}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"),
+)

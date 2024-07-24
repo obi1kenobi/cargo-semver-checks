@@ -4,6 +4,7 @@ SemverQuery(
     description: "An enum's repr attribute changed integer types.",
     reference: Some("The repr(u*) or repr(i*) attribute on an enum was changed to another integer type. This can cause its memory representation to change, breaking FFI use cases."),
     required_update: Major,
+    lint_level: Deny,
 
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-int-enum-change"),
     query: r#"

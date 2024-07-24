@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub trait method became unsafe",
     description: "A method in a public trait became unsafe",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#calling-an-unsafe-function-or-method"),
     query: r#"
     {
@@ -54,6 +55,6 @@ SemverQuery(
         "true": true,
         "public": "public",
     },
-    error_message: "A publicly-visible trait method became `unsafe`, so implementing it now requires an `unsafe` qualifier.",
+    error_message: "A publicly-visible trait method became `unsafe`, so implementing it now requires an `unsafe` qualifier and calling it now requires an `unsafe` block.",
     per_result_error_template: Some("trait method <{{join \"::\" path}}>::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
 )

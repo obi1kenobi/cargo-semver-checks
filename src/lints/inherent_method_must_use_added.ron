@@ -1,8 +1,9 @@
 SemverQuery(
     id: "inherent_method_must_use_added",
     human_readable_name: "inherent method #[must_use] added",
-    description: "An inherent method has been marked with #[must_use].",
+    description: "An inherent method or associated fn has been marked #[must_use].",
     required_update: Minor,
+    lint_level: Deny,
 
     // TODO: Change the reference link to point to the cargo semver reference
     //       once it has a section on attribute #[must_use].

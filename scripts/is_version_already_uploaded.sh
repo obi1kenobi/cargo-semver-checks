@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# check for bash using maximum compatibility sh syntax
+if [ -z "$BASH_VERSION" ]; then
+    >&2 printf 'This script must be run using the bash shell.\n'
+    exit 1
+fi
+
 # Script requirements:
 # - curl
 # - jq

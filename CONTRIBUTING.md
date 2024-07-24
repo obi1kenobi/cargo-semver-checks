@@ -4,6 +4,7 @@
 - [Design goals](#design-goals)
 - [Running `cargo test` for the first time](#running-cargo-test-for-the-first-time)
 - [Adding a new lint](#adding-a-new-lint)
+- [Development Environment](#development-environment)
 
 ## Making your first contribution
 
@@ -18,6 +19,8 @@ After choosing a lint to implement, try to identify a related lint that is alrea
 and relies on similar information.
 For example, if implementing a lint that uses information about attributes,
 find other lints that check attribute information and use them as guides as you write your lint.
+
+Make sure to check the ["Development Environment"](#development-environment) section, especially if you are using Windows.
 
 The ["Adding a new lint"](#adding-a-new-lint) section of this document has a walkthrough for
 defining and testing new lints.
@@ -118,7 +121,7 @@ Each lint is defined in its own file
 in [`src/lints`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/src/lints).
 
 Lints are tested by running them on a series of test crates defined in
-the [`test_crates` directory](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/test_outputs).
+the [`test_crates` directory](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/test_crates).
 Each test crate comes in two versions: `old` which represents the semver baseline,
 and `new` which represents a semver patch-level update to the crate.
 
@@ -243,3 +246,11 @@ So if you added code to a test crate and it caused other lints to report new fin
 
 If the answer to all is yes, then everything is fine! Just edit those other lints'
 expected output files to include the new items, and you can get back on track.
+
+## Development Environment
+
+While cargo-semver-checks is cross platform, the development task automation scripts in the scripts
+directory require a `bash` shell to run.
+
+Windows users can get a bash + GNU command line environment via WSL or git bash.
+Linux and Mac OS typically have bash installed by default.

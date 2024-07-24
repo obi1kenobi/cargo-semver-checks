@@ -3,6 +3,7 @@ SemverQuery(
     human_readable_name: "pub fn parameter count changed",
     description: "Parameter count of a function has changed.",
     required_update: Major,
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#fn-change-arity"),
     query: r#"
     {

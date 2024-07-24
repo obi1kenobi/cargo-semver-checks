@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# check for bash using maximum compatibility sh syntax
+if [ -z "$BASH_VERSION" ]; then
+    >&2 printf 'This script must be run using the bash shell.\n'
+    exit 1
+fi
+
 # Fail on first error, on undefined variables, and on failures in pipelines.
 set -euo pipefail
 
@@ -24,7 +30,7 @@ if [[ -d "$NEW_LINT_TEST_CRATES_DIR" ]]; then
     echo ' already exists.'
 else
     cp -R "$TEST_CRATES_DIR/template" "$NEW_LINT_TEST_CRATES_DIR"
-    sed -i'' "s/template/$NEW_TEST_CRATE/g" "$NEW_LINT_TEST_CRATES_DIR/old/Cargo.toml"
-    sed -i'' "s/template/$NEW_TEST_CRATE/g" "$NEW_LINT_TEST_CRATES_DIR/new/Cargo.toml"
+    sed -e "s/template/$NEW_TEST_CRATE/g" "$TEST_CRATES_DIR/template/old/Cargo.toml" > "$NEW_LINT_TEST_CRATES_DIR/old/Cargo.toml"
+    sed -e "s/template/$NEW_TEST_CRATE/g" "$TEST_CRATES_DIR/template/new/Cargo.toml" > "$NEW_LINT_TEST_CRATES_DIR/new/Cargo.toml"
     echo ' done!'
 fi

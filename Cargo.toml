@@ -1,55 +1,55 @@
 [package]
 name = "cargo-semver-checks"
-version = "0.28.0"
+version = "0.33.0"
 edition = "2021"
 authors = ["Predrag Gruevski <obi1kenobi82@gmail.com>"]
 license = "Apache-2.0 OR MIT"
 description = "Scan your Rust crate for semver violations."
 repository = "https://github.com/obi1kenobi/cargo-semver-checks"
 readme = "./README.md"
-keywords = ["semver", "check", "crate", "cargo"]
+keywords = ["semver", "linter", "check", "crate", "cargo"]
 categories = ["command-line-utilities", "development-tools::cargo-plugins"]
-rust-version = "1.70"
+rust-version = "1.74"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 trustfall = "0.7.1"
-trustfall_rustdoc = { version = "0.14.1", default-features = false, features = ["v26", "v27", "v28"] }
+trustfall_rustdoc = { version = "0.15.2", default-features = false, features = ["v27", "v28", "v29", "v30", "v32"] }
 clap = { version = "4.0.0", features = ["derive", "cargo"] }
 serde_json = "1.0.82"
 anyhow = "1.0.58"
 ron = "0.8.0"
 serde = { version = "1.0.185", features = ["derive"] }
 semver = "1.0.12"
-handlebars = "4.3.1"
+handlebars = "5.1.0"
 atty = "0.2.14"
-termcolor = "1.1.3"
-termcolor_output = "1.0.1"
-cargo_metadata = "0.17.0"
-clap-cargo = { version = "0.10.0", features = ["cargo_metadata"] }
+cargo_metadata = "0.18.1"
+clap-cargo = { version = "0.14.0", features = ["cargo_metadata"] }
 ignore = "0.4.18"
 clap-verbosity-flag = "2.0.0"
 log = "0.4.17"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
-gix = { version = "0.55.2", default-features = false, features = ["max-performance", "revision"] }
-tame-index = { version = "0.8", features = ["git", "sparse"] }
+gix = { version = "0.63", default-features = false, features = ["max-performance", "revision"] }
+tame-index = { version = "0.12", features = ["sparse"] }
 
 human-panic = "1.0.3"
 bugreport = "0.5.0"
-itertools = "0.11.0"
-cargo_toml = "0.15.2"
-toml = "0.7.6"
+itertools = "0.13.0"
+cargo_toml = "0.20.2"
+toml = "0.8.10"
 directories = "5.0.1"
 sha2 = "0.10.6"
 rustc_version = "0.4.0"
 rayon = "1.8.0"
+anstyle = "1.0.6"
+anstream = "0.6.13"
 
 [dev-dependencies]
 assert_cmd = "2.0"
-lazy_static = "1.4.0"
-similar-asserts = { version = "1.4.2", features = ["serde"] }
+similar-asserts = { version = "1.5.0", features = ["serde"] }
+predicates = "3.1.0"
 
 # In dev and test profiles, compile all dependencies with optimizations enabled,
 # but still checking debug assertions and overflows.
@@ -67,3 +67,13 @@ opt-level = 3
 debug-assertions = true
 overflow-checks = true
 codegen-units = 16
+
+[features]
+default = ["gix-reqwest"]
+
+# Gix has mutually exclusive features that are exposed through tame-index. Hard-coding either of
+# these features can lead to compile errors when another crate enables the other feature through
+# workspace feature unification. We therefore allow downstream users to choose which feature to
+# enable:
+gix-reqwest = ["tame-index/gix-reqwest"]
+gix-curl = ["tame-index/gix-curl"]
