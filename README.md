@@ -43,11 +43,11 @@ to the implementation of that query in the current version of the tool.
 - [What features does `cargo-semver-checks` enable in the tested crates?](#what-features-does-cargo-semver-checks-enable-in-the-tested-crates)
 - [Does `cargo-semver-checks` have false positives?](#does-cargo-semver-checks-have-false-positives)
 - [Will `cargo-semver-checks` catch every semver violation?](#will-cargo-semver-checks-catch-every-semver-violation)
+- [Can I configure individual lints?](#can-i-configure-individual-lints)
 - [If I really want a new feature to be implemented, can I sponsor its development?](#if-i-really-want-a-new-feature-to-be-implemented-can-i-sponsor-its-development)
 - [How is `cargo-semver-checks` similar to and different from other tools?](#how-is-cargo-semver-checks-similar-to-and-different-from-other-tools)
 - [Why is it sometimes `cargo-semver-check` and `cargo-semver-checks`?](#why-is-it-sometimes-cargo-semver-check-and-cargo-semver-checks)
 - [What is the MSRV policy with respect to semver?](#what-is-the-msrv-policy-with-respect-to-semver)
-- [Can I configure individual lints?](#can-i-configure-individual-lints)
 
 ### What Rust versions does `cargo-semver-checks` support?
 
@@ -182,6 +182,10 @@ Here are some example areas where `cargo-semver-checks` currently will not catch
 - breaking changes in generics or lifetimes
 - breaking changes that exist when only a subset of all crate features are activated
 
+### Can I configure individual lints?
+
+Yes! See [lint-level configuration](#lint-level-configuration).
+
 ### If I really want a new feature to be implemented, can I sponsor its development?
 
 Depending on the feature, possibly yes!
@@ -265,94 +269,171 @@ Changes to the _compile MSRV_ may happen in any kind of version bump.
 As much as practically possible, we'll aim to make them
 simultaneously with _runtime MSRV_ bumps.
 
-### Can I configure individual lints?
-
-Yes! See [lint-level configuration](#lint-level-configuration)
-
 ## Configuration
 
 ### Lint-level configuration
 
-Sometimes, it is useful to be able to control and enable/disable individual lints that `cargo-semver-checks` runs.  On the `main` branch, `cargo-semver-checks` has this functionality.  First, a refresher on some definitions:
+`cargo-semver-checks` offers the ability to customize which lints are enforced, what SemVer versions they require, and whether violations of that lint produce `deny / warn / allow` behavior.
 
-- **check/lint** - `cargo-semver-checks` runs many checks between versions of a crate's public API, which each check for one specific semver-breaking behavior.  For example, the `function_missing` lint is triggered when a function in the crate's public API is removed in a new version.
-- **lint level** - For each of these checks, it is now possible to configure the level of severity for when this check occurs.  `deny` means it is a hard error when the check finds breaking behavior, which will require a version bump to resolve.  `warn` still runs the check and reports findings, but it is only a warning if it triggers and does not require (but it does suggest) a version bump.  `allow` means that the breaking behavior in this check is allowed in the code, so the check doesn't need to be run.
-- **required (semver) update** - what version bump this check should require (for `deny`-level) or suggest (for `warn`) when the check is triggered.  For example, `function_missing` is `major` by default, so if a public function is removed between versions, the version needs a major version bump (e.g., 1.2.3 to 2.0.0 or 0.5.2 to 0.6.0).  This can be configured to `major` or `minor` (1.2.3 to 1.3.0 or 0.5.2 to 0.5.3).
+As a reminder, a "lint" or "check" is a rule in `cargo-semver-checks` that looks for a specific kind of issue. For example, the `function_missing` lint looks for functions that no longer exist in a crate's public API. `cargo-semver-checks` has many dozens of such lints.
 
+Lints may be configured in two ways:
+- **lint level:** When a lint finds issues, the lint level controls how `cargo-semver-checks` responds. The `deny` level makes the lint a hard error: `cargo-semver-checks` will exit with an error and will require a version bump to resolve. The `warn` level will print a warning describing the issue, but will not cause `cargo-semver-checks` to exit with an error code — meaning it _will not_ block CI runs. The `allow` level means the findings of the lint should be silently ignored, so the check doesn't even need to be run.
+- **required update:** This set the kind of version bump this check should require (for `deny`-level) or suggest (for `warn`) when it spots an issue. For example, the `function_missing` lint is `major` by default, so if a public function is removed between versions, the version needs a major version bump (e.g., 1.2.3 to 2.0.0 or 0.5.2 to 0.6.0). This can be configured to `major` or `minor` (1.2.3 to 1.3.0 or 0.5.2 to 0.5.3). There is no "patch" setting since that is equivalent to setting an `allow` lint level.
 
-To configure the level and/or required update for a lint, first find its id.  This will be in `snake_case` and is reported on error/warning or found as the file name in the [lints folder](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/src/lints).  Let's use `function_missing` as an example.
+To configure the level and/or required update for a lint, first find its name. This will be in `snake_case` and is reported in the CLI on errors/warnings, and can also be found as the file name in the [lints folder](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/src/lints).
 
-Then, determine what the new lint level and/or required version update should be.  For our example, let's set the level to `warn` and the required update to `minor`.
+- [Example: Downgrading an error-level lint to a warning](#example-changing-the-semver-requirement-for-a-lint)
+- [Example: Changing the SemVer requirement for a lint](#example-downgrading-an-error-level-lint-to-a-warning)
+- [Example: Configuring lints for an entire workspace](#example-configuring-lints-for-an-entire-workspace)
+- [Example: Overriding workspace configuration](#example-overriding-workspace-configuration)
+- [Common configurations: Make `#[must_use]` lints warn-only](#common-configurations-make-must_use-lints-warn-only)
+- [Common configurations: Disable `#[must_use]` lints entirely](#common-configurations-disable-must_use-lints-entirely)
+- [Implementation details & limitations](#implementation-details--limitations)
 
-In the `Cargo.toml` manifest for the package we're checking, add the `cargo-semver-checks` lints table:
+#### Example: Downgrading an error-level lint to a warning
+
+`cargo-semver-checks` by default considers adding `#[must_use]` on an existing function to require a `minor` version bump, and has level `deny`. Let's say our package considers that too strict, and would prefer adding `#[must_use]` to produce a warning instead of an error.
+
+We can accomplish that by adding the following to the `Cargo.toml` manifest for the package:
 
 ```toml
-# ...
 [package.metadata.cargo-semver-checks.lints]
-function_missing = { level = "warn", required-update = "minor" }
+function_must_use_added = "warn"
 ```
 
-To configure other lints, just add them as additional entries to that table.  Note that it is not required to configure *both* lint level and required version update, and you can use the shorthand `lint_id = "level"` to configure just the lint level:
-
+That option is shorthand notation for:
 ```toml
 [package.metadata.cargo-semver-checks.lints]
-function_missing = { level = "warn", required-update = "minor" }
-trait_now_doc_hidden = "allow" # shorthand to set just lint level to `allow`
-enum_variant_added = { level = "deny" } # leaves required-update as the default
-function_changed_abi = { required-update = "minor" } # leaves level as default
+function_must_use_added = { level = "warn" }
 ```
 
-This table should be placed in the current/new `Cargo.toml` manifest, not the baseline/old manifest.  (this defaults to `./Cargo.toml` in the directory that `cargo-semver-checks` was invoked on, and can be configured to a different path with the `--manifest-path` CLI option).
+If we wanted to configure other lints simultaneously, we could add their configuration there as well: one lint per line.
 
-#### Configuring a workspace
+#### Example: Changing the SemVer requirement for a lint
 
-It may also be helpful to configure these checks at the workspace level for multiple different crates in the same Cargo workspace. To do this, in the workspace root `Cargo.toml`, add a similar configuration table:
+Say we instead wanted to mandate a major version bump if `#[must_added]` is added.
 
+We'd add the following to our package's `Cargo.toml` file:
+```toml
+[package.metadata.cargo-semver-checks.lints]
+function_must_use_added = { required-update = "major" }
+```
+
+Of course, it's possible to combine `level` and `required-update` settings.
+For example, the following will make the `function_must_use_added` cause warnings (instead of errors) whenever `#[must_use]` is added without a major version bump:
+```toml
+[package.metadata.cargo-semver-checks.lints]
+function_must_use_added = { level = "warn", required-update = "major" }
+```
+
+#### Example: Configuring lints for an entire workspace
+
+`cargo-semver-checks` allows defining your lint configuration at the workspace level, and reusing it in each of your crates.
+
+First, add your configuration to the workspace root `Cargo.toml`, noting the `workspace.metadata` prefix instead of `package.metadata`:
 ```toml
 [workspace.metadata.cargo-semver-checks.lints]
-function_missing = { level = "warn", required-update = "minor" }
+function_must_use_added = { level = "warn" }
 ```
 
-Note that it is `workspace.metadata` and not `package.metadata`.  Then, to opt-in to these for each package that is being semver-checked, one of these keys to the *package* Cargo.toml:
+Then, to opt into the workspace configuration in individual packages, add either one of these keys to that package's `Cargo.toml`:
+
+```toml
+[package.metadata.cargo-semver-checks.lints]
+workspace = true
+```
+
+or, if your workspace already configures workspace-level lints (e.g. for clippy) at `[workspace.lint]`,
 
 ```toml
 [lints]
 workspace = true
 ```
 
-or
+Using the `lints.workspace` key will cause a cargo error if it is set and there is no `[workspace.lints]` table in the workspace Cargo.toml. We support the `lints.workspace` key to ease our transition toward [merging `cargo-semver-checks` into `cargo` itself](https://github.com/obi1kenobi/cargo-semver-checks/issues/61).
 
-```toml
-[package.metadata.cargo-semver-checks.lints]
-workspace = true
-```
+Setting `workspace = false` is not valid configuration for either of these keys. To have a package opt-out from the workspace's lints configuration, omit both keys entirely from the package's `Cargo.toml`.
 
-Either of these is acceptable to indicate to read the `[workspace.metadata.cargo-semver-checks.lints]` table for this package.  Using the `lints.workspace` key can be helpful to indicate this behavior for other linters (e.g., cargo and clippy), but will cause a cargo error if it is set and there is no `[workspace.lints]` table in the workspace Cargo.toml.  To solve this, we added the `package.metadata.cargo-semver-checks.lints.workspace` key for compatibility. Note that setting `workspace = false` is not valid configuration for either of these keys.  To indicate not to read workspace configuration for a crate, simply omit both keys entirely from the package's Cargo.toml.
+#### Example: Overriding workspace configuration
 
-#### Overriding workspace configuration
+When `workspace = true` is set, it is still possible to override individual lint settings in a package.
 
-When `workspace = true` is set, it is possible to override individual lint configuration lines in a package.  For example, if we have in the *workspace* Cargo.toml:
+Rule of thumb: for each config option of each lint,
+- the workspace configuration overrides the lint's defaults, and
+- the package's configuration overrides both of the above.
+
+For example, if we have in the *workspace* `Cargo.toml`:
 
 ```toml
 [workspace.metadata.cargo-semver-checks.lints]
 function_missing = { level = "warn", required-update = "minor" }
 trait_now_doc_hidden = "warn"
+function_must_use_added = "warn"
 ```
 
-and in the *package* Cargo.toml:
+and in the *package* `Cargo.toml`:
 
 ```toml
 [package.metadata.cargo-semver-checks.lints]
 workspace = true
 function_missing = "deny"
-trait_now_doc_hidden = { required-update = "major" }
+trait_now_doc_hidden = { required-update = "minor" }
 ```
 
-Fields set in the package configuration override the workspace configuration.  Thus, the lint level for `function_missing` will be overridden to `deny`, and the workspace default `required-update` of `minor` will be used because it is not configured in the package.  Similarly, the lint level for `trait_now_doc_hidden` will be the workspace's `warn`, but the required update will be overridden in the package to a `major` version bump.
+Here's the final configuration for that package:
+- For `function_missing`:
+  - The [built-in defaults](https://github.com/obi1kenobi/cargo-semver-checks/blob/1e0c82331cf26cf5ea52f3787d07eb583556cf79/src/lints/function_missing.ron#L5-L6) are `level = "deny", required-update = "major"`.
+  - The workspace overrides both to `level = "warn", required-update = "minor"`.
+  - The package opts into the workspace's configuration with `workspace = true`, then overrides to `level = "deny"`.
+  - The final config: `level = "deny", required-update = "minor"`.
+- For `trait_now_doc_hidden`:
+  - The [built-in defaults](https://github.com/obi1kenobi/cargo-semver-checks/blob/1e0c82331cf26cf5ea52f3787d07eb583556cf79/src/lints/trait_now_doc_hidden.ron#L5-L6) are `level = "deny", required-update = "major"`.
+  - The workspace overrides `level = warn"`, leaving `required-update` unchanged.
+  - The package opts into the workspace's configuration with `workspace = true`, then sets `required-update = "minor"`.
+  - The final config: `level = "deny", required-update = "minor"`.
+- For `function_must_use_added`:
+  - The [built-in defaults](https://github.com/obi1kenobi/cargo-semver-checks/blob/1e0c82331cf26cf5ea52f3787d07eb583556cf79/src/lints/function_must_use_added.ron#L5-L6) are `level = "deny", required-update = "minor"`.
+  - The workspace overrides `level = "warn"`, leaving `required-update` unchanged.
+  - The package opts into the workspace's configuration with `workspace = true`.
+  - The final config: `level = "warn", required-update = "minor"`.
 
-#### Limitations
+#### Common configurations: Make `#[must_use]` lints warn-only
 
-Currently, the configuration can only be read from the new version of the checked crate's Cargo.toml.  If this manifest isn't used (for example, when using the `--current-rustdoc` to use a preexisting rustdoc output instead, it is not possible to configure lints.  Configuration through other means (e.g., CLI flags) could be added in the future if there is a strong demand for them.
+In the default configuration, `cargo-semver-checks` considers it an error to add `#[must_use]` attributes in patch versions.
+The rationale is that such an addition risks introducing new lints in downstream projects, and many projects consider lints as errors and may be broken as a result.
+(Whether that setting is good practice for widespread use or not is outside the scope of `cargo-semver-checks`.)
+
+To downgrade all lints related to `#[must_use]` from error to warnings, add the following lines to the `cargo-semver-checks` configuration in your package or workspace:
+```toml
+function_must_use_added = "warn"
+inherent_method_must_use_added = "warn"
+struct_must_use_added = "warn"
+enum_must_use_added = "warn"
+trait_must_use_added = "warn"
+```
+
+#### Common configurations: Disable `#[must_use]` lints entirely
+
+To skip checking `#[must_use]`-related lints entirely, apply the following configuration to your package or workspace:
+
+```toml
+function_must_use_added = "allow"
+inherent_method_must_use_added = "allow"
+struct_must_use_added = "allow"
+enum_must_use_added = "allow"
+trait_must_use_added = "allow"
+```
+
+#### Implementation details & limitations
+
+When checking a package, `cargo-semver-checks` uses the manifest of the current subject's `Cargo.toml` file (plus its workspace configuration, if opted in).
+
+Configuration set in the _baseline version_ of the package (the version being compared _against_, such as an existing version published on crates.io) is not read and has no effect. This is because when publishing a new version, it makes sense to use the new version's configuration instead of any prior configuration.
+
+When the `--manifest-path` option is used to specify the subject package's `Cargo.toml` file, that's also the file from which configuration is loaded. If that CLI flag is not specified, `cargo-semver-checks` will by default attempt to find and use a `Cargo.toml` file that belongs to the current directory.
+
+If `cargo-semver-checks` is executed in a way that skips manifests entirely (such as the `--current-rustdoc` flag), it is currently not possible to configure lints. Interest in, and progress toward resolving this limitation is tracked in [this issue](https://github.com/obi1kenobi/cargo-semver-checks/issues/827).
 
 ### Visual Design
 
