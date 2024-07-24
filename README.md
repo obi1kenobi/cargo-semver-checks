@@ -279,7 +279,7 @@ As a reminder, a "lint" or "check" is a rule in `cargo-semver-checks` that looks
 
 Lints may be configured in two ways:
 - **lint level:** When a lint finds issues, the lint level controls how `cargo-semver-checks` responds. The `deny` level makes the lint a hard error: `cargo-semver-checks` will exit with an error and will require a version bump to resolve. The `warn` level will print a warning describing the issue, but will not cause `cargo-semver-checks` to exit with an error code — meaning it _will not_ block CI runs. The `allow` level means the findings of the lint should be silently ignored, so the check doesn't even need to be run.
-- **required update:** This set the kind of version bump this check should require (for `deny`-level) or suggest (for `warn`) when it spots an issue. For example, the `function_missing` lint is `major` by default, so if a public function is removed between versions, the version needs a major version bump (e.g., 1.2.3 to 2.0.0 or 0.5.2 to 0.6.0). This can be configured to `major` or `minor` (1.2.3 to 1.3.0 or 0.5.2 to 0.5.3). There is no "patch" setting since that is equivalent to setting an `allow` lint level.
+- **required update:** This sets the kind of version bump this check should require (for `deny`-level) or suggest (for `warn`) when it spots an issue. For example, the `function_missing` lint is `major` by default, so if a public function is removed between versions, the version needs a major version bump (e.g., 1.2.3 to 2.0.0 or 0.5.2 to 0.6.0). This can be configured to `major` or `minor` (1.2.3 to 1.3.0 or 0.5.2 to 0.5.3). There is no "patch" setting since that is equivalent to setting an `allow` lint level.
 
 To configure the level and/or required update for a lint, first find its name. This will be in `snake_case` and is reported in the CLI on errors/warnings, and can also be found as the file name in the [lints folder](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/src/lints).
 
@@ -312,7 +312,7 @@ If we wanted to configure other lints simultaneously, we could add their configu
 
 #### Example: Changing the SemVer requirement for a lint
 
-Say we instead wanted to mandate a major version bump if `#[must_added]` is added.
+Say we instead wanted to mandate a major version bump if `#[must_use]` is added.
 
 We'd add the following to our package's `Cargo.toml` file:
 ```toml
@@ -344,7 +344,7 @@ Then, to opt into the workspace configuration in individual packages, add either
 workspace = true
 ```
 
-or, if your workspace already configures workspace-level lints (e.g. for clippy) at `[workspace.lint]`,
+or, if your workspace already configures workspace-level lints (e.g. for clippy) at `[workspace.lints]`,
 
 ```toml
 [lints]
@@ -433,7 +433,7 @@ Configuration set in the _baseline version_ of the package (the version being co
 
 When the `--manifest-path` option is used to specify the subject package's `Cargo.toml` file, that's also the file from which configuration is loaded. If that CLI flag is not specified, `cargo-semver-checks` will by default attempt to find and use a `Cargo.toml` file that belongs to the current directory.
 
-If `cargo-semver-checks` is executed in a way that skips manifests entirely (such as the `--current-rustdoc` flag), it is currently not possible to configure lints. Interest in, and progress toward resolving this limitation is tracked in [this issue](https://github.com/obi1kenobi/cargo-semver-checks/issues/827).
+If `cargo-semver-checks` is executed in a way that skips reading the current manifest (such as with the `--current-rustdoc` flag), it is currently not possible to configure lints. Interest in, and progress toward resolving this limitation is tracked in [this issue](https://github.com/obi1kenobi/cargo-semver-checks/issues/827).
 
 ### Visual Design
 
