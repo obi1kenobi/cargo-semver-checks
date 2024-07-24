@@ -134,16 +134,28 @@ jobs:
         with:
           workspaces: 'semver'
 
+      # Ensure we include all new non-default features here explicitly, except for
+      # pass-through mutually-exclusive features from our dependencies such as:
+      # https://github.com/obi1kenobi/cargo-semver-checks/pull/824
+      #
+      # Ideally, one day we'd be able to do something like "`--all-features` except feature X":
+      # https://github.com/rust-lang/cargo/issues/3126
       - name: cargo clippy
-        run: cargo clippy --manifest-path semver/Cargo.toml --workspace --all-features --all-targets --no-deps -- -D warnings --allow deprecated
+        run: cargo clippy --manifest-path semver/Cargo.toml --workspace --all-targets --no-deps -- -D warnings --allow deprecated
 
       - name: cargo fmt
         run: cargo fmt --manifest-path semver/Cargo.toml -- --check
 
+      # Ensure we include all new non-default features here explicitly, except for
+      # pass-through mutually-exclusive features from our dependencies such as:
+      # https://github.com/obi1kenobi/cargo-semver-checks/pull/824
+      #
+      # Ideally, one day we'd be able to do something like "`--all-features` except feature X":
+      # https://github.com/rust-lang/cargo/issues/3126
       - name: cargo doc
         env:
           RUSTDOCFLAGS: -D warnings
-        run: cargo doc --manifest-path semver/Cargo.toml --workspace --all-features --no-deps --document-private-items
+        run: cargo doc --manifest-path semver/Cargo.toml --workspace --no-deps --document-private-items
 
   rust-tests:
     name: Run tests
