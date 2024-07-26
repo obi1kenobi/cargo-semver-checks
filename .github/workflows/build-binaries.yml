@@ -1,0 +1,59 @@
+name: Build binaries
+
+on:
+  workflow_call:
+    inputs:
+      publish-tag:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      publish-tag:
+        required: true
+        type: string
+
+concurrency:
+  group: build-binaries
+
+env:
+  RUST_BACKTRACE: 1
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-and-upload-binary:
+    name: Build ${{ matrix.target }}
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-gnu
+          - target: aarch64-unknown-linux-musl
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-unknown-linux-gnu
+          - target: x86_64-unknown-linux-musl
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Upload binary
+        uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: cargo-semver-checks
+          target: ${{ matrix.target }}
+          ref: refs/tags/${{ inputs.publish-tag }}
+          tar: all
+          zip: windows
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 1
+          CARGO_PROFILE_RELEASE_LTO: true
