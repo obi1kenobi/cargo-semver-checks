@@ -10,6 +10,18 @@
             "struct_name": String("StructF"),
         },
     ],
+    "./test_crates/inherent_method_now_doc_hidden/": [
+        {
+            "path": List([
+                String("inherent_method_now_doc_hidden"),
+                String("struct_and_inherent_method_now_doc_hidden"),
+                String("Foo"),
+            ]),
+            "span_begin_line": Uint64(5),
+            "span_filename": String("src/struct_and_inherent_method_now_doc_hidden.rs"),
+            "struct_name": String("Foo"),
+        },
+    ],
     "./test_crates/struct_now_doc_hidden/": [
         {
             "path": List([
