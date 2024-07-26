@@ -61,5 +61,5 @@ SemverQuery(
         "true": true
     },
     error_message: "A method or associated fn is now #[doc(hidden)], removing it from the crate's public API.",
-    per_result_error_template: Some("method or associated fn {{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{name}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
