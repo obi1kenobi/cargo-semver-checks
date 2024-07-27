@@ -19,11 +19,8 @@ impl S {
     }
 }
 
-// TODO: https://github.com/obi1kenobi/cargo-semver-checks/issues/624
-// Uncomment once the project drops support for Rust < 1.75
-//
-// #[allow(async_fn_in_trait)]
-// pub trait Trait {
-//     async fn switches_to_return_impl();
-//     fn switches_to_async() -> impl Future;
-// }
+#[allow(async_fn_in_trait)]
+pub trait Trait {
+    async fn switches_to_return_impl();
+    fn switches_to_async() -> impl Future;
+}
