@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "inherent_method_now_doc_hidden"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

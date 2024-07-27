@@ -1,0 +1,65 @@
+SemverQuery(
+    id: "inherent_method_now_doc_hidden",
+    human_readable_name: "inherent method #[doc(hidden)] added",
+    description: "A method or associated fn is now marked #[doc(hidden)] and is thus no longer part of the public API.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html#hidden"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
+                                method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                method_visibility: visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "!=", value: ["$true"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true
+    },
+    error_message: "A method or associated fn is now #[doc(hidden)], removing it from the crate's public API.",
+    per_result_error_template: Some("{{name}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+)
