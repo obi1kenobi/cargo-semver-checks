@@ -9,6 +9,7 @@ Lint your crate API changes for semver violations.
 - [Quick Start](#quick-start)
 - [FAQ](#faq)
 - [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
 - [Contributing](https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md)
 
 ## Quick Start
@@ -20,11 +21,17 @@ $ cargo install cargo-semver-checks --locked
 $ cargo semver-checks
 ```
 
-Or use as a [GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action) (used in .github/workflows/ci.yml in this repo):
+Or use as a [GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-action) (used in `.github/workflows/ci.yml` in this repo):
 
 ```yaml
 - name: Check semver
   uses: obi1kenobi/cargo-semver-checks-action@v2
+```
+
+Or if you use [`cargo-binstall`](https://github.com/cargo-bins/cargo-binstall), which will download prebuilt binaries instead of compiling from scratch:
+
+```sh
+$ cargo binstall cargo-semver-checks
 ```
 
 ![image](https://user-images.githubusercontent.com/2348618/180127698-240e4bed-5581-4cbd-9f47-038affbc4a3e.png)
@@ -434,6 +441,22 @@ Configuration set in the _baseline version_ of the package (the version being co
 When the `--manifest-path` option is used to specify the subject package's `Cargo.toml` file, that's also the file from which configuration is loaded. If that CLI flag is not specified, `cargo-semver-checks` will by default attempt to find and use a `Cargo.toml` file that belongs to the current directory.
 
 If `cargo-semver-checks` is executed in a way that skips reading the current manifest (such as with the `--current-rustdoc` flag), it is currently not possible to configure lints. Interest in, and progress toward resolving this limitation is tracked in [this issue](https://github.com/obi1kenobi/cargo-semver-checks/issues/827).
+
+## Troubleshooting
+
+This section documents common issues and the best ways to resolve them.
+
+### Running `cargo install cargo-semver-checks --locked` produces an error
+
+**Recommendation**: use [`cargo-binstall`](https://github.com/cargo-bins/cargo-binstall) to download a prebuilt binary if one is available for your platform, rather than compiling from scratch.
+
+Specific errors and their resolutions:
+- ["error: failed to run custom build command for `libz-ng-sys vX.Y.Z`"](https://github.com/obi1kenobi/cargo-semver-checks/issues/841)
+  - **Preferred resolution**: use a prebuilt binary to avoid this problem entirely.
+  - This error is caused by missing `cmake` on your system, which is required by a transitive dependency of `cargo-semver-checks`. `cargo` does not currently offer a mechanism for such a binary dependency to be declared as required, nor automatically installed when needed.
+  - You can usually install it via a command like `apt install cmake` or `brew install cmake`, depending on your platform.
+
+***
 
 ### Visual Design
 
