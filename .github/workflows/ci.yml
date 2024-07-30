@@ -319,8 +319,8 @@ jobs:
     needs:
       - build-binary
     env:
-      OLDER_RUST: "1.74"  # Rust 1.74 uses rustdoc v27
-      NEWER_RUST: "1.77"  # Rust 1.77 uses rustdoc v28
+      OLDER_RUST: "1.77"  # Rust 1.77 uses rustdoc v28
+      NEWER_RUST: "1.80"  # Rust 1.80 uses rustdoc v30
     steps:
       - name: Put env vars in outputs
         id: vars
