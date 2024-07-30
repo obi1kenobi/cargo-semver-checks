@@ -15,9 +15,13 @@ Lint your crate API changes for semver violations.
 ## Quick Start
 
 ```sh
+# If you already use `cargo-binstall` for faster tool installations:
+$ cargo binstall cargo-semver-checks
+
+# Otherwise:
 $ cargo install cargo-semver-checks --locked
 
-# Check whether it's safe to release the new version:
+# Lint a new release for SemVer breakage before `cargo publish`:
 $ cargo semver-checks
 ```
 
@@ -26,12 +30,6 @@ Or use as a [GitHub Action](https://github.com/obi1kenobi/cargo-semver-checks-ac
 ```yaml
 - name: Check semver
   uses: obi1kenobi/cargo-semver-checks-action@v2
-```
-
-Or if you use [`cargo-binstall`](https://github.com/cargo-bins/cargo-binstall), which will download prebuilt binaries instead of compiling from scratch:
-
-```sh
-$ cargo binstall cargo-semver-checks
 ```
 
 ![image](https://user-images.githubusercontent.com/2348618/180127698-240e4bed-5581-4cbd-9f47-038affbc4a3e.png)
