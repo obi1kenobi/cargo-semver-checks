@@ -31,6 +31,17 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
                         union_name: name @output
 
+
+                        # It's possible that both the union and its field became `#[doc(hidden)]`.
+                        # This is a rare case where we don't consider the lint on the field
+                        # to be a duplicate lint of the one on the union.
+                        #
+                        # Doc-hiddenness on the union means we can't legally *name* it
+                        # (i.e. import & use it). But if an existing public API returns this union,
+                        # its pub fields can still be public API without naming the union's type.
+                        #
+                        # This is why we don't check whether the union's path is `public_api`
+                        # in this branch of the query.
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
                         }
