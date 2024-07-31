@@ -1,0 +1,67 @@
+SemverQuery(
+    id: "union_pub_field_now_doc_hidden",
+    human_readable_name: "pub union field is now #[doc(hidden)]",
+    description: "A pub union field is now marked #[doc(hidden)] and is no longer part of the public API.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html#hidden"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        field {
+                            field_name: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        union_name: name @output
+                        # It's possible that both the union and its field became `#[doc(hidden)]`.
+                        # This is a rare case where we don't consider the lint on the field
+                        # to be a duplicate lint of the one on the union.
+                        #
+                        # Doc-hiddenness on the union means we can't legally *name* it
+                        # (i.e. import & use it). But if an existing public API returns this union,
+                        # its pub fields can still be public API without naming the union's type.
+                        #
+                        # This is why we don't check whether the union's path is `public_api`
+                        # in this branch of the query.
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        field {
+                            name @filter(op: "=", value: ["%field_name"])
+                            public_api_eligible @filter(op: "!=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A pub field of a pub union is now marked #[doc(hidden)] and is no longer part of the public API.",
+    per_result_error_template: Some("field {{union_name}}.{{field_name}} in file {{span_filename}}:{{span_begin_line}}"),
+)

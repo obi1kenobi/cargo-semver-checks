@@ -802,6 +802,7 @@ add_lints!(
     union_field_missing,
     union_missing,
     union_now_doc_hidden,
+    union_pub_field_now_doc_hidden,
     unit_struct_changed_kind,
     variant_marked_non_exhaustive,
 );
