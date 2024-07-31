@@ -8,7 +8,7 @@
                 String("UnionToMustUseUnion"),
             ]),
             "span_begin_line": Uint64(5),
-            "span_filename": String("src\\lib.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
         {
@@ -19,7 +19,7 @@
                 String("UnionToMustUseMessageUnion"),
             ]),
             "span_begin_line": Uint64(10),
-            "span_filename": String("src\\lib.rs"),
+            "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
     ],
