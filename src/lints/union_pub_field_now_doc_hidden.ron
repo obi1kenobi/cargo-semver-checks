@@ -30,8 +30,6 @@ SemverQuery(
                     ... on Union {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         union_name: name @output
-
-
                         # It's possible that both the union and its field became `#[doc(hidden)]`.
                         # This is a rare case where we don't consider the lint on the field
                         # to be a duplicate lint of the one on the union.
