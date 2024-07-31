@@ -801,6 +801,7 @@ add_lints!(
     type_marked_deprecated,
     union_field_missing,
     union_missing,
+    union_must_use_added,
     union_now_doc_hidden,
     union_pub_field_now_doc_hidden,
     unit_struct_changed_kind,

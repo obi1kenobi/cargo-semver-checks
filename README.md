@@ -416,6 +416,7 @@ inherent_method_must_use_added = "warn"
 struct_must_use_added = "warn"
 enum_must_use_added = "warn"
 trait_must_use_added = "warn"
+union_must_use_added = "warn"
 ```
 
 #### Common configurations: Disable `#[must_use]` lints entirely
@@ -428,6 +429,7 @@ inherent_method_must_use_added = "allow"
 struct_must_use_added = "allow"
 enum_must_use_added = "allow"
 trait_must_use_added = "allow"
+union_must_use_added = "allow"
 ```
 
 #### Implementation details & limitations
