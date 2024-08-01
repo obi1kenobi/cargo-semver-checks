@@ -4,7 +4,6 @@ SemverQuery(
     description: "A union has been marked with #[must_use].",
     required_update: Minor,
     lint_level: Deny,
-
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute"),
     query: r#"
     {
