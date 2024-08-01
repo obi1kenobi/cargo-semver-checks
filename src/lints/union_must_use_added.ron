@@ -1,0 +1,64 @@
+SemverQuery(
+    id: "union_must_use_added",
+    human_readable_name: "union #[must_use] added",
+    description: "A union has been marked with #[must_use].",
+    required_update: Minor,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        attribute {
+                            new_attr: raw_attribute @output
+                            content {
+                                base @filter(op: "=", value: ["$must_use"])
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$must_use"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "must_use": "must_use",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A union is now #[must_use]. Downstream crates that did not use its value will get a compiler lint.",
+    per_result_error_template: Some("union {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)
