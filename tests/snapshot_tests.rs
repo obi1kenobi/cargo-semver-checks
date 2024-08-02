@@ -39,6 +39,7 @@ use serde::Serialize;
 ///
 /// Typical workflow: run `CommandOutput::new` with a `builder` that adds
 /// args to the command, use `insta::assert_yaml_snapshot!(&output)`.
+#[allow(dead_code)] // TODO
 #[derive(Debug, Serialize)]
 struct CommandOutput {
     exit_code: Option<i32>,
@@ -51,6 +52,7 @@ impl CommandOutput {
     ///
     /// Use the `builder` parameter to customize the command (e.g., to add
     /// arguments to the invocation of the command)
+    #[allow(dead_code)] // TODO
     #[must_use]
     fn new(builder: impl FnOnce(&mut Command) -> &mut Command) -> Self {
         let mut cmd = Command::cargo_bin("cargo-semver-checks")
