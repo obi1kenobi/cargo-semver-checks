@@ -21,9 +21,9 @@
 //!
 //! # Adding a new test
 //!
-//! To add a new test, typically you will want to use `CommandOutput::new` with
-//! a `builder` that adds arguments (especially `--manifest-path` and `--baseline-root`).
-//! Then, call [`insta::assert_yaml_snapshot!`] with the `output`.
+//! To add a new test, typically you will want to use `create_command`
+//! and add arguments (especially `--manifest-path` and `--baseline-root`).
+//! Then, call [`assert_cmd_snapshot!`] with the command.
 //!
 //! Then run `cargo test --test snapshot_tests`.  The new test should fail, as
 //! there is no snapshot to compare to.  Review the output with `cargo insta review`,
@@ -31,45 +31,19 @@
 //! `cargo-insta`)
 use std::process::Command;
 
-use assert_cmd::cargo::CommandCargoExt;
-use serde::Serialize;
+#[allow(unused_imports)] // TODO
+use insta_cmd::assert_cmd_snapshot;
 
-/// Structure to serialize the result of running `cargo-semver-checks`
-/// to be tested with insta.
-///
-/// Typical workflow: run `CommandOutput::new` with a `builder` that adds
-/// args to the command, use `insta::assert_yaml_snapshot!(&output)`.
+/// Helper function to create a [`Command`] to run `cargo-semver-checks`
+/// for snapshot testing with `assert_cmd_snapshot!`
 #[allow(dead_code)] // TODO
-#[derive(Debug, Serialize)]
-struct CommandOutput {
-    exit_code: Option<i32>,
-    stderr: String,
-    stdout: String,
-}
+fn create_command() -> Command {
+    let mut cmd = Command::new(insta_cmd::get_cargo_bin("cargo-semver-checks"));
 
-impl CommandOutput {
-    /// Creates a new `CommandOutput` instance by running `cargo semver-checks`.
-    ///
-    /// Use the `builder` parameter to customize the command (e.g., to add
-    /// arguments to the invocation of the command)
-    #[allow(dead_code)] // TODO
-    #[must_use]
-    fn new(builder: impl FnOnce(&mut Command) -> &mut Command) -> Self {
-        let mut cmd = Command::cargo_bin("cargo-semver-checks")
-            .expect("cargo semver-checks binary not found");
+    cmd.arg("semver-checks");
+    // We don't want backtraces in our snapshot, as those may change the
+    // output but not affect the behavior of the program.
+    cmd.env("RUST_BACKTRACE", "0");
 
-        cmd.arg("semver-checks");
-        // We don't want backtraces in our snapshot, as those may change the
-        // output but not affect the behavior of the program.
-        cmd.env("RUST_BACKTRACE", "0");
-
-        builder(&mut cmd);
-
-        let output = cmd.output().expect("executing command failed");
-        Self {
-            exit_code: output.status.code(),
-            stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
-            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
-        }
-    }
+    cmd
 }
