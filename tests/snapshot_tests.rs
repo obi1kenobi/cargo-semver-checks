@@ -18,7 +18,7 @@
 //! Alternatively, if you can't use `cargo-insta`, review the changed files
 //! in the `test_outputs/snapshot_test/ directory by moving `{name}.snap.new` to
 //! `{name}.snap` to update the snapshot.  To update all changed tests,
-//! run `INSTA_UPDATE=always cargo test --lib snapshot_tests`
+//! run `INSTA_UPDATE=always cargo test --test snapshot_tests`
 //!
 //! # Adding a new test
 //!
