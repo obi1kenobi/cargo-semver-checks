@@ -9,6 +9,9 @@ mod rustdoc_gen;
 mod templating;
 mod util;
 
+#[cfg(test)]
+mod snapshot_tests;
+
 use anyhow::Context;
 use cargo_metadata::PackageId;
 use clap::ValueEnum;
