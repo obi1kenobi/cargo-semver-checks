@@ -59,6 +59,9 @@ impl CommandOutput {
             .expect("cargo semver-checks binary not found");
 
         cmd.arg("semver-checks");
+        // We don't want backtraces in our snapshot, as those may change the
+        // output but not affect the behavior of the program.
+        cmd.env("RUST_BACKTRACE", "0");
 
         builder(&mut cmd);
 
