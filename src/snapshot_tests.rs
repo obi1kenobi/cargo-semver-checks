@@ -43,6 +43,8 @@ use std::{
 use cargo_semver_checks::{Check, GlobalConfig};
 use clap::Parser as _;
 
+use crate::Cargo;
+
 /// Helper struct to implement [`Write + 'static`] on a shared buffer.  Single-threaded
 /// only, perform write actions then call `StaticWriter::try_into_buffer()` to read.
 #[derive(Debug, Default, Clone)]
@@ -171,14 +173,16 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
 /// targets should be an error.
 #[test]
 fn workspace_no_lib_targets_error() {
-    let mut cmd = create_command();
-    cmd.args([
-        "--manifest-path",
-        "test_crates/manifest_tests/no_lib_targets/new",
-        "--baseline-root",
-        "test_crates/manifest_tests/no_lib_targets/old",
-        "--workspace",
-    ]);
-
-    assert_cmd_snapshot!(cmd);
+    assert_integration_test(
+        "workspace_no_lib_targets",
+        &[
+            "cargo",
+            "semver-checks",
+            "--manifest-path",
+            "test_crates/manifest_tests/no_lib_targets/new",
+            "--baseline-root",
+            "test_crates/manifest_tests/no_lib_targets/old",
+            "--workspace",
+        ],
+    );
 }
