@@ -7,6 +7,9 @@ use cargo_semver_checks::{
 };
 use clap::{Args, Parser, Subcommand};
 
+#[cfg(test)]
+mod snapshot_tests;
+
 fn main() {
     human_panic::setup_panic!();
 
