@@ -9,7 +9,7 @@ repository = "https://github.com/obi1kenobi/cargo-semver-checks"
 readme = "./README.md"
 keywords = ["semver", "linter", "check", "crate", "cargo"]
 categories = ["command-line-utilities", "development-tools::cargo-plugins"]
-rust-version = "1.74"
+rust-version = "1.77"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
