@@ -40,12 +40,14 @@ body:
     validations:
       required: true
   - type: textarea
+    id: sys-info
     attributes:
       label: "Generated System Information"
       description: "Run `cargo semver-checks --bugreport` and copy-paste the output here."
     validations:
       required: true
   - type: textarea
+    id: build-config
     attributes:
       label: "Build Configuration"
       description: "Any local [Rust build configuration](https://doc.rust-lang.org/cargo/reference/config.html) in config.toml files, or in env vars prefixed with `CARGO_`? Paste them here, if you have any."
