@@ -46,5 +46,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "Trait is no longer object safe, which breaks `dyn Trait` usage.",
-    per_result_error_template: Some("trait {{trait_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("trait {{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
