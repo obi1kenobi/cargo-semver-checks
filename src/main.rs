@@ -2,7 +2,7 @@
 
 use std::{env, path::PathBuf};
 
-use anstyle::{Color, Reset, Style};
+use cargo_config2::Config;
 use cargo_semver_checks::{
     GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
 };
@@ -139,9 +139,7 @@ fn configure_color(cli_choice: Option<clap::ColorChoice>) {
 
 fn print_issue_url() {
     use bugreport::{bugreport, collector::*, format::Markdown};
-    let false_negative_url: &str = "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?labels=A-lint%2CC-enhancement&template=2-false-negative.yml";
-    let false_positive_url: &str = "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?labels=C-bug%2CA-lint&template=1-false-positive.yml";
-    let other_bug: &str = "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?labels=C-bug&template=3-bug-report.yml";
+    let other_bug_url: &str = "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?labels=C-bug&template=3-bug-report.yml";
 
     let bug_report = bugreport!()
         .info(SoftwareVersion::default())
@@ -152,24 +150,22 @@ fn print_issue_url() {
         .format::<Markdown>();
 
     let bug_report_url: String = urlencoding::encode(&bug_report).into_owned();
+    let cargo_config = match Config::load() {
+        Ok(c) => toml::to_string(&c).unwrap_or_else(|s| {
+            println!("Error serializing cargo build configuration: {}", s);
+            String::default()
+        }),
+        Err(e) => {
+            println!("Error loading cargo build configuration: {}", e);
+            String::default()
+        }
+    };
+
+    let cargo_config_url: String = urlencoding::encode(&cargo_config).into_owned();
 
     println!(
-        "{}",
-        format!(
-            "Please file a bug report at one of the following URLs:\n\n\
-            {}- False negative:{} {}sysinfo={bug_report_url}\n\
-            {}- False positive:{} {}sysinfo={bug_report_url}\n\
-            {}- Other bug:{} {}sysinfo={bug_report_url}\n\n",
-            Style::new().fg_color(Some(Color::Ansi(anstyle::AnsiColor::Cyan))),
-            Reset,
-            false_negative_url,
-            Style::new().fg_color(Some(Color::Ansi(anstyle::AnsiColor::Cyan))),
-            Reset,
-            false_positive_url,
-            Style::new().fg_color(Some(Color::Ansi(anstyle::AnsiColor::Cyan))),
-            Reset,
-            other_bug
-        )
+        "Please file a bug report:\n\n{}&sys-info={}&build-config={}",
+        other_bug_url, bug_report_url, cargo_config_url
     );
 }
 
