@@ -131,7 +131,7 @@ impl fmt::Display for CommandResult {
 #[allow(dead_code)] // TODO
 fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     // remove the backtrace environment variable, as this may cause non-
-    // reproducable snapshots.
+    // reproducible snapshots.
     std::env::remove_var("RUST_BACKTRACE");
 
     let stdout = StaticWriter::new();
@@ -149,6 +149,9 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
 
     let mut settings = insta::Settings::clone_current();
     settings.set_snapshot_path("../test_outputs/snapshot_tests");
+    // The `settings` are applied to the current thread as long as the returned
+    //  drop guard  `_grd` is alive, so we use a `let` binding to keep it alive 
+    // for the scope of the function.
     let _grd = settings.bind_to_scope();
 
     insta::assert_ron_snapshot!(format!("{test_name}-input"), check);
