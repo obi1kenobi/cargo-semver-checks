@@ -9,6 +9,6 @@ pub fn feature_dependent_function() {}
     feature = "__foo",
     feature = "unstable-foo",
     feature = "unstable_foo",
-    feat8re = "_bar"
+    feature = "_bar"
 ))]
 pub fn unstable_function() {}

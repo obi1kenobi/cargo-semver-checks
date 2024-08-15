@@ -1,4 +1,3 @@
-#![cfg(test)]
 //! Snapshot tests of `cargo semver-checks` runs to ensure
 //! that we define how we handle edge cases.
 //!
@@ -15,20 +14,28 @@
 //! in the `cargo insta review` CLI.  Make sure to commit the
 //! `test_outputs/snapshot_tests/{name}.snap` file in your PR.
 //!
+//! We check **multiple stages** of the `cargo-semver-checks` execution of a given command
+//! (currently two: the parsed input [`Check`](cargo_semver_checks::Check) and the output
+//! of running [`check_release`](cargo_semver_checks::Check::check_release)).  This means
+//! you may have to run `cargo test` and `cargo insta review` multiple times when adding or
+//! updating a new test if both the input and output change.
+//!
 //! Alternatively, if you can't use `cargo-insta`, review the changed files
 //! in the `test_outputs/snapshot_test/ directory by moving `{name}.snap.new` to
 //! `{name}.snap` to update the snapshot.  To update all changed tests,
-//! run `INSTA_UPDATE=always cargo test --test snapshot_tests`
+//! run `INSTA_UPDATE=always cargo test --bin cargo-semver-checks snapshot_tests`
 //!
 //! # Adding a new test
 //!
-//! To add a new test, typically you will want to use the [`integration_test`] helper function
+//! To add a new test, typically you will want to use the [`assert_integration_test`] helper function
 //! with a string invocation of `cargo semver-checks ...` (typically including the `--manifest-path`
-//! and `--baseline-root` arguments to specify the location of the current/baseline test crate path,
-//! usually in the `test_crates/manifest_tests` directory).  Add a new function marked `#[test]` that
-//! calls this function with the prefix (usually the function name) and the arguments.
+//! and `--baseline-root` arguments to specify the location of the current/baseline test crate path:
+//! in the `test_crates` directory if the test can use cached generated rustdoc files, or in the
+//! `test_crates/manifest_tests` directory if the test relies on `Cargo.toml` manifest files).
+//! Add a new function marked `#[test]` that calls [`assert_integration_test`] with
+//! the prefix (usually the function name) and the arguments to `cargo semver-checks`
 //!
-//! Then run `cargo test --bin cargo_semver_checks snapshot_tests`.  The new test should fail, as
+//! Then run `cargo test --bin cargo-semver-checks snapshot_tests`.  The new test should fail, as
 //! there is no snapshot to compare to.  Review the output with `cargo insta review`,
 //! and accept it when the captured behavior is correct. (see above if you can't use
 //! `cargo-insta`)
@@ -118,10 +125,9 @@ impl fmt::Display for CommandResult {
 /// # Arguments
 ///
 /// - `test_name` is the file prefix for snapshot tests to be saved in as
-/// `test_outputs/snapshot_tests/{test_name}-{"args" | "output"}.snap
+///   `test_outputs/snapshot_tests/{test_name}-{"args" | "output"}.snap
 /// - `invocation` is a list of arguments of the command line invocation,
-/// starting with `["cargo", "semver-checks"]`.
-#[allow(dead_code)] // TODO
+///   starting with `["cargo", "semver-checks"]`.
 fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     // remove the backtrace environment variable, as this may cause non-
     // reproducable snapshots.
@@ -130,7 +136,7 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     let stdout = StaticWriter::new();
     let stderr = StaticWriter::new();
 
-    let Cargo::SemverChecks(arguments) = Cargo::parse_from(invocation.into_iter());
+    let Cargo::SemverChecks(arguments) = Cargo::parse_from(invocation);
 
     let mut config = GlobalConfig::new();
 

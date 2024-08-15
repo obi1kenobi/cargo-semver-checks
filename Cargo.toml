@@ -1,6 +1,6 @@
 [package]
 name = "cargo-semver-checks"
-version = "0.33.0"
+version = "0.34.0"
 edition = "2021"
 authors = ["Predrag Gruevski <obi1kenobi82@gmail.com>"]
 license = "Apache-2.0 OR MIT"
@@ -9,19 +9,13 @@ repository = "https://github.com/obi1kenobi/cargo-semver-checks"
 readme = "./README.md"
 keywords = ["semver", "linter", "check", "crate", "cargo"]
 categories = ["command-line-utilities", "development-tools::cargo-plugins"]
-rust-version = "1.74"
+rust-version = "1.77"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 trustfall = "0.7.1"
-trustfall_rustdoc = { version = "0.15.2", default-features = false, features = [
-    "v27",
-    "v28",
-    "v29",
-    "v30",
-    "v32",
-] }
+trustfall_rustdoc = { version = "0.15.3", default-features = false, features = ["v27", "v28", "v29", "v30", "v32", "v33"] }
 clap = { version = "4.0.0", features = ["derive", "cargo"] }
 serde_json = "1.0.82"
 anyhow = "1.0.58"
@@ -37,10 +31,7 @@ clap-verbosity-flag = "2.0.0"
 log = "0.4.17"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
-gix = { version = "0.63", default-features = false, features = [
-    "max-performance",
-    "revision",
-] }
+gix = { version = "0.63", default-features = false, features = ["max-performance", "revision"] }
 tame-index = { version = "0.12", features = ["sparse"] }
 
 human-panic = "1.0.3"
