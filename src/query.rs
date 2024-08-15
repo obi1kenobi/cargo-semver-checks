@@ -171,7 +171,7 @@ pub type OverrideMap = BTreeMap<String, QueryOverride>;
 /// Stores a stack of [`OverrideMap`] references such that items towards the top of
 /// the stack (later in the backing `Vec`) have *higher* precedence and override items lower in the stack.
 /// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
-/// at the top of the stack will be used to calculate the effective lint level or required version update.  
+/// at the top of the stack will be used to calculate the effective lint level or required version update.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct OverrideStack(Vec<Arc<OverrideMap>>);
 
@@ -791,6 +791,7 @@ add_lints!(
     trait_method_unsafe_removed,
     trait_missing,
     trait_must_use_added,
+    trait_no_longer_object_safe,
     trait_now_doc_hidden,
     trait_removed_associated_constant,
     trait_removed_associated_type,
