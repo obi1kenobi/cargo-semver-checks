@@ -1,4 +1,3 @@
-#![cfg(test)]
 //! Snapshot tests of `cargo semver-checks` runs to ensure
 //! that we define how we handle edge cases.
 //!
@@ -126,9 +125,9 @@ impl fmt::Display for CommandResult {
 /// # Arguments
 ///
 /// - `test_name` is the file prefix for snapshot tests to be saved in as
-/// `test_outputs/snapshot_tests/{test_name}-{"args" | "output"}.snap
+///   `test_outputs/snapshot_tests/{test_name}-{"args" | "output"}.snap
 /// - `invocation` is a list of arguments of the command line invocation,
-/// starting with `["cargo", "semver-checks"]`.
+///   starting with `["cargo", "semver-checks"]`.
 #[allow(dead_code)] // TODO
 fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     // remove the backtrace environment variable, as this may cause non-
@@ -138,7 +137,7 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     let stdout = StaticWriter::new();
     let stderr = StaticWriter::new();
 
-    let Cargo::SemverChecks(arguments) = Cargo::parse_from(invocation.into_iter());
+    let Cargo::SemverChecks(arguments) = Cargo::parse_from(invocation);
 
     let mut config = GlobalConfig::new();
 
