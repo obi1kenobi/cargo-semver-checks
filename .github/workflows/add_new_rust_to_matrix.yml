@@ -97,6 +97,7 @@ jobs:
           name: ci.yml
           path: .github/workflows/ci.yml
           retention-days: 1
+          if-no-files-found: error
 
   pr-ci-yml:
     if: github.repository_owner == 'obi1kenobi'
