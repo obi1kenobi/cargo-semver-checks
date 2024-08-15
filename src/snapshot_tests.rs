@@ -36,7 +36,6 @@
 //! the prefix (usually the function name) and the arguments to `cargo semver-checks`
 //!
 //! Then run `cargo test --bin cargo-semver-checks snapshot_tests`.  The new test should fail, as
->>>>>>> add-snapshot
 //! there is no snapshot to compare to.  Review the output with `cargo insta review`,
 //! and accept it when the captured behavior is correct. (see above if you can't use
 //! `cargo-insta`)
