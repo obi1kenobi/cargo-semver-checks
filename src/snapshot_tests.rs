@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-#![cfg(test)]
-=======
->>>>>>> add-snapshot
 //! Snapshot tests of `cargo semver-checks` runs to ensure
 //! that we define how we handle edge cases.
 //!
@@ -18,22 +14,6 @@
 //! in the `cargo insta review` CLI.  Make sure to commit the
 //! `test_outputs/snapshot_tests/{name}.snap` file in your PR.
 //!
-<<<<<<< HEAD
-//! Alternatively, if you can't use `cargo-insta`, review the changed files
-//! in the `test_outputs/snapshot_test/ directory by moving `{name}.snap.new` to
-//! `{name}.snap` to update the snapshot.  To update all changed tests,
-//! run `INSTA_UPDATE=always cargo test --test snapshot_tests`
-//!
-//! # Adding a new test
-//!
-//! To add a new test, typically you will want to use the [`integration_test`] helper function
-//! with a string invocation of `cargo semver-checks ...` (typically including the `--manifest-path`
-//! and `--baseline-root` arguments to specify the location of the current/baseline test crate path,
-//! usually in the `test_crates/manifest_tests` directory).  Add a new function marked `#[test]` that
-//! calls this function with the prefix (usually the function name) and the arguments.
-//!
-//! Then run `cargo test --bin cargo_semver_checks snapshot_tests`.  The new test should fail, as
-=======
 //! We check **multiple stages** of the `cargo-semver-checks` execution of a given command
 //! (currently two: the parsed input [`Check`](cargo_semver_checks::Check) and the output
 //! of running [`check_release`](cargo_semver_checks::Check::check_release)).  This means
