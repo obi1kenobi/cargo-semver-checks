@@ -331,6 +331,7 @@ dependencies = [
  "log",
  "predicates",
  "rayon",
+ "regex",
  "ron 0.8.1",
  "rustc_version",
  "semver",
