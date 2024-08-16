@@ -178,8 +178,8 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
 
 /// [#163](https://github.com/obi1kenobi/cargo-semver-checks/issues/163)
 ///
-/// Running `cargo semver-checks --workspace` on a workspace that has library
-/// targets should be an error.
+/// Running `cargo semver-checks --workspace` on a workspace that doesn't
+/// have any library targets should be an error.
 #[test]
 fn workspace_no_lib_targets_error() {
     assert_integration_test(
