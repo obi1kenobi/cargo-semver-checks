@@ -1857,6 +1857,7 @@ dependencies = [
  "console",
  "lazy_static",
  "linked-hash-map",
+ "regex",
  "ron 0.7.1",
  "serde",
  "similar",
