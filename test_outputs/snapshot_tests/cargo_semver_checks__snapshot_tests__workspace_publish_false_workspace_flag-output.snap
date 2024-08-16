@@ -1,0 +1,8 @@
+---
+source: src/snapshot_tests.rs
+expression: result
+---
+success: true
+--- stdout ---
+
+--- stderr ---

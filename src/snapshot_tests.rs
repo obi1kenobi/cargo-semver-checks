@@ -243,3 +243,45 @@ fn workspace_all_publish_false() {
         ],
     );
 }
+
+/// Running `cargo semver-checks` on a workspace with a `publish = false` member,
+/// explicitly including that member with `--package`.  Currently, this executes
+/// `cargo semver-checks`.
+#[test]
+fn workspace_publish_false_explicit() {
+    assert_integration_test(
+        "workspace_publish_false_explicit",
+        &[
+            "cargo",
+            "semver-checks",
+            "--manifest-path",
+            "test_crates/manifest_tests/workspace_all_publish_false/new",
+            "--baseline-root",
+            "test_crates/manifest_tests/workspace_all_publish_false/old",
+            "--package",
+            "a",
+        ],
+    )
+}
+
+/// Running `cargo semver-checks` on a workspace with a `package = false` member,
+/// explicitly including that member with `--package` and also specifying `--workspace`.
+/// Currently, `--workspace` overrides `--package` and the `publish = false` member is not
+/// semver-checked, and `cargo-semver-checks` silently exits 0.
+#[test]
+fn workspace_publish_false_workspace_flag() {
+    assert_integration_test(
+        "workspace_publish_false_workspace_flag",
+        &[
+            "cargo",
+            "semver-checks",
+            "--manifest-path",
+            "test_crates/manifest_tests/workspace_all_publish_false/new",
+            "--baseline-root",
+            "test_crates/manifest_tests/workspace_all_publish_false/old",
+            "--workspace",
+            "--package",
+            "a",
+        ],
+    )
+}
