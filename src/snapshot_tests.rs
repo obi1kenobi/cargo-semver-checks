@@ -195,3 +195,23 @@ fn workspace_no_lib_targets_error() {
         ],
     );
 }
+
+/// [#424](https://github.com/obi1kenobi/cargo-semver-checks/issues/424)
+///
+/// Running `cargo semver-checks --workspace` on a workspace whose members are all
+/// `publish = false`.
+#[test]
+fn workspace_all_publish_false() {
+    assert_integration_test(
+        "workspace_all_publish_false",
+        &[
+            "cargo",
+            "semver-checks",
+            "--manifest-path",
+            "test_crates/manifest_tests/workspace_all_publish_false/new",
+            "--baseline-root",
+            "test_crates/manifest_tests/workspace_all_publish_false/old",
+            "--workspace",
+        ],
+    );
+}
