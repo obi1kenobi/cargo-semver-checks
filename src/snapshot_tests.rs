@@ -151,6 +151,12 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     settings.set_snapshot_path("../test_outputs/snapshot_tests");
     // Turn dynamic time strings like [  0.123s] into [TIME] for reproducibility.
     settings.add_filter(r"\[\s*[\d\.]+s\]", "[TIME]");
+    // Turn total number of checks into [TOTAL] to not fail when new lints are added.
+    settings.add_filter(r"\d+ checks", "[TOTAL] checks");
+    // Similarly, turn the number of passed checks to also not fail when new lints are added.
+    settings.add_filter(r"\d+ pass", "[PASS] pass");
+    // Redact filenames in spans when lints are triggered.
+    settings.add_filter(r"in file [^:]+:", "in file [PATH]:");
 
     // The `settings` are applied to the current thread as long as the returned
     // drop guard  `_grd` is alive, so we use a `let` binding to keep it alive
