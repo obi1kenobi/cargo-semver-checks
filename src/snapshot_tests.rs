@@ -130,7 +130,7 @@ impl fmt::Display for CommandResult {
 ///   starting with `["cargo", "semver-checks"]`.
 fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     // remove the backtrace environment variable, as this may cause non-
-    // reproducable snapshots.
+    // reproducible snapshots.
     std::env::remove_var("RUST_BACKTRACE");
 
     let stdout = StaticWriter::new();
@@ -148,6 +148,9 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
 
     let mut settings = insta::Settings::clone_current();
     settings.set_snapshot_path("../test_outputs/snapshot_tests");
+    // The `settings` are applied to the current thread as long as the returned
+    // drop guard  `_grd` is alive, so we use a `let` binding to keep it alive
+    // for the scope of the function.
     let _grd = settings.bind_to_scope();
 
     insta::assert_ron_snapshot!(format!("{test_name}-input"), check);
@@ -175,8 +178,8 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
 
 /// [#163](https://github.com/obi1kenobi/cargo-semver-checks/issues/163)
 ///
-/// Running `cargo semver-checks --workspace` on a workspace that has library
-/// targets should be an error.
+/// Running `cargo semver-checks --workspace` on a workspace that doesn't
+/// have any library targets should be an error.
 #[test]
 fn workspace_no_lib_targets_error() {
     assert_integration_test(
