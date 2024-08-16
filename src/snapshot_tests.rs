@@ -143,11 +143,15 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     config.set_stdout(Box::new(stdout.clone()));
     config.set_stderr(Box::new(stderr.clone()));
     config.set_color_choice(false);
+    config.set_log_level(arguments.check_release.verbosity.log_level());
 
     let check = Check::from(arguments.check_release);
 
     let mut settings = insta::Settings::clone_current();
     settings.set_snapshot_path("../test_outputs/snapshot_tests");
+    // Turn dynamic time strings like [  0.123s] into [TIME] for reproducibility.
+    settings.add_filter(r"\[\s*[\d\.]+s\]", "[TIME]");
+
     // The `settings` are applied to the current thread as long as the returned
     // drop guard  `_grd` is alive, so we use a `let` binding to keep it alive
     // for the scope of the function.
