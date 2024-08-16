@@ -285,7 +285,7 @@ fn workspace_publish_false_workspace_flag() {
             "--workspace",
             "--package",
             "a",
-            # use verbose mode to show what is being skipped
+            // use verbose mode to show what is being skipped
             "--verbose",
         ],
     )
