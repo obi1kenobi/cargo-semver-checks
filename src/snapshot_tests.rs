@@ -282,6 +282,7 @@ fn workspace_publish_false_workspace_flag() {
             "--workspace",
             "--package",
             "a",
+            "--verbose",
         ],
     )
 }
