@@ -128,7 +128,6 @@ impl fmt::Display for CommandResult {
 ///   `test_outputs/snapshot_tests/{test_name}-{"args" | "output"}.snap
 /// - `invocation` is a list of arguments of the command line invocation,
 ///   starting with `["cargo", "semver-checks"]`.
-#[allow(dead_code)] // TODO
 fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     // remove the backtrace environment variable, as this may cause non-
     // reproducible snapshots.
@@ -175,4 +174,24 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     }));
 
     insta::assert_snapshot!(format!("{test_name}-output"), result);
+}
+
+/// [#163](https://github.com/obi1kenobi/cargo-semver-checks/issues/163)
+///
+/// Running `cargo semver-checks --workspace` on a workspace that doesn't
+/// have any library targets should be an error.
+#[test]
+fn workspace_no_lib_targets_error() {
+    assert_integration_test(
+        "workspace_no_lib_targets",
+        &[
+            "cargo",
+            "semver-checks",
+            "--manifest-path",
+            "test_crates/manifest_tests/no_lib_targets/new",
+            "--baseline-root",
+            "test_crates/manifest_tests/no_lib_targets/old",
+            "--workspace",
+        ],
+    );
 }
