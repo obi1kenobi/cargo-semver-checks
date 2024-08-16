@@ -13,7 +13,7 @@ A publicly-visible function cannot be imported by its prior path. A `pub use` ma
        impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/v0.34.0/src/lints/function_missing.ron
 
 Failed in:
-  function a::should_not_run, previously in file /home/m/dev/cargo-semver-checks/test_crates/manifest_tests/workspace_all_publish_false/old/a/src/lib.rs:4
+  function a::should_not_run, previously in file [PATH]:4
 
 --- stderr ---
      Parsing a v0.1.0 (current)
@@ -21,7 +21,7 @@ Failed in:
      Parsing a v0.1.0 (baseline)
       Parsed [TIME] (baseline)
     Checking a v0.1.0 -> v0.1.0 (no change)
-     Checked [TIME] 80 checks: 79 pass, 1 fail, 0 warn, 0 skip
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 1 fail, 0 warn, 0 skip
 
      Summary semver requires new major version: 1 major and 0 minor checks failed
     Finished [TIME] a
