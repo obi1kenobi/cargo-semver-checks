@@ -44,6 +44,7 @@ use std::{
     cell::RefCell,
     fmt,
     io::{Cursor, Write},
+    path::{Path, PathBuf},
     rc::Rc,
 };
 
@@ -155,8 +156,10 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     settings.add_filter(r"\d+ checks", "[TOTAL] checks");
     // Similarly, turn the number of passed checks to also not fail when new lints are added.
     settings.add_filter(r"\d+ pass", "[PASS] pass");
-    // Redact filenames in spans when lints are triggered.
-    settings.add_filter(r"in file [^:]+:", "in file [PATH]:");
+    // Escape the root path (e.g., in lint spans) for deterministic results in different
+    // build environments.
+    let repo_root = get_root_path();
+    settings.add_filter(&regex::escape(&repo_root.to_string_lossy()), "[ROOT]");
 
     // The `settings` are applied to the current thread as long as the returned
     // drop guard  `_grd` is alive, so we use a `let` binding to keep it alive
@@ -184,6 +187,21 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     }));
 
     insta::assert_snapshot!(format!("{test_name}-output"), result);
+}
+
+/// Helper function to get the root of the source code repository, for
+/// filtering the path in snapshots.
+fn get_root_path() -> PathBuf {
+    let canonicalized = Path::new(file!())
+        .canonicalize()
+        .expect("canonicalization failed");
+    // this file is in `$ROOT/src/snapshot_tests.rs`, so the repo root is two `parent`s up.
+    let repo_root = canonicalized
+        .parent()
+        .and_then(Path::parent)
+        .expect("getting repo root failed");
+
+    repo_root.to_owned()
 }
 
 /// [#163](https://github.com/obi1kenobi/cargo-semver-checks/issues/163)
