@@ -12,16 +12,11 @@ SemverQuery(
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        sealed @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @output @tag
                             public_api @filter(op: "=", value: ["$true"])
-                        }
-
-                        supertrait @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            trait {
-                                importable_path @fold @transform(op: "count") @filter(op: "=", value: ["$zero"])
-                            }
                         }
 
                         method {
@@ -60,7 +55,6 @@ SemverQuery(
     arguments: {
         "true": true,
         "public": "public",
-        "zero": 0,
     },
     error_message: "A publicly-visible trait method is no longer `unsafe`, so implementations must remove the `unsafe` qualifier.",
     per_result_error_template: Some("trait method <{{join \"::\" path}}>::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
