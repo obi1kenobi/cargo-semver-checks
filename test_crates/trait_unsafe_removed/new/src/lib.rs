@@ -12,3 +12,10 @@ trait TraitBecomesPrivateAndSafe {}
 
 // Private trait becomes safe, shouldn't get reported.
 trait PrivateTraitBecomesSafe {}
+
+mod private {
+    pub trait Sealed {}
+}
+
+// Sealed trait, becoming safe doesn't matter since it cannot be implemented downstream.
+pub trait SealedTrait: private::Sealed {}

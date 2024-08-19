@@ -107,9 +107,9 @@ checksum = "69f7f8c3906b62b754cd5326047894316021dcfe5a194c8ea52bdd94934a3457"
 
 [[package]]
 name = "arrayvec"
-version = "0.7.4"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
+checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "assert_cmd"
@@ -289,9 +289,9 @@ dependencies = [
 
 [[package]]
 name = "camino"
-version = "1.1.7"
+version = "1.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0ec6b951b160caa93cc0c7b209e5a3bff7aae9062213451ac99493cd844c239"
+checksum = "8b96ec4966b5813e2c0507c1f86115c8c5abaadc3980879c3424042a02fd1ad3"
 dependencies = [
  "serde",
 ]
@@ -371,9 +371,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.1.11"
+version = "1.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fb8dd288a69fc53a1996d7ecfbf4a20d59065bff137ce7e56bbd620de191189"
+checksum = "72db2f7947ecee9b03b510377e8bb9077afa27176fdbff55c51027e976fdcc48"
 dependencies = [
  "shlex",
 ]
@@ -386,9 +386,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clap"
-version = "4.5.15"
+version = "4.5.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11d8838454fda655dafd3accb2b6e2bea645b9e4078abe84a22ceb947235c5cc"
+checksum = "ed6719fffa43d0d87e5fd8caeab59be1554fb028cd30edc88fc4369b17971019"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -453,9 +453,9 @@ checksum = "cbd0f76e066e64fdc5631e3bb46381254deab9ef1158292f27c8c57e3bf3fe59"
 
 [[package]]
 name = "cmake"
-version = "0.1.50"
+version = "0.1.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a31c789563b815f77f4250caee12365734369f942439b7defd71e18a48197130"
+checksum = "fb1e43aa7fd152b1f968787f7dbcdeb306d1867ff373c69955211876c053f91a"
 dependencies = [
  "cc",
 ]
@@ -1936,9 +1936,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
-version = "0.2.155"
+version = "0.2.157"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97b3888a4aecf77e811145cadf6eef5901f4782c53886191b2f693f24761847c"
+checksum = "374af5f94e54fa97cf75e945cce8a6b201e88a1a07e688b47dfd2a59c66dbd86"
 
 [[package]]
 name = "libredox"
@@ -2715,18 +2715,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.207"
+version = "1.0.208"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5665e14a49a4ea1b91029ba7d3bca9f299e1f7cfa194388ccc20f14743e784f2"
+checksum = "cff085d2cb684faa248efb494c39b68e522822ac0de72ccf08109abde717cfb2"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.207"
+version = "1.0.208"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6aea2634c86b0e8ef2cfdc0c340baede54ec27b1e46febd7f80dffb2aa44a00e"
+checksum = "24008e81ff7613ed8e5ba0cfaf24e2c2f1e5b8a0495711e44fcd4882fca62bcf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2735,9 +2735,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.124"
+version = "1.0.125"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66ad62847a56b3dba58cc891acd13884b9c61138d330c0d7b6181713d4fce38d"
+checksum = "83c8e735a073ccf5be70aa8066aa984eaf2fa000db6c8d0100ae605b366d31ed"
 dependencies = [
  "itoa",
  "memchr",
@@ -2906,9 +2906,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "syn"
-version = "2.0.74"
+version = "2.0.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fceb41e3d546d0bd83421d3409b1460cc7444cd389341a4c880fe7a042cb3d7"
+checksum = "f6af063034fc1935ede7be0122941bafa9bacb949334d090b77ca98b5817c7d9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3066,9 +3066,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.39.2"
+version = "1.39.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "daa4fb1bc778bd6f04cbfc4bb2d06a7396a8f299dc33ea1900cedaa316f467b1"
+checksum = "9babc99b9923bfa4804bd74722ff02c0381021eafa4db9949217e3be8e84fff5"
 dependencies = [
  "backtrace",
  "bytes",
@@ -3205,9 +3205,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "28.0.2"
+version = "28.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "973fcf4a4c1208e4bab5be508c94b3ad96163c9a1cb1f8725a9e2767640a9b94"
+checksum = "30d119e173b5a2c4dd36427eed3848e2057216a52ad42687e91b8b88d1a74acc"
 dependencies = [
  "rustdoc-types 0.24.0",
  "trustfall",
@@ -3215,9 +3215,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "29.0.0"
+version = "29.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96958f676288d0cd2d87dfe7fa4359075a32115c34e1020fe197963a2bd12e6d"
+checksum = "9463afe73e3d9faee02647a82cd55100005e04d7b8abd4c440309ef9a2d4152c"
 dependencies = [
  "rustdoc-types 0.25.0",
  "trustfall",
@@ -3225,9 +3225,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "30.0.0"
+version = "30.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5f8fd58a996a10d24181ca535a7f5bd58d1c1fda128cfa797a70b69a195e445"
+checksum = "96a7cf2c653a3354a291aef83f9c583c56e2017ab8ea55fbb7f7cd49c443846f"
 dependencies = [
  "rustdoc-types 0.26.0",
  "trustfall",
@@ -3235,9 +3235,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "32.0.0"
+version = "32.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93c09d1c910a6c3e6a373f527d2d852f52722e7168a5aad92dc081a381dff1fe"
+checksum = "980b17cea20008d6d3847ae1f1b1ef6459759d41309771995d16220d6499a931"
 dependencies = [
  "rustdoc-types 0.28.1",
  "trustfall",
@@ -3245,9 +3245,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "33.0.0"
+version = "33.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ca9f1a4725bde4a7e2e75074da04bc97ed43dd93ef7d9fa1ea260cd5322bd48"
+checksum = "4c6ad775d6b380591ccbfdb56362f7e76d197ad65c8f906097509389e3117311"
 dependencies = [
  "rustdoc-types 0.29.1",
  "trustfall",
@@ -3283,19 +3283,19 @@ dependencies = [
 
 [[package]]
 name = "trustfall_rustdoc"
-version = "0.15.3"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa422f93935c5ad3cbcd4bd09ecb6ee75f7eaa7b02e51b5185596a13fae019a4"
+checksum = "285db3f0985971888b37632f9b28529ee069c9c941489c7049bf0f456e842c68"
 dependencies = [
  "anyhow",
  "serde",
  "serde_json",
  "trustfall",
- "trustfall-rustdoc-adapter 28.0.2",
- "trustfall-rustdoc-adapter 29.0.0",
- "trustfall-rustdoc-adapter 30.0.0",
- "trustfall-rustdoc-adapter 32.0.0",
- "trustfall-rustdoc-adapter 33.0.0",
+ "trustfall-rustdoc-adapter 28.1.2",
+ "trustfall-rustdoc-adapter 29.1.2",
+ "trustfall-rustdoc-adapter 30.1.2",
+ "trustfall-rustdoc-adapter 32.1.2",
+ "trustfall-rustdoc-adapter 33.1.2",
 ]
 
 [[package]]

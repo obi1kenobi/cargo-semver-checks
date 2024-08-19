@@ -72,6 +72,3 @@ mod private {
 trait Sealed {}
 
 pub trait Unsealed {}
-
-// TODO: Try a sealed trait using a private supertrait
-// https://github.com/rust-lang/rust/issues/119280#issuecomment-1868582786
