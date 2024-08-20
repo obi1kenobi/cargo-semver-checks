@@ -2,6 +2,7 @@
 
 use std::{env, path::PathBuf};
 
+use anstyle::{AnsiColor, Color, Reset, Style};
 use cargo_config2::Config;
 use cargo_semver_checks::{
     GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
@@ -149,23 +150,41 @@ fn print_issue_url() {
         .info(CompileTimeInformation::default())
         .format::<Markdown>();
 
-    let bug_report_url: String = urlencoding::encode(&bug_report).into_owned();
+    println!(
+        "{}System information:{}\n--------------------------\n{bug_report}",
+        Style::new()
+            .bold()
+            .fg_color(Some(Color::Ansi(AnsiColor::Blue))),
+        Reset
+    );
+
+    let bug_report_url = urlencoding::encode(&bug_report);
+
     let cargo_config = match Config::load() {
         Ok(c) => toml::to_string(&c).unwrap_or_else(|s| {
-            println!("Error serializing cargo build configuration: {}", s);
+            eprintln!("Error serializing cargo build configuration: {}", s);
             String::default()
         }),
         Err(e) => {
-            println!("Error loading cargo build configuration: {}", e);
+            eprintln!("Error loading cargo build configuration: {}", e);
             String::default()
         }
     };
 
+    println!(
+        "{}Cargo build configuration:{}\n--------------------------\n{cargo_config}",
+        Style::new()
+            .bold()
+            .fg_color(Some(Color::Ansi(AnsiColor::Blue))),
+        Reset
+    );
+
     let cargo_config_url: String = urlencoding::encode(&cargo_config).into_owned();
 
     println!(
-        "Please file a bug report:\n\n{}&sys-info={}&build-config={}",
-        other_bug_url, bug_report_url, cargo_config_url
+        "{}Please file an Issue on github reporting your bug.\n\
+        Consider adding the diagnostic information above, either manually or automatically through the link below:{}\n\n{}&sys-info={}&build-config={}",
+        Style::new().bold(), Reset, other_bug_url, bug_report_url, cargo_config_url
     );
 }
 
