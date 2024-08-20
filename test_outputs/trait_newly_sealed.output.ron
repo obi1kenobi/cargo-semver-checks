@@ -1,0 +1,25 @@
+{
+ "./test_crates/trait_newly_sealed/": [
+        {
+            "name": String("TraitBecomesSealed"),
+            "path": List([
+                String("trait_newly_sealed"),
+                String("TraitBecomesSealed"),
+            ]),
+            "span_begin_line": Uint64(7),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("TraitMethodBecomesSealed"),
+            "path": List([
+                String("trait_newly_sealed"),
+                String("TraitMethodBecomesSealed"),
+            ]),
+            "span_begin_line": Uint64(13),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}
+

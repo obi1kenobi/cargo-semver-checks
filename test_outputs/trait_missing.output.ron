@@ -181,4 +181,16 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/trait_newly_sealed/": [
+        {
+            "name": String("TraitBecomesPrivateAndSealed"),
+            "path": List([
+                String("trait_newly_sealed"),
+                String("TraitBecomesPrivateAndSealed"),
+            ]),
+            "span_begin_line": Uint64(18),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
 }
