@@ -8,6 +8,7 @@ use cargo_semver_checks::{
     GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
 };
 use clap::{Args, Parser, Subcommand};
+use std::io::Write;
 
 fn main() {
     human_panic::setup_panic!();
@@ -15,9 +16,10 @@ fn main() {
     let Cargo::SemverChecks(args) = Cargo::parse();
 
     configure_color(args.color_choice);
+    let mut config = GlobalConfig::new();
 
     if args.bugreport {
-        print_issue_url();
+        print_issue_url(&mut config);
         std::process::exit(0);
     } else if args.list {
         exit_on_error(true, || {
@@ -85,8 +87,6 @@ fn main() {
         None => args.check_release,
     };
 
-    let mut config = GlobalConfig::new();
-
     config.set_log_level(check_release.verbosity.log_level());
 
     let check: cargo_semver_checks::Check = check_release.into();
@@ -138,7 +138,7 @@ fn configure_color(cli_choice: Option<clap::ColorChoice>) {
     choice.write_global();
 }
 
-fn print_issue_url() {
+fn print_issue_url(config: &mut GlobalConfig) {
     use bugreport::{bugreport, collector::*, format::Markdown};
     let other_bug_url: &str = "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?labels=C-bug&template=3-bug-report.yml";
 
@@ -150,13 +150,15 @@ fn print_issue_url() {
         .info(CompileTimeInformation::default())
         .format::<Markdown>();
 
-    println!(
+    writeln!(
+        config.stdout(),
         "{}System information:{}\n--------------------------\n{bug_report}",
         Style::new()
             .bold()
             .fg_color(Some(Color::Ansi(AnsiColor::Blue))),
         Reset
-    );
+    )
+    .expect("Failed to print bug report system information to stdout");
 
     let bug_report_url = urlencoding::encode(&bug_report);
 
@@ -171,21 +173,28 @@ fn print_issue_url() {
         }
     };
 
-    println!(
+    writeln!(
+        config.stdout(),
         "{}Cargo build configuration:{}\n--------------------------\n{cargo_config}",
         Style::new()
             .bold()
             .fg_color(Some(Color::Ansi(AnsiColor::Blue))),
         Reset
-    );
+    )
+    .expect("Failed to print bug report Cargo configuration to stdout");
 
     let cargo_config_url: String = urlencoding::encode(&cargo_config).into_owned();
 
-    println!(
+    writeln!(
+        config.stdout(),
         "{}Please file an Issue on github reporting your bug.\n\
-        Consider adding the diagnostic information above, either manually or automatically through the link below:{}\n\n{}&sys-info={}&build-config={}",
-        Style::new().bold(), Reset, other_bug_url, bug_report_url, cargo_config_url
-    );
+        Consider adding the diagnostic information above, either manually or automatically through the link below:{}\n\n\
+        {other_bug_url}&sys-info={bug_report_url}&build-config={cargo_config_url}",
+        Style::new()
+            .bold(),
+        Reset
+    )
+    .expect("Failed to print bug report generated github issue link");
 }
 
 #[derive(Debug, Parser)]
