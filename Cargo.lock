@@ -297,6 +297,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo-config2"
+version = "0.1.26"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d83ce0be8bd1479e5de6202def660e6c7e27e4e0599bffa4fed05bd380ec2ede"
+dependencies = [
+ "home",
+ "serde",
+ "serde_derive",
+ "toml_edit",
+]
+
+[[package]]
 name = "cargo-platform"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -315,6 +327,7 @@ dependencies = [
  "assert_cmd",
  "atty",
  "bugreport",
+ "cargo-config2",
  "cargo_metadata",
  "cargo_toml",
  "clap",
@@ -343,6 +356,7 @@ dependencies = [
  "toml",
  "trustfall",
  "trustfall_rustdoc",
+ "urlencoding",
 ]
 
 [[package]]
@@ -3385,6 +3399,12 @@ dependencies = [
  "idna",
  "percent-encoding",
 ]
+
+[[package]]
+name = "urlencoding"
+version = "2.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "daf8dba3b7eb870caf1ddeed7bc9d2a049f3cfdfae7cb521b087cc33ae4c49da"
 
 [[package]]
 name = "utf8parse"

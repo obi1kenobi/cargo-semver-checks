@@ -2,10 +2,13 @@
 
 use std::{env, path::PathBuf};
 
+use anstyle::{AnsiColor, Color, Reset, Style};
+use cargo_config2::Config;
 use cargo_semver_checks::{
     GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
 };
 use clap::{Args, Parser, Subcommand};
+use std::io::Write;
 
 #[cfg(test)]
 mod snapshot_tests;
@@ -16,16 +19,10 @@ fn main() {
     let Cargo::SemverChecks(args) = Cargo::parse();
 
     configure_color(args.color_choice);
+    let mut config = GlobalConfig::new();
 
     if args.bugreport {
-        use bugreport::{bugreport, collector::*, format::Markdown};
-        bugreport!()
-            .info(SoftwareVersion::default())
-            .info(OperatingSystem::default())
-            .info(CommandLine::default())
-            .info(CommandOutput::new("cargo version", "cargo", &["-V"]))
-            .info(CompileTimeInformation::default())
-            .print::<Markdown>();
+        print_issue_url(&mut config);
         std::process::exit(0);
     } else if args.list {
         exit_on_error(true, || {
@@ -93,8 +90,6 @@ fn main() {
         None => args.check_release,
     };
 
-    let mut config = GlobalConfig::new();
-
     config.set_log_level(check_release.verbosity.log_level());
 
     let check: cargo_semver_checks::Check = check_release.into();
@@ -144,6 +139,75 @@ fn configure_color(cli_choice: Option<clap::ColorChoice>) {
     };
 
     choice.write_global();
+}
+
+fn print_issue_url(config: &mut GlobalConfig) {
+    use bugreport::{bugreport, collector::*, format::Markdown};
+    let other_bug_url: &str = "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?labels=C-bug&template=3-bug-report.yml";
+
+    let mut bug_report = bugreport!()
+        .info(SoftwareVersion::default())
+        .info(OperatingSystem::default())
+        .info(CommandLine::default())
+        .info(CommandOutput::new("cargo version", "cargo", &["-V"]))
+        .info(CompileTimeInformation::default());
+
+    let bold_cyan = Style::new()
+        .bold()
+        .fg_color(Some(Color::Ansi(AnsiColor::Cyan)));
+
+    writeln!(
+        config.stdout(),
+        "{bold_cyan}\
+        System information:{Reset}\n\
+        -------------------"
+    )
+    .expect("Failed to print bug report system information to stdout");
+    bug_report.print::<Markdown>();
+
+    let bug_report = bug_report.format::<Markdown>();
+    let bug_report_url = urlencoding::encode(&bug_report);
+
+    let cargo_config = match Config::load() {
+        Ok(c) => toml::to_string(&c).unwrap_or_else(|s| {
+            writeln!(
+                config.stderr(),
+                "Error serializing cargo build configuration: {}",
+                s
+            )
+            .expect("Failed to print error");
+            String::default()
+        }),
+        Err(e) => {
+            writeln!(
+                config.stderr(),
+                "Error loading cargo build configuration: {}",
+                e
+            )
+            .expect("Failed to print error");
+            String::default()
+        }
+    };
+
+    writeln!(
+        config.stdout(),
+        "{bold_cyan}\
+        Cargo build configuration:{Reset}\n\
+        --------------------------\n\
+        {cargo_config}"
+    )
+    .expect("Failed to print bug report Cargo configuration to stdout");
+
+    let cargo_config_url: String = urlencoding::encode(&cargo_config).into_owned();
+
+    let bold = Style::new().bold();
+    writeln!(
+        config.stdout(),
+        "{bold}Please file an issue on GitHub reporting your bug.\n\
+        Consider adding the diagnostic information above, either manually or automatically through the link below:{Reset}\n\n\
+        {other_bug_url}&sys-info={bug_report_url}&build-config={cargo_config_url}",
+    )
+    .expect("Failed to print bug report generated github issue link");
 }
 
 #[derive(Debug, Parser)]
