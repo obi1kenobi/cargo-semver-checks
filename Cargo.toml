@@ -22,7 +22,7 @@ anyhow = "1.0.58"
 ron = "0.8.0"
 serde = { version = "1.0.185", features = ["derive"] }
 semver = "1.0.12"
-handlebars = "5.1.0"
+handlebars = "6.0.0"
 atty = "0.2.14"
 cargo_metadata = "0.18.1"
 clap-cargo = { version = "0.14.0", features = ["cargo_metadata"] }
