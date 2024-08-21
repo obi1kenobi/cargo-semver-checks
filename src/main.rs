@@ -155,7 +155,7 @@ fn print_issue_url(config: &mut GlobalConfig) {
         "{}System information:{}\n--------------------------\n{bug_report}",
         Style::new()
             .bold()
-            .fg_color(Some(Color::Ansi(AnsiColor::Blue))),
+            .fg_color(Some(Color::Ansi(AnsiColor::Cyan))),
         Reset
     )
     .expect("Failed to print bug report system information to stdout");
@@ -178,7 +178,7 @@ fn print_issue_url(config: &mut GlobalConfig) {
         "{}Cargo build configuration:{}\n--------------------------\n{cargo_config}",
         Style::new()
             .bold()
-            .fg_color(Some(Color::Ansi(AnsiColor::Blue))),
+            .fg_color(Some(Color::Ansi(AnsiColor::Cyan))),
         Reset
     )
     .expect("Failed to print bug report Cargo configuration to stdout");
