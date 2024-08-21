@@ -142,57 +142,68 @@ fn print_issue_url(config: &mut GlobalConfig) {
     use bugreport::{bugreport, collector::*, format::Markdown};
     let other_bug_url: &str = "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?labels=C-bug&template=3-bug-report.yml";
 
-    let bug_report = bugreport!()
+    let mut bug_report = bugreport!()
         .info(SoftwareVersion::default())
         .info(OperatingSystem::default())
         .info(CommandLine::default())
         .info(CommandOutput::new("cargo version", "cargo", &["-V"]))
-        .info(CompileTimeInformation::default())
-        .format::<Markdown>();
+        .info(CompileTimeInformation::default());
+
+    let bold_cyan = Style::new()
+        .bold()
+        .fg_color(Some(Color::Ansi(AnsiColor::Cyan)));
 
     writeln!(
         config.stdout(),
-        "{}System information:{}\n--------------------------\n{bug_report}",
-        Style::new()
-            .bold()
-            .fg_color(Some(Color::Ansi(AnsiColor::Cyan))),
-        Reset
+        "{bold_cyan}\
+        System information:{Reset}\n\
+        -------------------"
     )
     .expect("Failed to print bug report system information to stdout");
+    bug_report.print::<Markdown>();
 
+    let bug_report = bug_report.format::<Markdown>();
     let bug_report_url = urlencoding::encode(&bug_report);
 
     let cargo_config = match Config::load() {
         Ok(c) => toml::to_string(&c).unwrap_or_else(|s| {
-            eprintln!("Error serializing cargo build configuration: {}", s);
+            writeln!(
+                config.stderr(),
+                "Error serializing cargo build configuration: {}",
+                s
+            )
+            .expect("Failed to print error");
             String::default()
         }),
         Err(e) => {
-            eprintln!("Error loading cargo build configuration: {}", e);
+            writeln!(
+                config.stderr(),
+                "Error loading cargo build configuration: {}",
+                e
+            )
+            .expect("Failed to print error");
             String::default()
         }
     };
 
+
     writeln!(
         config.stdout(),
-        "{}Cargo build configuration:{}\n--------------------------\n{cargo_config}",
-        Style::new()
-            .bold()
-            .fg_color(Some(Color::Ansi(AnsiColor::Cyan))),
-        Reset
+        "{bold_cyan}\
+        Cargo build configuration:{Reset}\n\
+        --------------------------\n\
+        {cargo_config}"
     )
     .expect("Failed to print bug report Cargo configuration to stdout");
 
     let cargo_config_url: String = urlencoding::encode(&cargo_config).into_owned();
 
+    let bold = Style::new().bold();
     writeln!(
         config.stdout(),
-        "{}Please file an Issue on github reporting your bug.\n\
-        Consider adding the diagnostic information above, either manually or automatically through the link below:{}\n\n\
+        "{bold}Please file an issue on GitHub reporting your bug.\n\
+        Consider adding the diagnostic information above, either manually or automatically through the link below:{Reset}\n\n\
         {other_bug_url}&sys-info={bug_report_url}&build-config={cargo_config_url}",
-        Style::new()
-            .bold(),
-        Reset
     )
     .expect("Failed to print bug report generated github issue link");
 }
