@@ -186,7 +186,6 @@ fn print_issue_url(config: &mut GlobalConfig) {
         }
     };
 
-
     writeln!(
         config.stdout(),
         "{bold_cyan}\
