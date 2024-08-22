@@ -1,0 +1,6 @@
+---
+source: src/snapshot_tests.rs
+expression: result
+---
+--- error ---
+aborting due to failure to build rustdoc for crate error v0.1.0

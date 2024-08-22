@@ -303,3 +303,25 @@ fn workspace_publish_false_workspace_flag() {
         ],
     )
 }
+
+/// When a workspace has a crate with a compile error in the baseline version
+/// and the user request to semver-check the `--workspace`, which has other workspace
+/// members that do not have compile errors.
+///
+/// Currently, the workspace `semver-checks` all non-error workspace members but returns
+/// an error at the end.
+#[test]
+fn workspace_baseline_compile_error() {
+    assert_integration_test(
+        "workspace_baseline_compile_error",
+        &[
+            "cargo",
+            "semver-checks",
+            "--baseline-root",
+            "test_crates/manifest_tests/workspace_baseline_compile_error/old",
+            "--manifest-path",
+            "test_crates/manifest_tests/workspace_baseline_compile_error/new",
+            "--workspace",
+        ],
+    );
+}
