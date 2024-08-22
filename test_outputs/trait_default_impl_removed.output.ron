@@ -1,0 +1,15 @@
+{
+    "./test_crates/trait_default_impl_removed/": [
+        {
+            "method_name": String("method_default_impl_removed"),
+            "name": String("TraitA"),
+            "path": List([
+                String("trait_default_impl_removed"),
+                String("TraitA"),
+            ]),
+            "span_begin_line": Uint64(3),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
+}

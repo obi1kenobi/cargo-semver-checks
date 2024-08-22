@@ -1,0 +1,61 @@
+SemverQuery(
+    id: "trait_default_impl_removed",
+    human_readable_name: "pub trait default method impl removed",
+    description: "A non-sealed public trait default method impl was removed.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/book/ch10-02-traits.html#default-implementations"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        sealed @filter(op: "!=", value: ["$true"])
+                        name @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                        method {
+                            method_name: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            has_body @filter(op: "=", value: ["$true"])
+
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        sealed @filter(op: "!=", value: ["$true"])
+                        object_safe @filter(op: "=", value: ["$true"])
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                        method {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            name @filter(op: "=", value: ["%method_name"])
+                            has_body @filter(op: "!=", value: ["$true"])
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "true": true,
+        "public": "public",
+    },
+    error_message: "A trait's method default impl was removed, breaking users relying on the default impl",
+    per_result_error_template: Some("trait method <{{join \"::\" path}}>::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+)
