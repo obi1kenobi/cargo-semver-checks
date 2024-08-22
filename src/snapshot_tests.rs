@@ -88,9 +88,6 @@ impl Write for StaticWriter {
 /// Struct for printing the result of an invocation of `cargo-semver-checks`
 #[derive(Debug)]
 struct CommandOutput {
-    /// Whether the invocation of `cargo-semver-checks` was successful (i.e., there are no semver-breaking changes),
-    /// from [`Report::success`](cargo_semver_checks::Report::success).
-    success: bool,
     /// The stderr of the invocation.
     stderr: String,
     /// The stdout of the invocation.
@@ -99,7 +96,6 @@ struct CommandOutput {
 
 impl fmt::Display for CommandOutput {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "success: {}", self.success)?;
         writeln!(f, "--- stdout ---\n{}", self.stdout)?;
         writeln!(f, "--- stderr ---\n{}", self.stderr)?;
 
@@ -108,14 +104,23 @@ impl fmt::Display for CommandOutput {
 }
 
 #[derive(Debug)]
-struct CommandResult(anyhow::Result<CommandOutput>);
+struct CommandResult {
+    /// Whether the invocation of `cargo-semver-checks` was successful (i.e., there are no semver-breaking changes),
+    /// from [`Report::success`](cargo_semver_checks::Report::success), or an `Err` if `cargo-semver-checks` exited
+    /// early with an `Err` variant.
+    result: anyhow::Result<bool>,
+    /// Captured `stdout` and `stderr` for the command run, regardless of whether it was successful.
+    output: CommandOutput,
+}
 
 impl fmt::Display for CommandResult {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self.0 {
-            Ok(d) => write!(f, "{d}"),
-            Err(e) => writeln!(f, "--- error ---\n{e}"),
-        }
+        match &self.result {
+            Ok(success) => writeln!(f, "success: {success}")?,
+            Err(e) => writeln!(f, "--- error ---\n{e}")?,
+        };
+
+        write!(f, "{}", self.output)
     }
 }
 
@@ -180,11 +185,13 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
         .try_into_inner()
         .expect("failed to get unique reference to stderr");
 
-    let result = CommandResult(result.map(|report| CommandOutput {
-        success: report.success(),
-        stdout: String::from_utf8(stdout).expect("failed to convert to UTF-8"),
-        stderr: String::from_utf8(stderr).expect("failed to convert to UTF-8"),
-    }));
+    let stdout = String::from_utf8(stdout).expect("failed to convert to UTF-8");
+    let stderr = String::from_utf8(stderr).expect("failed to convert to UTF-8");
+
+    let result = CommandResult {
+        result: result.map(|report| report.success()),
+        output: CommandOutput { stderr, stdout },
+    };
 
     insta::assert_snapshot!(format!("{test_name}-output"), result);
 }
