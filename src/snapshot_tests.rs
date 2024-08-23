@@ -138,6 +138,9 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     // remove the backtrace environment variable, as this may cause non-
     // reproducible snapshots.
     std::env::remove_var("RUST_BACKTRACE");
+    // remove the cargo verbosity variable, which gets passed to `cargo doc`
+    // and may create a nonreproducible environment.
+    std::env::remove_var("CARGO_TERM_VERBOSE");
 
     let stdout = StaticWriter::new();
     let stderr = StaticWriter::new();
@@ -165,6 +168,9 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     // build environments.
     let repo_root = get_root_path();
     settings.add_filter(&regex::escape(&repo_root.to_string_lossy()), "[ROOT]");
+    // Remove cargo blocking lines (e.g. from `cargo doc` output) as the amount of blocks
+    // is not reproducible.
+    settings.add_filter("    Blocking waiting for file lock on package cache\n", "");
 
     // The `settings` are applied to the current thread as long as the returned
     // drop guard  `_grd` is alive, so we use a `let` binding to keep it alive
