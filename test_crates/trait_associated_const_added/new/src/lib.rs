@@ -1,30 +1,34 @@
-mod private {
+mod sealed {
     pub(crate) trait Sealed {}
 }
 
-pub trait Foo {
+// trigger
+pub trait WillGainConstWithoutDefault {
     const BAR: bool;
 }
 
-pub trait FooSealed: private::Sealed {
+pub trait WillGainConstWithoutDefaultSealed: sealed::Sealed {
     const BAR: bool;
 }
-pub trait FooNotSealed: private::Sealed {
+// trigger
+pub trait WillGainConstWithoutDefaultAndSeal: sealed::Sealed {
     const BAR: bool;
 }
 
-pub trait Bar {
+pub trait WillGainConstWithDefault {
     const BAR: bool = true;
 }
-pub trait BarSealed: private::Sealed {
+pub trait WillGainConstWithDefaultSealed: sealed::Sealed {
     const BAR: bool = true;
 }
 
-pub trait Baz {
+// trigger
+pub trait WillGainAnotherConstWithoutDefault {
     const ONE: bool;
     const TWO: bool;
 }
-pub trait BazSealed: private::Sealed {
+// trigger
+pub trait WillGainAnotherConstWithoutDefaultSealed: sealed::Sealed {
     const ONE: bool;
     const TWO: bool;
 }

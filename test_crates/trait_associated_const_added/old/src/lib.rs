@@ -1,18 +1,18 @@
-mod private {
+mod sealed {
     pub(crate) trait Sealed {}
 }
 
-pub trait Foo {}
+pub trait WillGainConstWithoutDefault {}
 
-pub trait FooSealed: private::Sealed {}
-pub trait FooNotSealed {}
+pub trait WillGainConstWithoutDefaultSealed: sealed::Sealed {}
+pub trait WillGainConstWithoutDefaultAndSeal {}
 
-pub trait Bar {}
-pub trait BarSealed: private::Sealed {}
+pub trait WillGainConstWithDefault {}
+pub trait WillGainConstWithDefaultSealed: sealed::Sealed {}
 
-pub trait Baz {
+pub trait WillGainAnotherConstWithoutDefault {
     const ONE: bool;
 }
-pub trait BazSealed: private::Sealed {
+pub trait WillGainAnotherConstWithoutDefaultSealed: sealed::Sealed {
     const ONE: bool;
 }
