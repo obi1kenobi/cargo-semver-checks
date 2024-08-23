@@ -2,17 +2,31 @@ mod sealed {
     pub(crate) trait Sealed {}
 }
 
-pub trait WillGainConstWithoutDefault {}
+pub trait WillGainConstWithoutDefault {
+    fn make_me_non_object_safe() -> Self;
+}
 
-pub trait WillGainConstWithoutDefaultSealed: sealed::Sealed {}
-pub trait WillGainConstWithoutDefaultAndSeal {}
+pub trait WillGainConstWithoutDefaultSealed: sealed::Sealed {
+    fn make_me_non_object_safe() -> Self;
+}
+pub trait WillGainConstWithoutDefaultAndSeal {
+    fn make_me_non_object_safe() -> Self;
+}
 
-pub trait WillGainConstWithDefault {}
-pub trait WillGainConstWithDefaultSealed: sealed::Sealed {}
+pub trait WillGainConstWithDefault {
+    fn make_me_non_object_safe() -> Self;
+}
+pub trait WillGainConstWithDefaultSealed: sealed::Sealed {
+    fn make_me_non_object_safe() -> Self;
+}
 
 pub trait WillGainAnotherConstWithoutDefault {
     const ONE: bool;
+
+    fn make_me_non_object_safe() -> Self;
 }
 pub trait WillGainAnotherConstWithoutDefaultSealed: sealed::Sealed {
     const ONE: bool;
+
+    fn make_me_non_object_safe() -> Self;
 }

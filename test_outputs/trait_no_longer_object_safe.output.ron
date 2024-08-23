@@ -21,18 +21,6 @@
             "visibility_limit": String("public"),
         },
     ],
-    "./test_crates/trait_associated_const_added/": [
-        {
-            "name": String("Foo"),
-            "path": List([
-                String("trait_associated_const_added"),
-                String("Foo"),
-            ]),
-            "span_begin_line": Uint64(1),
-            "span_filename": String("src/lib.rs"),
-            "visibility_limit": String("public"),
-        },
-    ],
     "./test_crates/trait_no_longer_object_safe/": [
         {
             "name": String("RefTrait"),
