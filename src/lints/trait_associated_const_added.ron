@@ -21,7 +21,7 @@ SemverQuery(
                         associated_constant {
                             associated_constant: name @output @tag
                             public_api_eligible @filter(op: "=", value: ["$true"])
-                            default @filter(op: "=", value: ["$null"]) @output
+                            default @filter(op: "is_null") @output
 
                             span_: span @optional {
                                filename @output
@@ -45,7 +45,7 @@ SemverQuery(
                         associated_constant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             name @filter(op: "=", value: ["%associated_constant"])
                             public_api_eligible @filter(op: "=", value: ["$true"])
-                            default @filter(op: "=", value: ["$null"])
+                            default @filter(op: "is_null")
                         }
                     }
                 }
@@ -56,7 +56,6 @@ SemverQuery(
         "public": "public",
         "true": true,
         "zero": 0,
-        "null": null
     },
     error_message: "A non-sealed trait has gained an associated constant without default value which break downstream implementations of the trait",
     per_result_error_template: Some("associated constant {{associated_constant}} of trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
