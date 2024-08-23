@@ -50,6 +50,7 @@ use std::{
 
 use cargo_semver_checks::{Check, GlobalConfig};
 use clap::Parser as _;
+use semver::Version;
 
 use crate::Cargo;
 
@@ -140,8 +141,7 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     std::env::remove_var("RUST_BACKTRACE");
     // remove the cargo verbosity variable, which gets passed to `cargo doc`
     // and may create a nonreproducible environment.
-    std::env::set_var("CARGO_TERM_VERBOSE", "false");
-    std::env::set_var("CARGO_TERM_QUIET", "true");
+    std::env::remove_var("CARGO_TERM_VERBOSE");
 
     let stdout = StaticWriter::new();
     let stderr = StaticWriter::new();
@@ -313,6 +313,16 @@ fn workspace_publish_false_workspace_flag() {
 /// an error at the end.
 #[test]
 fn workspace_baseline_compile_error() {
+    // HACK: the `cargo doc` error output changed from cargo 1.77 to 1.78, and the snapshot
+    // does not work for older versions
+    if rustc_version::version().map_or(true, |version| version < Version::new(1, 78, 0)) {
+        eprintln!(
+            "Skipping this test as `cargo doc` output is different in earlier versions.
+            Consider rerunning with cargo >= 1.78"
+        );
+        return;
+    }
+
     assert_integration_test(
         "workspace_baseline_compile_error",
         &[
