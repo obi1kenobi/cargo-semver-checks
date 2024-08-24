@@ -50,6 +50,7 @@ use std::{
 
 use cargo_semver_checks::{Check, GlobalConfig};
 use clap::Parser as _;
+use semver::Version;
 
 use crate::Cargo;
 
@@ -88,9 +89,6 @@ impl Write for StaticWriter {
 /// Struct for printing the result of an invocation of `cargo-semver-checks`
 #[derive(Debug)]
 struct CommandOutput {
-    /// Whether the invocation of `cargo-semver-checks` was successful (i.e., there are no semver-breaking changes),
-    /// from [`Report::success`](cargo_semver_checks::Report::success).
-    success: bool,
     /// The stderr of the invocation.
     stderr: String,
     /// The stdout of the invocation.
@@ -99,7 +97,6 @@ struct CommandOutput {
 
 impl fmt::Display for CommandOutput {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "success: {}", self.success)?;
         writeln!(f, "--- stdout ---\n{}", self.stdout)?;
         writeln!(f, "--- stderr ---\n{}", self.stderr)?;
 
@@ -108,14 +105,23 @@ impl fmt::Display for CommandOutput {
 }
 
 #[derive(Debug)]
-struct CommandResult(anyhow::Result<CommandOutput>);
+struct CommandResult {
+    /// Whether the invocation of `cargo-semver-checks` was successful (i.e., there are no semver-breaking changes),
+    /// from [`Report::success`](cargo_semver_checks::Report::success), or an `Err` if `cargo-semver-checks` exited
+    /// early with an `Err` variant.
+    result: anyhow::Result<bool>,
+    /// Captured `stdout` and `stderr` for the command run, regardless of whether it was successful.
+    output: CommandOutput,
+}
 
 impl fmt::Display for CommandResult {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self.0 {
-            Ok(d) => write!(f, "{d}"),
-            Err(e) => writeln!(f, "--- error ---\n{e}"),
-        }
+        match &self.result {
+            Ok(success) => writeln!(f, "success: {success}")?,
+            Err(e) => writeln!(f, "--- error ---\n{e}")?,
+        };
+
+        write!(f, "{}", self.output)
     }
 }
 
@@ -133,6 +139,9 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     // remove the backtrace environment variable, as this may cause non-
     // reproducible snapshots.
     std::env::remove_var("RUST_BACKTRACE");
+    // remove the cargo verbosity variable, which gets passed to `cargo doc`
+    // and may create a nonreproducible environment.
+    std::env::remove_var("CARGO_TERM_VERBOSE");
 
     let stdout = StaticWriter::new();
     let stderr = StaticWriter::new();
@@ -160,6 +169,9 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     // build environments.
     let repo_root = get_root_path();
     settings.add_filter(&regex::escape(&repo_root.to_string_lossy()), "[ROOT]");
+    // Remove cargo blocking lines (e.g. from `cargo doc` output) as the amount of blocks
+    // is not reproducible.
+    settings.add_filter("    Blocking waiting for file lock on package cache\n", "");
 
     // The `settings` are applied to the current thread as long as the returned
     // drop guard  `_grd` is alive, so we use a `let` binding to keep it alive
@@ -180,11 +192,13 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
         .try_into_inner()
         .expect("failed to get unique reference to stderr");
 
-    let result = CommandResult(result.map(|report| CommandOutput {
-        success: report.success(),
-        stdout: String::from_utf8(stdout).expect("failed to convert to UTF-8"),
-        stderr: String::from_utf8(stderr).expect("failed to convert to UTF-8"),
-    }));
+    let stdout = String::from_utf8(stdout).expect("failed to convert to UTF-8");
+    let stderr = String::from_utf8(stderr).expect("failed to convert to UTF-8");
+
+    let result = CommandResult {
+        result: result.map(|report| report.success()),
+        output: CommandOutput { stderr, stdout },
+    };
 
     insta::assert_snapshot!(format!("{test_name}-output"), result);
 }
@@ -289,4 +303,36 @@ fn workspace_publish_false_workspace_flag() {
             "--verbose",
         ],
     )
+}
+
+/// When a workspace has a crate with a compile error in the baseline version
+/// and the user request to semver-check the `--workspace`, which has other workspace
+/// members that do not have compile errors.
+///
+/// Currently, the workspace `semver-checks` all non-error workspace members but returns
+/// an error at the end.
+#[test]
+fn workspace_baseline_compile_error() {
+    // HACK: the `cargo doc` error output changed from cargo 1.77 to 1.78, and the snapshot
+    // does not work for older versions
+    if rustc_version::version().map_or(true, |version| version < Version::new(1, 78, 0)) {
+        eprintln!(
+            "Skipping this test as `cargo doc` output is different in earlier versions.
+            Consider rerunning with cargo >= 1.78"
+        );
+        return;
+    }
+
+    assert_integration_test(
+        "workspace_baseline_compile_error",
+        &[
+            "cargo",
+            "semver-checks",
+            "--baseline-root",
+            "test_crates/manifest_tests/workspace_baseline_compile_error/old",
+            "--manifest-path",
+            "test_crates/manifest_tests/workspace_baseline_compile_error/new",
+            "--workspace",
+        ],
+    );
 }
