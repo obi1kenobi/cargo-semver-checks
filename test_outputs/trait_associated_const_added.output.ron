@@ -46,5 +46,16 @@
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
          },
-     ],
+         {
+             "associated_constant": String("BAR"),
+             "default": Null,
+             "path": List([
+                 String("trait_associated_const_added"),
+                 String("WillGainADocHiddenConst"),
+             ]),
+             "span_begin_line": Uint64(48),
+             "span_filename": String("src/lib.rs"),
+             "visibility_limit": String("public"),
+         },
+    ],
 }
