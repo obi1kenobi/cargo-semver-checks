@@ -3,7 +3,7 @@ pub trait TraitA {
     fn method_default_impl_removed(&self);
 }
 
-// Default trait method becomes  removed completely, should not be reported as it becomes
+// Default trait method becomes removed completely, should not be reported as it becomes
 // missing instead
 pub trait TraitB {}
 
