@@ -1,0 +1,59 @@
+SemverQuery(
+    id: "trait_associated_const_added",
+    human_readable_name: "non-sealed trait added associated constant without default value",
+    description: "A non-sealed trait has gained an associated constant without a default value, which breaks downstream implementations of the trait",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#trait-new-item-no-default"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_constant {
+                            associated_constant: name @output @tag
+                            default @filter(op: "is_null") @output
+
+                            span_: span @optional {
+                               filename @output
+                               begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        sealed @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_constant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%associated_constant"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A non-sealed trait has gained an associated constant without a default value, which breaks downstream implementations of the trait",
+    per_result_error_template: Some("trait constant {{join \"::\" path}}::{{associated_constant}} in file {{span_filename}}:{{span_begin_line}}"),
+)
