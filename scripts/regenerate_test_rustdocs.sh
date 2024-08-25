@@ -23,8 +23,7 @@ RUSTDOC_OUTPUT_DIR="$CARGO_TARGET_DIR/doc"
 # - Otherwise, navigate up relative to this script's path.
 #   This latter option is useful when building cargo-semver-checks for distribution with NixOS:
 #   https://github.com/obi1kenobi/cargo-semver-checks/issues/855
-# TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null || { cd -- "$(dirname -- "${BASH_SOURCE[0]}" )" &>/dev/null && cd -- .. &>/dev/null && pwd; })"
-TOPLEVEL="/home/david/oss/cargo-semver-checks"
+TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null || { cd -- "$(dirname -- "${BASH_SOURCE[0]}" )" &>/dev/null && cd -- .. &>/dev/null && pwd; })"
 TARGET_DIR="$TOPLEVEL/localdata/test_data"
 TOOLCHAIN=
 
