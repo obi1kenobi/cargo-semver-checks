@@ -28,7 +28,7 @@
                 String("trait_default_impl_removed"),
                 String("TraitD"),
             ]),
-            "span_begin_line": Uint64(16),
+            "span_begin_line": Uint64(21),
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
