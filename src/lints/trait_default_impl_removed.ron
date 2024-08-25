@@ -58,5 +58,5 @@ SemverQuery(
         "public": "public",
     },
     error_message: "A method's default impl in an unsealed trait has been removed, breaking trait implementations that relied on that default",
-    per_result_error_template: Some("trait method <{{join \"::\" path}}>::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("trait method {{join \"::\" path}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
