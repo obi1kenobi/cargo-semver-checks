@@ -1,0 +1,13 @@
+---
+source: src/snapshot_tests.rs
+expression: result
+---
+--- error ---
+package `example` is ambiguous: it is defined by in multiple manifests within the root path test_crates/manifest_tests/multiple_ambiguous_package_name_definitions
+
+defined in:
+  test_crates/manifest_tests/multiple_ambiguous_package_name_definitions/Cargo.toml
+  test_crates/manifest_tests/multiple_ambiguous_package_name_definitions/nested/Cargo.toml
+--- stdout ---
+
+--- stderr ---

@@ -336,3 +336,29 @@ fn workspace_baseline_compile_error() {
         ],
     );
 }
+
+/// Pin down the behavior when running `cargo-semver-checks` on a project that
+/// for some reason contains multiple definitions of the same package name
+/// in different workspaces in the same directory.
+///
+/// The current behavior *is not* necessarily preferable in the long term, and may change.
+/// It looks through all `Cargo.toml` files in the directory and accumulates everything they define.
+///
+/// In the long run, we may want to use something like `cargo locate-project` to determine
+/// which workspace we're currently "inside" and only load its manifests.
+/// This approach is described here:
+/// <https://github.com/obi1kenobi/cargo-semver-checks/issues/462#issuecomment-1569413532>
+#[test]
+fn multiple_ambiguous_package_name_definitions() {
+    assert_integration_test(
+        "multiple_ambiguous_package_name_definitions",
+        &[
+            "cargo",
+            "semver-checks",
+            "--baseline-root",
+            "test_crates/manifest_tests/multiple_ambiguous_package_name_definitions",
+            "--manifest-path",
+            "test_crates/manifest_tests/multiple_ambiguous_package_name_definitions",
+        ],
+    );
+}
