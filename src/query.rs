@@ -834,6 +834,7 @@ add_lints!(
     struct_repr_transparent_removed,
     struct_with_pub_fields_changed_type,
     trait_associated_const_added,
+    trait_associated_const_default_removed,
     trait_associated_const_now_doc_hidden,
     trait_associated_type_now_doc_hidden,
     trait_default_impl_removed,
