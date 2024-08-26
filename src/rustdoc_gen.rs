@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use anyhow::{bail, Context as _};
@@ -426,8 +427,9 @@ impl RustdocGenerator for RustdocFromFile {
 #[derive(Debug)]
 pub(crate) struct RustdocFromProjectRoot {
     project_root: PathBuf,
-    manifests: std::collections::HashMap<String, Manifest>,
-    manifest_errors: std::collections::HashMap<PathBuf, anyhow::Error>,
+    manifests: HashMap<String, Manifest>,
+    manifest_errors: HashMap<PathBuf, anyhow::Error>,
+    duplicate_packages: HashMap<String, Vec<PathBuf>>,
     target_root: PathBuf,
 }
 
@@ -439,31 +441,69 @@ impl RustdocFromProjectRoot {
         project_root: &std::path::Path,
         target_root: &std::path::Path,
     ) -> anyhow::Result<Self> {
-        let mut manifests = std::collections::HashMap::new();
-        let mut manifest_errors = std::collections::HashMap::new();
+        let mut manifests_by_path: HashMap<PathBuf, Manifest> = HashMap::new();
+        let mut manifest_errors = HashMap::new();
+
+        // First, scan the contents of the root directory for `Cargo.toml` files.
+        // Parse such files' contents into `Manifest` values.
         for result in ignore::Walk::new(project_root) {
             let entry = result?;
             if entry.file_name() == "Cargo.toml" {
                 let path = entry.into_path();
                 match crate::manifest::Manifest::parse(path.clone()) {
-                    Ok(manifest) => match crate::manifest::get_package_name(&manifest) {
-                        Ok(name) => {
-                            manifests.insert(name.to_string(), manifest);
-                        }
-                        Err(e) => {
-                            manifest_errors.insert(path, e);
-                        }
-                    },
+                    Ok(manifest) => {
+                        manifests_by_path.insert(path, manifest);
+                    }
                     Err(e) => {
                         manifest_errors.insert(path, e);
                     }
                 }
             }
         }
+
+        // Then, figure out which packages are defined by those manifests.
+        // If some package name is defined by more than one manifest, record an error.
+        let mut package_manifests: HashMap<String, (PathBuf, Manifest)> = HashMap::new();
+        let mut duplicate_packages: HashMap<String, Vec<PathBuf>> = Default::default();
+        for (path, manifest) in manifests_by_path.into_iter() {
+            let name = match crate::manifest::get_package_name(&manifest) {
+                Ok(name) => name.to_string(),
+                Err(e) => {
+                    manifest_errors.insert(path.clone(), e);
+                    continue;
+                }
+            };
+
+            if let Some(duplicates) = duplicate_packages.get_mut(&name) {
+                // This package is defined in multiple manifests already.
+                // Add to the list of duplicate manifests that define it.
+                duplicates.push(path);
+            } else if let Some((prev_path, _)) =
+                package_manifests.insert(name.clone(), (path, manifest))
+            {
+                // This is the first duplicate entry for this package.
+                // Remove it from the `package_manifests` and add both
+                // conflicting manifests to the duplicates list.
+                let (path, _) = package_manifests
+                    .remove(&name)
+                    .expect("elements we just inserted weren't present");
+                duplicate_packages.insert(name, vec![prev_path, path]);
+            }
+        }
+        for (_package, paths) in duplicate_packages.iter_mut() {
+            paths.sort_unstable();
+        }
+
+        let manifests = package_manifests
+            .into_iter()
+            .map(|(package, (_, manifest))| (package, manifest))
+            .collect();
+
         Ok(Self {
             project_root: project_root.to_owned(),
             manifests,
             manifest_errors,
+            duplicate_packages,
             target_root: target_root.to_owned(),
         })
     }
@@ -477,21 +517,31 @@ impl RustdocGenerator for RustdocFromProjectRoot {
         crate_data: CrateDataForRustdoc,
     ) -> anyhow::Result<PathBuf> {
         let manifest: &Manifest = self.manifests.get(crate_data.name).ok_or_else(|| {
-            let err = anyhow::anyhow!(
-                "package `{}` not found in {}",
-                crate_data.name,
-                self.project_root.display(),
-            );
-            if self.manifest_errors.is_empty() {
+            if let Some(duplicates) = self.duplicate_packages.get(crate_data.name) {
+                let duplicates = duplicates.iter().map(|p| p.display()).join("\n  ");
+                let err = anyhow::anyhow!(
+                    "package `{}` is ambiguous: it is defined by in multiple manifests within the root path {}\n\ndefined in:\n  {duplicates}",
+                    crate_data.name,
+                    self.project_root.display(),
+                );
                 err
             } else {
-                let cause_list = self
-                    .manifest_errors
-                    .values()
-                    .map(|error| format!("  {error:#},"))
-                    .join("\n");
-                let possible_causes = format!("possibly due to errors: [\n{cause_list}\n]");
-                err.context(possible_causes)
+                let err = anyhow::anyhow!(
+                    "package `{}` not found in {}",
+                    crate_data.name,
+                    self.project_root.display(),
+                );
+                if self.manifest_errors.is_empty() {
+                    err
+                } else {
+                    let cause_list = self
+                        .manifest_errors
+                        .values()
+                        .map(|error| format!("  {error:#},"))
+                        .join("\n");
+                    let possible_causes = format!("possibly due to errors: [\n{cause_list}\n]");
+                    err.context(possible_causes)
+                }
             }
         })?;
         generate_rustdoc(
