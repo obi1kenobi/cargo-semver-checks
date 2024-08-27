@@ -41,7 +41,7 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        associated_constant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                        associated_constant {
                             name @filter(op: "=", value: ["%associated_constant"])
                             default @filter(op: "is_not_null")
                         }
@@ -53,7 +53,6 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
-        "zero": 0,
     },
     error_message: "TODO",
     per_result_error_template: Some("TODO"),
