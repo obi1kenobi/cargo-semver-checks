@@ -1,7 +1,7 @@
 SemverQuery(
     id: "trait_unsafe_removed",
     human_readable_name: "pub unsafe trait became safe",
-    description: "A public unsafe trait became safe.",
+    description: "A public unsealed unsafe trait became safe, so its `unsafe impl` blocks must be changed to regular `impl`.",
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#implementing-an-unsafe-trait"),
@@ -13,6 +13,7 @@ SemverQuery(
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         unsafe @filter(op: "=", value: ["$true"])
+                        sealed @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @output @tag

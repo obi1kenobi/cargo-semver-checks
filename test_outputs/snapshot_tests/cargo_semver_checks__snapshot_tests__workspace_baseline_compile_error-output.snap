@@ -1,0 +1,54 @@
+---
+source: src/snapshot_tests.rs
+expression: result
+---
+--- error ---
+aborting due to failure to build rustdoc for crate error v0.1.0
+--- stdout ---
+
+--- failure function_missing: pub fn removed or renamed ---
+
+Description:
+A publicly-visible function cannot be imported by its prior path. A `pub use` may have been removed, or the function itself may have been renamed or removed entirely.
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#item-remove
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/v0.34.0/src/lints/function_missing.ron
+
+Failed in:
+  function no_error::my_fn, previously in file [ROOT]/test_crates/manifest_tests/workspace_baseline_compile_error/old/no-error/src/lib.rs:3
+
+--- stderr ---
+     Parsing error v0.1.0 (current)
+      Parsed [TIME] (current)
+     Parsing error v0.1.0 (baseline)
+error: running cargo-doc on crate error failed with output:
+-----
+ Documenting error v0.1.0 ([ROOT]/test_crates/manifest_tests/workspace_baseline_compile_error/old/error)
+error: This crate has a compiler error.
+ --> [ROOT]/test_crates/manifest_tests/workspace_baseline_compile_error/old/error/src/lib.rs:4:1
+  |
+4 | compile_error!("This crate has a compiler error.");
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: could not document `error`
+
+-----
+
+error: failed to build rustdoc for crate error v0.1.0
+note: this is usually due to a compilation error in the crate,
+      and is unlikely to be a bug in cargo-semver-checks
+note: the following command can be used to reproduce the compilation error:
+      cargo new --lib example &&
+          cd example &&
+          echo '[workspace]' >> Cargo.toml &&
+          cargo add --path test_crates/manifest_tests/workspace_baseline_compile_error/old/error --no-default-features &&
+          cargo check
+
+     Parsing no-error v0.1.0 (current)
+      Parsed [TIME] (current)
+     Parsing no-error v0.1.0 (baseline)
+      Parsed [TIME] (baseline)
+    Checking no-error v0.1.0 -> v0.1.0 (no change)
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 1 fail, 0 warn, 0 skip
+
+     Summary semver requires new major version: 1 major and 0 minor checks failed
+    Finished [TIME] no-error

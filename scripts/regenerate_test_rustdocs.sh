@@ -17,7 +17,13 @@ dir_is_newer_than_file() {
 
 export CARGO_TARGET_DIR=/tmp/test_crates
 RUSTDOC_OUTPUT_DIR="$CARGO_TARGET_DIR/doc"
-TOPLEVEL="$(git rev-parse --show-toplevel)"
+
+# Get the top-level directory of the project (the repo):
+# - If the user has cloned the git repo, ask git.
+# - Otherwise, navigate up relative to this script's path.
+#   This latter option is useful when building cargo-semver-checks for distribution with NixOS:
+#   https://github.com/obi1kenobi/cargo-semver-checks/issues/855
+TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null || { cd -- "$(dirname -- "${BASH_SOURCE[0]}" )" &>/dev/null && cd -- .. &>/dev/null && pwd; })"
 TARGET_DIR="$TOPLEVEL/localdata/test_data"
 TOOLCHAIN=
 

@@ -1,0 +1,10 @@
+---
+source: src/snapshot_tests.rs
+expression: result
+---
+success: true
+--- stdout ---
+
+--- stderr ---
+    Skipping a v0.1.0 (current)
+    Skipping b v0.1.0 (current)

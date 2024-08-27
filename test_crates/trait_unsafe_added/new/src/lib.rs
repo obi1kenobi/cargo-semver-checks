@@ -18,3 +18,10 @@ pub unsafe trait UnsafeTrait {}
 
 // Normal trait, doesn't get changed.
 pub trait NormalTrait {}
+
+mod private {
+    pub trait Sealed {}
+}
+
+// Sealed trait, becoming unsafe doesn't matter since it cannot be implemented downstream.
+pub unsafe trait SealedTrait: private::Sealed {}

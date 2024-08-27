@@ -171,7 +171,7 @@ pub type OverrideMap = BTreeMap<String, QueryOverride>;
 /// Stores a stack of [`OverrideMap`] references such that items towards the top of
 /// the stack (later in the backing `Vec`) have *higher* precedence and override items lower in the stack.
 /// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
-/// at the top of the stack will be used to calculate the effective lint level or required version update.  
+/// at the top of the stack will be used to calculate the effective lint level or required version update.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct OverrideStack(Vec<Arc<OverrideMap>>);
 
@@ -223,6 +223,9 @@ impl From<Vec<Arc<OverrideMap>>> for OverrideStack {
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Cow;
+    use std::collections::BTreeSet;
+    use std::path::PathBuf;
     use std::sync::{Arc, OnceLock};
     use std::{collections::BTreeMap, path::Path};
 
@@ -694,6 +697,42 @@ mod tests {
             RequiredSemverUpdate::Minor
         );
     }
+
+    pub(super) fn check_all_lint_files_are_used_in_add_lints(added_lints: &[&str]) {
+        let mut lints_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        lints_dir.push("src");
+        lints_dir.push("lints");
+
+        let expected_lints: BTreeSet<_> = added_lints.iter().copied().collect();
+        let mut missing_lints: BTreeSet<String> = Default::default();
+
+        let dir_contents =
+            fs_err::read_dir(lints_dir).expect("failed to read 'src/lints' directory");
+        for file in dir_contents {
+            let file = file.expect("failed to examine file");
+            let path = file.path();
+
+            // Check if we found a `*.ron` file. If so, that's a lint.
+            if path.extension().map(|x| x.to_string_lossy()) == Some(Cow::Borrowed("ron")) {
+                let stem = path
+                    .file_stem()
+                    .map(|x| x.to_string_lossy())
+                    .expect("failed to get file name as utf-8");
+
+                // Check if the lint was added using our `add_lints!()` macro.
+                // If not, that's an error.
+                if !expected_lints.contains(stem.as_ref()) {
+                    missing_lints.insert(stem.to_string());
+                }
+            }
+        }
+
+        assert!(
+            missing_lints.is_empty(),
+            "some lints in 'src/lints/' haven't been registered using the `add_lints!()` macro, \
+            so they won't be part of cargo-semver-checks: {missing_lints:?}"
+        )
+    }
 }
 
 macro_rules! add_lints {
@@ -706,6 +745,17 @@ macro_rules! add_lints {
                     super::tests::check_query_execution(stringify!($name))
                 }
             )*
+
+            #[test]
+            fn all_lint_files_are_used_in_add_lints() {
+                let added_lints = [
+                    $(
+                        stringify!($name),
+                    )*
+                ];
+
+                super::tests::check_all_lint_files_are_used_in_add_lints(&added_lints);
+            }
         }
 
         fn get_queries() -> Vec<(&'static str, &'static str)> {
@@ -783,14 +833,19 @@ add_lints!(
     struct_pub_field_now_doc_hidden,
     struct_repr_transparent_removed,
     struct_with_pub_fields_changed_type,
+    trait_associated_const_added,
+    trait_associated_const_default_removed,
     trait_associated_const_now_doc_hidden,
     trait_associated_type_now_doc_hidden,
+    trait_default_impl_removed,
     trait_method_missing,
     trait_method_now_doc_hidden,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
     trait_missing,
     trait_must_use_added,
+    trait_newly_sealed,
+    trait_no_longer_object_safe,
     trait_now_doc_hidden,
     trait_removed_associated_constant,
     trait_removed_associated_type,
