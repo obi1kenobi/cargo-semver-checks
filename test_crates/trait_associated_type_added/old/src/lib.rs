@@ -1,3 +1,5 @@
+#![feature(associated_type_defaults)]
+
 mod sealed {
     pub(crate) trait Sealed {}
 }
@@ -9,6 +11,7 @@ pub trait WillGainTypeWithoutDefault {
 pub trait WillGainTypeWithoutDefaultSealed: sealed::Sealed {
     fn make_me_non_object_safe() -> Self;
 }
+
 pub trait WillGainTypeWithoutDefaultAndSeal {
     fn make_me_non_object_safe() -> Self;
 }
@@ -21,12 +24,13 @@ pub trait WillGainTypeWithDefaultSealed: sealed::Sealed {
 }
 
 pub trait WillGainAnotherTypeWithoutDefault {
-    type ONE;
+    type One;
 
     fn make_me_non_object_safe() -> Self;
 }
+
 pub trait WillGainAnotherTypeWithoutDefaultSealed: sealed::Sealed {
-    type ONE;
+    type One;
 
     fn make_me_non_object_safe() -> Self;
 }
@@ -36,13 +40,14 @@ pub trait WillGainADocHiddenType {
 }
 
 pub trait TypeWithoutDefaultUnchanged {
-    type BAR;
+    type Bar;
 
     fn make_me_non_object_safe() -> Self;
 }
+
 pub trait TypeDocHidden {
     #[doc(hidden)]
-    type BAR;
+    type Bar;
 
     fn make_me_non_object_safe() -> Self;
 }

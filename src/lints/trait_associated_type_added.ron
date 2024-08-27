@@ -20,7 +20,7 @@ SemverQuery(
 
                         associated_type {
                             associated_type: name @output @tag
-                            default @filter(op: "is_null") @output
+                            has_default @filter(op: "!=", value: ["$true"]) @output
 
                             span_: span @optional {
                                filename @output
@@ -51,7 +51,8 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
-        "true": true
+        "true": true,
+        "zero": 0,
     },
     error_message: "A non-sealed trait has gained an associated type without a default value, which breaks downstream implementations of the trait",
     per_result_error_template: Some("trait associated type {{join \"::\" path}}::{{associated_type}} in file {{span_filename}}:{{span_begin_line}}"),
