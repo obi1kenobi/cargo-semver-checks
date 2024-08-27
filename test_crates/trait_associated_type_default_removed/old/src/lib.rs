@@ -1,3 +1,5 @@
+#![feature(associated_type_defaults)]
+
 mod sealed {
     pub(crate) trait Sealed {}
 }
