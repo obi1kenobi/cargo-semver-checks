@@ -12,9 +12,6 @@ pub trait WillLoseDefaultSealed: sealed::Sealed {
 
     fn make_me_non_object_safe() -> Self;
 }
-// pub trait WillLostDefaultAndGainSeal {
-//     fn make_me_non_object_safe() -> Self;
-// }
 
 pub trait Unchanged {
     const ONE: bool = true;
@@ -37,19 +34,3 @@ pub trait UnchangedNoDefaultSealed: sealed::Sealed {
 
     fn make_me_non_object_safe() -> Self;
 }
-
-// pub trait WillGainADocHiddenConst {
-//     fn make_me_non_object_safe() -> Self;
-// }
-
-// pub trait ConstWithoutDefaultUnchanged {
-//     const BAR: bool;
-
-//     fn make_me_non_object_safe() -> Self;
-// }
-// pub trait ConstDocHidden {
-//     #[doc(hidden)]
-//     const BAR: bool = true;
-
-//     fn make_me_non_object_safe() -> Self;
-// }
