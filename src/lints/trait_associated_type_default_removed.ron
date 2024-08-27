@@ -1,0 +1,59 @@
+SemverQuery(
+    id: "trait_associated_type_default_removed",
+    human_readable_name: "non-sealed trait removed the default value for an associated type",
+    description: "A non-sealed trait associated type lost its default value, which breaks downstream implementations of the trait",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#trait-item-signature"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_type {
+                            associated_type: name @output @tag
+                            has_default @filter(op: "!=", value: ["$true"]) @output
+
+                            span_: span @optional {
+                               filename @output
+                               begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        sealed @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_type {
+                            name @filter(op: "=", value: ["%associated_type"])
+                            has_default @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A non-sealed trait associated type lost its default value, which breaks downstream implementations of the trait",
+    per_result_error_template: Some("trait type {{join \"::\" path}}::{{associated_type}} in file {{span_filename}}:{{span_begin_line}}"),
+)
