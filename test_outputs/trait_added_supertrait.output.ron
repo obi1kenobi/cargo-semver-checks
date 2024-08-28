@@ -3,7 +3,7 @@
         {
             "path": List([
                 String("trait_added_supertrait"),
-                String("WillGailOne"),
+                String("WillGainOne"),
             ]),
             "span_begin_line": Uint64(11),
             "span_filename": String("src/lib.rs"),
@@ -13,7 +13,7 @@
         {
             "path": List([
                 String("trait_added_supertrait"),
-                String("WillGailAnotherOne"),
+                String("WillGainAnotherOne"),
             ]),
             "span_begin_line": Uint64(14),
             "span_filename": String("src/lib.rs"),
