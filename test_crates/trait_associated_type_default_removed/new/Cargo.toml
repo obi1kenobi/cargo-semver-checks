@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "trait_associated_type_default_removed"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
