@@ -334,5 +334,27 @@
             "span_filename": String("src/lib.rs"),
             "visibility_limit": String("public"),
         },
+        {
+            "method_name": String("one_method"),
+            "name": String("WillGainMethodWithoutDefaultAndSeal"),
+            "path": List([
+                String("trait_method_added"),
+                String("WillGainMethodWithoutDefaultAndSeal"),
+            ]),
+            "span_begin_line": Uint64(21),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "method_name": String("one_method"),
+            "name": String("WIllGainDocHiddenMethodWithoutDefault"),
+            "path": List([
+                String("trait_method_added"),
+                String("WIllGainDocHiddenMethodWithoutDefault"),
+            ]),
+            "span_begin_line": Uint64(26),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
     ],
 }
