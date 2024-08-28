@@ -1099,16 +1099,6 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: |
-            subject/target/semver-checks/local-tokio-1_25_0
-            subject/target/semver-checks/local-tokio_macros-1_8_2
-            subject/target/semver-checks/local-tokio_stream-0_1_12
-            subject/target/semver-checks/local-tokio_test-0_4_2
-            subject/target/semver-checks/local-tokio_util-0_7_7
-
       - name: Restore binary
         id: cache-binary
         uses: actions/cache/restore@v4
@@ -1123,6 +1113,21 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-tokio-1_25_0
+            subject/target/semver-checks/local-tokio_macros-1_8_2
+            subject/target/semver-checks/local-tokio_stream-0_1_12
+            subject/target/semver-checks/local-tokio_test-0_4_2
+            subject/target/semver-checks/local-tokio_util-0_7_7
+
+      - name: Advance mtimes so that rustdoc build cache is used
+        run: |
+          export NEW_DATE="$(date -d '+1 hour')"
+          find subject/target/semver-checks/ -exec touch --date "$NEW_DATE" {} \;
 
       # This test caught two bugs:
       # - The default baseline was set to the current path instead of the default registry version.
