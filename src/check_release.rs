@@ -150,6 +150,20 @@ fn print_triggered_lint(
                 Ok(())
             })?;
         }
+
+        if let Some(witness_template) = semver_query.witness_template.as_deref() {
+            let message = config
+                .handlebars()
+                .render_template(witness_template, &pretty_result)
+                .context("Error instantiating witness template.")?;
+
+            config.log_info(|config| {
+                config.shell_note("the following downstream code would break:")?;
+                writeln!(config.stderr(), "{message}")?;
+
+                Ok(())
+            })?;
+        }
     }
 
     Ok(())
