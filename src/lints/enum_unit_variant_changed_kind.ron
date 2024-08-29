@@ -1,0 +1,69 @@
+SemverQuery(
+    id: "enum_unit_variant_changed_kind",
+    human_readable_name: "An enum unit variant changed kind",
+    description: "A public enum unit variant that isn't #[non_exhaustive] changed kind",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: None,
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        enum_name: name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            ... on PlainVariant {
+                                kind: __typename @output @tag
+
+                                attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                variant_name: name @output @tag
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%enum_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            name @filter(op: "=", value: ["%variant_name"])
+                            attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            new_kind: __typename @filter(op: "!=", value: ["%kind"])   
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "non_exhaustive": "#[non_exhaustive]",
+    },
+    error_message: "A public enum's exhaustive unit variant has changed kind, breaking possible instantiations and patterns.",
+    per_result_error_template: Some("variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+)

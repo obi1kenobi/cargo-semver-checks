@@ -25,6 +25,19 @@
             "visibility_limit": String("public"),
         },
     ],
+    "./test_crates/enum_unit_variant_changed_kind/": [
+        {
+            "name": String("TestBecomeNonExhaustive"),
+            "path": List([
+                String("enum_unit_variant_changed_kind"),
+                String("TestBecomeNonExhaustive"),
+            ]),
+            "span_begin_line": Uint64(56),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("WillBecomeStructLike"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/non_exhaustive/": [
         {
             "name": String("MyEnum"),
