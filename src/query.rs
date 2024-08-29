@@ -840,6 +840,7 @@ add_lints!(
     trait_associated_type_default_removed,
     trait_associated_type_now_doc_hidden,
     trait_default_impl_removed,
+    trait_method_added,
     trait_method_missing,
     trait_method_now_doc_hidden,
     trait_method_unsafe_added,
