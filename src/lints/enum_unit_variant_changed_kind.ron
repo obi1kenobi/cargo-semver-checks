@@ -45,7 +45,7 @@ SemverQuery(
                             name @filter(op: "=", value: ["%variant_name"])
                             attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
                             public_api_eligible @filter(op: "=", value: ["$true"])
-                            new_kind: __typename @filter(op: "!=", value: ["%kind"])   
+                            new_kind: __typename @filter(op: "!=", value: ["%kind"]) @output   
                            
                             span_: span @optional {
                                 filename @output
