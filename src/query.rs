@@ -124,6 +124,9 @@ pub struct SemverQuery {
     #[serde(default)]
     pub(crate) per_result_error_template: Option<String>,
 
+    /// Optional handlebars template to construct minimal witness code that demonstrates
+    /// how downstream code would break given an API change.  The template can use the
+    /// output from each instance of this query occuring.
     #[serde(default)]
     pub witness_template: Option<String>,
 }
