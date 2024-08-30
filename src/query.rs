@@ -125,10 +125,9 @@ pub struct SemverQuery {
     pub(crate) per_result_error_template: Option<String>,
 
     /// Optional data to create witness code for query output.  See the [`Witness`] struct for
-    /// more information.  Witness implements `Default` for a query that doesn't generate any
-    /// witness code.
+    /// more information.
     #[serde(default)]
-    pub witness: Witness,
+    pub witness: Option<Witness>,
 }
 
 impl SemverQuery {
@@ -240,18 +239,16 @@ impl From<Vec<Arc<OverrideMap>>> for OverrideStack {
 /// break given this change.  See field documentation for more information
 /// on each member.
 ///
-/// All fields are optional, and this struct is `Default` where all fields are
-/// initialized to `None`, as it is not always possible to build a witness or a hint
-/// for a given SemverQuery.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+/// Fields besides [`hint_template`](Self::hint_template) are optional, as it is not
+/// always necessary to use an additional query [`witness_query`](Self::witness_query)
+/// or possible to build a compilable witness from [`witness_template`](Self::witness_template)
+/// for a given `SemverQuery`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Witness {
     /// A [`handlebars`] template that renders a user-facing hint to give a quick
     /// explanation of breakage.  This may not be a buildable example, but it should
     /// show the idea of why downstream code could break.  It will be provided any
     /// `@output` query declarations in the [`SemverQuery::query`].
-    ///
-    /// If `None`, (e.g., if it is not possible to write a lint for this test), no
-    /// hint message will be displayed.
     ///
     /// Example for the `function_missing` lint, where `name` is the (re)moved function's
     /// name and `path` is the importable path:
@@ -264,7 +261,7 @@ pub struct Witness {
     /// Notice how this is not a compilable example, but it provides a distilled hint to the user
     /// of how downstream code would break with this change.
     #[serde(default)]
-    pub hint_template: Option<String>,
+    pub hint_template: String,
 
     /// A [`handlebars`] template that renders the compilable witness example of how
     /// downstream code would break.
@@ -297,16 +294,30 @@ pub struct Witness {
 }
 
 /// A [`trustfall`] query, containing the query string itself
-/// and a mapping of argument names to [`TransparentValue`]s provided
-/// to the query.
+/// and a mapping of argument names to value types which are
+/// provided to the query.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Query {
     /// The string containing the Trustfall query.
     pub query: String,
 
     /// The mapping of argument names to values provided to the query.
+    ///
+    /// These can be inherited from a previous query ([`InheritedValue::Inherited`]) or
+    /// specified as [`InheritedValue::Constant`]s.
     #[serde(default)]
-    pub arguments: BTreeMap<String, TransparentValue>,
+    pub arguments: BTreeMap<String, InheritedValue>,
+}
+
+/// Represents either a value inherited from a previous query, or a
+/// provided constant value.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum InheritedValue {
+    /// Inherit the value from the previous output whose name is the given `String`.
+    Inherited(String),
+    /// Provide the constant value specified here.
+    #[serde(untagged)]
+    Constant(TransparentValue),
 }
 
 #[cfg(test)]
@@ -327,8 +338,6 @@ mod tests {
         LintLevel, OverrideStack, QueryOverride, RequiredSemverUpdate, SemverQuery,
     };
     use crate::templating::make_handlebars_registry;
-
-    use super::Witness;
 
     static TEST_CRATE_NAMES: OnceLock<Vec<String>> = OnceLock::new();
 
@@ -669,7 +678,7 @@ mod tests {
             arguments: BTreeMap::new(),
             error_message: String::new(),
             per_result_error_template: None,
-            witness: Witness::default(),
+            witness: None,
         }
     }
 

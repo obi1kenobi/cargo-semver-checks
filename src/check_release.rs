@@ -151,15 +151,16 @@ fn print_triggered_lint(
             })?;
         }
 
-        if let Some(hint_template) = semver_query.witness.hint_template.as_deref() {
+        if let Some(witness) = &semver_query.witness {
             let message = config
                 .handlebars()
-                .render_template(hint_template, &pretty_result)
+                .render_template(&witness.hint_template, &pretty_result)
                 .context("Error instantiating witness hint template.")?;
 
             config.log_info(|config| {
                 config.shell_note("downstream code similar to the following would break:")?;
                 writeln!(config.stderr(), "{message}")?;
+                writeln!(config.stderr())?;
 
                 Ok(())
             })?;
