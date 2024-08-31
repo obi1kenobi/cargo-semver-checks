@@ -1,6 +1,7 @@
 use anstream::{AutoStream, ColorChoice};
 use anstyle::{AnsiColor, Color, Reset, Style};
-use std::io::Write;
+use clap::ValueEnum;
+use std::{collections::HashSet, io::Write};
 
 use crate::templating::make_handlebars_registry;
 
@@ -14,6 +15,7 @@ pub struct GlobalConfig {
     minimum_rustc_version: semver::Version,
     stdout: AutoStream<Box<dyn Write + 'static>>,
     stderr: AutoStream<Box<dyn Write + 'static>>,
+    feature_flags: HashSet<FeatureFlag>,
 }
 
 impl Default for GlobalConfig {
@@ -38,6 +40,7 @@ impl GlobalConfig {
             minimum_rustc_version: semver::Version::new(1, 77, 0),
             stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
             stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
+            feature_flags: HashSet::new(),
         }
     }
 
@@ -282,6 +285,83 @@ impl GlobalConfig {
             // returns the *currently active* choice, not the initially-configured choice
             // so an initial choice of `Auto` would be converted into either `Always` or `Never`.
             ColorChoice::Never | ColorChoice::Auto => false,
+        }
+    }
+
+    /// Set (overwrite) the [`FeatureFlag`] set.
+    #[inline]
+    pub fn set_feature_flags(&mut self, flags: HashSet<FeatureFlag>) -> &mut Self {
+        self.feature_flags = flags;
+        self
+    }
+
+    /// Enable a single [feature flag](FeatureFlag).
+    #[inline]
+    pub fn enable_feature_flag(&mut self, flag: FeatureFlag) -> &mut Self {
+        self.feature_flags.insert(flag);
+        self
+    }
+
+    /// Test for whether a specific feature flag is enabled.
+    #[must_use]
+    #[inline]
+    pub fn feature_flag_enabled(&self, flag: FeatureFlag) -> bool {
+        self.feature_flags.contains(&flag)
+    }
+
+    /// Returns a set of all enabled feature flags.
+    #[must_use]
+    #[inline]
+    pub fn feature_flags(&self) -> &HashSet<FeatureFlag> {
+        &self.feature_flags
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct FeatureFlag {
+    /// `kebab-case` identifier for this feature flag.
+    pub id: &'static str,
+    /// Optional help message for this flag, separated by line breaks.  The first line
+    /// should be able to serve as a one-line short help message.
+    pub help: Option<&'static [&'static str]>,
+    /// Whether this flag is stable and enabled by default.
+    pub stable: bool,
+}
+
+impl FeatureFlag {
+    /// Print a list of the current unstable feature flags.
+    pub const HELP: Self = Self {
+        id: "help",
+        help: Some(&["Print a list of the current unstable feature flags"]),
+        stable: false,
+    };
+
+    /// Enables the use of unstable CLI flags.
+    pub const UNSTABLE_OPTIONS: Self = Self {
+        id: "unstable-options",
+        help: Some(&[
+            "Enables the use of unstable CLI flags.",
+            "Run `cargo semver-checks -Z unstable-options --unstable-help` to list them",
+        ]),
+        stable: false,
+    };
+
+    pub const ALL_FLAGS: &'static [Self] = &[Self::HELP, Self::UNSTABLE_OPTIONS];
+}
+
+impl ValueEnum for FeatureFlag {
+    #[inline]
+    fn value_variants<'a>() -> &'a [Self] {
+        Self::ALL_FLAGS
+    }
+
+    fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
+        let value = clap::builder::PossibleValue::new(self.id).hide(self.stable);
+
+        if let Some(help) = self.help.and_then(|x| x.first()) {
+            Some(value.help(help))
+        } else {
+            Some(value)
         }
     }
 }
