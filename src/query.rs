@@ -274,7 +274,7 @@ pub struct Witness {
     /// Example for the `enum_variant_missing` lint, where `path` is the importable path of the enum,
     /// `name` is the name of the enum, and `variant_name` is the name of the removed/renamed variant:
     ///
-    /// ```norun
+    /// ```no_run
     /// r#"use {{join "::" path}};
     /// fn witness(item: {{name}}) {
     ///     if let {{name}}::{{variant_name}}{..} = item {
@@ -290,14 +290,14 @@ pub struct Witness {
     ///
     /// If `None`, no additional query will be run.
     #[serde(default)]
-    pub witness_query: Option<Query>,
+    pub witness_query: Option<WitnessQuery>,
 }
 
-/// A [`trustfall`] query, containing the query string itself
-/// and a mapping of argument names to value types which are
+/// A [`trustfall`] query, for [`Witness`] generation, containing the query
+/// string itself and a mapping of argument names to value types which are
 /// provided to the query.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Query {
+pub struct WitnessQuery {
     /// The string containing the Trustfall query.
     pub query: String,
 
@@ -335,7 +335,7 @@ mod tests {
     };
 
     use crate::query::{
-        LintLevel, OverrideStack, QueryOverride, RequiredSemverUpdate, SemverQuery,
+        InheritedValue, LintLevel, OverrideStack, QueryOverride, RequiredSemverUpdate, SemverQuery,
     };
     use crate::templating::make_handlebars_registry;
 
@@ -796,6 +796,46 @@ mod tests {
             stack.effective_required_update(&q2),
             RequiredSemverUpdate::Minor
         );
+    }
+
+    /// Makes sure we can specify [`InheritedValue`]s with `Inherited(...)`
+    /// and untagged variants as [`TransparentValue`]s.
+    #[test]
+    fn test_inherited_value_deserialization() {
+        panic!(
+            "{:?}",
+            ron::from_str::<InheritedValue>(
+                &ron::to_string(&InheritedValue::Inherited("abc".into())).unwrap()
+            ),
+        );
+
+        let my_map: BTreeMap<String, InheritedValue> = ron::from_str(
+            r#"{
+                "abc": Inherited("abc"),
+                "string": "literal_string",
+                "int": -30,
+                }"#,
+        )
+        .expect("deserialization failed");
+
+        let Some(InheritedValue::Inherited(abc)) = my_map.get("abc") else {
+            panic!("Expected Inherited, got {:?}", my_map.get("abc"));
+        };
+
+        assert_eq!(abc, "abc");
+
+        let Some(InheritedValue::Constant(TransparentValue::String(string))) = my_map.get("string")
+        else {
+            panic!("Expected Constant(String), got {:?}", my_map.get("string"));
+        };
+
+        assert_eq!(&**string, "literal_string");
+
+        let Some(InheritedValue::Constant(TransparentValue::Int64(int))) = my_map.get("int") else {
+            panic!("Expected Constant(Int64), got {:?}", my_map.get("int"));
+        };
+
+        assert_eq!(*int, -30);
     }
 
     pub(super) fn check_all_lint_files_are_used_in_add_lints(added_lints: &[&str]) {
