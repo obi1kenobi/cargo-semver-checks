@@ -312,11 +312,11 @@ pub struct WitnessQuery {
 /// Represents either a value inherited from a previous query, or a
 /// provided constant value.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
 pub enum InheritedValue {
     /// Inherit the value from the previous output whose name is the given `String`.
-    Inherited(String),
+    Inherited { inherit: String },
     /// Provide the constant value specified here.
-    #[serde(untagged)]
     Constant(TransparentValue),
 }
 
@@ -802,23 +802,16 @@ mod tests {
     /// and untagged variants as [`TransparentValue`]s.
     #[test]
     fn test_inherited_value_deserialization() {
-        panic!(
-            "{:?}",
-            ron::from_str::<InheritedValue>(
-                &ron::to_string(&InheritedValue::Inherited("abc".into())).unwrap()
-            ),
-        );
-
         let my_map: BTreeMap<String, InheritedValue> = ron::from_str(
             r#"{
-                "abc": Inherited("abc"),
+                "abc": (inherit: "abc"),
                 "string": "literal_string",
                 "int": -30,
                 }"#,
         )
         .expect("deserialization failed");
 
-        let Some(InheritedValue::Inherited(abc)) = my_map.get("abc") else {
+        let Some(InheritedValue::Inherited { inherit: abc }) = my_map.get("abc") else {
             panic!("Expected Inherited, got {:?}", my_map.get("abc"));
         };
 
