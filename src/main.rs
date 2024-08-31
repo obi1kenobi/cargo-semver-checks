@@ -38,12 +38,11 @@ fn main() {
                 writeln!(config.stderr(), "{header}Unstable options{header:#}\n")?;
                 writeln!(
                     config.stderr(),
-                    "{header}{:<20}{}{header:#}",
+                    "{header}{:<20}{header:#}Description",
                     "-Z name",
-                    "Description"
                 )?;
 
-                for flag in FeatureFlag::ALL_FLAGS.into_iter().filter(|x| !x.stable) {
+                for flag in FeatureFlag::ALL_FLAGS.iter().filter(|x| !x.stable) {
                     write!(config.stderr(), "{option}{:<20}{option:#}", flag.id)?;
 
                     if let Some((first, rest)) = flag.help.and_then(|x| x.split_first()) {
@@ -606,16 +605,16 @@ fn validate_feature_flags(config: &mut GlobalConfig, unstable_options: &mut Unst
             .expect("printing failed");
     }
 
-    if !config.feature_flag_enabled(FeatureFlag::UNSTABLE_OPTIONS) {
-        if unstable_options != &UnstableOptions::default() {
-            config
-                .shell_warn(
-                    "unstable options were passed without `-Z unstable-options`. They will be ignored.",
-                )
-                .expect("print failed");
+    if !config.feature_flag_enabled(FeatureFlag::UNSTABLE_OPTIONS)
+        && unstable_options != &UnstableOptions::default()
+    {
+        config
+            .shell_warn(
+                "unstable options were passed without `-Z unstable-options`. They will be ignored.",
+            )
+            .expect("print failed");
 
-            *unstable_options = UnstableOptions::default();
-        }
+        *unstable_options = UnstableOptions::default();
     }
 }
 
