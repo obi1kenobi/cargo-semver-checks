@@ -260,7 +260,6 @@ pub struct Witness {
     ///
     /// Notice how this is not a compilable example, but it provides a distilled hint to the user
     /// of how downstream code would break with this change.
-    #[serde(default)]
     pub hint_template: String,
 
     /// A [`handlebars`] template that renders the compilable witness example of how
@@ -807,6 +806,7 @@ mod tests {
                 "abc": (inherit: "abc"),
                 "string": "literal_string",
                 "int": -30,
+                "list": [-30, -2, "abc"],
                 }"#,
         )
         .expect("deserialization failed");
@@ -829,6 +829,27 @@ mod tests {
         };
 
         assert_eq!(*int, -30);
+
+        let Some(InheritedValue::Constant(TransparentValue::List(ls))) = my_map.get("list") else {
+            panic!("Expected Constant(List), got {:?}", my_map.get("list"));
+        };
+
+        let Some(TransparentValue::Int64(-30)) = ls.get(0) else {
+            panic!("Expected Int64(-30), got {:?}", ls.get(0));
+        };
+
+        let Some(TransparentValue::Int64(-2)) = ls.get(1) else {
+            panic!("Expected Int64(-30), got {:?}", ls.get(1));
+        };
+
+        let Some(TransparentValue::String(s)) = ls.get(2) else {
+            panic!("Expected String, got {:?}", ls.get(2));
+        };
+
+        assert_eq!(&**s, "abc");
+
+        ron::from_str::<InheritedValue>(r#"[(inherit: "invalid")]"#)
+            .expect_err("nested values should be TransparentValues, not InheritedValues");
     }
 
     pub(super) fn check_all_lint_files_are_used_in_add_lints(added_lints: &[&str]) {
