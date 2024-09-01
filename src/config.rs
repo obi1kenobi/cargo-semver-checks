@@ -378,7 +378,8 @@ impl FeatureFlag {
     pub const UNSTABLE_OPTIONS: Self = Self {
         id: "unstable-options",
         help: Some(
-            "Enables the use of unstable CLI flags. Run `cargo semver-checks -Z unstable-options --unstable-help` to list them"
+            "Enables the use of unstable CLI flags.\n\
+            Run `cargo semver-checks -Z unstable-options --unstable-help` to list them",
         ),
         stable: false,
     };

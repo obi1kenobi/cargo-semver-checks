@@ -25,7 +25,9 @@ fn main() {
     config.set_log_level(args.verbosity.log_level());
     config.set_feature_flags(feature_flags);
 
-    validate_feature_flags(&mut config, &mut args.unstable_options);
+    exit_on_error(true, || {
+        validate_feature_flags(&mut config, &mut args.unstable_options)
+    });
 
     if args.bugreport {
         print_issue_url(&mut config);
@@ -125,11 +127,15 @@ fn main() {
 
         std::process::exit(0);
     } else if args.unstable_options.unstable_help {
+        let header = Style::new()
+            .bold()
+            .fg_color(Some(Color::Ansi(AnsiColor::Cyan)));
+
         /// Unstable command-line options.  Run `cargo semver-checks --help` to see stable help.
         #[derive(Parser)]
         #[clap(
             disable_help_flag = true,
-            override_usage = "cargo semver-checks -Z unstable-options [OPTIONS] <stable-flags>",
+            help_template = "{options}",
             mut_args = |arg| arg.hide(false),
         )]
         struct HelpPrinter {
@@ -139,7 +145,9 @@ fn main() {
 
         write!(
             config.stderr(),
-            "{}",
+            "{header}Unstable options:{header:#}\n\
+            (run `cargo semver-checks --help` to see all stable options)\n\
+            {}",
             HelpPrinter::command().render_long_help()
         )
         .expect("print failed");
@@ -342,6 +350,43 @@ struct UnstableOptions {
     /// Enable printing witness hints, examples of potentially-broken downstream code.
     #[arg(long, hide = true)]
     witness_hints: bool,
+}
+
+impl UnstableOptions {
+    /// Returns a list of command line flags set when fields in this struct are
+    /// not their default values, used for detecting and printing when unstable options
+    /// are set without `-Z unstable-options`.
+    ///
+    /// When you add a new unstable option, the exhaustive let pattern below will not compile.
+    /// Fix this by adding the new field to the let pattern, then adding a similar if statement
+    /// to the ones below to detect when the field is not its default value, and insert the
+    /// command line flag that caused this into the list.  See the implementation
+    /// for examples.
+    ///
+    /// When you remove an unstable option (e.g., to stabilize it), remove the field from
+    /// the match pattern, and remove the if block corresponding to that struct field.
+    #[must_use]
+    fn non_default(&self) -> Vec<String> {
+        let mut list = Vec::new();
+
+        // If this has a compilation error from adding or removing fields, see this function's
+        // docstring for how to fix this function's implementation.
+        let Self {
+            unstable_help,
+            witness_hints,
+        } = self;
+
+        // *unstable_help != false, the default value
+        if *unstable_help {
+            list.push("--unstable-help".into());
+        }
+
+        if *witness_hints {
+            list.push("--witness-hints".into());
+        }
+
+        list
+    }
 }
 
 /// Check your crate for semver violations.
@@ -591,7 +636,10 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
 /// Helper function to encapsulate the logic of validating that unstable options
 /// were not used without `-Z unstable-options` and issuing deprecation warnings
 /// for any stable feature flags that were explicitly specified.
-fn validate_feature_flags(config: &mut GlobalConfig, unstable_options: &mut UnstableOptions) {
+fn validate_feature_flags(
+    config: &mut GlobalConfig,
+    unstable_options: &UnstableOptions,
+) -> anyhow::Result<()> {
     // needed to avoid borrow checker errors when printing with config.
     let stable_flags: Vec<_> = config
         .feature_flags()
@@ -610,17 +658,26 @@ fn validate_feature_flags(config: &mut GlobalConfig, unstable_options: &mut Unst
             .expect("printing failed");
     }
 
-    if !config.feature_flag_enabled(FeatureFlag::UNSTABLE_OPTIONS)
-        && unstable_options != &UnstableOptions::default()
-    {
-        config
-            .shell_warn(
-                "unstable options were passed without `-Z unstable-options`. They will be ignored.",
-            )
-            .expect("print failed");
+    if !config.feature_flag_enabled(FeatureFlag::UNSTABLE_OPTIONS) {
+        let non_default_options = unstable_options.non_default();
 
-        *unstable_options = UnstableOptions::default();
+        if !non_default_options.is_empty() {
+            let mut message = String::from(
+                "The following options are not supported without `-Z unstable-options`:\n",
+            );
+
+            for option in non_default_options {
+                use std::fmt::Write as _;
+
+                // writes to strings are infallible.
+                let _ = writeln!(&mut message, " - `{option}`");
+            }
+
+            anyhow::bail!(message);
+        }
     }
+
+    Ok(())
 }
 
 #[test]
