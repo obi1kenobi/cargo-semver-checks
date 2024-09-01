@@ -27,62 +27,7 @@ fn main() {
 
     validate_feature_flags(&mut config, &mut args.unstable_options);
 
-    if config.feature_flag_enabled(FeatureFlag::HELP) {
-        config
-            .log_info(|config| {
-                let header = Style::new()
-                    .bold()
-                    .fg_color(Some(Color::Ansi(AnsiColor::Cyan)));
-                let option = Style::new().bold();
-
-                writeln!(config.stderr(), "{header}Unstable options{header:#}\n")?;
-                writeln!(
-                    config.stderr(),
-                    "{header}{:<20}{header:#}Description",
-                    "-Z name",
-                )?;
-
-                for flag in FeatureFlag::ALL_FLAGS.iter().filter(|x| !x.stable) {
-                    write!(config.stderr(), "{option}{:<20}{option:#}", flag.id)?;
-
-                    if let Some((first, rest)) = flag.help.and_then(|x| x.split_first()) {
-                        writeln!(config.stderr(), "{first}")?;
-
-                        for line in rest {
-                            writeln!(config.stderr(), "{:<20}{line}", "")?;
-                        }
-                    } else {
-                        writeln!(config.stderr())?;
-                    }
-                }
-
-                Ok(())
-            })
-            .expect("write failed");
-
-        std::process::exit(0);
-    } else if args.unstable_options.unstable_help {
-        /// Unstable command-line options.  Run `cargo semver-checks --help` to see stable help.
-        #[derive(Parser)]
-        #[clap(
-            disable_help_flag = true,
-            override_usage = "cargo semver-checks -Z unstable-options [OPTIONS] <stable-flags>",
-            mut_args = |arg| arg.hide(false),
-        )]
-        struct HelpPrinter {
-            #[command(flatten)]
-            args: UnstableOptions,
-        }
-
-        write!(
-            config.stderr(),
-            "{}",
-            HelpPrinter::command().render_long_help()
-        )
-        .expect("print failed");
-
-        std::process::exit(0);
-    } else if args.bugreport {
+    if args.bugreport {
         print_issue_url(&mut config);
         std::process::exit(0);
     } else if args.list {
@@ -140,6 +85,65 @@ fn main() {
             }
             Ok(())
         });
+        std::process::exit(0);
+    } else if config.feature_flag_enabled(FeatureFlag::HELP) {
+        config
+            .log_info(|config| {
+                let header = Style::new()
+                    .bold()
+                    .fg_color(Some(Color::Ansi(AnsiColor::Cyan)));
+                let option = Style::new().bold();
+
+                writeln!(config.stderr(), "{header}Unstable options{header:#}\n")?;
+                writeln!(
+                    config.stderr(),
+                    "{header}{:<20}{header:#}Description",
+                    "-Z name",
+                )?;
+
+                for flag in FeatureFlag::ALL_FLAGS.iter().filter(|x| !x.stable) {
+                    write!(config.stderr(), "{option}{:<20}{option:#}", flag.id)?;
+
+                    if let Some(help) = flag.help {
+                        let mut lines = help.lines();
+
+                        if let Some(first) = lines.next() {
+                            writeln!(config.stderr(), "{first}")?;
+
+                            for line in lines {
+                                writeln!(config.stderr(), "{:<20}{line}", "")?;
+                            }
+                        }
+                    } else {
+                        writeln!(config.stderr())?;
+                    }
+                }
+
+                Ok(())
+            })
+            .expect("write failed");
+
+        std::process::exit(0);
+    } else if args.unstable_options.unstable_help {
+        /// Unstable command-line options.  Run `cargo semver-checks --help` to see stable help.
+        #[derive(Parser)]
+        #[clap(
+            disable_help_flag = true,
+            override_usage = "cargo semver-checks -Z unstable-options [OPTIONS] <stable-flags>",
+            mut_args = |arg| arg.hide(false),
+        )]
+        struct HelpPrinter {
+            #[command(flatten)]
+            args: UnstableOptions,
+        }
+
+        write!(
+            config.stderr(),
+            "{}",
+            HelpPrinter::command().render_long_help()
+        )
+        .expect("print failed");
+
         std::process::exit(0);
     }
 
@@ -330,6 +334,7 @@ struct SemverChecks {
 /// instead, so a docstring help message will be shown then.
 #[derive(Debug, Clone, Args, Default, PartialEq, Eq)]
 #[clap(hide = true)]
+#[non_exhaustive]
 struct UnstableOptions {
     /// Show help for the unstable options.
     #[arg(long, hide = true)]
@@ -641,4 +646,35 @@ fn features_empty_string_is_no_op() {
     };
 
     assert_eq!(Check::from(no_features), Check::from(empty_features));
+}
+
+/// Test to assert that all flags added to the [`UnstableOptions`] are
+/// hidden and won't show up in stable `--help`.
+#[test]
+fn all_unstable_features_are_hidden() {
+    // Helper struct to get a `Command` to use reflection on the unstable options.
+    #[derive(Debug, Parser)]
+    struct Wrapper {
+        #[clap(flatten)]
+        inner: UnstableOptions,
+    }
+
+    let unstable_options = Wrapper::command();
+    let cargo_command = Cargo::command();
+    let semver_checks = cargo_command
+        .find_subcommand("semver-checks")
+        .expect("expected semver-checks command");
+
+    for option in unstable_options.get_arguments() {
+        let argument = semver_checks
+            .get_arguments()
+            .find(|x| x.get_id() == option.get_id())
+            .expect("expected unstable argument");
+
+        assert!(
+            argument.is_hide_set(),
+            "unstable argument {} should be hidden by default",
+            argument.get_id()
+        );
+    }
 }
