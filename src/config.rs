@@ -329,20 +329,20 @@ impl GlobalConfig {
 /// ## Adding a new unstable feature flag
 ///
 /// Create a new associated constant in the `impl FeatureFlag` block with an identifier,
-/// help message, and `stable: false`, and **add this constant** to the [`ALL_FLAGS`](Self::ALL_FLAGS)
-/// slice.
+/// help message, and `stable: false`, and **add this constant** to the
+/// [`ALL_FLAGS`](Self::ALL_FLAGS) slice.
 ///
 /// ## Stabilizing a feature flag
 ///
-/// Set `stable: true` on the associated constant for that flag.  To keep the transition from unstable flag
-/// to stable feature, mark the associated constant `#[deprecated]`, but don't remove it.  This will warn downstream
-/// code and `cargo-semver-checks` binary users that the flag has been stabilized and may be removed in a
-/// future release, and hide it from `-Z help`, without breaking downstream code and binary users right
-/// when it is stabilized.
+/// Set `stable: true` on the associated constant for that flag.  To keep the transition
+/// from unstable flag to stable feature, mark the associated constant `#[deprecated]`, but
+/// don't remove it.  This will warn downstream code and `cargo-semver-checks` binary users
+/// that the flag has been stabilized and may be removed in a future release, and hide it
+/// from `-Z help`, without breaking downstream code and binary users right when it is stabilized.
 ///
-/// When you stabilize a flag and mark it as `#[deprecated]`, remove any `if` blocks that feature-gate code.
-/// Testing if a flag is enabled with [`GlobalConfig::feature_flag_enabled`] will always return
-/// `true` when a flag has been stabilized.
+/// When you stabilize a flag and mark it as `#[deprecated]`, remove any `if` blocks
+/// that feature-gate code. Testing if a flag is enabled with [`GlobalConfig::feature_flag_enabled`]
+/// will always return `true` when a flag has been stabilized.
 ///
 /// ## See also
 ///
