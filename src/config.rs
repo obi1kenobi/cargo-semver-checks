@@ -379,7 +379,7 @@ impl FeatureFlag {
         id: "unstable-options",
         help: Some(
             "Enables the use of unstable CLI flags.\n\
-            Run `cargo semver-checks -Z unstable-options --unstable-help` to list them",
+            Run `cargo semver-checks -Z help` to list them",
         ),
         stable: false,
     };

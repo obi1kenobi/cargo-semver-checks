@@ -16,7 +16,7 @@ mod snapshot_tests;
 fn main() {
     human_panic::setup_panic!();
 
-    let Cargo::SemverChecks(mut args) = Cargo::parse();
+    let Cargo::SemverChecks(args) = Cargo::parse();
 
     let feature_flags = HashSet::from_iter(args.unstable_features);
 
@@ -26,13 +26,16 @@ fn main() {
     config.set_feature_flags(feature_flags);
 
     exit_on_error(true, || {
-        validate_feature_flags(&mut config, &mut args.unstable_options)
+        validate_feature_flags(&mut config, &args.unstable_options)
     });
 
+    // --bugreport: generate a bug report URL
     if args.bugreport {
         print_issue_url(&mut config);
         std::process::exit(0);
-    } else if args.list {
+    }
+    // --list: print a list of all lints
+    else if args.list {
         exit_on_error(true, || {
             let queries = SemverQuery::all_queries();
             let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
@@ -63,7 +66,9 @@ fn main() {
             config.shell_note("Use `--explain <id>` to see more details")
         });
         std::process::exit(0);
-    } else if let Some(id) = args.explain.as_deref() {
+    }
+    // --explain ID: print detailed information about a lint
+    else if let Some(id) = args.explain.as_deref() {
         exit_on_error(true, || {
             let queries = SemverQuery::all_queries();
             let query = queries.get(id).ok_or_else(|| {
@@ -88,7 +93,9 @@ fn main() {
             Ok(())
         });
         std::process::exit(0);
-    } else if config.feature_flag_enabled(FeatureFlag::HELP) {
+    }
+    // -Z help: print information on all unstable FeatureFlags (-Z flag)
+    else if config.feature_flag_enabled(FeatureFlag::HELP) {
         config
             .log_info(|config| {
                 let header = Style::new()
@@ -121,36 +128,29 @@ fn main() {
                     }
                 }
 
+                // helper struct for rendering help for just the unstable options.
+                #[derive(Parser)]
+                #[clap(
+                    disable_help_flag = true,
+                    help_template = "{options}",
+                    mut_args = |arg| arg.hide(false),
+                )]
+                struct HelpPrinter {
+                    #[command(flatten)]
+                    args: UnstableOptions,
+                }
+
+                write!(
+                    config.stderr(),
+                    "{header}Unstable options:{header:#}\n\
+                    {}",
+                    HelpPrinter::command().render_long_help()
+                )
+                .expect("print failed");
+
                 Ok(())
             })
             .expect("write failed");
-
-        std::process::exit(0);
-    } else if args.unstable_options.unstable_help {
-        let header = Style::new()
-            .bold()
-            .fg_color(Some(Color::Ansi(AnsiColor::Cyan)));
-
-        /// Unstable command-line options.  Run `cargo semver-checks --help` to see stable help.
-        #[derive(Parser)]
-        #[clap(
-            disable_help_flag = true,
-            help_template = "{options}",
-            mut_args = |arg| arg.hide(false),
-        )]
-        struct HelpPrinter {
-            #[command(flatten)]
-            args: UnstableOptions,
-        }
-
-        write!(
-            config.stderr(),
-            "{header}Unstable options:{header:#}\n\
-            (run `cargo semver-checks --help` to see all stable options)\n\
-            {}",
-            HelpPrinter::command().render_long_help()
-        )
-        .expect("print failed");
 
         std::process::exit(0);
     }
@@ -338,15 +338,12 @@ struct SemverChecks {
 ///
 /// Also make sure to add `#[arg(hide = true)]` to your argument so it doesn't show
 /// up in stable help when it is not valid.  Users can run
-/// `cargo semver-checks -Z unstable-options --unstable-help` to show help messages
+/// `cargo semver-checks -Z help` to show help messages
 /// instead, so a docstring help message will be shown then.
 #[derive(Debug, Clone, Args, Default, PartialEq, Eq)]
 #[clap(hide = true)]
 #[non_exhaustive]
 struct UnstableOptions {
-    /// Show help for the unstable options.
-    #[arg(long, hide = true)]
-    unstable_help: bool,
     /// Enable printing witness hints, examples of potentially-broken downstream code.
     #[arg(long, hide = true)]
     witness_hints: bool,
@@ -371,15 +368,7 @@ impl UnstableOptions {
 
         // If this has a compilation error from adding or removing fields, see this function's
         // docstring for how to fix this function's implementation.
-        let Self {
-            unstable_help,
-            witness_hints,
-        } = self;
-
-        // *unstable_help != false, the default value
-        if *unstable_help {
-            list.push("--unstable-help".into());
-        }
+        let Self { witness_hints } = self;
 
         if *witness_hints {
             list.push("--witness-hints".into());
