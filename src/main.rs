@@ -650,7 +650,7 @@ fn validate_feature_flags(
 
         if !non_default_options.is_empty() {
             let mut message = String::from(
-                "The following options are not supported without `-Z unstable-options`:\n",
+                "the following options are not supported without `-Z unstable-options`:\n",
             );
 
             for option in non_default_options {
