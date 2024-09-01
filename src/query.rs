@@ -836,8 +836,8 @@ mod tests {
             panic!("Expected Constant(List), got {:?}", my_map.get("lint_list"));
         };
 
-        let Some(TransparentValue::Int64(-30)) = ints.get(0) else {
-            panic!("Expected Int64(-30), got {:?}", ints.get(0));
+        let Some(TransparentValue::Int64(-30)) = ints.first() else {
+            panic!("Expected Int64(-30), got {:?}", ints.first());
         };
 
         let Some(TransparentValue::Int64(-2)) = ints.get(1) else {
@@ -853,8 +853,8 @@ mod tests {
             );
         };
 
-        let Some(TransparentValue::String(s)) = strs.get(0) else {
-            panic!("Expected String, got {:?}", strs.get(0));
+        let Some(TransparentValue::String(s)) = strs.first() else {
+            panic!("Expected String, got {:?}", strs.first());
         };
 
         assert_eq!(&**s, "abc");
