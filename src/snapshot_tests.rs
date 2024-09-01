@@ -153,7 +153,7 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     config.set_stdout(Box::new(stdout.clone()));
     config.set_stderr(Box::new(stderr.clone()));
     config.set_color_choice(false);
-    config.set_log_level(arguments.check_release.verbosity.log_level());
+    config.set_log_level(arguments.verbosity.log_level());
 
     let check = Check::from(arguments.check_release);
 
