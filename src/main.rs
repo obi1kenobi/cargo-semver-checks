@@ -103,28 +103,26 @@ fn main() {
                     .fg_color(Some(Color::Ansi(AnsiColor::Cyan)));
                 let option = Style::new().bold();
 
-                writeln!(config.stderr(), "{header}Unstable options{header:#}\n")?;
-                writeln!(
-                    config.stderr(),
-                    "{header}{:<20}{header:#}Description",
-                    "-Z name",
-                )?;
+                let mut stdout = config.stdout();
+
+                writeln!(stdout, "{header}Unstable feature flags:{header:#}")?;
+                writeln!(stdout, "{header}{:<20}{header:#}Description", "-Z name",)?;
 
                 for flag in FeatureFlag::ALL_FLAGS.iter().filter(|x| !x.stable) {
-                    write!(config.stderr(), "{option}{:<20}{option:#}", flag.id)?;
+                    write!(stdout, "{option}{:<20}{option:#}", flag.id)?;
 
                     if let Some(help) = flag.help {
                         let mut lines = help.lines();
 
                         if let Some(first) = lines.next() {
-                            writeln!(config.stderr(), "{first}")?;
+                            writeln!(stdout, "{first}")?;
 
                             for line in lines {
-                                writeln!(config.stderr(), "{:<20}{line}", "")?;
+                                writeln!(stdout, "{:<20}{line}", "")?;
                             }
                         }
                     } else {
-                        writeln!(config.stderr())?;
+                        writeln!(stdout)?;
                     }
                 }
 
@@ -141,7 +139,7 @@ fn main() {
                 }
 
                 write!(
-                    config.stderr(),
+                    stdout,
                     "{header}Unstable options:{header:#}\n\
                     {}",
                     HelpPrinter::command().render_long_help()
