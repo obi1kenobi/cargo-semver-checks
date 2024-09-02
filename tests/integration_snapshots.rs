@@ -31,7 +31,6 @@ fn assert_integration_test(
     let mut settings = insta::Settings::clone_current();
     let mut cmd =
         Command::cargo_bin("cargo-semver-checks").expect("failed to get cargo-semver-checks");
-    cmd.env_clear();
 
     cmd.arg("semver-checks");
     settings.set_snapshot_path("../test_outputs/");
@@ -93,32 +92,6 @@ fn bugreport() {
             "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?[INFO_URLENCODED]",
         );
     });
-}
-
-#[test]
-fn ci_debugging() {
-    use std::fmt::Write as _;
-    let mut buf = String::new();
-    let mut normal_command = Command::new("cargo");
-    normal_command.arg("-V");
-    let _ = writeln!(
-        &mut buf,
-        "normal path: {}",
-        Path::new(normal_command.get_program()).display()
-    );
-    let output = normal_command.output().unwrap();
-    let _ = writeln!(
-        &mut buf,
-        "{}\n{}\n{}\n\n",
-        output.status,
-        String::from_utf8_lossy(&output.stderr),
-        String::from_utf8_lossy(&output.stdout)
-    );
-
-    let mut bugreport =
-        bugreport::bugreport!().info(CommandOutput::new("cargo version", "cargo", &["-V"]));
-
-    panic!("{buf}\n\n{}", bugreport.format::<Markdown>());
 }
 
 /// Helper function to get a canonicalized version of the cargo executable bin.
