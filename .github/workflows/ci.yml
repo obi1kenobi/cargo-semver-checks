@@ -1084,69 +1084,87 @@ jobs:
           persist-credentials: false
           path: 'semver'
 
-      - name: Checkout tokio
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          repository: 'tokio-rs/tokio'
-          ref: 'd7b7c6131774ab631be6529fef3680abfeeb4781'
-          path: 'subject'
-
-      - name: Install rust
-        id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache: false
-          rustflags: ""
-
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: |
-            subject/target/semver-checks/local-tokio-1_25_0
-            subject/target/semver-checks/local-tokio_macros-1_8_2
-            subject/target/semver-checks/local-tokio_stream-0_1_12
-            subject/target/semver-checks/local-tokio_test-0_4_2
-            subject/target/semver-checks/local-tokio_util-0_7_7
-
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
-        with:
-          path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
-
-      - name: Restore rustdoc
-        id: cache
-        uses: actions/cache/restore@v4
-        with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
-          path: subject/target/semver-checks/cache
-
-      # This test caught two bugs:
-      # - The default baseline was set to the current path instead of the default registry version.
-      # - Specifying `--exclude` together with a crate manifest that is within a workspace
-      #   (but doesn't *itself* define the workspace) would cause the entire workspace to
-      #   get tested, even though only a single crate's manifest was specified.
-      - name: Run semver-checks on tokio-stream crate manifest only
+      - name: Disabled due to \#902
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           cd semver
-          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/tokio-stream/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration --verbose
+          STATE="$(gh issue view 902 --json state --jq .state)"
 
-      # This test caught a bug where `--exclude` was silently ignored
-      # if `--workspace` wasn't set at the same time.
-      - name: Run semver-checks on workspace manifest with explicit exclusions
-        run: |
-          cd semver
-          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --release-type minor --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration --verbose
+          if [[ "$STATE" == 'OPEN' ]]; then
+            echo 'Test disabled due to https://github.com/obi1kenobi/cargo-semver-checks/issues/902'
+          elif [[ "$STATE" == 'CLOSED' ]]; then
+            echo 'Please re-enable this test since the underlying issue has been closed'
+            exit 1
+          else
+            echo 'Unknown state for issue #902:'
+            echo "$STATE"
+            exit 1
+          fi
 
-      - name: Save rustdoc
-        uses: actions/cache/save@v4
-        if: steps.cache.outputs.cache-hit != 'true'
-        with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
-          path: subject/target/semver-checks/cache
+      # - name: Checkout tokio
+      #   uses: actions/checkout@v4
+      #   with:
+      #     persist-credentials: false
+      #     repository: 'tokio-rs/tokio'
+      #     ref: 'd7b7c6131774ab631be6529fef3680abfeeb4781'
+      #     path: 'subject'
+
+      # - name: Install rust
+      #   id: toolchain
+      #   uses: actions-rust-lang/setup-rust-toolchain@v1
+      #   with:
+      #     cache: false
+      #     rustflags: ""
+
+      # - name: Restore cargo index and rustdoc target dir
+      #   uses: Swatinem/rust-cache@v2
+      #   with:
+      #     workspaces: |
+      #       subject/target/semver-checks/local-tokio-1_25_0
+      #       subject/target/semver-checks/local-tokio_macros-1_8_2
+      #       subject/target/semver-checks/local-tokio_stream-0_1_12
+      #       subject/target/semver-checks/local-tokio_test-0_4_2
+      #       subject/target/semver-checks/local-tokio_util-0_7_7
+
+      # - name: Restore binary
+      #   id: cache-binary
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     path: bins/
+      #     key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+      #     fail-on-cache-miss: true
+
+      # - name: Restore rustdoc
+      #   id: cache
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+      #     path: subject/target/semver-checks/cache
+
+      # # This test caught two bugs:
+      # # - The default baseline was set to the current path instead of the default registry version.
+      # # - Specifying `--exclude` together with a crate manifest that is within a workspace
+      # #   (but doesn't *itself* define the workspace) would cause the entire workspace to
+      # #   get tested, even though only a single crate's manifest was specified.
+      # - name: Run semver-checks on tokio-stream crate manifest only
+      #   run: |
+      #     cd semver
+      #     ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/tokio-stream/Cargo.toml" --release-type minor --exclude benches --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration --verbose
+
+      # # This test caught a bug where `--exclude` was silently ignored
+      # # if `--workspace` wasn't set at the same time.
+      # - name: Run semver-checks on workspace manifest with explicit exclusions
+      #   run: |
+      #     cd semver
+      #     ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --release-type minor --exclude examples --exclude stress-test --exclude tests-build --exclude tests-integration --verbose
+
+      # - name: Save rustdoc
+      #   uses: actions/cache/save@v4
+      #   if: steps.cache.outputs.cache-hit != 'true'
+      #   with:
+      #     key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+      #     path: subject/target/semver-checks/cache
 
   run-on-tokio-implicit:
     # cargo-semver-checks crashed here due to improper CLI argument handling:
@@ -1161,60 +1179,78 @@ jobs:
         with:
           persist-credentials: false
           path: 'semver'
-
-      - name: Checkout tokio
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          repository: 'tokio-rs/tokio'
-          ref: 'd7b7c6131774ab631be6529fef3680abfeeb4781'
-          path: 'subject'
-
-      - name: Install rust
-        id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache: false
-          rustflags: ""
-
-      - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: |
-            subject/target/semver-checks/local-tokio-1_25_0
-            subject/target/semver-checks/local-tokio_macros-1_8_2
-            subject/target/semver-checks/local-tokio_stream-0_1_12
-            subject/target/semver-checks/local-tokio_test-0_4_2
-            subject/target/semver-checks/local-tokio_util-0_7_7
-
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
-        with:
-          path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
-
-      - name: Restore rustdoc
-        id: cache
-        uses: actions/cache/restore@v4
-        with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
-          path: subject/target/semver-checks/cache
-
-      # This test caught a bug where `publish = false` items in a workspace were semver-checked
-      # unless either explicit `--workspace` was present or was implied e.g. via `--exclude`.
-      - name: Run semver-checks on workspace manifest with implicit exclusions
+      - name: Disabled due to \#902
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           cd semver
-          ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --release-type minor --verbose
+          STATE="$(gh issue view 902 --json state --jq .state)"
 
-      - name: Save rustdoc
-        uses: actions/cache/save@v4
-        if: steps.cache.outputs.cache-hit != 'true'
-        with:
-          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
-          path: subject/target/semver-checks/cache
+          if [[ "$STATE" == 'OPEN' ]]; then
+            echo 'Test disabled due to https://github.com/obi1kenobi/cargo-semver-checks/issues/902'
+          elif [[ "$STATE" == 'CLOSED' ]]; then
+            echo 'Please re-enable this test since the underlying issue has been closed'
+            exit 1
+          else
+            echo 'Unknown state for issue #902:'
+            echo "$STATE"
+            exit 1
+          fi
+
+
+      # - name: Checkout tokio
+      #   uses: actions/checkout@v4
+      #   with:
+      #     persist-credentials: false
+      #     repository: 'tokio-rs/tokio'
+      #     ref: 'd7b7c6131774ab631be6529fef3680abfeeb4781'
+      #     path: 'subject'
+
+      # - name: Install rust
+      #   id: toolchain
+      #   uses: actions-rust-lang/setup-rust-toolchain@v1
+      #   with:
+      #     cache: false
+      #     rustflags: ""
+
+      # - name: Restore cargo index and rustdoc target dir
+      #   uses: Swatinem/rust-cache@v2
+      #   with:
+      #     workspaces: |
+      #       subject/target/semver-checks/local-tokio-1_25_0
+      #       subject/target/semver-checks/local-tokio_macros-1_8_2
+      #       subject/target/semver-checks/local-tokio_stream-0_1_12
+      #       subject/target/semver-checks/local-tokio_test-0_4_2
+      #       subject/target/semver-checks/local-tokio_util-0_7_7
+
+      # - name: Restore binary
+      #   id: cache-binary
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     path: bins/
+      #     key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+      #     fail-on-cache-miss: true
+
+      # - name: Restore rustdoc
+      #   id: cache
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+      #     path: subject/target/semver-checks/cache
+
+      # # This test caught a bug where `publish = false` items in a workspace were semver-checked
+      # # unless either explicit `--workspace` was present or was implied e.g. via `--exclude`.
+      # - name: Run semver-checks on workspace manifest with implicit exclusions
+      #   run: |
+      #     cd semver
+      #     ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --release-type minor --verbose
+
+      # - name: Save rustdoc
+      #   uses: actions/cache/save@v4
+      #   if: steps.cache.outputs.cache-hit != 'true'
+      #   with:
+      #     key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+      #     path: subject/target/semver-checks/cache
 
   run-on-clap:
     # clap v3.2.0 added a semver violation
