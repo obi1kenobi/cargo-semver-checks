@@ -13,6 +13,16 @@ pub enum MultipleTest {
     WillStayUnitLike
 }
 
+pub enum TestBecomeDocHidden {
+    #[doc(hidden)]
+    WillBecomeStructLike{}
+}
+
+pub enum TestBecomeNonExhaustive {
+    #[non_exhaustive]
+    WillBecomeStructLike{}
+}
+
 // ---- Should not be reported ----
 pub enum TestUnit {
     WillStayUnitLike
@@ -30,28 +40,24 @@ pub enum TestTupleNonExhaustive {
 
 pub enum MultipleTestNonExhaustive {
     #[non_exhaustive]
-    WillBecomeStructLike,
+    WillBecomeStructLike{},
     #[non_exhaustive]
-    WillBecomeTupleLike,
+    WillBecomeTupleLike(()),
     #[non_exhaustive]
     WillStayUnitLike
 }
 
 pub enum TestDocHidden {
     #[doc(hidden)]
-    WillBecomeStructLike,
+    WillBecomeStructLike{},
     #[doc(hidden)]
-    WillBecomeTupleLike,
+    WillBecomeTupleLike(()),
     #[doc(hidden)]
     WillStayUnitLike
 }
 
-pub enum TestBecomeDocHidden {
-    #[doc(hidden)]
-    WillBecomeStructLike{}
-}
-
-pub enum TestBecomeNonExhaustive {
-    #[non_exhaustive]
-    WillBecomeStructLike{}
+pub enum MultipleStayTheSame {
+    StructLike{},
+    TupleLike(()),
+    UnitLike
 }

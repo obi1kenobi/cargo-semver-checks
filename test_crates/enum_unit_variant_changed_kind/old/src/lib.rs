@@ -13,6 +13,14 @@ pub enum MultipleTest {
     WillStayUnitLike
 }
 
+pub enum TestBecomeDocHidden {
+    WillBecomeStructLike
+}
+
+pub enum TestBecomeNonExhaustive {
+    WillBecomeStructLike
+}
+
 // ---- Should not be reported ----
 pub enum TestUnit {
     WillStayUnitLike
@@ -46,10 +54,8 @@ pub enum TestDocHidden {
     WillStayUnitLike
 }
 
-pub enum TestBecomeDocHidden {
-    WillBecomeStructLike
-}
-
-pub enum TestBecomeNonExhaustive {
-    WillBecomeStructLike
+pub enum MultipleStayTheSame {
+    StructLike{},
+    TupleLike(()),
+    UnitLike
 }

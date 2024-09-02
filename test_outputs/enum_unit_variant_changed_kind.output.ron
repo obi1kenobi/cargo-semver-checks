@@ -62,5 +62,29 @@
             "span_filename": String("src/lib.rs"),
             "variant_name": String("WillBecomeTupleLike"),
         },
+        {
+            "enum_name": String("TestBecomeDocHidden"),
+            "kind": String("PlainVariant"),
+            "new_kind": String("StructVariant"),
+            "path": List([
+                String("enum_unit_variant_changed_kind"),
+                String("TestBecomeDocHidden"),
+            ]),
+            "span_begin_line": Uint64(18),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("WillBecomeStructLike"),
+        },
+        {
+            "enum_name": String("TestBecomeNonExhaustive"),
+            "kind": String("PlainVariant"),
+            "new_kind": String("StructVariant"),
+            "path": List([
+                String("enum_unit_variant_changed_kind"),
+                String("TestBecomeNonExhaustive"),
+            ]),
+            "span_begin_line": Uint64(23),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("WillBecomeStructLike"),
+        },
     ],
 }

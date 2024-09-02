@@ -32,7 +32,7 @@
                 String("enum_unit_variant_changed_kind"),
                 String("TestBecomeNonExhaustive"),
             ]),
-            "span_begin_line": Uint64(56),
+            "span_begin_line": Uint64(23),
             "span_filename": String("src/lib.rs"),
             "variant_name": String("WillBecomeStructLike"),
             "visibility_limit": String("public"),
