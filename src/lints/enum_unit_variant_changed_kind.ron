@@ -44,7 +44,7 @@ SemverQuery(
                         }
 
                         # Don't check for exhaustiveness and public API eligibility here.
-                        # Variants that changed kind and gained #[doc(hidden)] should
+                        # Variants that changed kind and gained `#[doc(hidden)]` should
                         # report for both lints, since there is no implied continuity
                         # between the old variant and the new one with the same name.   
                         variant {
