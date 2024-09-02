@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "variant_marked_non_exhaustive",
+    id: "enum_variant_marked_non_exhaustive",
     human_readable_name: "enum variant marked #[non_exhaustive]",
     description: "An exhaustive enum variant has been marked #[non_exhaustive].",
     reference: Some("An exhaustive enum variant has been marked #[non_exhaustive], preventing it from being constructed using a literal from outside its own crate."),
