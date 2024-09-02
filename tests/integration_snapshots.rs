@@ -13,7 +13,6 @@
 use std::path::{Path, PathBuf};
 
 use assert_cmd::cargo::CommandCargoExt;
-use bugreport::{collector::CommandOutput, format::Markdown};
 use insta_cmd::Command;
 
 /// Create a snapshot of the output of a `cargo semver-checks` invocation, using [`insta_cmd`].
@@ -31,6 +30,7 @@ fn assert_integration_test(
     let mut settings = insta::Settings::clone_current();
     let mut cmd =
         Command::cargo_bin("cargo-semver-checks").expect("failed to get cargo-semver-checks");
+    cmd.env("CARGO_TERM_COLOR", "never");
 
     cmd.arg("semver-checks");
     settings.set_snapshot_path("../test_outputs/");
@@ -79,9 +79,9 @@ fn bugreport() {
         settings.add_filter(
             "Cargo build configuration:\\n\
             --------------------------\\n\
-            [.\\n]*\\n\
+            [\\s\\S]*\\n\
             Please file an issue",
-            "Cargo build configuration\n\
+            "Cargo build configuration:\n\
             --------------------------\n\
             [CARGO_BUILD_TOML]\n\
             Please file an issue",

@@ -5,6 +5,8 @@ info:
   args:
     - semver-checks
     - "--bugreport"
+  env:
+    CARGO_TERM_COLOR: never
 ---
 success: true
 exit_code: 0
@@ -45,7 +47,7 @@ cargo [CARGO_VERSION] ([CARGO_VERSION_DETAILS])
 - Host: [HOST_TRIPLE]
 
 
-Cargo build configuration
+Cargo build configuration:
 --------------------------
 [CARGO_BUILD_TOML]
 Please file an issue on GitHub reporting your bug.
