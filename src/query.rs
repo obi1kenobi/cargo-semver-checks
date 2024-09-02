@@ -1,5 +1,6 @@
 use std::{collections::BTreeMap, sync::Arc};
 
+use ron::extensions::Extensions;
 use serde::{Deserialize, Serialize};
 use trustfall::TransparentValue;
 
@@ -128,7 +129,13 @@ impl SemverQuery {
     pub fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
         for (id, query_text) in get_queries() {
-            let query: SemverQuery = ron::from_str(query_text).unwrap_or_else(|e| {
+            let mut deserializer = ron::Deserializer::from_str_with_options(
+                query_text,
+                ron::Options::default().with_default_extension(Extensions::IMPLICIT_SOME),
+            )
+            .expect("Failed to construct deserializer.");
+
+            let query = Self::deserialize(&mut deserializer).unwrap_or_else(|e| {
                 panic!(
                     "\
 Failed to parse a query: {e}
@@ -840,6 +847,7 @@ add_lints!(
     trait_associated_type_default_removed,
     trait_associated_type_now_doc_hidden,
     trait_default_impl_removed,
+    trait_method_added,
     trait_method_missing,
     trait_method_now_doc_hidden,
     trait_method_unsafe_added,

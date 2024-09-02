@@ -1,0 +1,60 @@
+SemverQuery(
+    id: "trait_method_added",
+    human_readable_name: "pub trait method added",
+    description: "A non-sealed public trait added a new method without a default implementation",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#trait-new-item-no-default"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            method_name: name @output @tag
+                            has_body @filter(op: "!=", value: ["$true"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        sealed @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%method_name"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "true": true,
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A non-sealed public trait added a new method without a default implementation, which breaks downstream implementations of the trait",
+    per_result_error_template: Some("trait method {{join \"::\" path}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+)

@@ -20,15 +20,13 @@ fn main() {
 
     configure_color(args.color_choice);
     let mut config = GlobalConfig::new();
+    config.set_log_level(args.verbosity.log_level());
 
     if args.bugreport {
         print_issue_url(&mut config);
         std::process::exit(0);
     } else if args.list {
         exit_on_error(true, || {
-            let mut config = GlobalConfig::new();
-            config.set_log_level(args.check_release.verbosity.log_level());
-
             let queries = SemverQuery::all_queries();
             let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
             for query in queries.values() {
@@ -89,8 +87,6 @@ fn main() {
         Some(SemverChecksCommands::CheckRelease(c)) => c,
         None => args.check_release,
     };
-
-    config.set_log_level(check_release.verbosity.log_level());
 
     let check: cargo_semver_checks::Check = check_release.into();
 
@@ -241,6 +237,10 @@ struct SemverChecks {
     /// Choose whether to output colors
     #[arg(long = "color", global = true, value_name = "WHEN", value_enum)]
     color_choice: Option<clap::ColorChoice>,
+
+    // docstring for help is on the `clap_verbosity_flag::Verbosity` struct itself
+    #[command(flatten)]
+    verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 }
 
 /// Check your crate for semver violations.
@@ -390,10 +390,6 @@ struct CheckRelease {
     /// `x86_64-unknown-linux-gnu`.
     #[arg(long = "target")]
     build_target: Option<String>,
-
-    // docstring for help is on the `clap_verbosity_flag::Verbosity` struct itself
-    #[command(flatten)]
-    verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 }
 
 impl From<CheckRelease> for cargo_semver_checks::Check {
