@@ -48,7 +48,7 @@ fn bugreport() {
         // much of this is not reproducible on different machines, so we have
         // to heavily filter it.
         settings.add_filter(
-            r"cargo-semver-checks \d+\.\d+\.\d+ \(\w+(-modified)?\)",
+            r"cargo-semver-checks \d+\.\d+\.\d+(-[\w\.-]+)? \(\w+(-modified)?\)",
             "cargo-semver-checks [VERSION] ([HASH])",
         );
         settings.add_filter(
@@ -61,7 +61,7 @@ fn bugreport() {
         );
 
         settings.add_filter(
-            r"cargo \d+\.\d+\.\d+ \(.+\)",
+            r"cargo \d+\.\d+\.\d+(-[\w\.-]+)? \(.+\)",
             "cargo [CARGO_VERSION] ([CARGO_VERSION_DETAILS])",
         );
 
