@@ -55,6 +55,7 @@ predicates = "3.1.0"
 insta = { version = "1.39.0", features = ["ron", "filters"] }
 fs-err = "2.11.0"
 regex = "1.10.6"
+insta-cmd = "0.6.0"
 
 # In dev and test profiles, compile all dependencies with optimizations enabled,
 # but still checking debug assertions and overflows.

@@ -1,0 +1,58 @@
+---
+source: tests/integration_snapshots.rs
+info:
+  program: cargo-semver-checks
+  args:
+    - semver-checks
+    - "--bugreport"
+  env:
+    CARGO_TERM_COLOR: never
+---
+success: true
+exit_code: 0
+----- stdout -----
+System information:
+-------------------
+#### Software version
+
+cargo-semver-checks [VERSION] ([HASH])
+
+#### Operating system
+
+[OS]
+
+#### Command-line
+
+```bash
+[EXECUTABLE_PATH] semver-checks --bugreport 
+```
+
+#### cargo version
+
+```
+> cargo -V 
+cargo [CARGO_VERSION] ([CARGO_VERSION_DETAILS])
+```
+
+#### Compile time information
+
+- Profile: [PROFILE]
+- Target triple: [TARGET_TRIPLE]
+- Family: [FAMILY]
+- OS: [OS]
+- Architecture: [ARCH]
+- Pointer width: [WIDTH]
+- Endian: [ENDIAN]
+- CPU features: [FEATURES]
+- Host: [HOST_TRIPLE]
+
+
+Cargo build configuration:
+--------------------------
+[CARGO_BUILD_TOML]
+Please file an issue on GitHub reporting your bug.
+Consider adding the diagnostic information above, either manually or automatically through the link below:
+
+https://github.com/obi1kenobi/cargo-semver-checks/issues/new?[INFO_URLENCODED]
+
+----- stderr -----

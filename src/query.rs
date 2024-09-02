@@ -805,6 +805,7 @@ add_lints!(
     enum_tuple_variant_field_now_doc_hidden,
     enum_unit_variant_changed_kind,
     enum_variant_added,
+    enum_variant_marked_non_exhaustive,
     enum_variant_missing,
     exported_function_changed_abi,
     function_abi_no_longer_unwind,
@@ -872,5 +873,4 @@ add_lints!(
     union_now_doc_hidden,
     union_pub_field_now_doc_hidden,
     unit_struct_changed_kind,
-    variant_marked_non_exhaustive,
 );
