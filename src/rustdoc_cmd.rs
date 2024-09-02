@@ -66,7 +66,7 @@ impl RustdocCommand {
         let placeholder_manifest_path =
             save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)
                 .context("failed to save placeholder rustdoc manifest")?;
-        if matches!(crate_source, CrateSource::Registry { .. }) {
+        if matches!(crate_source, CrateSource::ManifestPath { .. }) {
             // We have to run `cargo update` inside the newly-generated project, to ensure
             // all dependencies of the library we're scanning are up-to-date.
             //
