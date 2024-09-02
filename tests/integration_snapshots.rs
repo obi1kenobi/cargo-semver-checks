@@ -94,6 +94,27 @@ fn bugreport() {
     });
 }
 
+// TODO: this test will break when the `--witness-hints` is stabilized.  It will need to
+// be replaced with a different unstable option.  See the module-level doc comment for
+// how to update this test.
+/// Tests the behavior of unstable options being passed without `-Z unstable-options`.
+#[test]
+fn unstable_options_without_flag() {
+    assert_integration_test("unstable_options_without_flag", |cmd, _| {
+        cmd.arg("--witness-hints");
+    });
+}
+
+/// Snapshots the behavior of `-Z help`.  This snapshot will need to be updated when any
+/// unstable options or feature flags are added, removed, or stabilized.  See the module-level
+/// doc comment for how to update this test.
+#[test]
+fn z_help() {
+    assert_integration_test("z_help", |cmd, _| {
+        cmd.args(["-Z", "help"]);
+    })
+}
+
 /// Helper function to get a canonicalized version of the cargo executable bin.
 fn executable_path() -> PathBuf {
     Path::new(
