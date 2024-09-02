@@ -13,6 +13,7 @@
 use std::path::{Path, PathBuf};
 
 use assert_cmd::cargo::CommandCargoExt;
+use bugreport::{collector::CommandOutput, format::Markdown};
 use insta_cmd::Command;
 
 /// Create a snapshot of the output of a `cargo semver-checks` invocation, using [`insta_cmd`].
@@ -92,6 +93,32 @@ fn bugreport() {
             "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?[INFO_URLENCODED]",
         );
     });
+}
+
+#[test]
+fn ci_debugging() {
+    use std::fmt::Write as _;
+    let mut buf = String::new();
+    let mut normal_command = Command::new("cargo");
+    normal_command.arg("-V");
+    let _ = writeln!(
+        &mut buf,
+        "normal path: {}",
+        Path::new(normal_command.get_program()).display()
+    );
+    let output = normal_command.output().unwrap();
+    let _ = writeln!(
+        &mut buf,
+        "{}\n{}\n{}\n\n",
+        output.status,
+        String::from_utf8_lossy(&output.stderr),
+        String::from_utf8_lossy(&output.stdout)
+    );
+
+    let mut bugreport =
+        bugreport::bugreport!().info(CommandOutput::new("cargo version", "cargo", &["-V"]));
+
+    panic!("{buf}\n\n{}", bugreport.format::<Markdown>());
 }
 
 /// Helper function to get a canonicalized version of the cargo executable bin.
