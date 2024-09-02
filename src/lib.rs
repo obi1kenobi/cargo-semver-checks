@@ -378,7 +378,9 @@ impl Check {
     }
 
     pub fn check_release(&self, config: &mut GlobalConfig) -> anyhow::Result<Report> {
-        let rustdoc_cmd = RustdocCommand::new().deps(false).silence(config.is_info());
+        let rustdoc_cmd = RustdocCommand::new()
+            .deps(false)
+            .silence(!config.is_verbose());
 
         // If both the current and baseline rustdoc are given explicitly as a file path,
         // we don't need to use the installed rustc, and this check can be skipped.

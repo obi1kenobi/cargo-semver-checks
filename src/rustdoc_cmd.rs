@@ -53,6 +53,10 @@ impl RustdocCommand {
         crate_source: &CrateSource,
         crate_data: &CrateDataForRustdoc,
     ) -> anyhow::Result<std::path::PathBuf> {
+        let crate_name = crate_source.name()?;
+        let version = crate_source.version()?;
+        let pkg_spec = format!("{crate_name}@{version}");
+
         // Generate an empty placeholder project with a dependency on the crate
         // whose rustdoc we need. We take this indirect generation path to avoid issues like:
         // https://github.com/obi1kenobi/cargo-semver-checks/issues/167#issuecomment-1382367128
@@ -62,6 +66,100 @@ impl RustdocCommand {
         let placeholder_manifest_path =
             save_placeholder_rustdoc_manifest(build_dir.as_path(), placeholder_manifest)
                 .context("failed to save placeholder rustdoc manifest")?;
+        if matches!(crate_source, CrateSource::ManifestPath { .. }) {
+            // We have to run `cargo update` inside the newly-generated project, to ensure
+            // all dependencies of the library we're scanning are up-to-date.
+            //
+            // Otherwise, we risk having a newer version of a dependency in the baseline arm,
+            // and an older version of the same dependency in the current arm. If that dependency
+            // started providing stronger guarantees in the newer version, such as newly starting
+            // to implementing an auto-trait on an existing type, the baseline could contain
+            // types that inherit that stronger guarantee whereas the current would not.
+            // That would be reported as a breaking change -- incorrectly so.
+            //
+            // cargo does not guarantee it'll update dependencies to a newer lockfile
+            // if using a path dependency. This bit us in this case:
+            // https://github.com/obi1kenobi/cargo-semver-checks/issues/167#issuecomment-2324959305
+            let stderr = if self.silence {
+                std::process::Stdio::piped()
+            } else {
+                // Print cargo update progress
+                std::process::Stdio::inherit()
+            };
+
+            let mut cmd = std::process::Command::new("cargo");
+            cmd.stdout(std::process::Stdio::null()) // Don't pollute output
+                .stderr(stderr)
+                .current_dir(build_dir.as_path())
+                .arg("update")
+                .arg("--manifest-path")
+                .arg(&placeholder_manifest_path);
+
+            // Respect our configured color choice.
+            cmd.arg(if config.err_color_choice() {
+                "--color=always"
+            } else {
+                "--color=never"
+            });
+
+            let output = cmd.output()?;
+            if !output.status.success() {
+                if self.silence {
+                    config.log_error(|config| {
+                        let mut stderr = config.stderr();
+                        let delimiter = "-----";
+                        writeln!(
+                            stderr,
+                            "error: running 'cargo update' on crate {crate_name} failed with output:"
+                        )?;
+                        writeln!(
+                            stderr,
+                            "{delimiter}\n{}\n{delimiter}\n",
+                            String::from_utf8_lossy(&output.stderr)
+                        )?;
+                        writeln!(
+                            stderr,
+                            "error: failed to update dependencies for crate {crate_name} v{version}"
+                        )?;
+                        Ok(())
+                    })?;
+                } else {
+                    config.log_error(|config| {
+                        writeln!(
+                            config.stderr(),
+                            "error: running 'cargo update' on crate {crate_name} v{version} failed, see stderr output above"
+                        )?;
+                        Ok(())
+                    })?;
+                }
+                config.log_error(|config| {
+                    let features =
+                        crate_source.feature_list_from_config(config, crate_data.feature_config);
+                    let mut stderr = config.stderr();
+                    writeln!(
+                        stderr,
+                        "note: this is unlikely to be a bug in cargo-semver-checks,"
+                    )?;
+                    writeln!(
+                        stderr,
+                        "      and is probably an issue with the crate's Cargo.toml"
+                    )?;
+                    writeln!(
+                        stderr,
+                        "note: the following command can be used to reproduce the compilation error:"
+                    )?;
+                    let repro_base = produce_repro_workspace(crate_name, crate_source, &features);
+                    writeln!(
+                        stderr,
+                        "{repro_base}cargo update\n"
+                    )?;
+                    Ok(())
+                })?;
+                anyhow::bail!(
+                    "aborting due to failure to run 'cargo update' for crate {crate_name} v{version}"
+                );
+            }
+        }
 
         let metadata = cargo_metadata::MetadataCommand::new()
             .manifest_path(&placeholder_manifest_path)
@@ -81,10 +179,6 @@ impl RustdocCommand {
             // Print cargo doc progress
             std::process::Stdio::inherit()
         };
-
-        let crate_name = crate_source.name()?;
-        let version = crate_source.version()?;
-        let pkg_spec = format!("{crate_name}@{version}");
 
         // Generating rustdoc JSON for a crate also involves checking that crate's dependencies.
         // The check is done by rustc, not rustdoc, so it's subject to RUSTFLAGS not RUSTDOCFLAGS.
@@ -130,7 +224,7 @@ impl RustdocCommand {
             cmd.arg("--no-deps");
         }
 
-        // respect our configured color choice
+        // Respect our configured color choice
         cmd.arg(if config.err_color_choice() {
             "--color=always"
         } else {
@@ -183,32 +277,8 @@ impl RustdocCommand {
                     stderr,
                     "note: the following command can be used to reproduce the compilation error:"
                 )?;
-                let selector = match crate_source {
-                    CrateSource::Registry { version, .. } => format!("{crate_name}@={version}"),
-                    CrateSource::ManifestPath { manifest } => format!(
-                        "--path {}",
-                        manifest
-                            .path
-                            .parent()
-                            .expect("source Cargo.toml had no parent path")
-                            .to_str()
-                            .expect("failed to create path string")
-                    ),
-                };
-                let feature_list = if features.is_empty() {
-                    "".to_string()
-                } else {
-                    format!("--features {} ", features.into_iter().join(","))
-                };
-                writeln!(
-                    stderr,
-                    "      \
-cargo new --lib example &&
-          cd example &&
-          echo '[workspace]' >> Cargo.toml &&
-          cargo add {selector} --no-default-features {feature_list}&&
-          cargo check\n"
-                )?;
+                let repro_base = produce_repro_workspace(crate_name, crate_source, &features);
+                writeln!(stderr, "{repro_base}cargo check\n")?;
                 Ok(())
             })?;
             anyhow::bail!(
@@ -343,6 +413,38 @@ in the metadata and stderr didn't mention it was lacking a lib target. This is p
             crate_source.version()?
         )
     }
+}
+
+fn produce_repro_workspace(
+    crate_name: &str,
+    crate_source: &CrateSource,
+    features: &[String],
+) -> String {
+    let selector = match crate_source {
+        CrateSource::Registry { version, .. } => format!("{crate_name}@={version}"),
+        CrateSource::ManifestPath { manifest } => format!(
+            "--path {}",
+            manifest
+                .path
+                .parent()
+                .expect("source Cargo.toml had no parent path")
+                .to_str()
+                .expect("failed to create path string")
+        ),
+    };
+    let feature_list = if features.is_empty() {
+        "".to_string()
+    } else {
+        format!("--features {} ", features.iter().join(","))
+    };
+    format!(
+        "      \
+    cargo new --lib example &&
+          cd example &&
+          echo '[workspace]' >> Cargo.toml &&
+          cargo add {selector} --no-default-features {feature_list}&&
+          "
+    )
 }
 
 impl Default for RustdocCommand {
