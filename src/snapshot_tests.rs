@@ -172,6 +172,12 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     // Remove cargo blocking lines (e.g. from `cargo doc` output) as the amount of blocks
     // is not reproducible.
     settings.add_filter("    Blocking waiting for file lock on package cache\n", "");
+    // Filter out the current `cargo-semver-checks` version in links to lint references,
+    // as this will break across version changes.
+    settings.add_filter(
+        r"v\d+\.\d+\.\d+(-[\w\.-]+)?/src/lints",
+        "[VERSION]/src/lints",
+    );
 
     // The `settings` are applied to the current thread as long as the returned
     // drop guard  `_grd` is alive, so we use a `let` binding to keep it alive
