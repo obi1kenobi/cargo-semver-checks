@@ -18,16 +18,14 @@ fn main() {
 
     let Cargo::SemverChecks(args) = Cargo::parse();
 
-    let feature_flags = HashSet::from_iter(args.unstable_features);
+    let feature_flags = HashSet::from_iter(args.unstable_features.clone());
 
     configure_color(args.color_choice);
     let mut config = GlobalConfig::new();
     config.set_log_level(args.verbosity.log_level());
     config.set_feature_flags(feature_flags);
 
-    exit_on_error(true, || {
-        validate_feature_flags(&mut config, &args.unstable_options)
-    });
+    exit_on_error(true, || validate_feature_flags(&mut config, &args));
 
     // --bugreport: generate a bug report URL
     if args.bugreport {
@@ -320,19 +318,15 @@ struct SemverChecks {
         hide_possible_values = true // show explictly with -Z help
     )]
     unstable_features: Vec<FeatureFlag>,
-
-    #[clap(flatten)]
-    unstable_options: UnstableOptions,
 }
 
 /// Encapsulated unstable CLI flags.  These will only be used if
 /// `-Z unstable-options` is passed to `cargo-semver-checks`.
 ///
-/// Note for adding arguments: make sure your added argument implements `Default`.
-/// This will be used to invalidate passed arguments if they are passed without
-/// `-Z unstable-options`, so make sure the behavior when the arg is `Default` is
-/// the same as the behavior on stable `cargo-semver-checks` when this flag is not
-/// passed.
+/// Note for adding arguments: make sure your added argument has a default value to detect
+/// when arguments are passed without `-Z unstable-options`, so make sure the behavior
+/// when the arg is its default value is the same as the behavior on stable
+/// `cargo-semver-checks` when this flag is not passed.
 ///
 /// Also make sure to add `#[arg(hide = true)]` to your argument so it doesn't show
 /// up in stable help when it is not valid.  Users can run
@@ -523,6 +517,9 @@ struct CheckRelease {
     /// `x86_64-unknown-linux-gnu`.
     #[arg(long = "target")]
     build_target: Option<String>,
+
+    #[clap(flatten)]
+    unstable_options: UnstableOptions,
 }
 
 impl From<CheckRelease> for cargo_semver_checks::Check {
@@ -623,10 +620,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
 /// Helper function to encapsulate the logic of validating that unstable options
 /// were not used without `-Z unstable-options` and issuing deprecation warnings
 /// for any stable feature flags that were explicitly specified.
-fn validate_feature_flags(
-    config: &mut GlobalConfig,
-    unstable_options: &UnstableOptions,
-) -> anyhow::Result<()> {
+fn validate_feature_flags(config: &mut GlobalConfig, args: &SemverChecks) -> anyhow::Result<()> {
     // needed to avoid borrow checker errors when printing with config.
     let stable_flags: Vec<_> = config
         .feature_flags()
@@ -646,6 +640,11 @@ fn validate_feature_flags(
     }
 
     if !config.feature_flag_enabled(FeatureFlag::UNSTABLE_OPTIONS) {
+        let unstable_options = match &args.command {
+            Some(SemverChecksCommands::CheckRelease(cr)) => &cr.unstable_options,
+            None => &args.check_release.unstable_options,
+        };
+
         let non_default_options = unstable_options.non_default();
 
         if !non_default_options.is_empty() {
