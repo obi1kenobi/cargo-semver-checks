@@ -805,6 +805,7 @@ add_lints!(
     enum_tuple_variant_field_now_doc_hidden,
     enum_unit_variant_changed_kind,
     enum_variant_added,
+    enum_variant_discriminant_changed,
     enum_variant_marked_non_exhaustive,
     enum_variant_missing,
     exported_function_changed_abi,

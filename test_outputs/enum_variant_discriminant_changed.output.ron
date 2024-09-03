@@ -1,0 +1,56 @@
+{
+    "./test_crates/enum_variant_discriminant_changed/": [
+        {
+            "enum_name": String("ExplicitAndImplicitDiscriminantsAreChanged"),
+            "new_value": String("2"),
+            "old_value": String("1"),
+            "path": List([
+                String("enum_variant_discriminant_changed"),
+                String("ExplicitAndImplicitDiscriminantsAreChanged"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("First"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "enum_name": String("ExplicitAndImplicitDiscriminantsAreChanged"),
+            "new_value": String("3"),
+            "old_value": String("2"),
+            "path": List([
+                String("enum_variant_discriminant_changed"),
+                String("ExplicitAndImplicitDiscriminantsAreChanged"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("Second"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "enum_name": String("ImplicitDiscriminantBecomesExplicit"),
+            "new_value": String("5"),
+            "old_value": String("2"),
+            "path": List([
+                String("enum_variant_discriminant_changed"),
+                String("ImplicitDiscriminantBecomesExplicit"),
+            ]),
+            "span_begin_line": Uint64(12),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("Unit"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "enum_name": String("DiscriminantBecomesDocHiddenAndExplicit"),
+            "new_value": String("2"),
+            "old_value": String("1"),
+            "path": List([
+                String("enum_variant_discriminant_changed"),
+                String("DiscriminantBecomesDocHiddenAndExplicit"),
+            ]),
+            "span_begin_line": Uint64(20),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("Second"),
+            "visibility_limit": String("public"),
+        },
+    ]
+}

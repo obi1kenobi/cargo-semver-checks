@@ -1,0 +1,65 @@
+SemverQuery(
+    id: "enum_variant_discriminant_changed",
+    human_readable_name: "Public enum's variant had its discriminant changed from its previous value",
+    description: "A public enum's variant had its discriminant changed from its previous value.",
+    reference: Some("The public enum's variant had its discriminant changed from its previous value. This can cause compatibility issues, which may break FFI use cases."),
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/enumerations.html#discriminants"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        enum_name: name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            variant_name: name @output @tag
+                            discriminant @optional {
+                                old_value: value @output @tag
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%enum_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            name @filter(op: "=", value: ["%variant_name"])
+                            discriminant {
+                                new_value: value @output @filter (op: "!=", value: ["%old_value"])
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "The public enum's variant had its discriminant changed from its previous value. This can cause compatibility issues, which may break FFI use cases.",
+    per_result_error_template: Some("variant {{enum_name}}::{{variant_name}} {{old_value}} -> {{new_value}} in {{span_filename}}:{{span_begin_line}}"),
+)
