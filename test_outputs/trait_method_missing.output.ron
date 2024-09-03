@@ -1,10 +1,10 @@
 {
-     "./test_crates/trait_default_impl_removed/": [
+     "./test_crates/trait_method_default_impl_removed/": [
         {
             "method_name": String("method_becomes_removed"),
             "name": String("TraitB"),
             "path": List([
-                String("trait_default_impl_removed"),
+                String("trait_method_default_impl_removed"),
                 String("TraitB"),
             ]),
             "span_begin_line": Uint64(14),

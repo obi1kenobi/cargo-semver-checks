@@ -57,11 +57,11 @@
             "visibility_limit": String("public"),
         },
     ],
-    "./test_crates/trait_default_impl_removed/": [
+    "./test_crates/trait_method_default_impl_removed/": [
         {
             "name": String("TraitE"),
             "path": List([
-                String("trait_default_impl_removed"),
+                String("trait_method_default_impl_removed"),
                 String("TraitE"),
             ]),
             "span_begin_line": Uint64(26),
@@ -71,7 +71,7 @@
         {
             "name": String("TraitF"),
             "path": List([
-                String("trait_default_impl_removed"),
+                String("trait_method_default_impl_removed"),
                 String("TraitF"),
             ]),
             "span_begin_line": Uint64(31),
@@ -80,4 +80,3 @@
         },
     ],
 }
-
