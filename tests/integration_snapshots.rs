@@ -30,7 +30,11 @@ fn assert_integration_test(
     let mut settings = insta::Settings::clone_current();
     let mut cmd =
         Command::cargo_bin("cargo-semver-checks").expect("failed to get cargo-semver-checks");
+
+    // never use color for more readable snapshots
     cmd.env("CARGO_TERM_COLOR", "never");
+    // disable backtrace printing for reproducibility
+    cmd.env("RUST_BACKTRACE", "0");
 
     cmd.arg("semver-checks");
     settings.set_snapshot_path("../test_outputs/");
