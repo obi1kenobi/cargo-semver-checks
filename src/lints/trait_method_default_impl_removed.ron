@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "trait_default_impl_removed",
+    id: "trait_method_default_impl_removed",
     human_readable_name: "pub trait default method impl removed",
     description: "A non-sealed public trait default method impl was removed",
     required_update: Major,

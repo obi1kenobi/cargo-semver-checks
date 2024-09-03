@@ -1,10 +1,10 @@
 {
-    "./test_crates/trait_default_impl_removed/": [
+    "./test_crates/trait_method_default_impl_removed/": [
         {
             "method_name": String("method_default_impl_removed"),
             "name": String("TraitA"),
             "path": List([
-                String("trait_default_impl_removed"),
+                String("trait_method_default_impl_removed"),
                 String("TraitA"),
             ]),
             "span_begin_line": Uint64(8),
@@ -15,7 +15,7 @@
             "method_name": String("method_default_impl_removed_and_becomes_non_obj_safe"),
             "name": String("TraitD"),
             "path": List([
-                String("trait_default_impl_removed"),
+                String("trait_method_default_impl_removed"),
                 String("TraitD"),
             ]),
             "span_begin_line": Uint64(22),
@@ -26,7 +26,7 @@
             "method_name": String("method_default_impl_removed_and_becomes_sealed"),
             "name": String("TraitE"),
             "path": List([
-                String("trait_default_impl_removed"),
+                String("trait_method_default_impl_removed"),
                 String("TraitE"),
             ]),
             "span_begin_line": Uint64(27),
@@ -37,7 +37,7 @@
             "method_name": String("method_partially_sealed_has_default_impl_removed"),
             "name": String("TraitF"),
             "path": List([
-                String("trait_default_impl_removed"),
+                String("trait_method_default_impl_removed"),
                 String("TraitF"),
             ]),
             "span_begin_line": Uint64(32),
