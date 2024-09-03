@@ -655,8 +655,7 @@ fn validate_feature_flags(config: &mut GlobalConfig, args: &SemverChecks) -> any
             for option in non_default_options {
                 use std::fmt::Write as _;
 
-                // writes to strings are infallible.
-                let _ = writeln!(&mut message, " - `{option}`");
+                writeln!(&mut message, " - `{option}`").expect("writes to strings are infallible");
             }
 
             anyhow::bail!(message);
