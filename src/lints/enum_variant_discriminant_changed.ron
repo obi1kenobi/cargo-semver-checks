@@ -1,6 +1,6 @@
 SemverQuery(
     id: "enum_variant_discriminant_changed",
-    human_readable_name: "Public enum's variant had its discriminant changed from its previous value",
+    human_readable_name: "enum variant had its discriminant change value",
     description: "A public enum's variant had its discriminant changed from its previous value.",
     reference: Some("The public enum's variant had its discriminant changed from its previous value. This can cause compatibility issues, which may break FFI use cases."),
     required_update: Major,
