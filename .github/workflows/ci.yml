@@ -1329,7 +1329,7 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---")"
+          EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---\n--- failure enum_variant_discriminant_changed: enum variant had its discriminant change value ---")"
           RESULT="$(cat output | grep failure)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
@@ -1361,7 +1361,7 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---")"
+          EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---\n--- failure enum_variant_discriminant_changed: enum variant had its discriminant change value ---")"
           RESULT="$(cat output | grep failure)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
