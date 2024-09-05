@@ -1,0 +1,22 @@
+---
+source: tests/integration_snapshots.rs
+info:
+  program: cargo-semver-checks
+  args:
+    - semver-checks
+    - "-Z"
+    - help
+---
+success: true
+exit_code: 0
+----- stdout -----
+Unstable feature flags:
+-Z name             Description
+help                Print a list of the current unstable feature flags
+unstable-options    Enables the use of unstable CLI flags.
+                    Run `cargo semver-checks -Z help` to list them
+Unstable options:
+      --witness-hints
+          Enable printing witness hints, examples of potentially-broken downstream code
+
+----- stderr -----

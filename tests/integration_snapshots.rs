@@ -30,7 +30,11 @@ fn assert_integration_test(
     let mut settings = insta::Settings::clone_current();
     let mut cmd =
         Command::cargo_bin("cargo-semver-checks").expect("failed to get cargo-semver-checks");
+
+    // never use color for more readable snapshots
     cmd.env("CARGO_TERM_COLOR", "never");
+    // disable backtrace printing for reproducibility
+    cmd.env("RUST_BACKTRACE", "0");
 
     cmd.arg("semver-checks");
     settings.set_snapshot_path("../test_outputs/");
@@ -92,6 +96,27 @@ fn bugreport() {
             "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?[INFO_URLENCODED]",
         );
     });
+}
+
+// TODO: this test will break when the `--witness-hints` is stabilized.  It will need to
+// be replaced with a different unstable option.  See the module-level doc comment for
+// how to update this test.
+/// Tests the behavior of unstable options being passed without `-Z unstable-options`.
+#[test]
+fn unstable_options_without_flag() {
+    assert_integration_test("unstable_options_without_flag", |cmd, _| {
+        cmd.arg("--witness-hints");
+    });
+}
+
+/// Snapshots the behavior of `-Z help`.  This snapshot will need to be updated when any
+/// unstable options or feature flags are added, removed, or stabilized.  See the module-level
+/// doc comment for how to update this test.
+#[test]
+fn z_help() {
+    assert_integration_test("z_help", |cmd, _| {
+        cmd.args(["-Z", "help"]);
+    })
 }
 
 /// Helper function to get a canonicalized version of the cargo executable bin.

@@ -1,6 +1,7 @@
 use anstream::{AutoStream, ColorChoice};
 use anstyle::{AnsiColor, Color, Reset, Style};
-use std::io::Write;
+use clap::ValueEnum;
+use std::{collections::HashSet, io::Write};
 
 use crate::templating::make_handlebars_registry;
 
@@ -14,6 +15,7 @@ pub struct GlobalConfig {
     minimum_rustc_version: semver::Version,
     stdout: AutoStream<Box<dyn Write + 'static>>,
     stderr: AutoStream<Box<dyn Write + 'static>>,
+    feature_flags: HashSet<FeatureFlag>,
 }
 
 impl Default for GlobalConfig {
@@ -38,6 +40,7 @@ impl GlobalConfig {
             minimum_rustc_version: semver::Version::new(1, 77, 0),
             stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
             stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
+            feature_flags: HashSet::new(),
         }
     }
 
@@ -284,6 +287,120 @@ impl GlobalConfig {
             ColorChoice::Never | ColorChoice::Auto => false,
         }
     }
+
+    /// Set (overwrite) the [`FeatureFlag`] set.
+    #[inline]
+    pub fn set_feature_flags(&mut self, flags: HashSet<FeatureFlag>) -> &mut Self {
+        self.feature_flags = flags;
+        self
+    }
+
+    /// Enable a single [feature flag](FeatureFlag).
+    #[inline]
+    pub fn enable_feature_flag(&mut self, flag: FeatureFlag) -> &mut Self {
+        self.feature_flags.insert(flag);
+        self
+    }
+
+    /// Test for whether a specific feature flag is enabled.  If the flag has been
+    /// stabilized, this will always return true.
+    #[must_use]
+    #[inline]
+    pub fn feature_flag_enabled(&self, flag: FeatureFlag) -> bool {
+        flag.stable || self.feature_flags.contains(&flag)
+    }
+
+    /// Returns a set of all enabled feature flags.
+    #[must_use]
+    #[inline]
+    pub fn feature_flags(&self) -> &HashSet<FeatureFlag> {
+        &self.feature_flags
+    }
+}
+
+/// A feature flag for gating unstable `cargo-semver-checks` features.
+///
+/// ## Feature-gating code
+///
+/// To only execute a block of code when a given feature flag `flag` has been enabled,
+/// wrap the block in `if config.feature_flag_enabled(flag)`, where `config` is the
+/// program's [`GlobalConfig`].
+///
+/// ## Adding a new unstable feature flag
+///
+/// Create a new associated constant in the `impl FeatureFlag` block with an identifier,
+/// help message, and `stable: false`, and **add this constant** to the
+/// [`ALL_FLAGS`](Self::ALL_FLAGS) slice.
+///
+/// ## Stabilizing a feature flag
+///
+/// Set `stable: true` on the associated constant for that flag.  To keep the transition
+/// from unstable flag to stable feature, mark the associated constant `#[deprecated]`, but
+/// don't remove it.  This will warn downstream code and `cargo-semver-checks` binary users
+/// that the flag has been stabilized and may be removed in a future release, and hide it
+/// from `-Z help`, without breaking downstream code and binary users right when it is stabilized.
+///
+/// When you stabilize a flag and mark it as `#[deprecated]`, remove any `if` blocks
+/// that feature-gate code. Testing if a flag is enabled with [`GlobalConfig::feature_flag_enabled`]
+/// will always return `true` when a flag has been stabilized.
+///
+/// ## See also
+///
+/// - [`GlobalConfig::feature_flag_enabled]
+/// - [`GlobalConfig::feature_flags]
+/// - [`GlobalConfig::set_feature_flags]
+/// - [`GlobalConfig::enable_feature_flag]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct FeatureFlag {
+    /// `kebab-case` identifier for this feature flag.
+    pub id: &'static str,
+    /// Optional help message for this flag.
+    ///
+    /// If this contains multiple lines. the first should be able to serve as
+    /// a one-line 'short help' when needed, and the full help string will be
+    /// used as a `long help`.
+    pub help: Option<&'static str>,
+    /// Whether this flag is stable and enabled by default.  Stable flags may
+    /// be removed in future releases of `cargo-semver-checks` as the feature
+    /// is stabilized and feature-gated code is unconditionally executed.
+    pub stable: bool,
+}
+
+impl FeatureFlag {
+    /// Print a list of the current unstable feature flags.
+    pub const HELP: Self = Self {
+        id: "help",
+        help: Some("Print a list of the current unstable feature flags"),
+        stable: false,
+    };
+
+    /// Enables the use of unstable CLI flags.
+    pub const UNSTABLE_OPTIONS: Self = Self {
+        id: "unstable-options",
+        help: Some(
+            "Enables the use of unstable CLI flags.\n\
+            Run `cargo semver-checks -Z help` to list them",
+        ),
+        stable: false,
+    };
+
+    /// All feature flags that currently exist in `cargo-semver-checks`.
+    pub const ALL_FLAGS: &'static [Self] = &[Self::HELP, Self::UNSTABLE_OPTIONS];
+}
+
+impl ValueEnum for FeatureFlag {
+    #[inline]
+    fn value_variants<'a>() -> &'a [Self] {
+        Self::ALL_FLAGS
+    }
+
+    fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
+        Some(
+            clap::builder::PossibleValue::new(self.id)
+                .hide(self.stable)
+                .help(self.help),
+        )
+    }
 }
 
 #[cfg(test)]
@@ -494,5 +611,20 @@ mod tests {
         config = GlobalConfig::new();
         assert!(config.err_color_choice());
         assert!(config.out_color_choice());
+    }
+
+    #[test]
+    fn stable_flags_always_enabled() {
+        let config = GlobalConfig::new();
+        assert!(config.feature_flag_enabled(FeatureFlag {
+            id: "ad-hoc",
+            help: None,
+            stable: true
+        }));
+        assert!(!config.feature_flag_enabled(FeatureFlag {
+            id: "ad-hoc",
+            help: None,
+            stable: false,
+        }));
     }
 }

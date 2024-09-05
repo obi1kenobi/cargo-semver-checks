@@ -1,13 +1,13 @@
 #![forbid(unsafe_code)]
 
-use std::{env, path::PathBuf};
+use std::{collections::HashSet, env, path::PathBuf};
 
 use anstyle::{AnsiColor, Color, Reset, Style};
 use cargo_config2::Config;
 use cargo_semver_checks::{
-    GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
+    FeatureFlag, GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
 };
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, CommandFactory, Parser, Subcommand};
 use std::io::Write;
 
 #[cfg(test)]
@@ -18,14 +18,22 @@ fn main() {
 
     let Cargo::SemverChecks(args) = Cargo::parse();
 
+    let feature_flags = HashSet::from_iter(args.unstable_features.clone());
+
     configure_color(args.color_choice);
     let mut config = GlobalConfig::new();
     config.set_log_level(args.verbosity.log_level());
+    config.set_feature_flags(feature_flags);
 
+    exit_on_error(true, || validate_feature_flags(&mut config, &args));
+
+    // --bugreport: generate a bug report URL
     if args.bugreport {
         print_issue_url(&mut config);
         std::process::exit(0);
-    } else if args.list {
+    }
+    // --list: print a list of all lints
+    else if args.list {
         exit_on_error(true, || {
             let queries = SemverQuery::all_queries();
             let mut rows = vec![["id", "type", "description"], ["==", "====", "==========="]];
@@ -56,7 +64,9 @@ fn main() {
             config.shell_note("Use `--explain <id>` to see more details")
         });
         std::process::exit(0);
-    } else if let Some(id) = args.explain.as_deref() {
+    }
+    // --explain ID: print detailed information about a lint
+    else if let Some(id) = args.explain.as_deref() {
         exit_on_error(true, || {
             let queries = SemverQuery::all_queries();
             let query = queries.get(id).ok_or_else(|| {
@@ -80,6 +90,64 @@ fn main() {
             }
             Ok(())
         });
+        std::process::exit(0);
+    }
+    // -Z help: print information on all unstable FeatureFlags (-Z flag)
+    else if config.feature_flag_enabled(FeatureFlag::HELP) {
+        config
+            .log_info(|config| {
+                let header = Style::new()
+                    .bold()
+                    .fg_color(Some(Color::Ansi(AnsiColor::Cyan)));
+                let option = Style::new().bold();
+
+                let mut stdout = config.stdout();
+
+                writeln!(stdout, "{header}Unstable feature flags:{header:#}")?;
+                writeln!(stdout, "{header}{:<20}{header:#}Description", "-Z name",)?;
+
+                for flag in FeatureFlag::ALL_FLAGS.iter().filter(|x| !x.stable) {
+                    write!(stdout, "{option}{:<20}{option:#}", flag.id)?;
+
+                    if let Some(help) = flag.help {
+                        let mut lines = help.lines();
+
+                        if let Some(first) = lines.next() {
+                            writeln!(stdout, "{first}")?;
+
+                            for line in lines {
+                                writeln!(stdout, "{:<20}{line}", "")?;
+                            }
+                        }
+                    } else {
+                        writeln!(stdout)?;
+                    }
+                }
+
+                // helper struct for rendering help for just the unstable options.
+                #[derive(Parser)]
+                #[clap(
+                    disable_help_flag = true,
+                    help_template = "{options}",
+                    mut_args = |arg| arg.hide(false),
+                )]
+                struct HelpPrinter {
+                    #[command(flatten)]
+                    args: UnstableOptions,
+                }
+
+                write!(
+                    stdout,
+                    "{header}Unstable options:{header:#}\n\
+                    {}",
+                    HelpPrinter::command().render_long_help()
+                )
+                .expect("print failed");
+
+                Ok(())
+            })
+            .expect("write failed");
+
         std::process::exit(0);
     }
 
@@ -241,6 +309,65 @@ struct SemverChecks {
     // docstring for help is on the `clap_verbosity_flag::Verbosity` struct itself
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
+
+    /// Enable unstable feature flags, run `cargo semver-checks -Z help` for more help.
+    #[arg(
+        short = 'Z',
+        value_name = "FLAG",
+        global = true,
+        hide_possible_values = true // show explictly with -Z help
+    )]
+    unstable_features: Vec<FeatureFlag>,
+}
+
+/// Encapsulated unstable CLI flags.  These will only be used if
+/// `-Z unstable-options` is passed to `cargo-semver-checks`.
+///
+/// Note for adding arguments: make sure your added argument has a default value to detect
+/// when arguments are passed without `-Z unstable-options`, so make sure the behavior
+/// when the arg is its default value is the same as the behavior on stable
+/// `cargo-semver-checks` when this flag is not passed.
+///
+/// Also make sure to add `#[arg(hide = true)]` to your argument so it doesn't show
+/// up in stable help when it is not valid.  Users can run
+/// `cargo semver-checks -Z help` to show help messages
+/// instead, so a docstring help message will be shown then.
+#[derive(Debug, Clone, Args, Default, PartialEq, Eq)]
+#[clap(hide = true)]
+#[non_exhaustive]
+struct UnstableOptions {
+    /// Enable printing witness hints, examples of potentially-broken downstream code.
+    #[arg(long, hide = true)]
+    witness_hints: bool,
+}
+
+impl UnstableOptions {
+    /// Returns a list of command line flags set when fields in this struct are
+    /// not their default values, used for detecting and printing when unstable options
+    /// are set without `-Z unstable-options`.
+    ///
+    /// When you add a new unstable option, the exhaustive let pattern below will not compile.
+    /// Fix this by adding the new field to the let pattern, then adding a similar if statement
+    /// to the ones below to detect when the field is not its default value, and insert the
+    /// command line flag that caused this into the list.  See the implementation
+    /// for examples.
+    ///
+    /// When you remove an unstable option (e.g., to stabilize it), remove the field from
+    /// the match pattern, and remove the if block corresponding to that struct field.
+    #[must_use]
+    fn non_default(&self) -> Vec<String> {
+        let mut list = Vec::new();
+
+        // If this has a compilation error from adding or removing fields, see this function's
+        // docstring for how to fix this function's implementation.
+        let Self { witness_hints } = self;
+
+        if *witness_hints {
+            list.push("--witness-hints".into());
+        }
+
+        list
+    }
 }
 
 /// Check your crate for semver violations.
@@ -390,6 +517,9 @@ struct CheckRelease {
     /// `x86_64-unknown-linux-gnu`.
     #[arg(long = "target")]
     build_target: Option<String>,
+
+    #[clap(flatten)]
+    unstable_options: UnstableOptions,
 }
 
 impl From<CheckRelease> for cargo_semver_checks::Check {
@@ -487,6 +617,54 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
     }
 }
 
+/// Helper function to encapsulate the logic of validating that unstable options
+/// were not used without `-Z unstable-options` and issuing deprecation warnings
+/// for any stable feature flags that were explicitly specified.
+fn validate_feature_flags(config: &mut GlobalConfig, args: &SemverChecks) -> anyhow::Result<()> {
+    // needed to avoid borrow checker errors when printing with config.
+    let stable_flags: Vec<_> = config
+        .feature_flags()
+        .iter()
+        .filter(|x| x.stable)
+        .copied()
+        .collect();
+
+    for stable_flag in stable_flags {
+        config
+            .shell_warn(format_args!(
+                "the feature flag {} has been stabilized and may be removed
+            from the list of feature flags in a future release.",
+                stable_flag.id
+            ))
+            .expect("printing failed");
+    }
+
+    if !config.feature_flag_enabled(FeatureFlag::UNSTABLE_OPTIONS) {
+        let unstable_options = match &args.command {
+            Some(SemverChecksCommands::CheckRelease(cr)) => &cr.unstable_options,
+            None => &args.check_release.unstable_options,
+        };
+
+        let non_default_options = unstable_options.non_default();
+
+        if !non_default_options.is_empty() {
+            let mut message = String::from(
+                "the following options are not supported without `-Z unstable-options`:\n",
+            );
+
+            for option in non_default_options {
+                use std::fmt::Write as _;
+
+                writeln!(&mut message, " - `{option}`").expect("writes to strings are infallible");
+            }
+
+            anyhow::bail!(message);
+        }
+    }
+
+    Ok(())
+}
+
 #[test]
 fn verify_cli() {
     use clap::CommandFactory;
@@ -510,4 +688,35 @@ fn features_empty_string_is_no_op() {
     };
 
     assert_eq!(Check::from(no_features), Check::from(empty_features));
+}
+
+/// Test to assert that all flags added to the [`UnstableOptions`] are
+/// hidden and won't show up in stable `--help`.
+#[test]
+fn all_unstable_features_are_hidden() {
+    // Helper struct to get a `Command` to use reflection on the unstable options.
+    #[derive(Debug, Parser)]
+    struct Wrapper {
+        #[clap(flatten)]
+        inner: UnstableOptions,
+    }
+
+    let unstable_options = Wrapper::command();
+    let cargo_command = Cargo::command();
+    let semver_checks = cargo_command
+        .find_subcommand("semver-checks")
+        .expect("expected semver-checks command");
+
+    for option in unstable_options.get_arguments() {
+        let argument = semver_checks
+            .get_arguments()
+            .find(|x| x.get_id() == option.get_id())
+            .expect("expected unstable argument");
+
+        assert!(
+            argument.is_hide_set(),
+            "unstable argument {} should be hidden by default",
+            argument.get_id()
+        );
+    }
 }
