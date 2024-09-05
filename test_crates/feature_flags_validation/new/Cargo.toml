@@ -1,0 +1,19 @@
+[package]
+publish = false
+name = "feature_flags_validation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[features]
+default = ["std", "alloc"]
+foo = []
+std = []
+bar = []
+alloc = []
+unstable = []
+nightly = []
+bench = []
+no_std = []
+__foo = []
