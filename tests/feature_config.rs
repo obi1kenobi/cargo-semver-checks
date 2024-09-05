@@ -71,6 +71,52 @@ fn simple_default_features() {
 }
 
 #[test]
+fn simple_validation_feature_flags() {
+    CargoSemverChecks::new(
+        "test_crates/feature_flags_validation/new/",
+        "test_crates/feature_flags_validation/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .add_arg("--baseline-features")
+    .add_arg("std,alloc")
+    .add_arg("--current-features")
+    .add_arg("foo,bar")
+    // without --features flag still works, but this is about flag validation
+    .add_arg("--features")
+    .add_arg("unstable,nightly")
+    .run_all()
+    .into_iter()
+    .for_each(|a| {
+        a.success();
+    });
+    // We repeat the same test, but specify each flag separately,
+    // to ensure that both ways can be parsed
+    CargoSemverChecks::new(
+        "test_crates/feature_flags_validation/new/",
+        "test_crates/feature_flags_validation/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .add_arg("--baseline-features")
+    .add_arg("std")
+    .add_arg("--baseline-features")
+    .add_arg("alloc")
+    .add_arg("--current-features")
+    .add_arg("foo")
+    .add_arg("--current-features")
+    .add_arg("bar")
+    // without --features flag still works, but this is about flag validation
+    .add_arg("--features")
+    .add_arg("unstable")
+    .add_arg("--features")
+    .add_arg("nightly")
+    .run_all()
+    .into_iter()
+    .for_each(|a| {
+        a.success();
+    });
+}
+
+#[test]
 fn simple_heuristic_features() {
     CargoSemverChecks::new(
         "test_crates/features_simple/new/",
