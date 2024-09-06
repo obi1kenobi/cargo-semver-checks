@@ -1,4 +1,26 @@
 {
+    "./test_crates/feature_flags_validation/": [
+        {
+            "name": String("foo_becomes_gated"),
+            "path": List([
+                String("feature_flags_validation"),
+                String("foo_becomes_gated"),
+            ]),
+            "span_begin_line": Uint64(4),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+        {
+            "name": String("bar_becomes_gated"),
+            "path": List([
+                String("feature_flags_validation"),
+                String("bar_becomes_gated"),
+            ]),
+            "span_begin_line": Uint64(5),
+            "span_filename": String("src/lib.rs"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/features_simple/": [
         {
             "name": String("feature_dependent_function"),

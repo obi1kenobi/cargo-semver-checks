@@ -485,17 +485,31 @@ struct CheckRelease {
     /// Add a feature to the set of features being checked.
     /// The feature will be used in both the baseline and the current version
     /// of the crate.
-    #[arg(long, value_name = "NAME", help_heading = "Features")]
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_name = "NAME",
+        help_heading = "Features"
+    )]
     features: Vec<String>,
 
     /// Add a feature to the set of features being checked.
     /// The feature will be used in the baseline version of the crate only.
-    #[arg(long, value_name = "NAME", help_heading = "Features")]
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_name = "NAME",
+        help_heading = "Features"
+    )]
     baseline_features: Vec<String>,
-
     /// Add a feature to the set of features being checked.
     /// The feature will be used in the current version of the crate only.
-    #[arg(long, value_name = "NAME", help_heading = "Features")]
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_name = "NAME",
+        help_heading = "Features"
+    )]
     current_features: Vec<String>,
 
     /// Use all the features, including features named
