@@ -260,8 +260,10 @@ pub struct Witness {
     /// name and `path` is the importable path:
     ///
     /// ```no_run
-    /// r#"use {{join "::" path}};
-    /// {{name}}(...);"#
+    /// # let _ = r#"
+    /// "use {{join "::" path}};
+    /// {{name}}(...);
+    /// # "#;
     /// ```
     ///
     /// Notice how this is not a compilable example, but it provides a distilled hint to the user
@@ -280,17 +282,19 @@ pub struct Witness {
     /// `name` is the name of the enum, and `variant_name` is the name of the removed/renamed variant:
     ///
     /// ```no_run
-    /// r#"use {{join "::" path}};
+    /// # let _ = r#"
+    /// use {{join "::" path}};
     /// fn witness(item: {{name}}) {
     ///     if let {{name}}::{{variant_name}}{..} = item {
     ///
     ///     }
-    /// }"#
+    /// }
+    /// # "#;
     /// ```
     #[serde(default)]
     pub witness_template: Option<String>,
 
-    /// An optional [`Query`] to collect more information that is necessary to render
+    /// An optional [`WitnessQuery`] to collect more information that is necessary to render
     /// the [`witness_template`](Self::witness_template).
     ///
     /// If `None`, no additional query will be run.
