@@ -254,7 +254,7 @@ pub struct Witness {
     /// A [`handlebars`] template that renders a user-facing hint to give a quick
     /// explanation of breakage.  This may not be a buildable example, but it should
     /// show the idea of why downstream code could break.  It will be provided any
-    /// `@output` query declarations in the [`SemverQuery::query`].
+    /// `@output` query declarations in the [`SemverQuery`] query.
     ///
     /// Example for the `function_missing` lint, where `name` is the (re)moved function's
     /// name and `path` is the importable path:
@@ -294,7 +294,7 @@ pub struct Witness {
     #[serde(default)]
     pub witness_template: Option<String>,
 
-    /// An optional [`WitnessQuery`] to collect more information that is necessary to render
+    /// An optional query to collect more information that is necessary to render
     /// the [`witness_template`](Self::witness_template).
     ///
     /// If `None`, no additional query will be run.
