@@ -392,9 +392,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.1.17"
+version = "1.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a93fe60e2fc87b6ba2c117f67ae14f66e3fc7d6a1e612a25adb238cc980eadb3"
+checksum = "b62ac837cdb5cb22e10a256099b4fc502b1dfe560cb282963a974d7abd80e476"
 dependencies = [
  "shlex",
 ]
@@ -1908,9 +1908,9 @@ dependencies = [
 
 [[package]]
 name = "ipnet"
-version = "2.9.0"
+version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f518f335dce6725a761382244631d86cf0ccb2863413590b31338feb467f9c3"
+checksum = "187674a687eed5fe42285b40c6291f9a01517d415fad1c3cbc6a9f778af7fcd4"
 
 [[package]]
 name = "is_terminal_polyfill"
@@ -1944,9 +1944,9 @@ checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 
 [[package]]
 name = "jiff"
-version = "0.1.12"
+version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "437651126da47900d4d70255ab15f5c69510ca4e0d88c9f01b5b8d41a45c3a9b"
+checksum = "8a45489186a6123c128fdf6016183fcfab7113e1820eb813127e036e287233fb"
 dependencies = [
  "jiff-tzdb-platform",
  "windows-sys 0.59.0",
@@ -1954,15 +1954,15 @@ dependencies = [
 
 [[package]]
 name = "jiff-tzdb"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05fac328b3df1c0f18a3c2ab6cb7e06e4e549f366017d796e3e66b6d6889abe6"
+checksum = "91335e575850c5c4c673b9bd467b0e025f164ca59d0564f69d0c2ee0ffad4653"
 
 [[package]]
 name = "jiff-tzdb-platform"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8da387d5feaf355954c2c122c194d6df9c57d865125a67984bb453db5336940"
+checksum = "9835f0060a626fe59f160437bc725491a6af23133ea906500027d1bd2f8f4329"
 dependencies = [
  "jiff-tzdb",
 ]
@@ -2767,11 +2767,11 @@ dependencies = [
 
 [[package]]
 name = "schannel"
-version = "0.1.23"
+version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbc91545643bcf3a0bbb6569265615222618bdf33ce4ffbbd13c4bbd4c093534"
+checksum = "e9aaafd5a2b6e3d657ff009d82fbd630b6bd54dd4eb06f21693925cdf80f9b8b"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -3284,9 +3284,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "28.1.5"
+version = "28.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7feb94b180de42d6fa25df8f12a71476c021c1a4114430391609471ba591d5f8"
+checksum = "3c75c87b6555d5d888e2d7047d820cd4586302e42e9dd881ee28800f225b82a7"
 dependencies = [
  "rustdoc-types 0.24.0",
  "trustfall",
@@ -3294,9 +3294,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "29.1.5"
+version = "29.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4bf958a2f4f3c8ed5f7193a2e2cf6c99eff175a3373080f622d34b78b970f891"
+checksum = "0f2c2b64014ee66c61be248d12ee8db2d6973db90b6f68046e89f13588ca3475"
 dependencies = [
  "rustdoc-types 0.25.0",
  "trustfall",
@@ -3304,9 +3304,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "30.1.5"
+version = "30.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c30e68db34f9cb6584cca09ca6de5a7163c60d85f778ceeddbe16119f0d1932a"
+checksum = "0b6a00f2f51bc5f88028ad5ef064e40a9e8af5b313d7e37834c315b681cae2f4"
 dependencies = [
  "rustdoc-types 0.26.0",
  "trustfall",
@@ -3314,9 +3314,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "32.1.5"
+version = "32.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc6ca1ffeb855fa81d420c15467eccc55467d3cd496e62d255611e2bc6b54500"
+checksum = "f826c74e11761b4ef919396c16b3472ed767c81ce40ea6f234d9ba2ac79b65bd"
 dependencies = [
  "rustdoc-types 0.28.1",
  "trustfall",
@@ -3324,9 +3324,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "33.1.5"
+version = "33.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b1a982df472bd29ec24918884b0a0d50f54e7a4ed8868cfa4852c102f052883"
+checksum = "970e7763e31dffc6ee25699cde56c11a45e33c505ab4b08da5e1f4c0861e44f4"
 dependencies = [
  "rustdoc-types 0.29.1",
  "trustfall",
@@ -3370,11 +3370,11 @@ dependencies = [
  "serde",
  "serde_json",
  "trustfall",
- "trustfall-rustdoc-adapter 28.1.5",
- "trustfall-rustdoc-adapter 29.1.5",
- "trustfall-rustdoc-adapter 30.1.5",
- "trustfall-rustdoc-adapter 32.1.5",
- "trustfall-rustdoc-adapter 33.1.5",
+ "trustfall-rustdoc-adapter 28.1.6",
+ "trustfall-rustdoc-adapter 29.1.6",
+ "trustfall-rustdoc-adapter 30.1.6",
+ "trustfall-rustdoc-adapter 32.1.6",
+ "trustfall-rustdoc-adapter 33.1.6",
 ]
 
 [[package]]
