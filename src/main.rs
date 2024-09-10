@@ -54,7 +54,6 @@ fn main() {
             let stdout = std::io::stdout();
             let mut stdout = stdout.lock();
             for row in rows {
-                use std::io::Write;
                 writeln!(
                     stdout,
                     "{0:<1$} {2:<3$} {4:<5$}",

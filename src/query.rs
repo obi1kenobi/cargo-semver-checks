@@ -338,6 +338,8 @@ mod tests {
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
+    use serde::{Deserialize, Serialize};
+    use similar_asserts::SimpleDiff;
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_rustdoc::{
         load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
@@ -494,6 +496,27 @@ mod tests {
 
     type TestOutput = BTreeMap<String, Vec<BTreeMap<String, FieldValue>>>;
 
+    #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+    #[non_exhaustive]
+    struct WitnessOutput {
+        filename: String,
+        begin_line: usize,
+        hint: String,
+    }
+
+    impl PartialOrd for WitnessOutput {
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+
+    /// Sorts by span (filename, begin_line)
+    impl Ord for WitnessOutput {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            (&self.filename, self.begin_line).cmp(&(&other.filename, other.begin_line))
+        }
+    }
+
     fn pretty_format_output_difference(
         query_name: &str,
         output_name1: &'static str,
@@ -645,24 +668,96 @@ mod tests {
             );
         }
 
+        let transparent_actual_results: BTreeMap<_, Vec<BTreeMap<_, TransparentValue>>> =
+            actual_results
+                .into_iter()
+                .map(|(k, v)| {
+                    (
+                        k,
+                        v.into_iter()
+                            .map(|x| x.into_iter().map(|(k, v)| (k, v.into())).collect())
+                            .collect(),
+                    )
+                })
+                .collect();
+
         let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
-            assert!(!actual_results.is_empty());
+            assert!(!transparent_actual_results.is_empty());
 
-            let flattened_actual_results: Vec<_> = actual_results
-                .into_iter()
+            let flattened_actual_results: Vec<_> = transparent_actual_results
+                .iter()
                 .flat_map(|(_key, value)| value)
                 .collect();
             for semver_violation_result in flattened_actual_results {
-                let pretty_result: BTreeMap<String, TransparentValue> = semver_violation_result
-                    .into_iter()
-                    .map(|(k, v)| (k, v.into()))
-                    .collect();
-
                 registry
-                    .render_template(&template, &pretty_result)
+                    .render_template(&template, semver_violation_result)
                     .with_context(|| "Error instantiating semver query template.")
                     .expect("could not materialize template");
+            }
+        }
+
+        if let Some(witness) = semver_query.witness {
+            let expected_witness_text =
+                std::fs::read_to_string(format!("./test_outputs/witnesses/{query_name}.output.ron"))
+                .with_context(|| format!("Query {query_name} has a witness template, but could not load\n\
+                    `test_outputs/witnesses/{query_name}.output.ron` expected witness file, did you forget to add it?"))
+                .expect("failed to load expected witness output");
+            let expected_witnesses: BTreeMap<Cow<str>, BTreeSet<WitnessOutput>> =
+                ron::from_str(&expected_witness_text)
+                    .expect("could not parse expected witness outputs as ron format");
+
+            let actual_witnesses: BTreeMap<_, BTreeSet<_>> = transparent_actual_results
+                .iter()
+                .map(|(k, v)| {
+                    (
+                        Cow::Borrowed(k.as_str()),
+                        v.iter()
+                            .map(|values| {
+                                let Some(TransparentValue::String(filename)) = values.get("span_filename") else {
+                                    unreachable!("Missing span_filename String, this should be validated above")
+                                };
+                                let begin_line = match values.get("span_begin_line") {
+                                    Some(TransparentValue::Int64(i)) => *i as usize,
+                                    Some(TransparentValue::Uint64(n)) => *n as usize,
+                                    _ => unreachable!("Missing span_begin_line Int, this should be validated above"),
+                                };
+
+                                WitnessOutput {
+                                    filename: filename.to_string(),
+                                    begin_line,
+                                    hint: registry
+                                        .render_template(&witness.hint_template, values)
+                                        .expect("error rendering hint template"),
+                                }
+                            })
+                            .collect(),
+                    )
+                })
+                .collect();
+
+            if expected_witnesses != actual_witnesses {
+                // ideally we would use the `escape_strings` feature to pretty-print multiline
+                // strings, but this is blocked on ron releasing v0.9:
+                //
+                // https://docs.rs/ron/0.9.0-alpha.0/ron/ser/struct.PrettyConfig.html#structfield.escape_strings
+                let config = ron::ser::PrettyConfig::new();
+                // These are deserialized to BTreeSets, so they will be sorted by span (filename + begin_line)
+                let expected = ron::ser::to_string_pretty(&expected_witnesses, config.clone())
+                    .expect("serializing expected witnesses failed");
+                let actual = ron::ser::to_string_pretty(&actual_witnesses, config)
+                    .expect("serializing actual witnesses failed");
+
+                let diff = SimpleDiff::from_str(&expected, &actual, "expected", "actual");
+                let id = &semver_query.id;
+
+                println!("--- actual output ---\n{actual}");
+
+                panic!(
+                    "Witness output for {id} did not match expected values:\n{diff}\n\
+                    Update the `test_outputs/witnesses/{id}.output.ron` file if
+                    the new test results are correct.",
+                );
             }
         }
     }
