@@ -126,22 +126,28 @@ pub struct SemverQuery {
 }
 
 impl SemverQuery {
+    /// Deserializes a [`SemverQuery`] from a [`ron`]-encoded string slice.
+    ///
+    /// Returns an `Err` if the deserialization fails.
+    pub fn from_ron_str(query_text: &str) -> ron::Result<Self> {
+        let mut deserializer = ron::Deserializer::from_str_with_options(
+            query_text,
+            ron::Options::default().with_default_extension(Extensions::IMPLICIT_SOME),
+        )?;
+
+        Self::deserialize(&mut deserializer)
+    }
+
     pub fn all_queries() -> BTreeMap<String, SemverQuery> {
         let mut queries = BTreeMap::default();
         for (id, query_text) in get_queries() {
-            let mut deserializer = ron::Deserializer::from_str_with_options(
-                query_text,
-                ron::Options::default().with_default_extension(Extensions::IMPLICIT_SOME),
-            )
-            .expect("Failed to construct deserializer.");
-
-            let query = Self::deserialize(&mut deserializer).unwrap_or_else(|e| {
+            let query = Self::from_ron_str(query_text).unwrap_or_else(|e| {
                 panic!(
                     "\
-Failed to parse a query: {e}
-```ron
-{query_text}
-```"
+                Failed to parse a query: {e}
+                ```ron
+                {query_text}
+                ```"
                 );
             });
             assert_eq!(id, query.id, "Query id must match file name");
@@ -469,7 +475,7 @@ mod tests {
 
     pub(in crate::query) fn check_query_execution(query_name: &str) {
         let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
-        let semver_query: SemverQuery = ron::from_str(&query_text).unwrap();
+        let semver_query = SemverQuery::from_ron_str(&query_text).unwrap();
 
         let expected_result_text =
             std::fs::read_to_string(format!("./test_outputs/{query_name}.output.ron"))
