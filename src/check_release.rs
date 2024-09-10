@@ -160,10 +160,14 @@ fn print_triggered_lint(
                     .context("Error instantiating witness hint template.")?;
 
                 config.log_info(|config| {
-                    config.shell_note("downstream code similar to the following would break:")?;
-                    writeln!(config.stderr(), "{message}")?;
-                    writeln!(config.stderr())?;
-
+                    let note = Style::new()
+                        .fg_color(Some(Color::Ansi(AnsiColor::Cyan)))
+                        .bold();
+                    writeln!(
+                        config.stdout(),
+                        "{note}note:{note:#} downstream code similar to the following would break:\n\
+                        {message}\n"
+                    )?;
                     Ok(())
                 })?;
             }
