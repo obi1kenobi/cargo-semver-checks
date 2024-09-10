@@ -1,14 +1,36 @@
-// My task is:
-// discriminant changed value but no repr (API only)
-// the enum does not have an explicit representation (no repr)
-// we want to be super sure the 4 lints are disjoint here -- we should never have multiple of them trigger on the same variant
-
 // Explicit discriminant changed values. By doing so, it changed the implicit
 // discriminant's value as well, should be reported.
 pub enum ExplicitAndImplicitDiscriminantsAreChanged {
     First = 1,
     Second,
     Third = 5,
+}
+
+// Discriminant changed values. Having #[non_exhaustive] on the enum should not have any effect
+// on the *API* breakage, should still be reported.
+#[non_exhaustive]
+pub enum DiscriminantIsChanged {
+    First,
+}
+
+// Discriminant changed values and the variant is also marked as `non_exhaustive`.
+// This now implies that the enum is no longer `well-defined`, which means that a numeric
+// cast is no longer possible on the enum, should not be reported.
+// https://github.com/rust-lang/reference/pull/1249#issuecomment-2339003824
+#[non_exhaustive]
+pub enum DiscriminantIsChangedAndMarkedNonExhaustive {
+    First,
+    Second,
+}
+
+// Discriminant changed values, but the variant is already `non_exhaustive`.
+// This means that the enum is already not `well-defined`, and the numeric cast
+// was never possible, should not be reported.
+#[non_exhaustive]
+pub enum DiscriminantIsChangedButAlreadyNonExhaustive {
+    First,
+    #[non_exhaustive]
+    Second,
 }
 
 // Discriminant changed to be doc hidden and explicit. Being doc hidden is not relevant

@@ -7,7 +7,7 @@
                 String("enum_no_repr_variant_discriminant_changed"),
                 String("UnitOnlyBecomesUndefined"),
             ]),
-            "span_begin_line": Uint64(49),
+            "span_begin_line": Uint64(77),
             "span_filename": String("src/lib.rs"),
             "variant_name": String("Struct"),
         },

@@ -1,4 +1,17 @@
 {
+    "./test_crates/enum_no_repr_variant_discriminant_changed/": [
+        {
+            "name": String("DiscriminantIsChangedAndMarkedNonExhaustive"),
+            "path": List([
+                String("enum_no_repr_variant_discriminant_changed"),
+                String("DiscriminantIsChangedAndMarkedNonExhaustive"),
+            ]),
+            "span_begin_line": Uint64(24),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("Second"),
+            "visibility_limit": String("public"),
+        },
+    ],
     "./test_crates/enum_struct_variant_field_added/": [
         {
             "name": String("EnumWithExhaustiveVariant"),

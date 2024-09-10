@@ -27,6 +27,19 @@
             "visibility_limit": String("public"),
         },
         {
+            "enum_name": String("DiscriminantIsChanged"),
+            "new_value": String("1"),
+            "old_value": String("0"),
+            "path": List([
+                String("enum_no_repr_variant_discriminant_changed"),
+                String("DiscriminantIsChanged"),
+            ]),
+            "span_begin_line": Uint64(12),
+            "span_filename": String("src/lib.rs"),
+            "variant_name": String("First"),
+            "visibility_limit": String("public"),
+        },
+        {
             "enum_name": String("DiscriminantBecomesDocHiddenAndExplicit"),
             "new_value": String("2"),
             "old_value": String("1"),
@@ -34,7 +47,7 @@
                 String("enum_no_repr_variant_discriminant_changed"),
                 String("DiscriminantBecomesDocHiddenAndExplicit"),
             ]),
-            "span_begin_line": Uint64(11),
+            "span_begin_line": Uint64(39),
             "span_filename": String("src/lib.rs"),
             "variant_name": String("Second"),
             "visibility_limit": String("public"),

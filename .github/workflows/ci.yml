@@ -1330,7 +1330,7 @@ jobs:
         run: |
           cd semver
           EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---\n--- failure enum_no_repr_variant_discriminant_changed: enum variant had its discriminant change value ---")"
-          RESULT="$(cat output | grep failure)"
+          RESULT="$(cat output | grep failure | sort)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Cleanup
@@ -1362,7 +1362,7 @@ jobs:
         run: |
           cd semver
           EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---\n--- failure enum_no_repr_variant_discriminant_changed: enum variant had its discriminant change value ---")"
-          RESULT="$(cat output | grep failure)"
+          RESULT="$(cat output | grep failure | sort)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Save rustdoc

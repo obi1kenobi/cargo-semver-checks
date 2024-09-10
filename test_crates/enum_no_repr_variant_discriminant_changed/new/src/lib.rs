@@ -6,6 +6,34 @@ pub enum ExplicitAndImplicitDiscriminantsAreChanged {
     Third = 5,
 }
 
+// Discriminant changed values. Having #[non_exhaustive] on the enum should not have any effect
+// on the *API* breakage, should still be reported.
+#[non_exhaustive]
+pub enum DiscriminantIsChanged {
+    First = 1,
+}
+
+// Discriminant changed values and the variant is also marked as `non_exhaustive`.
+// This now implies that the enum is no longer `well-defined`, which means that a numeric
+// cast is no longer possible on the enum, should not be reported.
+// https://github.com/rust-lang/reference/pull/1249#issuecomment-2339003824
+#[non_exhaustive]
+pub enum DiscriminantIsChangedAndMarkedNonExhaustive {
+    First,
+    #[non_exhaustive]
+    Second = 2,
+}
+
+// Discriminant changed values, but the variant is already `non_exhaustive`.
+// This means that the enum is already not `well-defined`, and the numeric cast
+// was never possible, should not be reported.
+#[non_exhaustive]
+pub enum DiscriminantIsChangedButAlreadyNonExhaustive {
+    First,
+    #[non_exhaustive]
+    Second = 2,
+}
+
 // Discriminant changed to be doc hidden and explicit. Being doc hidden is not relevant
 // since it's still part of the public API, should be reported.
 pub enum DiscriminantBecomesDocHiddenAndExplicit {
