@@ -51,7 +51,7 @@ Failed in:
      Parsing all_lint_group v0.1.0 (baseline)
       Parsed [TIME] (baseline)
     Checking all_lint_group v0.1.0 -> v0.1.0 (no change)
-    Starting [TOTAL] checks, 0 unnecessary on 8 threads
+    Starting [TOTAL] checks, 0 unnecessary on [THREADS] threads
         PASS [TIME]       major        auto_trait_impl_removed
         PASS [TIME]       major        constructible_struct_adds_field
         PASS [TIME]       major        constructible_struct_adds_private_field

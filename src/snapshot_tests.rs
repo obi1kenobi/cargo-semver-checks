@@ -178,6 +178,8 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
         r"v\d+\.\d+\.\d+(-[\w\.-]+)?/src/lints",
         "[VERSION]/src/lints",
     );
+    // Filter the printed number of threads that `cargo-semver-checks` is running on.
+    settings.add_filter(r"on \d+ threads", "on [THREADS] threads");
 
     // The `settings` are applied to the current thread as long as the returned
     // drop guard  `_grd` is alive, so we use a `let` binding to keep it alive
