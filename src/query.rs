@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, sync::Arc};
+use std::collections::BTreeMap;
 
 use ron::extensions::Extensions;
 use serde::{Deserialize, Serialize};
@@ -180,11 +180,12 @@ pub struct QueryOverride {
 
 /// Identifies a lint, static lint group, or a dynamic lint group (e.g., `all`)
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged, rename_all = "kebab-case")]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Ord)]
+#[serde(rename_all = "kebab-case")]
 pub enum Identifier {
-    /// All lints in `cargo-semver-checks`.
     All,
+    /// All lints in `cargo-semver-checks`.
+    #[serde(untagged)]
     Lint(String),
 }
 
@@ -200,7 +201,7 @@ impl Identifier {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct OverrideMap(BTreeMap<Identifier, QueryOverride>);
+pub struct OverrideMap(pub(crate) BTreeMap<Identifier, QueryOverride>);
 
 /// A mapping of lint ids to configured values that override that lint's defaults.
 pub type CompiledOverrideMap = BTreeMap<String, QueryOverride>;
@@ -211,9 +212,9 @@ impl OverrideMap {
     /// Returns an `Err` if there are conflicting overrides for the same lint (e.g.,
     /// a lint and a lint group containing that lint are configured), use [`OverrideStack`]
     /// to get defined precedence.
-    pub fn compile(self) -> anyhow::Result<CompiledOverrideMap> {
+    pub fn compile(&self) -> anyhow::Result<CompiledOverrideMap> {
         let mut map = BTreeMap::new();
-        for (id, overrides) in self.0 {
+        for (id, overrides) in &self.0 {
             for lint in id.get_lints() {
                 let overrides = overrides.clone();
                 #[derive(Debug, Default)]
@@ -226,14 +227,18 @@ impl OverrideMap {
 
                 map.entry(lint.to_owned())
                     .and_modify(|prev: &mut QueryOverride| {
-                        if let (Some(p), Some(n)) = (prev.lint_level, overrides.lint_level) {
-                            conflict.lint_level = Some((p, n));
+                        match (prev.lint_level, overrides.lint_level) {
+                            (Some(p), Some(n)) => conflict.lint_level = Some((p, n)),
+                            (Some(p), None) => prev.lint_level = Some(p),
+                            (None, Some(n)) => prev.lint_level = Some(n),
+                            (None, None) => (),
                         }
 
-                        if let (Some(p), Some(n)) =
-                            (prev.required_update, overrides.required_update)
-                        {
-                            conflict.required_update = Some((p, n));
+                        match (prev.required_update, overrides.required_update) {
+                            (Some(p), Some(n)) => conflict.required_update = Some((p, n)),
+                            (Some(p), None) => prev.required_update = Some(p),
+                            (None, Some(n)) => prev.required_update = Some(n),
+                            (None, None) => (),
                         }
                     })
                     .or_insert(overrides);
@@ -271,6 +276,12 @@ impl OverrideMap {
 
         Ok(map)
     }
+
+    // Insert an `id -> overrides` pair into the map, overwriting
+    // any previous entry with the given `id`.
+    pub(crate) fn insert(&mut self, id: Identifier, overrides: QueryOverride) {
+        self.0.insert(id, overrides);
+    }
 }
 
 /// Stores a stack of [`OverrideMap`] references such that items towards the top of
@@ -278,7 +289,7 @@ impl OverrideMap {
 /// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
 /// at the top of the stack will be used to calculate the effective lint level or required version update.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct OverrideStack(Vec<Arc<CompiledOverrideMap>>);
+pub struct OverrideStack(Vec<CompiledOverrideMap>);
 
 impl OverrideStack {
     /// Creates a new, empty [`OverrideStack`] instance.
@@ -296,8 +307,8 @@ impl OverrideStack {
     ///
     /// Returns an `Err` if there is a configuration conflict in the map: see
     /// [`OverrideMap::compile`].
-    pub fn try_push(&mut self, item: OverrideMap) -> anyhow::Result<()> {
-        self.0.push(Arc::new(item.compile()?));
+    pub fn try_push(&mut self, item: &OverrideMap) -> anyhow::Result<()> {
+        self.0.push(item.compile()?);
 
         Ok(())
     }
@@ -327,18 +338,12 @@ impl OverrideStack {
     }
 }
 
-impl From<Vec<Arc<CompiledOverrideMap>>> for OverrideStack {
-    fn from(value: Vec<Arc<CompiledOverrideMap>>) -> Self {
-        Self(value)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::borrow::Cow;
     use std::collections::BTreeSet;
     use std::path::PathBuf;
-    use std::sync::{Arc, OnceLock};
+    use std::sync::OnceLock;
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
@@ -348,9 +353,10 @@ mod tests {
     };
 
     use crate::query::{
-        LintLevel, OverrideStack, QueryOverride, RequiredSemverUpdate, SemverQuery,
+        Identifier, LintLevel, OverrideStack, QueryOverride, RequiredSemverUpdate, SemverQuery,
     };
     use crate::templating::make_handlebars_registry;
+    use crate::OverrideMap;
 
     static TEST_CRATE_NAMES: OnceLock<Vec<String>> = OnceLock::new();
 
@@ -697,26 +703,24 @@ mod tests {
     #[test]
     fn test_overrides() {
         let mut stack = OverrideStack::new();
-        stack.push(Arc::new(
-            [
+        stack
+            .try_push(&OverrideMap(BTreeMap::from_iter([
                 (
-                    "query1".into(),
+                    Identifier::Lint("query1".into()),
                     QueryOverride {
                         lint_level: Some(LintLevel::Allow),
                         required_update: Some(RequiredSemverUpdate::Minor),
                     },
                 ),
                 (
-                    "query2".into(),
+                    Identifier::Lint("query2".into()),
                     QueryOverride {
                         lint_level: None,
                         required_update: Some(RequiredSemverUpdate::Minor),
                     },
                 ),
-            ]
-            .into_iter()
-            .collect(),
-        ));
+            ])))
+            .expect("found configuration conflicts");
 
         let q1 = make_blank_query(
             "query1".into(),
@@ -748,38 +752,34 @@ mod tests {
     #[test]
     fn test_override_precedence() {
         let mut stack = OverrideStack::new();
-        stack.push(Arc::new(
-            [
+        stack
+            .try_push(&OverrideMap(BTreeMap::from_iter([
                 (
-                    "query1".into(),
+                    Identifier::Lint("query1".into()),
                     QueryOverride {
                         lint_level: Some(LintLevel::Allow),
                         required_update: Some(RequiredSemverUpdate::Minor),
                     },
                 ),
                 (
-                    "query2".into(),
+                    Identifier::Lint("query2".into()),
                     QueryOverride {
                         lint_level: None,
                         required_update: Some(RequiredSemverUpdate::Minor),
                     },
                 ),
-            ]
-            .into_iter()
-            .collect(),
-        ));
+            ])))
+            .expect("found conflicts");
 
-        stack.push(Arc::new(
-            [(
-                "query1".into(),
+        stack
+            .try_push(&OverrideMap(BTreeMap::from_iter([(
+                Identifier::Lint("query1".into()),
                 QueryOverride {
                     required_update: None,
                     lint_level: Some(LintLevel::Warn),
                 },
-            )]
-            .into_iter()
-            .collect(),
-        ));
+            )])))
+            .expect("found conflicts");
 
         let q1 = make_blank_query(
             "query1".into(),
@@ -808,6 +808,67 @@ mod tests {
             stack.effective_required_update(&q2),
             RequiredSemverUpdate::Minor
         );
+    }
+
+    #[test]
+    fn override_conflict() {
+        let mut stack = OverrideStack::new();
+        stack
+            .try_push(&OverrideMap(BTreeMap::from_iter([
+                (
+                    Identifier::Lint("function_missing".into()),
+                    QueryOverride {
+                        required_update: Some(RequiredSemverUpdate::Major),
+                        lint_level: None,
+                    },
+                ),
+                (
+                    Identifier::All,
+                    QueryOverride {
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                        lint_level: None,
+                    },
+                ),
+            ])))
+            .expect_err("expected a conflict between function_missing and all");
+
+        stack
+            .try_push(&OverrideMap(BTreeMap::from_iter([
+                (
+                    Identifier::Lint("function_missing".into()),
+                    QueryOverride {
+                        required_update: Some(RequiredSemverUpdate::Major),
+                        lint_level: Some(LintLevel::Warn),
+                    },
+                ),
+                (
+                    Identifier::All,
+                    QueryOverride {
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                        lint_level: None,
+                    },
+                ),
+            ])))
+            .expect_err("expected a conflict between function_missing and all");
+
+        stack
+            .try_push(&OverrideMap(BTreeMap::from_iter([
+                (
+                    Identifier::Lint("function_missing".into()),
+                    QueryOverride {
+                        required_update: None,
+                        lint_level: Some(LintLevel::Warn),
+                    },
+                ),
+                (
+                    Identifier::All,
+                    QueryOverride {
+                        required_update: Some(RequiredSemverUpdate::Minor),
+                        lint_level: None,
+                    },
+                ),
+            ])))
+            .expect("expected no conflict between function_missing and all (they configure different fields)");
     }
 
     pub(super) fn check_all_lint_files_are_used_in_add_lints(added_lints: &[&str]) {

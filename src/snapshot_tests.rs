@@ -368,3 +368,20 @@ fn multiple_ambiguous_package_name_definitions() {
         ],
     );
 }
+
+/// Tests for the all lint group in lint overrides
+#[test]
+fn all_lint_group() {
+    assert_integration_test(
+        "all_lint_group",
+        &[
+            "cargo",
+            "semver-checks",
+            "--baseline-root",
+            "test_crates/manifest_tests/all_lint_group/old",
+            "--manifest-path",
+            "test_crates/manifest_tests/all_lint_group/new",
+            "-v",
+        ],
+    );
+}

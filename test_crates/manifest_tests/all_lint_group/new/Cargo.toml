@@ -1,0 +1,16 @@
+[package]
+publish = false
+name = "all_lint_group"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[package.metadata.cargo-semver-checks.lints]
+all = "warn" # priority 0
+# priority 0, should not conflict because it's a different field
+function_missing = { required-update = "minor" }
+# should be overridden by 'all' because it has a more positive priority
+module_missing = { level = "allow", priority = 2}
+# should override 'all'  because it has a more negative priority
+trait_missing = { level = "deny", priority = -1}

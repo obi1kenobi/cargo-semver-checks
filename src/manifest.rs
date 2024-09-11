@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use anyhow::Context;
 use serde::Deserialize;
 
-use crate::{LintLevel, OverrideMap, QueryOverride, RequiredSemverUpdate};
+use crate::{query::Identifier, LintLevel, OverrideMap, QueryOverride, RequiredSemverUpdate};
 
 #[derive(Debug, Clone)]
 pub(crate) struct Manifest {
@@ -99,13 +99,62 @@ pub(crate) struct LintTable {
     #[serde(default, deserialize_with = "deserialize_workspace_key")]
     pub(crate) workspace: bool,
     /// individual `lint_name = ...` entries
-    #[serde(flatten, deserialize_with = "deserialize_into_overridemap")]
-    pub(crate) inner: OverrideMap,
+    #[serde(flatten)]
+    pub(crate) inner: BTreeMap<Identifier, OverrideConfig>,
 }
 
-impl From<LintTable> for OverrideMap {
-    fn from(value: LintTable) -> OverrideMap {
-        value.inner
+impl LintTable {
+    /// Converts this into a stack of `OverrideMap`s, where the top of the stack (later
+    /// indices in the `Vec`) has higher priority than the bottom.
+    pub(crate) fn into_stack(self) -> Vec<OverrideMap> {
+        // use a priority -> OverrideMap BTreeMap, which will be sorted by priority
+        let mut map = BTreeMap::<_, OverrideMap>::new();
+        for (id, config) in self.inner {
+            let (priority, overrides) = match config {
+                OverrideConfig::Shorthand(lint_level) => (
+                    0,
+                    QueryOverride {
+                        lint_level: Some(lint_level),
+                        required_update: None,
+                    },
+                ),
+                OverrideConfig::Both {
+                    level,
+                    required_update,
+                    priority,
+                } => (
+                    priority,
+                    QueryOverride {
+                        lint_level: Some(level),
+                        required_update: Some(required_update),
+                    },
+                ),
+                OverrideConfig::LintLevel { level, priority } => (
+                    priority,
+                    QueryOverride {
+                        lint_level: Some(level),
+                        required_update: None,
+                    },
+                ),
+                OverrideConfig::RequiredUpdate {
+                    required_update,
+                    priority,
+                } => (
+                    priority,
+                    QueryOverride {
+                        lint_level: None,
+                        required_update: Some(required_update),
+                    },
+                ),
+            };
+
+            map.entry(priority).or_default().insert(id, overrides);
+        }
+
+        // this will be sorted by key `priority` in ascending order.
+        // to get the stack semantics of later elements take priority,
+        // we need to reverse this.
+        map.into_values().rev().collect()
     }
 }
 
@@ -113,15 +162,12 @@ impl From<LintTable> for OverrideMap {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(untagged)]
 pub(crate) enum OverrideConfig {
-    /// Specify members by name, e.g.
+    /// Specify both lint level and required update by name, e.g.
     /// `lint_name = { level = "deny", required-update = "major" }
-    /// Any omitted members will default to `None`
     #[serde(rename_all = "kebab-case")]
-    Structure {
-        #[serde(default)]
-        level: Option<LintLevel>,
-        #[serde(default)]
-        required_update: Option<RequiredSemverUpdate>,
+    Both {
+        level: LintLevel,
+        required_update: RequiredSemverUpdate,
         /// The priority for this configuration.  If there are multiple entries that
         /// configure a lint (e.g., a lint group containing a lint and the lint itself),
         /// the configuration entry with the **lowest** priority takes precedence.
@@ -129,37 +175,26 @@ pub(crate) enum OverrideConfig {
         #[serde(default)]
         priority: i64,
     },
+    /// Specify just lint level by name, with optional priority.
+    /// `lint_name = { level = "deny" }
+    #[serde(rename_all = "kebab-case")]
+    LintLevel {
+        level: LintLevel,
+        #[serde(default)]
+        priority: i64,
+    },
+    /// Specify just required update by name, with optional priority.
+    /// `lint_name = { level = "deny" }
+    #[serde(rename_all = "kebab-case")]
+    RequiredUpdate {
+        required_update: RequiredSemverUpdate,
+        #[serde(default)]
+        priority: i64,
+    },
     /// Shorthand for specifying just a lint level and leaving
     /// the other members as default: e.g.,
     /// `lint_name = "deny"`
-    LintLevel(LintLevel),
-}
-
-impl From<OverrideConfig> for QueryOverride {
-    fn from(value: OverrideConfig) -> Self {
-        match value {
-            OverrideConfig::Structure {
-                level,
-                required_update,
-            } => Self {
-                lint_level: level,
-                required_update,
-            },
-            OverrideConfig::LintLevel(lint_level) => Self {
-                lint_level: Some(lint_level),
-                required_update: None,
-            },
-        }
-    }
-}
-
-/// Lets serde deserialize a `BTreeMap<String, OverrideConfig>` into an [`OverrideMap`]
-fn deserialize_into_overridemap<'de, D>(de: D) -> Result<OverrideMap, D::Error>
-where
-    D: serde::de::Deserializer<'de>,
-{
-    BTreeMap::<String, OverrideConfig>::deserialize(de)
-        .map(|x| x.into_iter().map(|(k, v)| (k, v.into())).collect())
+    Shorthand(LintLevel),
 }
 
 /// Deserializes the `workspace` key as an `Option<bool>`, raising
@@ -194,8 +229,10 @@ pub(crate) fn deserialize_lint_table(
 #[cfg(test)]
 mod tests {
 
+    use std::collections::BTreeMap;
+
     use super::{LintTable, MetadataTable};
-    use crate::QueryOverride;
+    use crate::{query::Identifier, OverrideMap, QueryOverride};
 
     #[test]
     fn test_deserialize_config() {
@@ -210,12 +247,13 @@ mod tests {
             [package.metadata.cargo-semver-checks.lints]
             workspace = true
             two = "deny"
-            three = { level = "warn" }
-            four = { required-update = "major" }
-            five = { required-update = "minor", level = "allow" }
+            three = { level = "warn", priority = 1 }
+            four = { required-update = "major", priority = 0 }
+            five = { required-update = "minor", level = "allow", priority = -1 }
 
             [workspace.metadata.cargo-semver-checks.lints]
             six = "allow"
+            seven = { level = "deny", priority = 2 }
             "#;
 
         let parsed = cargo_toml::Manifest::from_slice_with_metadata(manifest.as_bytes())
@@ -242,74 +280,69 @@ mod tests {
             pkg_table.workspace,
             "Package lints table should contain `workspace = true`"
         );
-        let pkg = pkg_table.inner;
+        let pkg = pkg_table.into_stack();
 
         let wks = workspace_metadata
             .config
             .expect("Semver checks table should be present")
             .lints
             .expect("Lint table should be present")
-            .inner;
+            .into_stack();
 
-        assert!(
-            matches!(
-                pkg.get("two"),
-                Some(&QueryOverride {
-                    lint_level: Some(Deny),
-                    required_update: None,
-                })
-            ),
-            "got {:?}",
-            pkg.get("two")
+        assert_eq!(
+            wks,
+            vec![
+                OverrideMap(BTreeMap::from_iter([(
+                    Identifier::Lint("seven".into()),
+                    QueryOverride {
+                        lint_level: Some(Deny),
+                        required_update: None,
+                    }
+                ),])),
+                OverrideMap(BTreeMap::from_iter([(
+                    Identifier::Lint("six".into()),
+                    QueryOverride {
+                        lint_level: Some(Allow),
+                        required_update: None,
+                    }
+                ),])),
+            ]
         );
 
-        assert!(
-            matches!(
-                pkg.get("three"),
-                Some(&QueryOverride {
-                    required_update: None,
-                    lint_level: Some(Warn)
-                })
-            ),
-            "got {:?}",
-            pkg.get("three")
-        );
-
-        assert!(
-            matches!(
-                pkg.get("four"),
-                Some(&QueryOverride {
-                    required_update: Some(Major),
-                    lint_level: None,
-                })
-            ),
-            "got {:?}",
-            pkg.get("four")
-        );
-
-        //
-        assert!(
-            matches!(
-                pkg.get("five"),
-                Some(&QueryOverride {
-                    required_update: Some(Minor),
-                    lint_level: Some(Allow)
-                })
-            ),
-            "got {:?}",
-            pkg.get("five")
-        );
-
-        assert!(
-            matches!(
-                wks.get("six"),
-                Some(&QueryOverride {
-                    lint_level: Some(Allow),
-                    required_update: None
-                })
-            ),
-            "got {:?}",
-            wks.get("six")
+        similar_asserts::assert_eq!(
+            pkg,
+            vec![
+                OverrideMap(BTreeMap::from_iter([(
+                    Identifier::Lint("three".into()),
+                    QueryOverride {
+                        lint_level: Some(Warn),
+                        required_update: None,
+                    }
+                )])),
+                OverrideMap(BTreeMap::from_iter([
+                    (
+                        Identifier::Lint("two".into()),
+                        QueryOverride {
+                            lint_level: Some(Deny),
+                            required_update: None
+                        }
+                    ),
+                    (
+                        Identifier::Lint("four".into()),
+                        QueryOverride {
+                            lint_level: None,
+                            required_update: Some(Major),
+                        }
+                    ),
+                ])),
+                OverrideMap(BTreeMap::from_iter([(
+                    Identifier::Lint("five".into()),
+                    QueryOverride {
+                        lint_level: Some(Allow),
+                        required_update: Some(Minor),
+                    }
+                )]))
+            ]
         );
     }
 
@@ -327,5 +360,18 @@ mod tests {
         }})
         .expect("this should be a valid lint table");
         assert!(!table.workspace, "table.workspace should be false");
+    }
+
+    #[test]
+    fn entry_with_no_fields_is_error() {
+        serde_json::from_value::<LintTable>(serde_json::json! {{
+            "one": {}
+        }})
+        .expect_err("one = {} should be invalid");
+
+        serde_json::from_value::<LintTable>(serde_json::json! {{
+            "one": { "priority": 0 }
+        }})
+        .expect_err("one = {priority = 0} should be invalid");
     }
 }

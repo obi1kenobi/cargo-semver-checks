@@ -1,0 +1,148 @@
+---
+source: src/snapshot_tests.rs
+expression: result
+---
+success: false
+--- stdout ---
+
+--- failure trait_missing: pub trait removed or renamed ---
+
+Description:
+A publicly-visible trait cannot be imported by its prior path. A `pub use` may have been removed, or the trait itself may have been renamed or removed entirely.
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#item-remove
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/trait_missing.ron
+
+Failed in:
+  trait all_lint_group::TraitMissing, previously in file [ROOT]/test_crates/manifest_tests/all_lint_group/old/src/lib.rs:6
+
+--- warning enum_missing: pub enum removed or renamed ---
+
+Description:
+A publicly-visible enum cannot be imported by its prior path. A `pub use` may have been removed, or the enum itself may have been renamed or removed entirely.
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#item-remove
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/enum_missing.ron
+
+Failed in:
+  enum all_lint_group::EnumMissing, previously in file [ROOT]/test_crates/manifest_tests/all_lint_group/old/src/lib.rs:8
+
+--- warning function_missing: pub fn removed or renamed ---
+
+Description:
+A publicly-visible function cannot be imported by its prior path. A `pub use` may have been removed, or the function itself may have been renamed or removed entirely.
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#item-remove
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/function_missing.ron
+
+Failed in:
+  function all_lint_group::function_missing, previously in file [ROOT]/test_crates/manifest_tests/all_lint_group/old/src/lib.rs:2
+
+--- warning module_missing: pub module removed or renamed ---
+
+Description:
+A publicly-visible module cannot be imported by its prior path. A `pub use` may have been removed, or the module may have been renamed, removed, or made non-public.
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#item-remove
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/module_missing.ron
+
+Failed in:
+  mod all_lint_group::module_missing, previously in file [ROOT]/test_crates/manifest_tests/all_lint_group/old/src/lib.rs:4
+
+--- stderr ---
+     Parsing all_lint_group v0.1.0 (current)
+      Parsed [TIME] (current)
+     Parsing all_lint_group v0.1.0 (baseline)
+      Parsed [TIME] (baseline)
+    Checking all_lint_group v0.1.0 -> v0.1.0 (no change)
+    Starting [TOTAL] checks, 0 unnecessary on 8 threads
+        PASS [TIME]       major        auto_trait_impl_removed
+        PASS [TIME]       major        constructible_struct_adds_field
+        PASS [TIME]       major        constructible_struct_adds_private_field
+        PASS [TIME]       major        constructible_struct_changed_type
+        PASS [TIME]       major        derive_trait_impl_removed
+        PASS [TIME]       major        enum_marked_non_exhaustive
+        WARN [TIME]       major        enum_missing
+        PASS [TIME]       minor        enum_must_use_added
+        PASS [TIME]       major        enum_now_doc_hidden
+        PASS [TIME]       major        enum_repr_int_changed
+        PASS [TIME]       major        enum_repr_int_removed
+        PASS [TIME]       major        enum_repr_transparent_removed
+        PASS [TIME]       major        enum_struct_variant_field_added
+        PASS [TIME]       major        enum_struct_variant_field_missing
+        PASS [TIME]       major        enum_struct_variant_field_now_doc_hidden
+        PASS [TIME]       major        enum_tuple_variant_changed_kind
+        PASS [TIME]       major        enum_tuple_variant_field_added
+        PASS [TIME]       major        enum_tuple_variant_field_missing
+        PASS [TIME]       major        enum_tuple_variant_field_now_doc_hidden
+        PASS [TIME]       major        enum_unit_variant_changed_kind
+        PASS [TIME]       major        enum_variant_added
+        PASS [TIME]       major        enum_variant_marked_non_exhaustive
+        PASS [TIME]       major        enum_variant_missing
+        PASS [TIME]       major        exported_function_changed_abi
+        PASS [TIME]       major        function_abi_no_longer_unwind
+        PASS [TIME]       major        function_changed_abi
+        PASS [TIME]       major        function_const_removed
+        PASS [TIME]       major        function_export_name_changed
+        WARN [TIME]       minor        function_missing
+        PASS [TIME]       minor        function_must_use_added
+        PASS [TIME]       major        function_now_doc_hidden
+        PASS [TIME]       major        function_parameter_count_changed
+        PASS [TIME]       major        function_unsafe_added
+        PASS [TIME]       major        inherent_associated_const_now_doc_hidden
+        PASS [TIME]       major        inherent_associated_pub_const_missing
+        PASS [TIME]       major        inherent_method_const_removed
+        PASS [TIME]       major        inherent_method_missing
+        PASS [TIME]       minor        inherent_method_must_use_added
+        PASS [TIME]       major        inherent_method_now_doc_hidden
+        PASS [TIME]       major        inherent_method_unsafe_added
+        PASS [TIME]       major        method_parameter_count_changed
+        WARN [TIME]       major        module_missing
+        PASS [TIME]       major        pub_module_level_const_missing
+        PASS [TIME]       major        pub_module_level_const_now_doc_hidden
+        PASS [TIME]       major        pub_static_missing
+        PASS [TIME]       major        pub_static_mut_now_immutable
+        PASS [TIME]       major        pub_static_now_doc_hidden
+        PASS [TIME]       major        repr_c_removed
+        PASS [TIME]       major        repr_packed_added
+        PASS [TIME]       major        repr_packed_removed
+        PASS [TIME]       major        sized_impl_removed
+        PASS [TIME]       major        struct_marked_non_exhaustive
+        PASS [TIME]       major        struct_missing
+        PASS [TIME]       minor        struct_must_use_added
+        PASS [TIME]       major        struct_now_doc_hidden
+        PASS [TIME]       major        struct_pub_field_missing
+        PASS [TIME]       major        struct_pub_field_now_doc_hidden
+        PASS [TIME]       major        struct_repr_transparent_removed
+        PASS [TIME]       major        struct_with_pub_fields_changed_type
+        PASS [TIME]       major        trait_associated_const_added
+        PASS [TIME]       major        trait_associated_const_default_removed
+        PASS [TIME]       major        trait_associated_const_now_doc_hidden
+        PASS [TIME]       major        trait_associated_type_added
+        PASS [TIME]       major        trait_associated_type_default_removed
+        PASS [TIME]       major        trait_associated_type_now_doc_hidden
+        PASS [TIME]       major        trait_method_added
+        PASS [TIME]       major        trait_method_default_impl_removed
+        PASS [TIME]       major        trait_method_missing
+        PASS [TIME]       major        trait_method_now_doc_hidden
+        PASS [TIME]       major        trait_method_unsafe_added
+        PASS [TIME]       major        trait_method_unsafe_removed
+        FAIL [TIME]       major        trait_missing
+        PASS [TIME]       minor        trait_must_use_added
+        PASS [TIME]       major        trait_newly_sealed
+        PASS [TIME]       major        trait_no_longer_object_safe
+        PASS [TIME]       major        trait_now_doc_hidden
+        PASS [TIME]       major        trait_removed_associated_constant
+        PASS [TIME]       major        trait_removed_associated_type
+        PASS [TIME]       major        trait_removed_supertrait
+        PASS [TIME]       major        trait_unsafe_added
+        PASS [TIME]       major        trait_unsafe_removed
+        PASS [TIME]       major        tuple_struct_to_plain_struct
+        PASS [TIME]       minor        type_marked_deprecated
+        PASS [TIME]       major        union_field_missing
+        PASS [TIME]       major        union_missing
+        PASS [TIME]       minor        union_must_use_added
+        PASS [TIME]       major        union_now_doc_hidden
+        PASS [TIME]       major        union_pub_field_now_doc_hidden
+        PASS [TIME]       major        unit_struct_changed_kind
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 1 fail, 3 warn, 0 skip
+
+     Summary semver requires new major version: 1 major and 0 minor checks failed
+     Warning produced 2 major and 1 minor level warnings
+    Finished [TIME] all_lint_group
