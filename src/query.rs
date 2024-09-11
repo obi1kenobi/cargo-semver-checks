@@ -178,15 +178,107 @@ pub struct QueryOverride {
     pub lint_level: Option<LintLevel>,
 }
 
+/// Identifies a lint, static lint group, or a dynamic lint group (e.g., `all`)
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged, rename_all = "kebab-case")]
+pub enum Identifier {
+    /// All lints in `cargo-semver-checks`.
+    All,
+    Lint(String),
+}
+
+impl Identifier {
+    /// Returns a `Vec` of lint ids that this identifier refers to.
+    #[must_use]
+    pub fn get_lints(&self) -> Vec<&str> {
+        match self {
+            Identifier::All => ALL_QUERIES.to_vec(),
+            Identifier::Lint(q) => vec![q.as_str()],
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct OverrideMap(BTreeMap<Identifier, QueryOverride>);
+
 /// A mapping of lint ids to configured values that override that lint's defaults.
-pub type OverrideMap = BTreeMap<String, QueryOverride>;
+pub type CompiledOverrideMap = BTreeMap<String, QueryOverride>;
+
+impl OverrideMap {
+    /// Compiles `self` into a `CompiledOverrideMap` of lint names to overrides.
+    ///
+    /// Returns an `Err` if there are conflicting overrides for the same lint (e.g.,
+    /// a lint and a lint group containing that lint are configured), use [`OverrideStack`]
+    /// to get defined precedence.
+    pub fn compile(self) -> anyhow::Result<CompiledOverrideMap> {
+        let mut map = BTreeMap::new();
+        for (id, overrides) in self.0 {
+            for lint in id.get_lints() {
+                let overrides = overrides.clone();
+                #[derive(Debug, Default)]
+                struct Conflict {
+                    lint_level: Option<(LintLevel, LintLevel)>,
+                    required_update: Option<(RequiredSemverUpdate, RequiredSemverUpdate)>,
+                }
+
+                let mut conflict = Conflict::default();
+
+                map.entry(lint.to_owned())
+                    .and_modify(|prev: &mut QueryOverride| {
+                        if let (Some(p), Some(n)) = (prev.lint_level, overrides.lint_level) {
+                            conflict.lint_level = Some((p, n));
+                        }
+
+                        if let (Some(p), Some(n)) =
+                            (prev.required_update, overrides.required_update)
+                        {
+                            conflict.required_update = Some((p, n));
+                        }
+                    })
+                    .or_insert(overrides);
+
+                match conflict {
+                    Conflict {
+                        lint_level: Some((la, lb)),
+                        required_update: Some((ra, rb)),
+                    } => anyhow::bail!(
+                        "conflicting overrides for lint `{lint}` at the same priority:\n\
+                        - lint_level: {la:?} and {lb:?}\n\
+                        - required_update: {ra:?} and {rb:?}"
+                    ),
+                    Conflict {
+                        lint_level: Some((la, lb)),
+                        required_update: None,
+                    } => anyhow::bail!(
+                        "conflicting overrides for lint `{lint}` at the same priority:\n\
+                        - lint_level: {la:?} and {lb:?}"
+                    ),
+                    Conflict {
+                        lint_level: None,
+                        required_update: Some((ra, rb)),
+                    } => anyhow::bail!(
+                        "conflicting overrides for lint `{lint}` at the same priority\n\
+                        - required_update: {ra:?} and {rb:?}"
+                    ),
+                    Conflict {
+                        lint_level: None,
+                        required_update: None,
+                    } => (),
+                }
+            }
+        }
+
+        Ok(map)
+    }
+}
 
 /// Stores a stack of [`OverrideMap`] references such that items towards the top of
 /// the stack (later in the backing `Vec`) have *higher* precedence and override items lower in the stack.
 /// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
 /// at the top of the stack will be used to calculate the effective lint level or required version update.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct OverrideStack(Vec<Arc<OverrideMap>>);
+pub struct OverrideStack(Vec<Arc<CompiledOverrideMap>>);
 
 impl OverrideStack {
     /// Creates a new, empty [`OverrideStack`] instance.
@@ -199,8 +291,15 @@ impl OverrideStack {
     ///
     /// The inserted overrides will take precedence over any lower item in the stack,
     /// if both maps have a not-`None` entry for a given lint.
-    pub fn push(&mut self, item: Arc<OverrideMap>) {
-        self.0.push(item);
+    ///
+    /// # Errors
+    ///
+    /// Returns an `Err` if there is a configuration conflict in the map: see
+    /// [`OverrideMap::compile`].
+    pub fn try_push(&mut self, item: OverrideMap) -> anyhow::Result<()> {
+        self.0.push(Arc::new(item.compile()?));
+
+        Ok(())
     }
 
     /// Calculates the *effective* lint level of this query, by searching for an override
@@ -228,8 +327,8 @@ impl OverrideStack {
     }
 }
 
-impl From<Vec<Arc<OverrideMap>>> for OverrideStack {
-    fn from(value: Vec<Arc<OverrideMap>>) -> Self {
+impl From<Vec<Arc<CompiledOverrideMap>>> for OverrideStack {
+    fn from(value: Vec<Arc<CompiledOverrideMap>>) -> Self {
         Self(value)
     }
 }
@@ -781,6 +880,10 @@ macro_rules! add_lints {
                 )*
             ]
         }
+
+        static ALL_QUERIES: &[&str] = &[
+            $(stringify!($name)),*
+        ];
     };
     ($($name:ident),*) => {
         compile_error!("Please add a trailing comma after each lint identifier. This ensures our scripts like 'make_new_lint.sh' can safely edit invocations of this macro as needed.");

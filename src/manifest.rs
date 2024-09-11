@@ -122,6 +122,12 @@ pub(crate) enum OverrideConfig {
         level: Option<LintLevel>,
         #[serde(default)]
         required_update: Option<RequiredSemverUpdate>,
+        /// The priority for this configuration.  If there are multiple entries that
+        /// configure a lint (e.g., a lint group containing a lint and the lint itself),
+        /// the configuration entry with the **lowest** priority takes precedence.
+        /// The default value, if omitted, is 0.
+        #[serde(default)]
+        priority: i64,
     },
     /// Shorthand for specifying just a lint level and leaving
     /// the other members as default: e.g.,
