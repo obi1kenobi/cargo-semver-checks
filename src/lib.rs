@@ -27,8 +27,8 @@ use std::time::Instant;
 
 pub use config::{FeatureFlag, GlobalConfig};
 pub use query::{
-    ActualSemverUpdate, LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate,
-    SemverQuery,
+    ActualSemverUpdate, CompiledOverrideMap, Identifier, LintLevel, OverrideMap, OverrideStack,
+    QueryOverride, RequiredSemverUpdate, SemverQuery,
 };
 
 /// Test a release for semver violations.
