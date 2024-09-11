@@ -183,8 +183,9 @@ pub struct QueryOverride {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Ord)]
 #[serde(rename_all = "kebab-case")]
 pub enum Identifier {
-    All,
     /// All lints in `cargo-semver-checks`.
+    All,
+    /// A named lint with the given `id` String.
     #[serde(untagged)]
     Lint(String),
 }
@@ -200,6 +201,9 @@ impl Identifier {
     }
 }
 
+/// A mapping of [`Identifier`]s to configured override values.
+///
+/// Compiles to [`CompiledOverrideMap`] with [`compile`](Self::compile).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct OverrideMap(pub(crate) BTreeMap<Identifier, QueryOverride>);
 
@@ -277,14 +281,14 @@ impl OverrideMap {
         Ok(map)
     }
 
-    // Insert an `id -> overrides` pair into the map, overwriting
-    // any previous entry with the given `id`.
+    /// Insert an `id -> overrides` pair into the map, overwriting
+    /// any previous entry with the given `id`.
     pub(crate) fn insert(&mut self, id: Identifier, overrides: QueryOverride) {
         self.0.insert(id, overrides);
     }
 }
 
-/// Stores a stack of [`OverrideMap`] references such that items towards the top of
+/// Stores a stack of [`CompiledOverrideMap`]s such that items towards the top of
 /// the stack (later in the backing `Vec`) have *higher* precedence and override items lower in the stack.
 /// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
 /// at the top of the stack will be used to calculate the effective lint level or required version update.
@@ -298,7 +302,7 @@ impl OverrideStack {
         Self(Vec::new())
     }
 
-    /// Inserts the given element at the top of the stack.
+    /// Inserts the given map at the top of the stack.
     ///
     /// The inserted overrides will take precedence over any lower item in the stack,
     /// if both maps have a not-`None` entry for a given lint.

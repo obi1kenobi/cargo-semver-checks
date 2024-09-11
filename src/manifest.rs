@@ -289,7 +289,7 @@ mod tests {
             .expect("Lint table should be present")
             .into_stack();
 
-        assert_eq!(
+        similar_asserts::assert_eq!(
             wks,
             vec![
                 OverrideMap(BTreeMap::from_iter([(
