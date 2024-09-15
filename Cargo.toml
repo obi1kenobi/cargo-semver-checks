@@ -15,7 +15,7 @@ rust-version = "1.77"
 
 [dependencies]
 trustfall = "0.7.1"
-trustfall_rustdoc = { version = "0.16.0", default-features = false, features = ["v28", "v29", "v30", "v32", "v33", "rayon", "rustc-hash"] }
+trustfall_rustdoc = { version = "0.16.0", default-features = false, features = ["v28", "v29", "v30", "v32", "v33", "v34", "rayon", "rustc-hash"] }
 clap = { version = "4.0.0", features = ["derive", "cargo"] }
 serde_json = "1.0.82"
 anyhow = "1.0.58"
