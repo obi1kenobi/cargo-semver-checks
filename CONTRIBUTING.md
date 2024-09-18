@@ -212,8 +212,8 @@ Congrats on the new lint!
 
 #### Adding a witness
 
-**Witnesses** are a new, unstable feature of `cargo-semver-checks` that let us create witness
-code, a minimal compilable example of potential downstream breakage\. They are configured via the
+**Witnesses** are a new, unstable feature of `cargo-semver-checks` that let us create
+minimal compile-able examples of potential downstream breakage\. They are configured via the
 `witness` field in the lint file `src/lints/<lint_name>.ron`:
 
 If it is `None` (or the field is omitted entirely), `cargo-semver-checks` will not be able
@@ -228,11 +228,14 @@ what would unblock this lint from being able to generate a witness.
 
 When the `witness` field is not `None`, it must have the `hint_template` field\. This is a
 `handlebars` template that generates a small (1-3 line) human-readable message that
-explains the idea of how downstream code would break\. For example, for the `function_missing` lint:
+explains the idea of how downstream code would break.
+
+This example code is meant to be small and illustrative, and does not have to pass `cargo check`. It should give the reader a sense of the kind of breakage in one glance.
+
+For example, for the `function_missing` lint, a witness template may look like this:
 
 ```rust
-use {{join "::" path};
-{{name}}(...);
+{{join "::" path}(...);
 ```
 
 which could render to something like:
@@ -244,22 +247,21 @@ witness: (
 )
 ```
 
-A witness hint like this may not be buildable (e.g., we elide the function arguments here,
-and the function call is not inside a block), but a witness hint should be a distilled
-example of breakage, and should not require extra information beyond the original
-lint's query.
+This hint will not pass `cargo check` (e.g. the function call arguments are elided), 
+and that's okay. The hint is a distilled example of breakage, and shouldn't require
+additional information beyond what the lint query retrieved.
 
 ##### Templating
 
 We use the `handlebars` crate for writing these templates\. [More information
-more information about the syntax can be found here](https://handlebarsjs.com/guide/#simple-expressions),
+about the syntax can be found here](https://handlebarsjs.com/guide/#simple-expressions),
 and [here is where `cargo-semver-checks` defines custom helpers
 ](https://github.com/obi1kenobi/cargo-semver-checks/blob/main/src/templating.rs).
 
 All fields marked with `@output` in the `query` in `<lint_name>.ron` are available
 to access with `{{name}}` in the `hint_template`, like in the example above.
 
-##### Testing
+##### Testing witnesses
 
 When the `witness` field is not `None`, `cargo-semver-checks` tests the witness generation
 of the lint similarly to how it tests the `query` itself\. If you run `cargo test` after adding
@@ -317,7 +319,7 @@ Update the `test_outputs/witnesses/function_missing.output.ron` file if
 
 Check the actual result under `--- actual ---` and make sure that it outputted
 the correct witness hints\. Note that it may contain output for other test crates - this
-not necessarily an error: see the troubleshooting section for more info\. Once you've
+is not necessarily an error: see the troubleshooting section for more info\. Once you've
 verified that the `--- actual ---` results are as expected, copy the actual results
 into the `test_outputs/witnesses/<lint_name>.output.ron` file and save\. Running
 `cargo test` should pass the `<lint_name>` test now\. **Make sure to commit and push the
