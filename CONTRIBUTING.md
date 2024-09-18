@@ -210,6 +210,124 @@ the "actual" output, then re-run `cargo test` and make sure everything passes.
 
 Congrats on the new lint!
 
+#### Adding a witness
+
+**Witnesses** are a new, unstable feature of `cargo-semver-checks` that let us create witness
+code, a minimal compilable example of potential downstream breakage\. They are configured via the
+`witness` field in the lint file `src/lints/<lint_name>.ron`:
+
+If it is `None` (or the field is omitted entirely), `cargo-semver-checks` will not be able
+to generate witness code for this lint\. This can be the right choice, sometimes:
+for example, if this lint is a warn- or allow-by-default lint that hints at potential
+breakage, but won't cause breaking changes directly\. Additionally, if it's not currently
+possible to write a Trustfall query that gets the necessary information to generate
+witnesses, leave this field as `None`, but leave a `// TODO` comment explaining
+what would unblock this lint from being able to generate a witness.
+
+##### Hint templates
+
+When the `witness` field is not `None`, it must have the `hint_template` field\. This is a
+`handlebars` template that generates a small (1-3 line) human-readable message that
+explains the idea of how downstream code would break\. For example, for the `function_missing` lint:
+
+```rust
+use {{join "::" path};
+{{name}}(...);
+```
+
+which could render to something like:
+
+```ron
+witness: (
+  hint_template: r#"use function_missing::will_be_removed_fn;\n\
+  will_be_removed_fn(...);"#
+)
+```
+
+A witness hint like this may not be buildable (e.g., we elide the function arguments here,
+and the function call is not inside a block), but a witness hint should be a distilled
+example of breakage, and should not require extra information beyond the original
+lint's query.
+
+##### Templating
+
+We use the `handlebars` crate for writing these templates\. [More information
+more information about the syntax can be found here](https://handlebarsjs.com/guide/#simple-expressions),
+and [here is where `cargo-semver-checks` defines custom helpers
+](https://github.com/obi1kenobi/cargo-semver-checks/blob/main/src/templating.rs).
+
+All fields marked with `@output` in the `query` in `<lint_name>.ron` are available
+to access with `{{name}}` in the `hint_template`, like in the example above.
+
+##### Testing
+
+When the `witness` field is not `None`, `cargo-semver-checks` tests the witness generation
+of the lint similarly to how it tests the `query` itself\. If you run `cargo test` after adding
+a witness for the first time, the test will fail, because it expects a file containing the
+expected witness output.
+
+To solve this, create a file called `test_outputs/witnesses/<lint_name>.output.ron`. Make the
+contents `{}` currently, but we will change this\. Run `cargo test` again\. The test
+`<lint_name>` should fail (because we told it we expect no witnesses to be generated,
+and this is no longer true).
+
+The failed test should output a message like:
+
+```
+---- query::tests_lints::function_missing stdout ----
+--- actual output ---
+{
+    // cut down for readibility
+    "./test_crates/function_missing/": [
+        (
+            filename: "src/lib.rs",
+            begin_line: 1,
+            hint: "use function_missing::will_be_removed_fn;\nwill_be_removed_fn(...);",
+        ),
+        (
+            filename: "src/lib.rs",
+            begin_line: 4,
+            hint: "use function_missing::pub_use_removed_fn;\npub_use_removed_fn(...);",
+        ),
+    ],
+}
+thread 'query::tests_lints::function_missing' panicked at src/query.rs:751:17:
+Witness output for function_missing did not match expected values:
+Differences (-expected|+actual):
+-{}
++{
++    // cut down for readibility
++    "./test_crates/function_missing/": [
++        (
++            filename: "src/lib.rs",
++            begin_line: 1,
++            hint: "use function_missing::will_be_removed_fn;\nwill_be_removed_fn(...);",
++        ),
++        (
++            filename: "src/lib.rs",
++            begin_line: 4,
++            hint: "use function_missing::pub_use_removed_fn;\npub_use_removed_fn(...);",
++        ),
++    ],
++}
+
+Update the `test_outputs/witnesses/function_missing.output.ron` file if
+                    the new test results are correct.
+```
+
+Check the actual result under `--- actual ---` and make sure that it outputted
+the correct witness hints\. Note that it may contain output for other test crates - this
+not necessarily an error: see the troubleshooting section for more info\. Once you've
+verified that the `--- actual ---` results are as expected, copy the actual results
+into the `test_outputs/witnesses/<lint_name>.output.ron` file and save\. Running
+`cargo test` should pass the `<lint_name>` test now\. **Make sure to commit and push the
+`test_outputs/witnesses/<lint_name>.output.ron` into git**, otherwise the test will
+fail in CI.
+
+##### Full witness templates
+
+*TODO: @suaviloquence will write this once the feature has been implemented.*
+
 ### Troubleshooting
 #### A valid query must output span_filename and/or span_begin_line
 If your lint fails with an error similar to the following:
