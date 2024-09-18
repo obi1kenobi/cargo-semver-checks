@@ -213,20 +213,20 @@ Congrats on the new lint!
 #### Adding a witness
 
 **Witnesses** are a new, unstable feature of `cargo-semver-checks` that let us create
-minimal compile-able examples of potential downstream breakage\. They are configured via the
+minimal compile-able examples of potential downstream breakage. They are configured via the
 `witness` field in the lint file `src/lints/<lint_name>.ron`:
 
 If it is `None` (or the field is omitted entirely), `cargo-semver-checks` will not be able
-to generate witness code for this lint\. This can be the right choice, sometimes:
+to generate witness code for this lint. This can be the right choice, sometimes:
 for example, if this lint is a warn- or allow-by-default lint that hints at potential
-breakage, but won't cause breaking changes directly\. Additionally, if it's not currently
+breakage, but won't cause breaking changes directly. Additionally, if it's not currently
 possible to write a Trustfall query that gets the necessary information to generate
 witnesses, leave this field as `None`, but leave a `// TODO` comment explaining
 what would unblock this lint from being able to generate a witness.
 
 ##### Hint templates
 
-When the `witness` field is not `None`, it must have the `hint_template` field\. This is a
+When the `witness` field is not `None`, it must have the `hint_template` field. This is a
 `handlebars` template that generates a small (1-3 line) human-readable message that
 explains the idea of how downstream code would break.
 
@@ -234,42 +234,41 @@ This example code is meant to be small and illustrative, and does not have to pa
 
 For example, for the `function_missing` lint, a witness template may look like this:
 
-```rust
-{{join "::" path}(...);
+```ron
+witness: (
+  hint_template: r#"{{join "::" path}(...);"#,
+),
 ```
 
 which could render to something like:
 
-```ron
-witness: (
-  hint_template: r#"use function_missing::will_be_removed_fn;\n\
-  will_be_removed_fn(...);"#
-)
+```rust
+function_missing::will_be_removed_fn(...);
 ```
 
-This hint will not pass `cargo check` (e.g. the function call arguments are elided), 
+This hint will not pass `cargo check` (e.g. the function call arguments are elided),
 and that's okay. The hint is a distilled example of breakage, and shouldn't require
 additional information beyond what the lint query retrieved.
 
 ##### Templating
 
-We use the `handlebars` crate for writing these templates\. [More information
+We use the `handlebars` crate for writing these templates. [More information
 about the syntax can be found here](https://handlebarsjs.com/guide/#simple-expressions),
 and [here is where `cargo-semver-checks` defines custom helpers
 ](https://github.com/obi1kenobi/cargo-semver-checks/blob/main/src/templating.rs).
 
 All fields marked with `@output` in the `query` in `<lint_name>.ron` are available
-to access with `{{name}}` in the `hint_template`, like in the example above.
+to access with `{{output_name}}` in the `hint_template`, like in the example above.
 
 ##### Testing witnesses
 
 When the `witness` field is not `None`, `cargo-semver-checks` tests the witness generation
-of the lint similarly to how it tests the `query` itself\. If you run `cargo test` after adding
+of the lint similarly to how it tests the `query` itself. If you run `cargo test` after adding
 a witness for the first time, the test will fail, because it expects a file containing the
 expected witness output.
 
 To solve this, create a file called `test_outputs/witnesses/<lint_name>.output.ron`. Make the
-contents `{}` currently, but we will change this\. Run `cargo test` again\. The test
+contents `{}` currently, but we will change this. Run `cargo test` again. The test
 `<lint_name>` should fail (because we told it we expect no witnesses to be generated,
 and this is no longer true).
 
@@ -318,11 +317,11 @@ Update the `test_outputs/witnesses/function_missing.output.ron` file if
 ```
 
 Check the actual result under `--- actual ---` and make sure that it outputted
-the correct witness hints\. Note that it may contain output for other test crates - this
-is not necessarily an error: see the troubleshooting section for more info\. Once you've
+the correct witness hints. Note that it may contain output for other test crates - this
+is not necessarily an error: see the troubleshooting section for more info. Once you've
 verified that the `--- actual ---` results are as expected, copy the actual results
-into the `test_outputs/witnesses/<lint_name>.output.ron` file and save\. Running
-`cargo test` should pass the `<lint_name>` test now\. **Make sure to commit and push the
+into the `test_outputs/witnesses/<lint_name>.output.ron` file and save. Running
+`cargo test` should pass the `<lint_name>` test now. **Make sure to commit and push the
 `test_outputs/witnesses/<lint_name>.output.ron` into git**, otherwise the test will
 fail in CI.
 
