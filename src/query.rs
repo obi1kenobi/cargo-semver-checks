@@ -253,15 +253,15 @@ impl From<Vec<Arc<OverrideMap>>> for OverrideStack {
 pub struct Witness {
     /// A [`handlebars`] template that renders a user-facing hint to give a quick
     /// explanation of breakage.  This may not be a buildable example, but it should
-    /// show the idea of why downstream code could break.  It will be provided any
-    /// `@output` query declarations in the [`SemverQuery`] query.
+    /// show the idea of why downstream code could break.  It will be provided all
+    /// `@output` data from the [`SemverQuery`] query that contains this [`Witness`].
     ///
     /// Example for the `function_missing` lint, where `name` is the (re)moved function's
     /// name and `path` is the importable path:
     ///
     /// ```no_run
     /// # let _ = r#"
-    /// "use {{join "::" path}};
+    /// use {{join "::" path}};
     /// {{name}}(...);
     /// # "#;
     /// ```
@@ -283,9 +283,8 @@ pub struct Witness {
     ///
     /// ```no_run
     /// # let _ = r#"
-    /// use {{join "::" path}};
-    /// fn witness(item: {{name}}) {
-    ///     if let {{name}}::{{variant_name}}{..} = item {
+    /// fn witness(item: {{path}}) {
+    ///     if let {{path}}::{{variant_name}} {..} = item {
     ///
     ///     }
     /// }
@@ -723,6 +722,7 @@ mod tests {
                                     _ => unreachable!("Missing span_begin_line Int, this should be validated above"),
                                 };
 
+                                // TODO: Run witness queries and generate full witness here.
                                 WitnessOutput {
                                     filename: filename.to_string(),
                                     begin_line,
@@ -737,8 +737,8 @@ mod tests {
                 .collect();
 
             if expected_witnesses != actual_witnesses {
-                // ideally we would use the `escape_strings` feature to pretty-print multiline
-                // strings, but this is blocked on ron releasing v0.9:
+                // TODO: ideally we would use the `escape_strings` feature to pretty-print
+                //       multiline strings, but this is blocked on ron releasing v0.9:
                 //
                 // https://docs.rs/ron/0.9.0-alpha.0/ron/ser/struct.PrettyConfig.html#structfield.escape_strings
                 let config = ron::ser::PrettyConfig::new();

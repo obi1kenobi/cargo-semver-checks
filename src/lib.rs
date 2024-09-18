@@ -45,7 +45,7 @@ pub struct Check {
     baseline_feature_config: rustdoc_gen::FeatureConfig,
     /// Which `--target` to use, if unset pass no flag
     build_target: Option<String>,
-    /// Options for generating [witnessees](Witness).
+    /// Options for generating [witnesses](Witness).
     witness_generation: WitnessGeneration,
 }
 
