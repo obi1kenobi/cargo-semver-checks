@@ -15,44 +15,44 @@ rust-version = "1.77"
 
 [dependencies]
 trustfall = "0.7.1"
-trustfall_rustdoc = { version = "0.16.0", default-features = false, features = ["v28", "v29", "v30", "v32", "v33", "rayon", "rustc-hash"] }
-clap = { version = "4.0.0", features = ["derive", "cargo"] }
-serde_json = "1.0.82"
-anyhow = "1.0.58"
-ron = "0.8.0"
-serde = { version = "1.0.185", features = ["derive"] }
-semver = "1.0.12"
-handlebars = "6.0.0"
+trustfall_rustdoc = { version = "0.16.2", default-features = false, features = ["v28", "v29", "v30", "v32", "v33", "v34", "rayon", "rustc-hash"] }
+clap = { version = "4.5.17", features = ["derive", "cargo"] }
+serde_json = "1.0.128"
+anyhow = "1.0.89"
+ron = "0.8.1"
+serde = { version = "1.0.210", features = ["derive"] }
+semver = "1.0.23"
+handlebars = "6.1.0"
 atty = "0.2.14"
 cargo_metadata = "0.18.1"
-clap-cargo = { version = "0.14.0", features = ["cargo_metadata"] }
-ignore = "0.4.18"
-clap-verbosity-flag = "2.0.0"
-log = "0.4.17"
+clap-cargo = { version = "0.14.1", features = ["cargo_metadata"] }
+ignore = "0.4.23"
+clap-verbosity-flag = "2.2.1"
+log = "0.4.22"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
-gix = { version = "0.64", default-features = false, features = ["max-performance", "revision"] }
+gix = { version = "0.66", default-features = false, features = ["max-performance", "revision"] }
 tame-index = { version = "0.13", features = ["sparse"] }
 
-human-panic = "1.0.3"
+human-panic = "2.0.1"
 bugreport = "0.5.0"
 itertools = "0.13.0"
-cargo_toml = "0.20.2"
-toml = "0.8.10"
+cargo_toml = "0.20.4"
+toml = "0.8.19"
 directories = "5.0.1"
-sha2 = "0.10.6"
-rustc_version = "0.4.0"
-rayon = "1.8.0"
-anstyle = "1.0.6"
-anstream = "0.6.13"
+sha2 = "0.10.8"
+rustc_version = "0.4.1"
+rayon = "1.10.0"
+anstyle = "1.0.8"
+anstream = "0.6.15"
 urlencoding = "2.1.3"
-cargo-config2 = "0.1.26"
+cargo-config2 = "0.1.29"
 
 [dev-dependencies]
 assert_cmd = "2.0"
-similar-asserts = { version = "1.5.0", features = ["serde"] }
-predicates = "3.1.0"
-insta = { version = "1.39.0", features = ["ron", "filters"] }
+similar-asserts = { version = "1.6.0", features = ["serde"] }
+predicates = "3.1.2"
+insta = { version = "1.40.0", features = ["ron", "filters"] }
 fs-err = "2.11.0"
 regex = "1.10.6"
 insta-cmd = "0.6.0"

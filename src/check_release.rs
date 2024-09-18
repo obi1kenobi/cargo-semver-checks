@@ -12,7 +12,7 @@ use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocA
 
 use crate::{
     query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
-    CrateReport, GlobalConfig, ReleaseType,
+    CrateReport, GlobalConfig, ReleaseType, WitnessGeneration,
 };
 
 fn classify_semver_version_change(
@@ -69,6 +69,7 @@ fn print_triggered_lint(
     config: &mut GlobalConfig,
     semver_query: &SemverQuery,
     results: Vec<BTreeMap<Arc<str>, FieldValue>>,
+    witness_generation: &WitnessGeneration,
 ) -> anyhow::Result<()> {
     if let Some(ref_link) = semver_query.reference_link.as_deref() {
         config.log_info(|config| {
@@ -150,6 +151,27 @@ fn print_triggered_lint(
                 Ok(())
             })?;
         }
+
+        if let Some(witness) = &semver_query.witness {
+            if witness_generation.show_hints {
+                let message = config
+                    .handlebars()
+                    .render_template(&witness.hint_template, &pretty_result)
+                    .context("Error instantiating witness hint template.")?;
+
+                config.log_info(|config| {
+                    let note = Style::new()
+                        .fg_color(Some(Color::Ansi(AnsiColor::Cyan)))
+                        .bold();
+                    writeln!(
+                        config.stdout(),
+                        "{note}note:{note:#} downstream code similar to the following would break:\n\
+                        {message}\n"
+                    )?;
+                    Ok(())
+                })?;
+            }
+        }
     }
 
     Ok(())
@@ -162,6 +184,7 @@ pub(super) fn run_check_release(
     baseline_crate: VersionedCrate,
     release_type: Option<ReleaseType>,
     overrides: &OverrideStack,
+    witness_generation: &WitnessGeneration,
 ) -> anyhow::Result<CrateReport> {
     let current_version = current_crate.crate_version();
     let baseline_version = baseline_crate.crate_version();
@@ -338,7 +361,7 @@ pub(super) fn run_check_release(
                 Ok(())
             })?;
 
-            print_triggered_lint(config, semver_query, results)?;
+            print_triggered_lint(config, semver_query, results, witness_generation)?;
         }
 
         for (semver_query, results) in results_with_warnings {
@@ -353,7 +376,7 @@ pub(super) fn run_check_release(
                 Ok(())
             })?;
 
-            print_triggered_lint(config, semver_query, results)?;
+            print_triggered_lint(config, semver_query, results, witness_generation)?;
         }
 
         let required_bump = required_versions.iter().max().copied();

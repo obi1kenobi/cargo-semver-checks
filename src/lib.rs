@@ -23,13 +23,12 @@ use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
 use rustdoc_cmd::RustdocCommand;
 use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::time::Instant;
 
 pub use config::{FeatureFlag, GlobalConfig};
 pub use query::{
     ActualSemverUpdate, LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate,
-    SemverQuery,
+    SemverQuery, Witness,
 };
 
 /// Test a release for semver violations.
@@ -45,6 +44,8 @@ pub struct Check {
     baseline_feature_config: rustdoc_gen::FeatureConfig,
     /// Which `--target` to use, if unset pass no flag
     build_target: Option<String>,
+    /// Options for generating [witnesses](Witness).
+    witness_generation: WitnessGeneration,
 }
 
 /// The kind of release we're making.
@@ -258,6 +259,7 @@ impl Check {
             current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
             build_target: None,
+            witness_generation: WitnessGeneration::default(),
         }
     }
 
@@ -319,6 +321,12 @@ impl Check {
     /// relying on the users cargo configuration.
     pub fn set_build_target(&mut self, build_target: String) -> &mut Self {
         self.build_target = Some(build_target);
+        self
+    }
+
+    /// Set the options for generating witness code.  See [`WitnessGeneration`] for more.
+    pub fn set_witness_generation(&mut self, witness_generation: WitnessGeneration) -> &mut Self {
+        self.witness_generation = witness_generation;
         self
     }
 
@@ -461,6 +469,7 @@ impl Check {
                             baseline_crate,
                             self.release_type,
                             &OverrideStack::new(),
+                            &self.witness_generation,
                         )?;
                         config.shell_status(
                             "Finished",
@@ -492,7 +501,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                 let workspace_overrides =
                     manifest::deserialize_lint_table(&metadata.workspace_metadata)
                         .context("[workspace.metadata.cargo-semver-checks] table is invalid")?
-                        .map(|table| Arc::new(table.inner));
+                        .map(|table| table.into_stack());
 
                 selected
                     .iter()
@@ -535,12 +544,16 @@ note: skipped the following crates since they have no library target: {skipped}"
 
                             if lint_workspace_key || metadata_workspace_key {
                                 if let Some(workspace) = &workspace_overrides {
-                                    overrides.push(Arc::clone(workspace));
+                                    for level in workspace {
+                                        overrides.push(level);
+                                    }
                                 }
                             }
 
                             if let Some(package) = package_overrides {
-                                overrides.push(Arc::new(package.inner));
+                                for level in package.into_stack() {
+                                    overrides.push(&level);
+                                }
                             }
 
                             let start = std::time::Instant::now();
@@ -574,6 +587,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                                     baseline_crate,
                                     self.release_type,
                                     &overrides,
+                                    &self.witness_generation
                                 )?),
                             ));
                             config.shell_status(
@@ -679,6 +693,33 @@ impl Report {
     /// Reports of each crate checked, sorted by crate name.
     pub fn crate_reports(&self) -> &BTreeMap<String, CrateReport> {
         &self.crate_reports
+    }
+}
+
+/// Options for generating **witness code**.  A witness is a minimal buildable
+/// example of how downstream code could break for a specific breaking change.
+///
+/// See also: [`Witness`]
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize)]
+pub struct WitnessGeneration {
+    /// Whether to print witness hints, short examples that show why a change is breaking,
+    /// while not necessarily buildable standalone programs.  See [`Witness::hint_template`].
+    pub show_hints: bool,
+    /// Optional directory to write full witness examples to.  If this is `None`, full witnesses
+    /// will not be generated.  See [`Witness::witness_template`].
+    pub witness_directory: Option<PathBuf>,
+}
+
+impl WitnessGeneration {
+    /// Creates a new [`WitnessGeneration`] instance indicating to not generate any witnesses.
+    #[inline]
+    #[must_use]
+    pub const fn new() -> Self {
+        Self {
+            show_hints: false,
+            witness_directory: None,
+        }
     }
 }
 
