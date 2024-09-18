@@ -332,7 +332,6 @@ mod tests {
 
     use anyhow::Context;
     use serde::{Deserialize, Serialize};
-    use similar_asserts::SimpleDiff;
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_rustdoc::{
         load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
@@ -692,15 +691,6 @@ mod tests {
         }
 
         if let Some(witness) = semver_query.witness {
-            let expected_witness_text =
-                std::fs::read_to_string(format!("./test_outputs/witnesses/{query_name}.output.ron"))
-                .with_context(|| format!("Query {query_name} has a witness template, but could not load\n\
-                    `test_outputs/witnesses/{query_name}.output.ron` expected witness file, did you forget to add it?"))
-                .expect("failed to load expected witness output");
-            let expected_witnesses: BTreeMap<Cow<str>, BTreeSet<WitnessOutput>> =
-                ron::from_str(&expected_witness_text)
-                    .expect("could not parse expected witness outputs as ron format");
-
             let actual_witnesses: BTreeMap<_, BTreeSet<_>> = transparent_actual_results
                 .iter()
                 .map(|(k, v)| {
@@ -731,29 +721,20 @@ mod tests {
                 })
                 .collect();
 
-            if expected_witnesses != actual_witnesses {
-                // TODO: ideally we would use the `escape_strings` feature to pretty-print
-                //       multiline strings, but this is blocked on ron releasing v0.9:
-                //
-                // https://docs.rs/ron/0.9.0-alpha.0/ron/ser/struct.PrettyConfig.html#structfield.escape_strings
-                let config = ron::ser::PrettyConfig::new();
-                // These are deserialized to BTreeSets, so they will be sorted by span (filename + begin_line)
-                let expected = ron::ser::to_string_pretty(&expected_witnesses, config.clone())
-                    .expect("serializing expected witnesses failed");
-                let actual = ron::ser::to_string_pretty(&actual_witnesses, config)
-                    .expect("serializing actual witnesses failed");
-
-                let diff = SimpleDiff::from_str(&expected, &actual, "expected", "actual");
-                let id = &semver_query.id;
-
-                println!("--- actual output ---\n{actual}");
-
-                panic!(
-                    "Witness output for {id} did not match expected values:\n{diff}\n\
-                    Update the `test_outputs/witnesses/{id}.output.ron` file if
-                    the new test results are correct.",
-                );
-            }
+            insta::with_settings!(
+                {
+                    prepend_module_to_snapshot => false,
+                    snapshot_path => "../test_outputs/witnesses",
+                    description => format!(
+                        "Lint `{query_name}` did not have the expected witness output.\n\
+                        See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\n\
+                        for more information."
+                    ),
+                },
+                {
+                    insta::assert_ron_snapshot!(query_name, &actual_witnesses);
+                }
+            );
         }
     }
 
