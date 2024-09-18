@@ -28,6 +28,7 @@ SemverQuery(
 
                         variant {
                             variant_name: name @output @tag
+
                             discriminant {
                                 old_value: value @output @tag
                             }
@@ -52,6 +53,7 @@ SemverQuery(
 
                         variant {
                             name @filter(op: "=", value: ["%variant_name"])
+
                             discriminant {
                                 new_value: value @output @filter(op: "!=", value: ["%old_value"])
                             }
@@ -65,7 +67,6 @@ SemverQuery(
                         variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             attrs @filter(op: "contains", value: ["$non_exhaustive"])
                         }
-
                     }
                 }
             }
