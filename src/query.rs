@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, sync::Arc};
+use std::collections::BTreeMap;
 
 use ron::extensions::Extensions;
 use serde::{Deserialize, Serialize};
@@ -181,12 +181,12 @@ pub struct QueryOverride {
 /// A mapping of lint ids to configured values that override that lint's defaults.
 pub type OverrideMap = BTreeMap<String, QueryOverride>;
 
-/// Stores a stack of [`OverrideMap`] references such that items towards the top of
+/// Stores a stack of [`OverrideMap`]s such that items towards the top of
 /// the stack (later in the backing `Vec`) have *higher* precedence and override items lower in the stack.
 /// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
 /// at the top of the stack will be used to calculate the effective lint level or required version update.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct OverrideStack(Vec<Arc<OverrideMap>>);
+pub struct OverrideStack(Vec<OverrideMap>);
 
 impl OverrideStack {
     /// Creates a new, empty [`OverrideStack`] instance.
@@ -195,12 +195,12 @@ impl OverrideStack {
         Self(Vec::new())
     }
 
-    /// Inserts the given element at the top of the stack.
+    /// Inserts the given map at the top of the stack.
     ///
     /// The inserted overrides will take precedence over any lower item in the stack,
     /// if both maps have a not-`None` entry for a given lint.
-    pub fn push(&mut self, item: Arc<OverrideMap>) {
-        self.0.push(item);
+    pub fn push(&mut self, item: &OverrideMap) {
+        self.0.push(item.clone());
     }
 
     /// Calculates the *effective* lint level of this query, by searching for an override
@@ -228,18 +228,12 @@ impl OverrideStack {
     }
 }
 
-impl From<Vec<Arc<OverrideMap>>> for OverrideStack {
-    fn from(value: Vec<Arc<OverrideMap>>) -> Self {
-        Self(value)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::borrow::Cow;
     use std::collections::BTreeSet;
     use std::path::PathBuf;
-    use std::sync::{Arc, OnceLock};
+    use std::sync::OnceLock;
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
@@ -249,7 +243,7 @@ mod tests {
     };
 
     use crate::query::{
-        LintLevel, OverrideStack, QueryOverride, RequiredSemverUpdate, SemverQuery,
+        LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate, SemverQuery,
     };
     use crate::templating::make_handlebars_registry;
 
@@ -598,26 +592,22 @@ mod tests {
     #[test]
     fn test_overrides() {
         let mut stack = OverrideStack::new();
-        stack.push(Arc::new(
-            [
-                (
-                    "query1".into(),
-                    QueryOverride {
-                        lint_level: Some(LintLevel::Allow),
-                        required_update: Some(RequiredSemverUpdate::Minor),
-                    },
-                ),
-                (
-                    "query2".into(),
-                    QueryOverride {
-                        lint_level: None,
-                        required_update: Some(RequiredSemverUpdate::Minor),
-                    },
-                ),
-            ]
-            .into_iter()
-            .collect(),
-        ));
+        stack.push(&OverrideMap::from_iter([
+            (
+                "query1".into(),
+                QueryOverride {
+                    lint_level: Some(LintLevel::Allow),
+                    required_update: Some(RequiredSemverUpdate::Minor),
+                },
+            ),
+            (
+                "query2".into(),
+                QueryOverride {
+                    lint_level: None,
+                    required_update: Some(RequiredSemverUpdate::Minor),
+                },
+            ),
+        ]));
 
         let q1 = make_blank_query(
             "query1".into(),
@@ -649,38 +639,30 @@ mod tests {
     #[test]
     fn test_override_precedence() {
         let mut stack = OverrideStack::new();
-        stack.push(Arc::new(
-            [
-                (
-                    "query1".into(),
-                    QueryOverride {
-                        lint_level: Some(LintLevel::Allow),
-                        required_update: Some(RequiredSemverUpdate::Minor),
-                    },
-                ),
-                (
-                    "query2".into(),
-                    QueryOverride {
-                        lint_level: None,
-                        required_update: Some(RequiredSemverUpdate::Minor),
-                    },
-                ),
-            ]
-            .into_iter()
-            .collect(),
-        ));
-
-        stack.push(Arc::new(
-            [(
+        stack.push(&OverrideMap::from_iter([
+            (
                 "query1".into(),
                 QueryOverride {
-                    required_update: None,
-                    lint_level: Some(LintLevel::Warn),
+                    lint_level: Some(LintLevel::Allow),
+                    required_update: Some(RequiredSemverUpdate::Minor),
                 },
-            )]
-            .into_iter()
-            .collect(),
-        ));
+            ),
+            (
+                ("query2".into()),
+                QueryOverride {
+                    lint_level: None,
+                    required_update: Some(RequiredSemverUpdate::Minor),
+                },
+            ),
+        ]));
+
+        stack.push(&OverrideMap::from_iter([(
+            "query1".into(),
+            QueryOverride {
+                required_update: None,
+                lint_level: Some(LintLevel::Warn),
+            },
+        )]));
 
         let q1 = make_blank_query(
             "query1".into(),
