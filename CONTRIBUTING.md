@@ -283,12 +283,12 @@ The failed test should output a message like:
         (
             filename: "src/lib.rs",
             begin_line: 1,
-            hint: "use function_missing::will_be_removed_fn;\nwill_be_removed_fn(...);",
+            hint: "function_missing::will_be_removed_fn(...);",
         ),
         (
             filename: "src/lib.rs",
             begin_line: 4,
-            hint: "use function_missing::pub_use_removed_fn;\npub_use_removed_fn(...);",
+            hint: "function_missing::pub_use_removed_fn(...);",
         ),
     ],
 }
@@ -302,12 +302,12 @@ Differences (-expected|+actual):
 +        (
 +            filename: "src/lib.rs",
 +            begin_line: 1,
-+            hint: "use function_missing::will_be_removed_fn;\nwill_be_removed_fn(...);",
++            hint: "function_missing::will_be_removed_fn(...);",
 +        ),
 +        (
 +            filename: "src/lib.rs",
 +            begin_line: 4,
-+            hint: "use function_missing::pub_use_removed_fn;\npub_use_removed_fn(...);",
++            hint: "function_missing::pub_use_removed_fn(...);",
 +        ),
 +    ],
 +}
