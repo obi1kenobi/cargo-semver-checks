@@ -28,11 +28,13 @@ SemverQuery(
 
                         variant {
                             variant_name: name @output @tag
-                            attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
-
                             discriminant {
                                 old_value: value @output @tag
                             }
+                        }
+
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            attrs @filter(op: "contains", value: ["$non_exhaustive"])
                         }
                     }
                 }
@@ -50,17 +52,20 @@ SemverQuery(
 
                         variant {
                             name @filter(op: "=", value: ["%variant_name"])
-                            attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
-
                             discriminant {
-                                new_value: value @output @filter (op: "!=", value: ["%old_value"])
+                                new_value: value @output @filter(op: "!=", value: ["%old_value"])
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
                             }
                         }
 
-                        span_: span @optional {
-                            filename @output
-                            begin_line @output
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            attrs @filter(op: "contains", value: ["$non_exhaustive"])
                         }
+
                     }
                 }
             }
