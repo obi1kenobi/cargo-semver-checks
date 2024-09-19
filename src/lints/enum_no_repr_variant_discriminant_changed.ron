@@ -1,0 +1,84 @@
+SemverQuery(
+    id: "enum_no_repr_variant_discriminant_changed",
+    human_readable_name: "enum variant had its discriminant change value",
+    description: "A public enum's variant had its discriminant changed from its previous value.",
+    reference: Some("A public enum's variant had its discriminant value change. This breaks downstream code that used its value via a numeric cast like `as isize`."),
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/enumerations.html#assigning-discriminant-values"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        enum_name: name @output @tag
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                            }
+                        }
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            variant_name: name @output @tag
+
+                            discriminant {
+                                old_value: value @output @tag
+                            }
+                        }
+
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            attrs @filter(op: "contains", value: ["$non_exhaustive"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%enum_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            name @filter(op: "=", value: ["%variant_name"])
+
+                            discriminant {
+                                new_value: value @output @filter(op: "!=", value: ["%old_value"])
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            attrs @filter(op: "contains", value: ["$non_exhaustive"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "repr": "repr",
+        "non_exhaustive": "#[non_exhaustive]",
+        "zero": 0,
+        "true": true,
+    },
+    error_message: "The enum's variant had its discriminant value change. This breaks downstream code that used its value via a numeric cast like `as isize`.",
+    per_result_error_template: Some("variant {{enum_name}}::{{variant_name}} {{old_value}} -> {{new_value}} in {{span_filename}}:{{span_begin_line}}"),
+)
