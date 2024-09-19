@@ -52,6 +52,9 @@ SemverQuery(
     },
     error_message: "TODO",
     per_result_error_template: Some("TODO"),
+    // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
+    // for information about this field.
+    witness: None,
 )
 EOF
     echo ' done!'

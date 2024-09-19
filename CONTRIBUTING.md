@@ -210,6 +210,86 @@ the "actual" output, then re-run `cargo test` and make sure everything passes.
 
 Congrats on the new lint!
 
+#### Adding a witness
+
+**Witnesses** are a new, unstable feature of `cargo-semver-checks` that let us create
+minimal compile-able examples of potential downstream breakage. They are configured via the
+`witness` field in the lint file `src/lints/<lint_name>.ron`:
+
+If it is `None` (or the field is omitted entirely), `cargo-semver-checks` will not be able
+to generate witness code for this lint. This can be the right choice, sometimes:
+for example, if this lint is a warn- or allow-by-default lint that hints at potential
+breakage, but won't cause breaking changes directly. Additionally, if it's not currently
+possible to write a Trustfall query that gets the necessary information to generate
+witnesses, leave this field as `None`, but leave a `// TODO` comment explaining
+what would unblock this lint from being able to generate a witness.
+
+##### Hint templates
+
+When the `witness` field is not `None`, it must have the `hint_template` field. This is a
+`handlebars` template that generates a small (1-3 line) human-readable message that
+explains the idea of how downstream code would break.
+
+This example code is meant to be small and illustrative, and does not have to pass `cargo check`.
+It should give the reader a sense of the kind of breakage in one glance.
+
+For example, for the `function_missing` lint, a witness template may look like this:
+
+```ron
+witness: (
+  hint_template: r#"{{join "::" path}(...);"#,
+),
+```
+
+which could render to something like:
+
+```rust
+function_missing::will_be_removed_fn(...);
+```
+
+This hint will not pass `cargo check` (e.g. the function call arguments are elided),
+and that's okay. The hint is a distilled example of breakage, and shouldn't require
+additional information beyond what the lint query retrieved.
+
+##### Templating
+
+We use the `handlebars` crate for writing these templates. [More information
+about the syntax can be found here](https://handlebarsjs.com/guide/#simple-expressions),
+and [here is where `cargo-semver-checks` defines custom helpers
+](https://github.com/obi1kenobi/cargo-semver-checks/blob/main/src/templating.rs).
+
+All fields marked with `@output` in the `query` in `<lint_name>.ron` are available
+to access with `{{output_name}}` in the `hint_template`, like in the example above.
+
+##### Testing witnesses
+
+When the `witness` field is not `None`, `cargo-semver-checks` tests the witness generation
+of the lint similarly to how it tests the `query` itself. After adding a witness for the first
+time, run `cargo test` to start generating the snapshots.  The first time you run this test,
+it will fail, because there's no expected result to compare to.  Let's make the test pass:
+
+We use `insta` for snapshot testing witness results, so after adding/changing a witness, we need
+to update the test outputs. Note that it may contain output for other test crates - this
+is not necessarily an error: see the troubleshooting section for more info.
+
+There are two ways to update the output:
+
+1. **With `cargo insta`**: If you install (or have already installed) the `insta` CLI with
+   `cargo install --locked cargo-insta`, you can run `cargo insta review`. Check that the
+   new output is what you expect, and accept it in the TUI.
+2. **Manually**: If you can't (or don't want to) use `cargo-insta`, you can verify the snapshot
+   file manually.  There should be a file called `test_outputs/witnesses/<lint_name>.snap.new`.
+   Open it, and verify that the witnesses generated as expected.  Once you've checked it, move it
+   to `test_outputs/witnesses/<lint_name>.snap` (remove the `.new`)
+
+Once you've update the test output, run `cargo test` again and the `<lint_name>` test should pass!
+**Make sure to commit and push the `test_outputs/witnesses/<lint_name>.snap` into git**;
+otherwise the test will fail in CI.
+
+##### Full witness templates
+
+*TODO: @suaviloquence will write this once the feature has been implemented.*
+
 ### Troubleshooting
 #### A valid query must output span_filename and/or span_begin_line
 If your lint fails with an error similar to the following:
