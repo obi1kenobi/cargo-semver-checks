@@ -732,7 +732,7 @@ mod tests {
                     ),
                 },
                 {
-                    insta::assert_ron_snapshot!(query_name, &actual_witnesses);
+                    insta::assert_toml_snapshot!(query_name, &actual_witnesses);
                 }
             );
         }

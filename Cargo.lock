@@ -354,7 +354,7 @@ dependencies = [
  "sha2",
  "similar-asserts",
  "tame-index",
- "toml",
+ "toml 0.8.19",
  "trustfall",
  "trustfall_rustdoc",
  "urlencoding",
@@ -381,7 +381,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ad639525b1c67b6a298f378417b060fbc04618bea559482a8484381cce27d965"
 dependencies = [
  "serde",
- "toml",
+ "toml 0.8.19",
 ]
 
 [[package]]
@@ -2030,7 +2030,7 @@ dependencies = [
  "os_info",
  "serde",
  "serde_derive",
- "toml",
+ "toml 0.8.19",
  "uuid",
 ]
 
@@ -2142,6 +2142,7 @@ dependencies = [
  "ron 0.7.1",
  "serde",
  "similar",
+ "toml 0.5.11",
 ]
 
 [[package]]
@@ -3419,6 +3420,15 @@ dependencies = [
  "futures-sink",
  "pin-project-lite",
  "tokio",
+]
+
+[[package]]
+name = "toml"
+version = "0.5.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4f7f0dd8d50a853a531c426359045b1998f04219d88799810762cd4ad314234"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
