@@ -263,67 +263,27 @@ to access with `{{output_name}}` in the `hint_template`, like in the example abo
 ##### Testing witnesses
 
 When the `witness` field is not `None`, `cargo-semver-checks` tests the witness generation
-of the lint similarly to how it tests the `query` itself. If you run `cargo test` after adding
-a witness for the first time, the test will fail, because it expects a file containing the
-expected witness output.
+of the lint similarly to how it tests the `query` itself. After adding a witness for the first
+time, run `cargo test` to start generating the snapshots.  The first time you run this test,
+it will fail, because there's no expected result to compare to.  Let's make the test pass:
 
-To solve this, create a file called `test_outputs/witnesses/<lint_name>.output.ron`. Make the
-contents `{}` currently, but we will change this. Run `cargo test` again. The test
-`<lint_name>` should fail (because we told it we expect no witnesses to be generated,
-and this is no longer true).
+We use `insta` for snapshot testing witness results, so after adding/changing a witness, we need
+to update the test outputs. Note that it may contain output for other test crates - this
+is not necessarily an error: see the troubleshooting section for more info.
 
-The failed test should output a message like:
+There are two ways to update the output:
 
-```
----- query::tests_lints::function_missing stdout ----
---- actual output ---
-{
-    // cut down for readibility
-    "./test_crates/function_missing/": [
-        (
-            filename: "src/lib.rs",
-            begin_line: 1,
-            hint: "function_missing::will_be_removed_fn(...);",
-        ),
-        (
-            filename: "src/lib.rs",
-            begin_line: 4,
-            hint: "function_missing::pub_use_removed_fn(...);",
-        ),
-    ],
-}
-thread 'query::tests_lints::function_missing' panicked at src/query.rs:751:17:
-Witness output for function_missing did not match expected values:
-Differences (-expected|+actual):
--{}
-+{
-+    // cut down for readibility
-+    "./test_crates/function_missing/": [
-+        (
-+            filename: "src/lib.rs",
-+            begin_line: 1,
-+            hint: "function_missing::will_be_removed_fn(...);",
-+        ),
-+        (
-+            filename: "src/lib.rs",
-+            begin_line: 4,
-+            hint: "function_missing::pub_use_removed_fn(...);",
-+        ),
-+    ],
-+}
+1. **With `cargo insta`**: If you install (or have already installed) the `insta` CLI with
+   `cargo install --locked cargo-insta`, you can run `cargo insta review`. Check that the
+   new output is what you expect, and accept it in the TUI.
+2. **Manually**: If you can't (or don't want to) use `cargo-insta`, you can verify the snapshot
+   file manually.  There should be a file called `test_outputs/witnesses/<lint_name>.snap.new`.
+   Open it, and verify that the witnesses generated as expected.  Once you've checked it, move it
+   to `test_outputs/witnesses/<lint_name>.snap` (remove the `.new`)
 
-Update the `test_outputs/witnesses/function_missing.output.ron` file if
-                    the new test results are correct.
-```
-
-Check the actual result under `--- actual ---` and make sure that it outputted
-the correct witness hints. Note that it may contain output for other test crates - this
-is not necessarily an error: see the troubleshooting section for more info. Once you've
-verified that the `--- actual ---` results are as expected, copy the actual results
-into the `test_outputs/witnesses/<lint_name>.output.ron` file and save. Running
-`cargo test` should pass the `<lint_name>` test now. **Make sure to commit and push the
-`test_outputs/witnesses/<lint_name>.output.ron` into git**, otherwise the test will
-fail in CI.
+Once you've update the test output, run `cargo test` again and the `<lint_name>` test should pass!
+**Make sure to commit and push the `test_outputs/witnesses/<lint_name>.output.ron` into git**;
+otherwise the test will fail in CI.
 
 ##### Full witness templates
 
