@@ -1,0 +1,39 @@
+---
+source: src/query.rs
+description: "Lint `function_missing` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/feature_flags_validation/"]]
+filename = 'src/lib.rs'
+begin_line = 4
+hint = 'feature_flags_validation::foo_becomes_gated(...);'
+
+[["./test_crates/feature_flags_validation/"]]
+filename = 'src/lib.rs'
+begin_line = 5
+hint = 'feature_flags_validation::bar_becomes_gated(...);'
+
+[["./test_crates/features_simple/"]]
+filename = 'src/lib.rs'
+begin_line = 2
+hint = 'features_simple::feature_dependent_function(...);'
+
+[["./test_crates/function_const_removed/"]]
+filename = 'src/lib.rs'
+begin_line = 5
+hint = 'function_const_removed::fn_removed(...);'
+
+[["./test_crates/function_feature_changed/"]]
+filename = 'src/lib.rs'
+begin_line = 2
+hint = 'function_feature_changed::moving_from_feature_A_to_feature_B(...);'
+
+[["./test_crates/function_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 1
+hint = 'function_missing::will_be_removed_fn(...);'
+
+[["./test_crates/function_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 4
+hint = 'function_missing::pub_use_removed_fn(...);'
