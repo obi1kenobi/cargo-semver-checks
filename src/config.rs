@@ -75,7 +75,7 @@ impl GlobalConfig {
 
     pub fn log_verbose(
         &mut self,
-        callback: impl Fn(&mut Self) -> anyhow::Result<()>,
+        callback: impl FnOnce(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
         if self.is_verbose() {
             callback(self)?;
@@ -85,7 +85,7 @@ impl GlobalConfig {
 
     pub fn log_extra_verbose(
         &mut self,
-        callback: impl Fn(&mut Self) -> anyhow::Result<()>,
+        callback: impl FnOnce(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
         if self.is_extra_verbose() {
             callback(self)?;
@@ -95,7 +95,7 @@ impl GlobalConfig {
 
     pub fn log_info(
         &mut self,
-        callback: impl Fn(&mut Self) -> anyhow::Result<()>,
+        callback: impl FnOnce(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
         if self.is_info() {
             callback(self)?;
@@ -105,7 +105,7 @@ impl GlobalConfig {
 
     pub fn log_error(
         &mut self,
-        callback: impl Fn(&mut Self) -> anyhow::Result<()>,
+        callback: impl FnOnce(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
         if self.is_error() {
             callback(self)?;
