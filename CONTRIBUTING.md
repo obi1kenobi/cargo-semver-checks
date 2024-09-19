@@ -282,7 +282,7 @@ There are two ways to update the output:
    to `test_outputs/witnesses/<lint_name>.snap` (remove the `.new`)
 
 Once you've update the test output, run `cargo test` again and the `<lint_name>` test should pass!
-**Make sure to commit and push the `test_outputs/witnesses/<lint_name>.output.ron` into git**;
+**Make sure to commit and push the `test_outputs/witnesses/<lint_name>.snap` into git**;
 otherwise the test will fail in CI.
 
 ##### Full witness templates
