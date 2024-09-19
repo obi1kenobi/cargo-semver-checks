@@ -230,7 +230,8 @@ When the `witness` field is not `None`, it must have the `hint_template` field. 
 `handlebars` template that generates a small (1-3 line) human-readable message that
 explains the idea of how downstream code would break.
 
-This example code is meant to be small and illustrative, and does not have to pass `cargo check`. It should give the reader a sense of the kind of breakage in one glance.
+This example code is meant to be small and illustrative, and does not have to pass `cargo check`.
+It should give the reader a sense of the kind of breakage in one glance.
 
 For example, for the `function_missing` lint, a witness template may look like this:
 
