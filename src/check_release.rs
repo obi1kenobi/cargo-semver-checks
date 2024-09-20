@@ -83,16 +83,18 @@ fn print_triggered_lint(
     let mut message = snippets_level.title(&title);
     let mut description = Level::Info.title(&semver_query.error_message);
 
+    let ref_link_fmt;
     if let Some(ref_link) = semver_query.reference_link.as_deref() {
-        description = description.footer(Level::Info.title(ref_link).id("ref"));
+        ref_link_fmt = format!("ref: {ref_link}");
+        description = description.footer(Level::Help.title(&ref_link_fmt));
     }
 
     let impl_link = format!(
-        "https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
+        "impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
         crate_version!(),
         semver_query.id
     );
-    description = description.footer(Level::Info.title(&impl_link).id("impl"));
+    description = description.footer(Level::Help.title(&impl_link));
 
     message = message.footer(description);
 
@@ -139,13 +141,13 @@ fn print_triggered_lint(
                 .collect();
 
             if let Some(template) = semver_query.per_result_error_template.as_deref() {
-                result.error_message = Some(
-                    config
-                        .handlebars()
-                        .render_template(template, &pretty_result)
-                        .context("Error instantiating semver query template.")
-                        .expect("could not materialize template"),
-                );
+                let error_message = config
+                    .handlebars()
+                    .render_template(template, &pretty_result)
+                    .context("Error instantiating semver query template.")
+                    .expect("could not materialize template");
+
+                result.error_message = Some(format!("failed in: {error_message}"));
 
                 if config.is_extra_verbose() {
                     result.serde_pretty = Some(
@@ -176,7 +178,7 @@ fn print_triggered_lint(
 
     for format_result in &formats {
         let mut failure = if let Some(error_message) = &format_result.error_message {
-            snippets_level.title(error_message).id("failed in")
+            snippets_level.title(error_message)
         } else {
             snippets_level.title("failed in:")
         };
@@ -203,7 +205,6 @@ fn print_triggered_lint(
 
             failure = failure.snippet(
                 Snippet::source(source)
-                    .line_start(*begin_line)
                     .origin(filename)
                     .fold(true)
                     .annotation(snippets_level.span(start..end)),
@@ -231,7 +232,7 @@ fn print_triggered_lint(
 
     let renderer = Renderer::styled();
     config.log_info(|config| {
-        writeln!(config.stdout(), "{}", renderer.render(message))?;
+        writeln!(config.stdout(), "{}\n", renderer.render(message))?;
         Ok(())
     })
 }
