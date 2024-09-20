@@ -1,6 +1,7 @@
 use std::io::Write as _;
 use std::{collections::BTreeMap, sync::Arc, time::Instant};
 
+use annotate_snippets::{Level, Renderer, Snippet};
 use anstyle::{AnsiColor, Color, Reset, Style};
 
 use anyhow::Context;
@@ -70,111 +71,169 @@ fn print_triggered_lint(
     semver_query: &SemverQuery,
     results: Vec<BTreeMap<Arc<str>, FieldValue>>,
     witness_generation: &WitnessGeneration,
+    level: LintLevel,
 ) -> anyhow::Result<()> {
+    let snippets_level = match level {
+        LintLevel::Deny => Level::Error,
+        LintLevel::Warn => Level::Warning,
+        LintLevel::Allow => unreachable!("Called `print_triggered_lint` on an `allow`-level lint"),
+    };
+
+    let title = format!("{}: {}", semver_query.id, semver_query.human_readable_name);
+    let mut message = snippets_level.title(&title);
+    let mut description = Level::Info.title(&semver_query.error_message);
+
     if let Some(ref_link) = semver_query.reference_link.as_deref() {
-        config.log_info(|config| {
-            writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
-                Style::new().bold(), Reset,
-                &semver_query.error_message,
-                "ref:",
-                ref_link,
-                "impl:",
-                crate_version!(),
-                semver_query.id,
-            )?;
-            Ok(())
-        })?;
-    } else {
-        config.log_info(|config| {
-            writeln!(
-                config.stdout(),
-                "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
-                Style::new().bold(),
-                Reset,
-                &semver_query.error_message,
-                "impl:",
-                crate_version!(),
-                semver_query.id,
-            )?;
-            Ok(())
-        })?;
+        description = description.footer(Level::Info.title(ref_link).id("ref"));
     }
 
-    config.log_info(|config| {
-        writeln!(
-            config.stdout(),
-            "{}Failed in:{}",
-            Style::new().bold(),
-            Reset
-        )?;
-        Ok(())
-    })?;
+    let impl_link = format!(
+        "https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
+        crate_version!(),
+        semver_query.id
+    );
+    description = description.footer(Level::Info.title(&impl_link).id("impl"));
 
-    for semver_violation_result in results {
-        let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
-            .into_iter()
-            .map(|(k, v)| (k, v.into()))
-            .collect();
+    message = message.footer(description);
 
-        if let Some(template) = semver_query.per_result_error_template.as_deref() {
-            let message = config
-                .handlebars()
-                .render_template(template, &pretty_result)
-                .context("Error instantiating semver query template.")
-                .expect("could not materialize template");
-            config.log_info(|config| {
-                writeln!(config.stdout(), "  {}", message)?;
-                Ok(())
-            })?;
+    #[derive(Debug, Default)]
+    struct ResultFormat {
+        error_message: Option<String>,
+        /// (text source, 1-indexed line number to error, filename)
+        span: Option<(String, usize, String)>,
+        serde_pretty: Option<String>,
+        witness_hint: Option<String>,
+    }
 
-            config.log_extra_verbose(|config| {
-                let serde_pretty =
-                    serde_json::to_string_pretty(&pretty_result).expect("serde failed");
-                let indented_serde = serde_pretty
-                    .split('\n')
-                    .map(|line| format!("    {line}"))
-                    .join("\n");
-                writeln!(
-                    config.stdout(),
-                    "\tlint rule output values:\n{}",
-                    indented_serde
-                )?;
-                Ok(())
-            })?;
-        } else {
-            config.log_info(|config| {
-                writeln!(
-                    config.stdout(),
-                    "{}\n",
-                    serde_json::to_string_pretty(&pretty_result)?
-                )?;
-                Ok(())
-            })?;
-        }
+    let formats: Vec<_> = results
+        .into_iter()
+        .map(|semver_violation_result| {
+            let mut result = ResultFormat::default();
 
-        if let Some(witness) = &semver_query.witness {
-            if witness_generation.show_hints {
-                let message = config
-                    .handlebars()
-                    .render_template(&witness.hint_template, &pretty_result)
-                    .context("Error instantiating witness hint template.")?;
-
-                config.log_info(|config| {
-                    let note = Style::new()
-                        .fg_color(Some(Color::Ansi(AnsiColor::Cyan)))
-                        .bold();
-                    writeln!(
-                        config.stdout(),
-                        "{note}note:{note:#} downstream code similar to the following would break:\n\
-                        {message}\n"
-                    )?;
-                    Ok(())
-                })?;
+            if let Some(filename) = semver_violation_result
+                .get("span_filename")
+                .and_then(FieldValue::as_str)
+            {
+                if let Some(begin_line) = semver_violation_result
+                    .get("span_begin_line")
+                    .and_then(FieldValue::as_usize)
+                {
+                    match std::fs::read_to_string(filename) {
+                        Ok(contents) => {
+                            result.span = Some((contents, begin_line, filename.to_owned()));
+                        }
+                        Err(e) => config
+                            .log_verbose(|config| {
+                                config.shell_warn(format_args!(
+                                    "could not read file `{filename}`: {e}"
+                                ))
+                            })
+                            .expect("printing failed"),
+                    }
+                }
             }
+
+            let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
+                .into_iter()
+                .map(|(k, v)| (k, v.into()))
+                .collect();
+
+            if let Some(template) = semver_query.per_result_error_template.as_deref() {
+                result.error_message = Some(
+                    config
+                        .handlebars()
+                        .render_template(template, &pretty_result)
+                        .context("Error instantiating semver query template.")
+                        .expect("could not materialize template"),
+                );
+
+                if config.is_extra_verbose() {
+                    result.serde_pretty = Some(
+                        serde_json::to_string_pretty(&pretty_result)
+                            .expect("error serializing pretty results"),
+                    );
+                }
+            } else {
+                result.serde_pretty = Some(
+                    serde_json::to_string_pretty(&pretty_result)
+                        .expect("error serializing pretty results"),
+                );
+            }
+
+            if let Some(witness) = &semver_query.witness {
+                if witness_generation.show_hints {
+                    result.witness_hint = Some(
+                        config
+                            .handlebars()
+                            .render_template(&witness.hint_template, &pretty_result)
+                            .expect("Error instantiating witness hint template."),
+                    );
+                }
+            }
+            result
+        })
+        .collect();
+
+    for format_result in &formats {
+        let mut failure = if let Some(error_message) = &format_result.error_message {
+            snippets_level.title(error_message).id("failed in")
+        } else {
+            snippets_level.title("failed in:")
+        };
+
+        if let Some((source, begin_line, filename)) = &format_result.span {
+            // annotate_snippets wants the byte index to highlight
+            let (_, _, start, end) = source.as_bytes().into_iter().fold(
+                (1, 0, 0, 0),
+                |(mut line, mut len, mut start, mut end), c| {
+                    len += 1;
+                    if let b'\n' | b'\r' = c {
+                        if line == *begin_line {
+                            end = len;
+                        }
+                        line += 1;
+                        if line == *begin_line {
+                            start = len;
+                        }
+                    }
+
+                    (line, len, start, end)
+                },
+            );
+
+            failure = failure.snippet(
+                Snippet::source(source)
+                    .line_start(*begin_line)
+                    .origin(filename)
+                    .fold(true)
+                    .annotation(snippets_level.span(start..end)),
+            );
         }
+
+        if let Some(serde_pretty) = &format_result.serde_pretty {
+            failure = failure.footer(
+                Level::Info
+                    .title("lint rule output values")
+                    .snippet(Snippet::source(serde_pretty)),
+            );
+        }
+
+        if let Some(witness_hint) = &format_result.witness_hint {
+            failure = failure.footer(
+                Level::Note
+                    .title("downstream code similar to the following would break")
+                    .snippet(Snippet::source(&witness_hint)),
+            );
+        }
+
+        message = message.footer(failure);
     }
 
-    Ok(())
+    let renderer = Renderer::styled();
+    config.log_info(|config| {
+        writeln!(config.stdout(), "{}", renderer.render(message))?;
+        Ok(())
+    })
 }
 
 pub(super) fn run_check_release(
@@ -351,32 +410,25 @@ pub(super) fn run_check_release(
 
         for (semver_query, results) in results_with_errors {
             required_versions.push(overrides.effective_required_update(semver_query));
-            config.log_info(|config| {
-                writeln!(
-                    config.stdout(),
-                    "\n--- failure {}: {} ---\n",
-                    &semver_query.id,
-                    &semver_query.human_readable_name
-                )?;
-                Ok(())
-            })?;
 
-            print_triggered_lint(config, semver_query, results, witness_generation)?;
+            print_triggered_lint(
+                config,
+                semver_query,
+                results,
+                witness_generation,
+                LintLevel::Deny,
+            )?;
         }
 
         for (semver_query, results) in results_with_warnings {
             suggested_versions.push(overrides.effective_required_update(semver_query));
-            config.log_info(|config| {
-                writeln!(
-                    config.stdout(),
-                    "\n--- warning {}: {} ---\n",
-                    semver_query.id,
-                    semver_query.human_readable_name
-                )?;
-                Ok(())
-            })?;
-
-            print_triggered_lint(config, semver_query, results, witness_generation)?;
+            print_triggered_lint(
+                config,
+                semver_query,
+                results,
+                witness_generation,
+                LintLevel::Warn,
+            )?;
         }
 
         let required_bump = required_versions.iter().max().copied();
