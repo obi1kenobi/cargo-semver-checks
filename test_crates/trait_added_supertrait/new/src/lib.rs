@@ -19,3 +19,5 @@ pub trait WillGainStdTwo: core::fmt::Debug {}
 pub trait WillGainStdThree: PartialEq {
     fn make_me_non_object_safe() -> Self;
 }
+
+pub trait WillChangeStdToCore: core::fmt::Debug {}

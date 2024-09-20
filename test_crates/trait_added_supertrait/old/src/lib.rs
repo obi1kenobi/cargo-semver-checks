@@ -19,3 +19,5 @@ pub trait WillGainStdTwo {}
 pub trait WillGainStdThree {
     fn make_me_non_object_safe() -> Self;
 }
+
+pub trait WillChangeStdToCore: std::fmt::Debug {}
