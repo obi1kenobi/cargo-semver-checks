@@ -122,9 +122,8 @@ The following flags can be used to explicitly specify a baseline instead:
     The rustdoc json file to use as a semver baseline
 ```
 
-Custom registries are not currently supported
-([#160](https://github.com/obi1kenobi/cargo-semver-checks/issues/160)), so crates published on
-registries other than crates.io should use one of the other approaches of generating the baseline.
+For custom registries, use the `--registry` flag with the name of the registry
+that you want to use as configured in your `config.toml`.
 
 ### What features does `cargo-semver-checks` enable in the tested crates?
 
