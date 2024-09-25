@@ -329,8 +329,20 @@ expected output files to include the new items, and you can get back on track.
 
 ## Development Environment
 
+### Running required automation scripts
+
 While cargo-semver-checks is cross platform, the development task automation scripts in the scripts
 directory require a `bash` shell to run.
 
 Windows users can get a bash + GNU command line environment via WSL or git bash.
 Linux and Mac OS typically have bash installed by default.
+
+### Language server (LSP) integration
+
+It's possible to use a GraphQL language server to
+[assist with writing queries](https://github.com/obi1kenobi/trustfall/discussions/679)
+by offering schema-aware autocomplete and other functionality.
+
+To make this work, you'll need to point it to a schema file. The schema and Trustfall adapter
+`cargo-semver-checks` uses are defined in the `trustfall-rustdoc-adapter` crate:
+https://github.com/obi1kenobi/trustfall-rustdoc-adapter
