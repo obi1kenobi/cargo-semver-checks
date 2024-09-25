@@ -156,6 +156,10 @@ fn main() {
         None => args.check_release,
     };
 
+    if let Some(registry) = &check_release.registry {
+        config.set_registry(registry.clone());
+    }
+
     let check: cargo_semver_checks::Check = check_release.into();
 
     let report = exit_on_error(config.is_error(), || check.check_release(&mut config));
@@ -531,6 +535,11 @@ struct CheckRelease {
     /// `x86_64-unknown-linux-gnu`.
     #[arg(long = "target")]
     build_target: Option<String>,
+
+    /// Name of registry to use for crate lookups. Used with default behavior
+    /// and with `--baseline-version`.
+    #[arg(long = "registry")]
+    registry: Option<String>,
 
     #[clap(flatten)]
     unstable_options: UnstableOptions,

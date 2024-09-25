@@ -16,6 +16,8 @@ use crate::GlobalConfig;
 pub(crate) enum CrateSource<'a> {
     Registry {
         crate_: &'a tame_index::IndexVersion,
+        /// The url of the registry index that holds the specified crate
+        index_url: String,
         version: String,
     },
     ManifestPath {
@@ -634,6 +636,8 @@ pub(crate) struct RustdocFromRegistry {
     target_root: PathBuf,
     version: Option<semver::Version>,
     index: tame_index::index::ComboIndex,
+    /// The url of the index for the given registry
+    index_url: String,
 }
 
 impl core::fmt::Debug for RustdocFromRegistry {
@@ -648,31 +652,45 @@ impl core::fmt::Debug for RustdocFromRegistry {
 
 impl RustdocFromRegistry {
     pub fn new(target_root: &std::path::Path, config: &mut GlobalConfig) -> anyhow::Result<Self> {
-        let index_url = tame_index::IndexUrl::crates_io(
-            // This is the config root, where .cargo/config.toml configuration files
-            // are crawled to determine if crates.io has been source replaced
-            // <https://doc.rust-lang.org/cargo/reference/source-replacement.html>
-            // if not specified it defaults to the current working directory,
-            // which is the same default that cargo uses, though note this can be
-            // extremely confusing if one can specify the manifest path of the
-            // crate from a different current working directory, though AFAICT
-            // this is not how this binary works
-            None,
-            // If set this overrides the CARGO_HOME that is used for both finding
-            // the "global" default config if not overriden during directory
-            // traversal to the root, as well as where the various registry
-            // indices/git sources are rooted. This is generally only useful
-            // for testing
-            None,
-            // If set, overrides the version of the cargo binary used, this is used
-            // as a fallback to determine if the version is 1.70.0+, which means
-            // the default crates.io registry to use is the sparse registry, else
-            // it is the old git registry
-            None,
-        )
-        .context("failed to obtain crates.io url")?;
+        let index_url = match config.registry() {
+            Some(registry_name) => {
+                tame_index::IndexUrl::for_registry_name(
+                    // No need to override the config root. See comment below for more information.
+                    None,
+                    // No need to override the cargo home. See comment below for more information.
+                    None,
+                    registry_name,
+                )
+                .with_context(|| format!("failed to obtain url for registry '{}'", registry_name))?
+            }
+            None => tame_index::IndexUrl::crates_io(
+                // This is the config root, where .cargo/config.toml configuration files
+                // are crawled to determine if crates.io has been source replaced
+                // <https://doc.rust-lang.org/cargo/reference/source-replacement.html>
+                // if not specified it defaults to the current working directory,
+                // which is the same default that cargo uses, though note this can be
+                // extremely confusing if one can specify the manifest path of the
+                // crate from a different current working directory, though AFAICT
+                // this is not how this binary works
+                None,
+                // If set this overrides the CARGO_HOME that is used for both finding
+                // the "global" default config if not overriden during directory
+                // traversal to the root, as well as where the various registry
+                // indices/git sources are rooted. This is generally only useful
+                // for testing
+                None,
+                // If set, overrides the version of the cargo binary used, this is used
+                // as a fallback to determine if the version is 1.70.0+, which means
+                // the default crates.io registry to use is the sparse registry, else
+                // it is the old git registry
+                None,
+            )
+            .context("failed to obtain crates.io url")?,
+        };
 
         use tame_index::index::{self, ComboIndexCache};
+
+        let index_url_str = index_url.as_str().to_string();
 
         let index_cache = ComboIndexCache::new(tame_index::IndexLocation::new(index_url))
             .context("failed to open crates.io index cache")?;
@@ -706,6 +724,7 @@ impl RustdocFromRegistry {
             target_root: target_root.to_owned(),
             version: None,
             index,
+            index_url: index_url_str,
         })
     }
 
@@ -818,6 +837,7 @@ impl RustdocGenerator for RustdocFromRegistry {
             self.target_root.clone(),
             CrateSource::Registry {
                 version: crate_.version.to_string(),
+                index_url: self.index_url.clone(),
                 crate_,
             },
             crate_data,
