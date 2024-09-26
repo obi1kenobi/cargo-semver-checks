@@ -6,6 +6,9 @@ info:
     - semver-checks
     - "-Z"
     - help
+  env:
+    CARGO_TERM_COLOR: never
+    RUST_BACKTRACE: "0"
 ---
 success: true
 exit_code: 0
