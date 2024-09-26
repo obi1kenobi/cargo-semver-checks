@@ -1,3 +1,7 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
 {
   "./test_crates/move_item_and_reexport/": [
     {

@@ -1,3 +1,7 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
 {
   "./test_crates/method_moved_to_trait_must_use_added/": [
     {

@@ -1,3 +1,7 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
 {
   "./test_crates/struct_pub_field_missing/": [
     {
