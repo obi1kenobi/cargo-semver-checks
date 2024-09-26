@@ -3,7 +3,7 @@ SemverQuery(
     human_readable_name: "pub union pub field is removed or renamed",
     description: "pub union pub field is removed or renamed. No longer present under it's previous name, by whatever cause.",
     required_update: Major,
-    lint_level: Deny, 
+    lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
     query: r#"
     {
@@ -42,10 +42,10 @@ SemverQuery(
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
                         }
+
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             visibility_limit @filter(op: "=", value: ["$public"])
                             name @filter(op: "=", value: ["%field_name"])
-                            
                         }
                     }
                 }
