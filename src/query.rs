@@ -589,8 +589,8 @@ mod tests {
         let semver_query = SemverQuery::from_ron_str(&query_text).unwrap();
 
         let expected_result_text =
-            std::fs::read_to_string(format!("./test_outputs/{query_name}.output.ron"))
-            .with_context(|| format!("Could not load test_outputs/{query_name}.output.ron expected-outputs file, did you forget to add it?"))
+            std::fs::read_to_string(format!("./test_outputs/query_execution/{query_name}.snap"))
+            .with_context(|| format!("Could not load test_outputs/query_execution/{query_name}.snap expected-outputs file, did you forget to add it?"))
             .expect("failed to load expected outputs");
         let mut expected_results: TestOutput = ron::from_str(&expected_result_text)
             .expect("could not parse expected outputs as ron format");
