@@ -111,6 +111,38 @@ To generate this data, please run `./scripts/regenerate_test_rustdocs.sh`.
 To use a specific toolchain, like beta or nightly, pass it as
 an argument: `./scripts/regenerate_test_rustdocs.sh +nightly`.
 
+## What are those `.snap` or `.snap.new` files generated via `cargo test` 
+
+Next to the regular testcase strategies, we also utilise snapshot testing.
+The tool we use for this ([`insta`](https://insta.rs/docs/)) is user friendly and has mutliple ways to interact with it:
+
+These snapshots are by default written to `.snap.new` files (because `INSTA_UPDATE` explained below defaults to `auto`) if they differ and fail the testcase.
+Reviewing them is possible via these options:
+
+1. **With `cargo-insta`**: If you install (or have already installed) the `insta` CLI with
+   `cargo install --locked cargo-insta`, you can run `cargo insta review`. Check that the
+   new output is what you expect, and accept it in the TUI.
+2. **Without `cargo-insta`**:
+   From [`insa`s docs](https://insta.rs/docs/quickstart/#tests-without-insta):
+   > You can also just use insta directly from cargo test and control it via the `INSTA_UPDATE` environment variable.
+   > The default is auto which will write all new snapshots into .snap.new files if no CI is detected so that cargo-insta can pick them up. The following other modes are possible:
+   > - `auto`: the default. no for CI environments or new otherwise
+   > - `always`: overwrites old snapshot files with new ones unasked
+   > - `unseen`: behaves like always for new snapshots and new for others
+   > - `new`: write new snapshots into .snap.new files
+   > - `no`: does not update snapshot files at all (just runs tests)
+
+   Thus, if you run the following command, you can accept the current snapshots after reviewing the `.snap.new` files.
+   ```text
+   INSTA_UPDATE=always cargo test
+   ```
+3. **Manually**: If you can't (or don't want to) use `cargo-insta`, you can verify the snapshot
+   file manually.  There should be a file called `test_outputs/witnesses/<lint_name>.snap.new`.
+   Open it, and verify that the witnesses generated as expected.  Once you've checked it, move it
+   to `test_outputs/witnesses/<lint_name>.snap` (remove the `.new`)
+
+
+
 ## Adding a new lint
 
 ### Background
@@ -269,18 +301,13 @@ time, run `cargo test` to start generating the snapshots.  The first time you ru
 it will fail, because there's no expected result to compare to.  Let's make the test pass:
 
 We use `insta` for snapshot testing witness results, so after adding/changing a witness, we need
-to update the test outputs. Note that it may contain output for other test crates - this
-is not necessarily an error: see the troubleshooting section for more info.
+to update the test outputs.
 
-There are two ways to update the output:
+> [!TIP]
+> It may contain output for other test crates - this is not necessarily an error:
+> See the [troubleshooting section](#troubleshooting) for more info.
 
-1. **With `cargo insta`**: If you install (or have already installed) the `insta` CLI with
-   `cargo install --locked cargo-insta`, you can run `cargo insta review`. Check that the
-   new output is what you expect, and accept it in the TUI.
-2. **Manually**: If you can't (or don't want to) use `cargo-insta`, you can verify the snapshot
-   file manually.  There should be a file called `test_outputs/witnesses/<lint_name>.snap.new`.
-   Open it, and verify that the witnesses generated as expected.  Once you've checked it, move it
-   to `test_outputs/witnesses/<lint_name>.snap` (remove the `.new`)
+To update the output, please refer to the section on [snapshot testing](#what-are-those-snap-or-snapnew-files-generated-via-cargo-test-)
 
 Once you've update the test output, run `cargo test` again and the `<lint_name>` test should pass!
 **Make sure to commit and push the `test_outputs/witnesses/<lint_name>.snap` into git**;
