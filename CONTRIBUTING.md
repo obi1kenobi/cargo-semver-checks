@@ -168,8 +168,9 @@ If it didn't fail, then your lint didn't report any semver issues in the test cr
 and probably isn't working quite right.
 (Did any other lints' tests fail also? See the [troubleshooting item](#troubleshooting-other-lints-tests-failed-too) below.)
 
-For a lint named `enum_struct_variant_field_added`, you'll probably see its test fail with
-a message similar to this:
+<details><summary>For a lint named <code>enum_struct_variant_field_added</code>, you'll probably see its test fail with
+a message similar to this</summary>
+
 ```
 Query enum_struct_variant_field_added produced incorrect output (./src/lints/enum_struct_variant_field_added.ron).
 
@@ -195,6 +196,8 @@ Actual output:
     ],
 }
 ```
+
+</details>
 
 Inspect the "actual" output:
 - Does it report the semver issue your lint was supposed to catch? If not, the lint query
@@ -291,51 +294,56 @@ otherwise the test will fail in CI.
 *TODO: @suaviloquence will write this once the feature has been implemented.*
 
 ### Troubleshooting
-#### A valid query must output span_filename and/or span_begin_line
-If your lint fails with an error similar to the following:
-```
----- query::tests_lints::enum_missing stdout ----
-thread 'query::tests_lints::enum_missing' panicked at 'A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for how to do this.', src/query.rs:395:26
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-```
 
-It likely means that your lint does not specify the `span_filename` and `span_begin_line` of where the error occurs. To fix this, add the following to the part of query that catches the error:
-```
-span_: span @optional {
-  filename @output
-  begin_line @output
-}
-```
+- <details><summary>A valid query must output <code>span_filename</code> and/or <code>span_begin_line</code></summary>
+  
+  If your lint fails with an error similar to the following:
+  ```
+  ---- query::tests_lints::enum_missing stdout ----
+  thread 'query::tests_lints::enum_missing' panicked at 'A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for how to do this.', src/query.rs:395:26
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+  ```
+  
+  It likely means that your lint does not specify the `span_filename` and `span_begin_line` of where the error occurs. To fix this, add the following to the part of query that catches the error:
+  ```
+  span_: span @optional {
+    filename @output
+    begin_line @output
+  }
+  ```
+  
+  </details>
+- <details><summary>Other lints' tests failed too</summary>
 
-#### Other lints' tests failed too
-
-This is not always a problem! In process of testing a lint, it's frequently desirable to include
-test code that contains a related semver issue in order to ensure the lint differentiates between
-them.
-
-For example, say one is testing a lint for pub field removals from a struct. Its test crate code
+  This is not always a problem! In process of testing a lint, it's frequently desirable to include
+  test code that contains a related semver issue in order to ensure the lint differentiates between
+  them.
+  
+  For example, say one is testing a lint for pub field removals from a struct. Its test crate code
 may then include removals of the entire struct, in order to make sure that the lint *does not*
 report those. But those struct removals *will* get reported by the lint that looks for semver
 violations due to struct removal!
-
-So if you added code to a test crate and it caused other lints to report new findings, consider:
-- whether your code indeed contains the reported semver issue;
-- whether the same semver issue is being reported only once, and not multiple times
-  by different lints,
-- and whether the new reported lint result points to the correct item and span information.
-
-If the answer to all is yes, then everything is fine! Just edit those other lints'
+  
+  So if you added code to a test crate, and it caused other lints to report new findings, consider:
+  - whether your code indeed contains the reported semver issue;
+  - whether the same semver issue is being reported only once, and not multiple times
+    by different lints,
+  - and whether the new reported lint result points to the correct item and span information.
+  
+  If the answer to all is yes, then everything is fine! Just edit those other lints'
 expected output files to include the new items, and you can get back on track.
+  
+  </details>
 
 ## Development Environment
 
 ### Running required automation scripts
 
-While cargo-semver-checks is cross platform, the development task automation scripts in the scripts
+While cargo-semver-checks is cross-platform, the development task automation scripts in the scripts
 directory require a `bash` shell to run.
 
 Windows users can get a bash + GNU command line environment via WSL or git bash.
-Linux and Mac OS typically have bash installed by default.
+Linux and macOS typically have bash installed by default.
 
 ### Language server (LSP) integration
 
