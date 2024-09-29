@@ -168,9 +168,8 @@ If it didn't fail, then your lint didn't report any semver issues in the test cr
 and probably isn't working quite right.
 (Did any other lints' tests fail also? See the [troubleshooting item](#troubleshooting-other-lints-tests-failed-too) below.)
 
-<details><summary>For a lint named <code>enum_struct_variant_field_added</code>, you'll probably see its test fail with
-a message similar to this</summary>
-
+For a lint named `enum_struct_variant_field_added`, you'll probably see its test fail with
+a message similar to this:
 ```
 Query enum_struct_variant_field_added produced incorrect output (./src/lints/enum_struct_variant_field_added.ron).
 
@@ -196,8 +195,6 @@ Actual output:
     ],
 }
 ```
-
-</details>
 
 Inspect the "actual" output:
 - Does it report the semver issue your lint was supposed to catch? If not, the lint query
@@ -295,7 +292,7 @@ otherwise the test will fail in CI.
 
 ### Troubleshooting
 
-- <details><summary>A valid query must output <code>span_filename</code> and/or <code>span_begin_line</code></summary>
+- <details><summary>A valid query must output <code>span_filename</code> and/or <code>span_begin_line</code> (click to expand)</summary>
   
   If your lint fails with an error similar to the following:
   ```
@@ -313,7 +310,7 @@ otherwise the test will fail in CI.
   ```
   
   </details>
-- <details><summary>Other lints' tests failed too</summary>
+- <details><summary>Other lints' tests failed too (click to expand)</summary>
 
   This is not always a problem! In process of testing a lint, it's frequently desirable to include
   test code that contains a related semver issue in order to ensure the lint differentiates between
