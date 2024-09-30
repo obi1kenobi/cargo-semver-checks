@@ -329,7 +329,6 @@ violations due to struct removal!
   
   If the answer to all is yes, then everything is fine! Just edit those other lints'
 expected output files to include the new items, and you can get back on track.
-  
   </details>
 
 ## Development Environment
