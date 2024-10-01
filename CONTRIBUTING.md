@@ -303,7 +303,7 @@ We use `insta` for snapshot testing witness results, so after adding/changing a 
 to update the test outputs.
 
 > [!TIP]
-> It may contain output for other test crates - this is not necessarily an error:
+> It may contain output for other test crates — this is not necessarily an error:
 > See the [troubleshooting section](#troubleshooting) for more info.
 
 To update the output, please refer to the section on [snapshot testing](#what-are-those-snap-or-snapnew-files-generated-via-cargo-test-)
