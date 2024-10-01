@@ -113,7 +113,7 @@ an argument: `./scripts/regenerate_test_rustdocs.sh +nightly`.
 
 ## What are those `.snap` or `.snap.new` files generated via `cargo test` 
 
-Next to the regular testcase strategies, we also utilise snapshot testing.
+As part of our overall testing strategy, we use a technique called "snapshot testing."
 The tool we use for this ([`insta`](https://insta.rs/docs/)) is user friendly and has mutliple ways to interact with it:
 
 These snapshots are by default written to `.snap.new` files (because `INSTA_UPDATE` explained below defaults to `auto`) if they differ and fail the testcase.
