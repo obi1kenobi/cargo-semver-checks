@@ -137,9 +137,10 @@ Reviewing them is possible via these options:
    INSTA_UPDATE=always cargo test
    ```
 3. **Manually**: If you can't (or don't want to) use `cargo-insta`, you can verify the snapshot
-   file manually.  There should be a file called `test_outputs/witnesses/<lint_name>.snap.new`.
-   Open it, and verify that the witnesses generated as expected.  Once you've checked it, move it
-   to `test_outputs/witnesses/<lint_name>.snap` (remove the `.new`)
+   file manually.  There should be a file called `test_outputs/<some_path>/<lint_name>.snap.new`.
+   Open it, and verify that its contents match what you expected: all expected data is present, and no unexpected data is included. 
+   Once you've checked it, remove the `.new` suffix so that the file's new path
+   is `test_outputs/<some_path>/<lint_name>.snap`
 
 ## Adding a new lint
 
