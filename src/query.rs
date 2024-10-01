@@ -186,10 +186,12 @@ pub struct QueryOverride {
 /// A mapping of lint ids to configured values that override that lint's defaults.
 pub type OverrideMap = BTreeMap<String, QueryOverride>;
 
-/// Stores a stack of [`OverrideMap`]s such that items towards the top of
-/// the stack (later in the backing `Vec`) have *higher* precedence and override items lower in the stack.
-/// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
-/// at the top of the stack will be used to calculate the effective lint level or required version update.
+/// A stack of [`OverrideMap`] values capturing our precedence rules.
+///
+/// Items toward the top of the stack (later in the backing `Vec`) have *higher* precedence
+/// and override items lower in the stack. If an override is set and not `None` for a given lint
+/// in multiple maps in the stack, the value at the top of the stack will be used
+/// to calculate the effective lint level or required version update.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct OverrideStack(Vec<OverrideMap>);
 
