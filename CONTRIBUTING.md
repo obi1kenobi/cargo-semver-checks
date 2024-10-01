@@ -167,7 +167,7 @@ First, choose an appropriate name for your lint. We'll refer to it as `<lint_nam
 We'll use the [`scripts/make_new_lint.sh`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/scripts/make_new_lint.sh) script to automatically create the necessary file stubs, which you'll then fill in. It will:
 - Add a new lint file: `src/lints/<lint_name>.ron`.
 - Create a new test crate pair: `test_crates/<lint_name>/old` and `test_crates/<lint_name>/new`.
-- Add an empty expected test outputs file: `test_outputs/<lint_name>.output.ron`.
+- Add an empty expected test outputs file: `test_outputs/query_execution/<lint_name>.snap`.
 - Register your new lint in the `add_lints!()` macro near the bottom of [`src/query.rs`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/src/query.rs).
 
 Now it's time to fill in these files!
@@ -202,42 +202,76 @@ and probably isn't working quite right.
 For a lint named `enum_struct_variant_field_added`, you'll probably see its test fail with
 a message similar to this:
 ```
-Query enum_struct_variant_field_added produced incorrect output (./src/lints/enum_struct_variant_field_added.ron).
-
-Expected output (./test_outputs/enum_struct_variant_field_added.output.ron):
-{
-    "./test_crates/enum_struct_variant_field_added/": [],
-}
-
-Actual output:
-{
-    "./test_crates/enum_struct_variant_field_added/": [
-        {
-            "enum_name": String("PubEnum"),
-            "field_name": String("y"),
-            "path": List([
-                String("enum_struct_variant_field_added"),
-                String("PubEnum"),
-            ]),
-            "span_begin_line": Uint64(4),
-            "span_filename": String("src/lib.rs"),
-            "variant_name": String("Foo"),
-        },
-    ],
-}
+---- query::tests_lints::enum_struct_variant_field_added stdout ----
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Snapshot Summary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Snapshot file: src/../test_outputs/query_execution/enum_struct_variant_field_added.snap
+Snapshot: enum_struct_variant_field_added
+Source: src/query.rs:646
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+Expression: &query_execution_results
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+-old snapshot
++new results
+────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    0     0 │ {
+    1       │-  "./test_crates/enum_struct_variant_field_added/": []
+          1 │+  "./test_crates/enum_no_repr_variant_discriminant_changed/": [
+          2 │+    {
+          3 │+      "enum_name": String("UnitOnlyBecomesUndefined"),
+          4 │+      "field_name": String("a"),
+          5 │+      "path": List([
+          6 │+        String("enum_no_repr_variant_discriminant_changed"),
+          7 │+        String("UnitOnlyBecomesUndefined"),
+          8 │+      ]),
+          9 │+      "span_begin_line": Uint64(77),
+         10 │+      "span_filename": String("src/lib.rs"),
+         11 │+      "variant_name": String("Struct"),
+         12 │+    },
+         13 │+  ],
+         14 │+  "./test_crates/enum_struct_field_hidden_from_public_api/": [
+         15 │+    {
+         16 │+      "enum_name": String("AddedVariantField"),
+         17 │+      "field_name": String("y"),
+         18 │+      "path": List([
+         19 │+        String("enum_struct_field_hidden_from_public_api"),
+         20 │+        String("AddedVariantField"),
+         21 │+      ]),
+         22 │+      "span_begin_line": Uint64(38),
+         23 │+      "span_filename": String("src/lib.rs"),
+         24 │+      "variant_name": String("StructVariant"),
+         25 │+    },
+         26 │+  ],
+         27 │+  "./test_crates/enum_struct_variant_field_added/": [
+         28 │+    {
+         29 │+      "enum_name": String("PubEnum"),
+         30 │+      "field_name": String("y"),
+         31 │+      "path": List([
+         32 │+        String("enum_struct_variant_field_added"),
+         33 │+        String("PubEnum"),
+         34 │+      ]),
+         35 │+      "span_begin_line": Uint64(4),
+         36 │+      "span_filename": String("src/lib.rs"),
+         37 │+      "variant_name": String("Foo"),
+         38 │+    },
+         39 │+  ],
+    2    40 │ }
+────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+To update snapshots run `cargo insta review`
+Stopped on the first failure. Run `cargo insta test` to run all snapshots.
+thread 'query::tests_lints::enum_struct_variant_field_added' panicked at /home/frank/.cargo/registry/src/index.crates.io-6f17d22bba15001f/insta-1.40.0/src/runtime.rs:548:9:
 ```
 
-Inspect the "actual" output:
+Inspect the generated "actual" output in the `.snap.new` file:
 - Does it report the semver issue your lint was supposed to catch? If not, the lint query
   or the test crates' code may need to be tweaked.
 - Does it report correct span information? Is the span as specific as possible, for example
-  pointing to a struct's field rather than the whole struct if the lint refers to that field?
+  pointing to a `struct`'s field rather than the whole struct if the lint refers to that field?
 - Does the output also report any code from test crates other than `test_crates/<lint_name>`?
   If so, ensure the reported code is indeed violating semver and is not being flagged
   by any other lint.
 
-If everything looks okay, edit your `test_outputs/<lint_name>.output.ron` file adding
-the "actual" output, then re-run `cargo test` and make sure everything passes.
+If everything looks okay, either run `cargo insta review` (see the [snapshot instructions](#what-are-those-snap-or-snapnew-files-generated-via-cargo-test-) for context) or manually move `test_outputs/query_execution/<lint_name>.snap.new` to  `test_outputs/query_execution/<lint_name>.snap`.
+Then re-run `cargo test` and make sure everything passes.
 
 Congrats on the new lint!
 
