@@ -1,0 +1,11 @@
+---
+source: src/snapshot_tests.rs
+expression: result
+---
+--- error ---
+add a `priority` key to the entries in [package.metadata.cargo-semver-checks.lints].
+(for crate configuration_conflict at path [ROOT]/test_crates/manifest_tests/configuration_conflict/new/Cargo.toml)
+See https://github.com/obi1kenobi/cargo-semver-checks/blob/v0.35.0/README.md#configuration-priority for more info.
+--- stdout ---
+
+--- stderr ---

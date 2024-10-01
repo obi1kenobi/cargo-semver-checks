@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use anyhow::Context;
 use serde::Deserialize;
 
-use crate::{LintLevel, OverrideMap, QueryOverride, RequiredSemverUpdate};
+use crate::{query::Identifier, LintLevel, OverrideMap, QueryOverride, RequiredSemverUpdate};
 
 #[derive(Debug, Clone)]
 pub(crate) struct Manifest {
@@ -100,7 +100,7 @@ pub(crate) struct LintTable {
     pub(crate) workspace: bool,
     /// individual `lint_name = ...` entries
     #[serde(flatten)]
-    pub(crate) inner: BTreeMap<String, OverrideConfig>,
+    pub(crate) inner: BTreeMap<Identifier, OverrideConfig>,
 }
 
 impl LintTable {
@@ -234,9 +234,11 @@ pub(crate) fn deserialize_lint_table(
 
 #[cfg(test)]
 mod tests {
-
     use super::{LintTable, MetadataTable};
-    use crate::{OverrideMap, QueryOverride};
+    use crate::{
+        query::{Identifier, LintGroup},
+        OverrideMap, QueryOverride,
+    };
 
     #[test]
     fn test_deserialize_config() {
@@ -297,14 +299,14 @@ mod tests {
             wks,
             vec![
                 OverrideMap::from_iter([(
-                    "seven".into(),
+                    Identifier::Lint("seven".into()),
                     QueryOverride {
                         lint_level: Some(Deny),
                         required_update: None,
                     }
                 ),]),
                 OverrideMap::from_iter([(
-                    "six".into(),
+                    Identifier::Lint("six".into()),
                     QueryOverride {
                         lint_level: Some(Allow),
                         required_update: None,
@@ -317,7 +319,7 @@ mod tests {
             pkg,
             vec![
                 OverrideMap::from_iter([(
-                    "three".into(),
+                    Identifier::Lint("three".into()),
                     QueryOverride {
                         lint_level: Some(Warn),
                         required_update: None,
@@ -325,14 +327,14 @@ mod tests {
                 )]),
                 OverrideMap::from_iter([
                     (
-                        "two".into(),
+                        Identifier::Lint("two".into()),
                         QueryOverride {
                             lint_level: Some(Deny),
                             required_update: None
                         }
                     ),
                     (
-                        "four".into(),
+                        Identifier::Lint("four".into()),
                         QueryOverride {
                             lint_level: None,
                             required_update: Some(Major),
@@ -340,7 +342,7 @@ mod tests {
                     ),
                 ]),
                 OverrideMap::from_iter([(
-                    "five".into(),
+                    Identifier::Lint("five".into()),
                     QueryOverride {
                         lint_level: Some(Allow),
                         required_update: Some(Minor),
@@ -372,5 +374,20 @@ mod tests {
 
         toml::from_str::<LintTable>("one = { priority = 0 }")
             .expect_err("one = {priority = 0} should be invalid");
+    }
+
+    #[test]
+    fn lint_group() {
+        let table: LintTable = toml::from_str(r#"must_use_added = "warn""#).expect("invalid");
+        similar_asserts::assert_eq!(
+            table.into_stack(),
+            vec![OverrideMap::from_iter([(
+                Identifier::Group(LintGroup::MustUseAdded),
+                QueryOverride {
+                    required_update: None,
+                    lint_level: Some(crate::LintLevel::Warn),
+                }
+            )])]
+        );
     }
 }

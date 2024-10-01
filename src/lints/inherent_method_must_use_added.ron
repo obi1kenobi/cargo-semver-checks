@@ -4,6 +4,7 @@ SemverQuery(
     description: "An inherent method or associated fn has been marked #[must_use].",
     required_update: Minor,
     lint_level: Deny,
+    lint_group: must_use_added,
 
     // TODO: Change the reference link to point to the cargo semver reference
     //       once it has a section on attribute #[must_use].

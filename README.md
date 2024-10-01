@@ -432,6 +432,47 @@ trait_must_use_added = "allow"
 union_must_use_added = "allow"
 ```
 
+#### Configuration Priority
+
+When there are multiple conflicting entries for a given lint (for example, configuring the
+`must_use_added` group containing the `function_must_use_added` lint and `function_must_use_added` itself),
+`cargo-semver-checks` needs more information to determine which configuration entry takes
+precedence. Like the Cargo `[lints]` table, each configuration entry has an optional
+`priority` field that defines the order of configuration entries. If an entry has no
+`priority` key, its priority is 0 by default. Entries with a lower (more negative)
+`priority` override those with a higher `priority` when there is a conflict.
+
+For example:
+
+```toml
+must_use_added = { level = "warn", required-update = "major" }
+function_must_use_added = { level = "deny" }
+```
+
+`cargo-semver-checks` will raise an error if invoked with this configuration, because there is a
+conflict for the `level` field in `must_use_added`. Let's use the `priority` field to describe
+the configuration we want:
+
+```diff,toml
+- function_must_use_added = { level = "deny" }
++ function_must_use_added = { level = "deny", priority = -1 }
+```
+
+By adding a `priority` of -1, the `function_must_use_added` entry will override the `must_use_added`
+(which has the default priority of 0) when there is a conflict. This will result in a final configuration
+of:
+
+```toml
+enum_must_use_added = { level = "warn", required-update = "major" }
+struct_must_use_added = { level = "warn", required-update = "major" }
+# ...
+function_must_use_added = { level = "deny", required-update = "major" }
+```
+
+Note that `function_must_use_added` still has a `major` required update bump, because the entry with
+priority -1 left the `required-update` to its default value, so `cargo-semver-checks` will use the
+entry with less precedence to calculate the required version bump.
+
 #### Implementation details & limitations
 
 When checking a package, `cargo-semver-checks` uses the manifest of the current subject's `Cargo.toml` file (plus its workspace configuration, if opted in).

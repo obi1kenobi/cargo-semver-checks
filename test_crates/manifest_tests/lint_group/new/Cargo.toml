@@ -1,0 +1,12 @@
+[package]
+publish = false
+name = "lint_group"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[package.metadata.cargo-semver-checks.lints]
+must_use_added = { level = "warn", required-update = "major" }
+function_must_use_added = { level = "deny", priority = -1 }
+enum_must_use_added = { level = "allow", priority = 1 }

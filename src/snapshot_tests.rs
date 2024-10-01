@@ -368,3 +368,19 @@ fn multiple_ambiguous_package_name_definitions() {
         ],
     );
 }
+
+/// Snapshot the error message when there is a configuration conflict in `[package.metadata]`
+#[test]
+fn configuration_conflict() {
+    assert_integration_test(
+        "configuration_conflict",
+        &[
+            "cargo",
+            "semver-checks",
+            "--baseline-root",
+            "test_crates/manifest_tests/configuration_conflict/old",
+            "--manifest-path",
+            "test_crates/manifest_tests/configuration_conflict/new",
+        ],
+    );
+}

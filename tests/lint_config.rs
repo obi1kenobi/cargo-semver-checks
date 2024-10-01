@@ -140,3 +140,19 @@ fn test_only_read_config_from_new_manifest() {
         .stderr(predicates::str::is_match("FAIL(.*)struct_missing").expect("regex should be valid"))
         .failure();
 }
+
+/// Tests basic lint group functionality
+#[test]
+fn test_lint_groups() {
+    let assert = command_for_crate("lint_group").assert();
+    assert
+        // priority -1 deny overrides priority 0 warn, but use required update from priority 0
+        // because none is set in priority -1
+        .stderr(
+            predicates::str::is_match("FAIL(.*)major(.*)function_must_use_added").expect("regex"),
+        )
+        // configuration from lint group
+        .stderr(predicates::str::is_match("WARN(.*)major(.*)struct_must_use_added").expect("regex"))
+        // priority 0 (lint group) warn overrides priority 1 allow
+        .stderr(predicates::str::is_match("WARN(.*)major(.*)enum_must_use_added").expect("regex"));
+}
