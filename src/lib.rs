@@ -11,7 +11,7 @@ mod util;
 
 use anyhow::Context;
 use cargo_metadata::PackageId;
-use clap::ValueEnum;
+use clap::{crate_version, ValueEnum};
 use directories::ProjectDirs;
 use itertools::Itertools;
 
@@ -27,8 +27,8 @@ use std::time::Instant;
 
 pub use config::{FeatureFlag, GlobalConfig};
 pub use query::{
-    ActualSemverUpdate, LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate,
-    SemverQuery, Witness,
+    ActualSemverUpdate, Identifier, LintGroup, LintLevel, OverrideMap, OverrideStack,
+    QueryOverride, RequiredSemverUpdate, SemverQuery, Witness,
 };
 
 /// Test a release for semver violations.
@@ -545,14 +545,22 @@ note: skipped the following crates since they have no library target: {skipped}"
                             if lint_workspace_key || metadata_workspace_key {
                                 if let Some(workspace) = &workspace_overrides {
                                     for level in workspace {
-                                        overrides.push(level);
+                                        overrides.try_push(level).with_context(|| format!("add a `priority` key to the entries in [workspace.metadata.cargo-semver-checks.lints].\n\
+                                            (at path {})\n\
+                                            See https://github.com/obi1kenobi/cargo-semver-checks/blob/v{}/README.md#configuration-priority for more info.",
+                                            metadata.workspace_root, crate_version!()
+                                        ))?;
                                     }
                                 }
                             }
 
                             if let Some(package) = package_overrides {
                                 for level in package.into_stack() {
-                                    overrides.push(&level);
+                                    overrides.try_push(&level).with_context(|| format!("add a `priority` key to the entries in [package.metadata.cargo-semver-checks.lints].\n\
+                                        (for crate {} at path {})\n\
+                                        See https://github.com/obi1kenobi/cargo-semver-checks/blob/v{}/README.md#configuration-priority for more info.",
+                                        selected.name, selected.manifest_path, crate_version!()
+                                    ))?;
                                 }
                             }
 
