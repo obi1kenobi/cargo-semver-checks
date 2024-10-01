@@ -241,7 +241,7 @@ jobs:
           workspaces: 'semver'
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.5
+        uses: mozilla-actions/sccache-action@v0.0.6
 
       - name: build and cache
         run: |
@@ -291,7 +291,7 @@ jobs:
           workspaces: 'semver'
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.5
+        uses: mozilla-actions/sccache-action@v0.0.6
 
       - name: build and cache
         run: |
@@ -1329,8 +1329,8 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---")"
-          RESULT="$(cat output | grep failure)"
+          EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---\n--- failure enum_no_repr_variant_discriminant_changed: enum variant had its discriminant change value ---")"
+          RESULT="$(cat output | grep failure | sort)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Cleanup
@@ -1361,8 +1361,8 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---")"
-          RESULT="$(cat output | grep failure)"
+          EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---\n--- failure enum_no_repr_variant_discriminant_changed: enum variant had its discriminant change value ---")"
+          RESULT="$(cat output | grep failure | sort)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Save rustdoc

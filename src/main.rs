@@ -6,6 +6,7 @@ use anstyle::{AnsiColor, Color, Reset, Style};
 use cargo_config2::Config;
 use cargo_semver_checks::{
     FeatureFlag, GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
+    WitnessGeneration,
 };
 use clap::{Args, CommandFactory, Parser, Subcommand};
 use std::io::Write;
@@ -53,7 +54,6 @@ fn main() {
             let stdout = std::io::stdout();
             let mut stdout = stdout.lock();
             for row in rows {
-                use std::io::Write;
                 writeln!(
                     stdout,
                     "{0:<1$} {2:<3$} {4:<5$}",
@@ -626,6 +626,10 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         if let Some(build_target) = value.build_target {
             check.set_build_target(build_target);
         }
+
+        let mut witness_generation = WitnessGeneration::new();
+        witness_generation.show_hints = value.unstable_options.witness_hints;
+        check.set_witness_generation(witness_generation);
 
         check
     }

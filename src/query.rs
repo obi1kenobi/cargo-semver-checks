@@ -127,6 +127,11 @@ pub struct SemverQuery {
     /// a human-readable description of the specific semver violation that was discovered.
     #[serde(default)]
     pub(crate) per_result_error_template: Option<String>,
+
+    /// Optional data to create witness code for query output.  See the [`Witness`] struct for
+    /// more information.
+    #[serde(default)]
+    pub witness: Option<Witness>,
 }
 
 impl SemverQuery {
@@ -222,10 +227,12 @@ impl Identifier {
     }
 }
 
-/// Stores a stack of [`OverrideMap`]s such that items towards the top of
-/// the stack (later in the backing `Vec`) have *higher* precedence and override items lower in the stack.
-/// That is, when an override is set and not `None` for a given lint in multiple maps in the stack, the value
-/// at the top of the stack will be used to calculate the effective lint level or required version update.
+/// A stack of [`OverrideMap`] values capturing our precedence rules.
+///
+/// Items toward the top of the stack (later in the backing `Vec`) have *higher* precedence
+/// and override items lower in the stack. If an override is set and not `None` for a given lint
+/// in multiple maps in the stack, the value at the top of the stack will be used
+/// to calculate the effective lint level or required version update.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct OverrideStack(Vec<BTreeMap<String, QueryOverride>>);
 
@@ -306,6 +313,95 @@ impl OverrideStack {
     }
 }
 
+/// Data for generating a **witness** from the results of a [`SemverQuery`].
+///
+/// A witness is a minimal compilable example of how downstream code would
+/// break given this change.  See field documentation for more information
+/// on each member.
+///
+/// Fields besides [`hint_template`](Self::hint_template) are optional, as it is not
+/// always necessary to use an additional query [`witness_query`](Self::witness_query)
+/// or possible to build a compilable witness from [`witness_template`](Self::witness_template)
+/// for a given `SemverQuery`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Witness {
+    /// A [`handlebars`] template that renders a user-facing hint to give a quick
+    /// explanation of breakage.  This may not be a buildable example, but it should
+    /// show the idea of why downstream code could break.  It will be provided all
+    /// `@output` data from the [`SemverQuery`] query that contains this [`Witness`].
+    ///
+    /// Example for the `function_missing` lint, where `name` is the (re)moved function's
+    /// name and `path` is the importable path:
+    ///
+    /// ```no_run
+    /// # let _ = r#"
+    /// use {{join "::" path}};
+    /// {{name}}(...);
+    /// # "#;
+    /// ```
+    ///
+    /// Notice how this is not a compilable example, but it provides a distilled hint to the user
+    /// of how downstream code would break with this change.
+    pub hint_template: String,
+
+    /// A [`handlebars`] template that renders the compilable witness example of how
+    /// downstream code would break.
+    ///
+    /// This template will be provided any fields with `@output` directives in the
+    /// original [`SemverQuery`].  If [`witness_query`](Self::witness_query) is `Some`,
+    /// it will also be provided the `@output`s of that query. (The additional query's
+    /// outputs will take precedence over the original query if they share the same name.)
+    ///
+    /// Example for the `enum_variant_missing` lint, where `path` is the importable path of the enum,
+    /// `name` is the name of the enum, and `variant_name` is the name of the removed/renamed variant:
+    ///
+    /// ```no_run
+    /// # let _ = r#"
+    /// fn witness(item: {{path}}) {
+    ///     if let {{path}}::{{variant_name}} {..} = item {
+    ///
+    ///     }
+    /// }
+    /// # "#;
+    /// ```
+    #[serde(default)]
+    pub witness_template: Option<String>,
+
+    /// An optional query to collect more information that is necessary to render
+    /// the [`witness_template`](Self::witness_template).
+    ///
+    /// If `None`, no additional query will be run.
+    #[serde(default)]
+    pub witness_query: Option<WitnessQuery>,
+}
+
+/// A [`trustfall`] query, for [`Witness`] generation, containing the query
+/// string itself and a mapping of argument names to value types which are
+/// provided to the query.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WitnessQuery {
+    /// The string containing the Trustfall query.
+    pub query: String,
+
+    /// The mapping of argument names to values provided to the query.
+    ///
+    /// These can be inherited from a previous query ([`InheritedValue::Inherited`]) or
+    /// specified as [`InheritedValue::Constant`]s.
+    #[serde(default)]
+    pub arguments: BTreeMap<String, InheritedValue>,
+}
+
+/// Represents either a value inherited from a previous query, or a
+/// provided constant value.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub enum InheritedValue {
+    /// Inherit the value from the previous output whose name is the given `String`.
+    Inherited { inherit: String },
+    /// Provide the constant value specified here.
+    Constant(TransparentValue),
+}
+
 #[cfg(test)]
 mod tests {
     use std::borrow::Cow;
@@ -315,14 +411,15 @@ mod tests {
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
+    use serde::{Deserialize, Serialize};
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_rustdoc::{
         load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
     };
 
     use crate::query::{
-        Identifier, LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate,
-        SemverQuery,
+        Identifier, InheritedValue, LintLevel, OverrideMap, OverrideStack, QueryOverride,
+        RequiredSemverUpdate, SemverQuery,
     };
     use crate::templating::make_handlebars_registry;
 
@@ -471,6 +568,27 @@ mod tests {
     }
 
     type TestOutput = BTreeMap<String, Vec<BTreeMap<String, FieldValue>>>;
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+    #[non_exhaustive]
+    struct WitnessOutput {
+        filename: String,
+        begin_line: usize,
+        hint: String,
+    }
+
+    impl PartialOrd for WitnessOutput {
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+
+    /// Sorts by span (filename, begin_line)
+    impl Ord for WitnessOutput {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            (&self.filename, self.begin_line).cmp(&(&other.filename, other.begin_line))
+        }
+    }
 
     fn pretty_format_output_difference(
         query_name: &str,
@@ -623,25 +741,80 @@ mod tests {
             );
         }
 
+        let transparent_actual_results: BTreeMap<_, Vec<BTreeMap<_, TransparentValue>>> =
+            actual_results
+                .into_iter()
+                .map(|(k, v)| {
+                    (
+                        k,
+                        v.into_iter()
+                            .map(|x| x.into_iter().map(|(k, v)| (k, v.into())).collect())
+                            .collect(),
+                    )
+                })
+                .collect();
+
         let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
-            assert!(!actual_results.is_empty());
+            assert!(!transparent_actual_results.is_empty());
 
-            let flattened_actual_results: Vec<_> = actual_results
-                .into_iter()
+            let flattened_actual_results: Vec<_> = transparent_actual_results
+                .iter()
                 .flat_map(|(_key, value)| value)
                 .collect();
             for semver_violation_result in flattened_actual_results {
-                let pretty_result: BTreeMap<String, TransparentValue> = semver_violation_result
-                    .into_iter()
-                    .map(|(k, v)| (k, v.into()))
-                    .collect();
-
                 registry
-                    .render_template(&template, &pretty_result)
+                    .render_template(&template, semver_violation_result)
                     .with_context(|| "Error instantiating semver query template.")
                     .expect("could not materialize template");
             }
+        }
+
+        if let Some(witness) = semver_query.witness {
+            let actual_witnesses: BTreeMap<_, BTreeSet<_>> = transparent_actual_results
+                .iter()
+                .map(|(k, v)| {
+                    (
+                        Cow::Borrowed(k.as_str()),
+                        v.iter()
+                            .map(|values| {
+                                let Some(TransparentValue::String(filename)) = values.get("span_filename") else {
+                                    unreachable!("Missing span_filename String, this should be validated above")
+                                };
+                                let begin_line = match values.get("span_begin_line") {
+                                    Some(TransparentValue::Int64(i)) => *i as usize,
+                                    Some(TransparentValue::Uint64(n)) => *n as usize,
+                                    _ => unreachable!("Missing span_begin_line Int, this should be validated above"),
+                                };
+
+                                // TODO: Run witness queries and generate full witness here.
+                                WitnessOutput {
+                                    filename: filename.to_string(),
+                                    begin_line,
+                                    hint: registry
+                                        .render_template(&witness.hint_template, values)
+                                        .expect("error rendering hint template"),
+                                }
+                            })
+                            .collect(),
+                    )
+                })
+                .collect();
+
+            insta::with_settings!(
+                {
+                    prepend_module_to_snapshot => false,
+                    snapshot_path => "../test_outputs/witnesses",
+                    description => format!(
+                        "Lint `{query_name}` did not have the expected witness output.\n\
+                        See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\n\
+                        for more information."
+                    ),
+                },
+                {
+                    insta::assert_toml_snapshot!(query_name, &actual_witnesses);
+                }
+            );
         }
     }
 
@@ -666,6 +839,7 @@ mod tests {
             arguments: BTreeMap::new(),
             error_message: String::new(),
             per_result_error_template: None,
+            witness: None,
         }
     }
 
@@ -744,12 +918,11 @@ mod tests {
             .try_push(&OverrideMap::from_iter([(
                 Identifier::Lint("query1".into()),
                 QueryOverride {
-                    required_update: None,
-                    lint_level: Some(LintLevel::Warn),
+                    lint_level: Some(LintLevel::Allow),
+                    required_update: Some(RequiredSemverUpdate::Minor),
                 },
             )]))
             .expect("conflict");
-
         let q1 = make_blank_query(
             "query1".into(),
             LintLevel::Deny,
@@ -777,6 +950,78 @@ mod tests {
             stack.effective_required_update(&q2),
             RequiredSemverUpdate::Minor
         );
+    }
+
+    /// Makes sure we can specify [`InheritedValue`]s with `Inherited(...)`
+    /// and untagged variants as [`TransparentValue`]s.
+    #[test]
+    fn test_inherited_value_deserialization() {
+        let my_map: BTreeMap<String, InheritedValue> = ron::from_str(
+            r#"{
+                "abc": (inherit: "abc"),
+                "string": "literal_string",
+                "int": -30,
+                "int_list": [-30, -2],
+                "string_list": ["abc", "123"],
+                }"#,
+        )
+        .expect("deserialization failed");
+
+        let Some(InheritedValue::Inherited { inherit: abc }) = my_map.get("abc") else {
+            panic!("Expected Inherited, got {:?}", my_map.get("abc"));
+        };
+
+        assert_eq!(abc, "abc");
+
+        let Some(InheritedValue::Constant(TransparentValue::String(string))) = my_map.get("string")
+        else {
+            panic!("Expected Constant(String), got {:?}", my_map.get("string"));
+        };
+
+        assert_eq!(&**string, "literal_string");
+
+        let Some(InheritedValue::Constant(TransparentValue::Int64(int))) = my_map.get("int") else {
+            panic!("Expected Constant(Int64), got {:?}", my_map.get("int"));
+        };
+
+        assert_eq!(*int, -30);
+
+        let Some(InheritedValue::Constant(TransparentValue::List(ints))) = my_map.get("int_list")
+        else {
+            panic!("Expected Constant(List), got {:?}", my_map.get("lint_list"));
+        };
+
+        let Some(TransparentValue::Int64(-30)) = ints.first() else {
+            panic!("Expected Int64(-30), got {:?}", ints.first());
+        };
+
+        let Some(TransparentValue::Int64(-2)) = ints.get(1) else {
+            panic!("Expected Int64(-30), got {:?}", ints.get(1));
+        };
+
+        let Some(InheritedValue::Constant(TransparentValue::List(strs))) =
+            my_map.get("string_list")
+        else {
+            panic!(
+                "Expected Constant(List), got {:?}",
+                my_map.get("string_list")
+            );
+        };
+
+        let Some(TransparentValue::String(s)) = strs.first() else {
+            panic!("Expected String, got {:?}", strs.first());
+        };
+
+        assert_eq!(&**s, "abc");
+
+        let Some(TransparentValue::String(s)) = strs.get(1) else {
+            panic!("Expected String, got {:?}", strs.get(1));
+        };
+
+        assert_eq!(&**s, "123");
+
+        ron::from_str::<InheritedValue>(r#"[(inherit: "invalid")]"#)
+            .expect_err("nested values should be TransparentValues, not InheritedValues");
     }
 
     pub(super) fn check_all_lint_files_are_used_in_add_lints(added_lints: &[&str]) {
@@ -866,6 +1111,7 @@ add_lints!(
     enum_marked_non_exhaustive,
     enum_missing,
     enum_must_use_added,
+    enum_no_repr_variant_discriminant_changed,
     enum_now_doc_hidden,
     enum_repr_int_changed,
     enum_repr_int_removed,
@@ -917,6 +1163,7 @@ add_lints!(
     struct_pub_field_now_doc_hidden,
     struct_repr_transparent_removed,
     struct_with_pub_fields_changed_type,
+    trait_added_supertrait,
     trait_associated_const_added,
     trait_associated_const_default_removed,
     trait_associated_const_now_doc_hidden,

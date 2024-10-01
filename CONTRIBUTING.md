@@ -210,47 +210,143 @@ the "actual" output, then re-run `cargo test` and make sure everything passes.
 
 Congrats on the new lint!
 
+#### Adding a witness
+
+**Witnesses** are a new, unstable feature of `cargo-semver-checks` that let us create
+minimal compile-able examples of potential downstream breakage. They are configured via the
+`witness` field in the lint file `src/lints/<lint_name>.ron`:
+
+If it is `None` (or the field is omitted entirely), `cargo-semver-checks` will not be able
+to generate witness code for this lint. This can be the right choice, sometimes:
+for example, if this lint is a warn- or allow-by-default lint that hints at potential
+breakage, but won't cause breaking changes directly. Additionally, if it's not currently
+possible to write a Trustfall query that gets the necessary information to generate
+witnesses, leave this field as `None`, but leave a `// TODO` comment explaining
+what would unblock this lint from being able to generate a witness.
+
+##### Hint templates
+
+When the `witness` field is not `None`, it must have the `hint_template` field. This is a
+`handlebars` template that generates a small (1-3 line) human-readable message that
+explains the idea of how downstream code would break.
+
+This example code is meant to be small and illustrative, and does not have to pass `cargo check`.
+It should give the reader a sense of the kind of breakage in one glance.
+
+For example, for the `function_missing` lint, a witness template may look like this:
+
+```ron
+witness: (
+  hint_template: r#"{{join "::" path}(...);"#,
+),
+```
+
+which could render to something like:
+
+```rust
+function_missing::will_be_removed_fn(...);
+```
+
+This hint will not pass `cargo check` (e.g. the function call arguments are elided),
+and that's okay. The hint is a distilled example of breakage, and shouldn't require
+additional information beyond what the lint query retrieved.
+
+##### Templating
+
+We use the `handlebars` crate for writing these templates. [More information
+about the syntax can be found here](https://handlebarsjs.com/guide/#simple-expressions),
+and [here is where `cargo-semver-checks` defines custom helpers
+](https://github.com/obi1kenobi/cargo-semver-checks/blob/main/src/templating.rs).
+
+All fields marked with `@output` in the `query` in `<lint_name>.ron` are available
+to access with `{{output_name}}` in the `hint_template`, like in the example above.
+
+##### Testing witnesses
+
+When the `witness` field is not `None`, `cargo-semver-checks` tests the witness generation
+of the lint similarly to how it tests the `query` itself. After adding a witness for the first
+time, run `cargo test` to start generating the snapshots.  The first time you run this test,
+it will fail, because there's no expected result to compare to.  Let's make the test pass:
+
+We use `insta` for snapshot testing witness results, so after adding/changing a witness, we need
+to update the test outputs. Note that it may contain output for other test crates - this
+is not necessarily an error: see the troubleshooting section for more info.
+
+There are two ways to update the output:
+
+1. **With `cargo insta`**: If you install (or have already installed) the `insta` CLI with
+   `cargo install --locked cargo-insta`, you can run `cargo insta review`. Check that the
+   new output is what you expect, and accept it in the TUI.
+2. **Manually**: If you can't (or don't want to) use `cargo-insta`, you can verify the snapshot
+   file manually.  There should be a file called `test_outputs/witnesses/<lint_name>.snap.new`.
+   Open it, and verify that the witnesses generated as expected.  Once you've checked it, move it
+   to `test_outputs/witnesses/<lint_name>.snap` (remove the `.new`)
+
+Once you've update the test output, run `cargo test` again and the `<lint_name>` test should pass!
+**Make sure to commit and push the `test_outputs/witnesses/<lint_name>.snap` into git**;
+otherwise the test will fail in CI.
+
+##### Full witness templates
+
+*TODO: @suaviloquence will write this once the feature has been implemented.*
+
 ### Troubleshooting
-#### A valid query must output span_filename and/or span_begin_line
-If your lint fails with an error similar to the following:
-```
----- query::tests_lints::enum_missing stdout ----
-thread 'query::tests_lints::enum_missing' panicked at 'A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for how to do this.', src/query.rs:395:26
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-```
 
-It likely means that your lint does not specify the `span_filename` and `span_begin_line` of where the error occurs. To fix this, add the following to the part of query that catches the error:
-```
-span_: span @optional {
-  filename @output
-  begin_line @output
-}
-```
+- <details><summary>A valid query must output <code>span_filename</code> and/or <code>span_begin_line</code> (click to expand)</summary>
+  
+  If your lint fails with an error similar to the following:
+  ```
+  ---- query::tests_lints::enum_missing stdout ----
+  thread 'query::tests_lints::enum_missing' panicked at 'A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for how to do this.', src/query.rs:395:26
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+  ```
+  
+  It likely means that your lint does not specify the `span_filename` and `span_begin_line` of where the error occurs. To fix this, add the following to the part of query that catches the error:
+  ```
+  span_: span @optional {
+    filename @output
+    begin_line @output
+  }
+  ```
+  
+  </details>
+- <details><summary>Other lints' tests failed too (click to expand)</summary>
 
-#### Other lints' tests failed too
-
-This is not always a problem! In process of testing a lint, it's frequently desirable to include
-test code that contains a related semver issue in order to ensure the lint differentiates between
-them.
-
-For example, say one is testing a lint for pub field removals from a struct. Its test crate code
+  This is not always a problem! In process of testing a lint, it's frequently desirable to include
+  test code that contains a related semver issue in order to ensure the lint differentiates between
+  them.
+  
+  For example, say one is testing a lint for pub field removals from a struct. Its test crate code
 may then include removals of the entire struct, in order to make sure that the lint *does not*
 report those. But those struct removals *will* get reported by the lint that looks for semver
 violations due to struct removal!
-
-So if you added code to a test crate and it caused other lints to report new findings, consider:
-- whether your code indeed contains the reported semver issue;
-- whether the same semver issue is being reported only once, and not multiple times
-  by different lints,
-- and whether the new reported lint result points to the correct item and span information.
-
-If the answer to all is yes, then everything is fine! Just edit those other lints'
+  
+  So if you added code to a test crate, and it caused other lints to report new findings, consider:
+  - whether your code indeed contains the reported semver issue;
+  - whether the same semver issue is being reported only once, and not multiple times
+    by different lints,
+  - and whether the new reported lint result points to the correct item and span information.
+  
+  If the answer to all is yes, then everything is fine! Just edit those other lints'
 expected output files to include the new items, and you can get back on track.
+  </details>
 
 ## Development Environment
 
-While cargo-semver-checks is cross platform, the development task automation scripts in the scripts
+### Running required automation scripts
+
+While cargo-semver-checks is cross-platform, the development task automation scripts in the scripts
 directory require a `bash` shell to run.
 
 Windows users can get a bash + GNU command line environment via WSL or git bash.
-Linux and Mac OS typically have bash installed by default.
+Linux and macOS typically have bash installed by default.
+
+### Language server (LSP) integration
+
+It's possible to use a GraphQL language server to
+[assist with writing queries](https://github.com/obi1kenobi/trustfall/discussions/679)
+by offering schema-aware autocomplete and other functionality.
+
+To make this work, you'll need to point it to a schema file. The schema and Trustfall adapter
+`cargo-semver-checks` uses are defined in the `trustfall-rustdoc-adapter` crate:
+https://github.com/obi1kenobi/trustfall-rustdoc-adapter
