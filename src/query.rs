@@ -918,8 +918,8 @@ mod tests {
             .try_push(&OverrideMap::from_iter([(
                 Identifier::Lint("query1".into()),
                 QueryOverride {
-                    lint_level: Some(LintLevel::Allow),
-                    required_update: Some(RequiredSemverUpdate::Minor),
+                    lint_level: Some(LintLevel::Warn),
+                    required_update: None,
                 },
             )]))
             .expect("conflict");
