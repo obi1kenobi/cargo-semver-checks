@@ -141,8 +141,6 @@ Reviewing them is possible via these options:
    Open it, and verify that the witnesses generated as expected.  Once you've checked it, move it
    to `test_outputs/witnesses/<lint_name>.snap` (remove the `.new`)
 
-
-
 ## Adding a new lint
 
 ### Background
