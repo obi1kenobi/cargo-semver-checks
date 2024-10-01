@@ -123,7 +123,7 @@ Reviewing them is possible via these options:
    `cargo install --locked cargo-insta`, you can run `cargo insta review`. Check that the
    new output is what you expect, and accept it in the TUI.
 2. **Without `cargo-insta`**:
-   From [`insa`s docs](https://insta.rs/docs/quickstart/#tests-without-insta):
+   From [`insta`s docs](https://insta.rs/docs/quickstart/#tests-without-insta):
    > You can also just use insta directly from cargo test and control it via the `INSTA_UPDATE` environment variable.
    > The default is auto which will write all new snapshots into .snap.new files if no CI is detected so that cargo-insta can pick them up. The following other modes are possible:
    > - `auto`: the default. no for CI environments or new otherwise
