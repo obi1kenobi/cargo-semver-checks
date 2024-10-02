@@ -165,13 +165,14 @@ fn recurse_list_files(path: impl AsRef<Path>) -> Vec<std::fs::DirEntry> {
 #[test]
 fn no_new_snapshots() {
     let files = recurse_list_files("test_outputs/");
-    let new_snaps=files.into_iter()
+    let new_snaps = files
+        .into_iter()
         .map(|f| f.path())
         .filter(|f| {
             if f.as_path().to_str().unwrap().contains("snap.new") {
-                println!("{:?}",f.display());
+                println!("{:?}", f.display());
             }
-            if let Some(name)=f.file_name().unwrap().to_str() {
+            if let Some(name) = f.file_name().unwrap().to_str() {
                 return name.ends_with("snap.new");
             }
             return false;
