@@ -5,9 +5,6 @@ info:
   args:
     - semver-checks
     - "--witness-hints"
-  env:
-    CARGO_TERM_COLOR: never
-    RUST_BACKTRACE: "0"
 ---
 success: false
 exit_code: 1
