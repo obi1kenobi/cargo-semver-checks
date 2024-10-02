@@ -400,7 +400,7 @@ fn recurse_list_files(path: impl AsRef<Path>) -> Vec<std::fs::DirEntry> {
 /// if seeing both a `.snap.new` and a `.snap` file:
 /// - If the content of both files is equal,
 ///   it will pass without failure and remove `.snap.new`-file
-/// - Iif not, it will fail and show the diff
+/// - If not, it will fail and show the diff
 ///
 /// This behavior is problematic as
 /// - we might not pick up on a `.snap.new` file being added as the testcase pass in CI and
