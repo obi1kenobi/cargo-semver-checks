@@ -269,8 +269,10 @@ Inspect the generated "actual" output in the `.snap.new` file:
   If so, ensure the reported code is indeed violating semver and is not being flagged
   by any other lint.
 
-If everything looks okay, either run `cargo insta review` (see the [snapshot instructions](#what-are-those-snap-or-snapnew-files-generated-via-cargo-test-) for context)
-or manually move `test_outputs/query_execution/<lint_name>.snap.new` to  `test_outputs/query_execution/<lint_name>.snap`.
+If everything looks okay, either run `cargo insta review` (see 
+the [snapshot instructions](#what-are-those-snap-or-snapnew-files-generated-via-cargo-test) 
+for context) or manually move `test_outputs/query_execution/<lint_name>.snap.new`
+to  `test_outputs/query_execution/<lint_name>.snap`.
 Then re-run `cargo test` and make sure everything passes.
 
 Congrats on the new lint!
@@ -340,7 +342,8 @@ to update the test outputs.
 > It may contain output for other test crates — this is not necessarily an error:
 > See the [troubleshooting section](#troubleshooting) for more info.
 
-To update the output, please refer to the section on [snapshot testing](#what-are-those-snap-or-snapnew-files-generated-via-cargo-test)
+To update the output, please refer to the section 
+on [snapshot testing](#what-are-those-snap-or-snapnew-files-generated-via-cargo-test)
 
 Once you've update the test output, run `cargo test` again and the `<lint_name>` test should pass!
 **Make sure to commit and push the `test_outputs/witnesses/<lint_name>.snap` into git**;
