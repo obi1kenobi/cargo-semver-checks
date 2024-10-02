@@ -368,3 +368,64 @@ fn multiple_ambiguous_package_name_definitions() {
         ],
     );
 }
+
+/// Helper function which lists all files in the directory recursively.
+/// Errors lead to panics as this is only used in a testcase.
+///
+/// # Arguments
+///
+/// - `path` is the path from which all [`std::fs::DirEntry`]'s will be expanded from
+fn recurse_list_files(path: impl AsRef<Path>) -> Vec<std::fs::DirEntry> {
+    let mut buf = vec![];
+    let entries = std::fs::read_dir(path).unwrap();
+
+    for entry in entries {
+        let entry = entry.unwrap();
+        let meta = entry.metadata().unwrap();
+
+        if meta.is_dir() {
+            let mut subdir = recurse_list_files(entry.path());
+            buf.append(&mut subdir);
+        }
+        if meta.is_file() {
+            buf.push(entry);
+        }
+    }
+
+    buf
+}
+
+/// Make sure that no `.snap.new` snapshots exist.
+///
+/// This testcase exists as [`insta`] behaves as the following
+/// if seeing both a `.snap.new` and a `.snap` file:
+/// - If the content of both files is equal,
+///   it will pass without failure and remove `.snap.new`-file
+/// - Iif not, it will fail and show the diff
+///
+/// This behavior is problematic as
+/// - we might not pick up on a `.snap.new` file being added as the testcase pass in CI and
+/// - future contributors would be confused where this change comes from
+///
+/// Therefore, we are asserting that no such files exist.
+#[test]
+fn no_new_snapshots() {
+    let files = recurse_list_files("test_outputs/");
+    let new_snaps = files
+        .into_iter()
+        .map(|f| f.path())
+        .filter(|f| {
+            if f.as_path().to_str().unwrap().contains("snap.new") {
+                println!("{:?}", f.display());
+            }
+            if let Some(name) = f.file_name().unwrap().to_str() {
+                return name.ends_with("snap.new");
+            }
+            false
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        new_snaps,
+        Vec::<PathBuf>::new(),
+        "`.snap.new` files exit, but should not. Did you\n- forget to run `cargo insta review` or\n- forget to move the `.snap.new` file to `.snap` after verifying the content is exactly as expected?");
+}
