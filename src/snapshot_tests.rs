@@ -370,18 +370,17 @@ fn multiple_ambiguous_package_name_definitions() {
 }
 
 /// Helper function which lists all files in the directory recursively.
-/// Errors lead to panics as this is only used in a testcase.
 ///
 /// # Arguments
 ///
 /// - `path` is the path from which all [`std::fs::DirEntry`]'s will be expanded from
 fn recurse_list_files(path: impl AsRef<Path>) -> Vec<std::fs::DirEntry> {
     let mut buf = vec![];
-    let entries = std::fs::read_dir(path).unwrap();
+    let entries = std::fs::read_dir(path).expect("failed to read the requested path");
 
     for entry in entries {
-        let entry = entry.unwrap();
-        let meta = entry.metadata().unwrap();
+        let entry = entry.expect("failed to iterate due to intermittent IO errors");
+        let meta = entry.metadata().expect("failed to read file metadata");
 
         if meta.is_dir() {
             let mut subdir = recurse_list_files(entry.path());
@@ -415,9 +414,6 @@ fn no_new_snapshots() {
         .into_iter()
         .map(|f| f.path())
         .filter(|f| {
-            if f.as_path().to_str().unwrap().contains("snap.new") {
-                println!("{:?}", f.display());
-            }
             if let Some(name) = f.file_name().unwrap().to_str() {
                 return name.ends_with("snap.new");
             }
@@ -427,5 +423,9 @@ fn no_new_snapshots() {
     assert_eq!(
         new_snaps,
         Vec::<PathBuf>::new(),
-        "`.snap.new` files exit, but should not. Did you\n- forget to run `cargo insta review` or\n- forget to move the `.snap.new` file to `.snap` after verifying the content is exactly as expected?");
+        "`.snap.new` files exit, but should not. Did you\n\
+        - forget to run `cargo insta review` or\n\
+        - forget to move the `.snap.new` file to `.snap` after verifying \
+        the content is exactly as expected?"
+    );
 }
