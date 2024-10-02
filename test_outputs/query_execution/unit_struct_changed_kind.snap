@@ -1,0 +1,18 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/unit_struct_changed_kind/": [
+    {
+      "name": String("UnitStructToPlain"),
+      "path": List([
+        String("unit_struct_changed_kind"),
+        String("UnitStructToPlain"),
+      ]),
+      "span_begin_line": Uint64(1),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

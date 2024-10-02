@@ -1,0 +1,18 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_associated_const_now_doc_hidden/": [
+    {
+      "associated_constant": String("CONST_A"),
+      "path": List([
+        String("trait_associated_const_now_doc_hidden"),
+        String("PubTraitA"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "trait_name": String("PubTraitA"),
+    },
+  ],
+}

@@ -1,0 +1,28 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/repr_packed_added_removed/": [
+    {
+      "name": String("StructBecomesPacked"),
+      "path": List([
+        String("repr_packed_added_removed"),
+        String("StructBecomesPacked"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Struct"),
+    },
+    {
+      "name": String("UnionBecomesPacked"),
+      "path": List([
+        String("repr_packed_added_removed"),
+        String("UnionBecomesPacked"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Union"),
+    },
+  ],
+}

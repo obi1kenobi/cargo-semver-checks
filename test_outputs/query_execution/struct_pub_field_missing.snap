@@ -1,0 +1,19 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/struct_pub_field_missing/": [
+    {
+      "field_name": String("bar"),
+      "path": List([
+        String("struct_pub_field_missing"),
+        String("FieldWillBeRemoved"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("FieldWillBeRemoved"),
+      "struct_type": String("plain"),
+    },
+  ],
+}

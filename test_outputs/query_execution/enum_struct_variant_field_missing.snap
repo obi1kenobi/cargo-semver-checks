@@ -1,0 +1,19 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_struct_variant_field_missing/": [
+    {
+      "enum_name": String("Enum"),
+      "field_name": String("bar"),
+      "path": List([
+        String("enum_struct_variant_field_missing"),
+        String("Enum"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("FieldWillBeMissing"),
+    },
+  ],
+}

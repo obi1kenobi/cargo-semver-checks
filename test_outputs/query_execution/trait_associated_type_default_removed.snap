@@ -1,0 +1,19 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_associated_type_default_removed/": [
+    {
+      "associated_type": String("Foo"),
+      "has_default": Boolean(false),
+      "path": List([
+        String("trait_associated_type_default_removed"),
+        String("WillLoseDefault"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

@@ -1,0 +1,52 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/inherent_associated_pub_const_missing/": [
+    {
+      "associated_constant": String("PublicConstantA"),
+      "name": String("StructA"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("StructA"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("PublicConstantRenameA"),
+      "name": String("StructA"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("StructA"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("PublicConstantI"),
+      "name": String("StructE"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("StructE"),
+      ]),
+      "span_begin_line": Uint64(52),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("N_C"),
+      "name": String("ExampleC"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("ExampleC"),
+      ]),
+      "span_begin_line": Uint64(118),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

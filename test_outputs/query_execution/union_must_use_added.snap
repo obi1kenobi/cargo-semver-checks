@@ -1,0 +1,30 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/union_must_use_added/": [
+    {
+      "name": String("UnionToMustUseUnion"),
+      "new_attr": String("#[must_use]"),
+      "path": List([
+        String("union_must_use_added"),
+        String("UnionToMustUseUnion"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToMustUseMessageUnion"),
+      "new_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("union_must_use_added"),
+        String("UnionToMustUseMessageUnion"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

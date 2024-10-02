@@ -1,0 +1,86 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/inherent_method_now_doc_hidden/": [
+    {
+      "method_name": String("associated_fn"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "path": List([
+        String("inherent_method_now_doc_hidden"),
+        String("enum_inherent_method_now_doc_hidden"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/enum_inherent_method_now_doc_hidden.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("method"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "path": List([
+        String("inherent_method_now_doc_hidden"),
+        String("enum_inherent_method_now_doc_hidden"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/enum_inherent_method_now_doc_hidden.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("associated_fn"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "path": List([
+        String("inherent_method_now_doc_hidden"),
+        String("struct_inherent_method_now_doc_hidden"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/struct_inherent_method_now_doc_hidden.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("method"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "path": List([
+        String("inherent_method_now_doc_hidden"),
+        String("struct_inherent_method_now_doc_hidden"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/struct_inherent_method_now_doc_hidden.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("associated_fn"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "path": List([
+        String("inherent_method_now_doc_hidden"),
+        String("union_inherent_method_now_doc_hidden"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/union_inherent_method_now_doc_hidden.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("method"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "path": List([
+        String("inherent_method_now_doc_hidden"),
+        String("union_inherent_method_now_doc_hidden"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_filename": String("src/union_inherent_method_now_doc_hidden.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

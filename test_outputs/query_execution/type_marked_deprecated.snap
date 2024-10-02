@@ -1,0 +1,80 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/type_marked_deprecated/": [
+    {
+      "name": String("EnumToDeprecatedEnum"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("enums"),
+        String("EnumToDeprecatedEnum"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/enums.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EnumToDeprecatedMessageEnum"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("enums"),
+        String("EnumToDeprecatedMessageEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/enums.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("StructToDeprecatedStruct"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("structs"),
+        String("StructToDeprecatedStruct"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/structs.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("StructToDeprecatedMessageStruct"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("structs"),
+        String("StructToDeprecatedMessageStruct"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/structs.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToDeprecatedUnion"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("unions"),
+        String("UnionToDeprecatedUnion"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/unions.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToDeprecatedMessageUnion"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("unions"),
+        String("UnionToDeprecatedMessageUnion"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/unions.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

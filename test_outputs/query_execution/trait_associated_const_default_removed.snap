@@ -1,0 +1,32 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_associated_const_default_removed/": [
+    {
+      "associated_constant": String("ONE"),
+      "default": Null,
+      "path": List([
+        String("trait_associated_const_default_removed"),
+        String("WillLoseDefault"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_items_hidden_from_public_api/": [
+    {
+      "associated_constant": String("DEFAULT_REMOVED"),
+      "default": Null,
+      "path": List([
+        String("trait_items_hidden_from_public_api"),
+        String("NonSealed"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

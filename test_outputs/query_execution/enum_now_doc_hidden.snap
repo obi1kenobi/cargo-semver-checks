@@ -1,0 +1,49 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_now_doc_hidden/": [
+    {
+      "enum_name": String("MyEnum"),
+      "path": List([
+        String("enum_now_doc_hidden"),
+        String("MyPublicMod"),
+        String("MyEnum"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("MyEnum"),
+      "path": List([
+        String("enum_now_doc_hidden"),
+        String("MyNestedPublicMod"),
+        String("PublicInnerMod"),
+        String("MyEnum"),
+      ]),
+      "span_begin_line": Uint64(46),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("Example"),
+      "path": List([
+        String("enum_now_doc_hidden"),
+        String("Example"),
+      ]),
+      "span_begin_line": Uint64(59),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/type_hidden_from_public_api/": [
+    {
+      "enum_name": String("ExampleEnum"),
+      "path": List([
+        String("type_hidden_from_public_api"),
+        String("ExampleEnum"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

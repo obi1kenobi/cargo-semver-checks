@@ -1,0 +1,106 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_no_repr_variant_discriminant_changed/": [
+    {
+      "name": String("DiscriminantIsChangedAndMarkedNonExhaustive"),
+      "path": List([
+        String("enum_no_repr_variant_discriminant_changed"),
+        String("DiscriminantIsChangedAndMarkedNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Second"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_struct_variant_field_added/": [
+    {
+      "name": String("EnumWithExhaustiveVariant"),
+      "path": List([
+        String("enum_struct_variant_field_added"),
+        String("EnumWithExhaustiveVariant"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("ExhaustiveVariant"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_tuple_variant_changed_kind/": [
+    {
+      "name": String("TestBecomeNonExhaustive"),
+      "path": List([
+        String("enum_tuple_variant_changed_kind"),
+        String("TestBecomeNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_tuple_variant_field_added/": [
+    {
+      "name": String("PublicEnum"),
+      "path": List([
+        String("enum_tuple_variant_field_added"),
+        String("PublicEnum"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariantWithFieldAddedBecomesNonExhaustive"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_unit_variant_changed_kind/": [
+    {
+      "name": String("TestBecomeNonExhaustive"),
+      "path": List([
+        String("enum_unit_variant_changed_kind"),
+        String("TestBecomeNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/non_exhaustive/": [
+    {
+      "name": String("MyEnum"),
+      "path": List([
+        String("non_exhaustive"),
+        String("MyEnum"),
+      ]),
+      "span_begin_line": Uint64(38),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("UnitVariant"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MyEnum"),
+      "path": List([
+        String("non_exhaustive"),
+        String("MyEnum"),
+      ]),
+      "span_begin_line": Uint64(41),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariant"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MyEnum"),
+      "path": List([
+        String("non_exhaustive"),
+        String("MyEnum"),
+      ]),
+      "span_begin_line": Uint64(44),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

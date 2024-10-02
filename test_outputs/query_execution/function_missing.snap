@@ -1,0 +1,86 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/feature_flags_validation/": [
+    {
+      "name": String("foo_becomes_gated"),
+      "path": List([
+        String("feature_flags_validation"),
+        String("foo_becomes_gated"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("bar_becomes_gated"),
+      "path": List([
+        String("feature_flags_validation"),
+        String("bar_becomes_gated"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/features_simple/": [
+    {
+      "name": String("feature_dependent_function"),
+      "path": List([
+        String("features_simple"),
+        String("feature_dependent_function"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_const_removed/": [
+    {
+      "name": String("fn_removed"),
+      "path": List([
+        String("function_const_removed"),
+        String("fn_removed"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_feature_changed/": [
+    {
+      "name": String("moving_from_feature_A_to_feature_B"),
+      "path": List([
+        String("function_feature_changed"),
+        String("moving_from_feature_A_to_feature_B"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_missing/": [
+    {
+      "name": String("will_be_removed_fn"),
+      "path": List([
+        String("function_missing"),
+        String("will_be_removed_fn"),
+      ]),
+      "span_begin_line": Uint64(1),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("pub_use_removed_fn"),
+      "path": List([
+        String("function_missing"),
+        String("pub_use_removed_fn"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

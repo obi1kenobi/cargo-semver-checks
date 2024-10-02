@@ -1,0 +1,18 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/function_const_removed/": [
+    {
+      "name": String("add"),
+      "path": List([
+        String("function_const_removed"),
+        String("add"),
+      ]),
+      "span_begin_line": Uint64(1),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

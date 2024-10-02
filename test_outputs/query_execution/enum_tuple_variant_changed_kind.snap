@@ -1,0 +1,106 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_tuple_variant_changed_kind/": [
+    {
+      "enum_name": String("TestStruct"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("enum_tuple_variant_changed_kind"),
+        String("TestStruct"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+    },
+    {
+      "enum_name": String("TestUnit"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("PlainVariant"),
+      "path": List([
+        String("enum_tuple_variant_changed_kind"),
+        String("TestUnit"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeUnitLike"),
+    },
+    {
+      "enum_name": String("MultipleTest"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("enum_tuple_variant_changed_kind"),
+        String("MultipleTest"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+    },
+    {
+      "enum_name": String("MultipleTest"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("PlainVariant"),
+      "path": List([
+        String("enum_tuple_variant_changed_kind"),
+        String("MultipleTest"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeUnitLike"),
+    },
+    {
+      "enum_name": String("TestBecomeDocHidden"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("enum_tuple_variant_changed_kind"),
+        String("TestBecomeDocHidden"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+    },
+    {
+      "enum_name": String("TestBecomeNonExhaustive"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("enum_tuple_variant_changed_kind"),
+        String("TestBecomeNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+    },
+  ],
+  "./test_crates/enum_tuple_variant_field_missing/": [
+    {
+      "enum_name": String("PublicEnum"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("PlainVariant"),
+      "path": List([
+        String("enum_tuple_variant_field_missing"),
+        String("PublicEnum"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariantBecomesPlain"),
+    },
+    {
+      "enum_name": String("PublicEnum"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("enum_tuple_variant_field_missing"),
+        String("PublicEnum"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariantBecomesStruct"),
+    },
+  ],
+}

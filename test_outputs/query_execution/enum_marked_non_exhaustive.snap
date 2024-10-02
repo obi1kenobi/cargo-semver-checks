@@ -1,0 +1,18 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/non_exhaustive/": [
+    {
+      "name": String("SimpleEnum"),
+      "path": List([
+        String("non_exhaustive"),
+        String("SimpleEnum"),
+      ]),
+      "span_begin_line": Uint64(48),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

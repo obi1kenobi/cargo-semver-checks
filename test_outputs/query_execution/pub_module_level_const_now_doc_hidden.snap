@@ -1,0 +1,38 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/function_now_doc_hidden/": [
+    {
+      "constant_name": String("MY_FN"),
+      "path": List([
+        String("function_now_doc_hidden"),
+        String("MY_FN"),
+      ]),
+      "span_begin_line": Uint64(61),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/pub_module_level_const_now_doc_hidden/": [
+    {
+      "constant_name": String("GlobalConstantB"),
+      "path": List([
+        String("pub_module_level_const_now_doc_hidden"),
+        String("GlobalConstantB"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "constant_name": String("PublicModuleConstantB"),
+      "path": List([
+        String("pub_module_level_const_now_doc_hidden"),
+        String("PublicModule"),
+        String("PublicModuleConstantB"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

@@ -1,0 +1,54 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_unsafe_removed/": [
+    {
+      "name": String("TraitBecomesSafe"),
+      "path": List([
+        String("trait_method_unsafe_removed"),
+        String("TraitBecomesSafe"),
+      ]),
+      "span_begin_line": Uint64(25),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_missing/": [
+    {
+      "name": String("TraitStopsBeingUnsafe"),
+      "path": List([
+        String("trait_missing"),
+        String("TraitStopsBeingUnsafe"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_missing_with_major_bump/": [
+    {
+      "name": String("TraitStopsBeingUnsafe"),
+      "path": List([
+        String("trait_missing_with_major_bump"),
+        String("TraitStopsBeingUnsafe"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_unsafe_removed/": [
+    {
+      "name": String("TraitBecomesSafe"),
+      "path": List([
+        String("trait_unsafe_removed"),
+        String("TraitBecomesSafe"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

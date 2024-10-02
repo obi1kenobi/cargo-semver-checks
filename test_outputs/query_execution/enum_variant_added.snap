@@ -1,0 +1,32 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_variant_added/": [
+    {
+      "enum_name": String("EnumWithNewVariant"),
+      "path": List([
+        String("enum_variant_added"),
+        String("EnumWithNewVariant"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("NewVariant"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_variant_hidden_from_public_api/": [
+    {
+      "enum_name": String("AddedVariant"),
+      "path": List([
+        String("enum_variant_hidden_from_public_api"),
+        String("AddedVariant"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Added"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

@@ -1,0 +1,52 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_associated_type_added/": [
+    {
+      "associated_type": String("Bar"),
+      "has_default": Boolean(false),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainTypeWithoutDefault"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Bar"),
+      "has_default": Boolean(false),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainTypeWithoutDefaultAndSeal"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Two"),
+      "has_default": Boolean(false),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainAnotherTypeWithoutDefault"),
+      ]),
+      "span_begin_line": Uint64(39),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Bar"),
+      "has_default": Boolean(false),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainADocHiddenType"),
+      ]),
+      "span_begin_line": Uint64(53),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

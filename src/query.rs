@@ -590,14 +590,7 @@ mod tests {
         let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query = SemverQuery::from_ron_str(&query_text).unwrap();
 
-        let expected_result_text =
-            std::fs::read_to_string(format!("./test_outputs/{query_name}.output.ron"))
-            .with_context(|| format!("Could not load test_outputs/{query_name}.output.ron expected-outputs file, did you forget to add it?"))
-            .expect("failed to load expected outputs");
-        let mut expected_results: TestOutput = ron::from_str(&expected_result_text)
-            .expect("could not parse expected outputs as ron format");
-
-        let mut actual_results: TestOutput = get_test_crate_names()
+        let mut query_execution_results: TestOutput = get_test_crate_names()
             .iter()
             .map(|crate_pair_name| {
                 let (crate_old, crate_new) = get_test_crate_rustdocs(crate_pair_name);
@@ -629,42 +622,35 @@ mod tests {
             .filter(|(_crate_pair_name, output)| !output.is_empty())
             .collect();
 
-        // Reorder both vectors of results into a deterministic order that will compensate for
+        // Reorder vector of results into a deterministic order that will compensate for
         // nondeterminism in how the results are ordered.
-        let sort_individual_outputs = |results: &mut TestOutput| {
-            let key_func = |elem: &BTreeMap<String, FieldValue>| {
-                let filename = elem.get("span_filename").and_then(|value| value.as_str());
-                let line = elem.get("span_begin_line");
+        let key_func = |elem: &BTreeMap<String, FieldValue>| {
+            let filename = elem.get("span_filename").and_then(|value| value.as_str());
+            let line = elem.get("span_begin_line");
 
-                match (filename, line) {
-                    (Some(filename), Some(line)) => (filename.to_owned(), line.as_usize()),
-                    (Some(_filename), _) => panic!("A valid query must output `span_filename`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                    (_, Some(_line)) => panic!("A valid query must output `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                    _ => panic!("A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                }
-            };
-            for value in results.values_mut() {
-                value.sort_unstable_by_key(key_func);
+            match (filename, line) {
+                (Some(filename), Some(line)) => (filename.to_owned(), line.as_usize()),
+                (Some(_filename), None) => panic!("A valid query must output `span_filename`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                (None, Some(_line)) => panic!("A valid query must output `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                (None, None) => panic!("A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
             }
         };
-        sort_individual_outputs(&mut expected_results);
-        sort_individual_outputs(&mut actual_results);
-
-        if expected_results != actual_results {
-            panic!(
-                "\n{}\n",
-                pretty_format_output_difference(
-                    query_name,
-                    "expected",
-                    expected_results,
-                    "actual",
-                    actual_results
-                )
-            );
+        for value in query_execution_results.values_mut() {
+            value.sort_unstable_by_key(key_func);
         }
 
-        let transparent_actual_results: BTreeMap<_, Vec<BTreeMap<_, TransparentValue>>> =
-            actual_results
+        insta::with_settings!(
+            {
+                prepend_module_to_snapshot => false,
+                snapshot_path => "../test_outputs/query_execution",
+            },
+            {
+                insta::assert_ron_snapshot!(query_name, &query_execution_results);
+            }
+        );
+
+        let transparent_results: BTreeMap<_, Vec<BTreeMap<_, TransparentValue>>> =
+            query_execution_results
                 .into_iter()
                 .map(|(k, v)| {
                     (
@@ -678,9 +664,9 @@ mod tests {
 
         let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
-            assert!(!transparent_actual_results.is_empty());
+            assert!(!transparent_results.is_empty());
 
-            let flattened_actual_results: Vec<_> = transparent_actual_results
+            let flattened_actual_results: Vec<_> = transparent_results
                 .iter()
                 .flat_map(|(_key, value)| value)
                 .collect();
@@ -693,7 +679,7 @@ mod tests {
         }
 
         if let Some(witness) = semver_query.witness {
-            let actual_witnesses: BTreeMap<_, BTreeSet<_>> = transparent_actual_results
+            let actual_witnesses: BTreeMap<_, BTreeSet<_>> = transparent_results
                 .iter()
                 .map(|(k, v)| {
                     (

@@ -1,0 +1,48 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/type_hidden_from_public_api/": [
+    {
+      "path": List([
+        String("type_hidden_from_public_api"),
+        String("ExampleUnion"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "union_name": String("ExampleUnion"),
+    },
+  ],
+  "./test_crates/union_now_doc_hidden/": [
+    {
+      "path": List([
+        String("union_now_doc_hidden"),
+        String("MyUnion"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "union_name": String("MyUnion"),
+    },
+  ],
+  "./test_crates/union_pub_field_now_doc_hidden/": [
+    {
+      "path": List([
+        String("union_pub_field_now_doc_hidden"),
+        String("MyUnion"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "union_name": String("MyUnion"),
+    },
+    {
+      "path": List([
+        String("union_pub_field_now_doc_hidden"),
+        String("PublicUnionBothFieldAndUnionDocHidden"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+      "union_name": String("PublicUnionBothFieldAndUnionDocHidden"),
+    },
+  ],
+}

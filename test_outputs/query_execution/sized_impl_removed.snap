@@ -1,0 +1,18 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/sized_impl_removed/": [
+    {
+      "name": String("SizedStruct"),
+      "path": List([
+        String("sized_impl_removed"),
+        String("SizedStruct"),
+      ]),
+      "span_begin_line": Uint64(1),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

@@ -1,0 +1,86 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_associated_const_added/": [
+    {
+      "name": String("WillGainConstWithoutDefaultAndSeal"),
+      "path": List([
+        String("trait_associated_const_added"),
+        String("WillGainConstWithoutDefaultAndSeal"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_associated_type_added/": [
+    {
+      "name": String("WillGainTypeWithoutDefaultAndSeal"),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainTypeWithoutDefaultAndSeal"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_added/": [
+    {
+      "name": String("WillGainMethodWithoutDefaultAndSeal"),
+      "path": List([
+        String("trait_method_added"),
+        String("WillGainMethodWithoutDefaultAndSeal"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_default_impl_removed/": [
+    {
+      "name": String("TraitE"),
+      "path": List([
+        String("trait_method_default_impl_removed"),
+        String("TraitE"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("TraitF"),
+      "path": List([
+        String("trait_method_default_impl_removed"),
+        String("TraitF"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_newly_sealed/": [
+    {
+      "name": String("TraitBecomesSealed"),
+      "path": List([
+        String("trait_newly_sealed"),
+        String("TraitBecomesSealed"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("TraitMethodBecomesSealed"),
+      "path": List([
+        String("trait_newly_sealed"),
+        String("TraitMethodBecomesSealed"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

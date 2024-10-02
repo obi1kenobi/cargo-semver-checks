@@ -1,0 +1,106 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_added_supertrait/": [
+    {
+      "path": List([
+        String("trait_added_supertrait"),
+        String("WillGainOne"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("TraitOne"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "path": List([
+        String("trait_added_supertrait"),
+        String("WillGainAnotherOne"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("TraitTwo"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "path": List([
+        String("trait_added_supertrait"),
+        String("WillGainStdOne"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("Sync"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "path": List([
+        String("trait_added_supertrait"),
+        String("WillGainStdTwo"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("Debug"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "path": List([
+        String("trait_added_supertrait"),
+        String("WillGainStdThree"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("PartialEq"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_associated_const_added/": [
+    {
+      "path": List([
+        String("trait_associated_const_added"),
+        String("WillGainConstWithoutDefaultAndSeal"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("Sealed"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_associated_type_added/": [
+    {
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainTypeWithoutDefaultAndSeal"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("Sealed"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_added/": [
+    {
+      "path": List([
+        String("trait_method_added"),
+        String("WillGainMethodWithoutDefaultAndSeal"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("Sealed"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_newly_sealed/": [
+    {
+      "path": List([
+        String("trait_newly_sealed"),
+        String("TraitBecomesSealed"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("Sealed"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

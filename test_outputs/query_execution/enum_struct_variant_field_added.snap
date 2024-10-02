@@ -1,0 +1,45 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_no_repr_variant_discriminant_changed/": [
+    {
+      "enum_name": String("UnitOnlyBecomesUndefined"),
+      "field_name": String("a"),
+      "path": List([
+        String("enum_no_repr_variant_discriminant_changed"),
+        String("UnitOnlyBecomesUndefined"),
+      ]),
+      "span_begin_line": Uint64(77),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Struct"),
+    },
+  ],
+  "./test_crates/enum_struct_field_hidden_from_public_api/": [
+    {
+      "enum_name": String("AddedVariantField"),
+      "field_name": String("y"),
+      "path": List([
+        String("enum_struct_field_hidden_from_public_api"),
+        String("AddedVariantField"),
+      ]),
+      "span_begin_line": Uint64(38),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+    },
+  ],
+  "./test_crates/enum_struct_variant_field_added/": [
+    {
+      "enum_name": String("PubEnum"),
+      "field_name": String("y"),
+      "path": List([
+        String("enum_struct_variant_field_added"),
+        String("PubEnum"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Foo"),
+    },
+  ],
+}

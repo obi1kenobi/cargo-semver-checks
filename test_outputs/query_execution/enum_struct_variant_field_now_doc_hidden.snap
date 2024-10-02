@@ -1,0 +1,32 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_now_doc_hidden/": [
+    {
+      "enum_name": String("PublicEnumHiddenStructFieldOnVariant"),
+      "field_name": String("a"),
+      "path": List([
+        String("enum_now_doc_hidden"),
+        String("PublicEnumHiddenStructFieldOnVariant"),
+      ]),
+      "span_begin_line": Uint64(78),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("A"),
+    },
+  ],
+  "./test_crates/enum_struct_variant_field_now_doc_hidden/": [
+    {
+      "enum_name": String("PublicEnumA"),
+      "field_name": String("x"),
+      "path": List([
+        String("enum_struct_variant_field_now_doc_hidden"),
+        String("PublicEnumA"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+    },
+  ],
+}

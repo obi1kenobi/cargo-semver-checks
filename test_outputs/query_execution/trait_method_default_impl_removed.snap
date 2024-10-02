@@ -1,0 +1,65 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_default_impl_removed/": [
+    {
+      "method_name": String("method_default_impl_removed"),
+      "name": String("TraitA"),
+      "path": List([
+        String("trait_method_default_impl_removed"),
+        String("TraitA"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("method_default_impl_removed_and_becomes_non_obj_safe"),
+      "name": String("TraitD"),
+      "path": List([
+        String("trait_method_default_impl_removed"),
+        String("TraitD"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("method_default_impl_removed_and_becomes_sealed"),
+      "name": String("TraitE"),
+      "path": List([
+        String("trait_method_default_impl_removed"),
+        String("TraitE"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("method_partially_sealed_has_default_impl_removed"),
+      "name": String("TraitF"),
+      "path": List([
+        String("trait_method_default_impl_removed"),
+        String("TraitF"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_no_longer_object_safe/": [
+    {
+      "method_name": String("by_ref"),
+      "name": String("RefTrait"),
+      "path": List([
+        String("trait_no_longer_object_safe"),
+        String("RefTrait"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

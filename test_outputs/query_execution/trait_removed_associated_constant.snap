@@ -1,0 +1,30 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_removed_associated_constant/": [
+    {
+      "associated_constant": String("APPLE"),
+      "path": List([
+        String("trait_removed_associated_constant"),
+        String("RemovedAssociatedConstantFromTrait"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "trait_name": String("RemovedAssociatedConstantFromTrait"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("APPLE"),
+      "path": List([
+        String("trait_removed_associated_constant"),
+        String("RemovedAssociatedConstantDefaultFromTrait"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "trait_name": String("RemovedAssociatedConstantDefaultFromTrait"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

@@ -1,0 +1,56 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/derive_trait_impl_removed/": [
+    {
+      "name": String("DebugFoo"),
+      "path": List([
+        String("derive_trait_impl_removed"),
+        String("DebugFoo"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "trait_name": String("Debug"),
+      "trait_path": List([
+        String("core"),
+        String("fmt"),
+        String("Debug"),
+      ]),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("CopyBar"),
+      "path": List([
+        String("derive_trait_impl_removed"),
+        String("CopyBar"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "trait_name": String("Copy"),
+      "trait_path": List([
+        String("core"),
+        String("marker"),
+        String("Copy"),
+      ]),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EqFoo"),
+      "path": List([
+        String("derive_trait_impl_removed"),
+        String("EqFoo"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "trait_name": String("Eq"),
+      "trait_path": List([
+        String("core"),
+        String("cmp"),
+        String("Eq"),
+      ]),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

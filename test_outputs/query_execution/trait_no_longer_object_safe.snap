@@ -1,0 +1,52 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/inherent_associated_pub_const_missing/": [
+    {
+      "name": String("TraitA"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("TraitA"),
+      ]),
+      "span_begin_line": Uint64(59),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("TraitB"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("TraitB"),
+      ]),
+      "span_begin_line": Uint64(68),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_default_impl_removed/": [
+    {
+      "name": String("TraitD"),
+      "path": List([
+        String("trait_method_default_impl_removed"),
+        String("TraitD"),
+      ]),
+      "span_begin_line": Uint64(21),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_no_longer_object_safe/": [
+    {
+      "name": String("RefTrait"),
+      "path": List([
+        String("trait_no_longer_object_safe"),
+        String("RefTrait"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

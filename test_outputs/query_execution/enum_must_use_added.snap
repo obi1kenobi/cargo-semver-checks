@@ -1,0 +1,30 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_must_use_added/": [
+    {
+      "name": String("EnumToMustUseEnum"),
+      "new_attr": String("#[must_use]"),
+      "path": List([
+        String("enum_must_use_added"),
+        String("EnumToMustUseEnum"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EnumToMustUseMessageEnum"),
+      "new_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("enum_must_use_added"),
+        String("EnumToMustUseMessageEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

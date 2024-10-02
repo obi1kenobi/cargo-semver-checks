@@ -1,0 +1,48 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_unsafe_removed/": [
+    {
+      "method_name": String("becomes_safe"),
+      "path": List([
+        String("trait_method_unsafe_removed"),
+        String("PubTrait"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("becomes_safe"),
+      "path": List([
+        String("trait_method_unsafe_removed"),
+        String("TraitBecomesSafe"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("becomes_safe"),
+      "path": List([
+        String("trait_method_unsafe_removed"),
+        String("UnsealedTrait"),
+      ]),
+      "span_begin_line": Uint64(48),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("becomes_safe"),
+      "path": List([
+        String("trait_method_unsafe_removed"),
+        String("TraitWithStdSupertrait"),
+      ]),
+      "span_begin_line": Uint64(60),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
