@@ -265,7 +265,7 @@ Inspect the generated "actual" output in the `.snap.new` file:
 - Does it report the semver issue your lint was supposed to catch? If not, the lint query
   or the test crates' code may need to be tweaked.
 - Does it report correct span information? Is the span as specific as possible, for example
-  pointing to a `struct`'s field rather than the whole struct if the lint refers to that field?
+  pointing to a struct's field rather than the whole struct if the lint refers to that field?
 - Does the output also report any code from test crates other than `test_crates/<lint_name>`?
   If so, ensure the reported code is indeed violating semver and is not being flagged
   by any other lint.
