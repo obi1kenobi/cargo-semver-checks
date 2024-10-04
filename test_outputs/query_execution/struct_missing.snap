@@ -123,6 +123,19 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/struct_with_no_pub_fields_changed/": [
+    {
+      "name": String("PubStructChangedType"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed"),
+        String("PubStructChangedType"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("tuple"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/switch_to_reexport_as_underscore/": [
     {
       "name": String("Struct"),

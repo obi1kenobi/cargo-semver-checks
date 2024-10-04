@@ -1,17 +1,16 @@
 SemverQuery(
-    id: "struct_with_pub_fields_changed_type",
-    human_readable_name: "struct with pub fields became an enum or union",
-    description: "A struct with pub fields was converted into an enum or union, breaking accesses to its public fields.",
+    id: "struct_with_no_pub_fields_changed",
+    human_readable_name: "public API struct with no public fields is no longer a struct",
+    description: "A struct without pub fields was converted into an enum or union, breaking pattern matching.",
     required_update: Major,
     lint_level: Deny,
-    reference_link: Some("https://github.com/obi1kenobi/cargo-semver-checks/issues/297#issuecomment-1399099659"),
+    reference_link: Some("https://internals.rust-lang.org/t/rest-patterns-foo-should-match-non-struct-types/21607"),
     reference: Some(
         r#"\
-Pub fields of structs are accessible outside their defining crate. Changing such a struct \
-to make it an enum or union will break such field access: enums don't have fields, and accessing \
-union fields requires an `unsafe` block.
+Even if a structs does not expose pub fields, pattern matching like `matches!(value, Example { .. })` is accessible outside their defining crate. \
+Changing such a struct to make it an enum or union will break this pattern match, as their syntax is different.
 
-More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
+More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
 "#
     ),
     query: r#"
@@ -24,10 +23,15 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         struct_type @output
 
-                        # Ensure the struct has pub fields.
-                        field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                        # Ensure the struct does not have pub fields to prevent overlap with struct_with_pub_fields_changed
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             visibility_limit @filter(op: "=", value: ["$public"])
                             public_api_eligible @filter(op: "=", value: ["$true"])
+                        }
+
+                        # Ensure the struct does have non-pub fields to prevent overlap with constructible_struct_changed_type
+                        field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            visibility_limit @filter(op: "!=", value: ["$public"])
                         }
 
                         importable_path {
@@ -64,6 +68,10 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
         "true": true,
         "zero": 0,
     },
-    error_message: "A struct with pub fields became an enum or union, breaking accesses to its public fields.",
+    error_message: "A struct without pub fields became an enum or union, breaking pattern matching.",
     per_result_error_template: Some("struct {{join \"::\" path}} became {{lowercase current_typename}} in file {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"matches!(value, {{join "::" path}}{...});"#,
+        witness_template: r#"matches!(value, {{join "::" path}}::Variant);"#,
+    ),
 )
