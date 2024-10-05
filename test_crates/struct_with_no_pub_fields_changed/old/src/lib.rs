@@ -1,14 +1,14 @@
-pub struct PubStructChangedEnum {
+pub struct PubStructChangedToEnum {
     foo: usize,
 }
 
-pub struct PubStructChangedUnion {
+pub struct PubStructChangedToUnion {
     foo: usize,
 }
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// This is `struct_with_pub_fields_changed` instead
-pub struct PubStructWithPubFieldChangedEnum {
+pub struct PubStructWithPubFieldChangedToEnum {
     foo: usize,
     pub bar: usize,
 }
@@ -16,7 +16,7 @@ pub struct PubStructWithPubFieldChangedEnum {
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// This is `struct_with_pub_fields_changed` instead
-pub struct PubStructWithPubFieldChangedUnion {
+pub struct PubStructWithPubFieldChangedToUnion {
     foo: usize,
     pub bar: usize,
 
@@ -25,41 +25,41 @@ pub struct PubStructWithPubFieldChangedUnion {
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// This is `struct_missing` instead
-pub struct PubStructChangedType(u8);
+pub struct PubStructChangedToType(u8);
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// This is `constructible_struct_changed_type` instead
-pub struct PubStructChangedNoFieldsEnum {}
+pub struct PubStructChangedToNoFieldsEnum {}
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// since the struct is not pub in the first place, changing it does not change the API
-struct NonPubStructChangedEnum {
+struct NonPubStructChangedToEnum {
     foo: usize,
 }
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// since the struct is not pub in the first place, changing it does not change the API
-struct NonPubStructChangedUnion {
+struct NonPubStructChangedToUnion {
     foo: usize,
 }
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// since the struct is not pub in the first place, changing it does not change the API
-struct NonPubStructChangedType(u8);
+struct NonPubStructChangedToType(u8);
 
 mod not_pub_visible {
     /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
     /// since the struct is not in a pub module, changing it does not change the API
-    pub struct NonReachabgeStructChangedEnum {
+    pub struct NonReachabgeStructChangedToEnum {
         foo: usize,
     }
     /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
     /// since the struct is not in a pub module, changing it does not change the API
-    pub struct NonReachabgeStructChangedUnion {
+    pub struct NonReachabgeStructChangedToUnion {
         foo: usize,
     }
     /// This struct should not be reported by the `struct_pub_field_missing` rule:
     /// since the struct is not in a pub module, changing it does not change the API
-    pub struct NonReachabgeStructChangedType(u8);
+    pub struct NonReachabgeStructChangedToType(u8);
 }
 

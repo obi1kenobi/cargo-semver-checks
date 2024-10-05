@@ -1,14 +1,14 @@
-pub enum PubStructChangedEnum {
+pub enum PubStructChangedToEnum {
     Foo,
 }
 
-pub union PubStructChangedUnion {
+pub union PubStructChangedToUnion {
     foo: usize
 }
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// This is `struct_with_pub_fields_changed` instead
-pub enum PubStructWithPubFieldChangedEnum {
+pub enum PubStructWithPubFieldChangedToEnum {
     Foo(usize),
     Bar(usize),
 }
@@ -16,7 +16,7 @@ pub enum PubStructWithPubFieldChangedEnum {
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// This is `struct_with_pub_fields_changed` instead
-pub union PubStructWithPubFieldChangedUnion {
+pub union PubStructWithPubFieldChangedToUnion {
     foo: usize,
     pub bar: usize,
 
@@ -24,39 +24,39 @@ pub union PubStructWithPubFieldChangedUnion {
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// This is `struct_missing` instead
-pub type PubStructChangedType = u8;
+pub type PubStructChangedToType = u8;
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// This is `constructible_struct_changed_type` instead
-pub enum PubStructChangedNoFieldsEnum {}
+pub enum PubStructChangedToNoFieldsEnum {}
 
 /// This struct should not be reported by the `struct_pub_field_missing` rule:
 /// since the struct is not pub in the first place, changing it does not change the API
-enum NonPubStructChangedEnum {
+enum NonPubStructChangedToEnum {
     Foo,
 }
 
 /// This struct should not be reported by the `struct_pub_field_missing` rule:
 /// since the struct is not pub in the first place, changing it does not change the API
-union NonPubStructChangedUnion {
+union NonPubStructChangedToUnion {
     foo: usize
 }
 
-type NonPubStructChangedType = u8;
+type NonPubStructChangedToType = u8;
 
 mod not_pub_visible {
     /// This struct should not be reported by the `struct_pub_field_missing` rule:
     /// since the struct is not in a pub module, changing it does not change the API
-    pub enum NonReachabgeStructChangedEnum {
+    pub enum NonReachabgeStructChangedToEnum {
         Foo,
     }
     /// This struct should not be reported by the `struct_pub_field_missing` rule:
     /// since the struct is not in a pub module, changing it does not change the API
-    pub union NonReachabgeStructChangedUnion {
+    pub union NonReachabgeStructChangedToUnion {
         foo: usize
     }
     /// This struct should not be reported by the `struct_pub_field_missing` rule:
     /// since the struct is not in a pub module, changing it does not change the API
-    pub type NonReachabgeStructChangedType = u8;
+    pub type NonReachabgeStructChangedToType = u8;
 }
 
