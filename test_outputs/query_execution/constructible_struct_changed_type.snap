@@ -47,12 +47,12 @@ expression: "&query_execution_results"
   "./test_crates/struct_with_no_pub_fields_changed/": [
     {
       "current_typename": String("Enum"),
-      "name": String("PubStructChangedNoFieldsEnum"),
+      "name": String("PubStructChangedToNoFieldsEnum"),
       "path": List([
         String("struct_with_no_pub_fields_changed"),
-        String("PubStructChangedNoFieldsEnum"),
+        String("PubStructChangedToNoFieldsEnum"),
       ]),
-      "span_begin_line": Uint64(31),
+      "span_begin_line": Uint64(61),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("plain"),
       "struct_typename": String("Struct"),

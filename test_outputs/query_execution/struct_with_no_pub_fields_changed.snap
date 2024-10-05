@@ -64,10 +64,10 @@ expression: "&query_execution_results"
   "./test_crates/struct_with_no_pub_fields_changed/": [
     {
       "current_typename": String("Enum"),
-      "name": String("PubStructChangedEnum"),
+      "name": String("PubStructChangedToEnum"),
       "path": List([
         String("struct_with_no_pub_fields_changed"),
-        String("PubStructChangedEnum"),
+        String("PubStructChangedToEnum"),
       ]),
       "span_begin_line": Uint64(1),
       "span_filename": String("src/lib.rs"),
@@ -77,12 +77,38 @@ expression: "&query_execution_results"
     },
     {
       "current_typename": String("Union"),
-      "name": String("PubStructChangedUnion"),
+      "name": String("PubStructChangedToUnion"),
       "path": List([
         String("struct_with_no_pub_fields_changed"),
-        String("PubStructChangedUnion"),
+        String("PubStructChangedToUnion"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Enum"),
+      "name": String("PubStructWithNonPubDocChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed"),
+        String("PubStructWithNonPubDocChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Union"),
+      "name": String("PubStructWithNonPubDocChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed"),
+        String("PubStructWithNonPubDocChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(15),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("plain"),
       "struct_typename": String("Struct"),
