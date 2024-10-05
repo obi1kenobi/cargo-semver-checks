@@ -7,6 +7,22 @@ pub union PubStructChangedUnion {
 }
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
+/// This is `struct_with_pub_fields_changed` instead
+pub enum PubStructWithPubFieldChangedEnum {
+    Foo(usize),
+    Bar(usize),
+}
+
+
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
+/// This is `struct_with_pub_fields_changed` instead
+pub union PubStructWithPubFieldChangedUnion {
+    foo: usize,
+    pub bar: usize,
+
+}
+
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
 /// This is `struct_missing` instead
 pub type PubStructChangedType = u8;
 

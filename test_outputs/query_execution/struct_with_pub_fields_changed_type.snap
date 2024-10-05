@@ -31,4 +31,32 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/struct_with_no_pub_fields_changed/": [
+    {
+      "current_typename": String("Enum"),
+      "name": String("PubStructWithPubFieldChangedEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed"),
+        String("PubStructWithPubFieldChangedEnum"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Union"),
+      "name": String("PubStructWithPubFieldChangedUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed"),
+        String("PubStructWithPubFieldChangedUnion"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
