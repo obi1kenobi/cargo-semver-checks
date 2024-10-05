@@ -6,13 +6,25 @@ pub union PubStructChangedToUnion {
     foo: usize
 }
 
-pub enum PubStructWithNonPubDocChangedToEnum {
+pub enum PubStructWithNonPubDocFieldChangedToEnum {
+    Foo(usize),
+}
+
+
+pub union PubStructWithNonPubDocFieldChangedToUnion {
+    /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
+    /// This struct should trigger `struct_with_no_pub_fields_changed` instead of `struct_with_pub_fields_changed`
+    #[doc(hidden)]
+    pub foo: usize,
+}
+
+pub enum PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum {
     Foo(usize),
     Bar(usize),
 }
 
 
-pub union PubStructWithNonPubDocChangedToUnion {
+pub union PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion {
     foo: usize,
     /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
     /// This struct should trigger `struct_with_no_pub_fields_changed` instead of `struct_with_pub_fields_changed`
