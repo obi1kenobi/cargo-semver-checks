@@ -7,8 +7,8 @@ SemverQuery(
     reference_link: Some("https://internals.rust-lang.org/t/rest-patterns-foo-should-match-non-struct-types/21607"),
     reference: Some(
         r#"\
-Even if a structs does not expose pub fields, pattern matching like `matches!(value, Example { .. })` is accessible outside their defining crate. \
-Changing such a struct to make it an enum or union will break this pattern match, as their syntax is different.
+Even if a struct does not expose pub fields, pattern matching like `matches!(value, Example { .. })` is allowed outside the struct's own crate. \
+Changing such a struct into an enum or union will break such pattern matching.
 
 More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
 "#
