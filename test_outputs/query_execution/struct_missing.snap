@@ -130,7 +130,7 @@ expression: "&query_execution_results"
         String("struct_with_no_pub_fields_changed_type"),
         String("PubStructChangedToType"),
       ]),
-      "span_begin_line": Uint64(93),
+      "span_begin_line": Uint64(89),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("tuple"),
       "visibility_limit": String("public"),

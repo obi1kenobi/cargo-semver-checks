@@ -35,30 +35,30 @@ hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructChanged
 
 [["./test_crates/struct_with_no_pub_fields_changed_type/"]]
 filename = 'src/lib.rs'
-begin_line = 12
+begin_line = 10
 hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubNonExhaustiveStructChangedToEnum{...});'
 
 [["./test_crates/struct_with_no_pub_fields_changed_type/"]]
 filename = 'src/lib.rs'
-begin_line = 18
+begin_line = 14
 hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubNonExhaustiveStructChangedToUnion{...});'
 
 [["./test_crates/struct_with_no_pub_fields_changed_type/"]]
 filename = 'src/lib.rs'
-begin_line = 22
+begin_line = 18
 hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldChangedToEnum{...});'
 
 [["./test_crates/struct_with_no_pub_fields_changed_type/"]]
 filename = 'src/lib.rs'
-begin_line = 26
+begin_line = 22
 hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldChangedToUnion{...});'
 
 [["./test_crates/struct_with_no_pub_fields_changed_type/"]]
 filename = 'src/lib.rs'
-begin_line = 34
+begin_line = 30
 hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum{...});'
 
 [["./test_crates/struct_with_no_pub_fields_changed_type/"]]
 filename = 'src/lib.rs'
-begin_line = 39
+begin_line = 35
 hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion{...});'
