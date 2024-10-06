@@ -29,7 +29,6 @@ pub struct PubStructWithNonPubDocFieldChangedToEnum {
     pub foo: usize,
 }
 
-
 pub struct PubStructWithNonPubDocFieldChangedToUnion {
     /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
     /// This struct should trigger `struct_with_no_pub_fields_changed_type` instead of
@@ -49,7 +48,6 @@ pub struct PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum {
     pub bar: usize,
 }
 
-
 pub struct PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion {
     foo: usize,
     /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
@@ -59,8 +57,6 @@ pub struct PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion {
     #[doc(hidden)]
     pub bar: usize,
 }
-
-
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// The struct is not `public_api_eligible`.
@@ -85,15 +81,12 @@ pub struct PubStructWithPubFieldChangedToEnum {
     pub bar: usize,
 }
 
-
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// This is `struct_with_pub_fields_changed_type` instead
 pub struct PubStructWithPubFieldChangedToUnion {
     foo: usize,
     pub bar: usize,
-
 }
-
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// This is `struct_missing` instead
@@ -125,13 +118,14 @@ mod not_pub_visible {
     pub struct NonReachableStructChangedToEnum {
         foo: usize,
     }
+
     /// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
     /// since the struct is not in a pub module, changing it does not change the API
     pub struct NonReachableStructChangedToUnion {
         foo: usize,
     }
+
     /// This struct should not be reported by the `struct_pub_field_missing` rule:
     /// since the struct is not in a pub module, changing it does not change the API
     pub struct NonReachableStructChangedToType(u8);
 }
-

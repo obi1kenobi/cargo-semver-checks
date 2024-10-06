@@ -50,15 +50,15 @@ hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNon
 
 [["./test_crates/struct_with_no_pub_fields_changed_type/"]]
 filename = 'src/lib.rs'
-begin_line = 27
+begin_line = 26
 hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldChangedToUnion{...});'
 
 [["./test_crates/struct_with_no_pub_fields_changed_type/"]]
 filename = 'src/lib.rs'
-begin_line = 35
+begin_line = 34
 hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum{...});'
 
 [["./test_crates/struct_with_no_pub_fields_changed_type/"]]
 filename = 'src/lib.rs'
-begin_line = 41
+begin_line = 39
 hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion{...});'
