@@ -71,6 +71,6 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
     error_message: "A struct without pub fields became an enum or union, breaking pattern matching.",
     per_result_error_template: Some("struct {{join \"::\" path}} became {{lowercase current_typename}} in file {{span_filename}}:{{span_begin_line}}"),
     witness: (
-        hint_template: r#"matches!(value, {{join "::" path}}{...});"#,
+        hint_template: r#"matches!(value, {{join "::" path}} {..});"#,
     ),
 )
