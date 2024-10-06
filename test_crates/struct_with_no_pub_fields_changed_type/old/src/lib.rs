@@ -9,7 +9,7 @@ pub struct PubStructChangedToUnion {
 pub struct PubStructWithNonPubDocFieldChangedToEnum {
     /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
     /// This struct should trigger `struct_with_no_pub_fields_changed_type` instead of `struct_with_pub_fields_changed_type`
-    /// See https://predr.ag/blog/checking-semver-for-doc-hidden-items/ for additional context
+    /// See <https://predr.ag/blog/checking-semver-for-doc-hidden-items/> for additional context
     #[doc(hidden)]
     pub foo: usize,
 }
@@ -18,7 +18,7 @@ pub struct PubStructWithNonPubDocFieldChangedToEnum {
 pub struct PubStructWithNonPubDocFieldChangedToUnion {
     /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
     /// This struct should trigger `struct_with_no_pub_fields_changed_type` instead of `struct_with_pub_fields_changed_type`
-    /// See https://predr.ag/blog/checking-semver-for-doc-hidden-items/ for additional context
+    /// See <https://predr.ag/blog/checking-semver-for-doc-hidden-items/> for additional context
     #[doc(hidden)]
     pub foo: usize,
 }
@@ -27,7 +27,7 @@ pub struct PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum {
     foo: usize,
     /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
     /// This struct should trigger `struct_with_no_pub_fields_changed_type` instead of `struct_with_pub_fields_changed_type`
-    /// See https://predr.ag/blog/checking-semver-for-doc-hidden-items/ for additional context
+    /// See <https://predr.ag/blog/checking-semver-for-doc-hidden-items/> for additional context
     #[doc(hidden)]
     pub bar: usize,
 }
@@ -37,7 +37,7 @@ pub struct PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion {
     foo: usize,
     /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
     /// This struct should trigger `struct_with_no_pub_fields_changed_type` instead of `struct_with_pub_fields_changed_type`
-    /// See https://predr.ag/blog/checking-semver-for-doc-hidden-items/ for additional context
+    /// See <https://predr.ag/blog/checking-semver-for-doc-hidden-items/> for additional context
     #[doc(hidden)]
     pub bar: usize,
 }
@@ -46,7 +46,7 @@ pub struct PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion {
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// The struct is not `public_api_eligible`.
-/// See https://predr.ag/blog/checking-semver-for-doc-hidden-items/ for additional context
+/// See <https://predr.ag/blog/checking-semver-for-doc-hidden-items/> for additional context
 #[doc(hidden)]
 pub struct NonPubDocStructChangedToEnum {
     foo: usize,
@@ -54,7 +54,7 @@ pub struct NonPubDocStructChangedToEnum {
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// The struct is not `public_api_eligible`.
-/// See https://predr.ag/blog/checking-semver-for-doc-hidden-items/ for additional context
+/// See <https://predr.ag/blog/checking-semver-for-doc-hidden-items/> for additional context
 #[doc(hidden)]
 pub struct NonPubDocStructChangedToUnion {
     foo: usize,

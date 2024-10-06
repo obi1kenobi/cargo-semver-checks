@@ -34,7 +34,7 @@ pub union PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion {
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// The struct is not `public_api_eligible`.
-/// See https://predr.ag/blog/checking-semver-for-doc-hidden-items/ for additional context
+/// See <https://predr.ag/blog/checking-semver-for-doc-hidden-items/> for additional context
 #[doc(hidden)]
 pub enum NonPubDocStructChangedToEnum {
     Foo(usize),
@@ -42,7 +42,7 @@ pub enum NonPubDocStructChangedToEnum {
 
 /// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// The struct is not `public_api_eligible`.
-/// See https://predr.ag/blog/checking-semver-for-doc-hidden-items/ for additional context
+/// See <https://predr.ag/blog/checking-semver-for-doc-hidden-items/> for additional context
 #[doc(hidden)]
 pub union NonPubDocStructChangedToUnion {
     foo: usize,
