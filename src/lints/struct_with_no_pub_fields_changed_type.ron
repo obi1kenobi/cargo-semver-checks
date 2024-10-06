@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "struct_with_no_pub_fields_changed",
+    id: "struct_with_no_pub_fields_changed_type",
     human_readable_name: "public API struct with no public fields is no longer a struct",
     description: "A struct without pub fields was converted into an enum or union, breaking pattern matching.",
     required_update: Major,
@@ -23,7 +23,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         struct_type @output
 
-                        # Ensure the struct does not have pub fields to prevent overlap with struct_with_pub_fields_changed
+                        # Ensure the struct does not have pub fields to prevent overlap with struct_with_pub_fields_changed_type
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             visibility_limit @filter(op: "=", value: ["$public"])
                             public_api_eligible @filter(op: "=", value: ["$true"])

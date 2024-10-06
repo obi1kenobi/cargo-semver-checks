@@ -44,12 +44,12 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/struct_with_no_pub_fields_changed/": [
+  "./test_crates/struct_with_no_pub_fields_changed_type/": [
     {
       "current_typename": String("Enum"),
       "name": String("PubStructChangedToNoFieldsEnum"),
       "path": List([
-        String("struct_with_no_pub_fields_changed"),
+        String("struct_with_no_pub_fields_changed_type"),
         String("PubStructChangedToNoFieldsEnum"),
       ]),
       "span_begin_line": Uint64(73),

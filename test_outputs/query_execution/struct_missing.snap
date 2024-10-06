@@ -123,11 +123,11 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/struct_with_no_pub_fields_changed/": [
+  "./test_crates/struct_with_no_pub_fields_changed_type/": [
     {
       "name": String("PubStructChangedToType"),
       "path": List([
-        String("struct_with_no_pub_fields_changed"),
+        String("struct_with_no_pub_fields_changed_type"),
         String("PubStructChangedToType"),
       ]),
       "span_begin_line": Uint64(82),

@@ -13,7 +13,7 @@ pub enum PubStructWithNonPubDocFieldChangedToEnum {
 
 pub union PubStructWithNonPubDocFieldChangedToUnion {
     /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
-    /// This struct should trigger `struct_with_no_pub_fields_changed` instead of `struct_with_pub_fields_changed`
+    /// This struct should trigger `struct_with_no_pub_fields_changed_type` instead of `struct_with_pub_fields_changed_type`
     #[doc(hidden)]
     pub foo: usize,
 }
@@ -27,12 +27,12 @@ pub enum PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum {
 pub union PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion {
     foo: usize,
     /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
-    /// This struct should trigger `struct_with_no_pub_fields_changed` instead of `struct_with_pub_fields_changed`
+    /// This struct should trigger `struct_with_no_pub_fields_changed_type` instead of `struct_with_pub_fields_changed_type`
     #[doc(hidden)]
     pub bar: usize,
 }
 
-/// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// The struct is not `public_api_eligible`.
 /// See https://predr.ag/blog/checking-semver-for-doc-hidden-items/ for additional context
 #[doc(hidden)]
@@ -40,7 +40,7 @@ pub enum NonPubDocStructChangedToEnum {
     Foo(usize),
 }
 
-/// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// The struct is not `public_api_eligible`.
 /// See https://predr.ag/blog/checking-semver-for-doc-hidden-items/ for additional context
 #[doc(hidden)]
@@ -48,27 +48,27 @@ pub union NonPubDocStructChangedToUnion {
     foo: usize,
 }
 
-/// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
-/// This is `struct_with_pub_fields_changed` instead
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
+/// This is `struct_with_pub_fields_changed_type` instead
 pub enum PubStructWithPubFieldChangedToEnum {
     Foo(usize),
     Bar(usize),
 }
 
 
-/// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
-/// This is `struct_with_pub_fields_changed` instead
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
+/// This is `struct_with_pub_fields_changed_type` instead
 pub union PubStructWithPubFieldChangedToUnion {
     foo: usize,
     pub bar: usize,
 
 }
 
-/// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// This is `struct_missing` instead
 pub type PubStructChangedToType = u8;
 
-/// This struct should not be reported by the `struct_with_no_pub_fields_changed` rule:
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
 /// This is `constructible_struct_changed_type` instead
 pub enum PubStructChangedToNoFieldsEnum {}
 

@@ -61,12 +61,12 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/struct_with_no_pub_fields_changed/": [
+  "./test_crates/struct_with_no_pub_fields_changed_type/": [
     {
       "current_typename": String("Enum"),
       "name": String("PubStructChangedToEnum"),
       "path": List([
-        String("struct_with_no_pub_fields_changed"),
+        String("struct_with_no_pub_fields_changed_type"),
         String("PubStructChangedToEnum"),
       ]),
       "span_begin_line": Uint64(1),
@@ -79,7 +79,7 @@ expression: "&query_execution_results"
       "current_typename": String("Union"),
       "name": String("PubStructChangedToUnion"),
       "path": List([
-        String("struct_with_no_pub_fields_changed"),
+        String("struct_with_no_pub_fields_changed_type"),
         String("PubStructChangedToUnion"),
       ]),
       "span_begin_line": Uint64(5),
@@ -92,7 +92,7 @@ expression: "&query_execution_results"
       "current_typename": String("Enum"),
       "name": String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum"),
       "path": List([
-        String("struct_with_no_pub_fields_changed"),
+        String("struct_with_no_pub_fields_changed_type"),
         String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum"),
       ]),
       "span_begin_line": Uint64(21),
@@ -105,7 +105,7 @@ expression: "&query_execution_results"
       "current_typename": String("Union"),
       "name": String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion"),
       "path": List([
-        String("struct_with_no_pub_fields_changed"),
+        String("struct_with_no_pub_fields_changed_type"),
         String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion"),
       ]),
       "span_begin_line": Uint64(27),

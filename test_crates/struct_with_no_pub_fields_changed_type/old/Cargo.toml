@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "struct_with_no_pub_fields_changed"
+name = "struct_with_no_pub_fields_changed_type"
 version = "0.1.0"
 edition = "2021"
 
