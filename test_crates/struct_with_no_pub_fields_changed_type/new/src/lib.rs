@@ -6,6 +6,19 @@ pub union PubStructChangedToUnion {
     foo: usize
 }
 
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
+/// being `#[non_exhaustive]` makes constructing in a breaking way impossible
+#[non_exhaustive]
+pub enum PubNonExhaustiveStructChangedToEnum {
+    Foo(usize),
+}
+
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
+/// being `#[non_exhaustive]` before makes constructing in a breaking way impossible
+pub union PubNonExhaustiveStructChangedToUnion {
+    foo: usize,
+}
+
 pub enum PubStructWithNonPubDocFieldChangedToEnum {
     Foo(usize),
 }

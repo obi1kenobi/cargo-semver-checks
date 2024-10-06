@@ -6,6 +6,20 @@ pub struct PubStructChangedToUnion {
     foo: usize,
 }
 
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
+/// being `#[non_exhaustive]` makes constructing in a breaking way impossible
+#[non_exhaustive]
+pub struct PubNonExhaustiveStructChangedToEnum {
+    foo: usize,
+}
+
+/// This struct should not be reported by the `struct_with_no_pub_fields_changed_type` rule:
+/// being `#[non_exhaustive]` makes constructing in a breaking way impossible
+#[non_exhaustive]
+pub struct PubNonExhaustiveStructChangedToUnion {
+    foo: usize,
+}
+
 pub struct PubStructWithNonPubDocFieldChangedToEnum {
     /// Despite this field being pub, hiding it makes this not be `public_api_eligible` anymore
     /// This struct should trigger `struct_with_no_pub_fields_changed_type` instead of `struct_with_pub_fields_changed_type`
