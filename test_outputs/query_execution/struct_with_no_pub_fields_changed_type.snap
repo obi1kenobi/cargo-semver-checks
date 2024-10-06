@@ -1,0 +1,170 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/inherent_method_must_use_added/": [
+    {
+      "current_typename": String("Enum"),
+      "name": String("StructToEnumWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("StructToEnumWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(68),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Union"),
+      "name": String("StructToUnionWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("StructToUnionWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(99),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/struct_becomes_enum/": [
+    {
+      "current_typename": String("Enum"),
+      "name": String("TupleToEnum"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("TupleToEnum"),
+      ]),
+      "span_begin_line": Uint64(45),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("tuple"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Enum"),
+      "name": String("StructToEnum"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("StructToEnum"),
+      ]),
+      "span_begin_line": Uint64(61),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/struct_with_no_pub_fields_changed_type/": [
+    {
+      "current_typename": String("Enum"),
+      "name": String("PubStructChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(1),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Union"),
+      "name": String("PubStructChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Enum"),
+      "name": String("PubNonExhaustiveStructChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubNonExhaustiveStructChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Union"),
+      "name": String("PubNonExhaustiveStructChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubNonExhaustiveStructChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Enum"),
+      "name": String("PubStructWithNonPubDocFieldChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithNonPubDocFieldChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Union"),
+      "name": String("PubStructWithNonPubDocFieldChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithNonPubDocFieldChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Enum"),
+      "name": String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Union"),
+      "name": String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(35),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

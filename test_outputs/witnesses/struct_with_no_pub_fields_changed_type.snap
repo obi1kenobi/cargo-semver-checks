@@ -1,0 +1,64 @@
+---
+source: src/query.rs
+description: "Lint `struct_with_no_pub_fields_changed_type` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/inherent_method_must_use_added/"]]
+filename = 'src/item_type_changed_inherent_method_must_use_added.rs'
+begin_line = 68
+hint = 'matches!(value, inherent_method_must_use_added::item_type_changed_inherent_method_must_use_added::StructToEnumWithMustUseMethods {..});'
+
+[["./test_crates/inherent_method_must_use_added/"]]
+filename = 'src/item_type_changed_inherent_method_must_use_added.rs'
+begin_line = 99
+hint = 'matches!(value, inherent_method_must_use_added::item_type_changed_inherent_method_must_use_added::StructToUnionWithMustUseMethods {..});'
+
+[["./test_crates/struct_becomes_enum/"]]
+filename = 'src/lib.rs'
+begin_line = 45
+hint = 'matches!(value, struct_becomes_enum::TupleToEnum {..});'
+
+[["./test_crates/struct_becomes_enum/"]]
+filename = 'src/lib.rs'
+begin_line = 61
+hint = 'matches!(value, struct_becomes_enum::StructToEnum {..});'
+
+[["./test_crates/struct_with_no_pub_fields_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 1
+hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructChangedToEnum {..});'
+
+[["./test_crates/struct_with_no_pub_fields_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 5
+hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructChangedToUnion {..});'
+
+[["./test_crates/struct_with_no_pub_fields_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 10
+hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubNonExhaustiveStructChangedToEnum {..});'
+
+[["./test_crates/struct_with_no_pub_fields_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 14
+hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubNonExhaustiveStructChangedToUnion {..});'
+
+[["./test_crates/struct_with_no_pub_fields_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 18
+hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldChangedToEnum {..});'
+
+[["./test_crates/struct_with_no_pub_fields_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 22
+hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldChangedToUnion {..});'
+
+[["./test_crates/struct_with_no_pub_fields_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 30
+hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum {..});'
+
+[["./test_crates/struct_with_no_pub_fields_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 35
+hint = 'matches!(value, struct_with_no_pub_fields_changed_type::PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion {..});'
