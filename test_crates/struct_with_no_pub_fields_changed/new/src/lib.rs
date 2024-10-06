@@ -89,16 +89,16 @@ type NonPubStructChangedToType = u8;
 mod not_pub_visible {
     /// This struct should not be reported by the `struct_pub_field_missing` rule:
     /// since the struct is not in a pub module, changing it does not change the API
-    pub enum NonReachabgeStructChangedToEnum {
+    pub enum NonReachableStructChangedToEnum {
         Foo(usize),
     }
     /// This struct should not be reported by the `struct_pub_field_missing` rule:
     /// since the struct is not in a pub module, changing it does not change the API
-    pub union NonReachabgeStructChangedToUnion {
+    pub union NonReachableStructChangedToUnion {
         foo: usize
     }
     /// This struct should not be reported by the `struct_pub_field_missing` rule:
     /// since the struct is not in a pub module, changing it does not change the API
-    pub type NonReachabgeStructChangedToType = u8;
+    pub type NonReachableStructChangedToType = u8;
 }
 
