@@ -23,9 +23,6 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         struct_type @output
 
-                        # If the struct is non-exhaustive, it can't be constructed using a literal.
-                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
-
                         # Ensure the struct does not have pub fields to prevent overlap with struct_with_pub_fields_changed_type
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             visibility_limit @filter(op: "=", value: ["$public"])
@@ -66,7 +63,6 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
     }"#,
     arguments: {
         "public": "public",
-        "non_exhaustive": "#[non_exhaustive]",
         "true": true,
         "zero": 0,
     },

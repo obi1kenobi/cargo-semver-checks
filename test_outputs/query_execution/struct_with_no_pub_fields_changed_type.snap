@@ -90,6 +90,32 @@ expression: "&query_execution_results"
     },
     {
       "current_typename": String("Enum"),
+      "name": String("PubNonExhaustiveStructChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubNonExhaustiveStructChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Union"),
+      "name": String("PubNonExhaustiveStructChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubNonExhaustiveStructChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Enum"),
       "name": String("PubStructWithNonPubDocFieldChangedToEnum"),
       "path": List([
         String("struct_with_no_pub_fields_changed_type"),
