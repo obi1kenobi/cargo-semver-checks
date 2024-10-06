@@ -7,8 +7,8 @@ SemverQuery(
     reference_link: Some("https://internals.rust-lang.org/t/rest-patterns-foo-should-match-non-struct-types/21607"),
     reference: Some(
         r#"\
-Even if a struct does not expose pub fields, pattern matching like `matches!(value, Example { .. })` is allowed outside the struct's own crate. \
-Changing such a struct into an enum or union will break such pattern matching.
+Even if a struct does not expose pub fields, pattern matching like `matches!(value, Example { .. })` is allowed outside \
+the struct's own crate. Changing such a struct into an enum or union will break such pattern matching.
 
 More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
 "#
@@ -23,13 +23,15 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         struct_type @output
 
-                        # Ensure the struct does not have pub fields to prevent overlap with struct_with_pub_fields_changed_type
+                        # Ensure the struct does not have pub fields
+                        # This prevents overlap with struct_with_pub_fields_changed_type
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             visibility_limit @filter(op: "=", value: ["$public"])
                             public_api_eligible @filter(op: "=", value: ["$true"])
                         }
 
-                        # Ensure the struct does have non-pub fields to prevent overlap with constructible_struct_changed_type
+                        # Ensure the struct does have non-pub fields
+                        # This prevents overlap with constructible_struct_changed_type
                         field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"])
 
                         importable_path {

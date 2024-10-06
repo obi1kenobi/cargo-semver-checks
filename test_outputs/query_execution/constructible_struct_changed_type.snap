@@ -52,7 +52,7 @@ expression: "&query_execution_results"
         String("struct_with_no_pub_fields_changed_type"),
         String("PubStructChangedToNoFieldsEnum"),
       ]),
-      "span_begin_line": Uint64(86),
+      "span_begin_line": Uint64(88),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("plain"),
       "struct_typename": String("Struct"),
