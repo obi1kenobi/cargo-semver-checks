@@ -1,0 +1,29 @@
+---
+source: src/query.rs
+description: "Lint `struct_marked_non_exhaustive_changed_type` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/struct_becomes_enum/"]]
+filename = 'src/lib.rs'
+begin_line = 82
+hint = 'matches!(value, struct_becomes_enum::NonExhaustiveEmptyStructToEnum {..});'
+
+[["./test_crates/struct_becomes_enum/"]]
+filename = 'src/lib.rs'
+begin_line = 95
+hint = 'matches!(value, struct_becomes_enum::NoneExhaustiveFieldlessUnit {..});'
+
+[["./test_crates/struct_becomes_enum/"]]
+filename = 'src/lib.rs'
+begin_line = 100
+hint = 'matches!(value, struct_becomes_enum::NonExhaustiveFieldlessTuple {..});'
+
+[["./test_crates/struct_marked_non_exhaustive_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 1
+hint = 'matches!(value, struct_marked_non_exhaustive_changed_type::PubNonExhaustiveStructChangedToEnum {..});'
+
+[["./test_crates/struct_marked_non_exhaustive_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 3
+hint = 'matches!(value, struct_marked_non_exhaustive_changed_type::PubNonExhaustiveStructChangedToUnion {..});'

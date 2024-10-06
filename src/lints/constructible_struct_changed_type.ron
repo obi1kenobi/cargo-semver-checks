@@ -12,7 +12,7 @@ to make it an enum or union is a breaking change, since the new enum / union can
 with the same struct literal syntax.
 
 While struct literals can be used to create any exhaustive struct whose fields are all public, \
-structs with *any* (not *only*) public fields are handled in a different lint. \
+structs with *any* fields are handled in a different lints. \
 This lint covers the remaining edge case: exhaustive structs with no fields whatsoever.
 
 More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
@@ -29,6 +29,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
                         struct_type @output
 
                         # If the struct is non-exhaustive, it can't be constructed using a literal.
+                        # This is `struct_marked_non_exhaustive_changed_type` instead
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         # The struct must not have any fields.

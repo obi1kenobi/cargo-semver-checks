@@ -1,14 +1,15 @@
 SemverQuery(
-    id: "struct_with_no_pub_fields_changed_type",
-    human_readable_name: "public API struct with no public fields is no longer a struct",
-    description: "A struct without pub fields was converted into an enum or union, breaking pattern matching.",
+    id: "struct_marked_non_exhaustive_changed_type",
+    human_readable_name: "struct marked #[non_exhaustive] with no fields of any kind became an enum or union",
+    description: "A struct marked #[non_exhaustive] with no fields of any kind was converted into an enum or union, breaking pattern matching.",
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://internals.rust-lang.org/t/rest-patterns-foo-should-match-non-struct-types/21607"),
     reference: Some(
         r#"\
-Even if a struct does not expose pub fields, pattern matching like `matches!(value, Example { .. })` is allowed outside \
-the struct's own crate. Changing such a struct into an enum or union will break such pattern matching.
+Even if a struct does not have fields and is marked `#[non_exhaustive]`, pattern matching like
+`matches!(value, Example { .. })` is allowed outside the struct's own crate. \
+Changing such a struct into an enum or union will break such pattern matching.
 
 More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
 "#
@@ -23,19 +24,12 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         struct_type @output
 
-                        # Ensure the struct does not have pub fields
-                        # This prevents overlap with struct_with_pub_fields_changed_type
-                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            visibility_limit @filter(op: "=", value: ["$public"])
-                            public_api_eligible @filter(op: "=", value: ["$true"])
-                        }
+                        # Requiring #[non_exhaustive] removes overlap with constructible_struct_changed_type
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
 
-                        # Ensure the struct does have non-pub fields
-                        #
-                        # This prevents overlap with constructible_struct_changed_type, but doing this requires
-                        # struct_marked_non_exhaustive_changed_type instead (merging into this lint is not currently
-                        # possible due the query engine limitation of not having OR-conditions)
-                        field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"])
+                        # Requiring at least one field removes overlap with struct_with_no_pub_fields_changed_type
+                        # That this is not a special case in said query is a limitation of our query engine
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"])
 
                         importable_path {
                             path @output @tag
@@ -68,10 +62,11 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
     }"#,
     arguments: {
         "public": "public",
+        "non_exhaustive": "#[non_exhaustive]",
         "true": true,
         "zero": 0,
     },
-    error_message: "A struct without pub fields became an enum or union, breaking pattern matching.",
+    error_message: "A struct marked #[non_exhaustive] with no fields of any kind was converted into an enum or union, breaking pattern matching",
     per_result_error_template: Some("struct {{join \"::\" path}} became {{lowercase current_typename}} in file {{span_filename}}:{{span_begin_line}}"),
     witness: (
         hint_template: r#"matches!(value, {{join "::" path}} {..});"#,

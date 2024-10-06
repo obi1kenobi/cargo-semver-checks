@@ -1009,6 +1009,7 @@ add_lints!(
     constructible_struct_adds_field,
     constructible_struct_adds_private_field,
     constructible_struct_changed_type,
+    struct_marked_non_exhaustive_changed_type,
     derive_trait_impl_removed,
     enum_marked_non_exhaustive,
     enum_missing,
