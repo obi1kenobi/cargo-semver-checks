@@ -29,7 +29,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
                         struct_type @output
 
                         # If the struct is non-exhaustive, it can't be constructed using a literal.
-                        # This is `struct_marked_non_exhaustive_changed_type` instead
+                        # A struct having this is breaking via struct_marked_non_exhaustive_changed_type instead.
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         # The struct must not have any fields.
