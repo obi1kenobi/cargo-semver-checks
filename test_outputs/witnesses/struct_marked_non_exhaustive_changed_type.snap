@@ -11,7 +11,7 @@ hint = 'matches!(value, struct_becomes_enum::NonExhaustiveEmptyStructToEnum {..}
 [["./test_crates/struct_becomes_enum/"]]
 filename = 'src/lib.rs'
 begin_line = 95
-hint = 'matches!(value, struct_becomes_enum::NoneExhaustiveFieldlessUnit {..});'
+hint = 'matches!(value, struct_becomes_enum::NonExhaustiveFieldlessUnit {..});'
 
 [["./test_crates/struct_becomes_enum/"]]
 filename = 'src/lib.rs'

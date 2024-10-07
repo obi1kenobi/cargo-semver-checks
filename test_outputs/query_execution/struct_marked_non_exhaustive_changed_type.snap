@@ -19,10 +19,10 @@ expression: "&query_execution_results"
     },
     {
       "current_typename": String("Enum"),
-      "name": String("NoneExhaustiveFieldlessUnit"),
+      "name": String("NonExhaustiveFieldlessUnit"),
       "path": List([
         String("struct_becomes_enum"),
-        String("NoneExhaustiveFieldlessUnit"),
+        String("NonExhaustiveFieldlessUnit"),
       ]),
       "span_begin_line": Uint64(95),
       "span_filename": String("src/lib.rs"),
