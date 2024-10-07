@@ -92,7 +92,7 @@ impl NonExhaustiveEmptyStructToEnum {
 // The following structs are also not externally-constructible due to `#[non_exhaustive]`.
 
 #[non_exhaustive]
-pub struct NoneExhaustiveFieldlessUnit;
+pub struct NonExhaustiveFieldlessUnit;
 
 #[non_exhaustive]
 pub struct NonExhaustiveFieldlessTuple();
