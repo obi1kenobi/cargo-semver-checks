@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "struct_marked_non_exhaustive_changed_type"
+name = "non_exhaustive_struct_changed_type"
 version = "0.1.0"
 edition = "2021"
 

@@ -44,12 +44,12 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/struct_marked_non_exhaustive_changed_type/": [
+  "./test_crates/non_exhaustive_struct_changed_type/": [
     {
       "current_typename": String("Enum"),
       "name": String("PubNonExhaustiveStructChangedToEnum"),
       "path": List([
-        String("struct_marked_non_exhaustive_changed_type"),
+        String("non_exhaustive_struct_changed_type"),
         String("PubNonExhaustiveStructChangedToEnum"),
       ]),
       "span_begin_line": Uint64(1),
@@ -62,7 +62,7 @@ expression: "&query_execution_results"
       "current_typename": String("Union"),
       "name": String("PubNonExhaustiveStructChangedToUnion"),
       "path": List([
-        String("struct_marked_non_exhaustive_changed_type"),
+        String("non_exhaustive_struct_changed_type"),
         String("PubNonExhaustiveStructChangedToUnion"),
       ]),
       "span_begin_line": Uint64(3),

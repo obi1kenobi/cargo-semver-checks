@@ -33,7 +33,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
                         # Ensure the struct does have non-pub fields
                         #
                         # This prevents overlap with constructible_struct_changed_type, but doing this requires
-                        # struct_marked_non_exhaustive_changed_type instead. Merging into this lint is currently
+                        # non_exhaustive_struct_changed_type instead. Merging into this lint is currently
                         # impossible due the query engine limitation of not having OR-conditions.
                         field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"])
 

@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "struct_marked_non_exhaustive_changed_type",
+    id: "non_exhaustive_struct_changed_type",
     human_readable_name: "struct marked #[non_exhaustive] with no fields became an enum or union",
     description: "A struct marked #[non_exhaustive] with no fields was converted into an enum or union, breaking pattern matching.",
     required_update: Major,
