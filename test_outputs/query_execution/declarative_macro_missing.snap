@@ -1,0 +1,18 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/declarative_macro_missing/": [
+    {
+      "name": String("will_be_removed"),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("will_no_longer_be_exported"),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
