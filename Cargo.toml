@@ -84,3 +84,6 @@ default = ["gix-reqwest"]
 # enable:
 gix-reqwest = ["tame-index/gix-reqwest"]
 gix-curl = ["tame-index/gix-curl"]
+
+# Enables the use of OS native certificate store.
+native-certs = ["tame-index/native-certs"]
