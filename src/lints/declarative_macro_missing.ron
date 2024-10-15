@@ -26,7 +26,6 @@ SemverQuery(
                 item {
                     ... on Macro {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        public_api_eligible @filter(op: "=", value: ["$true"])
                         name @filter(op: "=", value: ["%name"])
                     }
                 }
