@@ -23,7 +23,7 @@ pub(crate) enum CrateSource<'a> {
     },
 }
 
-impl<'a> CrateSource<'a> {
+impl CrateSource<'_> {
     pub(crate) fn name(&self) -> anyhow::Result<&str> {
         Ok(match self {
             Self::Registry { crate_, .. } => &crate_.name,
@@ -304,7 +304,7 @@ pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) build_target: Option<&'a str>,
 }
 
-impl<'a> CrateType<'a> {
+impl CrateType<'_> {
     pub(crate) fn type_name(&self) -> &'static str {
         match self {
             CrateType::Current => "current",
