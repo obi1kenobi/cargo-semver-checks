@@ -3,6 +3,16 @@ source: src/query.rs
 description: "Lint `non_exhaustive_struct_changed_type` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 expression: "&actual_witnesses"
 ---
+[["./test_crates/non_exhaustive_struct_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 1
+hint = 'matches!(value, non_exhaustive_struct_changed_type::PubNonExhaustiveStructChangedToEnum {..});'
+
+[["./test_crates/non_exhaustive_struct_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 3
+hint = 'matches!(value, non_exhaustive_struct_changed_type::PubNonExhaustiveStructChangedToUnion {..});'
+
 [["./test_crates/struct_becomes_enum/"]]
 filename = 'src/lib.rs'
 begin_line = 82
@@ -17,13 +27,3 @@ hint = 'matches!(value, struct_becomes_enum::NonExhaustiveFieldlessUnit {..});'
 filename = 'src/lib.rs'
 begin_line = 100
 hint = 'matches!(value, struct_becomes_enum::NonExhaustiveFieldlessTuple {..});'
-
-[["./test_crates/non_exhaustive_struct_changed_type/"]]
-filename = 'src/lib.rs'
-begin_line = 1
-hint = 'matches!(value, non_exhaustive_struct_changed_type::PubNonExhaustiveStructChangedToEnum {..});'
-
-[["./test_crates/non_exhaustive_struct_changed_type/"]]
-filename = 'src/lib.rs'
-begin_line = 3
-hint = 'matches!(value, non_exhaustive_struct_changed_type::PubNonExhaustiveStructChangedToUnion {..});'
