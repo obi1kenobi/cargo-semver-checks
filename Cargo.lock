@@ -2425,9 +2425,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "openssl-sys"
-version = "0.9.103"
+version = "0.9.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f9e8deee91df40a943c71b917e5874b951d32a802526c85721ce3b776c929d6"
+checksum = "45abf306cbf99debc8195b66b7346498d7b10c210de50418b5ccd7ceba08c741"
 dependencies = [
  "cc",
  "libc",
@@ -3553,9 +3553,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "33.1.9"
+version = "33.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17adc0bfe368217b33e1fbb0a07ddecb374cee2b1ef8cc46282131b0347f51e9"
+checksum = "d1f4f941387388e8742cb641c8d186105010e42fddd273f7045c00733cfb6629"
 dependencies = [
  "rayon",
  "rustc-hash",
@@ -3629,7 +3629,7 @@ dependencies = [
  "trustfall-rustdoc-adapter 29.1.9",
  "trustfall-rustdoc-adapter 30.1.9",
  "trustfall-rustdoc-adapter 32.1.9",
- "trustfall-rustdoc-adapter 33.1.9",
+ "trustfall-rustdoc-adapter 33.1.10",
  "trustfall-rustdoc-adapter 34.0.3",
  "trustfall-rustdoc-adapter 35.0.0",
 ]
