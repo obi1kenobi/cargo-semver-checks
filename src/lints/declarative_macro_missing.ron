@@ -1,0 +1,45 @@
+SemverQuery(
+    id: "declarative_macro_missing",
+    human_readable_name: "macro_rules declaration removed or renamed",
+    description: "A declarative macro marked with #[macro_export] can no longer imported by its prior name.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/macros-by-example.html#path-based-scope"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Macro {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        public_api_eligible @filter(op: "=", value: ["$true"])
+                        name @output @tag
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    ... on Macro {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%name"])
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+        "true": true,
+    },
+    error_message: "A publicly-visible `macro_rules` declarative macro cannot be imported by its prior name. A `#[macro_export]` may have been removed, or the macro itself may have been renamed or removed entirely.",
+    per_result_error_template:  Some("macro_rules! {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"{{name}}!(...);"#
+    ),
+)

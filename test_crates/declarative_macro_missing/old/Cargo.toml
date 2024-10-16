@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "declarative_macro_missing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
