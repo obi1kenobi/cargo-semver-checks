@@ -1049,6 +1049,7 @@ add_lints!(
     inherent_method_unsafe_added,
     method_parameter_count_changed,
     module_missing,
+    non_exhaustive_struct_changed_type,
     pub_module_level_const_missing,
     pub_module_level_const_now_doc_hidden,
     pub_static_missing,
