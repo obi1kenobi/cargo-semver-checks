@@ -48,4 +48,9 @@ SemverQuery(
     },
     error_message: "A publicly-visible function is no longer `const` and can no longer be used in a `const` context.",
     per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"const fn foo() {
+    {{join "::" path}}(...);
+}"#,
+    ),
 )
