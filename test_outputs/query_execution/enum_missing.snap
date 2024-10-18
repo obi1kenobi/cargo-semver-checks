@@ -56,7 +56,7 @@ expression: "&query_execution_results"
         String("enum_variant_missing"),
         String("ShouldNotMatch"),
       ]),
-      "span_begin_line": Uint64(22),
+      "span_begin_line": Uint64(26),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

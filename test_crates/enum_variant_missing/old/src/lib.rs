@@ -11,9 +11,13 @@ pub enum TupleVariantWillBeRemoved {
 }
 
 pub enum StructVariantWillBeRemoved {
-    Foo { bar: usize },
+    Foo {
+        bar: usize,
+    },
     /// Testing: <https://doc.rust-lang.org/cargo/reference/semver.html#item-remove>
-    Bar { bar: usize },
+    Bar {
+        bar: usize,
+    },
 }
 
 /// This enum should not be reported by the `enum_variant_missing` rule:

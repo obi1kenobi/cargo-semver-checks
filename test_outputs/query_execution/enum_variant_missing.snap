@@ -49,7 +49,7 @@ expression: "&query_execution_results"
         String("enum_variant_missing"),
         String("StructVariantWillBeRemoved"),
       ]),
-      "span_begin_line": Uint64(16),
+      "span_begin_line": Uint64(18),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Bar"),
       "visibility_limit": String("public"),
