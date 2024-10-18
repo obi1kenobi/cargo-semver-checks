@@ -33,7 +33,7 @@ log = "0.4.22"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
 gix = { version = "0.66", default-features = false, features = ["max-performance", "revision"] }
-tame-index = { version = "0.13", features = ["sparse"] }
+tame-index = { version = "0.14", features = ["sparse"] }
 
 human-panic = "2.0.1"
 bugreport = "0.5.0"
