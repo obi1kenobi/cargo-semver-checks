@@ -1,6 +1,6 @@
 [package]
 name = "cargo-semver-checks"
-version = "0.35.0"
+version = "0.36.0"
 edition = "2021"
 authors = ["Predrag Gruevski <obi1kenobi82@gmail.com>"]
 license = "Apache-2.0 OR MIT"
