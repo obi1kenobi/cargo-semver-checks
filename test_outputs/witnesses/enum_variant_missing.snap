@@ -15,10 +15,10 @@ hint = 'let witness = enum_variant_missing::PlainVariantWillBeRemoved::Bar;'
 
 [["./test_crates/enum_variant_missing/"]]
 filename = 'src/lib.rs'
-begin_line = 9
+begin_line = 10
 hint = 'let witness = enum_variant_missing::TupleVariantWillBeRemoved::Bar(...);'
 
 [["./test_crates/enum_variant_missing/"]]
 filename = 'src/lib.rs'
-begin_line = 14
+begin_line = 16
 hint = 'let witness = enum_variant_missing::StructVariantWillBeRemoved::Bar{...};'
