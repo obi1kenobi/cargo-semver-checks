@@ -1,8 +1,19 @@
-pub enum VariantWillBeRemoved {
+pub enum PlainVariantWillBeRemoved {
     Foo,
-
     /// Testing: <https://doc.rust-lang.org/cargo/reference/semver.html#item-remove>
     Bar,
+}
+
+pub enum TupleVariantWillBeRemoved {
+    Foo(usize),
+    /// Testing: <https://doc.rust-lang.org/cargo/reference/semver.html#item-remove>
+    Bar(usize),
+}
+
+pub enum StructVariantWillBeRemoved {
+    Foo { bar: usize },
+    /// Testing: <https://doc.rust-lang.org/cargo/reference/semver.html#item-remove>
+    Bar{ bar: usize },
 }
 
 /// This enum should not be reported by the `enum_variant_missing` rule:

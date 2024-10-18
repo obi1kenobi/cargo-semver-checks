@@ -19,6 +19,8 @@ SemverQuery(
                         }
 
                         variant {
+                            kind: __typename @output
+
                             variant_name: name @output @tag
                             public_api_eligible @filter(op: "=", value: ["$true"])
 
@@ -57,6 +59,6 @@ SemverQuery(
     error_message: "A publicly-visible enum has at least one variant that is no longer available under its prior name. It may have been renamed or removed entirely.",
     per_result_error_template: Some("variant {{enum_name}}::{{variant_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
     witness: (
-        hint_template: r#"let witness = {{join "::" path}}::{{variant_name}};"#,
+        hint_template: r#"let witness = {{join "::" path}}::{{variant_name}}{{#if (eq kind "StructVariant")}}{...}{{/if}}{{#if (eq kind "TupleVariant")}}(...){{/if}};"#,
     ),
 )

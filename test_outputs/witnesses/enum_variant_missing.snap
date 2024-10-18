@@ -6,9 +6,19 @@ expression: "&actual_witnesses"
 [["./test_crates/enum_struct_variant_field_missing/"]]
 filename = 'src/lib.rs'
 begin_line = 14
-hint = 'let witness = enum_struct_variant_field_missing::IgnoredEnum::StructVariantWillBeMissing;'
+hint = 'let witness = enum_struct_variant_field_missing::IgnoredEnum::StructVariantWillBeMissing{...};'
 
 [["./test_crates/enum_variant_missing/"]]
 filename = 'src/lib.rs'
-begin_line = 5
-hint = 'let witness = enum_variant_missing::VariantWillBeRemoved::Bar;'
+begin_line = 4
+hint = 'let witness = enum_variant_missing::PlainVariantWillBeRemoved::Bar;'
+
+[["./test_crates/enum_variant_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 9
+hint = 'let witness = enum_variant_missing::TupleVariantWillBeRemoved::Bar(...);'
+
+[["./test_crates/enum_variant_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 14
+hint = 'let witness = enum_variant_missing::StructVariantWillBeRemoved::Bar{...};'

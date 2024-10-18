@@ -6,6 +6,7 @@ expression: "&query_execution_results"
   "./test_crates/enum_struct_variant_field_missing/": [
     {
       "enum_name": String("IgnoredEnum"),
+      "kind": String("StructVariant"),
       "path": List([
         String("enum_struct_variant_field_missing"),
         String("IgnoredEnum"),
@@ -18,12 +19,37 @@ expression: "&query_execution_results"
   ],
   "./test_crates/enum_variant_missing/": [
     {
-      "enum_name": String("VariantWillBeRemoved"),
+      "enum_name": String("PlainVariantWillBeRemoved"),
+      "kind": String("PlainVariant"),
       "path": List([
         String("enum_variant_missing"),
-        String("VariantWillBeRemoved"),
+        String("PlainVariantWillBeRemoved"),
       ]),
-      "span_begin_line": Uint64(5),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Bar"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("TupleVariantWillBeRemoved"),
+      "kind": String("TupleVariant"),
+      "path": List([
+        String("enum_variant_missing"),
+        String("TupleVariantWillBeRemoved"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Bar"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("StructVariantWillBeRemoved"),
+      "kind": String("StructVariant"),
+      "path": List([
+        String("enum_variant_missing"),
+        String("StructVariantWillBeRemoved"),
+      ]),
+      "span_begin_line": Uint64(16),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Bar"),
       "visibility_limit": String("public"),
