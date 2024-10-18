@@ -7,6 +7,6 @@ expression: "&actual_witnesses"
 filename = 'src/lib.rs'
 begin_line = 1
 hint = '''
-const fn foo() {
+const fn witness() {
     function_const_removed::add(...);
 }'''
