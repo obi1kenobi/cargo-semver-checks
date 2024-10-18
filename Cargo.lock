@@ -129,9 +129,9 @@ dependencies = [
 
 [[package]]
 name = "async-compression"
-version = "0.4.15"
+version = "0.4.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e26a9844c659a2a293d239c7910b752f8487fe122c6c8bd1659bf85a6507c302"
+checksum = "103db485efc3e41214fe4fda9f3dbeae2eb9082f48fd236e6095627a9422066e"
 dependencies = [
  "flate2",
  "futures-core",
@@ -1952,9 +1952,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
-version = "0.2.159"
+version = "0.2.161"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "561d97a539a36e26a9a5fad1ea11a3039a67714694aaa379433e580854bc3dc5"
+checksum = "8e9489c2807c139ffd9c1794f4af0ebe86a828db53ecdc7fea2111d0fed085d1"
 
 [[package]]
 name = "libredox"
@@ -2274,9 +2274,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.87"
+version = "1.0.88"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3e4daa0dcf6feba26f985457cdf104d4b4256fc5a09547140f3631bb076b19a"
+checksum = "7c3a7fc5db1e57d5a779a352c8cdb57b29aa4c40cc69c3a68a7fedc815fbf2f9"
 dependencies = [
  "unicode-ident",
 ]
@@ -2637,9 +2637,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.14"
+version = "0.23.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "415d9944693cb90382053259f89fbb077ea730ad7273047ec63b19bc9b160ba8"
+checksum = "5fbb44d7acc4e873d613422379f69f237a1b141928c02f6bc6ccfddddc2d7993"
 dependencies = [
  "once_cell",
  "ring",
@@ -2736,9 +2736,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.128"
+version = "1.0.129"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ff5456707a1de34e7e37f2a6fd3d3f808c318259cbd01ab6377795054b483d8"
+checksum = "6dbcf9b78a125ee667ae19388837dd12294b858d101fdd393cb9d5501ef09eb2"
 dependencies = [
  "itoa",
  "memchr",
@@ -3165,9 +3165,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "28.1.9"
+version = "28.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6df2903f73f943b4798ea23f8ee8137e253edacf38e448af6e2ec9db6ce9e262"
+checksum = "8cadcbdd678b7d537e41683f616e789d63a3674de8c70863e0b1ba3ae92421f4"
 dependencies = [
  "rayon",
  "rustc-hash",
@@ -3177,9 +3177,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "29.1.9"
+version = "29.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43fabde4993f060693cf5f45ab1300347ee63c1c23598a4aa14c788b285849b2"
+checksum = "09f2303c354295cb04588b374a1db6479e766764a49fa3befd6febb89d8439f0"
 dependencies = [
  "rayon",
  "rustc-hash",
@@ -3189,9 +3189,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "30.1.9"
+version = "30.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12f08617cfd1d080df7018a11293386cd956d167b6ced07e167bcff359e0670c"
+checksum = "a82a18a62c06d5eb31dd25afa89e65c88ec34045b6d65c692088951eb96a65d9"
 dependencies = [
  "rayon",
  "rustc-hash",
@@ -3201,9 +3201,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "32.1.9"
+version = "32.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78490f31e7f3e316566fecaacc7a2de3763266d56da843d3ec36a6e9c17145e7"
+checksum = "bcac4d3fcb01dffe295468378f94072e831c949b01686d15eef913b66222eab5"
 dependencies = [
  "rayon",
  "rustc-hash",
@@ -3213,9 +3213,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "33.1.10"
+version = "33.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1f4f941387388e8742cb641c8d186105010e42fddd273f7045c00733cfb6629"
+checksum = "2c53aa42d1749bb2f97496af456cbd6fb3cd599074d24950f31a720320e04675"
 dependencies = [
  "rayon",
  "rustc-hash",
@@ -3225,9 +3225,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "34.0.3"
+version = "34.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72056f7373a75fff8b3210c6a3011b12b65b2bb09d93c42759f2122ed2b08134"
+checksum = "37dcaf625e24c4d2dcf711af5090345dc83c1bb5c15978ba1d1774cd0272a370"
 dependencies = [
  "rayon",
  "rustc-hash",
@@ -3237,9 +3237,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "35.0.0"
+version = "35.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2dfcab42255e407422af10215be3c335fd2a9d2ef7927c289c9a2b1b7608f596"
+checksum = "c75c713ab7a8de89f314e9ff25d7ce5d8e89e801567b0b55fea20c68d1c8ff86"
 dependencies = [
  "rayon",
  "rustc-hash",
@@ -3297,13 +3297,13 @@ dependencies = [
  "serde",
  "serde_json",
  "trustfall",
- "trustfall-rustdoc-adapter 28.1.9",
- "trustfall-rustdoc-adapter 29.1.9",
- "trustfall-rustdoc-adapter 30.1.9",
- "trustfall-rustdoc-adapter 32.1.9",
- "trustfall-rustdoc-adapter 33.1.10",
- "trustfall-rustdoc-adapter 34.0.3",
- "trustfall-rustdoc-adapter 35.0.0",
+ "trustfall-rustdoc-adapter 28.1.10",
+ "trustfall-rustdoc-adapter 29.1.10",
+ "trustfall-rustdoc-adapter 30.1.10",
+ "trustfall-rustdoc-adapter 32.1.10",
+ "trustfall-rustdoc-adapter 33.1.11",
+ "trustfall-rustdoc-adapter 34.0.4",
+ "trustfall-rustdoc-adapter 35.0.1",
  "trustfall-rustdoc-adapter 36.0.0",
 ]
 
@@ -3408,9 +3408,9 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "uuid"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81dfa00651efa65069b0b6b651f4aaa31ba9e3c3ce0137aaad053604ee7e0314"
+checksum = "f8c5f0a0af699448548ad1a2fbf920fb4bee257eae39953ba95cb84891a0446a"
 dependencies = [
  "getrandom",
 ]
