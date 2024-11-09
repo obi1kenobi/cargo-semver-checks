@@ -54,7 +54,7 @@ To avoid false-positives, this query is restricted to checking only structs that
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
                             raw_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                 ... on ResolvedPathType {
-                                    name @filter(op: "one_of", value: ["$phantom_data"])
+                                    name @filter(op: "regex", value: ["$phantom_data"])
                                 }
                             }
                         }
@@ -74,7 +74,7 @@ To avoid false-positives, this query is restricted to checking only structs that
 
                             raw_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                 ... on ResolvedPathType {
-                                    name @filter(op: "one_of", value: ["$phantom_data"])
+                                    name @filter(op: "regex", value: ["$phantom_data"])
                                 }
                             }
                         }
@@ -119,7 +119,7 @@ To avoid false-positives, this query is restricted to checking only structs that
         "public": "public",
         "repr": "repr",
         "transparent": "transparent",
-        "phantom_data": ["core::marker::PhantomData", "std::marker::PhantomData"],
+        "phantom_data": "(?:core|std)::marker::PhantomData<",
         "true": true,
         "one": 1,
         "zero": 0,

@@ -7,7 +7,7 @@ repr(transparent) was removed from an enum. This can cause its memory layout to 
 breaking FFI use cases.
 
 Unlike with structs, repr(transparent) is always part of the ABI for enums since
-all variants inherit the visibility of their parent type. Note that 
+all variants inherit the visibility of their parent type. Note that
 > [repr(transparent)] can only be used on single-variant enum with a single non-zero-sized field
 > (there may be additional zero-sized fields). [...]
 https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent
@@ -53,7 +53,7 @@ To avoid false-positives, this query is restricted to checking only enums that i
                             field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
                                 raw_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     ... on ResolvedPathType {
-                                        name @filter(op: "one_of", value: ["$phantom_data"])
+                                        name @filter(op: "regex", value: ["$phantom_data"])
                                     }
                                 }
                             }
@@ -99,7 +99,7 @@ To avoid false-positives, this query is restricted to checking only enums that i
         "public": "public",
         "repr": "repr",
         "transparent": "transparent",
-        "phantom_data": ["core::marker::PhantomData", "std::marker::PhantomData"],
+        "phantom_data": "(?:core|std)::marker::PhantomData<",
         "true": true,
         "one": 1,
         "zero": 0,
