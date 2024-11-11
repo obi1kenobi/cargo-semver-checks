@@ -16,6 +16,8 @@ pub struct GlobalConfig {
     stdout: AutoStream<Box<dyn Write + 'static>>,
     stderr: AutoStream<Box<dyn Write + 'static>>,
     feature_flags: HashSet<FeatureFlag>,
+    /// Registry name to look up crates in
+    registry: Option<String>,
 }
 
 impl Default for GlobalConfig {
@@ -41,6 +43,7 @@ impl GlobalConfig {
             stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
             stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
             feature_flags: HashSet::new(),
+            registry: None,
         }
     }
 
@@ -315,6 +318,19 @@ impl GlobalConfig {
     #[inline]
     pub fn feature_flags(&self) -> &HashSet<FeatureFlag> {
         &self.feature_flags
+    }
+
+    /// Set (overwrite) the name of the registry to use for crate lookup
+    #[inline]
+    pub fn set_registry(&mut self, registry: String) -> &mut Self {
+        self.registry = Some(registry);
+        self
+    }
+
+    /// Return the name of the registry to use for crate lookup
+    #[inline]
+    pub fn registry(&self) -> Option<&str> {
+        self.registry.as_deref()
     }
 }
 
