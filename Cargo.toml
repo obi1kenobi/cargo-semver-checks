@@ -16,7 +16,7 @@ exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "t
 
 [dependencies]
 trustfall = "0.8.0"
-trustfall_rustdoc = { version = "0.17.0", default-features = false, features = ["v30", "v32", "v33", "v34", "v35", "v36", "rayon", "rustc-hash"] }
+trustfall_rustdoc = { version = "0.17.0", default-features = false, features = ["v36", "rayon", "rustc-hash"] }
 clap = { version = "4.5.17", features = ["derive", "cargo"] }
 serde_json = "1.0.128"
 anyhow = "1.0.89"
@@ -84,3 +84,7 @@ default = ["gix-reqwest"]
 # enable:
 gix-reqwest = ["tame-index/gix-reqwest"]
 gix-curl = ["tame-index/gix-curl"]
+
+[patch.crates-io]
+trustfall_rustdoc = { path = "../trustfall-rustdoc" }
+trustfall-rustdoc-adapter = { version = "36.1.0", path = "../trustfall-rustdoc-adapter" }
