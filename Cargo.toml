@@ -30,6 +30,7 @@ clap-cargo = { version = "0.14.1", features = ["cargo_metadata"] }
 ignore = "0.4.23"
 clap-verbosity-flag = "2.2.1"
 log = "0.4.22"
+fs-err = "2.11.0"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
 gix = { version = "0.66", default-features = false, features = ["max-performance-safe", "revision"] }
@@ -54,7 +55,6 @@ assert_cmd = "2.0"
 similar-asserts = { version = "1.6.0", features = ["serde"] }
 predicates = "3.1.2"
 insta = { version = "1.40.0", features = ["ron", "filters", "toml"] }
-fs-err = "2.11.0"
 regex = "1.10.6"
 insta-cmd = "0.6.0"
 

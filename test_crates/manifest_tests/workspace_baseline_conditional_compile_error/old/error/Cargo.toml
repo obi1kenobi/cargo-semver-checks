@@ -1,0 +1,10 @@
+[package]
+name = "error"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[features]
+default = ["some_feature"]
+some_feature = []

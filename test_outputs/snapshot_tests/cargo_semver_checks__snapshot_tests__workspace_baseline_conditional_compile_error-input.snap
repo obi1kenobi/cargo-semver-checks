@@ -1,0 +1,34 @@
+---
+source: src/snapshot_tests.rs
+expression: check
+---
+Check(
+  scope: Scope(
+    mode: DenyList(PackageSelection(
+      selection: Workspace,
+      excluded_packages: [],
+    )),
+  ),
+  current: Rustdoc(
+    source: Root("test_crates/manifest_tests/workspace_baseline_conditional_compile_error/new"),
+  ),
+  baseline: Rustdoc(
+    source: Root("test_crates/manifest_tests/workspace_baseline_conditional_compile_error/old"),
+  ),
+  release_type: None,
+  current_feature_config: FeatureConfig(
+    features_group: None,
+    extra_features: [],
+    is_baseline: false,
+  ),
+  baseline_feature_config: FeatureConfig(
+    features_group: None,
+    extra_features: [],
+    is_baseline: true,
+  ),
+  build_target: None,
+  witness_generation: WitnessGeneration(
+    show_hints: false,
+    witness_directory: None,
+  ),
+)

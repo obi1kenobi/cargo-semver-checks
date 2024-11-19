@@ -1,10 +1,11 @@
 #![forbid(unsafe_code)]
 
+mod callbacks;
 mod check_release;
 mod config;
+mod data_generation;
 mod manifest;
 mod query;
-mod rustdoc_cmd;
 mod rustdoc_gen;
 mod templating;
 mod util;
@@ -12,18 +13,17 @@ mod util;
 use anyhow::Context;
 use cargo_metadata::PackageId;
 use clap::ValueEnum;
+use data_generation::{DataStorage, IntoTerminalResult as _, TerminalError};
 use directories::ProjectDirs;
 use itertools::Itertools;
+use serde::Serialize;
+
+use std::collections::{BTreeMap, HashSet};
+use std::io::Write as _;
+use std::path::{Path, PathBuf};
 
 use check_release::run_check_release;
 use rustdoc_gen::CrateDataForRustdoc;
-use serde::Serialize;
-use trustfall_rustdoc::{load_rustdoc, VersionedCrate};
-
-use rustdoc_cmd::RustdocCommand;
-use std::collections::{BTreeMap, HashSet};
-use std::path::{Path, PathBuf};
-use std::time::Instant;
 
 pub use config::{FeatureFlag, GlobalConfig};
 pub use query::{
@@ -386,9 +386,11 @@ impl Check {
     }
 
     pub fn check_release(&self, config: &mut GlobalConfig) -> anyhow::Result<Report> {
-        let rustdoc_cmd = RustdocCommand::new()
-            .deps(false)
-            .silence(!config.is_verbose());
+        let generation_settings = data_generation::GenerationSettings {
+            use_color: config.err_color_choice(),
+            deps: false,
+            pass_through_stderr: config.is_verbose(),
+        };
 
         // If both the current and baseline rustdoc are given explicitly as a file path,
         // we don't need to use the installed rustc, and this check can be skipped.
@@ -441,9 +443,9 @@ impl Check {
                     .map(|name| {
                         let start = std::time::Instant::now();
                         let version = None;
-                        let (current_crate, baseline_crate) = generate_versioned_crates(
+                        let data_storage = match generate_crate_data(
                             config,
-                            &rustdoc_cmd,
+                            generation_settings,
                             &*current_loader,
                             &*baseline_loader,
                             CrateDataForRustdoc {
@@ -460,13 +462,22 @@ impl Check {
                                 feature_config: &self.baseline_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
-                        )?;
+                        ) {
+                            Ok(data) => data,
+                            Err(TerminalError::WithAdvice(err, advice)) => {
+                                config.log_error(|config| {
+                                    writeln!(config.stderr(), "{advice}")?;
+                                    Ok(())
+                                })?;
+                                return Err(err);
+                            }
+                            Err(TerminalError::Other(err)) => return Err(err),
+                        };
 
                         let report = run_check_release(
                             config,
+                            &data_storage,
                             &name,
-                            current_crate,
-                            baseline_crate,
                             self.release_type,
                             &OverrideStack::new(),
                             &self.witness_generation,
@@ -557,9 +568,9 @@ note: skipped the following crates since they have no library target: {skipped}"
                             }
 
                             let start = std::time::Instant::now();
-                            let (current_crate, baseline_crate) = generate_versioned_crates(
+                            let data_storage = match generate_crate_data(
                                 config,
-                                &rustdoc_cmd,
+                                generation_settings,
                                 &*current_loader,
                                 &*baseline_loader,
                                 CrateDataForRustdoc {
@@ -576,15 +587,24 @@ note: skipped the following crates since they have no library target: {skipped}"
                                     feature_config: &self.baseline_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
-                            )?;
+                            ) {
+                                Ok(data) => data,
+                                Err(TerminalError::WithAdvice(err, advice)) => {
+                                    config.log_error(|config| {
+                                        writeln!(config.stderr(), "{advice}")?;
+                                        Ok(())
+                                    })?;
+                                    return Err(err);
+                                }
+                                Err(TerminalError::Other(err)) => return Err(err),
+                            };
 
                             let result = Ok((
                                 crate_name.clone(),
                                 Some(run_check_release(
                                     config,
+                                    &data_storage,
                                     crate_name,
-                                    current_crate,
-                                    baseline_crate,
                                     self.release_type,
                                     &overrides,
                                     &self.witness_generation
@@ -723,33 +743,31 @@ impl WitnessGeneration {
     }
 }
 
-fn generate_versioned_crates(
+fn generate_crate_data(
     config: &mut GlobalConfig,
-    rustdoc_cmd: &RustdocCommand,
+    generation_settings: data_generation::GenerationSettings,
     current_loader: &dyn rustdoc_gen::RustdocGenerator,
     baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
     current_crate_data: rustdoc_gen::CrateDataForRustdoc,
     baseline_crate_data: rustdoc_gen::CrateDataForRustdoc,
-) -> anyhow::Result<(VersionedCrate, VersionedCrate)> {
-    let start = Instant::now();
-    let current_path = current_loader.load_rustdoc(config, rustdoc_cmd, current_crate_data)?;
-    let current_crate = load_rustdoc(&current_path)?;
-    config.shell_status(
-        "Parsed",
-        format_args!("[{:>8.3}s] (current)", start.elapsed().as_secs_f32()),
+) -> Result<DataStorage, TerminalError> {
+    let current_crate = current_loader.load_rustdoc(
+        config,
+        generation_settings,
+        data_generation::CacheSettings::ReadWrite(()),
+        current_crate_data,
     )?;
 
+    let baseline_crate_name = baseline_crate_data.name;
     let current_rustdoc_version = current_crate.version();
 
-    let start = Instant::now();
-    let baseline_path = get_baseline_rustdoc_path(
-        config,
-        rustdoc_cmd,
-        baseline_loader,
-        baseline_crate_data.clone(),
-    )?;
     let baseline_crate = {
-        let mut baseline_crate = load_rustdoc(&baseline_path)?;
+        let mut baseline_crate = baseline_loader.load_rustdoc(
+            config,
+            generation_settings,
+            data_generation::CacheSettings::ReadWrite(()),
+            baseline_crate_data.clone(),
+        )?;
 
         // The baseline rustdoc JSON may have been cached; ensure its rustdoc version matches
         // the version emitted by the currently-installed toolchain.
@@ -759,19 +777,20 @@ fn generate_versioned_crates(
         //
         // Fix for: https://github.com/obi1kenobi/cargo-semver-checks/issues/415
         if baseline_crate.version() != current_rustdoc_version {
-            let crate_name = baseline_crate_data.name;
-            config.shell_status(
-                "Removing",
-                format_args!("stale cached baseline rustdoc for {crate_name}"),
-            )?;
-            std::fs::remove_file(baseline_path)?;
-            let baseline_path = get_baseline_rustdoc_path(
+            let crate_name = baseline_crate_name;
+            config
+                .shell_status(
+                    "Removing",
+                    format_args!("stale cached baseline rustdoc for {crate_name}"),
+                )
+                .into_terminal_result()?;
+
+            baseline_crate = baseline_loader.load_rustdoc(
                 config,
-                rustdoc_cmd,
-                baseline_loader,
+                generation_settings,
+                data_generation::CacheSettings::WriteOnly(()),
                 baseline_crate_data,
             )?;
-            baseline_crate = load_rustdoc(&baseline_path)?;
 
             assert_eq!(
                 baseline_crate.version(),
@@ -783,22 +802,8 @@ fn generate_versioned_crates(
 
         baseline_crate
     };
-    config.shell_status(
-        "Parsed",
-        format_args!("[{:>8.3}s] (baseline)", start.elapsed().as_secs_f32()),
-    )?;
 
-    Ok((current_crate, baseline_crate))
-}
-
-fn get_baseline_rustdoc_path(
-    config: &mut GlobalConfig,
-    rustdoc_cmd: &RustdocCommand,
-    baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
-    baseline_crate_data: rustdoc_gen::CrateDataForRustdoc,
-) -> anyhow::Result<PathBuf> {
-    let baseline_path = baseline_loader.load_rustdoc(config, rustdoc_cmd, baseline_crate_data)?;
-    Ok(baseline_path)
+    Ok(DataStorage::new(current_crate, baseline_crate))
 }
 
 fn manifest_path(project_root: &Path) -> anyhow::Result<PathBuf> {
