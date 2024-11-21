@@ -8,8 +8,8 @@ use clap::crate_version;
 use itertools::Itertools;
 use rayon::prelude::*;
 use trustfall::{FieldValue, TransparentValue};
-use trustfall_rustdoc::{VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter};
 
+use crate::data_generation::DataStorage;
 use crate::{
     query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType, WitnessGeneration,
@@ -179,15 +179,14 @@ fn print_triggered_lint(
 
 pub(super) fn run_check_release(
     config: &mut GlobalConfig,
+    data_storage: &DataStorage,
     crate_name: &str,
-    current_crate: VersionedCrate,
-    baseline_crate: VersionedCrate,
     release_type: Option<ReleaseType>,
     overrides: &OverrideStack,
     witness_generation: &WitnessGeneration,
 ) -> anyhow::Result<CrateReport> {
-    let current_version = current_crate.crate_version();
-    let baseline_version = baseline_crate.crate_version();
+    let current_version = data_storage.current_crate().crate_version();
+    let baseline_version = data_storage.baseline_crate().crate_version();
 
     let version_change = release_type
         .map(Into::into)
@@ -211,9 +210,8 @@ pub(super) fn run_check_release(
         None => "",
     };
 
-    let current = VersionedIndexedCrate::new(&current_crate);
-    let previous = VersionedIndexedCrate::new(&baseline_crate);
-    let adapter = VersionedRustdocAdapter::new(&current, Some(&previous))?;
+    let index_storage = data_storage.create_indexes();
+    let adapter = index_storage.create_adapter();
 
     let (queries_to_run, queries_to_skip): (Vec<_>, _) =
         SemverQuery::all_queries().into_values().partition(|query| {

@@ -14,6 +14,7 @@ impl CargoSemverChecks {
                 String::from("check-release"),
                 format!("--manifest-path={current_path}"),
                 format!("--baseline-root={baseline_path}"),
+                String::from("--verbose"),
             ],
         }
     }

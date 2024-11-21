@@ -16,8 +16,12 @@ Failed in:
   function a::should_not_run, previously in file [ROOT]/test_crates/manifest_tests/workspace_all_publish_false/old/a/src/lib.rs:4
 
 --- stderr ---
+    Building a v0.1.0 (current)
+       Built [TIME] (current)
      Parsing a v0.1.0 (current)
       Parsed [TIME] (current)
+    Building a v0.1.0 (baseline)
+       Built [TIME] (baseline)
      Parsing a v0.1.0 (baseline)
       Parsed [TIME] (baseline)
     Checking a v0.1.0 -> v0.1.0 (no change)
