@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "safe_vs_unsafe_extern_fn"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

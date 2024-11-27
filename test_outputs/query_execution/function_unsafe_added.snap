@@ -15,4 +15,36 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/safe_vs_unsafe_extern_fn/": [
+    {
+      "name": String("originally_safe_now_implicit_unsafe"),
+      "path": List([
+        String("safe_vs_unsafe_extern_fn"),
+        String("originally_safe_now_implicit_unsafe"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("originally_safe_now_explicit_unsafe"),
+      "path": List([
+        String("safe_vs_unsafe_extern_fn"),
+        String("originally_safe_now_explicit_unsafe"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("originally_safe_now_legacy"),
+      "path": List([
+        String("safe_vs_unsafe_extern_fn"),
+        String("originally_safe_now_legacy"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
