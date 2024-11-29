@@ -1,3 +1,5 @@
+#![feature(unsafe_extern_blocks)]  // Remove after our lowest tested Rust version is 1.82+.
+
 extern "C" {
     pub fn originally_legacy_now_unsafe_extern_and_implicit_unsafe();
 
