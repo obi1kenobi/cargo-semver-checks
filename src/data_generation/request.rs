@@ -28,7 +28,7 @@ pub(super) enum RequestKind<'a> {
     LocalProject(ProjectRequest<'a>),
 }
 
-impl<'a> RequestKind<'a> {
+impl RequestKind<'_> {
     pub(super) fn name(&self) -> anyhow::Result<&str> {
         Ok(match self {
             Self::Registry(RegistryRequest { index_entry }) => &index_entry.name,
