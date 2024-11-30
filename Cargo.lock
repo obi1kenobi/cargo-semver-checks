@@ -363,7 +363,6 @@ dependencies = [
  "sha2",
  "similar-asserts",
  "tame-index",
- "template",
  "toml 0.8.19",
  "trustfall",
  "trustfall_rustdoc",
@@ -3107,10 +3106,6 @@ dependencies = [
  "rustix",
  "windows-sys 0.59.0",
 ]
-
-[[package]]
-name = "template"
-version = "0.1.0"
 
 [[package]]
 name = "termtree"
