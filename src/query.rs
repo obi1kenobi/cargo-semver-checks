@@ -418,7 +418,7 @@ mod tests {
         let metadata_path =
             format!("./localdata/test_data/{crate_pair}/{crate_version}/metadata.json");
         let metadata_text = std::fs::read_to_string(&metadata_path).map_err(|e| anyhow::anyhow!(e).context(
-            format!("Could not load {metadata_path} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?"))).expect("failed to load metadata");
+            format!("Could not load {metadata_path} file. These files are newly required as of PR#1007. Please re-run ./scripts/regenerate_test_rustdocs.sh"))).expect("failed to load metadata");
         let metadata = serde_json::from_str(&metadata_text).expect("failed to parse metadata file");
         load_rustdoc(Path::new(&rustdoc_path), Some(metadata))
             .with_context(|| format!("Could not load {rustdoc_path} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?"))
@@ -652,9 +652,9 @@ mod tests {
                     .map(|value: &FieldValue| value.as_usize().expect("begin line was not an int"));
                 match (filename, line) {
                     (Some(filename), Some(line)) => (Arc::clone(filename), line),
-                    (Some(_filename), None) => panic!("A valid query must output `span_filename`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                    (None, Some(_line)) => panic!("A valid query must output `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                    (None, None) => panic!("A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    (Some(_filename), None) => panic!("No `span_begin_line` was returned by the query, even though `span_filename` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    (None, Some(_line)) => panic!("No `span_filename` was returned by the query, even though `span_begin_line` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    (None, None) => panic!("A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
                 }
             }
         };
