@@ -53,6 +53,7 @@ fi
 
 PLACEHOLDER_DIR="$TARGET_DIR/placeholder"
 rm -rf "$PLACEHOLDER_DIR"
+mkdir -p "$TARGET_DIR"
 pushd "$TARGET_DIR"
 cargo new --lib placeholder
 cd placeholder
