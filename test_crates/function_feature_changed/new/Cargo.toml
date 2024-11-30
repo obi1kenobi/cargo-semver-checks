@@ -4,6 +4,19 @@ name = "function_feature_changed"
 version = "0.1.0"
 edition = "2021"
 
+# The purpose of this test crate is to ensure that cargo-semver-checks' feature selection
+# is robust to changes in which features exist and are enabled.
+#
+# We want cargo-semver-checks runs to succeed and fail on the basis of
+# what they find inside the crate, not just always fail because a feature has been deleted.
+# Hence, we disable this lint.
+#
+# This *only* affects directly running cargo-semver-checks against this crate.
+# It does not affect the lint query runs against all crates, since those run over
+# pre-generated rustdoc JSON and `cargo metadata` output and ignore this configuration.
+[package.metadata.cargo-semver-checks.lints]
+feature_missing = "allow"
+
 [dependencies]
 
 [features]

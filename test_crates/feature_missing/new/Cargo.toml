@@ -1,0 +1,13 @@
+[package]
+publish = false
+name = "feature_missing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[features]
+still_present = []
+# Explicitly-added feature, to replace the implicit feature defined by
+# the `optional = true` dependency in the previous crate version.
+rand_core = []

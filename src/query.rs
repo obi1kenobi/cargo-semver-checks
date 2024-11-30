@@ -329,7 +329,7 @@ mod tests {
     use std::borrow::Cow;
     use std::collections::BTreeSet;
     use std::path::PathBuf;
-    use std::sync::OnceLock;
+    use std::sync::{Arc, OnceLock};
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
@@ -631,14 +631,31 @@ mod tests {
         // Reorder vector of results into a deterministic order that will compensate for
         // nondeterminism in how the results are ordered.
         let key_func = |elem: &BTreeMap<String, FieldValue>| {
-            let filename = elem.get("span_filename").and_then(|value| value.as_str());
-            let line = elem.get("span_begin_line");
-
-            match (filename, line) {
-                (Some(filename), Some(line)) => (filename.to_owned(), line.as_usize()),
-                (Some(_filename), None) => panic!("A valid query must output `span_filename`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                (None, Some(_line)) => panic!("A valid query must output `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                (None, None) => panic!("A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+            // Queries should either:
+            // - define an explicit `ordering_key` string value sufficient to establish
+            //   a total order of results for each crate, or
+            // - define `span_filename` and `span_begin_line` values where the lint is being raised,
+            //   which will then define a total order of results for that query on that crate.
+            let ordering_key = elem
+                .get("ordering_key")
+                .and_then(|value| value.as_arc_str());
+            if let Some(key) = ordering_key {
+                (Arc::clone(key), 0)
+            } else {
+                let filename = elem.get("span_filename").map(|value| {
+                    value
+                        .as_arc_str()
+                        .expect("`span_filename` was not a string")
+                });
+                let line = elem
+                    .get("span_begin_line")
+                    .map(|value: &FieldValue| value.as_usize().expect("begin line was not an int"));
+                match (filename, line) {
+                    (Some(filename), Some(line)) => (Arc::clone(filename), line),
+                    (Some(_filename), None) => panic!("A valid query must output `span_filename`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    (None, Some(_line)) => panic!("A valid query must output `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    (None, None) => panic!("A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                }
             }
         };
         for value in query_execution_results.values_mut() {
@@ -1037,6 +1054,7 @@ add_lints!(
     enum_variant_marked_non_exhaustive,
     enum_variant_missing,
     exported_function_changed_abi,
+    feature_missing,
     function_abi_no_longer_unwind,
     function_changed_abi,
     function_const_removed,
