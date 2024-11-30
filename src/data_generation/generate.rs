@@ -47,7 +47,7 @@ pub(super) fn generate_rustdoc(
     build_dir: &Path,
     settings: GenerationSettings,
     callbacks: &mut CallbackHandler<'_>,
-) -> Result<PathBuf, TerminalError> {
+) -> Result<(PathBuf, cargo_metadata::Metadata), TerminalError> {
     let crate_name = request.kind.name().into_terminal_result()?;
     let version = request.kind.version().into_terminal_result()?;
 
@@ -107,16 +107,18 @@ pub(super) fn generate_rustdoc(
     let placeholder_target_directory = metadata.target_directory.as_path().as_std_path().to_owned();
     let target_dir = placeholder_target_directory.as_path();
 
-    run_cargo_doc(
+    let rustdoc_data = run_cargo_doc(
         request,
-        metadata,
+        &metadata,
         &placeholder_manifest_path,
         target_dir,
         crate_name,
         version,
         &settings,
         callbacks,
-    )
+    )?;
+
+    Ok((rustdoc_data, metadata))
 }
 
 fn produce_repro_workspace_shell_commands(request: &CrateDataRequest<'_>) -> String {
@@ -231,7 +233,7 @@ fn run_cargo_update(
 #[allow(clippy::too_many_arguments)]
 fn run_cargo_doc(
     request: &CrateDataRequest<'_>,
-    metadata: cargo_metadata::Metadata,
+    metadata: &cargo_metadata::Metadata,
     placeholder_manifest_path: &Path,
     target_dir: &Path,
     crate_name: &str,

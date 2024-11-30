@@ -36,14 +36,29 @@ fi
 set -u
 echo "Generating rustdoc with: $(cargo $TOOLCHAIN --version)"
 RUSTDOC_CMD="cargo $TOOLCHAIN rustdoc"
+METADATA_CMD="cargo $TOOLCHAIN metadata --format-version 1"
 
-# Run rustdoc on test_crates/*/{new,old}/
 if [[ $# -eq 0 ]]; then
+    # Run rustdoc on test_crates/*/{new,old}/
     set -- "$TOPLEVEL/test_crates/"*/
     always_update=
 else
+    # Run on whichever paths the user specified.
+    if [[ $1 == '*' ]]; then
+        # As a special case, run on everything if the user specified a literal (escaped) asterisk.
+        set -- "$TOPLEVEL/test_crates/"*/
+    fi
     always_update=1
 fi
+
+PLACEHOLDER_DIR="$TARGET_DIR/placeholder"
+rm -rf "$PLACEHOLDER_DIR"
+pushd "$TARGET_DIR"
+cargo new --lib placeholder
+cd placeholder
+cargo add --path ../../../test_crates/template/old/
+popd
+
 for crate_pair; do
     # Strip all but last path component from crate_pair
     crate_pair=${crate_pair%/}
@@ -55,6 +70,7 @@ for crate_pair; do
                 crate="$crate_pair/$crate_version"
                 crate_dir=$TOPLEVEL/test_crates/$crate
                 target=$TARGET_DIR/$crate/rustdoc.json
+                metadata=$TARGET_DIR/$crate/metadata.json
 
                 if [[ -z $always_update ]] && ! dir_is_newer_than_file "$crate_dir" "$target"; then
                     printf 'No updates needed for %s.\n' "$crate"
@@ -76,6 +92,13 @@ for crate_pair; do
                 RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --document-private-items --document-hidden-items --cap-lints "$CAP_LINTS" --output-format=json
                 mkdir -p "$TARGET_DIR/$crate"
                 mv "$RUSTDOC_OUTPUT_DIR/$crate_pair.json" "$target"
+                popd
+
+                pushd "$PLACEHOLDER_DIR"
+                head -n -1 Cargo.toml >Cargo.toml.trunc
+                mv Cargo.toml.trunc Cargo.toml
+                cargo add --path "../../../test_crates/$crate"
+                $METADATA_CMD >"$metadata"
                 popd
             done
         else

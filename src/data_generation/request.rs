@@ -3,7 +3,7 @@ use std::{borrow::Cow, collections::BTreeSet, path::Path};
 
 use anyhow::Context;
 use sha2::Digest as _;
-use trustfall_rustdoc::VersionedCrate;
+use trustfall_rustdoc::VersionedStorage;
 
 use crate::manifest::Manifest;
 use crate::util::slugify;
@@ -28,7 +28,7 @@ pub(super) enum RequestKind<'a> {
     LocalProject(ProjectRequest<'a>),
 }
 
-impl<'a> RequestKind<'a> {
+impl RequestKind<'_> {
     pub(super) fn name(&self) -> anyhow::Result<&str> {
         Ok(match self {
             Self::Registry(RegistryRequest { index_entry }) => &index_entry.name,
@@ -80,9 +80,19 @@ impl CacheSettings<()> {
 pub(crate) struct CacheUse<'a> {
     /// Invariant: always `None` if the cache settings are [`CacheSettings::None`],
     /// and always `Some` otherwise.
-    cache_location: Option<PathBuf>,
+    json_cache_location: Option<PathBuf>,
+
+    /// Invariant: always `None` if the cache settings are [`CacheSettings::None`],
+    /// and always `Some` otherwise.
+    metadata_cache_location: Option<PathBuf>,
 
     settings: CacheSettings<&'a Path>,
+}
+
+#[derive(Debug, Clone)]
+struct CacheEntry<'a> {
+    json: &'a Path,
+    metadata: &'a Path,
 }
 
 impl<'a> CacheUse<'a> {
@@ -108,31 +118,42 @@ impl<'a> CacheUse<'a> {
             }
         };
 
-        let cache_location = {
+        let (json_cache_location, metadata_cache_location) = {
             match settings {
-                CacheSettings::None => None,
+                CacheSettings::None => (None, None),
                 CacheSettings::ReadOnly(path)
                 | CacheSettings::ReadWrite(path)
-                | CacheSettings::WriteOnly(path) => Some(path.join(format!("{key}.json"))),
+                | CacheSettings::WriteOnly(path) => (
+                    Some(path.join(format!("{key}.json"))),
+                    Some(path.join(format!("{key}.metadata.json"))),
+                ),
             }
         };
 
         Ok(Self {
-            cache_location,
+            json_cache_location,
+            metadata_cache_location,
             settings,
         })
     }
 
-    fn read(&self) -> anyhow::Result<Option<&Path>> {
+    fn read(&self) -> anyhow::Result<Option<CacheEntry<'_>>> {
         match self.settings {
             CacheSettings::ReadWrite(..) | CacheSettings::ReadOnly(..) => {
-                let cache_path = self
-                    .cache_location
+                let json_path = self
+                    .json_cache_location
                     .as_ref()
                     .expect("invariant violation: no cache path for readable cache");
+                let metadata_path = self
+                    .metadata_cache_location
+                    .as_ref()
+                    .expect("invariant violation: no metadata path for readable cache");
 
-                if cache_path.exists() {
-                    return Ok(Some(cache_path));
+                if json_path.exists() && metadata_path.exists() {
+                    return Ok(Some(CacheEntry {
+                        json: json_path,
+                        metadata: metadata_path,
+                    }));
                 }
             }
             CacheSettings::WriteOnly(..) | CacheSettings::None => {}
@@ -145,15 +166,21 @@ impl<'a> CacheUse<'a> {
     ///
     /// If the cache policy does not allow writing, this returns `Ok(..)`.
     /// Errors are genuine failures to write to the cache, such as I/O errors.
-    fn populate(&self, data_path: &Path) -> anyhow::Result<bool> {
+    fn populate(&self, rustdoc_json: &Path, metadata: &cargo_metadata::Metadata) -> anyhow::Result<bool> {
         match self.settings {
             CacheSettings::ReadWrite(path) | CacheSettings::WriteOnly(path) => {
-                let cache_path = self
-                    .cache_location
+                let json_path = self
+                    .json_cache_location
                     .as_ref()
-                    .expect("invariant violation: no cache path for writeable cache");
+                    .expect("invariant violation: no cache path for readable cache");
+                let metadata_path = self
+                    .metadata_cache_location
+                    .as_ref()
+                    .expect("invariant violation: no metadata path for readable cache");
+
                 fs_err::create_dir_all(path)?;
-                fs_err::copy(data_path, cache_path)?;
+                fs_err::copy(rustdoc_json, json_path)?;
+                fs_err::write(metadata_path, serde_json::to_string(metadata)?)?;
                 Ok(true)
             }
             CacheSettings::None | CacheSettings::ReadOnly(..) => Ok(false),
@@ -229,7 +256,7 @@ impl<'a> CrateDataRequest<'a> {
         cache_settings: CacheSettings<&'a Path>,
         generation_settings: GenerationSettings,
         callbacks: &'slf mut dyn ProgressCallbacks<'slf>,
-    ) -> Result<VersionedCrate, TerminalError> {
+    ) -> Result<VersionedStorage, TerminalError> {
         let mut callbacks = CallbackHandler::new(
             self.kind
                 .name()
@@ -252,17 +279,34 @@ impl<'a> CrateDataRequest<'a> {
         // Can we satisfy the request from cache?
         match cache.read() {
             // Cache hit!
-            Ok(Some(path)) => {
+            Ok(Some(entry)) => {
                 callbacks.rustdoc_cache_hit();
                 callbacks.parse_rustdoc_start(true);
-                match trustfall_rustdoc::load_rustdoc(path) {
-                    Ok(data) => {
-                        callbacks.parse_rustdoc_success(true);
-                        return Ok(data);
-                    }
-                    Err(e) => {
-                        callbacks.non_fatal_error(e.context("failed to load cached rustdoc JSON"));
-                    }
+
+                match std::fs::read_to_string(entry.metadata) {
+                    Ok(text) => match serde_json::from_str(&text) {
+                        Ok(metadata) => {
+                            match trustfall_rustdoc::load_rustdoc(entry.json, metadata) {
+                                Ok(data) => {
+                                    callbacks.parse_rustdoc_success(true);
+                                    return Ok(data);
+                                }
+                                Err(e) => {
+                                    callbacks.non_fatal_error(
+                                        e.context("failed to load cached rustdoc JSON"),
+                                    );
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            callbacks.non_fatal_error(
+                                anyhow::anyhow!(e).context("failed to parse cached metadata"),
+                            );
+                        }
+                    },
+                    Err(e) => callbacks.non_fatal_error(
+                        anyhow::anyhow!(e).context("failed to read cached metadata file"),
+                    ),
                 }
             }
 
@@ -279,7 +323,7 @@ impl<'a> CrateDataRequest<'a> {
 
         // Generate the data we need.
         let build_dir = target_root.join(self.build_path_slug().into_terminal_result()?);
-        let data_path = super::generate::generate_rustdoc(
+        let (data_path, metadata) = super::generate::generate_rustdoc(
             self,
             &build_dir,
             generation_settings,
@@ -290,7 +334,7 @@ impl<'a> CrateDataRequest<'a> {
         // If the cache doesn't need to be populated, this returns `Ok(false)`.
         // Errors are genuine failures to populate the cache, such as I/O problems.
         let mut clean_up_build_dir = false;
-        match cache.populate(data_path.as_path()) {
+        match cache.populate(data_path.as_path(), &metadata) {
             // Populated the cache.
             Ok(true) => {
                 callbacks.rustdoc_cache_populated();
@@ -310,7 +354,7 @@ impl<'a> CrateDataRequest<'a> {
 
         // This time, failure to read the rustdoc is fatal.
         callbacks.parse_rustdoc_start(false);
-        let data = trustfall_rustdoc::load_rustdoc(data_path.as_path()).into_terminal_result()?;
+        let data = trustfall_rustdoc::load_rustdoc(data_path.as_path(), Some(metadata)).into_terminal_result()?;
         callbacks.parse_rustdoc_success(false);
 
         if clean_up_build_dir {
