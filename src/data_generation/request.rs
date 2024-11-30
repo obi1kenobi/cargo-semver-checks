@@ -290,7 +290,11 @@ impl<'a> CrateDataRequest<'a> {
                 match std::fs::read_to_string(entry.metadata) {
                     Ok(text) => match serde_json::from_str(&text) {
                         Ok(metadata) => {
-                            match load_rustdoc_with_optional_metadata(entry.json, metadata, &mut callbacks) {
+                            match load_rustdoc_with_optional_metadata(
+                                entry.json,
+                                metadata,
+                                &mut callbacks,
+                            ) {
                                 Ok(data) => {
                                     callbacks.parse_rustdoc_success(true);
                                     return Ok(data);
@@ -411,8 +415,7 @@ fn load_rustdoc_with_optional_metadata(
             // instead, drop back to not checking manifest data.
             callbacks.non_fatal_error(anyhow::Error::from(e).context("skipping package metadata due to failure to load it; package manifest checks will not discover any breakage"));
 
-            trustfall_rustdoc::load_rustdoc(json_path, None)
-                .map_err(anyhow::Error::from)
+            trustfall_rustdoc::load_rustdoc(json_path, None).map_err(anyhow::Error::from)
         }
         Err(e) => Err(anyhow::Error::from(e)),
     }

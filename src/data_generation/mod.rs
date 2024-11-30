@@ -3,7 +3,7 @@ mod generate;
 mod progress;
 mod request;
 
-use trustfall_rustdoc::{VersionedStorage, VersionedIndex, VersionedRustdocAdapter};
+use trustfall_rustdoc::{VersionedIndex, VersionedRustdocAdapter, VersionedStorage};
 
 pub(crate) use error::{IntoTerminalResult, TerminalError};
 pub(crate) use generate::GenerationSettings;
@@ -18,10 +18,7 @@ pub(crate) struct DataStorage {
 
 impl DataStorage {
     pub(crate) fn new(current: VersionedStorage, baseline: VersionedStorage) -> Self {
-        Self {
-            current,
-            baseline,
-        }
+        Self { current, baseline }
     }
 
     pub(crate) fn current_crate(&self) -> &VersionedStorage {

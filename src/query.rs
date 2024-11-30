@@ -336,7 +336,7 @@ mod tests {
     use serde::{Deserialize, Serialize};
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_rustdoc::{
-        load_rustdoc, VersionedStorage, VersionedIndex, VersionedRustdocAdapter,
+        load_rustdoc, VersionedIndex, VersionedRustdocAdapter, VersionedStorage,
     };
 
     use crate::query::{
@@ -413,8 +413,10 @@ mod tests {
     }
 
     fn load_pregenerated_rustdoc(crate_pair: &str, crate_version: &str) -> VersionedStorage {
-        let rustdoc_path = format!("./localdata/test_data/{crate_pair}/{crate_version}/rustdoc.json");
-        let metadata_path = format!("./localdata/test_data/{crate_pair}/{crate_version}/metadata.json");
+        let rustdoc_path =
+            format!("./localdata/test_data/{crate_pair}/{crate_version}/rustdoc.json");
+        let metadata_path =
+            format!("./localdata/test_data/{crate_pair}/{crate_version}/metadata.json");
         let metadata_text = std::fs::read_to_string(&metadata_path).map_err(|e| anyhow::anyhow!(e).context(
             format!("Could not load {metadata_path} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?"))).expect("failed to load metadata");
         let metadata = serde_json::from_str(&metadata_text).expect("failed to parse metadata file");
