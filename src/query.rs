@@ -336,7 +336,7 @@ mod tests {
     use serde::{Deserialize, Serialize};
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_rustdoc::{
-        load_rustdoc, VersionedStorage, VersionedHandler, VersionedRustdocAdapter,
+        load_rustdoc, VersionedStorage, VersionedIndex, VersionedRustdocAdapter,
     };
 
     use crate::query::{
@@ -426,7 +426,7 @@ mod tests {
     #[test]
     fn all_queries_are_valid() {
         let (_baseline_crate, current_crate) = get_test_crate_rustdocs("template");
-        let indexed_crate = VersionedHandler::from_storage(current_crate);
+        let indexed_crate = VersionedIndex::from_storage(current_crate);
 
         let adapter = VersionedRustdocAdapter::new(&indexed_crate, Some(&indexed_crate))
             .expect("failed to create adapter");
@@ -440,7 +440,7 @@ mod tests {
     #[test]
     fn pub_use_handling() {
         let (_baseline_crate, current_crate) = get_test_crate_rustdocs("pub_use_handling");
-        let current = VersionedHandler::from_storage(current_crate);
+        let current = VersionedIndex::from_storage(current_crate);
 
         let query = r#"
             {
@@ -546,8 +546,8 @@ mod tests {
     fn run_query_on_crate_pair(
         semver_query: &SemverQuery,
         crate_pair_name: &String,
-        indexed_crate_new: &VersionedHandler<'_>,
-        indexed_crate_old: &VersionedHandler<'_>,
+        indexed_crate_new: &VersionedIndex<'_>,
+        indexed_crate_old: &VersionedIndex<'_>,
     ) -> (String, Vec<BTreeMap<String, FieldValue>>) {
         let adapter = VersionedRustdocAdapter::new(indexed_crate_new, Some(indexed_crate_old))
             .expect("could not create adapter");
@@ -565,7 +565,7 @@ mod tests {
     fn assert_no_false_positives_in_nonchanged_crate(
         query_name: &str,
         semver_query: &SemverQuery,
-        indexed_crate: &VersionedHandler<'_>,
+        indexed_crate: &VersionedIndex<'_>,
         crate_pair_name: &String,
         crate_version: &str,
     ) {
@@ -598,8 +598,8 @@ mod tests {
             .iter()
             .map(|crate_pair_name| {
                 let (crate_old, crate_new) = get_test_crate_rustdocs(crate_pair_name);
-                let indexed_crate_old = VersionedHandler::from_storage(crate_old);
-                let indexed_crate_new = VersionedHandler::from_storage(crate_new);
+                let indexed_crate_old = VersionedIndex::from_storage(crate_old);
+                let indexed_crate_new = VersionedIndex::from_storage(crate_new);
 
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,

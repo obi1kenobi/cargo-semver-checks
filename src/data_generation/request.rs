@@ -3,7 +3,7 @@ use std::{borrow::Cow, collections::BTreeSet, path::Path};
 
 use anyhow::Context;
 use sha2::Digest as _;
-use trustfall_rustdoc::VersionedStorage;
+use trustfall_rustdoc::{LoadingError, VersionedStorage};
 
 use crate::manifest::Manifest;
 use crate::util::slugify;
@@ -166,7 +166,11 @@ impl<'a> CacheUse<'a> {
     ///
     /// If the cache policy does not allow writing, this returns `Ok(..)`.
     /// Errors are genuine failures to write to the cache, such as I/O errors.
-    fn populate(&self, rustdoc_json: &Path, metadata: &cargo_metadata::Metadata) -> anyhow::Result<bool> {
+    fn populate(
+        &self,
+        rustdoc_json: &Path,
+        metadata: &cargo_metadata::Metadata,
+    ) -> anyhow::Result<bool> {
         match self.settings {
             CacheSettings::ReadWrite(path) | CacheSettings::WriteOnly(path) => {
                 let json_path = self
@@ -286,7 +290,7 @@ impl<'a> CrateDataRequest<'a> {
                 match std::fs::read_to_string(entry.metadata) {
                     Ok(text) => match serde_json::from_str(&text) {
                         Ok(metadata) => {
-                            match trustfall_rustdoc::load_rustdoc(entry.json, metadata) {
+                            match load_rustdoc_with_optional_metadata(entry.json, metadata, &mut callbacks) {
                                 Ok(data) => {
                                     callbacks.parse_rustdoc_success(true);
                                     return Ok(data);
@@ -354,7 +358,8 @@ impl<'a> CrateDataRequest<'a> {
 
         // This time, failure to read the rustdoc is fatal.
         callbacks.parse_rustdoc_start(false);
-        let data = trustfall_rustdoc::load_rustdoc(data_path.as_path(), Some(metadata)).into_terminal_result()?;
+        let data = load_rustdoc_with_optional_metadata(&data_path, metadata, &mut callbacks)
+            .into_terminal_result()?;
         callbacks.parse_rustdoc_success(false);
 
         if clean_up_build_dir {
@@ -390,6 +395,26 @@ impl<'a> CrateDataRequest<'a> {
             slugify(self.kind.version()?),
             &self.features_fingerprint,
         ))
+    }
+}
+
+fn load_rustdoc_with_optional_metadata(
+    json_path: &Path,
+    metadata: cargo_metadata::Metadata,
+    callbacks: &mut CallbackHandler<'_>,
+) -> anyhow::Result<VersionedStorage> {
+    match trustfall_rustdoc::load_rustdoc(json_path, Some(metadata)) {
+        Ok(data) => Ok(data),
+        Err(e @ LoadingError::MetadataParsing(..)) => {
+            // Metadata parsing is brand new and might have unforeseen issues.
+            // Be resilient: report the problem but don't crash --
+            // instead, drop back to not checking manifest data.
+            callbacks.non_fatal_error(anyhow::Error::from(e).context("skipping package metadata due to failure to load it; package manifest checks will not discover any breakage"));
+
+            trustfall_rustdoc::load_rustdoc(json_path, None)
+                .map_err(anyhow::Error::from)
+        }
+        Err(e) => Err(anyhow::Error::from(e)),
     }
 }
 

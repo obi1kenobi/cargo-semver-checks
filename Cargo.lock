@@ -3415,8 +3415,10 @@ name = "trustfall_rustdoc"
 version = "0.17.0"
 dependencies = [
  "anyhow",
+ "cargo_metadata",
  "serde",
  "serde_json",
+ "thiserror 2.0.3",
  "trustfall",
  "trustfall-rustdoc-adapter 30.2.2",
  "trustfall-rustdoc-adapter 32.2.2",

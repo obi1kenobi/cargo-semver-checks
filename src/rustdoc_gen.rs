@@ -328,7 +328,9 @@ impl RustdocGenerator for RustdocFromFile {
         _cache_settings: super::data_generation::CacheSettings<()>,
         _crate_data: CrateDataForRustdoc,
     ) -> Result<VersionedStorage, TerminalError> {
-        trustfall_rustdoc::load_rustdoc(&self.path, None).into_terminal_result()
+        trustfall_rustdoc::load_rustdoc(&self.path, None)
+            .map_err(anyhow::Error::from)
+            .into_terminal_result()
     }
 }
 

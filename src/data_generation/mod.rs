@@ -3,7 +3,7 @@ mod generate;
 mod progress;
 mod request;
 
-use trustfall_rustdoc::{VersionedStorage, VersionedHandler, VersionedRustdocAdapter};
+use trustfall_rustdoc::{VersionedStorage, VersionedIndex, VersionedRustdocAdapter};
 
 pub(crate) use error::{IntoTerminalResult, TerminalError};
 pub(crate) use generate::GenerationSettings;
@@ -36,16 +36,16 @@ impl DataStorage {
 impl DataStorage {
     pub(crate) fn create_indexes(&self) -> IndexStorage<'_> {
         IndexStorage {
-            current_crate: VersionedHandler::from_storage(&self.current),
-            baseline_crate: VersionedHandler::from_storage(&self.baseline),
+            current_crate: VersionedIndex::from_storage(&self.current),
+            baseline_crate: VersionedIndex::from_storage(&self.baseline),
         }
     }
 }
 
 #[derive(Debug)]
 pub(crate) struct IndexStorage<'a> {
-    current_crate: VersionedHandler<'a>,
-    baseline_crate: VersionedHandler<'a>,
+    current_crate: VersionedIndex<'a>,
+    baseline_crate: VersionedIndex<'a>,
 }
 
 impl IndexStorage<'_> {
