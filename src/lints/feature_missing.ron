@@ -44,7 +44,7 @@ SemverQuery(
         "unstable_feature_pattern": "^(?:unstable|nightly|bench)(?:[-_].*)?$",
         "underscore": "_",
     },
-    error_message: "A feature has been removed from this package's Cargo.toml. This will break downstream crates that enable this feature.",
+    error_message: "A feature has been removed from this package's Cargo.toml. This will break downstream crates which enable that feature.",
     per_result_error_template: Some("feature {{name}} in the package's Cargo.toml"),
     // TODO: It's currently not possible to write witnesses for manifest lints,
     //       since we'd need to generate a *Cargo.toml* witness instead of a Rust code witness.
