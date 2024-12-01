@@ -61,6 +61,7 @@ predicates = "3.1.2"
 insta = { version = "1.40.0", features = ["ron", "filters", "toml"] }
 regex = "1.10.6"
 insta-cmd = "0.6.0"
+rayon = "1.10.0"
 
 # In dev and test profiles, compile all dependencies with optimizations enabled,
 # but still checking debug assertions and overflows.
