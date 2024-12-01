@@ -351,12 +351,28 @@ mod tests {
     static TEST_CRATE_RUSTDOCS: OnceLock<BTreeMap<String, (VersionedStorage, VersionedStorage)>> =
         OnceLock::new();
 
+    /// Mapping test crate (pair) name -> (old index, new index).
+    static TEST_CRATE_INDEXES: OnceLock<
+        BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)>,
+    > = OnceLock::new();
+
     fn get_test_crate_names() -> &'static [String] {
         TEST_CRATE_NAMES.get_or_init(initialize_test_crate_names)
     }
 
-    fn get_test_crate_rustdocs(test_crate: &str) -> &'static (VersionedStorage, VersionedStorage) {
-        &TEST_CRATE_RUSTDOCS.get_or_init(initialize_test_crate_rustdocs)[test_crate]
+    fn get_all_test_crates() -> &'static BTreeMap<String, (VersionedStorage, VersionedStorage)> {
+        TEST_CRATE_RUSTDOCS.get_or_init(initialize_test_crate_rustdocs)
+    }
+
+    fn get_all_test_crate_indexes(
+    ) -> &'static BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
+        TEST_CRATE_INDEXES.get_or_init(initialize_test_crate_indexes)
+    }
+
+    fn get_test_crate_indexes(
+        test_crate: &str,
+    ) -> &'static (VersionedIndex<'static>, VersionedIndex<'static>) {
+        &get_all_test_crate_indexes()[test_crate]
     }
 
     fn initialize_test_crate_names() -> Vec<String> {
@@ -412,6 +428,18 @@ mod tests {
             .collect()
     }
 
+    fn initialize_test_crate_indexes(
+    ) -> BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
+        get_all_test_crates()
+            .iter()
+            .map(|(key, (old_crate, new_crate))| {
+                let old_index = VersionedIndex::from_storage(old_crate);
+                let new_index = VersionedIndex::from_storage(new_crate);
+                (key.clone(), (old_index, new_index))
+            })
+            .collect()
+    }
+
     fn load_pregenerated_rustdoc(crate_pair: &str, crate_version: &str) -> VersionedStorage {
         let rustdoc_path =
             format!("./localdata/test_data/{crate_pair}/{crate_version}/rustdoc.json");
@@ -427,11 +455,10 @@ mod tests {
 
     #[test]
     fn all_queries_are_valid() {
-        let (_baseline_crate, current_crate) = get_test_crate_rustdocs("template");
-        let indexed_crate = VersionedIndex::from_storage(current_crate);
+        let (_baseline, current) = get_test_crate_indexes("template");
 
-        let adapter = VersionedRustdocAdapter::new(&indexed_crate, Some(&indexed_crate))
-            .expect("failed to create adapter");
+        let adapter =
+            VersionedRustdocAdapter::new(current, Some(current)).expect("failed to create adapter");
         for semver_query in SemverQuery::all_queries().into_values() {
             let _ = adapter
                 .run_query(&semver_query.query, semver_query.arguments)
@@ -441,8 +468,7 @@ mod tests {
 
     #[test]
     fn pub_use_handling() {
-        let (_baseline_crate, current_crate) = get_test_crate_rustdocs("pub_use_handling");
-        let current = VersionedIndex::from_storage(current_crate);
+        let (_baseline, current) = get_test_crate_indexes("pub_use_handling");
 
         let query = r#"
             {
@@ -466,7 +492,7 @@ mod tests {
         arguments.insert("struct", "CheckPubUseHandling");
 
         let adapter =
-            VersionedRustdocAdapter::new(&current, None).expect("could not create adapter");
+            VersionedRustdocAdapter::new(current, None).expect("could not create adapter");
 
         let results_iter = adapter
             .run_query(query, arguments)
@@ -599,31 +625,24 @@ mod tests {
         let mut query_execution_results: TestOutput = get_test_crate_names()
             .iter()
             .map(|crate_pair_name| {
-                let (crate_old, crate_new) = get_test_crate_rustdocs(crate_pair_name);
-                let indexed_crate_old = VersionedIndex::from_storage(crate_old);
-                let indexed_crate_new = VersionedIndex::from_storage(crate_new);
+                let (baseline, current) = get_test_crate_indexes(crate_pair_name);
 
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
-                    &indexed_crate_new,
+                    current,
                     crate_pair_name,
                     "new",
                 );
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
-                    &indexed_crate_old,
+                    baseline,
                     crate_pair_name,
                     "old",
                 );
 
-                run_query_on_crate_pair(
-                    &semver_query,
-                    crate_pair_name,
-                    &indexed_crate_new,
-                    &indexed_crate_old,
-                )
+                run_query_on_crate_pair(&semver_query, crate_pair_name, current, baseline)
             })
             .filter(|(_crate_pair_name, output)| !output.is_empty())
             .collect();
