@@ -333,6 +333,7 @@ mod tests {
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
+    use rayon::prelude::*;
     use serde::{Deserialize, Serialize};
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_rustdoc::{
@@ -418,7 +419,7 @@ mod tests {
 
     fn initialize_test_crate_rustdocs() -> BTreeMap<String, (VersionedStorage, VersionedStorage)> {
         get_test_crate_names()
-            .iter()
+            .par_iter()
             .map(|crate_pair| {
                 let old_rustdoc = load_pregenerated_rustdoc(crate_pair.as_str(), "old");
                 let new_rustdoc = load_pregenerated_rustdoc(crate_pair, "new");
@@ -431,7 +432,7 @@ mod tests {
     fn initialize_test_crate_indexes(
     ) -> BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
         get_all_test_crates()
-            .iter()
+            .par_iter()
             .map(|(key, (old_crate, new_crate))| {
                 let old_index = VersionedIndex::from_storage(old_crate);
                 let new_index = VersionedIndex::from_storage(new_crate);
