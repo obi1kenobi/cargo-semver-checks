@@ -1,0 +1,22 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/feature_missing/": [
+    {
+      "name": String("going_missing"),
+      "ordering_key": String("going_missing"),
+    },
+    {
+      "name": String("rand"),
+      "ordering_key": String("rand"),
+    },
+  ],
+  "./test_crates/function_feature_changed/": [
+    {
+      "name": String("feature_to_be_removed"),
+      "ordering_key": String("feature_to_be_removed"),
+    },
+  ],
+}

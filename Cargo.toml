@@ -16,7 +16,12 @@ exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "t
 
 [dependencies]
 trustfall = "0.8.0"
-trustfall_rustdoc = { version = "0.17.0", default-features = false, features = ["v30", "v32", "v33", "v34", "v35", "v36", "rayon", "rustc-hash"] }
+# `cargo_metadata` is used at the API boundary of `trustfall_rustdoc`,
+# so ensure the version we use for `cargo_metadata` here matches what `trustfall_rustdoc` uses too.
+trustfall_rustdoc = { version = "0.18.0", default-features = false, features = ["v30", "v32", "v33", "v34", "v35", "v36", "rayon", "rustc-hash"] }
+cargo_metadata = "0.18.1"
+# End of dependency block
+
 clap = { version = "4.5.17", features = ["derive", "cargo"] }
 serde_json = "1.0.128"
 anyhow = "1.0.89"
@@ -25,7 +30,6 @@ serde = { version = "1.0.210", features = ["derive"] }
 semver = "1.0.23"
 handlebars = "6.1.0"
 atty = "0.2.14"
-cargo_metadata = "0.18.1"
 clap-cargo = { version = "0.14.1", features = ["cargo_metadata"] }
 ignore = "0.4.23"
 clap-verbosity-flag = "2.2.1"
