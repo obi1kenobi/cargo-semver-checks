@@ -18,7 +18,6 @@ pub(crate) enum CrateSource<'a> {
         crate_: &'a tame_index::IndexVersion,
         /// The url of the registry index that holds the specified crate
         index_url: String,
-        version: String,
     },
     ManifestPath {
         manifest: &'a Manifest,
@@ -268,8 +267,11 @@ fn generate_rustdoc(
     );
 
     let request = match crate_source {
-        CrateSource::Registry { crate_, .. } => CrateDataRequest::from_index(
+        CrateSource::Registry {
+            crate_, index_url, ..
+        } => CrateDataRequest::from_index(
             crate_,
+            index_url,
             default_features,
             extra_features,
             crate_data.build_target,
@@ -552,6 +554,8 @@ pub(crate) struct RustdocFromRegistry {
     version: Option<semver::Version>,
     index: tame_index::index::ComboIndex,
     /// The url of the index for the given registry
+    ///
+    /// TODO unused!
     index_url: String,
 }
 
@@ -755,7 +759,6 @@ impl RustdocGenerator for RustdocFromRegistry {
             cache_settings,
             self.target_root.clone(),
             CrateSource::Registry {
-                version: crate_.version.to_string(),
                 index_url: self.index_url.clone(),
                 crate_,
             },

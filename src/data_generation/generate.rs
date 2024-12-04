@@ -543,6 +543,9 @@ fn create_placeholder_rustdoc_manifest(
                     // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
                     version: Some(format!("={}", request.kind.version()?)),
                     default_features: request.default_features,
+                    registry_index: Some(
+                        request.kind.index_url().map(ToString::to_string)?.clone(),
+                    ),
                     features: request
                         .extra_features
                         .iter()
