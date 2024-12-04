@@ -12,6 +12,9 @@ rand = { version = "*", optional = true }
 # However, re-adding an explicit feature after removing the implicit one
 # will avoid the breakage.
 rand_core = { version = "*", optional = true}
+# Adding a `dep:` on an optional dependency will remove its implicit feature,
+# making it a breaking change.
+rand_pcg = { version = "*", optional = true}
 
 [features]
 still_present = []
