@@ -119,6 +119,86 @@ fn z_help() {
     })
 }
 
+/// Pin down the behavior when running `cargo-semver-checks` on a package that
+/// relies on `--cfg` based conditional compilation to enable or disable functionality.
+///
+/// An example of such a crate in the wild:
+/// https://docs.rs/aes/latest/aes/#configuration-flags
+///
+/// Since `RUSTDOCFLAGS` is set to `--cfg custom`, the crate should be checked with that setting.
+/// This should reveal two breaking changes -- one caused by `cfg` in the baseline
+/// and one caused by `cfg` in the current.
+#[test]
+fn cfg_conditional_compilation() {
+    assert_integration_test("cfg_conditional_compilation", |cmd, settings| {
+        cmd.args([
+            "--manifest-path",
+            "test_crates/cfg_conditional_compilation/new",
+            "--baseline-root",
+            "test_crates/cfg_conditional_compilation/old",
+        ])
+        .env("RUSTDOCFLAGS", "--cfg custom");
+
+        set_snapshot_filters(settings);
+    });
+}
+
+/// Analogous test to the one above, but when the `--cfg` is not set.
+/// In this case, no breakage should be reported.
+#[test]
+fn cfg_conditional_compilation_without_cfg_set() {
+    assert_integration_test(
+        "cfg_conditional_compilation_without_cfg_set",
+        |cmd, settings| {
+            cmd.args([
+                "--manifest-path",
+                "test_crates/cfg_conditional_compilation/new",
+                "--baseline-root",
+                "test_crates/cfg_conditional_compilation/old",
+            ]);
+
+            set_snapshot_filters(settings);
+        },
+    );
+}
+
+fn set_snapshot_filters(settings: &mut insta::Settings) {
+    // Turn dynamic time strings like [  0.123s] into [TIME] for reproducibility.
+    settings.add_filter(r"\[\s*[\d\.]+s\]", "[TIME]");
+    // Turn total number of checks into [TOTAL] to not fail when new lints are added.
+    settings.add_filter(r"\d+ checks", "[TOTAL] checks");
+    // Similarly, turn the number of passed checks to also not fail when new lints are added.
+    settings.add_filter(r"\d+ pass", "[PASS] pass");
+    // Escape the root path (e.g., in lint spans) for deterministic results in different
+    // build environments.
+    let repo_root = get_root_path();
+    settings.add_filter(&regex::escape(&repo_root.to_string_lossy()), "[ROOT]");
+    // Remove cargo blocking lines (e.g. from `cargo doc` output) as the amount of blocks
+    // is not reproducible.
+    settings.add_filter("    Blocking waiting for file lock on package cache\n", "");
+    // Filter out the current `cargo-semver-checks` version in links to lint references,
+    // as this will break across version changes.
+    settings.add_filter(
+        r"v\d+\.\d+\.\d+(-[\w\.-]+)?/src/lints",
+        "[VERSION]/src/lints",
+    );
+}
+
+/// Helper function to get the root of the source code repository, for
+/// filtering the path in snapshots.
+fn get_root_path() -> PathBuf {
+    let canonicalized = Path::new(file!())
+        .canonicalize()
+        .expect("canonicalization failed");
+    // this file is in `$ROOT/tests/integration_snapshots.rs`, so the repo root is two `parent`s up.
+    let repo_root = canonicalized
+        .parent()
+        .and_then(Path::parent)
+        .expect("getting repo root failed");
+
+    repo_root.to_owned()
+}
+
 /// Helper function to get a canonicalized version of the cargo executable bin.
 fn executable_path() -> PathBuf {
     Path::new(

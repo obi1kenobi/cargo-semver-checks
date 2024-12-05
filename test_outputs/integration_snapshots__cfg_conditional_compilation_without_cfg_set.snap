@@ -1,0 +1,31 @@
+---
+source: tests/integration_snapshots.rs
+info:
+  program: cargo-semver-checks
+  args:
+    - semver-checks
+    - "--manifest-path"
+    - test_crates/cfg_conditional_compilation/new
+    - "--baseline-root"
+    - test_crates/cfg_conditional_compilation/old
+  env:
+    CARGO_TERM_COLOR: never
+    RUST_BACKTRACE: "0"
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+----- stderr -----
+    Building cfg_conditional_compilation v0.1.0 (current)
+       Built [TIME] (current)
+     Parsing cfg_conditional_compilation v0.1.0 (current)
+      Parsed [TIME] (current)
+    Building cfg_conditional_compilation v0.1.0 (baseline)
+       Built [TIME] (baseline)
+     Parsing cfg_conditional_compilation v0.1.0 (baseline)
+      Parsed [TIME] (baseline)
+    Checking cfg_conditional_compilation v0.1.0 -> v0.1.0 (no change)
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 0 skip
+     Summary no semver update required
+    Finished [TIME] cfg_conditional_compilation
