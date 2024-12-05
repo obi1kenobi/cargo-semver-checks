@@ -46,6 +46,7 @@ to the implementation of that query in the current version of the tool.
 - [What if my project needs stronger guarantees around supported Rust versions?](#what-if-my-project-needs-stronger-guarantees-around-supported-rust-versions)
 - [Does the crate I'm checking have to be published on crates.io?](#does-the-crate-im-checking-have-to-be-published-on-cratesio)
 - [What features does `cargo-semver-checks` enable in the tested crates?](#what-features-does-cargo-semver-checks-enable-in-the-tested-crates)
+- [My crate uses `--cfg` conditional compilation. Can `cargo-semver-checks` scan it?](#my-crate-uses---cfg-conditional-compilation-can-cargo-semver-checks-scan-it)
 - [Does `cargo-semver-checks` have false positives?](#does-cargo-semver-checks-have-false-positives)
 - [Will `cargo-semver-checks` catch every semver violation?](#will-cargo-semver-checks-catch-every-semver-violation)
 - [Can I configure individual lints?](#can-i-configure-individual-lints)
@@ -153,6 +154,17 @@ For example, consider crate [serde](https://github.com/serde-rs/serde), with the
 | `--default-features --features derive`         | `std`, `derive`                            | Feature `derive` is used along with crate's default features.      |
 | `--only-explicit-features`                     | none                                       | No explicit features are passed.                                   |
 | `--only-explicit-features --features unstable` | `unstable`                                 | All features can be added explicitly, regardless of their name.    |
+
+### My crate uses `--cfg` conditional compilation. Can `cargo-semver-checks` scan it?
+
+Yes! You can configure the `--cfg` options that `cargo-semver-checks` will use
+when scanning your crate by setting them in the `RUSTDOCFLAGS` environment variable.
+
+For example, you can ask `cargo-semver-checks` to enable the `some-option` config
+by invoking it as:
+```
+RUSTDOCFLAGS="--cfg some-option" cargo semver-checks
+```
 
 ### Does `cargo-semver-checks` have false positives?
 

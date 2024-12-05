@@ -1,0 +1,54 @@
+---
+source: tests/integration_snapshots.rs
+info:
+  program: cargo-semver-checks
+  args:
+    - semver-checks
+    - "--manifest-path"
+    - test_crates/cfg_conditional_compilation/new
+    - "--baseline-root"
+    - test_crates/cfg_conditional_compilation/old
+  env:
+    CARGO_TERM_COLOR: never
+    RUSTDOCFLAGS: "--cfg custom"
+    RUSTFLAGS: "--cfg custom"
+    RUST_BACKTRACE: "0"
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+--- failure enum_variant_added: enum variant added on exhaustive enum ---
+
+Description:
+A publicly-visible enum without #[non_exhaustive] has a new variant.
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#enum-variant-new
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/enum_variant_added.ron
+
+Failed in:
+  variant Data:Bool in [ROOT]/test_crates/cfg_conditional_compilation/new/src/lib.rs:5
+
+--- failure struct_missing: pub struct removed or renamed ---
+
+Description:
+A publicly-visible struct cannot be imported by its prior path. A `pub use` may have been removed, or the struct itself may have been renamed or removed entirely.
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#item-remove
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/struct_missing.ron
+
+Failed in:
+  struct cfg_conditional_compilation::Example, previously in file [ROOT]/test_crates/cfg_conditional_compilation/old/src/lib.rs:2
+
+----- stderr -----
+    Building cfg_conditional_compilation v0.1.0 (current)
+       Built [TIME] (current)
+     Parsing cfg_conditional_compilation v0.1.0 (current)
+      Parsed [TIME] (current)
+    Building cfg_conditional_compilation v0.1.0 (baseline)
+       Built [TIME] (baseline)
+     Parsing cfg_conditional_compilation v0.1.0 (baseline)
+      Parsed [TIME] (baseline)
+    Checking cfg_conditional_compilation v0.1.0 -> v0.1.0 (no change)
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 2 fail, 0 warn, 0 skip
+
+     Summary semver requires new major version: 2 major and 0 minor checks failed
+    Finished [TIME] cfg_conditional_compilation

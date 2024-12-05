@@ -244,8 +244,8 @@ fn run_cargo_doc(
     let pkg_spec = format!("{crate_name}@{version}");
 
     // Generating rustdoc JSON for a crate also involves checking that crate's dependencies.
-    // The check is done by rustc, not rustdoc, so it's subject to RUSTFLAGS not RUSTDOCFLAGS.
-    // We don't want rustc to fail that check if the user has set RUSTFLAGS="-Dwarnings" here.
+    // The check is done by rustc, not rustdoc, so it's subject to `RUSTFLAGS` not `RUSTDOCFLAGS`.
+    // We don't want rustc to fail that check if the user has set `RUSTFLAGS="-Dwarnings"` here.
     // This fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/589
     let rustflags = match std::env::var("RUSTFLAGS") {
         Ok(mut prior_rustflags) => {
@@ -253,6 +253,20 @@ fn run_cargo_doc(
             std::borrow::Cow::Owned(prior_rustflags)
         }
         Err(_) => std::borrow::Cow::Borrowed("--cap-lints=allow"),
+    };
+
+    // Ensure we preserve `RUSTDOCFLAGS` if they are set.
+    // This allows users to supply `--cfg <custom-value>` settings in `RUSTDOCFLAGS`
+    // in order to toggle what functionality is compiled into the scanned crate.
+    // Suggested in: https://github.com/obi1kenobi/cargo-semver-checks/discussions/1012
+    let extra_rustdocflags = "-Z unstable-options --document-private-items --document-hidden-items --output-format=json --cap-lints=allow";
+    let rustdocflags = match std::env::var("RUSTDOCFLAGS") {
+        Ok(mut prior_rustdocflags) => {
+            prior_rustdocflags.push(' ');
+            prior_rustdocflags.push_str(extra_rustdocflags);
+            std::borrow::Cow::Owned(prior_rustdocflags)
+        }
+        Err(_) => std::borrow::Cow::Borrowed(extra_rustdocflags),
     };
 
     // Run the rustdoc generation command on the placeholder crate,
@@ -266,10 +280,7 @@ fn run_cargo_doc(
     callbacks.generate_rustdoc_start();
     let mut cmd = std::process::Command::new("cargo");
     cmd.env("RUSTC_BOOTSTRAP", "1")
-        .env(
-            "RUSTDOCFLAGS",
-            "-Z unstable-options --document-private-items --document-hidden-items --output-format=json --cap-lints=allow",
-        )
+        .env("RUSTDOCFLAGS", rustdocflags.as_ref())
         .env("RUSTFLAGS", rustflags.as_ref())
         .stdout(std::process::Stdio::null()) // Don't pollute output
         .stderr(settings.stderr())
