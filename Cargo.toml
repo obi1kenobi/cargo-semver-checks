@@ -9,7 +9,7 @@ repository = "https://github.com/obi1kenobi/cargo-semver-checks"
 readme = "./README.md"
 keywords = ["semver", "linter", "check", "crate", "cargo"]
 categories = ["command-line-utilities", "development-tools::cargo-plugins"]
-rust-version = "1.80"
+rust-version = "1.81"
 exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "tests/"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -18,7 +18,7 @@ exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "t
 trustfall = "0.8.0"
 # `cargo_metadata` is used at the API boundary of `trustfall_rustdoc`,
 # so ensure the version we use for `cargo_metadata` here matches what `trustfall_rustdoc` uses too.
-trustfall_rustdoc = { version = "0.18.1", default-features = false, features = ["v30", "v32", "v33", "v34", "v35", "v36", "v37", "rayon", "rustc-hash"] }
+trustfall_rustdoc = { version = "0.18.1", default-features = false, features = ["v32", "v33", "v35", "v36", "v37", "rayon", "rustc-hash"] }
 cargo_metadata = "0.18.1"
 # End of dependency block
 
