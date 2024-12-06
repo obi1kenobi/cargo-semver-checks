@@ -12,6 +12,10 @@ expression: "&query_execution_results"
       "name": String("rand"),
       "ordering_key": String("rand"),
     },
+    {
+      "name": String("rand_pcg"),
+      "ordering_key": String("rand_pcg"),
+    },
   ],
   "./test_crates/function_feature_changed/": [
     {
