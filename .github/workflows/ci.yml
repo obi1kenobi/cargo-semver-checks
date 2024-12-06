@@ -169,7 +169,7 @@ jobs:
         #
         #            Also make sure to update the MSRV in the cargo-semver-checks-action CI:
         #            https://github.com/obi1kenobi/cargo-semver-checks-action/blob/main/.github/workflows/test-action.yml#L18
-        toolchain: ["1.80", "1.81", "stable", "beta"]
+        toolchain: ["1.81", "1.82", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -194,7 +194,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: semver/localdata/test_data/
-          key: test-rustdocs-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/test_crates/**/*.rs') }}
+          key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/test_crates/**/*.rs') }}
 
       - name: Regenerate test data
         if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
@@ -406,11 +406,17 @@ jobs:
 
           # Show what's in the cache.
           ls subject-new/target/semver-checks/cache/
-          EXPECTED_CACHED_RUSTDOC='subject-new/target/semver-checks/cache/libp2p_core-0_37_0-ccce455725cbab73.json'
+          EXPECTED_PREFIX='subject-new/target/semver-checks/cache/libp2p_core-0_37_0-ccce455725cbab73'
+          EXPECTED_CACHED_METADATA="${EXPECTED_PREFIX}.metadata.json"
+          EXPECTED_CACHED_RUSTDOC="${EXPECTED_PREFIX}.json"
 
-          # Ensure the previous cached rustdoc file still exists.
+          # Ensure the previous cached rustdoc and metadata files still exist.
+          [ -f "$EXPECTED_CACHED_METADATA" ] || { \
+            echo "could not find libp2p-core metadata cache file"; \
+            exit 1;
+          }
           [ -f "$EXPECTED_CACHED_RUSTDOC" ] || { \
-            echo "could not find libp2p-core cache file"; \
+            echo "could not find libp2p-core rustdoc cache file"; \
             exit 1;
           }
 
@@ -527,18 +533,28 @@ jobs:
           ls subject/target/semver-checks/cache/
 
           # The previous cached rustdoc should continue to exist.
-          if [ -f subject/target/semver-checks/cache/serde-1_0_162-5900ebf8bb9b9f8b.json ]; then
-            exit 0
-          else
+          PREVIOUS_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-5900ebf8bb9b9f8b'
+          PREVIOUS_RUSTDOC="${PREVIOUS_PREFIX}.json"
+          PREVIOUS_METADATA="${PREVIOUS_PREFIX}.metadata.json"
+          if [ ! -f "$PREVIOUS_RUSTDOC" ]; then
             echo "Older rustdoc JSON not found in cache!"
+            exit 1
+          fi
+          if [ ! -f "$PREVIOUS_METADATA" ]; then
+            echo "Older metadata file not found in cache!"
             exit 1
           fi
 
           # There should also be a new cached rustdoc file for the new feature settings.
-          if [ -f subject/target/semver-checks/cache/serde-1_0_162-6999ae87ca463ab3.json ]; then
-            exit 0
-          else
+          NEW_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-6999ae87ca463ab3'
+          NEW_RUSTDOC="${NEW_PREFIX}.json"
+          NEW_METADATA="${NEW_PREFIX}.metadata.json"
+          if [ ! -f "$NEW_RUSTDOC" ]; then
             echo "New rustdoc JSON for new feature combo not found in cache!"
+            exit 1
+          fi
+          if [ ! -f "$NEW_METADATA" ]; then
+            echo "New metadata file for new feature combo not found in cache!"
             exit 1
           fi
 
@@ -1767,7 +1783,7 @@ jobs:
         id: toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: "1.79"
+          toolchain: "1.80"
           rustflags: ""
           cache: false
 
@@ -1810,7 +1826,7 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "error: rustc version is not high enough: >=1.80.0 needed, got 1.79.0")"
+          EXPECTED="$(echo -e "error: rustc version is not high enough: >=1.81.0 needed, got 1.80.1")"
           RESULT="$(cat output | grep 'error: rustc version')"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 

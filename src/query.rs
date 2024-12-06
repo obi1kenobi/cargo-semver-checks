@@ -329,14 +329,15 @@ mod tests {
     use std::borrow::Cow;
     use std::collections::BTreeSet;
     use std::path::PathBuf;
-    use std::sync::OnceLock;
+    use std::sync::{Arc, OnceLock};
     use std::{collections::BTreeMap, path::Path};
 
     use anyhow::Context;
+    use rayon::prelude::*;
     use serde::{Deserialize, Serialize};
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_rustdoc::{
-        load_rustdoc, VersionedCrate, VersionedIndexedCrate, VersionedRustdocAdapter,
+        load_rustdoc, VersionedIndex, VersionedRustdocAdapter, VersionedStorage,
     };
 
     use crate::query::{
@@ -348,15 +349,31 @@ mod tests {
     static TEST_CRATE_NAMES: OnceLock<Vec<String>> = OnceLock::new();
 
     /// Mapping test crate (pair) name -> (old rustdoc, new rustdoc).
-    static TEST_CRATE_RUSTDOCS: OnceLock<BTreeMap<String, (VersionedCrate, VersionedCrate)>> =
+    static TEST_CRATE_RUSTDOCS: OnceLock<BTreeMap<String, (VersionedStorage, VersionedStorage)>> =
         OnceLock::new();
+
+    /// Mapping test crate (pair) name -> (old index, new index).
+    static TEST_CRATE_INDEXES: OnceLock<
+        BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)>,
+    > = OnceLock::new();
 
     fn get_test_crate_names() -> &'static [String] {
         TEST_CRATE_NAMES.get_or_init(initialize_test_crate_names)
     }
 
-    fn get_test_crate_rustdocs(test_crate: &str) -> &'static (VersionedCrate, VersionedCrate) {
-        &TEST_CRATE_RUSTDOCS.get_or_init(initialize_test_crate_rustdocs)[test_crate]
+    fn get_all_test_crates() -> &'static BTreeMap<String, (VersionedStorage, VersionedStorage)> {
+        TEST_CRATE_RUSTDOCS.get_or_init(initialize_test_crate_rustdocs)
+    }
+
+    fn get_all_test_crate_indexes(
+    ) -> &'static BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
+        TEST_CRATE_INDEXES.get_or_init(initialize_test_crate_indexes)
+    }
+
+    fn get_test_crate_indexes(
+        test_crate: &str,
+    ) -> &'static (VersionedIndex<'static>, VersionedIndex<'static>) {
+        &get_all_test_crate_indexes()[test_crate]
     }
 
     fn initialize_test_crate_names() -> Vec<String> {
@@ -400,9 +417,9 @@ mod tests {
             .collect()
     }
 
-    fn initialize_test_crate_rustdocs() -> BTreeMap<String, (VersionedCrate, VersionedCrate)> {
+    fn initialize_test_crate_rustdocs() -> BTreeMap<String, (VersionedStorage, VersionedStorage)> {
         get_test_crate_names()
-            .iter()
+            .par_iter()
             .map(|crate_pair| {
                 let old_rustdoc = load_pregenerated_rustdoc(crate_pair.as_str(), "old");
                 let new_rustdoc = load_pregenerated_rustdoc(crate_pair, "new");
@@ -412,20 +429,37 @@ mod tests {
             .collect()
     }
 
-    fn load_pregenerated_rustdoc(crate_pair: &str, crate_version: &str) -> VersionedCrate {
-        let path = format!("./localdata/test_data/{crate_pair}/{crate_version}/rustdoc.json");
-        load_rustdoc(Path::new(&path))
-            .with_context(|| format!("Could not load {path} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?"))
-            .expect("failed to load baseline rustdoc")
+    fn initialize_test_crate_indexes(
+    ) -> BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
+        get_all_test_crates()
+            .par_iter()
+            .map(|(key, (old_crate, new_crate))| {
+                let old_index = VersionedIndex::from_storage(old_crate);
+                let new_index = VersionedIndex::from_storage(new_crate);
+                (key.clone(), (old_index, new_index))
+            })
+            .collect()
+    }
+
+    fn load_pregenerated_rustdoc(crate_pair: &str, crate_version: &str) -> VersionedStorage {
+        let rustdoc_path =
+            format!("./localdata/test_data/{crate_pair}/{crate_version}/rustdoc.json");
+        let metadata_path =
+            format!("./localdata/test_data/{crate_pair}/{crate_version}/metadata.json");
+        let metadata_text = std::fs::read_to_string(&metadata_path).map_err(|e| anyhow::anyhow!(e).context(
+            format!("Could not load {metadata_path} file. These files are newly required as of PR#1007. Please re-run ./scripts/regenerate_test_rustdocs.sh"))).expect("failed to load metadata");
+        let metadata = serde_json::from_str(&metadata_text).expect("failed to parse metadata file");
+        load_rustdoc(Path::new(&rustdoc_path), Some(metadata))
+            .with_context(|| format!("Could not load {rustdoc_path} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?"))
+            .expect("failed to load rustdoc")
     }
 
     #[test]
     fn all_queries_are_valid() {
-        let (_baseline_crate, current_crate) = get_test_crate_rustdocs("template");
-        let indexed_crate = VersionedIndexedCrate::new(current_crate);
+        let (_baseline, current) = get_test_crate_indexes("template");
 
-        let adapter = VersionedRustdocAdapter::new(&indexed_crate, Some(&indexed_crate))
-            .expect("failed to create adapter");
+        let adapter =
+            VersionedRustdocAdapter::new(current, Some(current)).expect("failed to create adapter");
         for semver_query in SemverQuery::all_queries().into_values() {
             let _ = adapter
                 .run_query(&semver_query.query, semver_query.arguments)
@@ -435,8 +469,7 @@ mod tests {
 
     #[test]
     fn pub_use_handling() {
-        let (_baseline_crate, current_crate) = get_test_crate_rustdocs("pub_use_handling");
-        let current = VersionedIndexedCrate::new(current_crate);
+        let (_baseline, current) = get_test_crate_indexes("pub_use_handling");
 
         let query = r#"
             {
@@ -460,7 +493,7 @@ mod tests {
         arguments.insert("struct", "CheckPubUseHandling");
 
         let adapter =
-            VersionedRustdocAdapter::new(&current, None).expect("could not create adapter");
+            VersionedRustdocAdapter::new(current, None).expect("could not create adapter");
 
         let results_iter = adapter
             .run_query(query, arguments)
@@ -542,8 +575,8 @@ mod tests {
     fn run_query_on_crate_pair(
         semver_query: &SemverQuery,
         crate_pair_name: &String,
-        indexed_crate_new: &VersionedIndexedCrate,
-        indexed_crate_old: &VersionedIndexedCrate,
+        indexed_crate_new: &VersionedIndex<'_>,
+        indexed_crate_old: &VersionedIndex<'_>,
     ) -> (String, Vec<BTreeMap<String, FieldValue>>) {
         let adapter = VersionedRustdocAdapter::new(indexed_crate_new, Some(indexed_crate_old))
             .expect("could not create adapter");
@@ -561,7 +594,7 @@ mod tests {
     fn assert_no_false_positives_in_nonchanged_crate(
         query_name: &str,
         semver_query: &SemverQuery,
-        indexed_crate: &VersionedIndexedCrate,
+        indexed_crate: &VersionedIndex<'_>,
         crate_pair_name: &String,
         crate_version: &str,
     ) {
@@ -593,31 +626,24 @@ mod tests {
         let mut query_execution_results: TestOutput = get_test_crate_names()
             .iter()
             .map(|crate_pair_name| {
-                let (crate_old, crate_new) = get_test_crate_rustdocs(crate_pair_name);
-                let indexed_crate_old = VersionedIndexedCrate::new(crate_old);
-                let indexed_crate_new = VersionedIndexedCrate::new(crate_new);
+                let (baseline, current) = get_test_crate_indexes(crate_pair_name);
 
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
-                    &indexed_crate_new,
+                    current,
                     crate_pair_name,
                     "new",
                 );
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
-                    &indexed_crate_old,
+                    baseline,
                     crate_pair_name,
                     "old",
                 );
 
-                run_query_on_crate_pair(
-                    &semver_query,
-                    crate_pair_name,
-                    &indexed_crate_new,
-                    &indexed_crate_old,
-                )
+                run_query_on_crate_pair(&semver_query, crate_pair_name, current, baseline)
             })
             .filter(|(_crate_pair_name, output)| !output.is_empty())
             .collect();
@@ -625,14 +651,31 @@ mod tests {
         // Reorder vector of results into a deterministic order that will compensate for
         // nondeterminism in how the results are ordered.
         let key_func = |elem: &BTreeMap<String, FieldValue>| {
-            let filename = elem.get("span_filename").and_then(|value| value.as_str());
-            let line = elem.get("span_begin_line");
-
-            match (filename, line) {
-                (Some(filename), Some(line)) => (filename.to_owned(), line.as_usize()),
-                (Some(_filename), None) => panic!("A valid query must output `span_filename`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                (None, Some(_line)) => panic!("A valid query must output `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                (None, None) => panic!("A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+            // Queries should either:
+            // - define an explicit `ordering_key` string value sufficient to establish
+            //   a total order of results for each crate, or
+            // - define `span_filename` and `span_begin_line` values where the lint is being raised,
+            //   which will then define a total order of results for that query on that crate.
+            let ordering_key = elem
+                .get("ordering_key")
+                .and_then(|value| value.as_arc_str());
+            if let Some(key) = ordering_key {
+                (Arc::clone(key), 0)
+            } else {
+                let filename = elem.get("span_filename").map(|value| {
+                    value
+                        .as_arc_str()
+                        .expect("`span_filename` was not a string")
+                });
+                let line = elem
+                    .get("span_begin_line")
+                    .map(|value: &FieldValue| value.as_usize().expect("begin line was not an int"));
+                match (filename, line) {
+                    (Some(filename), Some(line)) => (Arc::clone(filename), line),
+                    (Some(_filename), None) => panic!("No `span_begin_line` was returned by the query, even though `span_filename` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    (None, Some(_line)) => panic!("No `span_filename` was returned by the query, even though `span_begin_line` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    (None, None) => panic!("A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                }
             }
         };
         for value in query_execution_results.values_mut() {
@@ -1031,6 +1074,7 @@ add_lints!(
     enum_variant_marked_non_exhaustive,
     enum_variant_missing,
     exported_function_changed_abi,
+    feature_missing,
     function_abi_no_longer_unwind,
     function_changed_abi,
     function_const_removed,

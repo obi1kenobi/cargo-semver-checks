@@ -6,7 +6,7 @@ use anyhow::{bail, Context as _};
 use itertools::Itertools;
 use serde::Serialize;
 use tame_index::IndexKrate;
-use trustfall_rustdoc::VersionedCrate;
+use trustfall_rustdoc::VersionedStorage;
 
 use crate::data_generation::{CrateDataRequest, IntoTerminalResult as _, TerminalError};
 use crate::manifest::Manifest;
@@ -253,7 +253,7 @@ fn generate_rustdoc(
     target_root: PathBuf,
     crate_source: CrateSource,
     crate_data: CrateDataForRustdoc,
-) -> Result<VersionedCrate, TerminalError> {
+) -> Result<VersionedStorage, TerminalError> {
     let extra_features: BTreeSet<Cow<'_, str>> = crate_source
         .feature_list_from_config(config, crate_data.feature_config)
         .into_iter()
@@ -306,7 +306,7 @@ pub(crate) trait RustdocGenerator {
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
         crate_data: CrateDataForRustdoc,
-    ) -> Result<VersionedCrate, TerminalError>;
+    ) -> Result<VersionedStorage, TerminalError>;
 }
 
 #[derive(Debug)]
@@ -327,8 +327,10 @@ impl RustdocGenerator for RustdocFromFile {
         _generation_settings: super::data_generation::GenerationSettings,
         _cache_settings: super::data_generation::CacheSettings<()>,
         _crate_data: CrateDataForRustdoc,
-    ) -> Result<VersionedCrate, TerminalError> {
-        trustfall_rustdoc::load_rustdoc(&self.path).into_terminal_result()
+    ) -> Result<VersionedStorage, TerminalError> {
+        trustfall_rustdoc::load_rustdoc(&self.path, None)
+            .map_err(anyhow::Error::from)
+            .into_terminal_result()
     }
 }
 
@@ -424,7 +426,7 @@ impl RustdocGenerator for RustdocFromProjectRoot {
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
         crate_data: CrateDataForRustdoc,
-    ) -> Result<VersionedCrate, TerminalError> {
+    ) -> Result<VersionedStorage, TerminalError> {
         let manifest: &Manifest = self.manifests.get(crate_data.name).ok_or_else(|| {
             if let Some(duplicates) = self.duplicate_packages.get(crate_data.name) {
                 let duplicates = duplicates.iter().map(|p| p.display()).join("\n  ");
@@ -522,7 +524,7 @@ impl RustdocGenerator for RustdocFromGitRevision {
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
         crate_data: CrateDataForRustdoc,
-    ) -> Result<VersionedCrate, TerminalError> {
+    ) -> Result<VersionedStorage, TerminalError> {
         self.path
             .load_rustdoc(config, generation_settings, cache_settings, crate_data)
     }
@@ -681,7 +683,7 @@ impl RustdocGenerator for RustdocFromRegistry {
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
         crate_data: CrateDataForRustdoc,
-    ) -> Result<VersionedCrate, TerminalError> {
+    ) -> Result<VersionedStorage, TerminalError> {
         let lock = acquire_cargo_global_package_lock(config).into_terminal_result()?;
         let crate_ = self.index.krate(crate_data.name.try_into().expect("this should be impossible"), false, &lock)
             .with_context(|| {

@@ -1,0 +1,17 @@
+[package]
+publish = false
+name = "feature_missing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Adding a `dep:` on an optional dependency will remove its implicit feature,
+# making it a breaking change.
+rand_pcg = { version = "*", optional = true}
+
+[features]
+still_present = []
+# Explicitly-added feature, to replace the implicit feature defined by
+# the `optional = true` dependency in the previous crate version.
+rand_core = []
+pcg = ["dep:rand_pcg"]

@@ -1,0 +1,34 @@
+[package]
+publish = false
+name = "feature_missing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Since `rand` isn't used in a feature with `dep:rand` syntax,
+# it defines an implicit feature by that name.
+# Removing that implicit feature is a breaking change.
+rand = { version = "*", optional = true }
+# However, re-adding an explicit feature after removing the implicit one
+# will avoid the breakage.
+rand_core = { version = "*", optional = true}
+# Adding a `dep:` on an optional dependency will remove its implicit feature,
+# making it a breaking change.
+rand_pcg = { version = "*", optional = true}
+
+[features]
+still_present = []
+going_missing = []
+
+# We ignore unstable-looking feature names.
+# All of the following will be removed, and none of them should be flagged.
+unstable = []
+nightly = []
+bench = []
+unstable-dash = []
+unstable_underscore = []
+nightly-dash = []
+nightly_underscore = []
+bench-dash = []
+bench_underscore = []
+_underscore_prefix = []

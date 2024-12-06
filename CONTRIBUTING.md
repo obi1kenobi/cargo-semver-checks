@@ -111,7 +111,7 @@ To generate this data, please run `./scripts/regenerate_test_rustdocs.sh`.
 To use a specific toolchain, like beta or nightly, pass it as
 an argument: `./scripts/regenerate_test_rustdocs.sh +nightly`.
 
-## What are those `.snap` or `.snap.new` files generated via `cargo test` 
+## What are those `.snap` or `.snap.new` files generated via `cargo test`
 
 As part of our overall testing strategy, we use a technique called "snapshot testing."
 The tool we use for this ([`insta`](https://insta.rs/docs/)) is user friendly and has mutliple ways to interact with it:
@@ -138,7 +138,7 @@ Reviewing them is possible via these options:
    ```
 3. **Manually**: If you can't (or don't want to) use `cargo-insta`, you can verify the snapshot
    file manually.  There should be a file called `test_outputs/<some_path>/<lint_name>.snap.new`.
-   Open it, and verify that its contents match what you expected: all expected data is present, and no unexpected data is included. 
+   Open it, and verify that its contents match what you expected: all expected data is present, and no unexpected data is included.
    Once you've checked it, remove the `.new` suffix so that the file's new path
    is `test_outputs/<some_path>/<lint_name>.snap`
 
@@ -172,14 +172,16 @@ We'll use the [`scripts/make_new_lint.sh`](https://github.com/obi1kenobi/cargo-s
 
 Now it's time to fill in these files!
 - Define the lint in `src/lints/<lint_name>.ron`.
-- Make sure your lint outputs `span_filename` and `span_begin_line` for it
-  to be a valid lint. The pattern we commonly use is:
+- For almost all lints, make sure your lint outputs `span_filename` and `span_begin_line`
+  in order to be a valid lint. The pattern we commonly use is:
   ```
   span_: span @optional {
     filename @output
     begin_line @output
   }
   ```
+  <details><summary>Exception: lints over Cargo.toml information (click to expand)</summary>If you are writing a lint over manifest (<code>Cargo.toml</code>) information such as "a feature was deleted," you won't be able to find span data from the manifest file. To proceed, pick a value unique to each result produced by your lint query and output it as <code>ordering_key</code> instead.</details>
+
 - Demonstrate the semver issue your lint is looking for by adding suitable code in
   the `test_crates/<lint_name>/old` and `test_crates/<lint_name>/new` crates.
 - Add code to the test crates that aims to catch for false-positives
@@ -269,8 +271,8 @@ Inspect the generated "actual" output in the `.snap.new` file:
   If so, ensure the reported code is indeed violating semver and is not being flagged
   by any other lint.
 
-If everything looks okay, either run `cargo insta review` (see 
-the [snapshot instructions](#what-are-those-snap-or-snapnew-files-generated-via-cargo-test) 
+If everything looks okay, either run `cargo insta review` (see
+the [snapshot instructions](#what-are-those-snap-or-snapnew-files-generated-via-cargo-test)
 for context) or manually move `test_outputs/query_execution/<lint_name>.snap.new`
 to  `test_outputs/query_execution/<lint_name>.snap`.
 Then re-run `cargo test` and make sure everything passes.
@@ -342,7 +344,7 @@ to update the test outputs.
 > It may contain output for other test crates — this is not necessarily an error:
 > See the [troubleshooting section](#troubleshooting) for more info.
 
-To update the output, please refer to the section 
+To update the output, please refer to the section
 on [snapshot testing](#what-are-those-snap-or-snapnew-files-generated-via-cargo-test)
 
 Once you've update the test output, run `cargo test` again and the `<lint_name>` test should pass!
@@ -356,14 +358,14 @@ otherwise the test will fail in CI.
 ### Troubleshooting
 
 - <details><summary>A valid query must output <code>span_filename</code> and/or <code>span_begin_line</code> (click to expand)</summary>
-  
+
   If your lint fails with an error similar to the following:
   ```
   ---- query::tests_lints::enum_missing stdout ----
   thread 'query::tests_lints::enum_missing' panicked at 'A valid query must output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for how to do this.', src/query.rs:395:26
   note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
   ```
-  
+
   It likely means that your lint does not specify the `span_filename` and `span_begin_line` of where the error occurs. To fix this, add the following to the part of query that catches the error:
   ```
   span_: span @optional {
@@ -371,25 +373,25 @@ otherwise the test will fail in CI.
     begin_line @output
   }
   ```
-  
+
   </details>
 - <details><summary>Other lints' tests failed too (click to expand)</summary>
 
   This is not always a problem! In process of testing a lint, it's frequently desirable to include
   test code that contains a related semver issue in order to ensure the lint differentiates between
   them.
-  
+
   For example, say one is testing a lint for pub field removals from a struct. Its test crate code
 may then include removals of the entire struct, in order to make sure that the lint *does not*
 report those. But those struct removals *will* get reported by the lint that looks for semver
 violations due to struct removal!
-  
+
   So if you added code to a test crate, and it caused other lints to report new findings, consider:
   - whether your code indeed contains the reported semver issue;
   - whether the same semver issue is being reported only once, and not multiple times
     by different lints,
   - and whether the new reported lint result points to the correct item and span information.
-  
+
   If the answer to all is yes, then everything is fine! Just edit those other lints'
 expected output files to include the new items, and you can get back on track.
   </details>
