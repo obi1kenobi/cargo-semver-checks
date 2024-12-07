@@ -96,7 +96,7 @@ for crate_pair; do
                 popd
 
                 pushd "$PLACEHOLDER_DIR"
-                sed -i '' '$d' Cargo.toml
+                sed -i='' '$d' Cargo.toml
                 cargo add --path "../../../test_crates/$crate"
                 $METADATA_CMD >"$metadata"
                 popd
