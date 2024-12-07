@@ -1048,6 +1048,7 @@ macro_rules! add_lints {
 // The following add_lints! invocation is programmatically edited by scripts/make_new_lint.sh
 // If you must manually edit it, be sure to read the "Requirements" comments in that script first
 add_lints!(
+    attribute_proc_macro_missing,
     auto_trait_impl_removed,
     constructible_struct_adds_field,
     constructible_struct_adds_private_field,
