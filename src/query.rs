@@ -1053,6 +1053,7 @@ add_lints!(
     constructible_struct_adds_private_field,
     constructible_struct_changed_type,
     declarative_macro_missing,
+    derive_proc_macro_missing,
     derive_trait_impl_removed,
     enum_marked_non_exhaustive,
     enum_missing,
