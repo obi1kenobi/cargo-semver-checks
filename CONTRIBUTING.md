@@ -144,6 +144,8 @@ Reviewing them is possible via these options:
 
 ## Adding a new lint
 
+If you haven't contributed lints before, consider running [`./scripts/regenerate_test_rustdocs.sh`](https://github.com/obi1kenobi/cargo-semver-checks/tree/main/scripts/regenerate_test_rustdocs.sh) while you read this guide. Its first run will take a few minutes, and it's necessary to make tests pass. So kick it off in the background while you get up to speed here.
+
 ### Background
 
 Lints are written as queries for the `trustfall` ["query everything" engine](https://github.com/obi1kenobi/trustfall).
