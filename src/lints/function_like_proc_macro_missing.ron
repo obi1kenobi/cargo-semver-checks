@@ -38,7 +38,5 @@ SemverQuery(
     },
     error_message: "A function-like procedural macro has been removed. Any code that invokes this macro will fail to compile.",
     per_result_error_template: Some("macro {{macro_name}} in file {{span_filename}}:{{span_begin_line}}"),
-    witness: Some((
-        hint_template: r#"{{macro_name}}!(...);"#,
-    )),
+    witness: None,
 )
