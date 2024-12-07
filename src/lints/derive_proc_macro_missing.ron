@@ -1,0 +1,41 @@
+SemverQuery(
+    id: "derive_proc_macro_missing",
+    human_readable_name: "derive macro removed",
+    description: "A derive macro that was previously available can no longer be used.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/procedural-macros.html#derive-macros"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on DeriveProcMacro {
+                        macro_name: name @output @tag
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    ... on DeriveProcMacro {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%macro_name"])
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A derive macro has been removed. Type definitions using #[derive(...)] with this macro will fail to compile.",
+    per_result_error_template: Some("macro {{macro_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
