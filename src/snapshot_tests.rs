@@ -171,7 +171,7 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     settings.add_filter(&regex::escape(&repo_root.to_string_lossy()), "[ROOT]");
     // Remove cargo blocking lines (e.g. from `cargo doc` output) as the amount of blocks
     // is not reproducible.
-    settings.add_filter("    Blocking waiting for file lock on package cache\n", "");
+    settings.add_filter("    Blocking waiting for file lock on [^\n]+\n", "");
     // Filter out the current `cargo-semver-checks` version in links to lint references,
     // as this will break across version changes.
     settings.add_filter(
