@@ -1,0 +1,42 @@
+SemverQuery(
+    id: "function_like_proc_macro_missing",
+    human_readable_name: "function-like proc macro removed",
+    description: "A function-like procedural macro that previously existed has been removed.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/procedural-macros.html#function-like-procedural-macros"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on FunctionLikeProcMacro {
+                        macro_name: name @output @tag
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        
+                        # Get span info from the baseline for error reporting
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            
+            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    ... on FunctionLikeProcMacro {
+                        name @filter(op: "=", value: ["%macro_name"])
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A function-like procedural macro has been removed. Any code that invokes this macro will fail to compile.",
+    per_result_error_template: Some("macro {{macro_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
