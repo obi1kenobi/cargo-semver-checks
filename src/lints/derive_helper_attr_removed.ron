@@ -1,0 +1,49 @@
+SemverQuery(
+    id: "derive_helper_attr_removed",
+    human_readable_name: "derive proc macro helper attribute removed",
+    description: "A helper attribute was removed from a derive proc macro, breaking downstream code that uses the attribute in #[derive] invocations.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/procedural-macros.html#derive-macro-helper-attributes"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on DeriveProcMacro {
+                        name @output @tag
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        helper_attribute {
+                            helper_name: name @output @tag
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on DeriveProcMacro {
+                        name @filter(op: "=", value: ["%name"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        helper_attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%helper_name"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+    },
+    error_message: "A helper attribute was removed from a derive proc macro, which will prevent downstream code using this attribute with #[derive] invocations from compiling.",
+    per_result_error_template: Some("helper attribute #[{{helper_name}}] removed from derive macro {{name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
