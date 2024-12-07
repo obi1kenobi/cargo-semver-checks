@@ -1,9 +1,14 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
-    "./test_crates/function_like_proc_macro_missing/": [
-        // TODO
-    ]
+  "./test_crates/function_like_proc_macro_missing/": [
+    {
+      "macro_name": String("make_answer"),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }
