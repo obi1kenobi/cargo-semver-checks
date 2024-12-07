@@ -1099,6 +1099,7 @@ add_lints!(
     pub_static_missing,
     pub_static_mut_now_immutable,
     pub_static_now_doc_hidden,
+    pub_static_now_mutable,
     repr_c_removed,
     repr_packed_added,
     repr_packed_removed,
