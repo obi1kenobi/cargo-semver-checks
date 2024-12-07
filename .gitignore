@@ -17,3 +17,6 @@ localdata/
 
 # Unnecessary test data
 test_crates/**/Cargo.lock
+
+# Ignore macOS metadata files
+**/.DS_Store
