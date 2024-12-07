@@ -1079,6 +1079,7 @@ add_lints!(
     function_changed_abi,
     function_const_removed,
     function_export_name_changed,
+    function_like_proc_macro_missing,
     function_missing,
     function_must_use_added,
     function_now_doc_hidden,
