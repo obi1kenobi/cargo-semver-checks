@@ -22,7 +22,7 @@ SemverQuery(
                         name @filter(op: "=", value: ["%name"])
                         # Check the macro still exists but is no longer public API
                         # and isn't doc(hidden) (which would be caught by another lint)
-                        public_api_eligible @filter(op: "=", value: ["$false"])
+                        public_api_eligible @filter(op: "!=", value: ["$true"])
                         doc_hidden @filter(op: "!=", value: ["$true"])
 
                         span_: span @optional {
