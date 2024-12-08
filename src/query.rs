@@ -1095,6 +1095,7 @@ add_lints!(
     inherent_method_must_use_added,
     inherent_method_now_doc_hidden,
     inherent_method_unsafe_added,
+    macro_now_doc_hidden,
     method_parameter_count_changed,
     module_missing,
     non_exhaustive_struct_changed_type,
