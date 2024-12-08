@@ -6,22 +6,22 @@ snapshot_kind: text
 {
   "./test_crates/declarative_macro_missing/": [
     {
-      "name": String("became_doc_hidden"),
-      "span_begin_line": Uint64(7),
+      "name": String("will_no_longer_be_exported"),
+      "span_begin_line": Uint64(1),
       "span_filename": String("src/lib.rs"),
     },
   ],
   "./test_crates/macro_no_longer_exported/": [
     {
-      "name": String("will_be_hidden"),
-      "span_begin_line": Uint64(10),
+      "name": String("example_macro"),
+      "span_begin_line": Uint64(2),
       "span_filename": String("src/lib.rs"),
     },
   ],
   "./test_crates/macro_now_doc_hidden/": [
     {
-      "name": String("will_be_hidden"),
-      "span_begin_line": Uint64(4),
+      "name": String("becomes_non_exported"),
+      "span_begin_line": Uint64(36),
       "span_filename": String("src/lib.rs"),
     },
   ],

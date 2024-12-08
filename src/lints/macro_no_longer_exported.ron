@@ -1,0 +1,45 @@
+SemverQuery(
+    id: "macro_no_longer_exported",
+    human_readable_name: "macro is no longer exported",
+    description: "A macro_rules macro that was previously exported is no longer exported.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/macros-by-example.html#path-based-scope"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Macro {
+                        name @output @tag
+                        public_api_eligible @filter(op: "=", value: ["$true"])
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Macro {
+                        name @filter(op: "=", value: ["%name"])
+                        # Check the macro still exists but is no longer public API
+                        # and isn't doc(hidden) (which would be caught by another lint)
+                        public_api_eligible @filter(op: "!=", value: ["$true"])
+                        doc_hidden @filter(op: "!=", value: ["$true"])
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "true": true,
+    },
+    error_message: "A macro that was previously exported with #[macro_export] is no longer exported. This breaks downstream code that used the macro.",
+    per_result_error_template: Some("macro {{name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: Some((
+        hint_template: r#"{{name}}!(...);"#,
+    )),
+)
