@@ -1,7 +1,7 @@
 SemverQuery(
     id: "declarative_macro_missing",
     human_readable_name: "macro_rules declaration removed or renamed",
-    description: "A declarative macro marked with #[macro_export] can no longer imported by its prior name.",
+    description: "A declarative macro marked with #[macro_export] can no longer be imported by its prior name.",
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/macros-by-example.html#path-based-scope"),
