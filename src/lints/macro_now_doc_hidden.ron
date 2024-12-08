@@ -1,0 +1,40 @@
+SemverQuery(
+    id: "macro_now_doc_hidden",
+    human_readable_name: "macro is now #[doc(hidden)]",
+    description: "A declarative macro that was previously part of the public API is now #[doc(hidden)], requiring downstream users to acknowledge their reliance on non-public APIs.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html#hidden"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Macro {
+                        name @output @tag
+                        public_api_eligible @filter(op: "=", value: ["$true"])
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Macro {
+                        name @filter(op: "=", value: ["%name"])
+                        doc_hidden @filter(op: "=", value: ["$true"])
+                        public_api_eligible @filter(op: "!=", value: ["$true"])
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "true": true,
+    },
+    error_message: "A macro that was previously part of the public API is now #[doc(hidden)].",
+    per_result_error_template: Some("macro {{name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

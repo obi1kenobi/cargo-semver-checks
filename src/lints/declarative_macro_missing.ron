@@ -25,7 +25,6 @@ SemverQuery(
             current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                 item {
                     ... on Macro {
-                        visibility_limit @filter(op: "=", value: ["$public"])
                         name @filter(op: "=", value: ["%name"])
                     }
                 }
@@ -37,7 +36,7 @@ SemverQuery(
         "zero": 0,
         "true": true,
     },
-    error_message: "A publicly-visible `macro_rules` declarative macro cannot be imported by its prior name. A `#[macro_export]` may have been removed, or the macro itself may have been renamed or removed entirely.",
+    error_message: "A `macro_rules` declarative macro cannot be imported by its prior name. The macro may have been renamed or removed entirely.",
     per_result_error_template:  Some("macro_rules! {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
     witness: (
         hint_template: r#"{{name}}!(...);"#
