@@ -1,0 +1,10 @@
+[package]
+publish = false
+name = "semver_trick_self_referential"
+version = "0.1.1"
+edition = "2021"
+
+[dependencies]
+# The "SemVer trick": reference a future major version of the package, and re-export its types
+# within the same *minor* version to offer a smoother upgrade process between major versions.
+self_ref = { package = "semver_trick_self_referential", path = "../future", version = "0.2.0" }

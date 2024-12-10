@@ -1,0 +1,32 @@
+---
+source: src/snapshot_tests.rs
+expression: result
+snapshot_kind: text
+---
+success: false
+--- stdout ---
+
+--- failure struct_missing: pub struct removed or renamed ---
+
+Description:
+A publicly-visible struct cannot be imported by its prior path. A `pub use` may have been removed, or the struct itself may have been renamed or removed entirely.
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#item-remove
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/struct_missing.ron
+
+Failed in:
+  struct semver_trick_self_referential::Example, previously in file [ROOT]/test_crates/semver_trick_self_referential/old/src/lib.rs:1
+
+--- stderr ---
+    Building semver_trick_self_referential v0.1.1 (current)
+       Built [TIME] (current)
+     Parsing semver_trick_self_referential v0.1.1 (current)
+      Parsed [TIME] (current)
+    Building semver_trick_self_referential v0.1.0 (baseline)
+       Built [TIME] (baseline)
+     Parsing semver_trick_self_referential v0.1.0 (baseline)
+      Parsed [TIME] (baseline)
+    Checking semver_trick_self_referential v0.1.0 -> v0.1.1 (minor change)
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 1 fail, 0 warn, 7 skip
+
+     Summary semver requires new major version: 1 major and 0 minor checks failed
+    Finished [TIME] semver_trick_self_referential

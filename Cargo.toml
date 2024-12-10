@@ -18,8 +18,8 @@ exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "t
 trustfall = "0.8.0"
 # `cargo_metadata` is used at the API boundary of `trustfall_rustdoc`,
 # so ensure the version we use for `cargo_metadata` here matches what `trustfall_rustdoc` uses too.
-trustfall_rustdoc = { version = "0.18.1", default-features = false, features = ["v32", "v33", "v35", "v36", "v37", "rayon", "rustc-hash"] }
-cargo_metadata = "0.18.1"
+trustfall_rustdoc = { version = "0.19.0", default-features = false, features = ["v32", "v33", "v35", "v36", "v37", "rayon", "rustc-hash"] }
+cargo_metadata = "0.19.1"
 # End of dependency block
 
 clap = { version = "4.5.21", features = ["derive", "cargo"] }

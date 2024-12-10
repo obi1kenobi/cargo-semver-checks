@@ -243,10 +243,15 @@ impl Scope {
 /// semver-check rlib, dylib, and staticlib targets as well.
 fn is_lib_like_checkable_target(target: &cargo_metadata::Target) -> bool {
     target.is_lib()
-        || target
-            .kind
-            .iter()
-            .any(|kind| matches!(kind.as_str(), "rlib" | "dylib" | "staticlib"))
+        || target.kind.iter().any(|kind| {
+            matches!(
+                kind,
+                cargo_metadata::TargetKind::RLib { .. }
+                    | cargo_metadata::TargetKind::DyLib { .. }
+                    | cargo_metadata::TargetKind::CDyLib { .. }
+                    | cargo_metadata::TargetKind::StaticLib { .. }
+            )
+        })
 }
 
 impl Check {
