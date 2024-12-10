@@ -110,7 +110,8 @@ impl<'a> crate::data_generation::ProgressCallbacks<'a> for Callbacks<'a> {
         let _ = self.config.log_info(|config| {
             config.shell_warn(format!(
                 "encountered non-fatal error while working on crate \
-                {crate_name} v{version} ({kind}): {error}",
+                {crate_name} v{version} ({kind}): {error} (root cause: {})",
+                error.root_cause()
             ))?;
             Ok(())
         });
