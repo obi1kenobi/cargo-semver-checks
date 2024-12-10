@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "semver_trick_self_referential"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

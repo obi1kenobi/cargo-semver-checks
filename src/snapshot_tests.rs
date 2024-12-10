@@ -402,6 +402,29 @@ fn multiple_ambiguous_package_name_definitions() {
     );
 }
 
+/// Ensure that linting self-referential packages (usually used for the "SemVer trick")
+/// works properly and doesn't suffer any issues due to the self-referential metadata.
+///
+/// More info on the "SemVer trick": https://github.com/dtolnay/semver-trick
+///
+/// This test currently triggers the `struct_missing` lint as a false-positive,
+/// due to the cross-crate re-export. This should be fixed when we start supporting
+/// cross-crate items.
+#[test]
+fn semver_trick_self_referential() {
+    assert_integration_test(
+        "semver_trick_self_referential",
+        &[
+            "cargo",
+            "semver-checks",
+            "--baseline-root",
+            "test_crates/semver_trick_self_referential/old/",
+            "--manifest-path",
+            "test_crates/semver_trick_self_referential/new/",
+        ],
+    );
+}
+
 /// Helper function which lists all files in the directory recursively.
 ///
 /// # Arguments
