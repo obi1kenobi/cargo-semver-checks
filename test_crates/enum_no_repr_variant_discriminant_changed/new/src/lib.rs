@@ -42,6 +42,14 @@ pub enum DiscriminantBecomesDocHiddenAndExplicit {
     Second = 2,
 }
 
+// This enum starts off not having repr(), then gains repr()
+// while also changing discriminant values. This should be reported here:
+// the enum originally has no ABI committments so the addition of the repr() doesn't matter.
+#[repr(u16)]
+pub enum GainsRepr {
+    First = 2,
+}
+
 // Explicit discriminants changed values, but being private dominates. Should not be
 // reported.
 enum PrivateEnum {
