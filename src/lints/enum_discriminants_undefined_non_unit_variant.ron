@@ -1,0 +1,79 @@
+SemverQuery(
+    id: "enum_discriminants_undefined_non_unit_variant",
+    human_readable_name: "enum's variants no longer have defined discriminants due to non-unit variant",
+    description: "A public enum's variants no longer have well-defined discriminants value due to a non-unit variant.",
+    reference: Some("A public enum's variants no longer have well-defined discriminants due to a non-unit variant. This breaks downstream code that accessed the discriminant via a numeric cast like `as isize`."),
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/enumerations.html#assigning-discriminant-values"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        enum_name: name @output @tag
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                            }
+                        }
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            discriminant {
+                                value
+                            }
+                        }
+
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            __typename @filter(op: "!=", value: ["$plain_variant"])
+                        }
+
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            attrs @filter(op: "contains", value: ["$non_exhaustive"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%enum_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            __typename @filter(op: "!=", value: ["$plain_variant"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "repr": "repr",
+        "non_exhaustive": "#[non_exhaustive]",
+        "plain_variant": "PlainVariant",
+        "zero": 0,
+        "true": true,
+    },
+    error_message: "An enum's variants no longer have well-defined discriminant values due to a tuple or struct variant in the enum. This breaks downstream code that accesses discriminants via a numeric cast like `as isize`.",
+    per_result_error_template: Some("enum {{enum_name}} in {{span_filename}}:{{span_begin_line}}"),
+)
