@@ -1065,6 +1065,7 @@ add_lints!(
     enum_repr_int_changed,
     enum_repr_int_removed,
     enum_repr_transparent_removed,
+    enum_repr_variant_discriminant_changed,
     enum_struct_variant_field_added,
     enum_struct_variant_field_missing,
     enum_struct_variant_field_now_doc_hidden,
