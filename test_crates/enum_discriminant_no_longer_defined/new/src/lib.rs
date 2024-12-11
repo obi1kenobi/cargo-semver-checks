@@ -12,8 +12,8 @@
 //
 // error: aborting due to 1 previous error
 //
-// To see this, run the following doctest:
-/// ```rust
+// To see this, remove `compile_fail` and then run the following doctest:
+/// ```rust,compile_fail
 /// fn example(value: enum_discriminant_no_longer_defined::GainsNonExhaustiveVariant) {
 ///     value as isize;
 /// }
@@ -48,8 +48,8 @@ pub enum NonUnitVariantButGainsNonExhaustiveVariant {
 //   |
 //   = note: see https://doc.rust-lang.org/reference/items/enumerations.html#casting for more information
 //
-// To see this, run the following doctest:
-/// ```rust
+// To see this, remove `compile_fail` and then run the following doctest:
+/// ```rust,compile_fail
 /// fn example(value: enum_discriminant_no_longer_defined::GainsTupleVariant) {
 ///     value as isize;
 /// }
