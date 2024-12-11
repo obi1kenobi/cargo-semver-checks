@@ -1147,6 +1147,7 @@ add_lints!(
     trait_unsafe_removed,
     tuple_struct_to_plain_struct,
     type_marked_deprecated,
+    type_mismatched_generic_lifetimes,
     union_field_missing,
     union_missing,
     union_must_use_added,
