@@ -1,0 +1,69 @@
+SemverQuery(
+    id: "trait_mismatched_generic_lifetimes",
+    human_readable_name: "trait now takes a different number of generic lifetimes",
+    description: "A trait now takes a different number of generic lifetime parameters, breaking uses of that trait.",
+    required_update: Major,
+    lint_level: Deny,
+    // The cargo SemVer reference only has entries for generic *type* parameters.
+    // There's no passable place to link to when it comes to specifically lifetime parameters.
+    reference_link: None,
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @tag(name: "old_lifetimes_count")
+                                          @output(name: "old_lifetimes_count") {
+                            ... on GenericLifetimeParameter {
+                                old_lifetimes: name @output
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "!=", value: ["%old_lifetimes_count"])
+                                          @output(name: "new_lifetimes_count") {
+                            ... on GenericLifetimeParameter {
+                                new_lifetimes: name @output
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A trait now takes a different number of generic lifetime parameters. Uses of this trait that name the previous number of parameters, such as in trait bounds, will be broken.",
+    per_result_error_template: Some("trait {{name}} ({{old_lifetimes_count}} -> {{new_lifetimes_count}} lifetime params) in {{span_filename}}:{{span_begin_line}}"),
+)

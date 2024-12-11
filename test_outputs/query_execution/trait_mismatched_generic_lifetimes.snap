@@ -1,0 +1,80 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+snapshot_kind: text
+---
+{
+  "./test_crates/trait_mismatched_generic_lifetimes/": [
+    {
+      "name": String("NotGeneric"),
+      "new_lifetimes": List([
+        String("\'a"),
+      ]),
+      "new_lifetimes_count": Uint64(1),
+      "old_lifetimes": List([]),
+      "old_lifetimes_count": Uint64(0),
+      "path": List([
+        String("trait_mismatched_generic_lifetimes"),
+        String("NotGeneric"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("GainsLifetimes"),
+      "new_lifetimes": List([
+        String("\'a"),
+        String("\'b"),
+      ]),
+      "new_lifetimes_count": Uint64(2),
+      "old_lifetimes": List([
+        String("\'a"),
+      ]),
+      "old_lifetimes_count": Uint64(1),
+      "path": List([
+        String("trait_mismatched_generic_lifetimes"),
+        String("GainsLifetimes"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("LosesLifetimes"),
+      "new_lifetimes": List([
+        String("\'a"),
+      ]),
+      "new_lifetimes_count": Uint64(1),
+      "old_lifetimes": List([
+        String("\'a"),
+        String("\'b"),
+      ]),
+      "old_lifetimes_count": Uint64(2),
+      "path": List([
+        String("trait_mismatched_generic_lifetimes"),
+        String("LosesLifetimes"),
+      ]),
+      "span_begin_line": Uint64(21),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("StopsBeingGeneric"),
+      "new_lifetimes": List([]),
+      "new_lifetimes_count": Uint64(0),
+      "old_lifetimes": List([
+        String("\'a"),
+        String("\'b"),
+      ]),
+      "old_lifetimes_count": Uint64(2),
+      "path": List([
+        String("trait_mismatched_generic_lifetimes"),
+        String("StopsBeingGeneric"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

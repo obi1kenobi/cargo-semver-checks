@@ -1135,6 +1135,7 @@ add_lints!(
     trait_method_now_doc_hidden,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
+    trait_mismatched_generic_lifetimes,
     trait_missing,
     trait_must_use_added,
     trait_newly_sealed,
