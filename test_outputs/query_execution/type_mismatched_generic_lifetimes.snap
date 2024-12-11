@@ -1,0 +1,109 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+snapshot_kind: text
+---
+{
+  "./test_crates/type_mismatched_generic_lifetimes/": [
+    {
+      "name": String("Example"),
+      "new_lifetimes": List([
+        String("\'a"),
+        String("\'b"),
+        String("\'c"),
+      ]),
+      "new_lifetimes_count": Uint64(3),
+      "old_lifetimes": List([
+        String("\'a"),
+        String("\'b"),
+      ]),
+      "old_lifetimes_count": Uint64(2),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_mismatched_generic_lifetimes"),
+        String("Example"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("Either"),
+      "new_lifetimes": List([
+        String("\'a"),
+        String("\'b"),
+        String("\'c"),
+      ]),
+      "new_lifetimes_count": Uint64(3),
+      "old_lifetimes": List([
+        String("\'a"),
+        String("\'b"),
+      ]),
+      "old_lifetimes_count": Uint64(2),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_mismatched_generic_lifetimes"),
+        String("Either"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("OneOrTheOther"),
+      "new_lifetimes": List([
+        String("\'a"),
+        String("\'b"),
+        String("\'c"),
+      ]),
+      "new_lifetimes_count": Uint64(3),
+      "old_lifetimes": List([
+        String("\'a"),
+        String("\'b"),
+      ]),
+      "old_lifetimes_count": Uint64(2),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_mismatched_generic_lifetimes"),
+        String("OneOrTheOther"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NotGenericAnymore"),
+      "new_lifetimes": List([]),
+      "new_lifetimes_count": Uint64(0),
+      "old_lifetimes": List([
+        String("\'a"),
+      ]),
+      "old_lifetimes_count": Uint64(1),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_mismatched_generic_lifetimes"),
+        String("NotGenericAnymore"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("BecameGeneric"),
+      "new_lifetimes": List([
+        String("\'a"),
+      ]),
+      "new_lifetimes_count": Uint64(1),
+      "old_lifetimes": List([]),
+      "old_lifetimes_count": Uint64(0),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_mismatched_generic_lifetimes"),
+        String("BecameGeneric"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
