@@ -1057,6 +1057,8 @@ add_lints!(
     derive_helper_attr_removed,
     derive_proc_macro_missing,
     derive_trait_impl_removed,
+    enum_discriminants_undefined_non_exhaustive_variant,
+    enum_discriminants_undefined_non_unit_variant,
     enum_marked_non_exhaustive,
     enum_missing,
     enum_must_use_added,
