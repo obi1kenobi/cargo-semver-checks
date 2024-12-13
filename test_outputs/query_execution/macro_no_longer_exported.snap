@@ -7,20 +7,51 @@ snapshot_kind: text
   "./test_crates/declarative_macro_missing/": [
     {
       "name": String("will_no_longer_be_exported"),
-      "span_begin_line": Uint64(1),
+      "non_exported_span_begin_line": List([
+        Uint64(1),
+      ]),
+      "non_exported_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "span_begin_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
     },
   ],
   "./test_crates/macro_no_longer_exported/": [
     {
       "name": String("example_macro"),
+      "non_exported_span_begin_line": List([
+        Uint64(2),
+      ]),
+      "non_exported_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("some_macro"),
+      "non_exported_span_begin_line": List([
+        Uint64(29),
+        Uint64(36),
+      ]),
+      "non_exported_span_filename": List([
+        String("src/lib.rs"),
+        String("src/lib.rs"),
+      ]),
+      "span_begin_line": Uint64(26),
       "span_filename": String("src/lib.rs"),
     },
   ],
   "./test_crates/macro_now_doc_hidden/": [
     {
       "name": String("becomes_non_exported"),
+      "non_exported_span_begin_line": List([
+        Uint64(36),
+      ]),
+      "non_exported_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "span_begin_line": Uint64(36),
       "span_filename": String("src/lib.rs"),
     },

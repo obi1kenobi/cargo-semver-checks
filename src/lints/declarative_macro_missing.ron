@@ -36,7 +36,7 @@ SemverQuery(
         "zero": 0,
         "true": true,
     },
-    error_message: "A `macro_rules` declarative macro cannot be imported by its prior name. The macro may have been renamed or removed entirely.",
+    error_message: "A `macro_rules` declarative macro cannot be invoked by its prior name. The macro may have been renamed or removed entirely.",
     per_result_error_template:  Some("macro_rules! {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
     witness: (
         hint_template: r#"{{name}}!(...);"#
