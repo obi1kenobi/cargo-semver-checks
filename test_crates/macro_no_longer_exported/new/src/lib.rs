@@ -7,9 +7,9 @@ macro_rules! example_macro {
 
 // No longer exported but is hidden - should NOT trigger (caught by different lint)
 #[doc(hidden)]
-macro_rules! will_be_hidden {
+macro_rules! will_be_hidden_and_not_exported {
     () => {
-        println!("Will become hidden");
+        println!("Will become hidden and not exported");
     };
 }
 

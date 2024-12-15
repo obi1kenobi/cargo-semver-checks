@@ -12,7 +12,11 @@ SemverQuery(
                 item {
                     ... on Macro {
                         name @output @tag
-                        public_api_eligible @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
 
                         span_: span @optional {
                             filename @output
@@ -26,7 +30,10 @@ SemverQuery(
                 item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                     ... on Macro {
                         name @filter(op: "=", value: ["%name"])
-                        public_api_eligible @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
                     }
                 }
 
@@ -54,7 +61,7 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "A macro that was previously exported with #[macro_export] is no longer exported. This breaks downstream code that used the macro.",
+    error_message: "A `macro_rules!` declarative macro that was previously exported with `#[macro_export]` is no longer exported. This breaks downstream code that used the macro.",
     per_result_error_template: Some("macro {{name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: Some((
         hint_template: r#"{{name}}!(...);"#,

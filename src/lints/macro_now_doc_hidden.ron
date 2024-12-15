@@ -12,7 +12,11 @@ SemverQuery(
                 item {
                     ... on Macro {
                         name @output @tag
-                        public_api_eligible @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
                     }
                 }
             }
@@ -20,8 +24,12 @@ SemverQuery(
                 item {
                     ... on Macro {
                         name @filter(op: "=", value: ["%name"])
-                        doc_hidden @filter(op: "=", value: ["$true"])
-                        public_api_eligible @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "!=", value: ["$true"])
+                        }
+
                         span_: span @optional {
                             filename @output
                             begin_line @output
@@ -34,7 +42,7 @@ SemverQuery(
     arguments: {
         "true": true,
     },
-    error_message: "A macro that was previously part of the public API is now #[doc(hidden)].",
+    error_message: "A `macro_rules!` declarative macro that was previously part of the public API is now `#[doc(hidden)]` and not public API anymore.",
     per_result_error_template: Some("macro {{name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )

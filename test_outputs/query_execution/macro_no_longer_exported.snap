@@ -13,6 +13,10 @@ snapshot_kind: text
       "non_exported_span_filename": List([
         String("src/lib.rs"),
       ]),
+      "path": List([
+        String("declarative_macro_missing"),
+        String("will_no_longer_be_exported"),
+      ]),
       "span_begin_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
     },
@@ -25,6 +29,10 @@ snapshot_kind: text
       ]),
       "non_exported_span_filename": List([
         String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("macro_no_longer_exported"),
+        String("example_macro"),
       ]),
       "span_begin_line": Uint64(2),
       "span_filename": String("src/lib.rs"),
@@ -39,6 +47,10 @@ snapshot_kind: text
         String("src/lib.rs"),
         String("src/lib.rs"),
       ]),
+      "path": List([
+        String("macro_no_longer_exported"),
+        String("some_macro"),
+      ]),
       "span_begin_line": Uint64(26),
       "span_filename": String("src/lib.rs"),
     },
@@ -51,6 +63,10 @@ snapshot_kind: text
       ]),
       "non_exported_span_filename": List([
         String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("macro_now_doc_hidden"),
+        String("becomes_non_exported"),
       ]),
       "span_begin_line": Uint64(36),
       "span_filename": String("src/lib.rs"),

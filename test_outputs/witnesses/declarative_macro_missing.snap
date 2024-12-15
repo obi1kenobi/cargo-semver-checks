@@ -8,3 +8,8 @@ snapshot_kind: text
 filename = 'src/lib.rs'
 begin_line = 2
 hint = 'will_be_removed!(...);'
+
+[["./test_crates/macro_no_longer_exported/"]]
+filename = 'src/lib.rs'
+begin_line = 9
+hint = 'will_be_hidden_and_not_exported!(...);'

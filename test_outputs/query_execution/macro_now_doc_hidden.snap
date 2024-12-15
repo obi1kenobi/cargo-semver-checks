@@ -7,20 +7,21 @@ snapshot_kind: text
   "./test_crates/declarative_macro_missing/": [
     {
       "name": String("became_doc_hidden"),
+      "path": List([
+        String("declarative_macro_missing"),
+        String("became_doc_hidden"),
+      ]),
       "span_begin_line": Uint64(7),
-      "span_filename": String("src/lib.rs"),
-    },
-  ],
-  "./test_crates/macro_no_longer_exported/": [
-    {
-      "name": String("will_be_hidden"),
-      "span_begin_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
     },
   ],
   "./test_crates/macro_now_doc_hidden/": [
     {
       "name": String("will_be_hidden"),
+      "path": List([
+        String("macro_now_doc_hidden"),
+        String("will_be_hidden"),
+      ]),
       "span_begin_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
     },
