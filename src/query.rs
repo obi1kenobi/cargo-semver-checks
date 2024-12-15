@@ -580,15 +580,84 @@ mod tests {
     ) -> (String, Vec<BTreeMap<String, FieldValue>>) {
         let adapter = VersionedRustdocAdapter::new(indexed_crate_new, Some(indexed_crate_old))
             .expect("could not create adapter");
+
         let results_iter = adapter
             .run_query(&semver_query.query, semver_query.arguments.clone())
             .unwrap();
-        (
-            format!("./test_crates/{crate_pair_name}/"),
-            results_iter
-                .map(|res| res.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
-                .collect::<Vec<BTreeMap<_, _>>>(),
-        )
+
+        // Ensure span data inside `@fold` blocks is deterministically ordered,
+        // since the underlying adapter is non-deterministic due to its iteration over hashtables.
+        // Our heuristic for detecting spans inside `@fold` is to look for:
+        // - list-typed outputs
+        // - with names ending in `_begin_line`
+        // - located inside *one* `@fold` level (i.e. their component is directly under the root).
+        let parsed_query = trustfall_core::frontend::parse(adapter.schema(), &semver_query.query)
+            .expect("not a valid query");
+        let fold_keys_and_targets: BTreeMap<&str, Vec<Arc<str>>> = parsed_query
+            .outputs
+            .iter()
+            .filter_map(|(name, output)| {
+                if name.as_ref().ends_with("_begin_line") && output.value_type.is_list() {
+                    if let Some(fold) = parsed_query
+                        .ir_query
+                        .root_component
+                        .folds
+                        .values()
+                        .find(|fold| fold.component.root == parsed_query.vids[&output.vid].root)
+                    {
+                        let targets = parsed_query
+                            .outputs
+                            .values()
+                            .filter_map(|o| {
+                                fold.component
+                                    .vertices
+                                    .contains_key(&o.vid)
+                                    .then_some(Arc::clone(&o.name))
+                            })
+                            .collect();
+                        Some((name.as_ref(), targets))
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        let results = results_iter
+            .map(move |mut res| {
+                // Reorder `@fold`-ed span data in increasing `begin_line` order.
+                for (fold_key, targets) in &fold_keys_and_targets {
+                    let mut data: Vec<(u64, usize)> = res[*fold_key]
+                        .as_vec_with(FieldValue::as_u64)
+                        .expect("fold key was not a list of u64")
+                        .into_iter()
+                        .enumerate()
+                        .map(|(idx, val)| (val, idx))
+                        .collect();
+                    data.sort_unstable();
+                    for target in targets {
+                        res.entry(Arc::clone(target)).and_modify(|value| {
+                            // The output of a `@fold @transform(op: "count")` might not be a list here,
+                            // so ignore such outputs. They don't need reordering anyway.
+                            if let Some(slice) = value.as_slice() {
+                                let new_order = data
+                                    .iter()
+                                    .map(|(_, idx)| slice[*idx].clone())
+                                    .collect::<Vec<_>>()
+                                    .into();
+                                *value = new_order;
+                            }
+                        });
+                    }
+                }
+
+                // Turn the output keys into regular strings.
+                res.into_iter().map(|(k, v)| (k.to_string(), v)).collect()
+            })
+            .collect::<Vec<BTreeMap<_, _>>>();
+        (format!("./test_crates/{crate_pair_name}/"), results)
     }
 
     fn assert_no_false_positives_in_nonchanged_crate(
