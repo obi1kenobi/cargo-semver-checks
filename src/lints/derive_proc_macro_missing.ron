@@ -11,8 +11,13 @@ SemverQuery(
             baseline {
                 item {
                     ... on DeriveProcMacro {
-                        macro_name: name @output @tag
+                        macro_name: name @output
                         visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
 
                         span_: span @optional {
                             filename @output
@@ -25,7 +30,10 @@ SemverQuery(
                 item {
                     ... on DeriveProcMacro {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%macro_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
                     }
                 }
             }
@@ -34,6 +42,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "zero": 0,
+        "true": true,
     },
     error_message: "A derive macro has been removed. Type definitions using #[derive(...)] with this macro will fail to compile.",
     per_result_error_template: Some("macro {{macro_name}} in {{span_filename}}:{{span_begin_line}}"),

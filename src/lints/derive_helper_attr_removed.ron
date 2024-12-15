@@ -11,8 +11,13 @@ SemverQuery(
             baseline {
                 item {
                     ... on DeriveProcMacro {
-                        name @output @tag
+                        name @output
                         visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
 
                         helper_attribute {
                             helper_name: name @output @tag
@@ -28,8 +33,11 @@ SemverQuery(
             current {
                 item {
                     ... on DeriveProcMacro {
-                        name @filter(op: "=", value: ["%name"])
                         visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
 
                         helper_attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             name @filter(op: "=", value: ["%helper_name"])
@@ -42,6 +50,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "zero": 0,
+        "true": true,
     },
     error_message: "A helper attribute was removed from a derive proc macro, which will prevent downstream code using this attribute with #[derive] invocations from compiling.",
     per_result_error_template: Some("helper attribute #[{{helper_name}}] removed from derive macro {{name}} in {{span_filename}}:{{span_begin_line}}"),
