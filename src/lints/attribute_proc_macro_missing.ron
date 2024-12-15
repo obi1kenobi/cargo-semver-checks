@@ -12,7 +12,13 @@ SemverQuery(
                 item {
                     ... on AttributeProcMacro {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @output @tag
+                        name @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
                         span_: span @optional {
                             filename @output
                             begin_line @output
@@ -24,7 +30,10 @@ SemverQuery(
                 item {
                     ... on AttributeProcMacro {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
                     }
                 }
             }
@@ -33,6 +42,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "zero": 0,
+        "true": true,
     },
     error_message: "A previously available attribute macro has been removed, breaking code that uses attribute syntax on annotated items.",
     per_result_error_template: Some("macro #[{{name}}] in {{span_filename}}:{{span_begin_line}}"),

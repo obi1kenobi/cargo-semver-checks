@@ -7,6 +7,10 @@ snapshot_kind: text
   "./test_crates/attribute_proc_macro_missing/": [
     {
       "name": String("logging"),
+      "path": List([
+        String("attribute_proc_macro_missing"),
+        String("logging"),
+      ]),
       "span_begin_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
     },

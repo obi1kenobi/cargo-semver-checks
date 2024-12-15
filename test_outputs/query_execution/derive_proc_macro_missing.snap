@@ -7,6 +7,10 @@ snapshot_kind: text
   "./test_crates/derive_proc_macro_missing/": [
     {
       "macro_name": String("MyDerive"),
+      "path": List([
+        String("derive_proc_macro_missing"),
+        String("MyDerive"),
+      ]),
       "span_begin_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
     },
