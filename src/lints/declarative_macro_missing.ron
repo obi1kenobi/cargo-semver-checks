@@ -12,8 +12,12 @@ SemverQuery(
                 item {
                     ... on Macro {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        public_api_eligible @filter(op: "=", value: ["$true"])
                         name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
 
                         span_: span @optional {
                             filename @output
@@ -22,10 +26,26 @@ SemverQuery(
                     }
                 }
             }
-            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                item {
+            current {
+                # There is no exported macro at that path anymore (hidden or not).
+                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    ... on Macro {
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+
+                # There is also no macro under the same name that is *not* exported,
+                # nor exportable (in a way that fixes the breakage)
+                # just by adding `#[macro_export]`.
+                # This is to differentiate from the `macro_no_longer_exported` and
+                # `macro_now_doc_hidden` lints.
+                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                     ... on Macro {
                         name @filter(op: "=", value: ["%name"])
+                        public_api_eligible @filter(op: "!=", value: ["$true"])
+                        doc_hidden @filter(op: "!=", value: ["$true"])
                     }
                 }
             }
@@ -36,8 +56,8 @@ SemverQuery(
         "zero": 0,
         "true": true,
     },
-    error_message: "A `macro_rules` declarative macro cannot be invoked by its prior name. The macro may have been renamed or removed entirely.",
-    per_result_error_template:  Some("macro_rules! {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A `macro_rules!` declarative macro cannot be invoked by its prior name. The macro may have been renamed or removed entirely.",
+    per_result_error_template:  Some("macro {{name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
     witness: (
         hint_template: r#"{{name}}!(...);"#
     ),
