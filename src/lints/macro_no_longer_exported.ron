@@ -13,19 +13,35 @@ SemverQuery(
                     ... on Macro {
                         name @output @tag
                         public_api_eligible @filter(op: "=", value: ["$true"])
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
                     }
                 }
             }
             current {
-                item {
+                # There's no exported macro under the name we wanted.
+                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                     ... on Macro {
                         name @filter(op: "=", value: ["%name"])
+                        public_api_eligible @filter(op: "=", value: ["$true"])
+                    }
+                }
+
+                # There is at least one macro under the same name that is *not* exported.
+                # Perhaps the macro is not deleted, just no longer exported.
+                item @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                    ... on Macro {
+                        name @filter(op: "=", value: ["%name"])
+
                         # Check the macro still exists but is no longer public API
                         # and isn't doc(hidden) (which would be caught by another lint)
                         public_api_eligible @filter(op: "!=", value: ["$true"])
                         doc_hidden @filter(op: "!=", value: ["$true"])
 
-                        span_: span @optional {
+                        non_exported_span_: span @optional {
                             filename @output
                             begin_line @output
                         }
@@ -36,6 +52,7 @@ SemverQuery(
     }"#,
     arguments: {
         "true": true,
+        "zero": 0,
     },
     error_message: "A macro that was previously exported with #[macro_export] is no longer exported. This breaks downstream code that used the macro.",
     per_result_error_template: Some("macro {{name}} in {{span_filename}}:{{span_begin_line}}"),

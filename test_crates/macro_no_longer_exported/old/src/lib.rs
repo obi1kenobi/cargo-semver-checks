@@ -18,3 +18,19 @@ macro_rules! internal_macro {
         println!("Internal macro");
     };
 }
+
+mod foo {
+    // Public macro. Exported even though it's in a private module,
+    // because of the `#[macro_export]`.
+    #[macro_export]
+    macro_rules! some_macro {
+        () => {}
+    }
+}
+
+mod bar {
+    // Private macro by the same name.
+    macro_rules! some_macro {
+        () => {}
+    }
+}

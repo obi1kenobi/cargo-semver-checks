@@ -365,6 +365,7 @@ dependencies = [
  "tame-index",
  "toml 0.8.19",
  "trustfall",
+ "trustfall_core",
  "trustfall_rustdoc",
  "urlencoding",
 ]
