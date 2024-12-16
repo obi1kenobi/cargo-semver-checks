@@ -1218,6 +1218,8 @@ add_lints!(
     tuple_struct_to_plain_struct,
     type_marked_deprecated,
     type_mismatched_generic_lifetimes,
+    union_field_added_with_all_pub_fields,
+    union_field_added_with_non_pub_fields,
     union_field_missing,
     union_missing,
     union_must_use_added,

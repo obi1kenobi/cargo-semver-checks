@@ -1,0 +1,93 @@
+SemverQuery(
+    id: "union_field_added_with_all_pub_fields",
+    human_readable_name: "union with only public API fields added a new field",
+    description: "A union with only public API fields added a new field, possibly changing the union's bit-compatibility.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://github.com/obi1kenobi/cargo-semver-checks/issues/950"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$c"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # None of the union's fields are non-public-API.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            public_api_eligible @filter(op: "!=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        union_name: name @output
+
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$c"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        field {
+                            field_name: name @output @tag
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Union {
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+
+                        # The original union's definition didn't include the field we're looking at.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%field_name"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+        "repr": "repr",
+        "c": "C",
+    },
+    error_message: "A public repr(C) union with only public fields has added a new field, which may change the union's bit-compatibility rules. This may invalidate downstream safety invariants and cause those programs to become unsound.",
+    per_result_error_template: Some("field {{union_name}}.{{field_name}} in file {{span_filename}}:{{span_begin_line}}"),
+)
