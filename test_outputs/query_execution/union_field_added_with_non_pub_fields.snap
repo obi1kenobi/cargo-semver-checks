@@ -1,0 +1,49 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+snapshot_kind: text
+---
+{
+  "./test_crates/union_field_added/": [
+    {
+      "field_name": String("c"),
+      "path": List([
+        String("union_field_added"),
+        String("SomeHiddenPubFields"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "union_name": String("SomeHiddenPubFields"),
+    },
+    {
+      "field_name": String("c"),
+      "path": List([
+        String("union_field_added"),
+        String("SomePrivateFields"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "union_name": String("SomePrivateFields"),
+    },
+    {
+      "field_name": String("c"),
+      "path": List([
+        String("union_field_added"),
+        String("HiddenFieldBecamePublicAPI"),
+      ]),
+      "span_begin_line": Uint64(80),
+      "span_filename": String("src/lib.rs"),
+      "union_name": String("HiddenFieldBecamePublicAPI"),
+    },
+    {
+      "field_name": String("c"),
+      "path": List([
+        String("union_field_added"),
+        String("PrivateFieldBecamePublicAPI"),
+      ]),
+      "span_begin_line": Uint64(89),
+      "span_filename": String("src/lib.rs"),
+      "union_name": String("PrivateFieldBecamePublicAPI"),
+    },
+  ],
+}

@@ -46,7 +46,12 @@ SemverQuery(
 
                         field {
                             name @filter(op: "=", value: ["%field_name"])
+
+                            # We have to ensure that the field is non-public-API
+                            # *by reason of* becoming `#[doc(hidden)]`. Otherwise,
+                            # this lint will trigger on fields becoming non-`pub` as well.
                             public_api_eligible @filter(op: "!=", value: ["$true"])
+                            doc_hidden @filter(op: "=", value: ["$true"])
                         }
 
                         span_: span @optional {
