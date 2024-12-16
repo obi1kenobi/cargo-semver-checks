@@ -1,0 +1,10 @@
+[package]
+publish = false
+name = "proc_macro_now_doc_hidden"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]

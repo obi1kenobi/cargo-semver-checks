@@ -1,0 +1,50 @@
+SemverQuery(
+    id: "proc_macro_now_doc_hidden",
+    human_readable_name: "proc macro became #[doc(hidden)]",
+    description: "A procedural macro has become #[doc(hidden)] and is no longer public API.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html#hidden"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ProcMacro {
+                        kind: __typename @output @tag
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ProcMacro {
+                        __typename @filter(op: "=", value: ["%kind"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "!=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A public procedural macro is now #[doc(hidden)], removing it from the crate's public API.",
+    per_result_error_template: Some("proc macro {{name}} in file {{span_filename}}:{{span_begin_line}}"),
+)

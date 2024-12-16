@@ -1172,6 +1172,7 @@ add_lints!(
     method_parameter_count_changed,
     module_missing,
     non_exhaustive_struct_changed_type,
+    proc_macro_now_doc_hidden,
     pub_module_level_const_missing,
     pub_module_level_const_now_doc_hidden,
     pub_static_missing,
