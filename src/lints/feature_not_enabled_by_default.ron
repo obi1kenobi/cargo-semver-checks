@@ -1,0 +1,60 @@
+SemverQuery(
+    id: "feature_not_enabled_by_default",
+    human_readable_name: "package feature is not enabled by default",
+    description: "A feature has been removed from this package's set of default features.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#cargo-feature-remove-another"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                default_feature {
+                    # Until cargo ships with support for private and/or unstable feature names,
+                    # we'll rely on feature names to detect whether to flag feature removals.
+                    #
+                    # This lint will ignore features that match any of the following:
+                    # - start with an underscore (`_`) character
+                    # - are named `unstable`, `nightly`, or `bench`
+                    # - have a prefix of `unstable`, `nightly`, or `bench` followed by
+                    #   a dash (`-`) or underscore (`_`) character.
+                    #
+                    # Cargo tracking issues:
+                    # - unstable/nightly features: https://github.com/rust-lang/cargo/issues/10881
+                    # - private/hidden features: https://github.com/rust-lang/cargo/issues/10882
+                    name @tag
+                         @filter(op: "not_regex", value: ["$unstable_feature_pattern"])
+                         @filter(op: "not_has_prefix", value: ["$underscore"])
+                         @output
+
+                    # An explicit ordering key is needed since we don't have span information,
+                    # which what we usually use to order results in tests.
+                    name @output(name: "ordering_key")
+                }
+            }
+            current {
+                default_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    name @filter(op: "=", value: ["%name"])
+                }
+
+                # Ensure the feature still exists, just isn't enabled by default.
+                # If the feature is missing entirely, we want to report it
+                # in the `feature_missing` lint, not here.
+                feature @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                    name @filter(op: "=", value: ["%name"])
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "zero": 0,
+        "unstable_feature_pattern": "^(?:unstable|nightly|bench)(?:[-_].*)?$",
+        "underscore": "_",
+    },
+    error_message: "A feature is no longer enabled by default for this package. This will break downstream crates which rely on the package's default features and require the functionality of this feature.",
+    per_result_error_template: Some("feature {{name}} in the package's Cargo.toml"),
+    // TODO: It's currently not possible to write witnesses for manifest lints,
+    //       since we'd need to generate a *Cargo.toml* witness instead of a Rust code witness.
+    //       Issue: https://github.com/obi1kenobi/cargo-semver-checks/issues/1008
+    witness: None,
+)

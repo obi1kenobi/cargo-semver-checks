@@ -1150,6 +1150,7 @@ add_lints!(
     enum_variant_missing,
     exported_function_changed_abi,
     feature_missing,
+    feature_not_enabled_by_default,
     function_abi_no_longer_unwind,
     function_changed_abi,
     function_const_removed,
