@@ -4,6 +4,11 @@ name = "features_simple"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.cargo-semver-checks.lints]
+# This package is for testing that feature selection in the CLI works correctly,
+# so we aren't looking for breaking changes in the features themselves.
+feature_not_enabled_by_default = "allow"
+
 [dependencies]
 
 [features]

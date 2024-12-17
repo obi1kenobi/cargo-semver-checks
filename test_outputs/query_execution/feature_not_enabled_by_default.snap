@@ -1,0 +1,27 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+snapshot_kind: text
+---
+{
+  "./test_crates/feature_not_enabled_by_default/": [
+    {
+      "name": String("becoming_non_default"),
+      "ordering_key": String("becoming_non_default"),
+    },
+    {
+      "name": String("indirect_feature"),
+      "ordering_key": String("indirect_feature"),
+    },
+    {
+      "name": String("rand"),
+      "ordering_key": String("rand"),
+    },
+  ],
+  "./test_crates/features_simple/": [
+    {
+      "name": String("foo"),
+      "ordering_key": String("foo"),
+    },
+  ],
+}

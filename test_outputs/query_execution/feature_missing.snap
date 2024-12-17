@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/feature_missing/": [
@@ -15,6 +16,12 @@ expression: "&query_execution_results"
     {
       "name": String("rand_pcg"),
       "ordering_key": String("rand_pcg"),
+    },
+  ],
+  "./test_crates/feature_not_enabled_by_default/": [
+    {
+      "name": String("missing_entirely"),
+      "ordering_key": String("missing_entirely"),
     },
   ],
   "./test_crates/function_feature_changed/": [

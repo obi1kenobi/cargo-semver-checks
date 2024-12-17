@@ -1,0 +1,46 @@
+[package]
+publish = false
+name = "feature_not_enabled_by_default"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Since `rand` isn't used in a feature with `dep:rand` syntax,
+# it defines an implicit feature by that name.
+# Removing that implicit feature from the defaults is a breaking change.
+rand = { version = "*", optional = true }
+
+[features]
+default = ["becoming_non_default", "still_present", "missing_entirely", "rand", "transitive", "multi_root_transitive", "unstable", "nightly", "bench", "unstable", "unstable_underscore", "nightly", "nightly_underscore", "bench", "bench_underscore", "_underscore_prefix"]
+still_present = []         # No breakage here.
+becoming_non_default = []  # Should be reported.
+missing_entirely = []      # Flagged only by `feature_missing`, even though it was default too.
+
+# The `transitive` feature depends on `indirect_feature`.
+# `transitive` is enabled by default, but removing `indirect_feature` from `transitive`
+# means that `indirect_feature` is *no longer enabled by default*.
+# This is breaking and should be reported.
+transitive = ["indirect_feature"]
+indirect_feature = []
+
+# The `root` feature is depended on in multiple ways in the default features.
+# Breaking some of those paths, but not all of them, still means that `root` is enabled by default.
+# There's no breaking change here, and no lints should trigger.
+multi_root_transitive = ["path_a", "path_b"]
+path_a = ["root"]
+path_b = ["root"]
+root = []
+
+# We ignore unstable-looking feature names.
+# All of the following will be removed from the default features,
+# and none of them should be flagged.
+unstable = []
+nightly = []
+bench = []
+unstable-dash = []
+unstable_underscore = []
+nightly-dash = []
+nightly_underscore = []
+bench-dash = []
+bench_underscore = []
+_underscore_prefix = []
