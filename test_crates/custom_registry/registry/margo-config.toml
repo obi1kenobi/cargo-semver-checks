@@ -1,0 +1,7 @@
+version = "1"
+base_url = "http://127.0.0.1:5000/"
+auth_required = false
+
+[html]
+enabled = false
+suggested_registry_name = "custom-registry"
