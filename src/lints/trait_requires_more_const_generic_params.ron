@@ -1,0 +1,75 @@
+SemverQuery(
+    id: "trait_requires_more_const_generic_params",
+    human_readable_name: "trait now requires more const generic parameters",
+    description: "A trait now requires more const generic parameters than before.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/generics.html#const-generics"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                        @transform(op: "count")
+                                        @tag(name: "old_required_const_count")
+                                        @output(name: "old_required_const_count") {
+                            ... on GenericConstParameter {
+                                old_required_consts: name @output
+                                has_default @filter(op: "!=", value: ["$true"])
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: ">", value: ["%old_required_const_count"])
+                                          @output(name: "new_required_const_count") {
+                            ... on GenericConstParameter {
+                                new_required_consts: name @output
+                                has_default @filter(op: "!=", value: ["$true"])
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A trait now requires more const generic parameters than it used to. Uses of this trait that supplied the previously-required number of const generics will be broken. To fix this, consider supplying default values for newly-added const generics.",
+    per_result_error_template: Some("{{owner_type}} {{name}} ({{old_required_const_count}} -> {{new_required_const_count}} required const generics) in {{span_filename}}:{{span_begin_line}}"),
+    // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
+    // for information about this field.
+    //
+    // The witness would be a type ascription with the old number
+    // of required const generics, which is insufficient for the new definition.
+    witness: None,
+)
