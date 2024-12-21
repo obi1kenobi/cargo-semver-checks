@@ -1,0 +1,65 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+snapshot_kind: text
+---
+{
+  "./test_crates/trait_method_default_impl_removed/": [
+    {
+      "method_name": String("method_default_impl_removed_and_becomes_sealed"),
+      "name": String("TraitE"),
+      "new_parameter_count": Uint64(2),
+      "old_parameter_count": Uint64(1),
+      "path": List([
+        String("trait_method_default_impl_removed"),
+        String("TraitE"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_parameter_count_changed/": [
+    {
+      "method_name": String("gain_a_parameter"),
+      "name": String("Example"),
+      "new_parameter_count": Uint64(1),
+      "old_parameter_count": Uint64(0),
+      "path": List([
+        String("trait_method_parameter_count_changed"),
+        String("Example"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("lose_a_parameter"),
+      "name": String("Example"),
+      "new_parameter_count": Uint64(0),
+      "old_parameter_count": Uint64(1),
+      "path": List([
+        String("trait_method_parameter_count_changed"),
+        String("Example"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_newly_sealed/": [
+    {
+      "method_name": String("method"),
+      "name": String("TraitMethodBecomesSealed"),
+      "new_parameter_count": Uint64(2),
+      "old_parameter_count": Uint64(1),
+      "path": List([
+        String("trait_newly_sealed"),
+        String("TraitMethodBecomesSealed"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
