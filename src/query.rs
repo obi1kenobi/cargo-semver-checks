@@ -1160,6 +1160,7 @@ add_lints!(
     function_must_use_added,
     function_now_doc_hidden,
     function_parameter_count_changed,
+    function_requires_different_const_generic_params,
     function_unsafe_added,
     inherent_associated_const_now_doc_hidden,
     inherent_associated_pub_const_missing,

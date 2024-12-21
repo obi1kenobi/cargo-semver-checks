@@ -1,0 +1,77 @@
+SemverQuery(
+    id: "function_requires_different_const_generic_params",
+    human_readable_name: "function now requires a different number of const generic parameters",
+    // Currently, const generics in functions and methods cannot have defaults set.
+    // This is why we have only one lint ("requires different number") instead of
+    // two separate lints ("requires" / "allows") like for structs/traits etc.
+    description: "A function now requires a different number of const generic parameters than before.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/generics.html#const-generics"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @tag(name: "old_required_const_count")
+                                          @output(name: "old_required_const_count") {
+                            ... on GenericConstParameter {
+
+                                old_required_consts: name @output
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "!=", value: ["%old_required_const_count"])
+                                          @output(name: "new_required_const_count") {
+                            ... on GenericConstParameter {
+                                new_required_consts: name @output
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A function now requires a different number of const generic parameters than it used to. Uses of this function that supplied the previous number of const generics will be broken.",
+    per_result_error_template: Some("function {{name}} ({{old_required_const_count}} -> {{new_required_const_count}} const generics) in {{span_filename}}:{{span_begin_line}}"),
+    // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
+    // for information about this field.
+    //
+    // The witness would be a function invocation with the old number
+    // of const generics, which is insufficient for the new definition.
+    witness: None,
+)
