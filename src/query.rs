@@ -1206,6 +1206,7 @@ add_lints!(
     trait_method_added,
     trait_method_missing,
     trait_method_now_doc_hidden,
+    trait_method_requires_different_const_generic_params,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
     trait_mismatched_generic_lifetimes,
