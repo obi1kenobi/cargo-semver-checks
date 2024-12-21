@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "type_requires_more_const_generic_params"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
