@@ -1,0 +1,60 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+snapshot_kind: text
+---
+{
+  "./test_crates/trait_allows_fewer_const_generic_params/": [
+    {
+      "name": String("Example"),
+      "new_allowed_const_count": Uint64(1),
+      "new_allowed_consts": List([
+        String("N"),
+      ]),
+      "old_allowed_const_count": Uint64(2),
+      "old_allowed_consts": List([
+        String("N"),
+        String("M"),
+      ]),
+      "path": List([
+        String("trait_allows_fewer_const_generic_params"),
+        String("Example"),
+      ]),
+      "span_begin_line": Uint64(1),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NotGenericAnymore"),
+      "new_allowed_const_count": Uint64(0),
+      "new_allowed_consts": List([]),
+      "old_allowed_const_count": Uint64(1),
+      "old_allowed_consts": List([
+        String("N"),
+      ]),
+      "path": List([
+        String("trait_allows_fewer_const_generic_params"),
+        String("NotGenericAnymore"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NotGenericEither"),
+      "new_allowed_const_count": Uint64(0),
+      "new_allowed_consts": List([]),
+      "old_allowed_const_count": Uint64(1),
+      "old_allowed_consts": List([
+        String("N"),
+      ]),
+      "path": List([
+        String("trait_allows_fewer_const_generic_params"),
+        String("NotGenericEither"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
