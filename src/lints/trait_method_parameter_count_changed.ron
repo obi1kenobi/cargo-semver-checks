@@ -1,0 +1,77 @@
+SemverQuery(
+    id: "trait_method_parameter_count_changed",
+    human_readable_name: "pub trait method parameter count changed",
+    description: "A trait method requires a different number of parameters than it used to.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#major-any-change-to-trait-item-signatures"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            method_name: name @output @tag
+
+                            # TODO: Once we decide to split trait method lints based on whether the
+                            # trait is sealed (e.g. see `trait_method_missing`), split this lint:
+                            # - Sealed traits should ignore ineligible (~approx. `#[doc(hidden)]`)
+                            #   methods since they are indeed never public API.
+                            # - Non-sealed traits should only ignore ineligible methods
+                            #   if they have a default implementation; otherwise, implementors
+                            #   of the trait have to impl the method regardless of `#[doc(hidden)]`.
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters")
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            name @filter(op: "=", value: ["%method_name"])
+
+                            new_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"]) @output
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    // TODO: This has a false-positive edge case, because it assumes the trait method
+    //       was *previously* callable. This might not be the case for partially-sealed traits
+    //       which can make some methods uncallable. In that case, the method signature change
+    //       is not a breaking change, since it could never have been called in the first place.
+    //       If the trait wasn't sealed and the method didn't have a default impl, then
+    //       the change is still breaking even if the method wasn't callable -- it's just
+    //       on the side of implementing the trait, not calling the method.
+    error_message: "A trait method now takes a different number of parameters.",
+    per_result_error_template: Some("{{name}}::{{method_name}} now takes {{new_parameter_count}} instead of {{old_parameter_count}} parameters, in file {{span_filename}}:{{span_begin_line}}"),
+)
