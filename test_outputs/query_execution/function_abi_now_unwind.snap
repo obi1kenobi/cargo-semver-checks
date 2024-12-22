@@ -6,14 +6,14 @@ snapshot_kind: text
 {
   "./test_crates/function_abi_no_longer_unwind/": [
     {
-      "abi_raw_name": String("C-unwind"),
-      "name": String("unwind_function_becomes_non_unwind"),
-      "new_abi_raw_name": String("C"),
+      "abi_raw_name": String("C"),
+      "name": String("non_unwind_function_becomes_unwind"),
+      "new_abi_raw_name": String("C-unwind"),
       "path": List([
         String("function_abi_no_longer_unwind"),
-        String("unwind_function_becomes_non_unwind"),
+        String("non_unwind_function_becomes_unwind"),
       ]),
-      "span_begin_line": Uint64(1),
+      "span_begin_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
     },
   ],

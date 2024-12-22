@@ -1,7 +1,7 @@
 SemverQuery(
-    id: "function_abi_no_longer_unwind",
-    human_readable_name: "function abi no longer unwind",
-    description: "A pub fn changed from an unwind-capable ABI to the same-named ABI without unwind. If that function causes an unwind (e.g. by panicking), its behavior is now undefined.",
+    id: "function_abi_now_unwind",
+    human_readable_name: "function abi is now unwind-capable",
+    description: "A pub fn changed from an non-unwind ABI to the same-named ABI with unwind ability. This change might not be compatible with callers of this function, since they may not expect unwinding to happen here.",
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://rust-lang.github.io/rfcs/2945-c-unwind-abi.html"),
@@ -18,7 +18,7 @@ SemverQuery(
                         new_abi_: abi {
                             name @tag(name: "abi")
                             raw_name @output
-                            unwind @filter(op: "!=", value: ["$true"])
+                            unwind @filter(op: "=", value: ["$true"])
                         }
 
                         importable_path {
@@ -41,7 +41,7 @@ SemverQuery(
                         abi_: abi {
                             name @filter(op: "=", value: ["%abi"])
                             raw_name @output
-                            unwind @filter(op: "=", value: ["$true"])
+                            unwind @filter(op: "!=", value: ["$true"])
                         }
 
                         importable_path {
@@ -57,6 +57,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A pub fn changed from an unwind-capable ABI to the same-named ABI without unwind. If that function causes an unwind (e.g. by panicking), its behavior is now undefined.",
-    per_result_error_template: Some("pub fn {{name}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A pub fn changed from a non-unwind ABI to the same-named ABI with unwind ability. This change might not be compatible with callers of this function, since they may not expect unwinding to happen here.",
+    per_result_error_template: Some("{{join \"::\" path}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
