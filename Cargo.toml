@@ -63,6 +63,12 @@ regex = "1.11.1"
 insta-cmd = "0.6.0"
 rayon = "1.10.0"
 trustfall_core = "0.8.0"  # Ensure this matches the `trustfall` version above.
+axum = "0.7.9"
+tokio = "1.42.0"
+tokio-util = "0.7.13"
+tower = "0.5.1"
+tower-http = { version = "0.6.1", features = ["fs", "timeout"] }
+reqwest = "0.12.9"
 
 # In dev and test profiles, compile all dependencies with optimizations enabled,
 # but still checking debug assertions and overflows.
