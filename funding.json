@@ -1,0 +1,97 @@
+{
+    "version": "v1.0.0",
+    "entity": {
+        "type": "individual",
+        "role": "owner",
+        "name": "Predrag Gruevski",
+        "email": "obi1kenobi82@gmail.com",
+        "description": "Author and maintainer of cargo-semver-checks.",
+        "webpageUrl": {
+            "url": "https://github.com/sponsors/obi1kenobi"
+        }
+    },
+    "projects": [
+        {
+            "guid": "cargo-semver-checks",
+            "name": "cargo-semver-checks",
+            "description": "Lint your Rust crates for accidental breaking changes.",
+            "webpageUrl": {
+                "url": "https://github.com/obi1kenobi/cargo-semver-checks"
+            },
+            "repositoryUrl": {
+                "url": "https://github.com/obi1kenobi/cargo-semver-checks"
+            },
+            "licenses": [
+                "spdx:Apache-2.0",
+                "spdx:MIT"
+            ],
+            "tags": [
+                "linter",
+                "semver",
+                "packaging",
+                "developer-tools",
+                "devops"
+            ]
+        }
+    ],
+    "funding": {
+        "channels": [
+            {
+                "guid": "github-sponsors",
+                "type": "other",
+                "address": "https://github.com/sponsors/obi1kenobi",
+                "description": "Use GitHub Sponsors to fund my work. If for any reason GitHub Sponsors isn't a good fit for you, please contact me over email and we can make alternative arrangements."
+            }
+        ],
+        "plans": [
+            {
+                "guid": "enterprise-supporter",
+                "status": "active",
+                "name": "Enterprise Tier",
+                "description": "For enterprises with needs which might not be served by cargo-semver-checks in its current form. Get direct maintainer access, get help with your team's custom needs, and have influence on future design decisions. Please reach out over email before selecting this tier so we can ensure we can accommodate your team's needs.",
+                "amount": 10000,
+                "currency": "USD",
+                "frequency": "monthly",
+                "channels": [
+                    "github-sponsors"
+                ]
+            },
+            {
+                "guid": "corporate-supporter",
+                "status": "active",
+                "name": "Corporate Tier",
+                "description": "For companies that see value in my work and would like to incentivize me to do more of it. You'll have some influence over future development, but will not be able to get customized features specific to your use case. For custom work specific to your needs, please use the Enterprise Tier instead.",
+                "amount": 3000,
+                "currency": "USD",
+                "frequency": "monthly",
+                "channels": [
+                    "github-sponsors"
+                ]
+            },
+            {
+                "guid": "startup-supporter",
+                "status": "active",
+                "name": "Startup Tier",
+                "description": "For small startup companies (<100 people) that see value in my work and would like to incentivize me to do more of it. Allows me to spend time working on cargo-semver-checks instead of doing other work to pay my bills.",
+                "amount": 300,
+                "currency": "USD",
+                "frequency": "monthly",
+                "channels": [
+                    "github-sponsors"
+                ]
+            },
+            {
+                "guid": "any-amount",
+                "status": "active",
+                "name": "A Token of Support",
+                "description": "Pay any amount to show your support and good will for the project. Allows me to spend time working on cargo-semver-checks instead of doing other work to pay my bills.",
+                "amount": 0,
+                "currency": "USD",
+                "frequency": "other",
+                "channels": [
+                    "github-sponsors"
+                ]
+            }
+        ]
+    }
+}
