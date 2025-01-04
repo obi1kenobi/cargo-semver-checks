@@ -7,7 +7,8 @@
         "email": "obi1kenobi82@gmail.com",
         "description": "Author and maintainer of cargo-semver-checks.",
         "webpageUrl": {
-            "url": "https://github.com/sponsors/obi1kenobi"
+            "url": "https://predr.ag/",
+            "wellKnown": "https://predr.ag/.well-known/funding-manifest-urls"
         }
     },
     "projects": [
@@ -41,6 +42,12 @@
                 "type": "other",
                 "address": "https://github.com/sponsors/obi1kenobi",
                 "description": "Use GitHub Sponsors to fund my work. If for any reason GitHub Sponsors isn't a good fit for you, please contact me over email and we can make alternative arrangements."
+            },
+            {
+                "guid": "bank-invoice",
+                "type": "bank",
+                "address": "",
+                "description": "Send a payment via bank transfer. If you need an invoice, I'm happy to provide one. Please email me for details."
             }
         ],
         "plans": [
@@ -53,7 +60,8 @@
                 "currency": "USD",
                 "frequency": "monthly",
                 "channels": [
-                    "github-sponsors"
+                    "github-sponsors",
+                    "bank-invoice"
                 ]
             },
             {
@@ -65,7 +73,8 @@
                 "currency": "USD",
                 "frequency": "monthly",
                 "channels": [
-                    "github-sponsors"
+                    "github-sponsors",
+                    "bank-invoice"
                 ]
             },
             {
@@ -77,7 +86,8 @@
                 "currency": "USD",
                 "frequency": "monthly",
                 "channels": [
-                    "github-sponsors"
+                    "github-sponsors",
+                    "bank-invoice"
                 ]
             },
             {
