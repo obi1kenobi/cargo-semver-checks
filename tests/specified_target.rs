@@ -34,6 +34,14 @@ fn with_env_var_riscv64gc_unknown_linux_gnu() {
 }
 
 #[test]
+fn with_env_var_aarch64_unknown_none() {
+    base()
+        .env("CARGO_BUILD_TARGET", "aarch64-unknown-none")
+        .assert()
+        .success();
+}
+
+#[test]
 #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
 fn with_flag() {
     base()
@@ -48,6 +56,15 @@ fn with_flag_riscv64gc_unknown_linux_gnu() {
     base()
         .env_remove("CARGO_BUILD_TARGET")
         .arg("--target=riscv64gc-unknown-linux-gnu")
+        .assert()
+        .success();
+}
+
+#[test]
+fn with_flag_aarch64_unknown_none() {
+    base()
+        .env_remove("CARGO_BUILD_TARGET")
+        .arg("--target=aarch64-unknown-none")
         .assert()
         .success();
 }
