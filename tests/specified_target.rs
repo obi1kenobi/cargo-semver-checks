@@ -26,8 +26,7 @@ fn with_env_var() {
 }
 
 #[test]
-#[cfg(all(target_os = "linux", target_arch = "riscv64"))]
-fn with_env_var() {
+fn with_env_var_riscv64gc_unknown_linux_gnu() {
     base()
         .env("CARGO_BUILD_TARGET", "riscv64gc-unknown-linux-gnu")
         .assert()
@@ -45,8 +44,7 @@ fn with_flag() {
 }
 
 #[test]
-#[cfg(all(target_os = "linux", target_arch = "riscv64"))]
-fn with_flag() {
+fn with_flag_riscv64gc_unknown_linux_gnu() {
     base()
         .env_remove("CARGO_BUILD_TARGET")
         .arg("--target=riscv64gc-unknown-linux-gnu")
