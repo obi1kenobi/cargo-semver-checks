@@ -7,6 +7,8 @@ info:
     - "--bugreport"
   env:
     CARGO_TERM_COLOR: never
+    RUST_BACKTRACE: "0"
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -19,7 +21,8 @@ cargo-semver-checks [VERSION] ([HASH])
 
 #### Operating system
 
-[OS]
+- OS: [OS]
+- Kernel: [KERNEL]
 
 #### Command-line
 
