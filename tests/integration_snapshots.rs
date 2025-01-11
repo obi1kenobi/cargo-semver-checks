@@ -56,8 +56,8 @@ fn bugreport() {
             "cargo-semver-checks [VERSION] ([HASH])",
         );
         settings.add_filter(
-            r"#### Operating system\n\n[^\n]+",
-            "#### Operating system\n\n[OS]",
+            r"#### Operating system\n\n- OS: [^\n]+\n- Kernel: [^\n]+",
+            "#### Operating system\n\n- OS: [OS]\n- Kernel: [KERNEL]",
         );
         settings.add_filter(
             &regex::escape(executable_path().to_str().expect("non-UTF-8 path")),
