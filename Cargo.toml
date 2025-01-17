@@ -15,7 +15,7 @@ exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "t
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-trustfall = "0.8.0"  # Ensure this matches the `trustfall_core` dev-dependency version below.
+trustfall = "0.8.1"  # Ensure this matches the `trustfall_core` dev-dependency version below.
 # `cargo_metadata` is used at the API boundary of `trustfall_rustdoc`,
 # so ensure the version we use for `cargo_metadata` here matches what `trustfall_rustdoc` uses too.
 trustfall_rustdoc = { version = "0.20.0", default-features = false, features = ["v32", "v33", "v35", "v36", "v37", "rayon", "rustc-hash"] }
@@ -62,7 +62,7 @@ insta = { version = "1.41.1", features = ["ron", "filters", "toml"] }
 regex = "1.11.1"
 insta-cmd = "0.6.0"
 rayon = "1.10.0"
-trustfall_core = "0.8.0"  # Ensure this matches the `trustfall` version above.
+trustfall_core = "0.8.1"  # Ensure this matches the `trustfall` version above.
 
 # In dev and test profiles, compile all dependencies with optimizations enabled,
 # but still checking debug assertions and overflows.
