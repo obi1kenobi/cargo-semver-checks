@@ -1,0 +1,150 @@
+SemverQuery(
+    id: "method_requires_different_generic_type_params",
+    human_readable_name: "method now requires a different number of generic type parameters",
+    // Currently, generic types in functions and methods cannot have defaults set.
+    // This is why we have only one lint ("requires different number") instead of
+    // two separate lints ("requires" / "allows") like for structs/traits etc.
+    description: "A method now requires a different number of generic type parameters than before.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/generics.html"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
+                                method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                generic_parameter @fold
+                                                  @transform(op: "count")
+                                                  @tag(name: "old_required_type_count")
+                                                  @output(name: "old_required_type_count") {
+                                    ... on GenericTypeParameter {
+                                        # Ignore generic type parameters introduced by `impl Trait`.
+                                        synthetic @filter(op: "!=", value: ["$true"])
+
+                                        old_required_types: name @output
+                                    }
+                                }
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # We use "impl" instead of "inherent_impl" here because moving
+                        # an inherently-implemented method to a trait is not necessarily
+                        # a breaking change, but changing the number of generic types is.
+                        #
+                        # Method names are not unique on an ImplOwner! It's perfectly valid to have
+                        # both an inherent method `foo()` as well as a trait-provided method
+                        # `<Self as Bar>::foo()` at the same time. Whenever possible, rustc
+                        # attempts to "do the right thing" and dispatch to the correct one.
+                        #
+                        # Because of the above, this check has to be written as
+                        # "there is no method with the correct name and number of generic types"
+                        # rather than the (incorrect!) alternative
+                        # "the named method does not have the correct number of arguments."
+                        #
+                        # The above by itself is still not enough: say if the method was removed,
+                        # that still makes the "there is no method ..." statement true.
+                        # So we add an additional clause demanding that a method by that name
+                        # with appropriate visibility actually exists.
+                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                            }
+                        }
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                generic_parameter @fold
+                                                  @transform(op: "count")
+                                                  @filter(op: "=", value: ["%old_required_type_count"]) {
+                                    ... on GenericTypeParameter {
+                                        # Ignore generic type parameters introduced by `impl Trait`.
+                                        synthetic @filter(op: "!=", value: ["$true"])
+
+                                        name
+                                    }
+                                }
+                            }
+                        }
+
+                        # Get the non-matching methods by that name so we can report them
+                        # in the lint error message.
+                        impl @fold {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                generic_parameter @fold
+                                                  @transform(op: "count")
+                                                  @output(name: "new_required_type_count") {
+                                    ... on GenericTypeParameter {
+                                        # Ignore generic type parameters introduced by `impl Trait`.
+                                        synthetic @filter(op: "!=", value: ["$true"])
+
+                                        new_required_types: name @output
+                                    }
+                                }
+
+                                non_matching_span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "public_or_default": ["public", "default"],
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A method now requires a different number of generic type parameters than it used to. Uses of this method that supplied the previous number of generic types will be broken.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} takes {{unpack_if_singleton new_required_type_count}} generic types instead of {{old_required_type_count}}, in {{multiple_spans non_matching_span_filename non_matching_span_begin_line}}"),
+    // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
+    // for information about this field.
+    //
+    // The witness would be a invocation with the old number
+    // of generic types, which is insufficient for the new definition.
+    witness: None,
+)

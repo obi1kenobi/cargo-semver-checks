@@ -1,0 +1,82 @@
+SemverQuery(
+    id: "function_requires_different_generic_type_params",
+    human_readable_name: "function now requires a different number of generic type parameters",
+    // Currently, generic types in functions and methods cannot have defaults set.
+    // This is why we have only one lint ("requires different number") instead of
+    // two separate lints ("requires" / "allows") like for structs/traits etc.
+    description: "A function now requires a different number of generic type parameters than before.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/generics.html"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @tag(name: "old_required_type_count")
+                                          @output(name: "old_required_type_count") {
+                            ... on GenericTypeParameter {
+                                # Ignore generic type parameters introduced by `impl Trait`.
+                                synthetic @filter(op: "!=", value: ["$true"])
+
+                                old_required_types: name @output
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "!=", value: ["%old_required_type_count"])
+                                          @output(name: "new_required_type_count") {
+                            ... on GenericTypeParameter {
+                                # Ignore generic type parameters introduced by `impl Trait`.
+                                synthetic @filter(op: "!=", value: ["$true"])
+
+                                new_required_types: name @output
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A function now requires a different number of generic type parameters than it used to. Uses of this function that supplied the previous number of generic types will be broken.",
+    per_result_error_template: Some("function {{name}} ({{old_required_type_count}} -> {{new_required_type_count}} generic types) in {{span_filename}}:{{span_begin_line}}"),
+    // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
+    // for information about this field.
+    //
+    // The witness would be a function invocation with the old number
+    // of generic types, which is insufficient for the new definition.
+    witness: None,
+)
