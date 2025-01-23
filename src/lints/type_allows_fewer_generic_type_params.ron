@@ -1,0 +1,76 @@
+SemverQuery(
+    id: "type_allows_fewer_generic_type_params",
+    human_readable_name: "type now allows fewer generic type parameters",
+    description: "A type now allows fewer generic type parameters than before.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/generics.html#const-generics"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        owner_type: __typename @tag @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                        @transform(op: "count")
+                                        @tag(name: "old_allowed_type_count")
+                                        @output(name: "old_allowed_type_count") {
+                            ... on GenericTypeParameter {
+                                old_allowed_consts: name @output
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        __typename @filter(op: "=", value: ["%owner_type"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "<", value: ["%old_allowed_type_count"])
+                                          @output(name: "new_allowed_type_count") {
+                            ... on GenericTypeParameter {
+                                new_allowed_consts: name @output
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A type now allows fewer generic type parameters than it used to. Uses of this type that supplied all previously-supported generic types will be broken.",
+    per_result_error_template: Some("{{owner_type}} {{name}} allows {{old_allowed_type_count}} -> {{new_allowed_type_count}} generic types in {{span_filename}}:{{span_begin_line}}"),
+    // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
+    // for information about this field.
+    //
+    // The witness would be a type ascription with the old number
+    // of allowed generic types (including ones that provided default values),
+    // which will be too many generics for the new definition.
+    witness: None,
+)

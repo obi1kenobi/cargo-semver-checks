@@ -1,0 +1,60 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+snapshot_kind: text
+---
+{
+  "./test_crates/type_requires_more_generic_type_params/": [
+    {
+      "name": String("NotGeneric"),
+      "new_required_consts": List([
+        String("T"),
+      ]),
+      "new_required_type_count": Uint64(1),
+      "old_required_consts": List([]),
+      "old_required_type_count": Uint64(0),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_requires_more_generic_type_params"),
+        String("NotGeneric"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("DefaultBecomesRequired"),
+      "new_required_consts": List([
+        String("A"),
+      ]),
+      "new_required_type_count": Uint64(1),
+      "old_required_consts": List([]),
+      "old_required_type_count": Uint64(0),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_requires_more_generic_type_params"),
+        String("DefaultBecomesRequired"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("GenericAdded"),
+      "new_required_consts": List([
+        String("T"),
+      ]),
+      "new_required_type_count": Uint64(1),
+      "old_required_consts": List([]),
+      "old_required_type_count": Uint64(0),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_requires_more_generic_type_params"),
+        String("GenericAdded"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
