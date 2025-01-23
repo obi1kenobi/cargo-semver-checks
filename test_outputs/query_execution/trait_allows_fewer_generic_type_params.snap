@@ -7,10 +7,10 @@ snapshot_kind: text
   "./test_crates/trait_allows_fewer_generic_type_params/": [
     {
       "name": String("Example"),
-      "new_allowed_typeold_allowed_type_count": Uint64(1),
       "new_allowed_types": List([
         String("A"),
       ]),
+      "new_required_type_count": Uint64(1),
       "old_allowed_type_count": Uint64(2),
       "old_allowed_types": List([
         String("A"),
@@ -26,8 +26,8 @@ snapshot_kind: text
     },
     {
       "name": String("NotGenericAnymore"),
-      "new_allowed_typeold_allowed_type_count": Uint64(0),
       "new_allowed_types": List([]),
+      "new_required_type_count": Uint64(0),
       "old_allowed_type_count": Uint64(1),
       "old_allowed_types": List([
         String("T"),
@@ -42,8 +42,8 @@ snapshot_kind: text
     },
     {
       "name": String("NotGenericEither"),
-      "new_allowed_typeold_allowed_type_count": Uint64(0),
       "new_allowed_types": List([]),
+      "new_required_type_count": Uint64(0),
       "old_allowed_type_count": Uint64(1),
       "old_allowed_types": List([
         String("T"),
@@ -60,8 +60,8 @@ snapshot_kind: text
   "./test_crates/trait_removed_supertrait/": [
     {
       "name": String("CorrectTraitChangingTheGenericTypeNonBreaking"),
-      "new_allowed_typeold_allowed_type_count": Uint64(0),
       "new_allowed_types": List([]),
+      "new_required_type_count": Uint64(0),
       "old_allowed_type_count": Uint64(1),
       "old_allowed_types": List([
         String("T"),

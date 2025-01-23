@@ -43,7 +43,7 @@ SemverQuery(
                         generic_parameter @fold
                                           @transform(op: "count")
                                           @filter(op: "<", value: ["%old_allowed_type_count"])
-                                          @output(name: "new_allowed_typeold_allowed_type_count") {
+                                          @output(name: "new_required_type_count") {
                             ... on GenericTypeParameter {
                                 new_allowed_types: name @output
                             }
@@ -63,7 +63,7 @@ SemverQuery(
         "true": true,
     },
     error_message: "A trait now allows fewer generic type parameters than it used to. Uses of this trait that supplied all previously-supported generic types will be broken.",
-    per_result_error_template: Some("trait {{name}} allows {{old_allowed_type_count}} -> {{new_allowed_typeold_allowed_type_count}} generic types in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("trait {{name}} allows {{old_allowed_type_count}} -> {{new_required_type_count}} generic types in {{span_filename}}:{{span_begin_line}}"),
     // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
     // for information about this field.
     //

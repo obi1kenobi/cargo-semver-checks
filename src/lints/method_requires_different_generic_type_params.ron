@@ -32,6 +32,8 @@ SemverQuery(
                                                   @tag(name: "old_required_type_count")
                                                   @output(name: "old_required_type_count") {
                                     ... on GenericTypeParameter {
+                                        # Ignore generic type parameters introduced by `impl Trait`.
+                                        synthetic @filter(op: "!=", value: ["$true"])
 
                                         old_required_types: name @output
                                     }
@@ -92,6 +94,9 @@ SemverQuery(
                                                   @transform(op: "count")
                                                   @filter(op: "=", value: ["%old_required_type_count"]) {
                                     ... on GenericTypeParameter {
+                                        # Ignore generic type parameters introduced by `impl Trait`.
+                                        synthetic @filter(op: "!=", value: ["$true"])
+
                                         name
                                     }
                                 }
@@ -110,6 +115,9 @@ SemverQuery(
                                                   @transform(op: "count")
                                                   @output(name: "new_required_type_count") {
                                     ... on GenericTypeParameter {
+                                        # Ignore generic type parameters introduced by `impl Trait`.
+                                        synthetic @filter(op: "!=", value: ["$true"])
+
                                         new_required_types: name @output
                                     }
                                 }
@@ -132,7 +140,7 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A method now requires a different number of generic type parameters than it used to. Uses of this method that supplied the previous number of generic types will be broken.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} takes {{unpack_if_singleton new_required_typeold_required_type_count}} generic types instead of {{old_required_type_count}}, in {{multiple_spans non_matching_span_filename non_matching_span_begin_line}}"),
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} takes {{unpack_if_singleton new_required_type_count}} generic types instead of {{old_required_type_count}}, in {{multiple_spans non_matching_span_filename non_matching_span_begin_line}}"),
     // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
     // for information about this field.
     //

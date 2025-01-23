@@ -27,6 +27,8 @@ SemverQuery(
                                           @tag(name: "old_required_type_count")
                                           @output(name: "old_required_type_count") {
                             ... on GenericTypeParameter {
+                                # Ignore generic type parameters introduced by `impl Trait`.
+                                synthetic @filter(op: "!=", value: ["$true"])
 
                                 old_required_types: name @output
                             }
@@ -49,6 +51,9 @@ SemverQuery(
                                           @filter(op: "!=", value: ["%old_required_type_count"])
                                           @output(name: "new_required_type_count") {
                             ... on GenericTypeParameter {
+                                # Ignore generic type parameters introduced by `impl Trait`.
+                                synthetic @filter(op: "!=", value: ["$true"])
+
                                 new_required_types: name @output
                             }
                         }
