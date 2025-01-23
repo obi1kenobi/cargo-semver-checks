@@ -1,0 +1,93 @@
+SemverQuery(
+    id: "trait_method_requires_different_generic_type_params",
+    human_readable_name: "trait method now requires a different number of generic type parameters",
+    // Currently, generic types in functions and methods cannot have defaults set.
+    // This is why we have only one lint ("requires different number") instead of
+    // two separate lints ("requires" / "allows") like for structs/traits etc.
+    description: "A trait method now requires a different number of generic type parameters than before.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/generics.html"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            method: name @output @tag
+
+                            generic_parameter @fold
+                                              @transform(op: "count")
+                                              @tag(name: "old_required_type_count")
+                                              @output(name: "old_required_type_count") {
+                                ... on GenericTypeParameter {
+                                    old_required_types: name @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            name @filter(op: "=", value: ["%method"])
+
+                            generic_parameter @fold
+                                              @transform(op: "count")
+                                              @filter(op: "!=", value: ["%old_required_type_count"])
+                                              @output(name: "new_required_type_count") {
+                                ... on GenericTypeParameter {
+                                    new_required_types: name @output
+                                }
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A trait method now requires a different number of generic type parameters than it used to. Calls or implementations of this trait method using the previous number of generic types will be broken.",
+    per_result_error_template: Some("{{name}}::{{method}} ({{old_required_type_count}} -> {{new_required_type_count}} generic types) in {{span_filename}}:{{span_begin_line}}"),
+    // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
+    // for information about this field.
+    //
+    // The witness here depends on whether the trait method is implementable or sealed,
+    // and whether the method is callable.
+    // - If the method is callable, the witness would be a trait method invocation
+    //   with the old number of generic types, which is insufficient for the new definition.
+    // - If the trait is not sealed, and the method is implementable, then the witness would be
+    //   an implementation of that trait that supplies an implementation of the method with the old
+    //   number of generic types. Refinement by making a method implementation more generic isn't
+    //   supported, so this is always breaking in current Rust.
+    witness: None,
+)

@@ -1,0 +1,96 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+snapshot_kind: text
+---
+{
+  "./test_crates/method_requires_different_generic_type_params/": [
+    {
+      "method_name": String("previously_not_generic"),
+      "method_visibility": String("public"),
+      "name": String("Owner"),
+      "new_required_type_count": List([
+        Uint64(1),
+      ]),
+      "new_required_types": List([
+        List([
+          String("T"),
+        ]),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(4),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_required_type_count": Uint64(0),
+      "old_required_types": List([]),
+      "path": List([
+        String("method_requires_different_generic_type_params"),
+        String("Owner"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("add_generic_type"),
+      "method_visibility": String("public"),
+      "name": String("Owner"),
+      "new_required_type_count": List([
+        Uint64(2),
+      ]),
+      "new_required_types": List([
+        List([
+          String("T"),
+          String("U"),
+        ]),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(8),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_required_type_count": Uint64(1),
+      "old_required_types": List([
+        String("T"),
+      ]),
+      "path": List([
+        String("method_requires_different_generic_type_params"),
+        String("Owner"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("remove_generic_type"),
+      "method_visibility": String("public"),
+      "name": String("Owner"),
+      "new_required_type_count": List([
+        Uint64(0),
+      ]),
+      "new_required_types": List([
+        List([]),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(12),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_required_type_count": Uint64(1),
+      "old_required_types": List([
+        String("T"),
+      ]),
+      "path": List([
+        String("method_requires_different_generic_type_params"),
+        String("Owner"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
