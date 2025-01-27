@@ -17,7 +17,7 @@ pub trait WillGainAnotherOneSealed: TraitOne + sealed::Sealed {}
 pub trait WillGainStdOne {}
 pub trait WillGainStdTwo {}
 pub trait WillGainStdThree {
-    fn make_me_non_object_safe() -> Self;
+    fn make_me_non_dyn_compatible() -> Self;
 }
 
 pub trait WillChangeStdToCore: std::fmt::Debug {}

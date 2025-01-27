@@ -37,11 +37,11 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/trait_no_longer_object_safe/": [
+  "./test_crates/trait_no_longer_dyn_compatible/": [
     {
       "name": String("RefTrait"),
       "path": List([
-        String("trait_no_longer_object_safe"),
+        String("trait_no_longer_dyn_compatible"),
         String("RefTrait"),
       ]),
       "span_begin_line": Uint64(2),

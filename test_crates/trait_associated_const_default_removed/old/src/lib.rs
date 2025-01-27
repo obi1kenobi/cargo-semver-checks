@@ -5,33 +5,33 @@ mod sealed {
 pub trait WillLoseDefault {
     const ONE: bool = true;
 
-    fn make_me_non_object_safe() -> Self;
+    fn make_me_non_dyn_compatible() -> Self;
 }
 
 pub trait WillLoseDefaultSealed: sealed::Sealed {
     const ONE: bool = true;
 
-    fn make_me_non_object_safe() -> Self;
+    fn make_me_non_dyn_compatible() -> Self;
 }
 
 pub trait Unchanged {
     const ONE: bool = true;
 
-    fn make_me_non_object_safe() -> Self;
+    fn make_me_non_dyn_compatible() -> Self;
 }
 pub trait UnchangedSealed: sealed::Sealed {
     const ONE: bool = true;
 
-    fn make_me_non_object_safe() -> Self;
+    fn make_me_non_dyn_compatible() -> Self;
 }
 
 pub trait UnchangedNoDefault {
     const ONE: bool;
 
-    fn make_me_non_object_safe() -> Self;
+    fn make_me_non_dyn_compatible() -> Self;
 }
 pub trait UnchangedNoDefaultSealed: sealed::Sealed {
     const ONE: bool;
 
-    fn make_me_non_object_safe() -> Self;
+    fn make_me_non_dyn_compatible() -> Self;
 }

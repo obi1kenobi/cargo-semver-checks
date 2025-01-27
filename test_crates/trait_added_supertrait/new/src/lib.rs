@@ -17,7 +17,7 @@ pub trait WillGainAnotherOneSealed: TraitOne + TraitTwo + sealed::Sealed {}
 pub trait WillGainStdOne: Sync {}
 pub trait WillGainStdTwo: core::fmt::Debug {}
 pub trait WillGainStdThree: PartialEq {
-    fn make_me_non_object_safe() -> Self;
+    fn make_me_non_dyn_compatible() -> Self;
 }
 
 pub trait WillChangeStdToCore: core::fmt::Debug {}

@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "trait_no_longer_object_safe"
+name = "trait_no_longer_dyn_compatible"
 version = "0.1.0"
 edition = "2021"
 

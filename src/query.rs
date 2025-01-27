@@ -1220,7 +1220,7 @@ add_lints!(
     trait_missing,
     trait_must_use_added,
     trait_newly_sealed,
-    trait_no_longer_object_safe,
+    trait_no_longer_dyn_compatible,
     trait_now_doc_hidden,
     trait_removed_associated_constant,
     trait_removed_associated_type,
