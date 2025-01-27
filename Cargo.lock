@@ -2878,6 +2878,7 @@ version = "0.32.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fd5cb7a0c0a5a4f6bc429274fc1073d395237c83ef13d0ac728e0f95f5499ca"
 dependencies = [
+ "rustc-hash",
  "serde",
 ]
 
@@ -2887,6 +2888,17 @@ version = "0.33.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e33060dbec9e1d13d285c4cddc150a431569be97f33bf0b6c1ec6eea934c31ca"
 dependencies = [
+ "rustc-hash",
+ "serde",
+]
+
+[[package]]
+name = "rustdoc-types"
+version = "0.35.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf583db9958b3161d7980a56a8ee3c25e1a40708b81259be72584b7e0ea07c95"
+dependencies = [
+ "rustc-hash",
  "serde",
 ]
 
@@ -3493,9 +3505,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "32.5.0"
+version = "32.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2a9860d80ee6a7a1a998a1f64c51801a0149ad7a509f1fccc77c3ea4a20d4257"
+checksum = "67f0ba753cd74f0efee6ff1c7922cebe646bac8b125ae52e3bd2962021298271"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3507,9 +3519,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "33.5.0"
+version = "33.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a12d88069896ee1f06ca4848428d2f43675808ce467440f898cd10a3d2011dfd"
+checksum = "19113fb390cdf825572d17daba46110a502e1cd135ec82c373f985e070000639"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3521,9 +3533,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "35.4.0"
+version = "35.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7110995ace82077e14c83658734296243cf0923d88ceb9648eb7e7284f9a010"
+checksum = "b925dd481e3d3a67177bf5118626dc356037eb1e61af7a0ae0ff1f426da60927"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3535,9 +3547,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "36.4.0"
+version = "36.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9240bc5739f5c122c29909984b33bd0ced0cd0d45ae3f2c15b3ef28612752698"
+checksum = "893e13bd4f2a2341ef29b4731ac442259ad7beb20d6514a2ad8df9298620fb1b"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3549,15 +3561,29 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "37.2.0"
+version = "37.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5697b93116897f23c7ba6b98623308ac7c4a200dcecd0da040ded631fc7c865"
+checksum = "f4243569c6960eb2d48a40fd01a543318bb672d808619adcfcdec0d19637c5eb"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
  "rayon",
  "rustc-hash",
  "rustdoc-types 0.33.0",
+ "trustfall",
+]
+
+[[package]]
+name = "trustfall-rustdoc-adapter"
+version = "39.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eedaaa8489d688fd7a3da825c7509a5596dfc5c50cc151fe76f90d4c075a6e82"
+dependencies = [
+ "cargo_metadata",
+ "cargo_toml",
+ "rayon",
+ "rustc-hash",
+ "rustdoc-types 0.35.0",
  "trustfall",
 ]
 
@@ -3591,9 +3617,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall_rustdoc"
-version = "0.20.0"
+version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb5c6b0c65f25a4a148844ba6d9301f7ba9eb350ae85bde79f4c6bb8450f38b5"
+checksum = "25076143ca78db256286d2068dc504297a19999580668d3d684869bb11aa5c1e"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3601,11 +3627,12 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.11",
  "trustfall",
- "trustfall-rustdoc-adapter 32.5.0",
- "trustfall-rustdoc-adapter 33.5.0",
- "trustfall-rustdoc-adapter 35.4.0",
- "trustfall-rustdoc-adapter 36.4.0",
- "trustfall-rustdoc-adapter 37.2.0",
+ "trustfall-rustdoc-adapter 32.6.0",
+ "trustfall-rustdoc-adapter 33.6.0",
+ "trustfall-rustdoc-adapter 35.5.0",
+ "trustfall-rustdoc-adapter 36.5.0",
+ "trustfall-rustdoc-adapter 37.3.0",
+ "trustfall-rustdoc-adapter 39.1.0",
 ]
 
 [[package]]
