@@ -1,6 +1,6 @@
 SemverQuery(
-    id: "trait_no_longer_object_safe",
-    human_readable_name: "trait no longer object safe",
+    id: "trait_no_longer_dyn_compatible",
+    human_readable_name: "trait no longer dyn compatible",
     description: "A trait is no longer object safe, meaning it can no longer be used as `dyn Trait`.",
     required_update: Major,
     lint_level: Deny,
@@ -45,6 +45,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "Trait is no longer object safe, which breaks `dyn Trait` usage.",
+    error_message: "Trait is no longer dyn compatible, which breaks `dyn Trait` usage.",
     per_result_error_template: Some("trait {{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
