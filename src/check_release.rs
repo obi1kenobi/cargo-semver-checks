@@ -429,7 +429,7 @@ pub(super) fn run_check_release(
                 true,
             )?;
 
-            if required_bump.map_or(true, |required_bump| required_bump < suggested_bump) {
+            if required_bump.is_none_or(|required_bump| required_bump < suggested_bump) {
                 writeln!(
                     config.stderr(),
                     "{:12} produced warnings suggest new {} version",
