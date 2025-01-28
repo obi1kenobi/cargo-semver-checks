@@ -81,6 +81,10 @@ debug-assertions = true
 overflow-checks = true
 codegen-units = 16
 
+[profile.release]
+lto = true
+codegen-units = 1
+
 [features]
 default = ["gix-reqwest"]
 
