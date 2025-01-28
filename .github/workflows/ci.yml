@@ -319,8 +319,8 @@ jobs:
     needs:
       - build-binary
     env:
-      OLDER_RUST: "1.81"  # Rust 1.81 uses rustdoc v32
-      NEWER_RUST: "1.82"  # Rust 1.82 uses rustdoc v33
+      OLDER_RUST: "1.83"  # Rust 1.83 uses rustdoc v35
+      NEWER_RUST: "1.84"  # Rust 1.84 uses rustdoc v36
     steps:
       - name: Put env vars in outputs
         id: vars
