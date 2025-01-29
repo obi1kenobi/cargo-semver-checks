@@ -754,7 +754,7 @@ mod tests {
 
         // TODO: Remove this once Rust 1.85 is the oldest Rust supported by cargo-semver-checks.
         if query_name == "static_became_unsafe"
-            && rustc_version::version().map_or(false, |version| version < Version::new(1, 85, 0))
+            && rustc_version::version().is_ok_and(|version| version < Version::new(1, 85, 0))
         {
             eprintln!("skipping query execution test for lint `static_became_unsafe` since data for it isn't available in Rust prior to 1.85");
             return;
