@@ -1,6 +1,0 @@
----
-source: src/query.rs
-assertion_line: 760
-expression: "&query_execution_results"
----
-{}

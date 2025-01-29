@@ -1,7 +1,7 @@
 SemverQuery(
     id: "static_unsafe_added",
     human_readable_name: "pub static became unsafe",
-    description: "a extern static became unsafe to call",
+    description: "a extern static became unsafe to call.",
     required_update: Major,  
     lint_level: Deny,  
     reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#accessing-or-modifying-a-mutable-static-variable"),  

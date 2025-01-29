@@ -1,0 +1,18 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/static_unsafe_added/": [
+    {
+      "name": String("FOO"),
+      "path": List([
+        String("static_unsafe_added"),
+        String("FOO"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
