@@ -1,0 +1,51 @@
+SemverQuery(
+    id: "static_unsafe_added",
+    human_readable_name: "pub static became unsafe",
+    description: "a extern static became unsafe to call",
+    required_update: Major,  
+    lint_level: Deny,  
+    reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#accessing-or-modifying-a-mutable-static-variable"),  
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Static {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        unsafe @filter(op: "!=", value: ["$true"])
+                        
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Static {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        unsafe @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A publicly-visible static became `unsafe`, so calling it now requires an `unsafe` block.",
+    per_result_error_template: Some("static {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+)

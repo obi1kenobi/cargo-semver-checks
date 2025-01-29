@@ -1189,6 +1189,7 @@ add_lints!(
     repr_packed_added,
     repr_packed_removed,
     sized_impl_removed,
+    static_unsafe_added,
     struct_marked_non_exhaustive,
     struct_missing,
     struct_must_use_added,
