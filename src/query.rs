@@ -334,6 +334,7 @@ mod tests {
 
     use anyhow::Context;
     use rayon::prelude::*;
+    use semver::Version;
     use serde::{Deserialize, Serialize};
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_rustdoc::{
@@ -749,6 +750,14 @@ mod tests {
         };
         for value in query_execution_results.values_mut() {
             value.sort_unstable_by_key(key_func);
+        }
+
+        // TODO: Remove this once Rust 1.85 is the oldest Rust supported by cargo-semver-checks.
+        if query_name == "static_became_unsafe"
+            && rustc_version::version().map_or(false, |version| version < Version::new(1, 85, 0))
+        {
+            eprintln!("skipping query execution test for lint `static_became_unsafe` since data for it isn't available in Rust prior to 1.85");
+            return;
         }
 
         insta::with_settings!(
