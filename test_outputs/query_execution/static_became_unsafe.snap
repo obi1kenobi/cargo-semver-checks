@@ -3,11 +3,11 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
-  "./test_crates/static_unsafe_added/": [
+  "./test_crates/static_became_unsafe/": [
     {
       "name": String("FOO"),
       "path": List([
-        String("static_unsafe_added"),
+        String("static_became_unsafe"),
         String("FOO"),
       ]),
       "span_begin_line": Uint64(2),
