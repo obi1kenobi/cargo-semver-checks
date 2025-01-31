@@ -165,6 +165,9 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
     settings.add_filter(r"\d+ checks", "[TOTAL] checks");
     // Similarly, turn the number of passed checks to also not fail when new lints are added.
     settings.add_filter(r"\d+ pass", "[PASS] pass");
+    // Turn the number of skipped checks into [SKIP] to not fail when new lints are added.
+    settings.add_filter(r"\d+ skip", "[SKIP] skip");
+
     // Escape the root path (e.g., in lint spans) for deterministic results in different
     // build environments.
     let repo_root = get_root_path();
