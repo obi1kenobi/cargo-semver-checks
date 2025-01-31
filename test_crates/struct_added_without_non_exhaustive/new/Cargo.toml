@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "struct_added_without_non_exhaustive"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
