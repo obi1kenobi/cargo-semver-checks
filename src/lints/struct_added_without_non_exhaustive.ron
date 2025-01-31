@@ -50,7 +50,7 @@ SemverQuery(
         "public": "public",
         "zero": 0,
         "true": true,
-        "non_exhaustive": "non_exhaustive",
+        "non_exhaustive": "#[non_exhaustive]",
     },
     error_message: "A new public struct was added without #[non_exhaustive], which may make it difficult to evolve in the future",
     per_result_error_template: Some("struct {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
