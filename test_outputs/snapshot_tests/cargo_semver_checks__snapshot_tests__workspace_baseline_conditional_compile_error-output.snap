@@ -54,7 +54,7 @@ note: the following command can be used to reproduce the compilation error:
      Parsing no-error v0.1.0 (baseline)
       Parsed [TIME] (baseline)
     Checking no-error v0.1.0 -> v0.1.0 (no change)
-     Checked [TIME] [TOTAL] checks: [PASS] pass, 1 fail, 0 warn, 0 skip
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 1 fail, 0 warn, [SKIP] skip
 
      Summary semver requires new major version: 1 major and 0 minor checks failed
     Finished [TIME] no-error

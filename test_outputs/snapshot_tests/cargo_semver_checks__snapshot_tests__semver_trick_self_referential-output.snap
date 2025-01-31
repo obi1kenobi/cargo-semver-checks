@@ -25,7 +25,7 @@ Failed in:
      Parsing semver_trick_self_referential v0.1.0 (baseline)
       Parsed [TIME] (baseline)
     Checking semver_trick_self_referential v0.1.0 -> v0.1.1 (minor change)
-     Checked [TIME] [TOTAL] checks: [PASS] pass, 1 fail, 0 warn, 8 skip
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 1 fail, 0 warn, [SKIP] skip
 
      Summary semver requires new major version: 1 major and 0 minor checks failed
     Finished [TIME] semver_trick_self_referential
