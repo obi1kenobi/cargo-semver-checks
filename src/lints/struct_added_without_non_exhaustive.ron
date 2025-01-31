@@ -3,7 +3,7 @@ SemverQuery(
     human_readable_name: "pub struct added without #[non_exhaustive]",
     description: "A new public struct was added without #[non_exhaustive], making it harder to evolve in the future.",
     required_update: Minor,
-    lint_level: Warn,
+    lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
     query: r#"
     {

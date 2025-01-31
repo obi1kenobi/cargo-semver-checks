@@ -81,17 +81,6 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
     {
-      "name": String("NewWithNonExhaustive"),
-      "path": List([
-        String("struct_added_without_non_exhaustive"),
-        String("NewWithNonExhaustive"),
-      ]),
-      "span_begin_line": Uint64(25),
-      "span_filename": String("src/lib.rs"),
-      "struct_type": String("plain"),
-      "visibility_limit": String("public"),
-    },
-    {
       "name": String("NewUnitStruct"),
       "path": List([
         String("struct_added_without_non_exhaustive"),
