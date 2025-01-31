@@ -6,10 +6,3 @@ pub struct ExistingStruct {
 struct PrivateStruct {
     pub field: i32,
 }
-
-// This module helps test that private paths don't trigger the lint
-mod private {
-    pub struct InPrivateModule {
-        pub field: i32,
-    }
-}
