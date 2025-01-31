@@ -1,0 +1,119 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/inherent_method_must_use_added/": [
+    {
+      "name": String("EnumToStructWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("EnumToStructWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToStructWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("UnionToStructWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(161),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NewStructWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("struct_inherent_method_must_use_added"),
+        String("NewStructWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(65),
+      "span_filename": String("src/struct_inherent_method_must_use_added.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_moved_to_trait_must_use_added/": [
+    {
+      "name": String("NewStructWithTraitMustUseMethods"),
+      "path": List([
+        String("method_moved_to_trait_must_use_added"),
+        String("struct_method_moved_to_trait_must_use_added"),
+        String("NewStructWithTraitMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(147),
+      "span_filename": String("src/struct_method_moved_to_trait_must_use_added.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/nonbreaking_item_rename/": [
+    {
+      "name": String("NewName"),
+      "path": List([
+        String("nonbreaking_item_rename"),
+        String("NewName"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/struct_added_without_non_exhaustive/": [
+    {
+      "name": String("NewAllPubFields"),
+      "path": List([
+        String("struct_added_without_non_exhaustive"),
+        String("NewAllPubFields"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NewUnitStruct"),
+      "path": List([
+        String("struct_added_without_non_exhaustive"),
+        String("NewUnitStruct"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NewTupleStruct"),
+      "path": List([
+        String("struct_added_without_non_exhaustive"),
+        String("NewTupleStruct"),
+      ]),
+      "span_begin_line": Uint64(47),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("tuple"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/switch_away_from_reexport_as_underscore/": [
+    {
+      "name": String("Struct"),
+      "path": List([
+        String("switch_away_from_reexport_as_underscore"),
+        String("Struct"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
