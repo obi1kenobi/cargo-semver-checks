@@ -1,0 +1,28 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_marked_deprecated/": [
+    {
+      "name": String("TraitToDeprecatedTrait"),
+      "path": List([
+        String("trait_marked_deprecated"),
+        String("TraitToDeprecatedTrait"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("TraitToDeprecatedMessageTrait"),
+      "path": List([
+        String("trait_marked_deprecated"),
+        String("TraitToDeprecatedMessageTrait"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
