@@ -1157,6 +1157,7 @@ add_lints!(
     enum_variant_added,
     enum_variant_marked_non_exhaustive,
     enum_variant_missing,
+    enum_variant_deprecated,
     exported_function_changed_abi,
     feature_missing,
     feature_not_enabled_by_default,

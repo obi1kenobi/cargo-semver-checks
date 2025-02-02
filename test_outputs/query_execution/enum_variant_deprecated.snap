@@ -1,0 +1,63 @@
+---
+source: src/query.rs
+assertion_line: 769
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_variant_deprecated/": [
+    {
+      "enum_name": String("Status"),
+      "path": List([
+        String("enum_variant_deprecated"),
+        String("Status"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("OldVariant"),
+    },
+    {
+      "enum_name": String("Status"),
+      "path": List([
+        String("enum_variant_deprecated"),
+        String("Status"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("OldVariantWithMessage"),
+    },
+    {
+      "enum_name": String("Status"),
+      "path": List([
+        String("enum_variant_deprecated"),
+        String("Status"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("OldVariantWithMetadata"),
+    },
+  ],
+  "./test_crates/type_marked_deprecated/": [
+    {
+      "enum_name": String("EnumToDeprecatedEnum"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("enums"),
+        String("EnumToDeprecatedEnum"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/enums.rs"),
+      "variant_name": String("First"),
+    },
+    {
+      "enum_name": String("EnumToDeprecatedMessageEnum"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("enums"),
+        String("EnumToDeprecatedMessageEnum"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_filename": String("src/enums.rs"),
+      "variant_name": String("First"),
+    },
+  ],
+}
