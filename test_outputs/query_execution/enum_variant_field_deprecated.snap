@@ -1,0 +1,30 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_variant_field_deprecated/": [
+    {
+      "enum_name": String("Message"),
+      "field_name": String("old_format"),
+      "path": List([
+        String("enum_variant_field_deprecated"),
+        String("Message"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Complex"),
+    },
+    {
+      "enum_name": String("Message"),
+      "field_name": String("text"),
+      "path": List([
+        String("enum_variant_field_deprecated"),
+        String("Message"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Complex"),
+    },
+  ],
+}
