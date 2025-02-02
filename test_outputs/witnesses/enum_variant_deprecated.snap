@@ -1,0 +1,49 @@
+---
+source: src/query.rs
+description: "Lint `enum_variant_deprecated` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/enum_variant_deprecated/"]]
+filename = 'src/lib.rs'
+begin_line = 4
+hint = '''
+match value {
+    Status::OldVariant => { /* ... */ },
+    _ => { /* ... */ }
+}'''
+
+[["./test_crates/enum_variant_deprecated/"]]
+filename = 'src/lib.rs'
+begin_line = 7
+hint = '''
+match value {
+    Status::OldVariantWithMessage => { /* ... */ },
+    _ => { /* ... */ }
+}'''
+
+[["./test_crates/enum_variant_deprecated/"]]
+filename = 'src/lib.rs'
+begin_line = 10
+hint = '''
+match value {
+    Status::OldVariantWithMetadata => { /* ... */ },
+    _ => { /* ... */ }
+}'''
+
+[["./test_crates/type_marked_deprecated/"]]
+filename = 'src/enums.rs'
+begin_line = 6
+hint = '''
+match value {
+    EnumToDeprecatedEnum::First => { /* ... */ },
+    _ => { /* ... */ }
+}'''
+
+[["./test_crates/type_marked_deprecated/"]]
+filename = 'src/enums.rs'
+begin_line = 11
+hint = '''
+match value {
+    EnumToDeprecatedMessageEnum::First => { /* ... */ },
+    _ => { /* ... */ }
+}'''
