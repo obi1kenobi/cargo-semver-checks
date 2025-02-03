@@ -1,0 +1,27 @@
+pub trait TraitWithMethodToBeDeprecated {
+    // This method will be marked deprecated
+    fn method_to_deprecated(&self) -> i32;
+
+    // This method will be marked deprecated with a message
+    fn method_to_deprecated_message(&self, input: &str) -> String;
+
+    // These methods should not trigger the lint
+    fn method_stays_normal(&self);
+
+    #[deprecated]
+    fn method_already_deprecated(&self);
+
+    #[deprecated = "Old message"]
+    fn method_message_changes(&self);
+}
+
+// Changes to private trait methods should not be reported
+trait PrivateTrait {
+    fn private_method_to_deprecated(&self);
+}
+
+#[deprecated]
+pub trait DeprecatedTrait {
+    // Adding deprecated to a method in an already deprecated trait should not be reported
+    fn method_in_deprecated_trait(&self);
+}
