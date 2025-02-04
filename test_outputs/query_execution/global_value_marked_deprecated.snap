@@ -1,0 +1,74 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/global_value_marked_deprecated/": [
+    {
+      "kind": String("Constant"),
+      "name": String("VALUE_TO_DEPRECATED"),
+      "path": List([
+        String("global_value_marked_deprecated"),
+        String("VALUE_TO_DEPRECATED"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "kind": String("Static"),
+      "name": String("STATIC_TO_DEPRECATED"),
+      "path": List([
+        String("global_value_marked_deprecated"),
+        String("STATIC_TO_DEPRECATED"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "kind": String("Static"),
+      "name": String("CONST_BECOMING_STATIC"),
+      "path": List([
+        String("global_value_marked_deprecated"),
+        String("CONST_BECOMING_STATIC"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "kind": String("Constant"),
+      "name": String("STATIC_BECOMING_CONST"),
+      "path": List([
+        String("global_value_marked_deprecated"),
+        String("STATIC_BECOMING_CONST"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "kind": String("Constant"),
+      "name": String("VALUE_TO_DEPRECATED_MESSAGE"),
+      "path": List([
+        String("global_value_marked_deprecated"),
+        String("VALUE_TO_DEPRECATED_MESSAGE"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "kind": String("Static"),
+      "name": String("STATIC_TO_DEPRECATED_MESSAGE"),
+      "path": List([
+        String("global_value_marked_deprecated"),
+        String("STATIC_TO_DEPRECATED_MESSAGE"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

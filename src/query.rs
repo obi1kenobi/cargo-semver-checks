@@ -1174,6 +1174,7 @@ add_lints!(
     function_requires_different_const_generic_params,
     function_requires_different_generic_type_params,
     function_unsafe_added,
+    global_value_marked_deprecated,
     inherent_associated_const_now_doc_hidden,
     inherent_associated_pub_const_missing,
     inherent_method_const_removed,

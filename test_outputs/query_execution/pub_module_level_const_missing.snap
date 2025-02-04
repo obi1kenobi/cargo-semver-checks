@@ -25,16 +25,6 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
     {
-      "name": String("PUB_CONST_IN_GLOBAL_WILL_BE_STATIC"),
-      "path": List([
-        String("pub_module_level_const_missing"),
-        String("PUB_CONST_IN_GLOBAL_WILL_BE_STATIC"),
-      ]),
-      "span_begin_line": Uint64(4),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
       "name": String("PUB_CONST_IN_GLOBAL_WILL_BE_PRIVATE_CONST"),
       "path": List([
         String("pub_module_level_const_missing"),
@@ -77,17 +67,6 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
     {
-      "name": String("PUB_CONST_IN_MODULE_WILL_BE_STATIC"),
-      "path": List([
-        String("pub_module_level_const_missing"),
-        String("my_module"),
-        String("PUB_CONST_IN_MODULE_WILL_BE_STATIC"),
-      ]),
-      "span_begin_line": Uint64(12),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
       "name": String("PUB_CONST_IN_MODULE_WILL_BE_PRIVATE_CONST"),
       "path": List([
         String("pub_module_level_const_missing"),
@@ -106,17 +85,6 @@ expression: "&query_execution_results"
         String("PUB_CONST_IN_MODULE_WILL_BE_PRIVATE_STATIC"),
       ]),
       "span_begin_line": Uint64(14),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
-      "name": String("PUB_CONST_IN_MODULE_WILL_RE_EXPORT_STATIC"),
-      "path": List([
-        String("pub_module_level_const_missing"),
-        String("my_module"),
-        String("PUB_CONST_IN_MODULE_WILL_RE_EXPORT_STATIC"),
-      ]),
-      "span_begin_line": Uint64(16),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -145,18 +113,6 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
     {
-      "name": String("PUB_CONST_IN_NESTED_MODULE_WILL_BE_STATIC"),
-      "path": List([
-        String("pub_module_level_const_missing"),
-        String("my_module"),
-        String("my_module_nested"),
-        String("PUB_CONST_IN_NESTED_MODULE_WILL_BE_STATIC"),
-      ]),
-      "span_begin_line": Uint64(22),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
       "name": String("PUB_CONST_IN_NESTED_MODULE_WILL_BE_PRIVATE_CONST"),
       "path": List([
         String("pub_module_level_const_missing"),
@@ -177,18 +133,6 @@ expression: "&query_execution_results"
         String("PUB_CONST_IN_NESTED_MODULE_WILL_BE_PRIVATE_STATIC"),
       ]),
       "span_begin_line": Uint64(24),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
-      "name": String("PUB_CONST_IN_NESTED_MODULE_WILL_RE_EXPORT_STATIC"),
-      "path": List([
-        String("pub_module_level_const_missing"),
-        String("my_module"),
-        String("my_module_nested"),
-        String("PUB_CONST_IN_NESTED_MODULE_WILL_RE_EXPORT_STATIC"),
-      ]),
-      "span_begin_line": Uint64(26),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
