@@ -1,7 +1,7 @@
 SemverQuery(
     id: "pub_module_level_const_missing",
     human_readable_name: "pub module-level const is missing",
-    description: "A pub const is missing, renamed, or changed to static.",
+    description: "A pub const is missing or renamed.",
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
@@ -28,7 +28,7 @@ SemverQuery(
             }
             current {
                 item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                    ... on Constant {
+                    ... on GlobalValue {
                         visibility_limit @filter(op: "=", value: ["$public"])
 
                         importable_path {
@@ -44,6 +44,6 @@ SemverQuery(
         "zero": 0,
         "true": true,
     },
-    error_message: "A public const is missing, renamed, or changed from const to static.",
+    error_message: "A public const is missing or renamed",
     per_result_error_template: Some("{{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
