@@ -21,6 +21,7 @@ SemverQuery(
 
                         method {
                             method_name: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
                             deprecated @filter(op: "=", value: ["$true"])
                         }
 
@@ -43,6 +44,7 @@ SemverQuery(
 
                         method {
                             name @filter(op: "=", value: ["%method_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
                             deprecated @filter(op: "!=", value: ["$true"])
                         }
                     }

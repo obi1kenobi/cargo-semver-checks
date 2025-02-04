@@ -35,3 +35,17 @@ pub trait NewTraitWithDeprecatedMethod {
     #[deprecated]
     fn new_deprecated_method(&self);
 }
+
+// Hidden trait - changes to its methods should not be reported
+#[doc(hidden)]
+pub trait HiddenTrait {
+    #[deprecated]
+    fn method_becomes_deprecated(&self);
+}
+
+// Public trait with hidden method should not be reported
+pub trait PublicTraitWithHiddenMethod {
+    #[doc(hidden)]
+    #[deprecated]
+    fn hidden_method_becomes_deprecated(&self);
+}
