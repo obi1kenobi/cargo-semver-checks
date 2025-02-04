@@ -5,6 +5,12 @@ pub const fn CONST_FN_TO_DEPRECATED(x: i32) -> i32 {
     x + 1
 }
 
+// This const will become a static and be deprecated
+pub const CONST_BECOMING_STATIC: u32 = 123;
+
+// This static will become a const and be deprecated
+pub static STATIC_BECOMING_CONST: i32 = 456;
+
 pub const VALUE_TO_DEPRECATED_MESSAGE: bool = true;
 pub static STATIC_TO_DEPRECATED_MESSAGE: char = 'x';
 pub const fn CONST_FN_TO_DEPRECATED_MESSAGE(s: &str) -> usize {

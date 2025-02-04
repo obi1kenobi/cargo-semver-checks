@@ -12,6 +12,7 @@ SemverQuery(
                 item {
                     ... on GlobalValue {
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        kind: __typename @output
                         name @output
                         deprecated @filter(op: "=", value: ["$true"])
 
@@ -47,5 +48,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A global value (constant or static) is now #[deprecated]. Downstream crates will get a compiler warning when using this value.",
-    per_result_error_template: Some("global value {{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{lowercase kind}} {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )

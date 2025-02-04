@@ -10,6 +10,14 @@ pub const fn CONST_FN_TO_DEPRECATED(x: i32) -> i32 {
     x + 1
 }
 
+// Changed from const to static and deprecated - should be reported
+#[deprecated]
+pub static CONST_BECOMING_STATIC: u32 = 123;
+
+// Changed from static to const and deprecated - should be reported
+#[deprecated]
+pub const STATIC_BECOMING_CONST: i32 = 456;
+
 #[deprecated = "This value is deprecated"]
 pub const VALUE_TO_DEPRECATED_MESSAGE: bool = true;
 
