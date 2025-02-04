@@ -1,0 +1,30 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_associated_const_marked_deprecated/": [
+    {
+      "associated_constant": String("CONST_TO_DEPRECATED"),
+      "name": String("TraitWithConstToBeDeprecated"),
+      "path": List([
+        String("trait_associated_const_marked_deprecated"),
+        String("TraitWithConstToBeDeprecated"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("CONST_TO_DEPRECATED_MESSAGE"),
+      "name": String("TraitWithConstToBeDeprecated"),
+      "path": List([
+        String("trait_associated_const_marked_deprecated"),
+        String("TraitWithConstToBeDeprecated"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
