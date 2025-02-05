@@ -31,6 +31,8 @@ SemverQuery(
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        # Filter out deprecated structs since rustdoc automatically marks their fields as deprecated.
+                        # This ensures we only detect fields that are explicitly marked with #[deprecated].
                         deprecated @filter(op: "!=", value: ["$true"])
                         struct_name: name @output
 
