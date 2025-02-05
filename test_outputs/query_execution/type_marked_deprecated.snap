@@ -22,7 +22,7 @@ expression: "&query_execution_results"
         String("struct_field_marked_deprecated"),
         String("StructBecomesDeprecated"),
       ]),
-      "span_begin_line": Uint64(47),
+      "span_begin_line": Uint64(26),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

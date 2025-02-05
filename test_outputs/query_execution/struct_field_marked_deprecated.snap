@@ -1,0 +1,68 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/struct_field_marked_deprecated/": [
+    {
+      "field_name": String("field_becomes_deprecated"),
+      "path": List([
+        String("struct_field_marked_deprecated"),
+        String("Plain"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("Plain"),
+    },
+    {
+      "field_name": String("field_with_deprecation_message"),
+      "path": List([
+        String("struct_field_marked_deprecated"),
+        String("Plain"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("Plain"),
+    },
+    {
+      "field_name": String("0"),
+      "path": List([
+        String("struct_field_marked_deprecated"),
+        String("Tuple"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("Tuple"),
+    },
+    {
+      "field_name": String("1"),
+      "path": List([
+        String("struct_field_marked_deprecated"),
+        String("Tuple"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("Tuple"),
+    },
+    {
+      "field_name": String("field_becomes_both"),
+      "path": List([
+        String("struct_field_marked_deprecated"),
+        String("DocHiddenInteractions"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("DocHiddenInteractions"),
+    },
+    {
+      "field_name": String("field_only_deprecated"),
+      "path": List([
+        String("struct_field_marked_deprecated"),
+        String("DocHiddenInteractions"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("DocHiddenInteractions"),
+    },
+  ],
+}

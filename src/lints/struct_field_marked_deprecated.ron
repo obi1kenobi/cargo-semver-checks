@@ -1,7 +1,7 @@
 SemverQuery(
     id: "struct_field_marked_deprecated",
     human_readable_name: "pub struct field is now #[deprecated]",
-    description: "A pub struct field is now marked #[deprecated] and will be removed in a future version.",
+    description: "A pub struct field is now marked #[deprecated].",
     required_update: Minor,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-deprecated-attribute"),
@@ -12,6 +12,7 @@ SemverQuery(
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        deprecated @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @output @tag
@@ -30,16 +31,12 @@ SemverQuery(
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        deprecated @filter(op: "!=", value: ["$true"])
                         struct_name: name @output
 
-                        # It's possible that both the struct and its field became deprecated.
-                        # This is a rare case where we don't consider the lint on the field
-                        # to be a duplicate lint of the one on the struct.
-                        #
-                        # Deprecation on the struct means we shouldn't use it in new code,
-                        # but existing code can still access its fields until they are removed.
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         field {
@@ -61,6 +58,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A pub field of a pub struct is now marked #[deprecated] and will be removed in a future version.",
+    error_message: "A pub field of a pub struct is now marked #[deprecated]. Downstream crates will get a compiler warning when accessing this field.",
     per_result_error_template: Some("field {{struct_name}}.{{field_name}} in file {{span_filename}}:{{span_begin_line}}"),
 )

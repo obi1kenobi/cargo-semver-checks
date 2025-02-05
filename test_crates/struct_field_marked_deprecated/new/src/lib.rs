@@ -21,30 +21,77 @@ pub struct BothBecomeDeprecated {
     pub field_with_message_struct_deprecated: String,
 }
 
-// Private struct fields becoming deprecated should not trigger the lint
-pub struct PrivateFields {
-    #[deprecated]
-    private_field_becomes_deprecated: i64,
-    #[deprecated]
-    private_field_also_deprecated: String,
-}
-
-// Already deprecated fields should not trigger the lint
-pub struct AlreadyDeprecated {
-    #[deprecated]
-    pub already_deprecated_field: i64,
-    pub normal_untouched_field: String,
-}
-
-// Private structs should not trigger the lint
-struct PrivateStruct {
-    #[deprecated]
-    pub private_struct_field: i64,
-}
-
 // Only the struct becomes deprecated, fields remain normal
 #[deprecated = "Use NewStruct instead"]
 pub struct StructBecomesDeprecated {
     pub field_stays_public: i64,
     pub field_remains_undeprecated: String,
+}
+
+// Test doc(hidden) interactions with deprecation
+pub struct DocHiddenInteractions {
+    // Was already doc(hidden), now also deprecated - should not trigger the lint
+    #[doc(hidden)]
+    #[deprecated = "Use new_api instead"]
+    pub already_hidden_field: i32,
+
+    // Gets both attributes at once
+    #[doc(hidden)]
+    #[deprecated]
+    pub field_becomes_both: String,
+
+    // Only gets deprecated - should trigger the lint
+    #[deprecated = "This field is deprecated"]
+    pub field_only_deprecated: bool,
+
+    // Stays just doc(hidden) - should not trigger the lint
+    #[doc(hidden)]
+    pub stays_just_hidden: u64,
+
+    // Was deprecated, now also hidden - should not trigger the lint
+    #[deprecated]
+    #[doc(hidden)]
+    pub deprecated_becomes_hidden: i32,
+
+    // No change - stays deprecated - should not trigger the lint
+    #[deprecated]
+    pub stays_deprecated: String,
+
+    // Control field - no changes
+    pub untouched_field: bool,
+}
+
+// Test when struct is doc(hidden) - should not trigger the lint
+#[doc(hidden)]
+pub struct DocHiddenStruct {
+    #[deprecated]
+    pub field_becomes_deprecated: i32,
+    #[deprecated = "Use new_api instead"]
+    pub another_field_deprecated: String,
+    pub untouched_field: bool,
+}
+
+// Private fields should not trigger regardless of attributes
+pub struct PrivateFieldCases {
+    #[doc(hidden)]
+    #[deprecated]
+    hidden_becomes_deprecated: i32,
+
+    #[doc(hidden)]
+    #[deprecated]
+    becomes_both_but_private: String,
+
+    #[deprecated]
+    normal_becomes_deprecated: bool,
+}
+
+// Private struct - should not trigger regardless of field changes
+struct PrivateStructCase {
+    #[doc(hidden)]
+    #[deprecated]
+    pub hidden_field_becomes_deprecated: i32,
+
+    #[doc(hidden)]
+    #[deprecated]
+    pub becomes_both_attrs: String,
 }
