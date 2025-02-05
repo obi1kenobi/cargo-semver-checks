@@ -34,7 +34,7 @@ SemverQuery(
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        sealed @filter(op: "!=", value: ["$true"])
+                        unconditionally_sealed @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
