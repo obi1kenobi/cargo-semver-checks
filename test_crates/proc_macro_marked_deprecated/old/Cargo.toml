@@ -1,0 +1,10 @@
+[package]
+publish = false
+name = "proc_macro_marked_deprecated"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]

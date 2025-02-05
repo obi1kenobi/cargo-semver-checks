@@ -1,0 +1,68 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/proc_macro_marked_deprecated/": [
+    {
+      "name": String("proc_macro_to_deprecated"),
+      "path": List([
+        String("proc_macro_marked_deprecated"),
+        String("proc_macro_to_deprecated"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("proc_macro_to_deprecated_message"),
+      "path": List([
+        String("proc_macro_marked_deprecated"),
+        String("proc_macro_to_deprecated_message"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("DeriveToDeprecated"),
+      "path": List([
+        String("proc_macro_marked_deprecated"),
+        String("DeriveToDeprecated"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("DeriveToDeprecatedMessage"),
+      "path": List([
+        String("proc_macro_marked_deprecated"),
+        String("DeriveToDeprecatedMessage"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("attr_to_deprecated"),
+      "path": List([
+        String("proc_macro_marked_deprecated"),
+        String("attr_to_deprecated"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("attr_to_deprecated_message"),
+      "path": List([
+        String("proc_macro_marked_deprecated"),
+        String("attr_to_deprecated_message"),
+      ]),
+      "span_begin_line": Uint64(36),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
