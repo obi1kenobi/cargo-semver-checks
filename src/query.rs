@@ -1190,6 +1190,7 @@ add_lints!(
     method_requires_different_generic_type_params,
     module_missing,
     non_exhaustive_struct_changed_type,
+    proc_macro_marked_deprecated,
     proc_macro_now_doc_hidden,
     pub_module_level_const_missing,
     pub_module_level_const_now_doc_hidden,
