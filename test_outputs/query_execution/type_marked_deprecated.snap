@@ -3,6 +3,30 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
+  "./test_crates/struct_field_marked_deprecated/": [
+    {
+      "name": String("BothBecomeDeprecated"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("struct_field_marked_deprecated"),
+        String("BothBecomeDeprecated"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("StructBecomesDeprecated"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("struct_field_marked_deprecated"),
+        String("StructBecomesDeprecated"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/type_marked_deprecated/": [
     {
       "name": String("EnumToDeprecatedEnum"),
