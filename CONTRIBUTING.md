@@ -180,6 +180,7 @@ Now it's time to fill in these files!
   span_: span @optional {
     filename @output
     begin_line @output
+    end_line @output
   }
   ```
   <details><summary>Exception: lints over Cargo.toml information (click to expand)</summary>If you are writing a lint over manifest (<code>Cargo.toml</code>) information such as "a feature was deleted," you won't be able to find span data from the manifest file. To proceed, pick a value unique to each result produced by your lint query and output it as <code>ordering_key</code> instead.</details>
