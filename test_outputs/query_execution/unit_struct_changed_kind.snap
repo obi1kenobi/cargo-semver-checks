@@ -11,6 +11,7 @@ expression: "&query_execution_results"
         String("UnitStructToPlain"),
       ]),
       "span_begin_line": Uint64(1),
+      "span_end_line": Uint64(1),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

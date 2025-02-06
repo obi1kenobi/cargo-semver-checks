@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/type_mismatched_generic_lifetimes/": [
@@ -24,6 +23,7 @@ snapshot_kind: text
         String("Example"),
       ]),
       "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -46,6 +46,7 @@ snapshot_kind: text
         String("Either"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -68,6 +69,7 @@ snapshot_kind: text
         String("OneOrTheOther"),
       ]),
       "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(15),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -85,6 +87,7 @@ snapshot_kind: text
         String("NotGenericAnymore"),
       ]),
       "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -102,6 +105,7 @@ snapshot_kind: text
         String("BecameGeneric"),
       ]),
       "span_begin_line": Uint64(30),
+      "span_end_line": Uint64(30),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

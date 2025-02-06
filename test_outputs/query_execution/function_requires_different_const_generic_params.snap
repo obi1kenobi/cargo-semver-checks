@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/function_requires_different_const_generic_params/": [
@@ -18,6 +17,7 @@ snapshot_kind: text
         String("previously_not_generic"),
       ]),
       "span_begin_line": Uint64(1),
+      "span_end_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -37,6 +37,7 @@ snapshot_kind: text
         String("add_const_generic"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -53,6 +54,7 @@ snapshot_kind: text
         String("remove_const_generic"),
       ]),
       "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

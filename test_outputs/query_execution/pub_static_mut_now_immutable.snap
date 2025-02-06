@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 769
 expression: "&query_execution_results"
 ---
 {
@@ -10,6 +11,7 @@ expression: "&query_execution_results"
         String("STATIC_A"),
       ]),
       "span_begin_line": Uint64(2),
+      "span_end_line": Uint64(2),
       "span_filename": String("src/lib.rs"),
       "static_name": String("STATIC_A"),
     },

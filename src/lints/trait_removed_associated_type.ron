@@ -26,6 +26,7 @@ SemverQuery(
                             span_: span {
                                 filename @output
                                 begin_line @output
+                                end_line @output
                             }
                         }
                     }

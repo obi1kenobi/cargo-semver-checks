@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 769
 expression: "&query_execution_results"
 ---
 {
@@ -12,6 +13,7 @@ expression: "&query_execution_results"
         String("AddedVariantField"),
       ]),
       "span_begin_line": Uint64(41),
+      "span_end_line": Uint64(41),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("TupleVariant"),
     },
@@ -25,6 +27,7 @@ expression: "&query_execution_results"
         String("PublicEnum"),
       ]),
       "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("TupleVariantWithFieldAdded"),
     },

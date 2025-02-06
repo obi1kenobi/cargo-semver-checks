@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/enum_no_repr_variant_discriminant_changed/": [
@@ -13,6 +12,7 @@ snapshot_kind: text
         String("UnitOnlyBecomesUndefined"),
       ]),
       "span_begin_line": Uint64(85),
+      "span_end_line": Uint64(85),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Struct"),
     },
@@ -26,6 +26,7 @@ snapshot_kind: text
         String("AddedVariantField"),
       ]),
       "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(38),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("StructVariant"),
     },
@@ -39,6 +40,7 @@ snapshot_kind: text
         String("PubEnum"),
       ]),
       "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Foo"),
     },

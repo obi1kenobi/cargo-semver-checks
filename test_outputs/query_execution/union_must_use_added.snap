@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 769
 expression: "&query_execution_results"
 ---
 {
@@ -12,6 +13,7 @@ expression: "&query_execution_results"
         String("UnionToMustUseUnion"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -23,6 +25,7 @@ expression: "&query_execution_results"
         String("UnionToMustUseMessageUnion"),
       ]),
       "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(12),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

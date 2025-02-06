@@ -51,6 +51,7 @@ SemverQuery(
                         non_exported_span_: span @optional {
                             filename @output
                             begin_line @output
+                            end_line @output
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 769
 expression: "&query_execution_results"
 ---
 {
@@ -10,6 +11,7 @@ expression: "&query_execution_results"
         String("StructF"),
       ]),
       "span_begin_line": Uint64(41),
+      "span_end_line": Uint64(41),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("StructF"),
     },
@@ -22,6 +24,7 @@ expression: "&query_execution_results"
         String("Foo"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/struct_and_inherent_method_now_doc_hidden.rs"),
       "struct_name": String("Foo"),
     },
@@ -34,6 +37,7 @@ expression: "&query_execution_results"
         String("MyStruct"),
       ]),
       "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("MyStruct"),
     },
@@ -45,6 +49,7 @@ expression: "&query_execution_results"
         String("MyStruct"),
       ]),
       "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(38),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("MyStruct"),
     },
@@ -54,6 +59,7 @@ expression: "&query_execution_results"
         String("Example"),
       ]),
       "span_begin_line": Uint64(47),
+      "span_end_line": Uint64(47),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("Example"),
     },
@@ -65,6 +71,7 @@ expression: "&query_execution_results"
         String("BothBecomeHidden"),
       ]),
       "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(18),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("BothBecomeHidden"),
     },
@@ -76,6 +83,7 @@ expression: "&query_execution_results"
         String("ExamplePlainStruct"),
       ]),
       "span_begin_line": Uint64(2),
+      "span_end_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("ExamplePlainStruct"),
     },
@@ -85,6 +93,7 @@ expression: "&query_execution_results"
         String("ExampleTupleStruct"),
       ]),
       "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("ExampleTupleStruct"),
     },
@@ -94,6 +103,7 @@ expression: "&query_execution_results"
         String("ExampleUnitStruct"),
       ]),
       "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("ExampleUnitStruct"),
     },

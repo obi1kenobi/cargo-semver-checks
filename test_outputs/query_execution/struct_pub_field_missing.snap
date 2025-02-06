@@ -11,6 +11,7 @@ expression: "&query_execution_results"
         String("FieldWillBeRemoved"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("FieldWillBeRemoved"),
       "struct_type": String("plain"),

@@ -47,6 +47,7 @@ Source: Rust for Rustaceans, Chapter 3, "Type Modifications", page 51
                         span_: span @optional {
                             filename @output
                             begin_line @output
+                            end_line @output
                         }
                     }
                 }

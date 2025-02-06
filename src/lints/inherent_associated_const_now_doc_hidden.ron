@@ -11,7 +11,7 @@ SemverQuery(
             baseline {
                 item {
                     ... on ImplOwner {
-                        visibility_limit @filter(op: "=", value: ["$public"]) 
+                        visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
 
                         importable_path {
@@ -29,6 +29,7 @@ SemverQuery(
                                 span_: span @optional {
                                     filename @output
                                     begin_line @output
+                                    end_line @output
                                 }
                             }
                         }
