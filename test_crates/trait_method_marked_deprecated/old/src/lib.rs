@@ -37,3 +37,13 @@ pub trait PublicTraitWithHiddenMethod {
     #[doc(hidden)]
     fn hidden_method_becomes_deprecated(&self);
 }
+
+// This trait will be marked deprecated - should not trigger the lint
+pub trait TraitMarkedDeprecated {
+    fn method(&self);
+}
+
+// Both the trait and its method will be marked deprecated - should not trigger the lint
+pub trait TraitAndMethodWillBeDeprecated {
+    fn method_will_be_deprecated(&self);
+}

@@ -13,6 +13,9 @@ SemverQuery(
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
+                        # Filter out deprecated traits since rustdoc automatically marks their methods as deprecated.
+                        # This ensures we only detect methods that are explicitly marked with #[deprecated].
+                        deprecated @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @tag @output
@@ -36,6 +39,7 @@ SemverQuery(
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        deprecated @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
