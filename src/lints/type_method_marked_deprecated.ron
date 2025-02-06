@@ -1,7 +1,7 @@
 SemverQuery(
     id: "type_method_marked_deprecated",
     human_readable_name: "type method #[deprecated] added",
-    description: "A method in a type implementation has been newly marked with #[deprecated].",
+    description: "An inherent method has been newly marked with #[deprecated].",
     required_update: Minor,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-deprecated-attribute"),
@@ -27,13 +27,13 @@ SemverQuery(
                                 method_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
                                 deprecated @filter(op: "=", value: ["$true"])
-                            }
-                        }
 
-                        span_: span @optional {
-                            filename @output
-                            begin_line @output
-                            end_line @output
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
                         }
                     }
                 }
@@ -68,5 +68,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A type method is now #[deprecated]. Downstream crates will get a compiler warning when using this method.",
-    per_result_error_template: Some("method {{method_name}} in {{owner_type}} {{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("method {{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
 )

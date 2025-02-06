@@ -71,3 +71,13 @@ impl UnionBecomesDeprecated {
         unsafe { self.b }
     }
 }
+
+// Both union and methods are deprecated
+pub union BothUnionAndMethodDeprecated {
+    a: i32,
+    b: u32,
+}
+
+impl BothUnionAndMethodDeprecated {
+    pub fn method_to_be_deprecated(&self) {}
+}

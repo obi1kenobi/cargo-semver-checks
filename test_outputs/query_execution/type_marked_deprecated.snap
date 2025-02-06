@@ -124,6 +124,19 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
     {
+      "name": String("BothEnumAndMethodDeprecated"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("enums"),
+        String("BothEnumAndMethodDeprecated"),
+      ]),
+      "span_begin_line": Uint64(82),
+      "span_end_line": Uint64(84),
+      "span_filename": String("src/enums.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
       "name": String("StructBecomesDeprecated"),
       "owner_type": String("Struct"),
       "path": List([
@@ -137,6 +150,19 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
     {
+      "name": String("BothStructAndMethodDeprecated"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("structs"),
+        String("BothStructAndMethodDeprecated"),
+      ]),
+      "span_begin_line": Uint64(80),
+      "span_end_line": Uint64(82),
+      "span_filename": String("src/structs.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
       "name": String("UnionBecomesDeprecated"),
       "owner_type": String("Union"),
       "path": List([
@@ -146,6 +172,19 @@ expression: "&query_execution_results"
       ]),
       "span_begin_line": Uint64(64),
       "span_end_line": Uint64(67),
+      "span_filename": String("src/unions.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("BothUnionAndMethodDeprecated"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("unions"),
+        String("BothUnionAndMethodDeprecated"),
+      ]),
+      "span_begin_line": Uint64(82),
+      "span_end_line": Uint64(85),
       "span_filename": String("src/unions.rs"),
       "visibility_limit": String("public"),
     },

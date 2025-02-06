@@ -76,3 +76,14 @@ impl EnumBecomesDeprecated {
         format!("{:?}", self)
     }
 }
+
+// Both enum and methods are deprecated
+#[deprecated]
+pub enum BothEnumAndMethodDeprecated {
+    A,
+}
+
+impl BothEnumAndMethodDeprecated {
+    #[deprecated]
+    pub fn method_to_be_deprecated(&self) {}
+}

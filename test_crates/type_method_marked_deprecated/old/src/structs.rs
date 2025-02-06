@@ -71,3 +71,12 @@ impl StructBecomesDeprecated {
         "hello".to_string()
     }
 }
+
+// Both struct and methods are deprecated
+pub struct BothStructAndMethodDeprecated {
+    value: i32,
+}
+
+impl BothStructAndMethodDeprecated {
+    pub fn method_to_be_deprecated(&self) {}
+}
