@@ -1,0 +1,51 @@
+SemverQuery(
+    id: "proc_macro_marked_deprecated",
+    human_readable_name: "proc macro #[deprecated] added",
+    description: "A procedural macro has has been newly marked with #[deprecated].",
+    required_update: Minor,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/macros-by-example.html#the-deprecated-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on ProcMacro {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        deprecated @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on ProcMacro {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        deprecated @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A public procedural macro is now #[deprecated]. Downstream crates will get a compiler warning when using this macro.",
+    per_result_error_template: Some("proc macro {{name}} in file {{span_filename}}:{{span_begin_line}}"),
+)
