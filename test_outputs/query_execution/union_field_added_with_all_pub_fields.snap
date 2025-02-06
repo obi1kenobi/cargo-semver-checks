@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/union_field_added/": [
@@ -12,6 +11,7 @@ snapshot_kind: text
         String("AllPubFields"),
       ]),
       "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
       "union_name": String("AllPubFields"),
     },
@@ -22,6 +22,7 @@ snapshot_kind: text
         String("FieldBecameNonPublic"),
       ]),
       "span_begin_line": Uint64(59),
+      "span_end_line": Uint64(59),
       "span_filename": String("src/lib.rs"),
       "union_name": String("FieldBecameNonPublic"),
     },
@@ -32,6 +33,7 @@ snapshot_kind: text
         String("FieldBecameNonPublicAPI"),
       ]),
       "span_begin_line": Uint64(71),
+      "span_end_line": Uint64(71),
       "span_filename": String("src/lib.rs"),
       "union_name": String("FieldBecameNonPublicAPI"),
     },

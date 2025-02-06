@@ -12,6 +12,7 @@ expression: "&query_execution_results"
         String("StructA"),
       ]),
       "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -22,6 +23,7 @@ expression: "&query_execution_results"
         String("EnumA"),
       ]),
       "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(27),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -32,6 +34,7 @@ expression: "&query_execution_results"
         String("UnionA"),
       ]),
       "span_begin_line": Uint64(39),
+      "span_end_line": Uint64(39),
       "span_filename": String("src/lib.rs"),
     },
   ],

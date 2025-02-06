@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/enum_no_repr_variant_discriminant_changed/": [
@@ -14,6 +13,7 @@ snapshot_kind: text
         String("ExplicitAndImplicitDiscriminantsAreChanged"),
       ]),
       "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("First"),
       "visibility_limit": String("public"),
@@ -27,6 +27,7 @@ snapshot_kind: text
         String("ExplicitAndImplicitDiscriminantsAreChanged"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Second"),
       "visibility_limit": String("public"),
@@ -40,6 +41,7 @@ snapshot_kind: text
         String("DiscriminantIsChanged"),
       ]),
       "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("First"),
       "visibility_limit": String("public"),
@@ -53,6 +55,7 @@ snapshot_kind: text
         String("DiscriminantBecomesDocHiddenAndExplicit"),
       ]),
       "span_begin_line": Uint64(42),
+      "span_end_line": Uint64(42),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Second"),
       "visibility_limit": String("public"),
@@ -66,6 +69,7 @@ snapshot_kind: text
         String("GainsRepr"),
       ]),
       "span_begin_line": Uint64(50),
+      "span_end_line": Uint64(50),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("First"),
       "visibility_limit": String("public"),

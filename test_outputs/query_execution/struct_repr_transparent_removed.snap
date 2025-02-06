@@ -12,6 +12,7 @@ expression: "&query_execution_results"
         String("Foo"),
       ]),
       "span_begin_line": Uint64(1),
+      "span_end_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
       "transparent_field_name": List([
         String("bar"),
@@ -26,6 +27,7 @@ expression: "&query_execution_results"
         String("Bar"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "transparent_field_name": List([
         String("0"),
@@ -40,6 +42,7 @@ expression: "&query_execution_results"
         String("WithZeroSizedData"),
       ]),
       "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
       "transparent_field_name": List([
         String("bar"),
@@ -54,6 +57,7 @@ expression: "&query_execution_results"
         String("TupleWithZeroSizedData"),
       ]),
       "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
       "span_filename": String("src/lib.rs"),
       "transparent_field_name": List([
         String("0"),
@@ -68,6 +72,7 @@ expression: "&query_execution_results"
         String("WithPubZeroSizedData"),
       ]),
       "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(17),
       "span_filename": String("src/lib.rs"),
       "transparent_field_name": List([
         String("bar"),
@@ -82,6 +87,7 @@ expression: "&query_execution_results"
         String("WithSpecificZeroSizedData"),
       ]),
       "span_begin_line": Uint64(19),
+      "span_end_line": Uint64(22),
       "span_filename": String("src/lib.rs"),
       "transparent_field_name": List([
         String("bar"),
@@ -96,6 +102,7 @@ expression: "&query_execution_results"
         String("WithFoo"),
       ]),
       "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(27),
       "span_filename": String("src/lib.rs"),
       "transparent_field_name": List([
         String("bar"),
@@ -110,6 +117,7 @@ expression: "&query_execution_results"
         String("WithRef"),
       ]),
       "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(32),
       "span_filename": String("src/lib.rs"),
       "transparent_field_name": List([
         String("bar"),
@@ -124,6 +132,7 @@ expression: "&query_execution_results"
         String("WithTuple"),
       ]),
       "span_begin_line": Uint64(34),
+      "span_end_line": Uint64(37),
       "span_filename": String("src/lib.rs"),
       "transparent_field_name": List([
         String("bar"),
@@ -138,6 +147,7 @@ expression: "&query_execution_results"
         String("WithGeneric"),
       ]),
       "span_begin_line": Uint64(39),
+      "span_end_line": Uint64(42),
       "span_filename": String("src/lib.rs"),
       "transparent_field_name": List([
         String("bar"),

@@ -12,6 +12,7 @@ expression: "&query_execution_results"
         String("my_function"),
       ]),
       "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -23,6 +24,7 @@ expression: "&query_execution_results"
         String("my_function"),
       ]),
       "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(38),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -32,6 +34,7 @@ expression: "&query_execution_results"
         String("my_function"),
       ]),
       "span_begin_line": Uint64(47),
+      "span_end_line": Uint64(47),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -41,6 +44,7 @@ expression: "&query_execution_results"
         String("my_function_with_types"),
       ]),
       "span_begin_line": Uint64(50),
+      "span_end_line": Uint64(50),
       "span_filename": String("src/lib.rs"),
     },
   ],

@@ -12,6 +12,7 @@ expression: "&query_execution_results"
         String("Enum"),
       ]),
       "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("FieldWillBeMissing"),
     },

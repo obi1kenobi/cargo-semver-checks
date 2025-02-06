@@ -12,6 +12,7 @@ expression: "&query_execution_results"
         String("Foo"),
       ]),
       "span_begin_line": Uint64(1),
+      "span_end_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -26,6 +27,7 @@ expression: "&query_execution_results"
         String("Bar"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Baz"),
@@ -40,6 +42,7 @@ expression: "&query_execution_results"
         String("StructStyleWithZeroSizedData"),
       ]),
       "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(14),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -54,6 +57,7 @@ expression: "&query_execution_results"
         String("TupleStyleWithZeroSizedData"),
       ]),
       "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(18),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -68,6 +72,7 @@ expression: "&query_execution_results"
         String("StructStyleWithFoo"),
       ]),
       "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(25),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -82,6 +87,7 @@ expression: "&query_execution_results"
         String("TupleStyleWithFoo"),
       ]),
       "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(29),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -96,6 +102,7 @@ expression: "&query_execution_results"
         String("StructStyleWithRef"),
       ]),
       "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(36),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -110,6 +117,7 @@ expression: "&query_execution_results"
         String("TupleStyleWithRef"),
       ]),
       "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(40),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -124,6 +132,7 @@ expression: "&query_execution_results"
         String("StructStyleWithTupleStyle"),
       ]),
       "span_begin_line": Uint64(42),
+      "span_end_line": Uint64(47),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -138,6 +147,7 @@ expression: "&query_execution_results"
         String("TupleStyleWithTuple"),
       ]),
       "span_begin_line": Uint64(49),
+      "span_end_line": Uint64(51),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -152,6 +162,7 @@ expression: "&query_execution_results"
         String("StructStyleWithGeneric"),
       ]),
       "span_begin_line": Uint64(53),
+      "span_end_line": Uint64(58),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -166,6 +177,7 @@ expression: "&query_execution_results"
         String("TupleStyleWithGeneric"),
       ]),
       "span_begin_line": Uint64(60),
+      "span_end_line": Uint64(65),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -180,6 +192,7 @@ expression: "&query_execution_results"
         String("StructStyleWithSpecificZeroSizedData"),
       ]),
       "span_begin_line": Uint64(67),
+      "span_end_line": Uint64(72),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -194,6 +207,7 @@ expression: "&query_execution_results"
         String("TupleStyleWithSpecificZeroSizedData"),
       ]),
       "span_begin_line": Uint64(74),
+      "span_end_line": Uint64(76),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
