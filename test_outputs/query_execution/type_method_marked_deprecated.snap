@@ -1,0 +1,125 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/type_method_marked_deprecated/": [
+    {
+      "method_name": String("method_to_be_deprecated"),
+      "name": String("NormalEnum"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("enums"),
+        String("NormalEnum"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/enums.rs"),
+    },
+    {
+      "method_name": String("method_with_message_to_be_deprecated"),
+      "name": String("NormalEnum"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("enums"),
+        String("NormalEnum"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/enums.rs"),
+    },
+    {
+      "method_name": String("method_to_be_deprecated"),
+      "name": String("BothEnumAndMethodDeprecated"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("enums"),
+        String("BothEnumAndMethodDeprecated"),
+      ]),
+      "span_begin_line": Uint64(88),
+      "span_end_line": Uint64(88),
+      "span_filename": String("src/enums.rs"),
+    },
+    {
+      "method_name": String("method_to_be_deprecated"),
+      "name": String("NormalStruct"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("structs"),
+        String("NormalStruct"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/structs.rs"),
+    },
+    {
+      "method_name": String("method_with_message_to_be_deprecated"),
+      "name": String("NormalStruct"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("structs"),
+        String("NormalStruct"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/structs.rs"),
+    },
+    {
+      "method_name": String("method_to_be_deprecated"),
+      "name": String("BothStructAndMethodDeprecated"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("structs"),
+        String("BothStructAndMethodDeprecated"),
+      ]),
+      "span_begin_line": Uint64(86),
+      "span_end_line": Uint64(86),
+      "span_filename": String("src/structs.rs"),
+    },
+    {
+      "method_name": String("method_to_be_deprecated"),
+      "name": String("NormalUnion"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("unions"),
+        String("NormalUnion"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/unions.rs"),
+    },
+    {
+      "method_name": String("method_with_message_to_be_deprecated"),
+      "name": String("NormalUnion"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("unions"),
+        String("NormalUnion"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/unions.rs"),
+    },
+    {
+      "method_name": String("method_to_be_deprecated"),
+      "name": String("BothUnionAndMethodDeprecated"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_method_marked_deprecated"),
+        String("unions"),
+        String("BothUnionAndMethodDeprecated"),
+      ]),
+      "span_begin_line": Uint64(89),
+      "span_end_line": Uint64(89),
+      "span_filename": String("src/unions.rs"),
+    },
+  ],
+}
