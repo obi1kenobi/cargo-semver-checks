@@ -37,3 +37,13 @@ pub trait PublicTraitWithHiddenConst {
     #[doc(hidden)]
     const HIDDEN_CONST_BECOMES_DEPRECATED: i32 = 3;
 }
+
+// This trait will be marked deprecated - should not trigger the lint
+pub trait TraitMarkedDeprecated {
+    const CONST: i32;
+}
+
+// Both the trait and its constant will be marked deprecated - should not trigger the lint
+pub trait TraitAndConstWillBeDeprecated {
+    const CONST_WILL_BE_DEPRECATED: i32;
+}

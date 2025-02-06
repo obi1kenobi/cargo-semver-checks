@@ -42,3 +42,16 @@ pub trait PublicTraitWithHiddenType {
     #[deprecated]
     type HiddenTypeBecomesDeprecated;
 }
+
+// This trait will be marked deprecated - should not trigger the lint
+#[deprecated]
+pub trait TraitMarkedDeprecated {
+    type Type;
+}
+
+// Both the trait and its type will be marked deprecated - should not trigger the lint
+#[deprecated]
+pub trait TraitAndTypeWillBeDeprecated {
+    #[deprecated]
+    type TypeWillBeDeprecated;
+}
