@@ -1,0 +1,125 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/type_associated_const_marked_deprecated/": [
+    {
+      "associated_constant": String("CONST_TO_DEPRECATED"),
+      "name": String("NormalEnum"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_associated_const_marked_deprecated"),
+        String("enums"),
+        String("NormalEnum"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/enums.rs"),
+    },
+    {
+      "associated_constant": String("CONST_WITH_MESSAGE"),
+      "name": String("NormalEnum"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_associated_const_marked_deprecated"),
+        String("enums"),
+        String("NormalEnum"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/enums.rs"),
+    },
+    {
+      "associated_constant": String("CONST_BOTH_DEPRECATED"),
+      "name": String("BothBecomeDeprecated"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("type_associated_const_marked_deprecated"),
+        String("enums"),
+        String("BothBecomeDeprecated"),
+      ]),
+      "span_begin_line": Uint64(76),
+      "span_end_line": Uint64(76),
+      "span_filename": String("src/enums.rs"),
+    },
+    {
+      "associated_constant": String("CONST_TO_DEPRECATED"),
+      "name": String("NormalStruct"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_associated_const_marked_deprecated"),
+        String("structs"),
+        String("NormalStruct"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/structs.rs"),
+    },
+    {
+      "associated_constant": String("CONST_WITH_MESSAGE"),
+      "name": String("NormalStruct"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_associated_const_marked_deprecated"),
+        String("structs"),
+        String("NormalStruct"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/structs.rs"),
+    },
+    {
+      "associated_constant": String("CONST_BOTH_DEPRECATED"),
+      "name": String("BothBecomeDeprecated"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_associated_const_marked_deprecated"),
+        String("structs"),
+        String("BothBecomeDeprecated"),
+      ]),
+      "span_begin_line": Uint64(74),
+      "span_end_line": Uint64(74),
+      "span_filename": String("src/structs.rs"),
+    },
+    {
+      "associated_constant": String("CONST_TO_DEPRECATED"),
+      "name": String("NormalUnion"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_associated_const_marked_deprecated"),
+        String("unions"),
+        String("NormalUnion"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/unions.rs"),
+    },
+    {
+      "associated_constant": String("CONST_WITH_MESSAGE"),
+      "name": String("NormalUnion"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_associated_const_marked_deprecated"),
+        String("unions"),
+        String("NormalUnion"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/unions.rs"),
+    },
+    {
+      "associated_constant": String("CONST_BOTH_DEPRECATED"),
+      "name": String("BothBecomeDeprecated"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("type_associated_const_marked_deprecated"),
+        String("unions"),
+        String("BothBecomeDeprecated"),
+      ]),
+      "span_begin_line": Uint64(75),
+      "span_end_line": Uint64(75),
+      "span_filename": String("src/unions.rs"),
+    },
+  ],
+}
