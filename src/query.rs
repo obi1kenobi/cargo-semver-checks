@@ -1119,7 +1119,7 @@ mod tests {
             );
         }
 
-        for test_crate in fs_err::read_dir(&test_crate_dir)? {
+        for test_crate in fs_err::read_dir(test_crate_dir)? {
             let test_crate = test_crate?;
 
             if !test_crate.metadata()?.is_dir() {
