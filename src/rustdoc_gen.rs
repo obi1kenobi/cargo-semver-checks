@@ -608,7 +608,8 @@ impl RustdocFromRegistry {
             }
             ComboIndexCache::Sparse(sparse) => {
                 let client = tame_index::external::reqwest::blocking::Client::builder()
-                    .http2_prior_knowledge()
+                    .tls_built_in_native_certs(config.certs_source().use_native())
+                    .tls_built_in_webpki_certs(config.certs_source().use_webpki())
                     .build()
                     .context("failed to build HTTP client")?;
                 index::RemoteSparseIndex::new(sparse, client).into()

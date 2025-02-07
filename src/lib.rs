@@ -25,7 +25,7 @@ use std::path::{Path, PathBuf};
 use check_release::run_check_release;
 use rustdoc_gen::CrateDataForRustdoc;
 
-pub use config::{FeatureFlag, GlobalConfig};
+pub use config::{CertsSource, FeatureFlag, GlobalConfig};
 pub use query::{
     ActualSemverUpdate, LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate,
     SemverQuery, Witness,

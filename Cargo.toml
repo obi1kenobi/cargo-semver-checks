@@ -38,7 +38,10 @@ fs-err = "3.0.0"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
 gix = { version = "0.70", default-features = false, features = ["max-performance-safe", "revision"] }
-tame-index = { version = "0.17", features = ["sparse"] }
+# Purposefully leave the default features on, so we compile-in support for
+# both the native certs and the standard WebPKI certs. This way users can
+# select which certificate store to use at runtime.
+tame-index = { version = "0.17", features = ["sparse", "native-certs"] }
 
 human-panic = "2.0.2"
 bugreport = "0.5.1"
