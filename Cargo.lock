@@ -364,7 +364,7 @@ dependencies = [
  "sha2",
  "similar-asserts",
  "tame-index",
- "toml 0.8.19",
+ "toml 0.8.20",
  "trustfall",
  "trustfall_core",
  "trustfall_rustdoc",
@@ -392,14 +392,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5fbd1fe9db3ebf71b89060adaf7b0504c2d6a425cf061313099547e382c2e472"
 dependencies = [
  "serde",
- "toml 0.8.19",
+ "toml 0.8.20",
 ]
 
 [[package]]
 name = "cc"
-version = "1.2.12"
+version = "1.2.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "755717a7de9ec452bf7f3f1a3099085deabd7f2962b861dae91ecd7a365903d2"
+checksum = "c7777341816418c02e033934a09f20dc0ccaf65a5201ef8a450ae0105a573fda"
 dependencies = [
  "shlex",
 ]
@@ -598,9 +598,9 @@ dependencies = [
 
 [[package]]
 name = "curl-sys"
-version = "0.4.78+curl-8.11.0"
+version = "0.4.79+curl-8.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8eec768341c5c7789611ae51cf6c459099f22e64a5d5d0ce4892434e33821eaf"
+checksum = "18a9bbeeb3996717ef1248018db20d1b0b5ba7165bff60e3b5135b4f4c2b37a5"
 dependencies = [
  "cc",
  "libc",
@@ -1743,9 +1743,9 @@ dependencies = [
 
 [[package]]
 name = "handlebars"
-version = "6.3.0"
+version = "6.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d6b224b95c1e668ac0270325ad563b2eef1469fbbb8959bc7c692c844b813d9"
+checksum = "d752747ddabc4c1a70dd28e72f2e3c218a816773e0d7faf67433f1acfa6cba7c"
 dependencies = [
  "derive_builder",
  "log",
@@ -1849,7 +1849,7 @@ dependencies = [
  "os_info",
  "serde",
  "serde_derive",
- "toml 0.8.19",
+ "toml 0.8.20",
  "uuid",
 ]
 
@@ -2365,9 +2365,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.20.2"
+version = "1.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
+checksum = "945462a4b81e43c4e3ba96bd7b49d834c6f61198356aa858733bc4acf3cbe62e"
 
 [[package]]
 name = "openssl-probe"
@@ -2395,9 +2395,9 @@ checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
 name = "os_info"
-version = "3.9.2"
+version = "3.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e6520c8cc998c5741ee68ec1dc369fc47e5f0ea5320018ecf2a1ccd6328f48b"
+checksum = "2a604e53c24761286860eba4e2c8b23a0161526476b1de520139d69cdb85a6b5"
 dependencies = [
  "log",
  "serde",
@@ -2844,9 +2844,9 @@ checksum = "719b953e2095829ee67db738b3bfa9fa368c94900df327b3f07fe6e794d2fe1f"
 
 [[package]]
 name = "rustc-hash"
-version = "2.1.0"
+version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7fb8039b3032c191086b10f11f319a6e99e1e82889c5cc6046f515c9db1d497"
+checksum = "357703d41365b4b27c590e3ed91eabb1b663f07c4c084095e60cbed4362dff0d"
 
 [[package]]
 name = "rustc_version"
@@ -3399,9 +3399,9 @@ dependencies = [
 
 [[package]]
 name = "toml"
-version = "0.8.19"
+version = "0.8.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1ed1f98e3fdc28d6d910e6737ae6ab1a93bf1985935a1193e68f93eeb68d24e"
+checksum = "cd87a5cdd6ffab733b2f74bc4fd7ee5fff6634124999ac278c35fc78c6120148"
 dependencies = [
  "serde",
  "serde_spanned",
@@ -3499,9 +3499,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "35.5.1"
+version = "35.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7f7bfe1aae2549913f7e44737f99a7c42e05e3f13fecf390bfe9fe4b6e0c8f1"
+checksum = "5c17c09e5cea4727c628abfae7007a5fee9027df731bbd6c75ba9198dea1e149"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3513,9 +3513,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "36.5.1"
+version = "36.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e81dce2749556dcaced78c9b5a3099ad201463ab6a2fb2fb86c44a27ae3b43ce"
+checksum = "813a1a9277268dec66591cc463e3b732218e0c4e345b47cc7b91af0233a7bf17"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3527,9 +3527,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "37.3.1"
+version = "37.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae03765e85cbccbcc3af71a022e60bbbfa2875dfdd541aa51a4cbb886ac7c5f5"
+checksum = "f8fa0c04cf40c43ca0214d31fa88b9949c3ea60c7c67399db6294e6c03c0b674"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3541,9 +3541,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "39.1.1"
+version = "39.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c53cf1155e1d60a7da2096b02e3b584d1f9dc1cc22c4bf0a27c6dfaff8f25cf"
+checksum = "34c94626a66a0542e077faf09c431f338f8e5105f1b643b9d304a4a36b44fba0"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3593,10 +3593,10 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.11",
  "trustfall",
- "trustfall-rustdoc-adapter 35.5.1",
- "trustfall-rustdoc-adapter 36.5.1",
- "trustfall-rustdoc-adapter 37.3.1",
- "trustfall-rustdoc-adapter 39.1.1",
+ "trustfall-rustdoc-adapter 35.5.2",
+ "trustfall-rustdoc-adapter 36.5.2",
+ "trustfall-rustdoc-adapter 37.3.2",
+ "trustfall-rustdoc-adapter 39.1.2",
 ]
 
 [[package]]
@@ -3702,11 +3702,11 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "uuid"
-version = "1.12.1"
+version = "1.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3758f5e68192bb96cc8f9b7e2c2cfdabb435499a28499a42f8f984092adad4b"
+checksum = "ced87ca4be083373936a67f8de945faa23b6b42384bd5b64434850802c6dccd0"
 dependencies = [
- "getrandom 0.2.15",
+ "getrandom 0.3.1",
 ]
 
 [[package]]
