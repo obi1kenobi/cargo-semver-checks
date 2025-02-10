@@ -2,7 +2,6 @@ SemverQuery(
     id: "repr_c_plain_struct_fields_reordered",
     human_readable_name: "struct fields reordered in repr(C) struct",
     description: "A public repr(C) plain struct had its fields reordered, changing its memory layout.",
-    reference: Some("A public repr(C) plain struct had its fields reordered. This changes the struct's memory layout, breaking FFI use cases that depend on the field ordering."),
     required_update: Major,
     lint_level: Warn,
     reference_link: Some("https://doc.rust-lang.org/reference/type-layout.html#reprc-structs"),
