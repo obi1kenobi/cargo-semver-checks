@@ -1,0 +1,104 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/repr_c_plain_struct_fields_reordered/": [
+    {
+      "field_name": String("b"),
+      "name": String("PublicStruct"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("PublicStruct"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("c"),
+      "name": String("PublicStruct"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("PublicStruct"),
+      ]),
+      "position": Int64(3),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("a"),
+      "name": String("PublicStruct"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("PublicStruct"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("b"),
+      "name": String("MixedVisibilityStruct"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("MixedVisibilityStruct"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(36),
+      "span_end_line": Uint64(36),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("c"),
+      "name": String("MixedVisibilityStruct"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("MixedVisibilityStruct"),
+      ]),
+      "position": Int64(3),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("a"),
+      "name": String("MixedVisibilityStruct"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("MixedVisibilityStruct"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(38),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("b"),
+      "name": String("MultipleReprStruct"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("MultipleReprStruct"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(51),
+      "span_end_line": Uint64(51),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("a"),
+      "name": String("MultipleReprStruct"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("MultipleReprStruct"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(52),
+      "span_end_line": Uint64(52),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
