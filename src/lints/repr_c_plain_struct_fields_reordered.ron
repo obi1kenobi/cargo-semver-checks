@@ -1,0 +1,84 @@
+SemverQuery(
+    id: "repr_c_plain_struct_fields_reordered",
+    human_readable_name: "struct fields reordered in repr(C) struct",
+    description: "A public repr(C) plain struct had its fields reordered, changing its memory layout.",
+    reference: Some("A public repr(C) plain struct had its fields reordered. This changes the struct's memory layout, breaking FFI use cases that depend on the field ordering."),
+    required_update: Major,
+    lint_level: Warn,
+    reference_link: Some("https://doc.rust-lang.org/reference/type-layout.html#reprc-structs"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        struct_type @filter(op: "=", value: ["$plain"])
+
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$c"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        field {
+                            field_name: name @output @tag
+                            position @output @tag
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        struct_type @filter(op: "=", value: ["$plain"])
+
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$c"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        field {
+                            name @filter(op: "=", value: ["%field_name"])
+                            position @filter(op: "!=", value: ["%position"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "plain": "plain",
+        "repr": "repr",
+        "c": "C",
+        "true": true,
+    },
+    error_message: "A public repr(C) struct had its fields reordered. This changes the struct's memory layout, breaking FFI use cases that depend on field ordering.",
+    per_result_error_template: Some("field {{field_name}} in struct {{name}} changed position in {{span_filename}}:{{span_begin_line}}"),
+)
