@@ -13,6 +13,7 @@ expression: "&query_execution_results"
         String("export_name_changed"),
       ]),
       "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -24,6 +25,7 @@ expression: "&query_execution_results"
         String("no_mangle_changed_to_other_export_name"),
       ]),
       "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -35,6 +37,7 @@ expression: "&query_execution_results"
         String("export_name_changed_to_other_no_mangle"),
       ]),
       "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -46,6 +49,7 @@ expression: "&query_execution_results"
         String("no_mangle_removed"),
       ]),
       "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -57,6 +61,7 @@ expression: "&query_execution_results"
         String("export_name_removed"),
       ]),
       "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(25),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -68,6 +73,7 @@ expression: "&query_execution_results"
         String("private_export_name_changed"),
       ]),
       "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -80,6 +86,7 @@ expression: "&query_execution_results"
         String("export_name_moved_1"),
       ]),
       "span_begin_line": Uint64(35),
+      "span_end_line": Uint64(35),
       "span_filename": String("src/lib.rs"),
     },
   ],

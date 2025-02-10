@@ -11,6 +11,7 @@ expression: "&query_execution_results"
         String("MY_FN"),
       ]),
       "span_begin_line": Uint64(61),
+      "span_end_line": Uint64(61),
       "span_filename": String("src/lib.rs"),
     },
   ],
@@ -22,6 +23,7 @@ expression: "&query_execution_results"
         String("GlobalConstantB"),
       ]),
       "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -32,6 +34,7 @@ expression: "&query_execution_results"
         String("PublicModuleConstantB"),
       ]),
       "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
       "span_filename": String("src/lib.rs"),
     },
   ],

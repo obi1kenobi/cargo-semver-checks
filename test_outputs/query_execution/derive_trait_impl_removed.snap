@@ -11,6 +11,7 @@ expression: "&query_execution_results"
         String("DebugFoo"),
       ]),
       "span_begin_line": Uint64(2),
+      "span_end_line": Uint64(2),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("Debug"),
       "trait_path": List([
@@ -27,6 +28,7 @@ expression: "&query_execution_results"
         String("CopyBar"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("Copy"),
       "trait_path": List([
@@ -43,6 +45,7 @@ expression: "&query_execution_results"
         String("EqFoo"),
       ]),
       "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("Eq"),
       "trait_path": List([

@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/derive_helper_attr_removed/": [
@@ -13,6 +12,7 @@ snapshot_kind: text
         String("MyDerive"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
     },
   ],

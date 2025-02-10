@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/declarative_macro_missing/": [
@@ -9,6 +8,9 @@ snapshot_kind: text
       "name": String("will_no_longer_be_exported"),
       "non_exported_span_begin_line": List([
         Uint64(1),
+      ]),
+      "non_exported_span_end_line": List([
+        Uint64(3),
       ]),
       "non_exported_span_filename": List([
         String("src/lib.rs"),
@@ -27,6 +29,9 @@ snapshot_kind: text
       "non_exported_span_begin_line": List([
         Uint64(2),
       ]),
+      "non_exported_span_end_line": List([
+        Uint64(6),
+      ]),
       "non_exported_span_filename": List([
         String("src/lib.rs"),
       ]),
@@ -42,6 +47,10 @@ snapshot_kind: text
       "non_exported_span_begin_line": List([
         Uint64(29),
         Uint64(36),
+      ]),
+      "non_exported_span_end_line": List([
+        Uint64(31),
+        Uint64(38),
       ]),
       "non_exported_span_filename": List([
         String("src/lib.rs"),
@@ -60,6 +69,9 @@ snapshot_kind: text
       "name": String("becomes_non_exported"),
       "non_exported_span_begin_line": List([
         Uint64(36),
+      ]),
+      "non_exported_span_end_line": List([
+        Uint64(40),
       ]),
       "non_exported_span_filename": List([
         String("src/lib.rs"),

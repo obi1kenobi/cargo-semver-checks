@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 769
 expression: "&query_execution_results"
 ---
 {
@@ -13,6 +14,7 @@ expression: "&query_execution_results"
         String("PublicEnum"),
       ]),
       "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("PlainVariantBecomesTuple"),
     },
@@ -27,6 +29,7 @@ expression: "&query_execution_results"
         String("TestStruct"),
       ]),
       "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("WillBecomeStructLike"),
     },
@@ -39,6 +42,7 @@ expression: "&query_execution_results"
         String("TestTuple"),
       ]),
       "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("WillBecomeTupleLike"),
     },
@@ -51,6 +55,7 @@ expression: "&query_execution_results"
         String("MultipleTest"),
       ]),
       "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("WillBecomeStructLike"),
     },
@@ -63,6 +68,7 @@ expression: "&query_execution_results"
         String("MultipleTest"),
       ]),
       "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("WillBecomeTupleLike"),
     },
@@ -75,6 +81,7 @@ expression: "&query_execution_results"
         String("TestBecomeDocHidden"),
       ]),
       "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("WillBecomeStructLike"),
     },
@@ -87,6 +94,7 @@ expression: "&query_execution_results"
         String("TestBecomeNonExhaustive"),
       ]),
       "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("WillBecomeStructLike"),
     },

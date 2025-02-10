@@ -89,6 +89,7 @@ To avoid false-positives, this query is restricted to checking only enums that i
                         span_: span @optional {
                             filename @output
                             begin_line @output
+                            end_line @output
                         }
                     }
                 }

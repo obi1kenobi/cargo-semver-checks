@@ -19,7 +19,7 @@ SemverQuery(
                     }
                 }
             }
-            
+
             current {
                 item {
                     ... on Function {
@@ -34,6 +34,7 @@ SemverQuery(
                         span_: span @optional {
                             filename @output
                             begin_line @output
+                            end_line @output
                         }
                     }
                 }
@@ -45,4 +46,3 @@ SemverQuery(
     error_message: "The ABI export name of a function has been changed or removed through the #[no_mangle] or #[export_name] attributes.",
     per_result_error_template: Some("function {{join \"::\" path}} no longer has ABI name {{export_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
-

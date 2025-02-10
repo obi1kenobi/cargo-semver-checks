@@ -46,14 +46,15 @@ SemverQuery(
                         # Don't check for exhaustiveness and public API eligibility here.
                         # Variants that changed kind and gained `#[doc(hidden)]` should
                         # report for both lints, since there is no implied continuity
-                        # between the old variant and the new one with the same name.   
+                        # between the old variant and the new one with the same name.
                         variant {
                             name @filter(op: "=", value: ["%variant_name"])
-                            new_kind: __typename @filter(op: "!=", value: ["%kind"]) @output   
-                           
+                            new_kind: __typename @filter(op: "!=", value: ["%kind"]) @output
+
                             span_: span @optional {
                                 filename @output
                                 begin_line @output
+                                end_line @output
                             }
                         }
                     }

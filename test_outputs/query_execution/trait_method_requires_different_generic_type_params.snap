@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/trait_method_requires_different_generic_type_params/": [
@@ -19,6 +18,7 @@ snapshot_kind: text
         String("Example"),
       ]),
       "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -39,6 +39,7 @@ snapshot_kind: text
         String("Example"),
       ]),
       "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -59,6 +60,7 @@ snapshot_kind: text
         String("Example"),
       ]),
       "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

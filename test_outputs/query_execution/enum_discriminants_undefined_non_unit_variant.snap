@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/enum_discriminant_no_longer_defined/": [
@@ -12,6 +11,7 @@ snapshot_kind: text
         String("GainsTupleVariant"),
       ]),
       "span_begin_line": Uint64(58),
+      "span_end_line": Uint64(62),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -22,6 +22,7 @@ snapshot_kind: text
         String("GainsStructVariant"),
       ]),
       "span_begin_line": Uint64(65),
+      "span_end_line": Uint64(68),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -34,6 +35,7 @@ snapshot_kind: text
         String("TestStruct"),
       ]),
       "span_begin_line": Uint64(2),
+      "span_end_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -44,6 +46,7 @@ snapshot_kind: text
         String("TestTuple"),
       ]),
       "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -54,6 +57,7 @@ snapshot_kind: text
         String("MultipleTest"),
       ]),
       "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(14),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -64,6 +68,7 @@ snapshot_kind: text
         String("TestBecomeDocHidden"),
       ]),
       "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(19),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -74,6 +79,7 @@ snapshot_kind: text
         String("TestBecomeNonExhaustive"),
       ]),
       "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(24),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -84,6 +90,7 @@ snapshot_kind: text
         String("TestDocHidden"),
       ]),
       "span_begin_line": Uint64(50),
+      "span_end_line": Uint64(57),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

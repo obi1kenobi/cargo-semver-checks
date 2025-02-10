@@ -11,6 +11,7 @@ expression: "&query_execution_results"
         String("PublicTrait"),
       ]),
       "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -20,6 +21,7 @@ expression: "&query_execution_results"
         String("PublicTrait"),
       ]),
       "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
       "span_filename": String("src/lib.rs"),
     },
   ],
@@ -31,6 +33,7 @@ expression: "&query_execution_results"
         String("PublicTraitHiddenVariant"),
       ]),
       "span_begin_line": Uint64(54),
+      "span_end_line": Uint64(54),
       "span_filename": String("src/lib.rs"),
     },
   ],

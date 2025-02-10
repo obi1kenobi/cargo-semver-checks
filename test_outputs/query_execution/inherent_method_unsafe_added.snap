@@ -11,6 +11,9 @@ expression: "&query_execution_results"
       "non_matching_span_begin_line": List([
         Uint64(4),
       ]),
+      "non_matching_span_end_line": List([
+        Uint64(6),
+      ]),
       "non_matching_span_filename": List([
         String("src/lib.rs"),
       ]),
@@ -28,6 +31,9 @@ expression: "&query_execution_results"
       "name": String("Foo"),
       "non_matching_span_begin_line": List([
         Uint64(8),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(10),
       ]),
       "non_matching_span_filename": List([
         String("src/lib.rs"),

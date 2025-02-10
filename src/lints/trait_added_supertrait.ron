@@ -23,8 +23,9 @@ SemverQuery(
                         }
 
                         span_: span @optional {
-                           filename @output
-                           begin_line @output
+                            filename @output
+                            begin_line @output
+                            end_line @output
                         }
                     }
                 }

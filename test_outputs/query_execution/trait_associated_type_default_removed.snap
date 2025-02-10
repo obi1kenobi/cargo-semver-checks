@@ -12,6 +12,7 @@ expression: "&query_execution_results"
         String("WillLoseDefault"),
       ]),
       "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

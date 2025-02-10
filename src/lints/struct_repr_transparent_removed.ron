@@ -109,6 +109,7 @@ To avoid false-positives, this query is restricted to checking only structs that
                         span_: span @optional {
                             filename @output
                             begin_line @output
+                            end_line @output
                         }
                     }
                 }

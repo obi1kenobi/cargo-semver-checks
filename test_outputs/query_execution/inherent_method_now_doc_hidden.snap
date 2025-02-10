@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 769
 expression: "&query_execution_results"
 ---
 {
@@ -14,6 +15,7 @@ expression: "&query_execution_results"
         String("Foo"),
       ]),
       "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(8),
       "span_filename": String("src/enum_inherent_method_now_doc_hidden.rs"),
       "visibility_limit": String("public"),
     },
@@ -27,6 +29,7 @@ expression: "&query_execution_results"
         String("Foo"),
       ]),
       "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(12),
       "span_filename": String("src/enum_inherent_method_now_doc_hidden.rs"),
       "visibility_limit": String("public"),
     },
@@ -40,6 +43,7 @@ expression: "&query_execution_results"
         String("Foo"),
       ]),
       "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(6),
       "span_filename": String("src/struct_inherent_method_now_doc_hidden.rs"),
       "visibility_limit": String("public"),
     },
@@ -53,6 +57,7 @@ expression: "&query_execution_results"
         String("Foo"),
       ]),
       "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/struct_inherent_method_now_doc_hidden.rs"),
       "visibility_limit": String("public"),
     },
@@ -66,6 +71,7 @@ expression: "&query_execution_results"
         String("Foo"),
       ]),
       "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/union_inherent_method_now_doc_hidden.rs"),
       "visibility_limit": String("public"),
     },
@@ -79,6 +85,7 @@ expression: "&query_execution_results"
         String("Foo"),
       ]),
       "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(13),
       "span_filename": String("src/union_inherent_method_now_doc_hidden.rs"),
       "visibility_limit": String("public"),
     },

@@ -11,6 +11,7 @@ expression: "&query_execution_results"
         String("RemovingSingleTrait"),
       ]),
       "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "trait_path": List([
         String("trait_removed_supertrait"),
@@ -25,6 +26,7 @@ expression: "&query_execution_results"
         String("RemovingOneTraitOfMultiple"),
       ]),
       "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
       "trait_path": List([
         String("trait_removed_supertrait"),
@@ -39,6 +41,7 @@ expression: "&query_execution_results"
         String("RemovingOneWithGenerics"),
       ]),
       "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "trait_path": List([
         String("trait_removed_supertrait"),
@@ -53,6 +56,7 @@ expression: "&query_execution_results"
         String("RemovingOneWithGenericsOnTheSuperTrait"),
       ]),
       "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
       "trait_path": List([
         String("trait_removed_supertrait"),
@@ -67,6 +71,7 @@ expression: "&query_execution_results"
         String("RemovingTraitAndLifetime"),
       ]),
       "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
       "trait_path": List([
         String("trait_removed_supertrait"),
@@ -81,6 +86,7 @@ expression: "&query_execution_results"
         String("RemovingMultiple"),
       ]),
       "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
       "trait_path": List([
         String("trait_removed_supertrait"),
@@ -95,6 +101,7 @@ expression: "&query_execution_results"
         String("RemovingMultiple"),
       ]),
       "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
       "trait_path": List([
         String("trait_removed_supertrait"),

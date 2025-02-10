@@ -60,6 +60,7 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/954
                         span_: span @optional {
                             filename @output
                             begin_line @output
+                            end_line @output
                         }
                     }
                 }
