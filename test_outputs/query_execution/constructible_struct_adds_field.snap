@@ -79,4 +79,18 @@ expression: "&query_execution_results"
       "struct_type": String("tuple"),
     },
   ],
+  "./test_crates/repr_c_plain_struct_fields_reordered/": [
+    {
+      "field_name": String("c"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("StructWithAddition"),
+      ]),
+      "span_begin_line": Uint64(61),
+      "span_end_line": Uint64(61),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("StructWithAddition"),
+      "struct_type": String("plain"),
+    },
+  ],
 }

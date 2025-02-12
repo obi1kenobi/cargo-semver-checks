@@ -3,6 +3,20 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
+  "./test_crates/repr_c_plain_struct_fields_reordered/": [
+    {
+      "field_name": String("a"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("StructWithRemoval"),
+      ]),
+      "span_begin_line": Uint64(67),
+      "span_end_line": Uint64(67),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("StructWithRemoval"),
+      "struct_type": String("plain"),
+    },
+  ],
   "./test_crates/struct_pub_field_missing/": [
     {
       "field_name": String("bar"),
