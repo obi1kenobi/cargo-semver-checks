@@ -51,3 +51,20 @@ pub struct MultipleReprStruct {
     pub a: u8,
     pub b: u16,
 }
+
+// A case in which a new field is later added. The total number of fields is different,
+// so the reorder lint should not trigger.
+#[repr(C)]
+pub struct StructWithAddition {
+    pub a: u8,
+    pub b: u16,
+}
+
+// A case in which a field is later removed. Again the field count changes,
+// and the lint should not trigger.
+#[repr(C)]
+pub struct StructWithRemoval {
+    pub a: u8,
+    pub b: u16,
+    pub c: u32,
+}
