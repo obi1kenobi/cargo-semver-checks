@@ -210,7 +210,7 @@ jobs:
         if: steps.cache-test-rustdocs.outputs.cache-hit == 'true'
         run: |
           cd semver
-          find localdata/test_data -exec sh -c 'touch "{}"' \;
+          find localdata/test_data -exec touch {} \;
 
       - uses: Swatinem/rust-cache@v2
         with:
