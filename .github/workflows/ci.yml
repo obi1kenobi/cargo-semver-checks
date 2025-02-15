@@ -205,6 +205,12 @@ jobs:
         run: |
           cd semver
           ./scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
+      
+      - name: Fake rustdoc mtime on cache hit
+        if: steps.cache-test-rustdocs.outputs.cache-hit == 'true'
+        run: |
+          cd semver
+          find localdata/test_data -exec sh -c 'touch "{}"' \;
 
       - uses: Swatinem/rust-cache@v2
         with:
