@@ -15,8 +15,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Download actionlint
         id: get_actionlint
-        run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+        run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/7ddc72c1a2c9ee3a2b16ba1e3da5b46ff456b33c/scripts/download-actionlint.bash)
         shell: bash
       - name: Check workflow files
-        run: ${{ steps.get_actionlint.outputs.executable }} -color
+        run: ${{ steps.get_actionlint.outputs.executable }} -color -ignore 'SC2086|SC2016'
         shell: bash

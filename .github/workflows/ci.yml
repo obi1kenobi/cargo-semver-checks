@@ -430,7 +430,9 @@ jobs:
             exit 1;
           }
 
-          export OLD_RUSTDOC_VERSION="$(jq .format_version "$EXPECTED_CACHED_RUSTDOC")"
+          OLD_RUSTDOC_VERSION=
+          OLD_RUSTDOC_VERSION=$(jq .format_version "$EXPECTED_CACHED_RUSTDOC")
+          export OLD_RUSTDOC_VERSION
 
           # Run cargo-semver-checks with the older cached file.
           # In a prior step, we installed a newer Rust, so we'll set that as the default
@@ -441,7 +443,9 @@ jobs:
           # Show what's in the cache now.
           ls subject-new/target/semver-checks/cache/
 
-          export NEW_RUSTDOC_VERSION="$(jq .format_version "$EXPECTED_CACHED_RUSTDOC")"
+          NEW_RUSTDOC_VERSION=
+          NEW_RUSTDOC_VERSION=$(jq .format_version "$EXPECTED_CACHED_RUSTDOC")
+          export NEW_RUSTDOC_VERSION
 
           # Ensure the cached rustdoc versions were indeed different before and after.
           [ "$OLD_RUSTDOC_VERSION" != "$NEW_RUSTDOC_VERSION" ] || exit 1
@@ -534,7 +538,7 @@ jobs:
         run: |
           cd semver
           EXPECTED="$(echo -e "--- failure struct_missing: pub struct removed or renamed ---")"
-          RESULT="$(cat output | grep failure)"
+          RESULT="$(grep failure output)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Verify cached rustdoc's hash
@@ -1381,7 +1385,7 @@ jobs:
         run: |
           cd semver
           EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---\n--- failure enum_no_repr_variant_discriminant_changed: enum variant had its discriminant change value ---")"
-          RESULT="$(cat output | grep failure | sort)"
+          RESULT="$(grep failure output | sort)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Cleanup
@@ -1413,7 +1417,7 @@ jobs:
         run: |
           cd semver
           EXPECTED="$(echo -e "--- failure auto_trait_impl_removed: auto trait no longer implemented ---\n--- failure enum_no_repr_variant_discriminant_changed: enum variant had its discriminant change value ---")"
-          RESULT="$(cat output | grep failure | sort)"
+          RESULT="$(grep failure output | sort)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Save rustdoc
@@ -1505,14 +1509,14 @@ jobs:
           cd semver
           EXPECTED="$(echo -e "    Checking ref_slice v1.2.1 -> v1.2.1 (no change)")"
           # Strip ANSI escapes for colors and bold text before comparing.
-          RESULT="$(cat output | grep ' -> v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g")"
+          RESULT="$(grep ' -> v1.' output | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g")"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Semver break found
         run: |
           cd semver
           EXPECTED="$(echo -e "--- failure function_missing: pub fn removed or renamed ---")"
-          RESULT="$(cat output | grep failure)"
+          RESULT="$(grep failure output)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
           # Ensure the following fragment (not full line!) is in the output file:
           grep '  function ref_slice::ref_slice, previously in file' output
@@ -1837,7 +1841,7 @@ jobs:
         run: |
           cd semver
           EXPECTED="$(echo -e "error: rustc version is not high enough: >=1.83.0 needed, got 1.82.0")"
-          RESULT="$(cat output | grep 'error: rustc version')"
+          RESULT="$(grep 'error: rustc version' output)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Cleanup
@@ -1894,9 +1898,9 @@ jobs:
           export EXIT_CODE="$?"
           set -e
           if [[ "$EXIT_CODE" == "7" ]]; then
-            echo 'is_new_version=no' >> $GITHUB_OUTPUT
+            echo 'is_new_version=no' >> "$GITHUB_OUTPUT"
           elif [[ "$EXIT_CODE" == "0" ]]; then
-            echo 'is_new_version=yes' >> $GITHUB_OUTPUT
+            echo 'is_new_version=yes' >> "$GITHUB_OUTPUT"
           else
             # Unexpected outcome, indicates a bug.
             exit "$EXIT_CODE"
@@ -1904,8 +1908,9 @@ jobs:
       - name: Determine the tag name
         id: tag
         run: |
-          export TAG_NAME="v$(./scripts/get_current_version.sh cargo-semver-checks)"
-          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+          TAG_NAME=
+          TAG_NAME="v$(./scripts/get_current_version.sh "cargo-semver-checks")"
+          echo "tag=$TAG_NAME" >> "$GITHUB_OUTPUT"
 
   pre-publish-checks:
     name: Check for semver compliance
