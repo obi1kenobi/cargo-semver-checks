@@ -11,7 +11,7 @@ name: Bump dependencies in Cargo.lock
 on:
   schedule:
     # Run weekly early in the morning on Mondays.
-    - cron: '37 03 * * MON'
+    - cron: "37 03 * * MON"
   workflow_dispatch:
     # Needed so we can run it manually
 permissions:
@@ -88,13 +88,17 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "${COMMIT_MESSAGE}" > commit.txt
-          cat cargo_update.log >> commit.txt
+          {
+            echo "${COMMIT_MESSAGE}"
+            cat cargo_update.log
+          } > commit.txt
 
-          echo "${PR_MESSAGE}" > body.md
-          echo '```txt' >> body.md
-          cat cargo_update.log >> body.md
-          echo '```' >> body.md
+          {
+            echo "${PR_MESSAGE}"
+            echo '```txt'
+            cat cargo_update.log
+            echo '```'
+          } > body.md
 
       - name: commit
         run: |
@@ -105,8 +109,8 @@ jobs:
           git switch --force-create "$BRANCH_NAME"
           git add ./Cargo.lock
           DIFF="$(git diff --staged)"
-          if [[ "$DIFF" == "" ]]; then
-            echo >2 "Cargo.lock was not changed, bailing out and not making a PR"
+          if [ -z "$DIFF" ]; then
+            echo >&2 "Cargo.lock was not changed, bailing out and not making a PR"
             exit 1
           fi
           git commit --no-verify --file=commit.txt

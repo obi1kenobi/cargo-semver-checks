@@ -86,8 +86,8 @@ jobs:
             sed 's/,/, /g' \
             >.next_versions
 
-          CURRENT="$(cat .current_versions | sed 's/^/\\/g' | sed 's/\]/\\]/g')"
-          NEXT="$(cat .next_versions)"
+          CURRENT="$(< .current_versions sed 's/^/\\/g; s/\]/\\]/g')"
+          NEXT="$(< .next_versions sed 's/^/\\/g; s/\]/\\]/g')"
 
           sed -i "s/$CURRENT/$NEXT/g" .github/workflows/ci.yml
 
@@ -131,10 +131,12 @@ jobs:
 
           DIFF="$(git diff)"
 
-          echo "${PR_MESSAGE}" > body.md
-          echo '```diff' >> body.md
-          echo "$DIFF" >> body.md
-          echo '```' >> body.md
+          {
+            echo "${PR_MESSAGE}"
+            echo '```diff'
+            echo "$DIFF"
+            echo '```'
+          } > body.md
 
       - name: commit
         run: |
@@ -146,7 +148,7 @@ jobs:
           git add ./.github/workflows/ci.yml
           DIFF="$(git diff --staged)"
           if [[ "$DIFF" == "" ]]; then
-            echo >2 "./.github/workflows/ci.yml was not changed, bailing out and not making a PR"
+            echo >&2 "./.github/workflows/ci.yml was not changed, bailing out and not making a PR"
             exit 1
           fi
           git commit --no-verify --file=body.md
