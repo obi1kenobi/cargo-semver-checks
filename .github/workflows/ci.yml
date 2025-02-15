@@ -335,8 +335,8 @@ jobs:
       - name: Put env vars in outputs
         id: vars
         run: |
-          echo "older-rust=$OLDER_RUST" >> $GITHUB_OUTPUT
-          echo "newer-rust=$NEWER_RUST" >> $GITHUB_OUTPUT
+          echo "older-rust=$OLDER_RUST" >> "$GITHUB_OUTPUT"
+          echo "newer-rust=$NEWER_RUST" >> "$GITHUB_OUTPUT"
 
       - name: Checkout cargo-semver-checks
         uses: actions/checkout@v4

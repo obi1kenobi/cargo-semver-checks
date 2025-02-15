@@ -18,5 +18,6 @@ jobs:
         run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/2ab3a12c7848f6c15faca9a92612ef4261d0e370/scripts/download-actionlint.bash)
         shell: bash
       - name: Check workflow files
-        run: ${{ steps.get_actionlint.outputs.executable }} -color -ignore 'SC2086|SC2016'
+        # - https://www.shellcheck.net/wiki/SC2016 - "Expressions don't expand in single quotes, use double quotes for that."
+        run: ${{ steps.get_actionlint.outputs.executable }} -color -ignore 'SC2016'
         shell: bash
