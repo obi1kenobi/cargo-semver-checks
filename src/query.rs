@@ -328,6 +328,7 @@ pub enum InheritedValue {
 mod tests {
     use std::borrow::Cow;
     use std::collections::BTreeSet;
+    use std::ffi::OsStr;
     use std::path::PathBuf;
     use std::sync::{Arc, OnceLock};
     use std::time::SystemTime;
@@ -1087,7 +1088,8 @@ mod tests {
 
     #[test]
     fn test_data_is_fresh() -> anyhow::Result<()> {
-        // Adds the modification time of all files in `{dir}/**/*` to `set`
+        // Adds the modification time of all files in `{dir}/**/*.{rs,toml,json}` to `set`, excluding
+        // the `target` directory.
         fn recursive_file_times<P: Into<PathBuf>>(
             dir: P,
             set: &mut BTreeSet<SystemTime>,
@@ -1095,13 +1097,18 @@ mod tests {
             for item in fs_err::read_dir(dir)? {
                 let item = item?;
                 let metadata = item.metadata()?;
-                if item.file_name() == "target" || item.file_name() == "Cargo.lock" {
-                    continue;
-                }
                 if metadata.is_dir() {
+                    // Don't recurse into the `target` directory.
+                    if item.file_name() == "target" {
+                        continue;
+                    }
                     recursive_file_times(item.path(), set)?;
                 } else {
-                    set.insert(metadata.modified()?);
+                    if let Some("rs" | "toml" | "json") =
+                        item.path().extension().and_then(OsStr::to_str)
+                    {
+                        set.insert(metadata.modified()?);
+                    }
                 }
             }
 
@@ -1113,7 +1120,7 @@ mod tests {
 
         if !localdata_dir.fs_err_try_exists()? {
             panic!(
-                "'{}' does not exist yet.\n\
+                "The localdata directory '{}' does not exist yet.\n\
                 Please run `scripts/regenerate_test_rustdocs.sh`.",
                 localdata_dir.display()
             );
