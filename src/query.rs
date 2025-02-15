@@ -1103,12 +1103,10 @@ mod tests {
                         continue;
                     }
                     recursive_file_times(item.path(), set)?;
-                } else {
-                    if let Some("rs" | "toml" | "json") =
-                        item.path().extension().and_then(OsStr::to_str)
-                    {
-                        set.insert(metadata.modified()?);
-                    }
+                } else if let Some("rs" | "toml" | "json") =
+                    item.path().extension().and_then(OsStr::to_str)
+                {
+                    set.insert(metadata.modified()?);
                 }
             }
 
