@@ -5,8 +5,8 @@ use std::{collections::HashSet, env, path::PathBuf};
 use anstyle::{AnsiColor, Color, Reset, Style};
 use cargo_config2::Config;
 use cargo_semver_checks::{
-    FeatureFlag, GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
-    WitnessGeneration,
+    CertsSource, FeatureFlag, GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection,
+    SemverQuery, WitnessGeneration,
 };
 use clap::{Args, CommandFactory, Parser, Subcommand};
 use std::io::Write;
@@ -24,6 +24,7 @@ fn main() {
     configure_color(args.color_choice);
     let mut config = GlobalConfig::new();
     config.set_log_level(args.verbosity.log_level());
+    config.set_certs_source(args.certs_source.unwrap_or_default());
     config.set_feature_flags(feature_flags);
 
     exit_on_error(true, || validate_feature_flags(&mut config, &args));
@@ -309,6 +310,10 @@ struct SemverChecks {
     // docstring for help is on the `clap_verbosity_flag::Verbosity` struct itself
     #[command(flatten)]
     verbosity: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
+
+    /// What certificate store to use, Mozilla's or the system store
+    #[arg(long = "certs-source", global = true, value_name = "SOURCE")]
+    certs_source: Option<CertsSource>,
 
     /// Enable unstable feature flags, run `cargo semver-checks -Z help` for more help.
     #[arg(

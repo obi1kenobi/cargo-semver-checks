@@ -15,6 +15,7 @@ pub struct GlobalConfig {
     minimum_rustc_version: semver::Version,
     stdout: AutoStream<Box<dyn Write + 'static>>,
     stderr: AutoStream<Box<dyn Write + 'static>>,
+    certs_source: CertsSource,
     feature_flags: HashSet<FeatureFlag>,
 }
 
@@ -40,6 +41,7 @@ impl GlobalConfig {
             minimum_rustc_version: semver::Version::new(1, 83, 0),
             stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
             stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
+            certs_source: CertsSource::default(),
             feature_flags: HashSet::new(),
         }
     }
@@ -50,6 +52,15 @@ impl GlobalConfig {
 
     pub fn minimum_rustc_version(&self) -> &semver::Version {
         &self.minimum_rustc_version
+    }
+
+    pub fn set_certs_source(&mut self, certs_source: CertsSource) -> &mut Self {
+        self.certs_source = certs_source;
+        self
+    }
+
+    pub fn certs_source(&self) -> CertsSource {
+        self.certs_source
     }
 
     pub fn set_log_level(&mut self, level: Option<log::Level>) -> &mut Self {
@@ -400,6 +411,25 @@ impl ValueEnum for FeatureFlag {
                 .hide(self.stable)
                 .help(self.help),
         )
+    }
+}
+
+#[derive(Debug, Default, Clone, Copy, clap::ValueEnum)]
+pub enum CertsSource {
+    /// Use certs from Mozilla's certificate store.
+    #[default]
+    WebPki,
+    /// Use certs from the system certificate store.
+    Native,
+}
+
+impl CertsSource {
+    pub(crate) fn use_native(&self) -> bool {
+        matches!(self, CertsSource::Native)
+    }
+
+    pub(crate) fn use_webpki(&self) -> bool {
+        matches!(self, CertsSource::WebPki)
     }
 }
 
