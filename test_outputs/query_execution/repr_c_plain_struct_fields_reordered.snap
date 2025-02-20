@@ -100,5 +100,53 @@ expression: "&query_execution_results"
       "span_end_line": Uint64(52),
       "span_filename": String("src/lib.rs"),
     },
+    {
+      "field_name": String("b"),
+      "name": String("StructWithAddition"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("StructWithAddition"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(58),
+      "span_end_line": Uint64(58),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("a"),
+      "name": String("StructWithAddition"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("StructWithAddition"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(59),
+      "span_end_line": Uint64(59),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("b"),
+      "name": String("StructWithRemoval"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("StructWithRemoval"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(66),
+      "span_end_line": Uint64(66),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("c"),
+      "name": String("StructWithRemoval"),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("StructWithRemoval"),
+      ]),
+      "position": Int64(3),
+      "span_begin_line": Uint64(67),
+      "span_end_line": Uint64(67),
+      "span_filename": String("src/lib.rs"),
+    },
   ],
 }
