@@ -1293,6 +1293,7 @@ add_lints!(
     repr_c_removed,
     repr_packed_added,
     repr_packed_removed,
+    repr_c_plain_struct_fields_reordered,
     sized_impl_removed,
     static_became_unsafe,
     struct_field_marked_deprecated,
