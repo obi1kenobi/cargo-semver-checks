@@ -6,6 +6,7 @@ pub extern "Rust" fn rust_function_becomes_c() -> () {}
 
 pub fn implicit_rust_function_becomes_c() -> () {}
 
+#[allow(missing_abi)]
 pub extern fn implicit_c_function_becomes_rust() -> () {}
 
 pub extern "Rust" fn rust_function_remains_rust() -> () {}
