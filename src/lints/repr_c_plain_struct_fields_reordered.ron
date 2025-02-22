@@ -30,6 +30,7 @@ SemverQuery(
                         
                         field {
                             field_name: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
                             position @output @tag
                         }
                     }
@@ -58,7 +59,8 @@ SemverQuery(
 
                         field {
                             name @filter(op: "=", value: ["%field_name"])
-                            position @filter(op: "!=", value: ["%position"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            position @filter(op: "!=", value: ["%position"]) @output(name: "new_position")
 
                             span_: span @optional {
                                 filename @output
@@ -78,6 +80,6 @@ SemverQuery(
         "c": "C",
         "true": true,
     },
-    error_message: "A public repr(C) struct had its fields reordered. This changes the struct's memory layout, breaking FFI use cases that depend on field ordering.",
-    per_result_error_template: Some("{{name}}.{{field_name}} changed position in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A public repr(C) struct had its fields reordered. This can change the struct's memory layout, possibly breaking FFI use cases that depend on field position and order.",
+    per_result_error_template: Some("{{name}}.{{field_name}} moved from position {{position}} to {{new_position}}, in {{span_filename}}:{{span_begin_line}}"),
 )

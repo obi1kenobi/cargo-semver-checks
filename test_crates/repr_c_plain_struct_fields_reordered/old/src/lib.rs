@@ -30,7 +30,26 @@ pub struct DocHiddenStruct {
     pub c: u32,
 }
 
-// Public repr(C) struct with mixed visibility fields
+// Public repr(C) struct with doc(hidden) fields swapped positions - should not trigger
+#[repr(C)]
+pub struct PublicStructWithDocHiddenFieldsSwapped {
+    pub a: u8,
+    #[doc(hidden)]
+    pub b: u16,
+    #[doc(hidden)]
+    pub c: u32,
+    pub d: u64,
+}
+
+// Public repr(C) struct with private fields swapped positions - should not trigger
+#[repr(C)]
+pub struct PublicStructWithPrivateFieldsSwapped {
+    pub a: u8,
+    b: u16,
+    c: u32,
+    pub d: u64,
+}
+
 #[repr(C)]
 pub struct MixedVisibilityStruct {
     pub a: u8,
