@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/feature_flags_validation/": [
@@ -48,7 +49,7 @@ expression: "&query_execution_results"
         String("fn_removed"),
       ]),
       "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(7),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

@@ -47,7 +47,9 @@ pub fn aliased_as_doc_hidden() {}
 pub fn my_function() {}
 
 #[doc(hidden)] // should flag, this is the case of adding #[doc(hidden)] to a pub function with arguments and a return type.
-pub fn my_function_with_types(a: i32, b: i32) -> i32 {}
+pub fn my_function_with_types(a: i32, b: i32) -> i32 {
+    a + b
+}
 
 #[doc(hidden)]
 fn public_function_that_goes_private() {}
