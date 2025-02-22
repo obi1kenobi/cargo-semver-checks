@@ -204,7 +204,7 @@ jobs:
             -path 'test_crates/feature_flags_validation/*' -prune -o \
             -type f -name 'Cargo.toml' \
             -print0 | \
-          xargs -0 -n 1 --exec cargo check --manifest-path {}
+          xargs -0 -n 1 cargo check --manifest-path
 
   rust-tests:
     name: Run tests
