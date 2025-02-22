@@ -175,7 +175,7 @@ jobs:
         id: toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly  # Because we sometimes test unstable features.
           rustflags: ""
           cache: false
 
@@ -185,8 +185,16 @@ jobs:
 
       - name: '"cargo check" each test crate'
         env:
-          # Don't complain about dead code or unused items.
-          RUSTFLAGS: -A dead_code -A unused
+          # Don't complain about dead code, deprecated items, or unused items.
+          # Those are common in almost every test crate.
+          #
+          # Also don't complain about test crates that rely on:
+          # - non-pub trait bounds (`private_bounds`)
+          # - `repr(C, i16)` and similar code (`conflicting_repr_hints`)
+          #
+          # TODO: Clean up warnings around `non_snake_case` and `non_upper_case_globals`.
+          #       In the meantime, we suppress them as well since they clog the logs.
+          RUSTFLAGS: -A dead_code -A deprecated -A unused -A private_bounds -A conflicting_repr_hints -A non_snake_case -A non_upper_case_globals
         run: |
           find test_crates/ -name 'Cargo.toml' -print0 | xargs --null -n 1 cargo check --manifest-path
 
