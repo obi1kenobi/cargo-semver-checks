@@ -72,7 +72,7 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A function now requires a different number of generic type parameters than it used to. Uses of this function that supplied the previous number of generic types will be broken.",
+    error_message: "A function now requires a different number of generic type parameters than it used to. Uses of this function that supplied the previous number of generic types (e.g. via turbofish syntax) will be broken.",
     per_result_error_template: Some("function {{name}} ({{old_required_type_count}} -> {{new_required_type_count}} generic types) in {{span_filename}}:{{span_begin_line}}"),
     // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
     // for information about this field.
