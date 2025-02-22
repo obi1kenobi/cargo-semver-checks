@@ -20,7 +20,7 @@ pub struct MyIter;
 impl MyIter {
     // This method is getting removed.
     pub fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        <Self as Iterator>::next()
+        <Self as Iterator>::next(self)
     }
 }
 
@@ -39,7 +39,7 @@ pub struct SecretlyIter;
 impl SecretlyIter {
     // This method is getting removed.
     pub fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        <Self as Iterator>::next()
+        <Self as Iterator>::next(self)
     }
 }
 
