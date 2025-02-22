@@ -27,7 +27,9 @@ pub fn aliased_as_doc_hidden() {}
 
 pub fn my_function() {}
 
-pub fn my_function_with_types(a: i32, b: i32) -> i32 {}
+pub fn my_function_with_types(a: i32, b: i32) -> i32 {
+    a + b
+}
 
 fn public_function_that_goes_private() {}
 

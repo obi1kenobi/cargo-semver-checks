@@ -9,7 +9,7 @@ impl NormalEnum {
     }
 
     pub fn method_with_message_to_be_deprecated(&self) -> String {
-        format!("{:?}", self)
+        todo!()
     }
 
     #[deprecated]
@@ -68,7 +68,7 @@ impl EnumBecomesDeprecated {
     }
 
     pub fn another_normal_method(&self) -> String {
-        format!("{:?}", self)
+        todo!()
     }
 }
 

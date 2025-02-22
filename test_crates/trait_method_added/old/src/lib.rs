@@ -6,7 +6,7 @@ mod sealed {
 pub trait WillGainMethodWithoutDefault {}
 
 pub trait WillGainAnotherMethodWithoutDefault {
-    fn one_method(self);
+    fn one_method(&self);
 }
 
 pub trait WillGainMultipleMethodsWithoutDefault {}
@@ -19,7 +19,7 @@ pub trait WIllGainDocHiddenMethodWithoutDefault {}
 pub trait WillGainMethodWithDefault {}
 
 pub trait WillGainAnotherMethodWithDefault {
-    fn one_method(self);
+    fn one_method(&self);
 }
 
 pub trait WillGainMethodWithoutDefaultSealed: sealed::Sealed {}
@@ -27,5 +27,5 @@ pub trait WillGainMethodWithoutDefaultSealed: sealed::Sealed {}
 pub trait WillGainMethodWithoutDefaultAndLoseSeal: sealed::Sealed {}
 
 pub trait WillKeepAMethodWithoutDefault {
-    fn one_method(self);
+    fn one_method(&self);
 }
