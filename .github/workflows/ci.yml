@@ -188,7 +188,7 @@ jobs:
           # Don't complain about dead code or unused items.
           RUSTFLAGS: -A dead_code -A unused
         run: |
-          find test_crates/ -name 'Cargo.toml' | xargs -n 1 cargo check --manifest-path
+          find test_crates/ -name 'Cargo.toml' -print0 | xargs --null -n 1 cargo check --manifest-path
 
   rust-tests:
     name: Run tests
