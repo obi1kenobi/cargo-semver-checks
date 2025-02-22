@@ -195,8 +195,15 @@ jobs:
           # TODO: Clean up warnings around `non_snake_case` and `non_upper_case_globals`.
           #       In the meantime, we suppress them as well since they clog the logs.
           RUSTFLAGS: -A dead_code -A deprecated -A unused -A private_bounds -A conflicting_repr_hints -A non_snake_case -A non_upper_case_globals
+        # Exclude test crates that intentionally do not pass `cargo check`
+        # in order to serve their test purpose.
         run: |
-          find test_crates/ -name 'Cargo.toml' -print0 | xargs --null -n 1 cargo check --manifest-path
+          find test_crates/ \
+            -path 'test_crates/manifest_tests/workspace_baseline_compile_error/*' -prune -o \
+            -path 'test_crates/manifest_tests/workspace_baseline_conditional_compile_error/*' -prune -o \
+            -path 'test_crates/feature_flags_validation/*' -prune -o \
+            -type f -name 'Cargo.toml' -print | \
+          xargs -n 1 --exec cargo check --manifest-path {}
 
   rust-tests:
     name: Run tests
