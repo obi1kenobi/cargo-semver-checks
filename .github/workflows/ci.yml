@@ -28,6 +28,7 @@ jobs:
     needs:
       - lint
       - rust-tests
+      - cargo-check-test-crates
       - cross-version-caching
       - cross-feature-caching
       - run-on-rust-libp2p
@@ -161,6 +162,51 @@ jobs:
           RUSTDOCFLAGS: -D warnings
         run: cargo doc --manifest-path semver/Cargo.toml --workspace --no-deps --document-private-items
 
+  cargo-check-test-crates:
+    name: Ensure test crates pass "cargo check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install rust
+        id: toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly  # Because we sometimes test unstable features.
+          rustflags: ""
+          cache: false
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: 'semver'
+
+      - name: '"cargo check" each test crate'
+        env:
+          # Don't complain about dead code, deprecated items, or unused items.
+          # Those are common in almost every test crate.
+          #
+          # Also don't complain about test crates that rely on:
+          # - non-pub trait bounds (`private_bounds`)
+          # - `repr(C, i16)` and similar code (`conflicting_repr_hints`)
+          #
+          # TODO: Clean up warnings around `non_snake_case` and `non_upper_case_globals`.
+          #       In the meantime, we suppress them as well since they clog the logs.
+          RUSTFLAGS: -A dead_code -A deprecated -A unused -A private_bounds -A conflicting_repr_hints -A non_snake_case -A non_upper_case_globals
+        # Exclude test crates that intentionally do not pass `cargo check`
+        # in order to serve their test purpose.
+        run: |
+          find test_crates/ \
+            -path 'test_crates/manifest_tests/workspace_baseline_compile_error/*' -prune -o \
+            -path 'test_crates/manifest_tests/workspace_baseline_conditional_compile_error/*' -prune -o \
+            -path 'test_crates/feature_flags_validation/*' -prune -o \
+            -path 'test_crates/broken_rustdoc/*' -prune -o \
+            -type f -name 'Cargo.toml' \
+            -print0 | \
+          xargs -0 -n 1 cargo check --manifest-path
+
   rust-tests:
     name: Run tests
     runs-on: ubuntu-latest
@@ -205,7 +251,7 @@ jobs:
         run: |
           cd semver
           ./scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
-      
+
       - name: Fake rustdoc mtime on cache hit
         if: steps.cache-test-rustdocs.outputs.cache-hit == 'true'
         run: |
