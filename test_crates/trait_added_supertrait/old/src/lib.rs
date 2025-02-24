@@ -21,3 +21,8 @@ pub trait WillGainStdThree {
 }
 
 pub trait WillChangeStdToCore: std::fmt::Debug {}
+
+pub trait PublicAPISealed {
+    #[doc(hidden)]
+    type Hidden;
+}
