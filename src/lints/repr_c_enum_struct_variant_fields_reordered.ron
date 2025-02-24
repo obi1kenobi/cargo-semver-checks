@@ -1,0 +1,96 @@
+SemverQuery(
+    id: "repr_c_enum_struct_variant_fields_reordered",
+    human_readable_name: "struct variant fields reordered in repr(C) enum",
+    description: "A struct variant in a public repr(C) enum had its fields reordered, changing its memory layout.",
+    required_update: Major,
+    lint_level: Warn,
+    reference_link: Some("https://doc.rust-lang.org/reference/type-layout.html#reprc-enums-with-fields"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$c"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                        
+                        variant {
+                            ... on StructVariant {
+                                variant_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                
+                                field {
+                                    field_name: name @output @tag
+                                    public_api_eligible @filter(op: "=", value: ["$true"])
+                                    position @output @tag
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$c"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            ... on StructVariant {
+                                name @filter(op: "=", value: ["%variant_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                
+                                field {
+                                    name @filter(op: "=", value: ["%field_name"])
+                                    public_api_eligible @filter(op: "=", value: ["$true"])
+                                    position @filter(op: "!=", value: ["%position"]) @output(name: "new_position")
+
+                                    span_: span @optional {
+                                        filename @output
+                                        begin_line @output
+                                        end_line @output
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "repr": "repr",
+        "c": "C",
+        "true": true,
+    },
+    error_message: "A struct variant in a public repr(C) enum had its fields reordered. This can change the enum's memory layout, possibly breaking FFI use cases that depend on field position and order.",
+    per_result_error_template: Some("{{name}}::{{variant_name}}.{{field_name}} moved from position {{position}} to {{new_position}}, in {{span_filename}}:{{span_begin_line}}"),
+)
