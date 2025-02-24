@@ -21,3 +21,8 @@ pub trait WillGainStdThree: PartialEq {
 }
 
 pub trait WillChangeStdToCore: core::fmt::Debug {}
+
+pub trait PublicAPISealed: TraitOne {
+    #[doc(hidden)]
+    type Hidden;
+}
