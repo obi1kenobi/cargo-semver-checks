@@ -66,4 +66,6 @@ pub trait PublicAPISealed {
     type Hidden;
 
     const BAR: bool = true;
+
+    fn make_me_non_dyn_compatible() -> Self;
 }
