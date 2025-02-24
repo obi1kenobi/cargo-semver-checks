@@ -51,3 +51,10 @@ pub trait TypeDocHidden {
 
     fn make_me_non_dyn_compatible() -> Self;
 }
+
+pub trait PublicAPISealed {
+    #[doc(hidden)]
+    type Hidden;
+
+    fn make_me_non_dyn_compatible() -> Self;
+}
