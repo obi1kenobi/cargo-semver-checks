@@ -61,6 +61,7 @@ pub trait ConstDocHidden {
 
     fn make_me_non_dyn_compatible() -> Self;
 }
+
 pub trait PublicAPISealed {
     #[doc(hidden)]
     type Hidden;
