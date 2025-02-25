@@ -1,5 +1,6 @@
 pub trait PublicAPISealed {
-    /// Changing the bounds on a hidden type of a public API sealed trait is non breaking    #[doc(hidden)]
+    /// Changing the bounds on a hidden type of a public API sealed trait is non breaking
+    #[doc(hidden)]
     type Bounded: Send + Sync;
 
     /// Removing the default value for a hidden associated const of a public API sealed trait is not breaking
