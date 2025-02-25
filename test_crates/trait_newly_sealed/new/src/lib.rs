@@ -22,3 +22,11 @@ pub trait TraitBecomesPublicAndSealed: private::Sealed {}
 // and should be the only violation that's reported:
 // Thus being newly sealed is not the main problem
 trait TraitBecomesPrivateAndSealed: private::Sealed {}
+
+// This trait was public API sealed to begin with.
+// Here it becomes unconditionally sealed, which we shouldn't flag.
+// The only breakage is among uses that went beyond the public API.
+pub trait PublicAPISealed: private::Sealed {
+    #[doc(hidden)]
+    type Hidden;
+}

@@ -16,3 +16,11 @@ trait TraitBecomesPublicAndSealed {}
 // and should be the only violation that's reported:
 // Thus being newly sealed is not the main problem
 pub trait TraitBecomesPrivateAndSealed {}
+
+// This trait is public API sealed.
+// In the new code, it becomes unconditionally sealed, which we shouldn't flag.
+// The only breakage is among uses that went beyond the public API.
+pub trait PublicAPISealed {
+    #[doc(hidden)]
+    type Hidden;
+}

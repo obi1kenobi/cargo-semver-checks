@@ -12,7 +12,7 @@ SemverQuery(
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        unconditionally_sealed @filter(op: "!=", value: ["$true"])
+                        public_api_sealed @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @output @tag
@@ -25,7 +25,7 @@ SemverQuery(
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        unconditionally_sealed @filter(op: "=", value: ["$true"])
+                        public_api_sealed @filter(op: "=", value: ["$true"])
                         name @output
 
                         importable_path {
