@@ -25,3 +25,10 @@ pub trait UnchangedNoDefault {
 pub trait UnchangedNoDefaultSealed: sealed::Sealed {
     type Foo;
 }
+
+pub trait PublicAPISealed {
+    #[doc(hidden)]
+    type Hidden;
+
+    type Foo;
+}
