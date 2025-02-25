@@ -35,3 +35,12 @@ pub trait UnchangedNoDefaultSealed: sealed::Sealed {
 
     fn make_me_non_dyn_compatible() -> Self;
 }
+
+pub trait PublicAPISealed {
+    #[doc(hidden)]
+    type Hidden;
+
+    const ONE: bool = true;
+
+    fn make_me_non_dyn_compatible() -> Self;
+}
