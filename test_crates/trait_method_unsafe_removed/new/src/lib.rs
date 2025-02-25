@@ -72,3 +72,10 @@ mod private {
 trait Sealed {}
 
 pub trait Unsealed {}
+
+pub trait PublicAPISealed {
+    #[doc(hidden)]
+    type Hidden;
+
+    fn becomes_safe();
+}
