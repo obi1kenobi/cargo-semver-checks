@@ -1,0 +1,86 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/partial_ord_struct_fields_reordered/": [
+    {
+      "field_name": String("b"),
+      "name": String("PublicStruct"),
+      "new_position": Int64(1),
+      "path": List([
+        String("partial_ord_struct_fields_reordered"),
+        String("PublicStruct"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("c"),
+      "name": String("PublicStruct"),
+      "new_position": Int64(2),
+      "path": List([
+        String("partial_ord_struct_fields_reordered"),
+        String("PublicStruct"),
+      ]),
+      "position": Int64(3),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("a"),
+      "name": String("PublicStruct"),
+      "new_position": Int64(3),
+      "path": List([
+        String("partial_ord_struct_fields_reordered"),
+        String("PublicStruct"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("b"),
+      "name": String("MultipleDerivesWithPartialOrd"),
+      "new_position": Int64(1),
+      "path": List([
+        String("partial_ord_struct_fields_reordered"),
+        String("MultipleDerivesWithPartialOrd"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(74),
+      "span_end_line": Uint64(74),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("c"),
+      "name": String("MultipleDerivesWithPartialOrd"),
+      "new_position": Int64(2),
+      "path": List([
+        String("partial_ord_struct_fields_reordered"),
+        String("MultipleDerivesWithPartialOrd"),
+      ]),
+      "position": Int64(3),
+      "span_begin_line": Uint64(75),
+      "span_end_line": Uint64(75),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("a"),
+      "name": String("MultipleDerivesWithPartialOrd"),
+      "new_position": Int64(3),
+      "path": List([
+        String("partial_ord_struct_fields_reordered"),
+        String("MultipleDerivesWithPartialOrd"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(76),
+      "span_end_line": Uint64(76),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
