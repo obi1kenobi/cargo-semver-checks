@@ -38,3 +38,10 @@ pub trait TraitF {
 pub trait TraitG: private::Sealed {
     fn method_sealed_has_default_impl_removed(&self);
 }
+
+pub trait PublicAPISealed {
+    #[doc(hidden)]
+    type Hidden;
+
+    fn method_default_impl_removed(&self);
+}
