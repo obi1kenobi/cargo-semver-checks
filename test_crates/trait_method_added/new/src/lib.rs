@@ -47,3 +47,10 @@ pub trait WillGainMethodWithoutDefaultAndLoseSeal {
 pub trait WillKeepAMethodWithoutDefault {
     fn one_method(&self);
 }
+
+pub trait PublicAPISealed {
+    #[doc(hidden)]
+    type Hidden;
+
+    fn one_method(&self);
+}
