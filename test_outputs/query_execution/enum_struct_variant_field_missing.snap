@@ -17,4 +17,18 @@ expression: "&query_execution_results"
       "variant_name": String("FieldWillBeMissing"),
     },
   ],
+  "./test_crates/repr_c_enum_struct_variant_fields_reordered/": [
+    {
+      "enum_name": String("EnumWithRemoval"),
+      "field_name": String("a"),
+      "path": List([
+        String("repr_c_enum_struct_variant_fields_reordered"),
+        String("EnumWithRemoval"),
+      ]),
+      "span_begin_line": Uint64(66),
+      "span_end_line": Uint64(66),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+    },
+  ],
 }

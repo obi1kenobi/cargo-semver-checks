@@ -45,4 +45,18 @@ expression: "&query_execution_results"
       "variant_name": String("Foo"),
     },
   ],
+  "./test_crates/repr_c_enum_struct_variant_fields_reordered/": [
+    {
+      "enum_name": String("EnumWithAddition"),
+      "field_name": String("c"),
+      "path": List([
+        String("repr_c_enum_struct_variant_fields_reordered"),
+        String("EnumWithAddition"),
+      ]),
+      "span_begin_line": Uint64(63),
+      "span_end_line": Uint64(63),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+    },
+  ],
 }
