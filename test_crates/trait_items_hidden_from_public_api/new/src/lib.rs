@@ -1,16 +1,16 @@
 pub trait PublicAPISealed {
-    /// Changing the bounds on a hidden type of a public api sealed trait is non breaking    #[doc(hidden)]
+    /// Changing the bounds on a hidden type of a public API sealed trait is non breaking    #[doc(hidden)]
     type Bounded: Send + Sync;
 
-    /// Removing the default value for a hidden associated const of a public api sealed trait is not breaking
+    /// Removing the default value for a hidden associated const of a public API sealed trait is not breaking
     #[doc(hidden)]
     const DEFAULT_REMOVED: i64;
 
-    /// Changing a function signature without a default impl in a public api sealed trait is not breaking
+    /// Changing a function signature without a default impl in a public API sealed trait is not breaking
     #[doc(hidden)]
     fn changed_signature(x: i64, y: i64, z: i64) -> i64;
 
-    /// Removing a default impl for a function in a public api sealed trait is not breaking
+    /// Removing a default impl for a function in a public API sealed trait is not breaking
     #[doc(hidden)]
     fn default_impl_removed(x: i64, y: i64) -> i64;
 }
