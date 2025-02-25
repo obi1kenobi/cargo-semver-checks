@@ -19,3 +19,8 @@ mod private {
 
 // Sealed trait, becoming safe doesn't matter since it cannot be implemented downstream.
 pub unsafe trait SealedTrait: private::Sealed {}
+
+pub unsafe trait PublicAPISealed {
+    #[doc(hidden)]
+    type Hidden;
+}
