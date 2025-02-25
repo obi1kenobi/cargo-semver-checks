@@ -241,6 +241,7 @@ impl Scope {
 ///
 /// This is a broader definition than cargo's own "lib" definition, since we can also
 /// semver-check rlib, dylib, and staticlib targets as well.
+#[allow(clippy::unneeded_struct_pattern)]  // remain resilient to any future changes in variant kind
 fn is_lib_like_checkable_target(target: &cargo_metadata::Target) -> bool {
     target.is_lib()
         || target.kind.iter().any(|kind| {
