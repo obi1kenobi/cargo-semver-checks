@@ -13,7 +13,7 @@ SemverQuery(
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         unsafe @filter(op: "!=", value: ["$true"])
-                        unconditionally_sealed @filter(op: "!=", value: ["$true"])
+                        public_api_sealed @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @output @tag
