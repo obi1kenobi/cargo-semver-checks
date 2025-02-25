@@ -15,6 +15,17 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "name": String("WillGainADocHiddenConst"),
+      "path": List([
+        String("trait_associated_const_added"),
+        String("WillGainADocHiddenConst"),
+      ]),
+      "span_begin_line": Uint64(46),
+      "span_end_line": Uint64(51),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
   "./test_crates/trait_associated_type_added/": [
     {
@@ -28,6 +39,17 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "name": String("WillGainADocHiddenType"),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainADocHiddenType"),
+      ]),
+      "span_begin_line": Uint64(51),
+      "span_end_line": Uint64(56),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
   "./test_crates/trait_method_added/": [
     {
@@ -38,6 +60,17 @@ expression: "&query_execution_results"
       ]),
       "span_begin_line": Uint64(20),
       "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("WIllGainDocHiddenMethodWithoutDefault"),
+      "path": List([
+        String("trait_method_added"),
+        String("WIllGainDocHiddenMethodWithoutDefault"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(27),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -66,6 +99,19 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/trait_method_now_doc_hidden/": [
+    {
+      "name": String("PublicTrait"),
+      "path": List([
+        String("trait_method_now_doc_hidden"),
+        String("PublicTrait"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_newly_sealed/": [
     {
       "name": String("TraitBecomesSealed"),
@@ -86,6 +132,19 @@ expression: "&query_execution_results"
       ]),
       "span_begin_line": Uint64(13),
       "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_now_doc_hidden/": [
+    {
+      "name": String("PublicTraitHiddenVariant"),
+      "path": List([
+        String("trait_now_doc_hidden"),
+        String("PublicTraitHiddenVariant"),
+      ]),
+      "span_begin_line": Uint64(49),
+      "span_end_line": Uint64(55),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

@@ -16,3 +16,8 @@ trait TraitBecomesPublicAndSealed {}
 // and should be the only violation that's reported:
 // Thus being newly sealed is not the main problem
 pub trait TraitBecomesPrivateAndSealed {}
+
+pub trait PublicAPISealed {
+    #[doc(hidden)]
+    type Hidden;
+}
