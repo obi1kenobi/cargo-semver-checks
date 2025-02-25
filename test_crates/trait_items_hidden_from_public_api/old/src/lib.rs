@@ -19,7 +19,7 @@ pub trait PublicAPISealed {
     #[doc(hidden)]
     const DEFAULT_REMOVED: i64 = 5;
 
-    /// Removing an associated function without a default impl in a public api sealed trait is not breaking    #[doc(hidden)]
+    /// Removing an associated function without a default impl in a public api sealed trait is not breaking
     #[doc(hidden)]
     fn implement_me();
 
