@@ -75,3 +75,53 @@ pub struct MultipleDerivesWithPartialOrd {
     pub b: u16,
     pub c: u32,
 }
+
+// Struct that no longer derives PartialOrd but has reordered fields - should not trigger
+#[derive(PartialOrd, PartialEq)]
+pub struct NoLongerPartialOrd {
+    pub a: u8,
+    pub b: u16,
+    pub c: u32,
+}
+
+// Struct that newly derives PartialOrd and has reordered fields - should not trigger
+pub struct NewlyPartialOrd {
+    pub a: u8,
+    pub b: u16,
+    pub c: u32,
+}
+
+// Struct that switches from derived to hand-implemented PartialOrd - should not trigger
+#[derive(PartialOrd, PartialEq)]
+pub struct SwitchToHandImpl {
+    pub a: u8,
+    pub b: u16,
+    pub c: u32,
+}
+
+// Struct that switches from hand-implemented to derived PartialOrd - should not trigger
+pub struct SwitchToDerived {
+    pub a: u8,
+    pub b: u16,
+    pub c: u32,
+}
+
+impl PartialEq for SwitchToDerived {
+    fn eq(&self, other: &Self) -> bool {
+        self.a == other.a && self.b == other.b && self.c == other.c
+    }
+}
+
+impl PartialOrd for SwitchToDerived {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self.a.partial_cmp(&other.a) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.b.partial_cmp(&other.b) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        self.c.partial_cmp(&other.c)
+    }
+}

@@ -86,6 +86,6 @@ SemverQuery(
         "true": true,
         "partial_ord": ["core", "cmp", "PartialOrd"],
     },
-    error_message: "A public struct that derives PartialOrd had its fields reordered. This changes the struct's ordering behavior, which may break downstream code that relies on the previous ordering.",
+    error_message: "A public struct that derives PartialOrd had its fields reordered. #[derive(PartialOrd)] uses the field order to set the struct's ordering behavior, so this change may break downstream code that relies on the previous order.",
     per_result_error_template: Some("{{name}}.{{field_name}} moved from position {{position}} to {{new_position}}, in {{span_filename}}:{{span_begin_line}}"),
 )
