@@ -1,0 +1,69 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_associated_type_marked_deprecated/": [
+    {
+      "name": String("PublicTraitWithHiddenType"),
+      "path": List([
+        String("trait_associated_type_marked_deprecated"),
+        String("PublicTraitWithHiddenType"),
+      ]),
+      "span_begin_line": Uint64(40),
+      "span_end_line": Uint64(44),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_added/": [
+    {
+      "name": String("WillGainMethodWithoutDefaultAndLoseSeal"),
+      "path": List([
+        String("trait_method_added"),
+        String("WillGainMethodWithoutDefaultAndLoseSeal"),
+      ]),
+      "span_begin_line": Uint64(43),
+      "span_end_line": Uint64(45),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_marked_deprecated/": [
+    {
+      "name": String("PublicTraitWithHiddenMethod"),
+      "path": List([
+        String("trait_method_marked_deprecated"),
+        String("PublicTraitWithHiddenMethod"),
+      ]),
+      "span_begin_line": Uint64(47),
+      "span_end_line": Uint64(51),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_sealed_becomes_unsealed/": [
+    {
+      "name": String("PublicAPIToBeUnsealed"),
+      "path": List([
+        String("trait_sealed_becomes_unsealed"),
+        String("PublicAPIToBeUnsealed"),
+      ]),
+      "span_begin_line": Uint64(2),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("HiddenSealedInherited"),
+      "path": List([
+        String("trait_sealed_becomes_unsealed"),
+        String("HiddenSealedInherited"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

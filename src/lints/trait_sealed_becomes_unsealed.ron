@@ -1,0 +1,54 @@
+SemverQuery(
+    id: "trait_sealed_becomes_unsealed",
+    human_readable_name: "trait sealed becomes unsealed",
+    description: "A public sealed trait is unsealed, so users of this trait can implement it from now",
+    required_update: Minor,
+    lint_level: Deny,
+    reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),  // TODO
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        public_api_sealed @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        public_api_sealed @filter(op: "!=", value: ["$true"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }
+  "#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A publicly-visible sealed trait became unsealed, so now downstream crates are able to implement it",
+    per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
