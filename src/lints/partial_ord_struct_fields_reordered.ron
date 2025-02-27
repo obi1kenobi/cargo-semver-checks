@@ -1,0 +1,91 @@
+SemverQuery(
+    id: "partial_ord_struct_fields_reordered",
+    human_readable_name: "struct fields reordered in #[derive(PartialOrd)] struct",
+    description: "A public struct that derives PartialOrd had its fields reordered, which can change its ordering behavior.",
+    required_update: Major,
+    lint_level: Warn,
+    reference_link: Some("https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html#derivable"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        impl {
+                            negative @filter(op: "=", value: ["$false"])
+                            attrs @filter(op: "contains", value: ["$derived"])
+
+                            implemented_trait {
+                                trait {
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["$partial_ord"])
+                                    }
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                        
+                        field {
+                            field_name: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            position @output @tag
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        impl {
+                            negative @filter(op: "=", value: ["$false"])
+                            attrs @filter(op: "contains", value: ["$derived"])
+
+                            implemented_trait {
+                                trait {
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["$partial_ord"])
+                                    }
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        field {
+                            name @filter(op: "=", value: ["%field_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            position @filter(op: "!=", value: ["%position"]) @output(name: "new_position")
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "derived": "#[automatically_derived]",
+        "false": false,
+        "true": true,
+        "partial_ord": ["core", "cmp", "PartialOrd"],
+    },
+    error_message: "A public struct that derives PartialOrd had its fields reordered. #[derive(PartialOrd)] uses the field order to set the struct's ordering behavior, so this change may break downstream code that relies on the previous order.",
+    per_result_error_template: Some("{{name}}.{{field_name}} moved from position {{position}} to {{new_position}}, in {{span_filename}}:{{span_begin_line}}"),
+)
