@@ -1,0 +1,53 @@
+SemverQuery(
+    id: "unconditionally_sealed_trait_became_unsealed",
+    human_readable_name: "Unconditionally sealed trait became unsealed",
+    description: "A trait that was previously unconditionally sealed is now unsealed, allowing downstream crates to implement it. This change introduces potential long-term stability risks, as reverting it in the future would be a breaking change",
+    required_update: Minor,
+    lint_level: Warn,
+    reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        unconditionally_sealed @filter(op: "=", value: ["$true"])
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        unconditionally_sealed @filter(op: "!=", value: ["$true"])
+                        public_api_sealed @filter(op: "!=", value: ["$true"])
+                        name @output
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "An unconditionally sealed trait is now unsealed, allowing downstream crates to implement it. 
+                    This change introduces potential stability risks because if it needs to be re-sealed in the future, 
+                    it would be a breaking change.",
+    per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
