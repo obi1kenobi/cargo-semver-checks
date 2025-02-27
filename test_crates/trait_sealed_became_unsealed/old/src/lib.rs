@@ -1,42 +1,36 @@
-// This trait is public API sealed.
+#[doc(hidden)]
+pub mod public_api_hidden_module_tobe_exposed {
+    pub trait Sealed {}
+    pub struct Token;
+}
+
+#[doc(hidden)]
+pub mod public_api_hidden_module_to_be_unconditionally_hidden {
+    pub trait Sealed {}
+    pub struct Token;
+}
+
+// Traits transitioning from Public API Sealed → Unsealed (Lint should detect these)
 pub trait PublicAPIToBeUnsealed {
     #[doc(hidden)]
     type Hidden;
 }
-
-#[doc(hidden)]
-pub mod hidden_module {
-    /// This trait is public-API-sealed because implementing it
-    /// requires going outside the public API.
-    pub trait HiddenSealed {}
-
-    pub struct Token;
+pub trait TraitExtendsPublicAPIHiddenTrait: public_api_hidden_module_tobe_exposed::Sealed {}
+pub trait MethodReturnPublicAPIHiddenToken {
+    fn method(&self) -> public_api_hidden_module_tobe_exposed::Token;
+}
+pub trait MethodTakingPublicAPIHiddenToken {
+    fn method(&self, token: public_api_hidden_module_tobe_exposed::Token);
 }
 
-/// This trait is public-API-sealed since implementing it requires naming
-/// its non-public-API supertrait.
-pub trait HiddenSealedInherited: hidden_module::HiddenSealed {}
-
-/// This trait is public-API-sealed because its method's return type is doc-hidden,
-/// so external implementers would have to name a non-public-API type to write the impl.
-pub trait MethodReturnHiddenSealed {
-    fn method(&self) -> hidden_module::Token;
-}
-
-/// This trait is public-API-sealed transitively because of its supertrait.
-pub trait TransitivelyHiddenSealed: HiddenSealedInherited {}
-
-/// This trait is public-API-sealed, since `Self: hidden_module::HiddenSealed`
-/// still requires that `Self` implement a public-API-sealed trait,
-/// even though the public-API-sealed trait isn't *exactly* a supertrait.
-pub trait HiddenSealedWithWhereSelfBound
-where
-    Self: hidden_module::HiddenSealed,
+// Traits transitioning from Public API Sealed → Unconditionally Sealed (Lint should ignore these)
+pub trait TraitExtendsUnconditionallyHiddenTrait:
+    public_api_hidden_module_to_be_unconditionally_hidden::Sealed
 {
 }
-
-/// This trait is public-API-sealed because its method's argument type is doc-hidden,
-/// so external implementers would have to name a non-public-API type to write the impl.
-pub trait MethodHiddenSealed {
-    fn method(&self, token: hidden_module::Token);
+pub trait MethodReturningUnconditionallyHiddenToken {
+    fn method(&self) -> public_api_hidden_module_to_be_unconditionally_hidden::Token;
+}
+pub trait MethodTakingUnconditionallyHiddenToken {
+    fn method(&self, token: public_api_hidden_module_to_be_unconditionally_hidden::Token);
 }
