@@ -65,5 +65,49 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "name": String("MethodReturnHiddenSealed"),
+      "path": List([
+        String("trait_sealed_becomes_unsealed"),
+        String("MethodReturnHiddenSealed"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("TransitivelyHiddenSealed"),
+      "path": List([
+        String("trait_sealed_becomes_unsealed"),
+        String("TransitivelyHiddenSealed"),
+      ]),
+      "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(25),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("HiddenSealedWithWhereSelfBound"),
+      "path": List([
+        String("trait_sealed_becomes_unsealed"),
+        String("HiddenSealedWithWhereSelfBound"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_end_line": Uint64(34),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MethodHiddenSealed"),
+      "path": List([
+        String("trait_sealed_becomes_unsealed"),
+        String("MethodHiddenSealed"),
+      ]),
+      "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(40),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
 }

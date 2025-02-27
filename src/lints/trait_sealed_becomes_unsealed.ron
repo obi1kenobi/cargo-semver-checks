@@ -3,7 +3,7 @@ SemverQuery(
     human_readable_name: "trait sealed becomes unsealed",
     description: "A public sealed trait is unsealed, so users of this trait can implement it from now",
     required_update: Minor,
-    lint_level: Deny,
+    lint_level: Warn,
     reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),  // TODO
     query: r#"
     {
