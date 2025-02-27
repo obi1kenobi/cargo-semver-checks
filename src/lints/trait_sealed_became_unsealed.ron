@@ -1,6 +1,6 @@
 SemverQuery(
-    id: "trait_sealed_becomes_unsealed",
-    human_readable_name: "trait sealed becomes unsealed",
+    id: "trait_sealed_became_unsealed",
+    human_readable_name: "trait sealed became unsealed",
     description: "A public sealed trait is unsealed, so users of this trait can implement it from now",
     required_update: Minor,
     lint_level: Warn,

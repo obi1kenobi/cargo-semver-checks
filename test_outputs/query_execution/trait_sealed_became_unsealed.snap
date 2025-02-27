@@ -42,11 +42,11 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/trait_sealed_becomes_unsealed/": [
+  "./test_crates/trait_sealed_became_unsealed/": [
     {
       "name": String("PublicAPIToBeUnsealed"),
       "path": List([
-        String("trait_sealed_becomes_unsealed"),
+        String("trait_sealed_became_unsealed"),
         String("PublicAPIToBeUnsealed"),
       ]),
       "span_begin_line": Uint64(2),
@@ -57,7 +57,7 @@ expression: "&query_execution_results"
     {
       "name": String("HiddenSealedInherited"),
       "path": List([
-        String("trait_sealed_becomes_unsealed"),
+        String("trait_sealed_became_unsealed"),
         String("HiddenSealedInherited"),
       ]),
       "span_begin_line": Uint64(16),
@@ -68,7 +68,7 @@ expression: "&query_execution_results"
     {
       "name": String("MethodReturnHiddenSealed"),
       "path": List([
-        String("trait_sealed_becomes_unsealed"),
+        String("trait_sealed_became_unsealed"),
         String("MethodReturnHiddenSealed"),
       ]),
       "span_begin_line": Uint64(20),
@@ -79,7 +79,7 @@ expression: "&query_execution_results"
     {
       "name": String("TransitivelyHiddenSealed"),
       "path": List([
-        String("trait_sealed_becomes_unsealed"),
+        String("trait_sealed_became_unsealed"),
         String("TransitivelyHiddenSealed"),
       ]),
       "span_begin_line": Uint64(25),
@@ -90,7 +90,7 @@ expression: "&query_execution_results"
     {
       "name": String("HiddenSealedWithWhereSelfBound"),
       "path": List([
-        String("trait_sealed_becomes_unsealed"),
+        String("trait_sealed_became_unsealed"),
         String("HiddenSealedWithWhereSelfBound"),
       ]),
       "span_begin_line": Uint64(30),
@@ -101,7 +101,7 @@ expression: "&query_execution_results"
     {
       "name": String("MethodHiddenSealed"),
       "path": List([
-        String("trait_sealed_becomes_unsealed"),
+        String("trait_sealed_became_unsealed"),
         String("MethodHiddenSealed"),
       ]),
       "span_begin_line": Uint64(38),
