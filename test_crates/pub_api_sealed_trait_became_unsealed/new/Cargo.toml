@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "trait_sealed_became_unsealed"
+name = "pub_api_sealed_trait_became_unsealed"
 version = "0.1.0"
 edition = "2021"
 

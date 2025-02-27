@@ -1,7 +1,9 @@
 SemverQuery(
-    id: "trait_sealed_became_unsealed",
-    human_readable_name: "trait sealed became unsealed",
-    description: "A public sealed trait is unsealed, so users of this trait can implement it from now",
+    id: "pub_api_sealed_trait_became_unsealed",
+    human_readable_name: "Sealed trait in the public API became unsealed",
+    description: "A trait in the public API that was previously sealed is now unsealed, allowing downstream crates to implement it. 
+    This could be risky: if this change needs to be reverted, it would be a breaking change, as downstream crates may already depend on their implementations of this trait. 
+    Review this change carefully to avoid unintentionally breaking compatibility in the future",
     required_update: Minor,
     lint_level: Warn,
     reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),  // TODO
@@ -42,13 +44,14 @@ SemverQuery(
                 }
             }
         }
-    }
-  "#,
+    }"#,
     arguments: {
         "public": "public",
         "true": true,
     },
-    error_message: "A publicly-visible sealed trait became unsealed, so now downstream crates are able to implement it",
+    error_message: "A sealed trait in the public api has become unsealed, allowing external crates to implement it. 
+    If you later need to re-seal this trait, it will be a breaking change. 
+    Consider whether this change is intentional and whether it aligns with your stability guarantees",
     per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
