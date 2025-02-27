@@ -1,0 +1,81 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_added/": [
+    {
+      "name": String("WillGainMethodWithoutDefaultAndLoseSeal"),
+      "path": List([
+        String("trait_method_added"),
+        String("WillGainMethodWithoutDefaultAndLoseSeal"),
+      ]),
+      "span_begin_line": Uint64(43),
+      "span_end_line": Uint64(45),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/unconditionally_sealed_trait_became_unsealed/": [
+    {
+      "name": String("ExtendsTraitInHiddenModule"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_unsealed"),
+        String("unconditionally_sealed_to_unsealed"),
+        String("ExtendsTraitInHiddenModule"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("TransitivelyTraitSealed"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_unsealed"),
+        String("unconditionally_sealed_to_unsealed"),
+        String("TransitivelyTraitSealed"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("ReturnsTraitInHiddenModule"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_unsealed"),
+        String("unconditionally_sealed_to_unsealed"),
+        String("ReturnsTraitInHiddenModule"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("AcceptsTraitInHiddenModule"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_unsealed"),
+        String("unconditionally_sealed_to_unsealed"),
+        String("AcceptsTraitInHiddenModule"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("SealedWithWhereSelfBound"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_unsealed"),
+        String("unconditionally_sealed_to_unsealed"),
+        String("SealedWithWhereSelfBound"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
