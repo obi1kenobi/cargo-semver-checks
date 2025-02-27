@@ -6,7 +6,7 @@ SemverQuery(
     Review this change carefully to avoid unintentionally breaking compatibility in the future",
     required_update: Minor,
     lint_level: Warn,
-    reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),  // TODO
+    reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),
     query: r#"
     {
         CrateDiff {
