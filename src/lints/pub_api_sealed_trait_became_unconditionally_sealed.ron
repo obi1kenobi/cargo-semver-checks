@@ -1,0 +1,55 @@
+SemverQuery(
+    id: "pub_api_sealed_trait_became_unconditionally_sealed",
+    human_readable_name: "Public API sealed trait became unconditionally sealed",
+    description: "A trait that was previously only sealed to public API consumers is now unconditionally sealed. 
+                  This change prevents all external implementations, including from related first-party crates 
+                  that might have relied on private API access",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        public_api_sealed @filter(op: "=", value: ["$true"])
+                        unconditionally_sealed @filter(op: "!=", value: ["$true"])
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        unconditionally_sealed @filter(op: "=", value: ["$true"])
+                        name @output
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A public API sealed trait is now unconditionally sealed, preventing all external implementations. 
+                    This change impacts related first-party crates (e.g., derive macros or other internal tooling) 
+                    that previously could implement the trait using non-public API",
+    per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

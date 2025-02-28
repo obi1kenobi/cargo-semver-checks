@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "pub_api_sealed_trait_became_unconditionally_sealed"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
