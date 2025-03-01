@@ -1343,6 +1343,7 @@ add_lints!(
     trait_removed_supertrait,
     trait_requires_more_const_generic_params,
     trait_requires_more_generic_type_params,
+    pub_api_sealed_trait_became_unsealed,
     trait_unsafe_added,
     trait_unsafe_removed,
     tuple_struct_to_plain_struct,
