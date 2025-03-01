@@ -1,0 +1,106 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/partial_ord_enum_struct_variant_fields_reordered/": [
+    {
+      "field_name": String("a"),
+      "name": String("PublicEnum"),
+      "new_position": Int64(3),
+      "path": List([
+        String("partial_ord_enum_struct_variant_fields_reordered"),
+        String("PublicEnum"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+    },
+    {
+      "field_name": String("b"),
+      "name": String("PublicEnum"),
+      "new_position": Int64(1),
+      "path": List([
+        String("partial_ord_enum_struct_variant_fields_reordered"),
+        String("PublicEnum"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+    },
+    {
+      "field_name": String("c"),
+      "name": String("PublicEnum"),
+      "new_position": Int64(2),
+      "path": List([
+        String("partial_ord_enum_struct_variant_fields_reordered"),
+        String("PublicEnum"),
+      ]),
+      "position": Int64(3),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+    },
+    {
+      "field_name": String("a"),
+      "name": String("MultipleVariants"),
+      "new_position": Int64(2),
+      "path": List([
+        String("partial_ord_enum_struct_variant_fields_reordered"),
+        String("MultipleVariants"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(65),
+      "span_end_line": Uint64(65),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("First"),
+    },
+    {
+      "field_name": String("b"),
+      "name": String("MultipleVariants"),
+      "new_position": Int64(1),
+      "path": List([
+        String("partial_ord_enum_struct_variant_fields_reordered"),
+        String("MultipleVariants"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(65),
+      "span_end_line": Uint64(65),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("First"),
+    },
+    {
+      "field_name": String("x"),
+      "name": String("MultipleVariants"),
+      "new_position": Int64(2),
+      "path": List([
+        String("partial_ord_enum_struct_variant_fields_reordered"),
+        String("MultipleVariants"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(66),
+      "span_end_line": Uint64(66),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Second"),
+    },
+    {
+      "field_name": String("y"),
+      "name": String("MultipleVariants"),
+      "new_position": Int64(1),
+      "path": List([
+        String("partial_ord_enum_struct_variant_fields_reordered"),
+        String("MultipleVariants"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(66),
+      "span_end_line": Uint64(66),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Second"),
+    },
+  ],
+}

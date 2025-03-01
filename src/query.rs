@@ -1282,6 +1282,7 @@ add_lints!(
     method_requires_different_generic_type_params,
     module_missing,
     non_exhaustive_struct_changed_type,
+    partial_ord_enum_struct_variant_fields_reordered,
     partial_ord_enum_variants_reordered,
     partial_ord_struct_fields_reordered,
     proc_macro_marked_deprecated,
