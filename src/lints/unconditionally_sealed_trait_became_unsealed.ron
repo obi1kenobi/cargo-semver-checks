@@ -1,7 +1,7 @@
 SemverQuery(
     id: "unconditionally_sealed_trait_became_unsealed",
     human_readable_name: "Unconditionally sealed trait became unsealed",
-    description: "An unconditionally sealed trait is now unsealed, allowing downstream crates to implement it and reverting this in the future would be a breaking change.",
+    description: "An unconditionally sealed trait is now unsealed, allowing downstream crates to implement it. Reverting this in the future would be a breaking change.",
     required_update: Minor,
     lint_level: Warn,
     reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),
@@ -48,7 +48,7 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "An unconditionally sealed trait is now unsealed, allowing downstream crates to implement it and resealing it later would be a breaking change.",
+    error_message: "An unconditionally sealed trait is now unsealed, allowing downstream crates to implement it. Resealing it later would be a breaking change.",
     per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
