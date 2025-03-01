@@ -1355,6 +1355,7 @@ add_lints!(
     type_mismatched_generic_lifetimes,
     type_requires_more_const_generic_params,
     type_requires_more_generic_type_params,
+    unconditionally_sealed_trait_became_unsealed,
     union_field_added_with_all_pub_fields,
     union_field_added_with_non_pub_fields,
     union_field_missing,
