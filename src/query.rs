@@ -1287,6 +1287,7 @@ add_lints!(
     partial_ord_struct_fields_reordered,
     proc_macro_marked_deprecated,
     proc_macro_now_doc_hidden,
+    pub_api_sealed_trait_became_unconditionally_sealed,
     pub_module_level_const_missing,
     pub_module_level_const_now_doc_hidden,
     pub_static_missing,
