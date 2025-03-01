@@ -1,7 +1,7 @@
 SemverQuery(
     id: "pub_api_sealed_trait_became_unconditionally_sealed",
     human_readable_name: "public API sealed trait became unconditionally sealed",
-    description: "A public API sealed trait has become unconditionally sealed, blocking external implementations, including those from first-party crates relying on non-public API access.",
+    description: "A public API sealed trait has become unconditionally sealed, blocking external implementations, including those from first-party crates that rely on the non-public API.",
     required_update: Minor,
     lint_level: Warn,
     reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),
@@ -48,7 +48,7 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A public API sealed trait has became unconditionally sealed, blocking external implementations, including those from first-party crates relying on non-public API.",
+    error_message: "A public API sealed trait has became unconditionally sealed, blocking external implementations, including those from first-party crates that rely on the non-public API.",
     per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
