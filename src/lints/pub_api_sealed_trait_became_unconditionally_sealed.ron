@@ -1,6 +1,6 @@
 SemverQuery(
     id: "pub_api_sealed_trait_became_unconditionally_sealed",
-    human_readable_name: "Public API sealed trait became unconditionally sealed",
+    human_readable_name: "public API sealed trait became unconditionally sealed",
     description: "A public API sealed trait has become unconditionally sealed, blocking external implementations, including those from first-party crates relying on non-public API access.",
     required_update: Minor,
     lint_level: Warn,
