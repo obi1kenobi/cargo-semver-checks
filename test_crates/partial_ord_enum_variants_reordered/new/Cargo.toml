@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "partial_ord_enum_variants_reordered"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
