@@ -1,6 +1,6 @@
 SemverQuery(
     id: "pub_api_sealed_trait_became_unsealed",
-    human_readable_name: "Public API sealed trait became unsealed",
+    human_readable_name: "public API sealed trait became unsealed",
     description: "A public API sealed trait has become unsealed, allowing downstream crates to implement it. Reverting this would be a major breaking change.",
     required_update: Minor,
     lint_level: Warn,
