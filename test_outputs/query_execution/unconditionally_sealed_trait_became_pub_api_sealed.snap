@@ -1,0 +1,82 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/unconditionally_sealed_trait_became_pub_api_sealed/": [
+    {
+      "name": String("ExtendsTraitInHiddenModule"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_pub_api_sealed"),
+        String("unconditionally_sealed_to_public_api_sealed"),
+        String("ExtendsTraitInHiddenModule"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("ReturnsTraitInHiddenModule"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_pub_api_sealed"),
+        String("unconditionally_sealed_to_public_api_sealed"),
+        String("ReturnsTraitInHiddenModule"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("AcceptsTraitInHiddenModule"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_pub_api_sealed"),
+        String("unconditionally_sealed_to_public_api_sealed"),
+        String("AcceptsTraitInHiddenModule"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("SealedWithWhereSelfBound"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_pub_api_sealed"),
+        String("unconditionally_sealed_to_public_api_sealed"),
+        String("SealedWithWhereSelfBound"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/unconditionally_sealed_trait_became_unsealed/": [
+    {
+      "name": String("ExtendsTraitInHiddenModule"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_unsealed"),
+        String("unconditionally_sealed_to_public_api_sealed"),
+        String("ExtendsTraitInHiddenModule"),
+      ]),
+      "span_begin_line": Uint64(35),
+      "span_end_line": Uint64(35),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("ReturnsTraitInHiddenModule"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_unsealed"),
+        String("unconditionally_sealed_to_public_api_sealed"),
+        String("ReturnsTraitInHiddenModule"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(39),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
