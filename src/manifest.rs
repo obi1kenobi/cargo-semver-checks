@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use anyhow::Context;
 use serde::Deserialize;
 
-use crate::{LintLevel, OverrideMap, QueryOverride, RequiredSemverUpdate};
+use crate::{query::LintMode, LintLevel, OverrideMap, QueryOverride, RequiredSemverUpdate};
 
 #[derive(Debug, Clone)]
 pub(crate) struct Manifest {
@@ -116,17 +116,20 @@ impl LintTable {
                     QueryOverride {
                         lint_level: Some(lint_level),
                         required_update: None,
+                        lint_mode: None,
                     },
                 ),
                 OverrideConfig::Both {
                     level,
                     required_update,
+                    lint_mode,
                     priority,
                 } => (
                     priority,
                     QueryOverride {
                         lint_level: Some(level),
                         required_update: Some(required_update),
+                        lint_mode,
                     },
                 ),
                 OverrideConfig::LintLevel { level, priority } => (
@@ -134,6 +137,7 @@ impl LintTable {
                     QueryOverride {
                         lint_level: Some(level),
                         required_update: None,
+                        lint_mode: None,
                     },
                 ),
                 OverrideConfig::RequiredUpdate {
@@ -144,6 +148,15 @@ impl LintTable {
                     QueryOverride {
                         lint_level: None,
                         required_update: Some(required_update),
+                        lint_mode: None,
+                    },
+                ),
+                OverrideConfig::LintMode { mode, priority } => (
+                    priority,
+                    QueryOverride {
+                        lint_level: None,
+                        required_update: None,
+                        lint_mode: Some(mode),
                     },
                 ),
             };
@@ -165,12 +178,14 @@ impl LintTable {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(untagged)]
 pub(crate) enum OverrideConfig {
-    /// Specify both lint level and required update by name, e.g.
+    /// Specify both lint level and required update by name, with optional lint mode.
     /// `lint_name = { level = "deny", required-update = "major" }
+    /// `lint_name = { level = "deny", required-update = "major", mode = "always-run" }
     #[serde(rename_all = "kebab-case")]
     Both {
         level: LintLevel,
         required_update: RequiredSemverUpdate,
+        lint_mode: Option<LintMode>,
         /// The priority for this configuration.  If there are multiple entries that
         /// configure a lint (e.g., a lint group containing a lint and the lint itself),
         /// the configuration entry with the **lowest** priority takes precedence.
@@ -191,6 +206,14 @@ pub(crate) enum OverrideConfig {
     #[serde(rename_all = "kebab-case")]
     RequiredUpdate {
         required_update: RequiredSemverUpdate,
+        #[serde(default)]
+        priority: i64,
+    },
+    /// Specify just lint mode by name, with optional priority.
+    /// `lint_name = { mode = "always-run" }`
+    #[serde(rename_all = "kebab-case")]
+    LintMode {
+        mode: LintMode,
         #[serde(default)]
         priority: i64,
     },
@@ -301,6 +324,7 @@ mod tests {
                     QueryOverride {
                         lint_level: Some(Deny),
                         required_update: None,
+                        lint_mode: None,
                     }
                 ),]),
                 OverrideMap::from_iter([(
@@ -308,6 +332,7 @@ mod tests {
                     QueryOverride {
                         lint_level: Some(Allow),
                         required_update: None,
+                        lint_mode: None,
                     }
                 ),]),
             ]
@@ -321,6 +346,7 @@ mod tests {
                     QueryOverride {
                         lint_level: Some(Warn),
                         required_update: None,
+                        lint_mode: None,
                     }
                 )]),
                 OverrideMap::from_iter([
@@ -328,7 +354,8 @@ mod tests {
                         "two".into(),
                         QueryOverride {
                             lint_level: Some(Deny),
-                            required_update: None
+                            required_update: None,
+                            lint_mode: None,
                         }
                     ),
                     (
@@ -336,6 +363,7 @@ mod tests {
                         QueryOverride {
                             lint_level: None,
                             required_update: Some(Major),
+                            lint_mode: None,
                         }
                     ),
                 ]),
@@ -344,6 +372,7 @@ mod tests {
                     QueryOverride {
                         lint_level: Some(Allow),
                         required_update: Some(Minor),
+                        lint_mode: None,
                     }
                 )])
             ]

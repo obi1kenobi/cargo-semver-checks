@@ -10,6 +10,7 @@ use rayon::prelude::*;
 use trustfall::{FieldValue, TransparentValue};
 
 use crate::data_generation::DataStorage;
+use crate::query::LintMode;
 use crate::{
     query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType, WitnessGeneration,
@@ -215,8 +216,9 @@ pub(super) fn run_check_release(
 
     let (queries_to_run, queries_to_skip): (Vec<_>, _) =
         SemverQuery::all_queries().into_values().partition(|query| {
-            !version_change.supports_requirement(overrides.effective_required_update(query))
-                && overrides.effective_lint_level(query) > LintLevel::Allow
+            overrides.effective_lint_mode(query) == LintMode::AlwaysRun
+                || !version_change.supports_requirement(overrides.effective_required_update(query))
+                    && overrides.effective_lint_level(query) > LintLevel::Allow
         });
     let skipped_queries = queries_to_skip.len();
 
@@ -272,6 +274,9 @@ pub(super) fn run_check_release(
 
     let mut results_with_errors = vec![];
     let mut results_with_warnings = vec![];
+    let mut results_with_always_run_errors = vec![];
+    let mut results_with_always_run_warnings = vec![];
+
     for (semver_query, time_to_decide, results) in all_results {
         config
             .log_verbose(|config| {
@@ -309,20 +314,42 @@ pub(super) fn run_check_release(
             .expect("print failed");
 
         if !results.is_empty() {
-            match overrides.effective_lint_level(semver_query) {
-                LintLevel::Deny => results_with_errors.push((semver_query, results)),
-                LintLevel::Warn => results_with_warnings.push((semver_query, results)),
-                LintLevel::Allow => unreachable!(
+            let lint_level = overrides.effective_lint_level(semver_query);
+            let lint_mode = overrides.effective_lint_mode(semver_query);
+
+            match (lint_level, lint_mode) {
+                (LintLevel::Deny, LintMode::SemVer) => {
+                    results_with_errors.push((semver_query, results))
+                }
+                (LintLevel::Warn, LintMode::SemVer) => {
+                    results_with_warnings.push((semver_query, results))
+                }
+                (LintLevel::Warn, LintMode::AlwaysRun) => {
+                    results_with_always_run_warnings.push((semver_query, results))
+                }
+                (LintLevel::Deny, LintMode::AlwaysRun) => {
+                    results_with_always_run_errors.push((semver_query, results))
+                }
+                (LintLevel::Allow, _) => unreachable!(
                     "`LintLevel::Allow` lint was unexpectedly not skipped: {semver_query:?}"
                 ),
             };
         }
     }
 
-    let produced_errors = !results_with_errors.is_empty();
-    let produced_warnings = !results_with_warnings.is_empty();
-    if produced_errors || produced_warnings {
-        let status_color = if produced_errors {
+    let produced_semver_errors = !results_with_errors.is_empty();
+    let produced_semver_warnings = !results_with_warnings.is_empty();
+    let produced_always_run_errors = !results_with_always_run_errors.is_empty();
+    let produced_always_run_warnings = !results_with_always_run_warnings.is_empty();
+    let total_always_run_issues =
+        results_with_always_run_errors.len() + results_with_always_run_warnings.len();
+    let has_issues = produced_semver_errors
+        || produced_semver_warnings
+        || produced_always_run_errors
+        || produced_always_run_warnings;
+
+    if has_issues {
+        let status_color = if produced_semver_errors || produced_always_run_errors {
             AnsiColor::Red
         } else {
             AnsiColor::Yellow
@@ -377,6 +404,35 @@ pub(super) fn run_check_release(
             print_triggered_lint(config, semver_query, results, witness_generation)?;
         }
 
+        for (semver_query, results) in results_with_always_run_errors {
+            config.log_info(|config| {
+                writeln!(
+                    config.stdout(),
+                    "\n--- risk failure {}: {} ---\n",
+                    &semver_query.id,
+                    &semver_query.human_readable_name
+                )?;
+                Ok(())
+            })?;
+
+            print_triggered_lint(config, semver_query, results, witness_generation)?;
+        }
+
+        // Process AlwaysRun warnings
+        for (semver_query, results) in results_with_always_run_warnings {
+            config.log_info(|config| {
+                writeln!(
+                    config.stdout(),
+                    "\n--- risk warning {}: {} ---\n",
+                    semver_query.id,
+                    semver_query.human_readable_name
+                )?;
+                Ok(())
+            })?;
+
+            print_triggered_lint(config, semver_query, results, witness_generation)?;
+        }
+
         let required_bump = required_versions.iter().max().copied();
         let suggested_bump = suggested_versions.iter().max().copied();
 
@@ -399,7 +455,7 @@ pub(super) fn run_check_release(
                 Color::Ansi(AnsiColor::Red),
                 true,
             )?;
-        } else if produced_warnings {
+        } else if produced_semver_warnings {
             writeln!(config.stderr())?;
             config.shell_print(
                 "Summary",
@@ -407,8 +463,6 @@ pub(super) fn run_check_release(
                 Color::Ansi(AnsiColor::Green),
                 true,
             )?;
-        } else {
-            unreachable!("Expected either warnings or errors to be produced.");
         }
 
         if let Some(suggested_bump) = suggested_bump {
@@ -437,6 +491,30 @@ pub(super) fn run_check_release(
                     suggested_bump.as_str(),
                 )?;
             }
+        }
+
+        if total_always_run_issues > 0 {
+            writeln!(config.stderr())?;
+            let label = if produced_always_run_errors {
+                "Risk Alert"
+            } else {
+                "Risk Notice"
+            };
+            let color = if produced_always_run_errors {
+                AnsiColor::Red
+            } else {
+                AnsiColor::Yellow
+            };
+
+            config.shell_print(
+                label,
+                format_args!(
+                    "{} potentially risky changes detected that require attention regardless of version bump",
+                    total_always_run_issues
+                ),
+                Color::Ansi(color),
+                true,
+            )?;
         }
 
         Ok(CrateReport {

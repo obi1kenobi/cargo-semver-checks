@@ -57,6 +57,17 @@ impl LintLevel {
     }
 }
 
+/// Whether to run this query in semver mode or always run mode.
+#[non_exhaustive]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum LintMode {
+    #[default]
+    #[serde(alias = "semver")]
+    SemVer,
+    #[serde(alias = "always-run")]
+    AlwaysRun,
+}
+
 /// Kind of semver update.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ActualSemverUpdate {
@@ -102,6 +113,10 @@ pub struct SemverQuery {
 
     /// The default lint level for when this lint occurs.
     pub lint_level: LintLevel,
+
+    /// Whether to run this query in semver mode or always run mode.
+    #[serde(default)]
+    pub lint_mode: LintMode,
 
     #[serde(default)]
     pub reference: Option<String>,
@@ -181,6 +196,13 @@ pub struct QueryOverride {
     /// the effective lint level.
     #[serde(default)]
     pub lint_level: Option<LintLevel>,
+
+    /// Whether to run this query in semver mode or always run mode.
+    ///
+    /// If this is `None`, use the query's default `lint_mode` when calculating
+    /// the effective lint mode.
+    #[serde(default)]
+    pub lint_mode: Option<LintMode>,
 }
 
 /// A mapping of lint ids to configured values that override that lint's defaults.
@@ -232,6 +254,18 @@ impl OverrideStack {
             .rev()
             .find_map(|x| x.get(&query.id).and_then(|y| y.required_update))
             .unwrap_or(query.required_update)
+    }
+
+    /// Calculates the *effective* lint mode of this query, by searching for an override
+    /// mapped to this query's id from the top of the stack first, returning the query's default
+    /// lint mode if not overridden.
+    #[must_use]
+    pub fn effective_lint_mode(&self, query: &SemverQuery) -> LintMode {
+        self.0
+            .iter()
+            .rev()
+            .find_map(|x| x.get(&query.id).and_then(|y| y.lint_mode))
+            .unwrap_or(query.lint_mode)
     }
 }
 
@@ -862,6 +896,7 @@ mod tests {
             id,
             lint_level,
             required_update,
+            lint_mode: Default::default(),
             human_readable_name: String::new(),
             description: String::new(),
             reference: None,
@@ -883,6 +918,7 @@ mod tests {
                 QueryOverride {
                     lint_level: Some(LintLevel::Allow),
                     required_update: Some(RequiredSemverUpdate::Minor),
+                    lint_mode: None,
                 },
             ),
             (
@@ -890,6 +926,7 @@ mod tests {
                 QueryOverride {
                     lint_level: None,
                     required_update: Some(RequiredSemverUpdate::Minor),
+                    lint_mode: None,
                 },
             ),
         ]));
@@ -930,6 +967,7 @@ mod tests {
                 QueryOverride {
                     lint_level: Some(LintLevel::Allow),
                     required_update: Some(RequiredSemverUpdate::Minor),
+                    lint_mode: None,
                 },
             ),
             (
@@ -937,6 +975,7 @@ mod tests {
                 QueryOverride {
                     lint_level: None,
                     required_update: Some(RequiredSemverUpdate::Minor),
+                    lint_mode: None,
                 },
             ),
         ]));
@@ -946,6 +985,7 @@ mod tests {
             QueryOverride {
                 required_update: None,
                 lint_level: Some(LintLevel::Warn),
+                lint_mode: None,
             },
         )]));
 
