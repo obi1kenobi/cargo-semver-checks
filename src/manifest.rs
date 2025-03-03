@@ -179,8 +179,7 @@ impl LintTable {
 #[serde(untagged)]
 pub(crate) enum OverrideConfig {
     /// Specify both lint level and required update by name, with optional lint mode.
-    /// `lint_name = { level = "deny", required-update = "major" }
-    /// `lint_name = { level = "deny", required-update = "major", mode = "always-run" }
+    /// `lint_name = { level = "deny", required-update = "major" }`
     #[serde(rename_all = "kebab-case")]
     Both {
         level: LintLevel,
@@ -194,7 +193,7 @@ pub(crate) enum OverrideConfig {
         priority: i64,
     },
     /// Specify just lint level by name, with optional priority.
-    /// `lint_name = { level = "deny" }
+    /// `lint_name = { level = "deny" }`
     #[serde(rename_all = "kebab-case")]
     LintLevel {
         level: LintLevel,
@@ -202,7 +201,7 @@ pub(crate) enum OverrideConfig {
         priority: i64,
     },
     /// Specify just required update by name, with optional priority.
-    /// `lint_name = { required-update = "minor" }
+    /// `lint_name = { required-update = "minor" }`
     #[serde(rename_all = "kebab-case")]
     RequiredUpdate {
         required_update: RequiredSemverUpdate,

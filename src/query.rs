@@ -61,11 +61,11 @@ impl LintLevel {
 #[non_exhaustive]
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum LintMode {
+    #[serde(alias = "always-run")]
+    AlwaysRun,
     #[default]
     #[serde(alias = "semver")]
     SemVer,
-    #[serde(alias = "always-run")]
-    AlwaysRun,
 }
 
 /// Kind of semver update.
