@@ -280,9 +280,13 @@ pub(super) fn run_check_release(
     for (semver_query, time_to_decide, results) in all_results {
         config
             .log_verbose(|config| {
-                let category = match overrides.effective_required_update(semver_query) {
-                    RequiredSemverUpdate::Major => "major",
-                    RequiredSemverUpdate::Minor => "minor",
+                let category = match (
+                    overrides.effective_required_update(semver_query),
+                    overrides.effective_lint_mode(semver_query),
+                ) {
+                    (RequiredSemverUpdate::Major, LintMode::SemVer) => "major",
+                    (RequiredSemverUpdate::Minor, LintMode::SemVer) => "minor",
+                    (_, LintMode::AlwaysRun) => "always-run",
                 };
 
                 let (status, status_color) = match (
@@ -341,8 +345,6 @@ pub(super) fn run_check_release(
     let produced_semver_warnings = !results_with_warnings.is_empty();
     let produced_always_run_errors = !results_with_always_run_errors.is_empty();
     let produced_always_run_warnings = !results_with_always_run_warnings.is_empty();
-    let total_always_run_issues =
-        results_with_always_run_errors.len() + results_with_always_run_warnings.len();
     let has_issues = produced_semver_errors
         || produced_semver_warnings
         || produced_always_run_errors
@@ -354,6 +356,12 @@ pub(super) fn run_check_release(
         } else {
             AnsiColor::Yellow
         };
+
+        let total_always_run_issues =
+            results_with_always_run_errors.len() + results_with_always_run_warnings.len();
+        let total_failures = results_with_errors.len() + results_with_always_run_errors.len();
+        let total_warnings = results_with_warnings.len() + results_with_always_run_warnings.len();
+
         config
             .shell_print(
                 "Checked",
@@ -361,9 +369,9 @@ pub(super) fn run_check_release(
                     "[{:>8.3}s] {} checks: {} pass, {} fail, {} warn, {} skip",
                     queries_start_instant.elapsed().as_secs_f32(),
                     queries_to_run.len(),
-                    queries_to_run.len() - results_with_errors.len() - results_with_warnings.len(),
-                    results_with_errors.len(),
-                    results_with_warnings.len(),
+                    queries_to_run.len() - total_failures - total_warnings,
+                    total_failures,
+                    total_warnings,
                     skipped_queries,
                 ),
                 Color::Ansi(status_color),
@@ -520,6 +528,7 @@ pub(super) fn run_check_release(
         Ok(CrateReport {
             required_bump: required_bump.map(ReleaseType::from),
             detected_bump: version_change,
+            has_always_run_issues: produced_always_run_errors || produced_always_run_warnings,
         })
     } else {
         config
@@ -547,6 +556,7 @@ pub(super) fn run_check_release(
         Ok(CrateReport {
             detected_bump: version_change,
             required_bump: None,
+            has_always_run_issues: false,
         })
     }
 }

@@ -653,12 +653,17 @@ pub struct CrateReport {
     /// For example, if the crate contains breaking changes, this is [`Some(ReleaseType::Major)`].
     /// If no additional bump beyond the already-detected one is required, this is [`Option::None`].
     required_bump: Option<ReleaseType>,
+    /// Whether the crate has breaking changes that require attention regardless of version bump.
+    has_always_run_issues: bool,
 }
 
 impl CrateReport {
     /// Check if the semver check was successful.
     /// `true` if required bump <= detected bump.
     pub fn success(&self) -> bool {
+        if self.has_always_run_issues {
+            return false;
+        }
         match self.required_bump {
             // If `None`, no additional bump is required.
             None => true,
