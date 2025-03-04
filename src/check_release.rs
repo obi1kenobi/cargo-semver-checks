@@ -528,7 +528,7 @@ pub(super) fn run_check_release(
         Ok(CrateReport {
             required_bump: required_bump.map(ReleaseType::from),
             detected_bump: version_change,
-            has_always_run_issues: produced_always_run_errors || produced_always_run_warnings,
+            has_always_run_issues: total_always_run_issues > 0,
         })
     } else {
         config
