@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait Example {
     fn becomes_generic(data: [i64; 4]) -> [i64; 4];
 

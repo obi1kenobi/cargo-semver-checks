@@ -1,3 +1,5 @@
+#![no_std]
+
 
 pub mod union_inherent_method_now_doc_hidden;
 

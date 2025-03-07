@@ -1,9 +1,11 @@
+#![no_std]
+
 pub trait TraitWithMethodToBeDeprecated {
     // This method will be marked deprecated
     fn method_to_deprecated(&self) -> i32;
 
     // This method will be marked deprecated with a message
-    fn method_to_deprecated_message(&self, input: &str) -> String;
+    fn method_to_deprecated_message(&self, input: &str) -> &str;
 
     // These methods should not trigger the lint
     fn method_stays_normal(&self);

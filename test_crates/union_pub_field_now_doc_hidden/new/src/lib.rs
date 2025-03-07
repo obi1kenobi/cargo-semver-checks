@@ -1,3 +1,5 @@
+#![no_std]
+
 // shouldn't flag `union_pub_field_now_doc_hidden` rule
 // and flag `union_now_doc_hidden` instead
 #[doc(hidden)]

@@ -1,3 +1,5 @@
+#![no_std]
+
 /// The relationship between semver and removing fields from enum variants is complex.
 ///
 /// Removing hidden fields from a struct variant (whether hidden or not) is not a breaking change.
@@ -20,12 +22,12 @@ pub enum RemovedHiddenFieldFromVariant {
     },
 
     #[doc(hidden)]
-    HiddenTupleVariant(i64, String),
+    HiddenTupleVariant(i64, &'static str),
 
     VisibleTupleVariantNoReordering(i64),
 
     /// The removal of the hidden field makes the fields behind it have different indexes.
-    VisibleTupleVariantBreaking(i64, String, usize),
+    VisibleTupleVariantBreaking(i64, &'static str, usize),
 }
 
 /// Adding fields to an exhaustive public API variant of a public API enum is always breaking,

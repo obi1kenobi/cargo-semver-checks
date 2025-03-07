@@ -1,3 +1,5 @@
+#![no_std]
+
 // Public repr(C) enum with struct variant having reordered fields - should trigger warning
 #[repr(C)]
 pub enum PublicEnum {

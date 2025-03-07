@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/trait_method_requires_different_const_generic_params/": [
@@ -17,8 +18,8 @@ expression: "&query_execution_results"
         String("trait_method_requires_different_const_generic_params"),
         String("Example"),
       ]),
-      "span_begin_line": Uint64(2),
-      "span_end_line": Uint64(2),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -38,8 +39,8 @@ expression: "&query_execution_results"
         String("trait_method_requires_different_const_generic_params"),
         String("Example"),
       ]),
-      "span_begin_line": Uint64(4),
-      "span_end_line": Uint64(4),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -59,8 +60,8 @@ expression: "&query_execution_results"
         String("trait_method_requires_different_const_generic_params"),
         String("Example"),
       ]),
-      "span_begin_line": Uint64(6),
-      "span_end_line": Uint64(6),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

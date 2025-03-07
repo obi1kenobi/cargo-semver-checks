@@ -1,3 +1,5 @@
+#![no_std]
+
 // Basic Test cases
 pub static mut STATIC_A: i32 = 0;
 pub static mut STATIC_B: i32 = 0;

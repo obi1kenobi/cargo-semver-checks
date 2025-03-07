@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait RemovedAssociatedConstantFromTrait {
     const APPLE: i32;
 }

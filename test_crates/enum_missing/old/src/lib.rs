@@ -1,3 +1,5 @@
+#![no_std]
+
 pub enum WillBeRemovedEnum {}
 
 pub mod my_pub_mod {

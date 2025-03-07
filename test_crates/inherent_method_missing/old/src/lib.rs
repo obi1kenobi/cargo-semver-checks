@@ -1,3 +1,5 @@
+#![no_std]
+
 // Test that associated function removal:
 // - is caught and reported by `inherent_method_missing`
 // - is not caught by `function_missing`.

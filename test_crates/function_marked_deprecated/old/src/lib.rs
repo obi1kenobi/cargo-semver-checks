@@ -1,3 +1,5 @@
+#![no_std]
+
 // These functions did not have the #[deprecated] attribute in the old version.
 // Addition of the attribute should be reported by this rule.
 
@@ -5,8 +7,8 @@ pub fn function_to_deprecated() -> i32 {
     42
 }
 
-pub fn function_to_deprecated_message(input: &str) -> String {
-    input.to_string()
+pub fn function_to_deprecated_message(input: &str) -> &str {
+    input
 }
 
 // These functions had the #[deprecated] attribute in the old version. Changes of

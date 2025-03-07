@@ -1,3 +1,5 @@
+#![no_std]
+
 #[repr(C)]
 pub enum CEnumToEnum {
     Bar,

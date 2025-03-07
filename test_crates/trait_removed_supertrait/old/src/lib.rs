@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait SuperTrait {}
 pub trait SuperTrait2 {}
 pub trait GenericSuperTrait<T> {}

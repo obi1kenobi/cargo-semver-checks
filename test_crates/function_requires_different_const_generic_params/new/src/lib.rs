@@ -1,3 +1,5 @@
+#![no_std]
+
 pub fn previously_not_generic<const N: usize>() -> [i64; N] {
     todo!()
 }

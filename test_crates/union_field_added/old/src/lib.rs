@@ -1,3 +1,5 @@
+#![no_std]
+
 // Should trigger `union_field_added_with_all_pub_fields`.
 #[repr(C)]
 pub union AllPubFields {

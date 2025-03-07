@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/function_unsafe_added/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("function_unsafe_added"),
         String("add"),
       ]),
-      "span_begin_line": Uint64(1),
-      "span_end_line": Uint64(3),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -23,8 +24,8 @@ expression: "&query_execution_results"
         String("safe_vs_unsafe_extern_fn"),
         String("originally_safe_now_implicit_unsafe"),
       ]),
-      "span_begin_line": Uint64(16),
-      "span_end_line": Uint64(16),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -34,8 +35,8 @@ expression: "&query_execution_results"
         String("safe_vs_unsafe_extern_fn"),
         String("originally_safe_now_explicit_unsafe"),
       ]),
-      "span_begin_line": Uint64(18),
-      "span_end_line": Uint64(18),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(20),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -45,8 +46,8 @@ expression: "&query_execution_results"
         String("safe_vs_unsafe_extern_fn"),
         String("originally_safe_now_legacy"),
       ]),
-      "span_begin_line": Uint64(28),
-      "span_end_line": Uint64(28),
+      "span_begin_line": Uint64(30),
+      "span_end_line": Uint64(30),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

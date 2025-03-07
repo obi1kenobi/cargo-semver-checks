@@ -1,3 +1,5 @@
+#![no_std]
+
 pub struct Plain {
     #[doc(hidden)]
     pub field: i64,

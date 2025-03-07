@@ -1,3 +1,5 @@
+#![no_std]
+
 //! Changing a struct that isn't externally-constructible (e.g. due to private fields)
 //! into an enum or union is not a breaking change by itself.
 //!

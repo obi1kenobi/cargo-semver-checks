@@ -1,3 +1,5 @@
+#![no_std]
+
 #[cfg(feature = "foo")]
 pub fn foo_becomes_gated() {}
 

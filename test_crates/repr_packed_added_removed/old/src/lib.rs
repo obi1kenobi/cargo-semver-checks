@@ -1,3 +1,5 @@
+#![no_std]
+
 // should trigger lint for becoming packed
 pub struct StructBecomesPacked;
 

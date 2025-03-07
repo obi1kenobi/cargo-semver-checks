@@ -1,3 +1,5 @@
+#![no_std]
+
 pub struct WillBeRemovedStruct;
 
 pub mod my_pub_mod {

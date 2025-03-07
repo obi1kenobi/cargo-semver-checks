@@ -1,3 +1,5 @@
+#![no_std]
+
 // Public struct with #[derive(PartialOrd)] and reordered fields - should trigger warning
 #[derive(PartialOrd, PartialEq)]
 pub struct PublicStruct {
@@ -56,7 +58,7 @@ pub struct ManuallyImplemented {
 }
 
 impl PartialOrd for ManuallyImplemented {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         Some(self.a.cmp(&other.a))
     }
 }
@@ -113,7 +115,7 @@ impl PartialEq for SwitchToDerived {
 }
 
 impl PartialOrd for SwitchToDerived {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         match self.a.partial_cmp(&other.a) {
             Some(core::cmp::Ordering::Equal) => {}
             ord => return ord,

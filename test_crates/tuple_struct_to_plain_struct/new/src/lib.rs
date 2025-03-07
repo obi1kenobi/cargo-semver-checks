@@ -1,15 +1,17 @@
+#![no_std]
+
 // Basic case, should be reported.
 pub struct TupleToPlainStructPublicFields {
     pub a: i32,
     pub b: usize,
-    pub c: String,
+    pub c: &'static str,
 }
 
 // This struct is not externally constructible due to a private field and should not be reported.
 pub struct TupleToPlainStructPrivateFields {
     a: i32,
     b: usize,
-    c: String,
+    c: &'static str,
 }
 
 // This struct is explicitly #[non_exhaustive] and should not be reported.
@@ -17,7 +19,7 @@ pub struct TupleToPlainStructPrivateFields {
 pub struct TupleToPlainStructNonExhaustive {
     pub a: i32,
     pub b: usize,
-    pub c: String,
+    pub c: &'static str,
 }
 
 // Even though this struct has no fields, changing it to plain struct is a breaking change.
@@ -27,19 +29,19 @@ pub struct TupleToPlainStructEmpty {}
 struct TupleToPlainStructPrivate {
     pub a: i32,
     pub b: usize,
-    pub c: String,
+    pub c: &'static str,
 }
 
 // Tuple struct changing to unit struct is a different kind of breaking change.
 pub struct TupleToUnitStruct;
 
 // Plain struct changing to tuple struct is a different kind of breaking change.
-pub struct PlainToTupleStruct(pub i32, pub usize, pub String);
+pub struct PlainToTupleStruct(pub i32, pub usize, pub &'static str);
 
 // Struct becoming non_exhaustive should take priority, and not get reported
 #[non_exhaustive]
 pub struct TupleToNonExhaustivePlainStruct {
     pub a: i32,
     pub b: usize,
-    pub c: String,
+    pub c: &'static str,
 }

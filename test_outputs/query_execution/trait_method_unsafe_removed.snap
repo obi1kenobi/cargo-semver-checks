@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/trait_method_unsafe_removed/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("trait_method_unsafe_removed"),
         String("PubTrait"),
       ]),
-      "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(5),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -21,8 +22,8 @@ expression: "&query_execution_results"
         String("trait_method_unsafe_removed"),
         String("TraitBecomesSafe"),
       ]),
-      "span_begin_line": Uint64(26),
-      "span_end_line": Uint64(26),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -32,8 +33,8 @@ expression: "&query_execution_results"
         String("trait_method_unsafe_removed"),
         String("UnsealedTrait"),
       ]),
-      "span_begin_line": Uint64(48),
-      "span_end_line": Uint64(48),
+      "span_begin_line": Uint64(50),
+      "span_end_line": Uint64(50),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -43,8 +44,8 @@ expression: "&query_execution_results"
         String("trait_method_unsafe_removed"),
         String("TraitWithStdSupertrait"),
       ]),
-      "span_begin_line": Uint64(60),
-      "span_end_line": Uint64(60),
+      "span_begin_line": Uint64(62),
+      "span_end_line": Uint64(62),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

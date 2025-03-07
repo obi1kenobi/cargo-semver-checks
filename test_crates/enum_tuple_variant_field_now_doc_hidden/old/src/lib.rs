@@ -1,3 +1,5 @@
+#![no_std]
+
 enum NonPublicEnum {
     TupleVariant(i32, u8),
 }

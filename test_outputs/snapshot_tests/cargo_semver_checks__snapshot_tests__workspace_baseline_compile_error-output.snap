@@ -1,6 +1,7 @@
 ---
 source: src/snapshot_tests.rs
 expression: result
+snapshot_kind: text
 ---
 --- error ---
 aborting due to failure to build rustdoc for crate error v0.1.0
@@ -14,7 +15,7 @@ A publicly-visible function cannot be imported by its prior path. A `pub use` ma
        impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/function_missing.ron
 
 Failed in:
-  function no_error::my_fn, previously in file [ROOT]/test_crates/manifest_tests/workspace_baseline_compile_error/old/no-error/src/lib.rs:3
+  function no_error::my_fn, previously in file [ROOT]/test_crates/manifest_tests/workspace_baseline_compile_error/old/no-error/src/lib.rs:5
 
 --- stderr ---
     Building error v0.1.0 (current)
@@ -26,9 +27,9 @@ error: running cargo-doc on crate 'error' failed with output:
 -----
  Documenting error v0.1.0 ([ROOT]/test_crates/manifest_tests/workspace_baseline_compile_error/old/error)
 error: This crate has a compiler error.
- --> [ROOT]/test_crates/manifest_tests/workspace_baseline_compile_error/old/error/src/lib.rs:4:1
+ --> [ROOT]/test_crates/manifest_tests/workspace_baseline_compile_error/old/error/src/lib.rs:6:1
   |
-4 | compile_error!("This crate has a compiler error.");
+6 | compile_error!("This crate has a compiler error.");
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: could not document `error`

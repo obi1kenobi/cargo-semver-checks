@@ -1,3 +1,5 @@
+#![no_std]
+
 // These macros are now deprecated and should be reported
 #[deprecated]
 #[macro_export]

@@ -1,3 +1,5 @@
+#![no_std]
+
 // Tests adapted from the trait_now_doc_hidden lint and tests
 
 // since this is not a public trait, it isn't semver-breaking if we add

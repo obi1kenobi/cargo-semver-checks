@@ -9,8 +9,8 @@ impl NormalStruct {
     }
 
     #[deprecated = "Use new_method instead"]
-    pub fn method_with_message_to_be_deprecated(&self) -> String {
-        "hello".to_string()
+    pub fn method_with_message_to_be_deprecated(&self) -> &'static str {
+        "hello"
     }
 
     #[deprecated]
@@ -70,8 +70,8 @@ impl StructBecomesDeprecated {
         self.value
     }
 
-    pub fn another_normal_method(&self) -> String {
-        "hello".to_string()
+    pub fn another_normal_method(&self) -> &'static str {
+        "hello"
     }
 }
 

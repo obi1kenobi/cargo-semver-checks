@@ -1,3 +1,5 @@
+#![no_std]
+
 #![allow(dead_code)]
 
 pub struct Example<'a, 'b, 'c>(&'a i64, &'b i64, &'c i64);
@@ -27,4 +29,4 @@ pub struct NotGenericAnymore(&'static str);
 /// ```rust,compile_fail
 /// struct Witness(type_mismatched_generic_lifetimes::BecameGeneric);
 /// ```
-pub struct BecameGeneric<'a>(String, &'a str);
+pub struct BecameGeneric<'a>(&'static str, &'a str);

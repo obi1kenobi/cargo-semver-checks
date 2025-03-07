@@ -1,3 +1,5 @@
+#![no_std]
+
 #[derive(Debug, Clone)]
 pub struct DebugFoo;
 

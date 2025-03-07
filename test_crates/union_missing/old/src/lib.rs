@@ -1,3 +1,5 @@
+#![no_std]
+
 pub union PubUnionRemoved {
     f1: i32,
 }

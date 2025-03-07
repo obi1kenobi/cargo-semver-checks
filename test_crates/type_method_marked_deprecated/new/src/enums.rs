@@ -10,7 +10,7 @@ impl NormalEnum {
     }
 
     #[deprecated = "Use to_string instead"]
-    pub fn method_with_message_to_be_deprecated(&self) -> String {
+    pub fn method_with_message_to_be_deprecated(&self) -> &'static str {
         todo!()
     }
 
@@ -72,7 +72,7 @@ impl EnumBecomesDeprecated {
         matches!(self, EnumBecomesDeprecated::A)
     }
 
-    pub fn another_normal_method(&self) -> String {
+    pub fn another_normal_method(&self) -> &'static str {
         todo!()
     }
 }

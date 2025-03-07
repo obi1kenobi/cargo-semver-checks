@@ -1,3 +1,5 @@
+#![no_std]
+
 #[repr(transparent)]
 pub enum Foo {
     Bar(usize),
@@ -12,7 +14,7 @@ pub enum Bar {
 pub enum StructStyleWithZeroSizedData<T> {
     Bar {
         bar: usize,
-        _marker: std::marker::PhantomData<T>,
+        _marker: core::marker::PhantomData<T>,
     },
 }
 
@@ -25,59 +27,59 @@ pub enum TupleStyleWithZeroSizedData<T> {
 pub enum StructStyleWithSpecificZeroSizedData {
     Bar {
         bar: usize,
-        _marker: std::marker::PhantomData<&'static usize>,
+        _marker: core::marker::PhantomData<&'static usize>,
     },
 }
 
 #[repr(transparent)]
 pub enum TupleStyleWithSpecificZeroSizedData {
-    Bar(usize, std::marker::PhantomData<&'static usize>),
+    Bar(usize, core::marker::PhantomData<&'static usize>),
 }
 
 #[repr(transparent)]
 pub enum StructStyleWithFoo {
     Bar {
         bar: Foo,
-        _marker: std::marker::PhantomData<&'static usize>,
+        _marker: core::marker::PhantomData<&'static usize>,
     },
 }
 
 #[repr(transparent)]
 pub enum TupleStyleWithFoo {
-    Bar(Foo, std::marker::PhantomData<&'static usize>),
+    Bar(Foo, core::marker::PhantomData<&'static usize>),
 }
 
 #[repr(transparent)]
 pub enum StructStyleWithRef {
     Bar {
         bar: &'static usize,
-        _marker: std::marker::PhantomData<&'static usize>,
+        _marker: core::marker::PhantomData<&'static usize>,
     },
 }
 
 #[repr(transparent)]
 pub enum TupleStyleWithRef {
-    Bar(&'static usize, std::marker::PhantomData<&'static usize>),
+    Bar(&'static usize, core::marker::PhantomData<&'static usize>),
 }
 
 #[repr(transparent)]
 pub enum StructStyleWithTupleStyle {
     Bar {
         bar: (usize, i64),
-        _marker: std::marker::PhantomData<&'static usize>,
+        _marker: core::marker::PhantomData<&'static usize>,
     },
 }
 
 #[repr(transparent)]
 pub enum TupleStyleWithTuple {
-    Bar((usize, i64), std::marker::PhantomData<&'static usize>),
+    Bar((usize, i64), core::marker::PhantomData<&'static usize>),
 }
 
 #[repr(transparent)]
 pub enum StructStyleWithGeneric {
     Bar {
         bar: StructStyleWithZeroSizedData<usize>,
-        _marker: std::marker::PhantomData<&'static usize>,
+        _marker: core::marker::PhantomData<&'static usize>,
     },
 }
 
@@ -85,7 +87,7 @@ pub enum StructStyleWithGeneric {
 pub enum TupleStyleWithGeneric {
     Bar(
         StructStyleWithZeroSizedData<usize>,
-        std::marker::PhantomData<&'static usize>,
+        core::marker::PhantomData<&'static usize>,
     ),
 }
 

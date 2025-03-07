@@ -1,3 +1,5 @@
+#![no_std]
+
 pub struct Example<const N: usize> {
     data: [i64; N],
 }
@@ -7,5 +9,5 @@ pub enum NotGenericAnymore {
 }
 
 pub union NotGenericEither<T> {
-    left: std::mem::ManuallyDrop<[T; 4]>,
+    left: core::mem::ManuallyDrop<[T; 4]>,
 }

@@ -1,3 +1,5 @@
+#![no_std]
+
 #[cfg(feature = "A")]
 pub fn moving_from_feature_A_to_feature_B() {}
 

@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/struct_field_marked_deprecated/": [
@@ -10,7 +11,7 @@ expression: "&query_execution_results"
         String("struct_field_marked_deprecated"),
         String("Plain"),
       ]),
-      "span_begin_line": Uint64(2),
+      "span_begin_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("Plain"),
     },
@@ -20,7 +21,7 @@ expression: "&query_execution_results"
         String("struct_field_marked_deprecated"),
         String("Plain"),
       ]),
-      "span_begin_line": Uint64(2),
+      "span_begin_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("Plain"),
     },
@@ -30,7 +31,7 @@ expression: "&query_execution_results"
         String("struct_field_marked_deprecated"),
         String("Tuple"),
       ]),
-      "span_begin_line": Uint64(9),
+      "span_begin_line": Uint64(11),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("Tuple"),
     },
@@ -40,7 +41,7 @@ expression: "&query_execution_results"
         String("struct_field_marked_deprecated"),
         String("Tuple"),
       ]),
-      "span_begin_line": Uint64(9),
+      "span_begin_line": Uint64(11),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("Tuple"),
     },
@@ -50,7 +51,7 @@ expression: "&query_execution_results"
         String("struct_field_marked_deprecated"),
         String("DocHiddenInteractions"),
       ]),
-      "span_begin_line": Uint64(32),
+      "span_begin_line": Uint64(34),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("DocHiddenInteractions"),
     },
@@ -60,7 +61,7 @@ expression: "&query_execution_results"
         String("struct_field_marked_deprecated"),
         String("DocHiddenInteractions"),
       ]),
-      "span_begin_line": Uint64(32),
+      "span_begin_line": Uint64(34),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("DocHiddenInteractions"),
     },

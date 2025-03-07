@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait Example<A> {}
 
 pub trait NotGenericAnymore {}

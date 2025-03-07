@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/struct_becomes_enum/": [
@@ -11,8 +12,8 @@ expression: "&query_execution_results"
         String("struct_becomes_enum"),
         String("ConstructibleFieldlessUnit"),
       ]),
-      "span_begin_line": Uint64(29),
-      "span_end_line": Uint64(29),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(31),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("unit"),
       "struct_typename": String("Struct"),
@@ -25,8 +26,8 @@ expression: "&query_execution_results"
         String("struct_becomes_enum"),
         String("ConstructibleFieldlessTuple"),
       ]),
-      "span_begin_line": Uint64(31),
-      "span_end_line": Uint64(33),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(35),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("tuple"),
       "struct_typename": String("Struct"),
@@ -39,8 +40,8 @@ expression: "&query_execution_results"
         String("struct_becomes_enum"),
         String("ConstructibleFieldlessStruct"),
       ]),
-      "span_begin_line": Uint64(35),
-      "span_end_line": Uint64(35),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(37),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("plain"),
       "struct_typename": String("Struct"),
@@ -55,8 +56,8 @@ expression: "&query_execution_results"
         String("struct_with_no_pub_fields_changed_type"),
         String("PubStructChangedToNoFieldsEnum"),
       ]),
-      "span_begin_line": Uint64(80),
-      "span_end_line": Uint64(80),
+      "span_begin_line": Uint64(82),
+      "span_end_line": Uint64(82),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("plain"),
       "struct_typename": String("Struct"),

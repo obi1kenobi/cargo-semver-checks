@@ -1,3 +1,5 @@
+#![no_std]
+
 #[no_mangle]
 pub extern "C" fn public_null_export_name_func_will_become_c() {}
 

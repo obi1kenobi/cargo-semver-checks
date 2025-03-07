@@ -1,3 +1,5 @@
+#![no_std]
+
 pub const PUB_CONST_IN_GLOBAL: i32 = 0;
 pub const PUB_CONST_IN_GLOBAL_IS_RENAMED: i32 = 0;
 pub static PUB_CONST_IN_GLOBAL_WILL_BE_STATIC: i32 = 0;

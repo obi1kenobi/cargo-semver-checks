@@ -1,3 +1,5 @@
+#![no_std]
+
 #[non_exhaustive]
 pub struct NotGeneric {}
 
@@ -8,10 +10,10 @@ pub enum DefaultBecomesRequired<const N: usize = 1, const M: usize = 1> {
 }
 
 pub union ConstGenericAdded<T> {
-    left: std::mem::ManuallyDrop<[T; 16]>,
+    left: core::mem::ManuallyDrop<[T; 16]>,
 }
 
 // This one isn't breaking, so it shouldn't be flagged!
 pub union DefaultedConstGenericAdded<T> {
-    left: std::mem::ManuallyDrop<[T; 16]>,
+    left: core::mem::ManuallyDrop<[T; 16]>,
 }

@@ -1,3 +1,5 @@
+#![no_std]
+
 use proc_macro::TokenStream;
 
 // These proc macros are now deprecated and should be reported

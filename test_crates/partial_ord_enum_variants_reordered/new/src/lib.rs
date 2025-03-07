@@ -1,3 +1,5 @@
+#![no_std]
+
 // Public enum with #[derive(PartialOrd)] and reordered variants - should trigger warning
 #[derive(PartialOrd, PartialEq)]
 pub enum PublicEnum {
@@ -56,12 +58,12 @@ pub enum ManuallyImplemented {
 }
 
 impl PartialOrd for ManuallyImplemented {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         match (self, other) {
-            (Self::A, Self::A) => Some(std::cmp::Ordering::Equal),
-            (Self::A, Self::B) => Some(std::cmp::Ordering::Less),
-            (Self::B, Self::A) => Some(std::cmp::Ordering::Greater),
-            (Self::B, Self::B) => Some(std::cmp::Ordering::Equal),
+            (Self::A, Self::A) => Some(core::cmp::Ordering::Equal),
+            (Self::A, Self::B) => Some(core::cmp::Ordering::Less),
+            (Self::B, Self::A) => Some(core::cmp::Ordering::Greater),
+            (Self::B, Self::B) => Some(core::cmp::Ordering::Equal),
         }
     }
 }
@@ -77,15 +79,15 @@ pub enum MultipleDerivesWithPartialOrd {
 // Test with mixed variant types - should trigger
 #[derive(PartialOrd, PartialEq)]
 pub enum MixedVariantTypes {
-    Tuple(i32, String),
-    Struct { x: i32, y: String },
+    Tuple(i32, &'static str),
+    Struct { x: i32, y: &'static str },
     Unit,
 }
 
 // Test with struct variants - should trigger
 #[derive(PartialOrd, PartialEq)]
 pub enum StructVariants {
-    B { y: String },
+    B { y: &'static str },
     C { z: bool },
     A { x: i32 },
 }
@@ -93,7 +95,7 @@ pub enum StructVariants {
 // Test with tuple variants - should trigger
 #[derive(PartialOrd, PartialEq)]
 pub enum TupleVariants {
-    B(String),
+    B(&'static str),
     C(bool),
     A(i32),
 }
@@ -131,7 +133,7 @@ pub enum DerivedToHandImpl {
 }
 
 impl PartialOrd for DerivedToHandImpl {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         todo!()
     }
 }

@@ -1,3 +1,5 @@
+#![no_std]
+
 // Public trait becomes sealed, should be reported
 pub trait TraitBecomesSealed {}
 

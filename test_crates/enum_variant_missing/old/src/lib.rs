@@ -1,3 +1,5 @@
+#![no_std]
+
 pub enum PlainVariantWillBeRemoved {
     Foo,
     /// Testing: <https://doc.rust-lang.org/cargo/reference/semver.html#item-remove>

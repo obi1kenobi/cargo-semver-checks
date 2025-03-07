@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/sized_impl_removed/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("sized_impl_removed"),
         String("SizedStruct"),
       ]),
-      "span_begin_line": Uint64(1),
-      "span_end_line": Uint64(4),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

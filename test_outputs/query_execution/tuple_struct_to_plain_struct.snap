@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/constructible_struct_adds_field/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("constructible_struct_adds_field"),
         String("TupleToPlainStruct"),
       ]),
-      "span_begin_line": Uint64(59),
-      "span_end_line": Uint64(63),
+      "span_begin_line": Uint64(61),
+      "span_end_line": Uint64(65),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -23,8 +24,8 @@ expression: "&query_execution_results"
         String("constructible_struct_adds_private_field"),
         String("TupleToPlainStruct"),
       ]),
-      "span_begin_line": Uint64(59),
-      "span_end_line": Uint64(63),
+      "span_begin_line": Uint64(61),
+      "span_end_line": Uint64(65),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -36,8 +37,8 @@ expression: "&query_execution_results"
         String("tuple_struct_to_plain_struct"),
         String("TupleToPlainStructPublicFields"),
       ]),
-      "span_begin_line": Uint64(2),
-      "span_end_line": Uint64(6),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -47,8 +48,8 @@ expression: "&query_execution_results"
         String("tuple_struct_to_plain_struct"),
         String("TupleToPlainStructEmpty"),
       ]),
-      "span_begin_line": Uint64(24),
-      "span_end_line": Uint64(24),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(26),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

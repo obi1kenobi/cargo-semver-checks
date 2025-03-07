@@ -1,3 +1,5 @@
+#![no_std]
+
 // No longer exported but not hidden - should trigger
 macro_rules! example_macro {
     () => {

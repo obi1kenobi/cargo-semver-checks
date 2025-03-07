@@ -1,3 +1,5 @@
+#![no_std]
+
 #[macro_export]
 macro_rules! will_be_removed {
     () => {};

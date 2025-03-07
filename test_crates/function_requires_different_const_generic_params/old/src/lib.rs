@@ -1,3 +1,5 @@
+#![no_std]
+
 pub fn previously_not_generic() {}
 
 pub fn add_const_generic<const N: usize>(data: [i64; N]) {}

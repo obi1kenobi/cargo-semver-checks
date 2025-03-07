@@ -1,3 +1,5 @@
+#![no_std]
+
 // Public enum with #[derive(PartialOrd)] and struct variant with reordered fields - should trigger warning
 #[derive(PartialOrd, PartialEq)]
 pub enum PublicEnum {
@@ -54,7 +56,7 @@ pub enum ManuallyImplemented {
 }
 
 impl PartialOrd for ManuallyImplemented {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         todo!()
     }
 }
@@ -87,7 +89,7 @@ pub enum DerivedToHandImpl {
 }
 
 impl PartialOrd for DerivedToHandImpl {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         todo!()
     }
 }

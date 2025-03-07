@@ -1,3 +1,5 @@
+#![no_std]
+
 mod sealed {
     pub(crate) trait Sealed {}
 }

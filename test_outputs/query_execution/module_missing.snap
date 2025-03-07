@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/module_missing/": [
@@ -11,8 +12,8 @@ expression: "&query_execution_results"
         String("bb"),
         String("will_remove"),
       ]),
-      "span_begin_line": Uint64(8),
-      "span_end_line": Uint64(8),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -22,8 +23,8 @@ expression: "&query_execution_results"
         String("module_missing"),
         String("will_make_private"),
       ]),
-      "span_begin_line": Uint64(11),
-      "span_end_line": Uint64(11),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -35,8 +36,8 @@ expression: "&query_execution_results"
         String("trait_missing"),
         String("my_pub_mod"),
       ]),
-      "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(5),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -48,8 +49,8 @@ expression: "&query_execution_results"
         String("trait_missing_with_major_bump"),
         String("my_pub_mod"),
       ]),
-      "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(5),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

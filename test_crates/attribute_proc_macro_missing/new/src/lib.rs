@@ -1,3 +1,5 @@
+#![no_std]
+
 use proc_macro::TokenStream;
 
 // Keep other macro types to verify specific detection

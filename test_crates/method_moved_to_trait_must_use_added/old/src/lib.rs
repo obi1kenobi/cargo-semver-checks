@@ -1,3 +1,5 @@
+#![no_std]
+
 // The purpose of this test crate is to avoid duplicate lints. In this crate,
 // there could be reports about both #[must_use] being added to the methods,
 // as well as the methods themselves being moved to a Trait. 
