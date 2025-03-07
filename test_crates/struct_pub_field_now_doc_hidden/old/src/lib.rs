@@ -1,3 +1,5 @@
+#![no_std]
+
 pub struct Plain {
     pub field: i64,
 }

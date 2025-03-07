@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/type_hidden_from_public_api/": [
@@ -9,8 +10,8 @@ expression: "&query_execution_results"
         String("type_hidden_from_public_api"),
         String("ExampleUnion"),
       ]),
-      "span_begin_line": Uint64(19),
-      "span_end_line": Uint64(22),
+      "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(24),
       "span_filename": String("src/lib.rs"),
       "union_name": String("ExampleUnion"),
     },
@@ -21,8 +22,8 @@ expression: "&query_execution_results"
         String("union_now_doc_hidden"),
         String("MyUnion"),
       ]),
-      "span_begin_line": Uint64(2),
-      "span_end_line": Uint64(5),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "union_name": String("MyUnion"),
     },
@@ -33,8 +34,8 @@ expression: "&query_execution_results"
         String("union_pub_field_now_doc_hidden"),
         String("MyUnion"),
       ]),
-      "span_begin_line": Uint64(4),
-      "span_end_line": Uint64(7),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
       "union_name": String("MyUnion"),
     },
@@ -43,8 +44,8 @@ expression: "&query_execution_results"
         String("union_pub_field_now_doc_hidden"),
         String("PublicUnionBothFieldAndUnionDocHidden"),
       ]),
-      "span_begin_line": Uint64(30),
-      "span_end_line": Uint64(34),
+      "span_begin_line": Uint64(32),
+      "span_end_line": Uint64(36),
       "span_filename": String("src/lib.rs"),
       "union_name": String("PublicUnionBothFieldAndUnionDocHidden"),
     },

@@ -1,3 +1,5 @@
+#![no_std]
+
 use proc_macro::TokenStream;
 
 // An attribute macro we'll hide. Should trigger the lint.

@@ -1,3 +1,5 @@
+#![no_std]
+
 /// Hiding a variant from the public API is a breaking change.
 pub enum HiddenVariant {
     #[doc(hidden)]

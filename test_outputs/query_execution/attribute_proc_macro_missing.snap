@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/attribute_proc_macro_missing/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("attribute_proc_macro_missing"),
         String("logging"),
       ]),
-      "span_begin_line": Uint64(4),
-      "span_end_line": Uint64(6),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
     },
   ],

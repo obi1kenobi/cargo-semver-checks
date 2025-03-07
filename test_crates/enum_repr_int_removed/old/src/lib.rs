@@ -1,3 +1,5 @@
+#![no_std]
+
 #[repr(u8)]
 pub enum U8EnumToEnum {
     Bar,

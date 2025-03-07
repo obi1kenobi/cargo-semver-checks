@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/derive_trait_impl_removed/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("derive_trait_impl_removed"),
         String("DebugFoo"),
       ]),
-      "span_begin_line": Uint64(2),
-      "span_end_line": Uint64(2),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("Debug"),
       "trait_path": List([
@@ -27,8 +28,8 @@ expression: "&query_execution_results"
         String("derive_trait_impl_removed"),
         String("CopyBar"),
       ]),
-      "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(7),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("Copy"),
       "trait_path": List([
@@ -44,8 +45,8 @@ expression: "&query_execution_results"
         String("derive_trait_impl_removed"),
         String("EqFoo"),
       ]),
-      "span_begin_line": Uint64(10),
-      "span_end_line": Uint64(10),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("Eq"),
       "trait_path": List([
@@ -63,8 +64,8 @@ expression: "&query_execution_results"
         String("partial_ord_enum_struct_variant_fields_reordered"),
         String("NoLongerPartialOrd"),
       ]),
-      "span_begin_line": Uint64(73),
-      "span_end_line": Uint64(75),
+      "span_begin_line": Uint64(75),
+      "span_end_line": Uint64(77),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("PartialOrd"),
       "trait_path": List([
@@ -82,8 +83,8 @@ expression: "&query_execution_results"
         String("partial_ord_enum_variants_reordered"),
         String("NoLongerPartialOrd"),
       ]),
-      "span_begin_line": Uint64(111),
-      "span_end_line": Uint64(115),
+      "span_begin_line": Uint64(113),
+      "span_end_line": Uint64(117),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("PartialOrd"),
       "trait_path": List([
@@ -101,8 +102,8 @@ expression: "&query_execution_results"
         String("partial_ord_struct_fields_reordered"),
         String("NoLongerPartialOrd"),
       ]),
-      "span_begin_line": Uint64(80),
-      "span_end_line": Uint64(84),
+      "span_begin_line": Uint64(82),
+      "span_end_line": Uint64(86),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("PartialOrd"),
       "trait_path": List([
@@ -118,8 +119,8 @@ expression: "&query_execution_results"
         String("partial_ord_struct_fields_reordered"),
         String("NoLongerPartialOrd"),
       ]),
-      "span_begin_line": Uint64(80),
-      "span_end_line": Uint64(84),
+      "span_begin_line": Uint64(82),
+      "span_end_line": Uint64(86),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("PartialEq"),
       "trait_path": List([

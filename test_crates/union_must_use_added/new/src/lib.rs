@@ -1,3 +1,5 @@
+#![no_std]
+
 // These unions did not have the #[must_use] attribute in the old version.
 // Addition of the attribute should be reported by this rule.
 

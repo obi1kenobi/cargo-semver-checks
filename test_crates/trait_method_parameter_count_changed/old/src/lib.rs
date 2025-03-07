@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait Example {
     fn gain_a_parameter();
 

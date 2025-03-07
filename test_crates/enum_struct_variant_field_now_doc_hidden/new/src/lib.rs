@@ -1,3 +1,5 @@
+#![no_std]
+
 // should not be caught since field was already marked #[doc(hidden)]
 pub enum PublicEnum {
     StructVariant {

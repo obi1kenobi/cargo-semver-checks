@@ -1,3 +1,5 @@
+#![no_std]
+
 //! Adding `non_exhaustive` to a struct, enum or enum variant is breaking because
 //! those items cannot be constructed outside of their defining crate:
 //!

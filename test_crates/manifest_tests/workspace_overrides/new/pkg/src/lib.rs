@@ -1,3 +1,5 @@
+#![no_std]
+
 // removing this line should trigger the `function_missing` lint,
 // so we can test that we can override its lint level and required
 // version bump in the [package.metadata] and [workspace.metadata].

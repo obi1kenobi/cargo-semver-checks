@@ -1,3 +1,5 @@
+#![no_std]
+
 mod MyNonPublicMod {
     pub fn my_function() {}
 }

@@ -1,3 +1,5 @@
+#![no_std]
+
 mod MyNonPublicMod {
     pub enum MyEnum {
         A,

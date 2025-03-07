@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/enum_repr_transparent_removed/": [
@@ -11,8 +12,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("Foo"),
       ]),
-      "span_begin_line": Uint64(1),
-      "span_end_line": Uint64(3),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -26,8 +27,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("Bar"),
       ]),
-      "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(7),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Baz"),
@@ -41,8 +42,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("StructStyleWithZeroSizedData"),
       ]),
-      "span_begin_line": Uint64(9),
-      "span_end_line": Uint64(14),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(16),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -56,8 +57,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("TupleStyleWithZeroSizedData"),
       ]),
-      "span_begin_line": Uint64(16),
-      "span_end_line": Uint64(18),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(20),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -71,8 +72,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("StructStyleWithFoo"),
       ]),
-      "span_begin_line": Uint64(20),
-      "span_end_line": Uint64(25),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(27),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -86,8 +87,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("TupleStyleWithFoo"),
       ]),
-      "span_begin_line": Uint64(27),
-      "span_end_line": Uint64(29),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(31),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -101,8 +102,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("StructStyleWithRef"),
       ]),
-      "span_begin_line": Uint64(31),
-      "span_end_line": Uint64(36),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(38),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -116,8 +117,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("TupleStyleWithRef"),
       ]),
-      "span_begin_line": Uint64(38),
-      "span_end_line": Uint64(40),
+      "span_begin_line": Uint64(40),
+      "span_end_line": Uint64(42),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -131,8 +132,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("StructStyleWithTupleStyle"),
       ]),
-      "span_begin_line": Uint64(42),
-      "span_end_line": Uint64(47),
+      "span_begin_line": Uint64(44),
+      "span_end_line": Uint64(49),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -146,8 +147,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("TupleStyleWithTuple"),
       ]),
-      "span_begin_line": Uint64(49),
-      "span_end_line": Uint64(51),
+      "span_begin_line": Uint64(51),
+      "span_end_line": Uint64(53),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -161,8 +162,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("StructStyleWithGeneric"),
       ]),
-      "span_begin_line": Uint64(53),
-      "span_end_line": Uint64(58),
+      "span_begin_line": Uint64(55),
+      "span_end_line": Uint64(60),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -176,8 +177,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("TupleStyleWithGeneric"),
       ]),
-      "span_begin_line": Uint64(60),
-      "span_end_line": Uint64(65),
+      "span_begin_line": Uint64(62),
+      "span_end_line": Uint64(67),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -191,8 +192,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("StructStyleWithSpecificZeroSizedData"),
       ]),
-      "span_begin_line": Uint64(67),
-      "span_end_line": Uint64(72),
+      "span_begin_line": Uint64(69),
+      "span_end_line": Uint64(74),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),
@@ -206,8 +207,8 @@ expression: "&query_execution_results"
         String("enum_repr_transparent_removed"),
         String("TupleStyleWithSpecificZeroSizedData"),
       ]),
-      "span_begin_line": Uint64(74),
-      "span_end_line": Uint64(76),
+      "span_begin_line": Uint64(76),
+      "span_end_line": Uint64(78),
       "span_filename": String("src/lib.rs"),
       "transparent_variant_name": List([
         String("Bar"),

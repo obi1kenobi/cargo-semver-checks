@@ -1,3 +1,5 @@
+#![no_std]
+
 //! Pretending that `#[doc(hidden)]` items simply don't exist is not a valid solution.
 //! This crate presents a counterexample: an edge case that would trigger
 //! a false-positive "enum_variant_added" lint error with such an implementation.

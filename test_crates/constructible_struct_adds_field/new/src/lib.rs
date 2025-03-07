@@ -1,3 +1,5 @@
+#![no_std]
+
 pub struct ExhaustiveEmptyPlainStruct {
     pub new_field: bool,
 }

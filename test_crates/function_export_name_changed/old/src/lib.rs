@@ -1,3 +1,5 @@
+#![no_std]
+
 /// positive test - a function changes export_name
 #[export_name = "export_name_changed_old"]
 pub fn export_name_changed() {}

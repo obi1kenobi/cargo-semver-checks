@@ -1,3 +1,5 @@
+#![no_std]
+
 pub enum PublicEnum {
     // The basic case - should get reported
     TupleVariantWithFieldAdded(i32, i64, u8),
@@ -12,7 +14,7 @@ pub enum PublicEnum {
     // Variant type change is a different kind of breaking change
     PlainVariantBecomesTuple(usize),
     // Variant type change is a different kind of breaking change
-    StructVariantBecomesTuple(String),
+    StructVariantBecomesTuple(&'static str),
 }
 
 // Changes in a private enum should not be reported

@@ -1,7 +1,7 @@
 ---
 source: src/query.rs
-assertion_line: 769
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/global_value_marked_deprecated/": [
@@ -12,8 +12,8 @@ expression: "&query_execution_results"
         String("global_value_marked_deprecated"),
         String("VALUE_TO_DEPRECATED"),
       ]),
-      "span_begin_line": Uint64(3),
-      "span_end_line": Uint64(3),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -24,8 +24,8 @@ expression: "&query_execution_results"
         String("global_value_marked_deprecated"),
         String("STATIC_TO_DEPRECATED"),
       ]),
-      "span_begin_line": Uint64(6),
-      "span_end_line": Uint64(6),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -36,8 +36,8 @@ expression: "&query_execution_results"
         String("global_value_marked_deprecated"),
         String("CONST_BECOMING_STATIC"),
       ]),
-      "span_begin_line": Uint64(10),
-      "span_end_line": Uint64(10),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -48,8 +48,8 @@ expression: "&query_execution_results"
         String("global_value_marked_deprecated"),
         String("STATIC_BECOMING_CONST"),
       ]),
-      "span_begin_line": Uint64(14),
-      "span_end_line": Uint64(14),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -60,8 +60,8 @@ expression: "&query_execution_results"
         String("global_value_marked_deprecated"),
         String("VALUE_TO_DEPRECATED_MESSAGE"),
       ]),
-      "span_begin_line": Uint64(17),
-      "span_end_line": Uint64(17),
+      "span_begin_line": Uint64(19),
+      "span_end_line": Uint64(19),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -72,8 +72,8 @@ expression: "&query_execution_results"
         String("global_value_marked_deprecated"),
         String("STATIC_TO_DEPRECATED_MESSAGE"),
       ]),
-      "span_begin_line": Uint64(20),
-      "span_end_line": Uint64(20),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

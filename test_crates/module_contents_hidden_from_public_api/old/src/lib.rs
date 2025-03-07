@@ -1,3 +1,5 @@
+#![no_std]
+
 pub mod removals {
     #[doc(hidden)]
     pub fn hidden() {}

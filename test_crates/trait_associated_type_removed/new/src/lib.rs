@@ -1,3 +1,5 @@
+#![no_std]
+
 #![feature(associated_type_defaults)]
 // removing a type from a trait is breaking.
 pub trait RemovedTypeFromTrait {}

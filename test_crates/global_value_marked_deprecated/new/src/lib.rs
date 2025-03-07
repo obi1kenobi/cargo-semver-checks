@@ -1,3 +1,5 @@
+#![no_std]
+
 // These values are now deprecated and should be reported
 #[deprecated]
 pub const VALUE_TO_DEPRECATED: i32 = 42;

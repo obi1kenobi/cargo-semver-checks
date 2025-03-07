@@ -1,3 +1,5 @@
+#![no_std]
+
 #[cfg(not(all(feature = "std", feature = "alloc")))]
 compile_error!("`std` and `alloc` features are  currently required to build this awesome crate");
 

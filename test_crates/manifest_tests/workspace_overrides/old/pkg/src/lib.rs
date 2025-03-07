@@ -1,3 +1,5 @@
+#![no_std]
+
 // this line will be removed in the `new` version in order to trigger
 // the `function_missing` lint, so we can test that we can override
 // its lint level and required version bump in the [package.metadata]

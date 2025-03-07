@@ -1,3 +1,5 @@
+#![no_std]
+
 // Traits transitioning from Unconditionally Sealed → Unsealed (Lint should detect these)
 pub mod unconditionally_sealed_to_unsealed {
     mod hidden {

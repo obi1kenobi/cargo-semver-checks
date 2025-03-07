@@ -1,3 +1,5 @@
+#![no_std]
+
 // private union shouldn't cause any breaking changes
 union PrivateUnion {
     f3: f32,

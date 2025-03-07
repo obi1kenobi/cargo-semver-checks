@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/enum_missing/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("enum_missing"),
         String("WillBeRemovedEnum"),
       ]),
-      "span_begin_line": Uint64(1),
-      "span_end_line": Uint64(1),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -21,8 +22,8 @@ expression: "&query_execution_results"
         String("enum_missing"),
         String("PubUseRemovedEnum"),
       ]),
-      "span_begin_line": Uint64(4),
-      "span_end_line": Uint64(4),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -34,8 +35,8 @@ expression: "&query_execution_results"
         String("enum_tuple_variant_field_added"),
         String("BecomesPrivateEnum"),
       ]),
-      "span_begin_line": Uint64(29),
-      "span_end_line": Uint64(31),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(33),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -47,8 +48,8 @@ expression: "&query_execution_results"
         String("enum_tuple_variant_field_missing"),
         String("BecomesPrivateEnum"),
       ]),
-      "span_begin_line": Uint64(21),
-      "span_end_line": Uint64(23),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(25),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -60,8 +61,8 @@ expression: "&query_execution_results"
         String("enum_variant_missing"),
         String("ShouldNotMatch"),
       ]),
-      "span_begin_line": Uint64(26),
-      "span_end_line": Uint64(28),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(30),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -99,8 +100,8 @@ expression: "&query_execution_results"
         String("switch_to_reexport_as_underscore"),
         String("Enum"),
       ]),
-      "span_begin_line": Uint64(6),
-      "span_end_line": Uint64(8),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

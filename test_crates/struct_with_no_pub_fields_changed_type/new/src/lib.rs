@@ -1,3 +1,5 @@
+#![no_std]
+
 pub enum PubStructChangedToEnum {
     Foo(usize),
 }

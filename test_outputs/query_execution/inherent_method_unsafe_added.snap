@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/inherent_method_unsafe_added/": [
@@ -9,10 +10,10 @@ expression: "&query_execution_results"
       "method_visibility": String("public"),
       "name": String("Foo"),
       "non_matching_span_begin_line": List([
-        Uint64(4),
+        Uint64(6),
       ]),
       "non_matching_span_end_line": List([
-        Uint64(6),
+        Uint64(8),
       ]),
       "non_matching_span_filename": List([
         String("src/lib.rs"),
@@ -21,7 +22,7 @@ expression: "&query_execution_results"
         String("inherent_method_unsafe_added"),
         String("Foo"),
       ]),
-      "span_begin_line": Uint64(4),
+      "span_begin_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -30,10 +31,10 @@ expression: "&query_execution_results"
       "method_visibility": String("public"),
       "name": String("Foo"),
       "non_matching_span_begin_line": List([
-        Uint64(8),
+        Uint64(10),
       ]),
       "non_matching_span_end_line": List([
-        Uint64(10),
+        Uint64(12),
       ]),
       "non_matching_span_filename": List([
         String("src/lib.rs"),
@@ -42,7 +43,7 @@ expression: "&query_execution_results"
         String("inherent_method_unsafe_added"),
         String("Foo"),
       ]),
-      "span_begin_line": Uint64(8),
+      "span_begin_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

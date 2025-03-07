@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/non_exhaustive_struct_changed_type/": [
@@ -11,8 +12,8 @@ expression: "&query_execution_results"
         String("non_exhaustive_struct_changed_type"),
         String("PubNonExhaustiveStructChangedToEnum"),
       ]),
-      "span_begin_line": Uint64(1),
-      "span_end_line": Uint64(1),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("plain"),
       "struct_typename": String("Struct"),
@@ -25,8 +26,8 @@ expression: "&query_execution_results"
         String("non_exhaustive_struct_changed_type"),
         String("PubNonExhaustiveStructChangedToUnion"),
       ]),
-      "span_begin_line": Uint64(3),
-      "span_end_line": Uint64(5),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("plain"),
       "struct_typename": String("Struct"),
@@ -41,8 +42,8 @@ expression: "&query_execution_results"
         String("struct_becomes_enum"),
         String("NonExhaustiveEmptyStructToEnum"),
       ]),
-      "span_begin_line": Uint64(82),
-      "span_end_line": Uint64(84),
+      "span_begin_line": Uint64(84),
+      "span_end_line": Uint64(86),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("plain"),
       "struct_typename": String("Struct"),
@@ -55,8 +56,8 @@ expression: "&query_execution_results"
         String("struct_becomes_enum"),
         String("NonExhaustiveFieldlessUnit"),
       ]),
-      "span_begin_line": Uint64(95),
-      "span_end_line": Uint64(97),
+      "span_begin_line": Uint64(97),
+      "span_end_line": Uint64(99),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("unit"),
       "struct_typename": String("Struct"),
@@ -69,8 +70,8 @@ expression: "&query_execution_results"
         String("struct_becomes_enum"),
         String("NonExhaustiveFieldlessTuple"),
       ]),
-      "span_begin_line": Uint64(100),
-      "span_end_line": Uint64(102),
+      "span_begin_line": Uint64(102),
+      "span_end_line": Uint64(104),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("tuple"),
       "struct_typename": String("Struct"),

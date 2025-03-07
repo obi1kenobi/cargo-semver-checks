@@ -1,3 +1,5 @@
+#![no_std]
+
 // Public repr(C) struct with reordered fields - should trigger warning
 #[repr(C)]
 pub struct PublicStruct {

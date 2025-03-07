@@ -1,22 +1,24 @@
+#![no_std]
+
 /// Normal case, should trigger the lint
 pub struct Plain {
     pub field_becomes_deprecated: i64,
-    pub field_with_deprecation_message: String,
+    pub field_with_deprecation_message: &'static str,
 }
 
-pub struct Tuple(pub i64, pub String);
+pub struct Tuple(pub i64, pub &'static str);
 
 /// Both the struct and its field here will become `#[deprecated]`.
 /// This is a case where we want to report a lint for both the struct and the field.
 pub struct BothBecomeDeprecated {
     pub field_and_struct_deprecated: i64,
-    pub field_with_message_struct_deprecated: String,
+    pub field_with_message_struct_deprecated: &'static str,
 }
 
 // This struct will become deprecated, but its fields won't
 pub struct StructBecomesDeprecated {
     pub field_stays_public: i64,
-    pub field_remains_undeprecated: String,
+    pub field_remains_undeprecated: &'static str,
 }
 
 // Test doc(hidden) interactions with deprecation
@@ -26,7 +28,7 @@ pub struct DocHiddenInteractions {
     pub already_hidden_field: i32,
 
     // Will become both doc(hidden) and deprecated
-    pub field_becomes_both: String,
+    pub field_becomes_both: &'static str,
 
     // Will become deprecated only
     pub field_only_deprecated: bool,
@@ -41,7 +43,7 @@ pub struct DocHiddenInteractions {
 
     // Already deprecated, stays that way
     #[deprecated]
-    pub stays_deprecated: String,
+    pub stays_deprecated: &'static str,
 
     // Control field - no changes
     pub untouched_field: bool,
@@ -51,7 +53,7 @@ pub struct DocHiddenInteractions {
 #[doc(hidden)]
 pub struct DocHiddenStruct {
     pub field_becomes_deprecated: i32,
-    pub another_field_deprecated: String,
+    pub another_field_deprecated: &'static str,
     pub untouched_field: bool,
 }
 
@@ -60,7 +62,7 @@ pub struct PrivateFieldCases {
     #[doc(hidden)]
     hidden_becomes_deprecated: i32,
 
-    becomes_both_but_private: String,
+    becomes_both_but_private: &'static str,
 
     normal_becomes_deprecated: bool,
 }
@@ -70,5 +72,5 @@ struct PrivateStructCase {
     #[doc(hidden)]
     pub hidden_field_becomes_deprecated: i32,
 
-    pub becomes_both_attrs: String,
+    pub becomes_both_attrs: &'static str,
 }

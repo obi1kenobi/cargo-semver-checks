@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait NotGeneric {}
 
 pub trait DefaultBecomesRequired<A, B = i64> {}

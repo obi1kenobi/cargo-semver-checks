@@ -1,3 +1,5 @@
+#![no_std]
+
 pub static GlobalStaticA: i32 = 0;
 pub static GlobalStaticB: i32 = 0;
 

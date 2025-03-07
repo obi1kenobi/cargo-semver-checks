@@ -1,7 +1,7 @@
 ---
 source: src/query.rs
-assertion_line: 769
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/trait_method_default_impl_removed/": [
@@ -12,8 +12,8 @@ expression: "&query_execution_results"
         String("trait_method_default_impl_removed"),
         String("TraitA"),
       ]),
-      "span_begin_line": Uint64(8),
-      "span_end_line": Uint64(8),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -24,8 +24,8 @@ expression: "&query_execution_results"
         String("trait_method_default_impl_removed"),
         String("TraitD"),
       ]),
-      "span_begin_line": Uint64(22),
-      "span_end_line": Uint64(22),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -36,8 +36,8 @@ expression: "&query_execution_results"
         String("trait_method_default_impl_removed"),
         String("TraitE"),
       ]),
-      "span_begin_line": Uint64(27),
-      "span_end_line": Uint64(27),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -48,8 +48,8 @@ expression: "&query_execution_results"
         String("trait_method_default_impl_removed"),
         String("TraitF"),
       ]),
-      "span_begin_line": Uint64(32),
-      "span_end_line": Uint64(32),
+      "span_begin_line": Uint64(34),
+      "span_end_line": Uint64(34),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -62,8 +62,8 @@ expression: "&query_execution_results"
         String("trait_no_longer_dyn_compatible"),
         String("RefTrait"),
       ]),
-      "span_begin_line": Uint64(3),
-      "span_end_line": Uint64(3),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

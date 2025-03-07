@@ -1,3 +1,5 @@
+#![no_std]
+
 macro_rules! will_no_longer_be_exported {
     () => {};
 }

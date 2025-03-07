@@ -1,3 +1,5 @@
+#![no_std]
+
 #[cfg(feature = "A")]
 pub fn function_previously_depending_on_A() {}
 

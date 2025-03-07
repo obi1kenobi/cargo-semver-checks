@@ -1,3 +1,5 @@
+#![no_std]
+
 // Method of public trait becomes unsafe, should get reported.
 pub trait PubTrait {
     unsafe fn becomes_unsafe();

@@ -1,3 +1,5 @@
+#![no_std]
+
 // Public enum with #[derive(PartialOrd)] and reordered variants - should trigger warning
 #[derive(PartialOrd, PartialEq)]
 pub enum PublicEnum {
@@ -56,12 +58,12 @@ pub enum ManuallyImplemented {
 }
 
 impl PartialOrd for ManuallyImplemented {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         match (self, other) {
-            (Self::A, Self::A) => Some(std::cmp::Ordering::Equal),
-            (Self::A, Self::B) => Some(std::cmp::Ordering::Less),
-            (Self::B, Self::A) => Some(std::cmp::Ordering::Greater),
-            (Self::B, Self::B) => Some(std::cmp::Ordering::Equal),
+            (Self::A, Self::A) => Some(core::cmp::Ordering::Equal),
+            (Self::A, Self::B) => Some(core::cmp::Ordering::Less),
+            (Self::B, Self::A) => Some(core::cmp::Ordering::Greater),
+            (Self::B, Self::B) => Some(core::cmp::Ordering::Equal),
         }
     }
 }
@@ -78,15 +80,15 @@ pub enum MultipleDerivesWithPartialOrd {
 #[derive(PartialOrd, PartialEq)]
 pub enum MixedVariantTypes {
     Unit,
-    Tuple(i32, String),
-    Struct { x: i32, y: String },
+    Tuple(i32, &'static str),
+    Struct { x: i32, y: &'static str },
 }
 
 // Test with struct variants - should trigger
 #[derive(PartialOrd, PartialEq)]
 pub enum StructVariants {
     A { x: i32 },
-    B { y: String },
+    B { y: &'static str },
     C { z: bool },
 }
 
@@ -94,7 +96,7 @@ pub enum StructVariants {
 #[derive(PartialOrd, PartialEq)]
 pub enum TupleVariants {
     A(i32),
-    B(String),
+    B(&'static str),
     C(bool),
 }
 
@@ -138,15 +140,15 @@ pub enum HandImplToDerived {
 }
 
 impl PartialOrd for HandImplToDerived {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         match (self, other) {
-            (Self::A, Self::A) => Some(std::cmp::Ordering::Equal),
-            (Self::A, Self::B) | (Self::A, Self::C) => Some(std::cmp::Ordering::Less),
-            (Self::B, Self::A) => Some(std::cmp::Ordering::Greater),
-            (Self::B, Self::B) => Some(std::cmp::Ordering::Equal),
-            (Self::B, Self::C) => Some(std::cmp::Ordering::Less),
-            (Self::C, Self::A) | (Self::C, Self::B) => Some(std::cmp::Ordering::Greater),
-            (Self::C, Self::C) => Some(std::cmp::Ordering::Equal),
+            (Self::A, Self::A) => Some(core::cmp::Ordering::Equal),
+            (Self::A, Self::B) | (Self::A, Self::C) => Some(core::cmp::Ordering::Less),
+            (Self::B, Self::A) => Some(core::cmp::Ordering::Greater),
+            (Self::B, Self::B) => Some(core::cmp::Ordering::Equal),
+            (Self::B, Self::C) => Some(core::cmp::Ordering::Less),
+            (Self::C, Self::A) | (Self::C, Self::B) => Some(core::cmp::Ordering::Greater),
+            (Self::C, Self::C) => Some(core::cmp::Ordering::Equal),
         }
     }
 }

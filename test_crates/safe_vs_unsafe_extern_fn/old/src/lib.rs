@@ -1,3 +1,5 @@
+#![no_std]
+
 #![feature(unsafe_extern_blocks)]  // Remove after our lowest tested Rust version is 1.82+.
 
 extern "C" {

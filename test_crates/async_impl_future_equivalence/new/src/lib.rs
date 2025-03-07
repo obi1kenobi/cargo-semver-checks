@@ -1,7 +1,9 @@
+#![no_std]
+
 //! async fn and return position impl Future are equivalent.
 //! Switching from one to the other should NOT generate any lints
 
-use std::future::Future;
+use core::future::Future;
 
 pub fn switches_to_return_impl() -> impl Future {
     async {}

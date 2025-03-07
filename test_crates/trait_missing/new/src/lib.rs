@@ -1,3 +1,5 @@
+#![no_std]
+
 trait AddedPrivateTrait {}
 
 pub trait AddedPubTrait {}

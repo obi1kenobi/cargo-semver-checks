@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/unit_struct_changed_kind/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("unit_struct_changed_kind"),
         String("UnitStructToPlain"),
       ]),
-      "span_begin_line": Uint64(1),
-      "span_end_line": Uint64(1),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

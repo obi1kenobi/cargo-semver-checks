@@ -1,3 +1,5 @@
+#![no_std]
+
 #[doc(hidden)]
 pub union MyUnion {
     f1: u32,

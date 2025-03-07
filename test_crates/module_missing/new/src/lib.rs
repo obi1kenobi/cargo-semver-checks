@@ -1,3 +1,5 @@
+#![no_std]
+
 // Removing this, but no warning should happen:
 // it isn't public.
 //

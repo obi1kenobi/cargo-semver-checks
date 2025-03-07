@@ -1,3 +1,5 @@
+#![no_std]
+
 pub extern "C" fn c_function_becomes_rust() -> () {}
 
 pub extern "C" fn c_function_becomes_rust_implicitly() -> () {}

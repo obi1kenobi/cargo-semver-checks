@@ -1,3 +1,5 @@
+#![no_std]
+
 #[repr(transparent)]
 pub struct Foo {
     pub bar: usize,
@@ -9,7 +11,7 @@ pub struct Bar(pub usize);
 #[repr(transparent)]
 pub struct WithZeroSizedData<T> {
     pub bar: usize,
-    _marker: std::marker::PhantomData<T>,
+    _marker: core::marker::PhantomData<T>,
 }
 
 #[repr(transparent)]
@@ -18,37 +20,37 @@ pub struct TupleWithZeroSizedData<T>(pub usize, core::marker::PhantomData<T>);
 #[repr(transparent)]
 pub struct WithPubZeroSizedData<T> {
     pub bar: usize,
-    pub _marker: std::marker::PhantomData<T>,
+    pub _marker: core::marker::PhantomData<T>,
 }
 
 #[repr(transparent)]
 pub struct WithSpecificZeroSizedData {
     pub bar: usize,
-    _marker: std::marker::PhantomData<&'static usize>,
+    _marker: core::marker::PhantomData<&'static usize>,
 }
 
 #[repr(transparent)]
 pub struct WithFoo {
     pub bar: Foo,
-    _marker: std::marker::PhantomData<&'static usize>,
+    _marker: core::marker::PhantomData<&'static usize>,
 }
 
 #[repr(transparent)]
 pub struct WithRef {
     pub bar: &'static usize,
-    _marker: std::marker::PhantomData<&'static usize>,
+    _marker: core::marker::PhantomData<&'static usize>,
 }
 
 #[repr(transparent)]
 pub struct WithTuple {
     pub bar: (usize, i64),
-    _marker: std::marker::PhantomData<&'static usize>,
+    _marker: core::marker::PhantomData<&'static usize>,
 }
 
 #[repr(transparent)]
 pub struct WithGeneric {
     pub bar: WithZeroSizedData<usize>,
-    _marker: std::marker::PhantomData<&'static usize>,
+    _marker: core::marker::PhantomData<&'static usize>,
 }
 
 

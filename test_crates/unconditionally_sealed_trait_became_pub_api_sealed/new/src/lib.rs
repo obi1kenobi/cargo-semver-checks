@@ -1,3 +1,5 @@
+#![no_std]
+
 // Traits transitioning from Unconditionally Sealed -> Public API Sealed (Lint should detect these)
 pub mod unconditionally_sealed_to_public_api_sealed {
     #[doc(hidden)]

@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait NotGeneric<const COUNT: usize> {}
 
 pub trait DefaultBecomesRequired<const N: usize, const M: usize = 1> {}
