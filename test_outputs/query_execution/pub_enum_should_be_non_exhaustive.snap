@@ -1,0 +1,144 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/non_exhaustive_struct_changed_type/": [
+    {
+      "attrs": List([]),
+      "name": String("PubNonExhaustiveStructChangedToEnum"),
+      "path": List([
+        String("non_exhaustive_struct_changed_type"),
+        String("PubNonExhaustiveStructChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/struct_becomes_enum/": [
+    {
+      "attrs": List([]),
+      "name": String("PubFieldTuple"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("PubFieldTuple"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "attrs": List([]),
+      "name": String("PubFieldStruct"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("PubFieldStruct"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "attrs": List([]),
+      "name": String("ConstructibleFieldlessUnit"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("ConstructibleFieldlessUnit"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "attrs": List([]),
+      "name": String("ConstructibleFieldlessTuple"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("ConstructibleFieldlessTuple"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "attrs": List([]),
+      "name": String("ConstructibleFieldlessStruct"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("ConstructibleFieldlessStruct"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "attrs": List([]),
+      "name": String("TupleToEnum"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("TupleToEnum"),
+      ]),
+      "span_begin_line": Uint64(47),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/struct_with_no_pub_fields_changed_type/": [
+    {
+      "attrs": List([]),
+      "name": String("PubStructChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "attrs": List([]),
+      "name": String("PubStructWithNonPubDocFieldChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithNonPubDocFieldChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "attrs": List([]),
+      "name": String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "attrs": List([]),
+      "name": String("PubStructWithPubFieldChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithPubFieldChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(64),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "attrs": List([]),
+      "name": String("PubStructChangedToNoFieldsEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructChangedToNoFieldsEnum"),
+      ]),
+      "span_begin_line": Uint64(82),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/switch_away_from_reexport_as_underscore/": [
+    {
+      "attrs": List([]),
+      "name": String("Enum"),
+      "path": List([
+        String("switch_away_from_reexport_as_underscore"),
+        String("Enum"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
