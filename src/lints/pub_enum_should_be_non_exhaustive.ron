@@ -1,7 +1,7 @@
 SemverQuery(
     id: "pub_enum_should_be_non_exhaustive",
     human_readable_name: "Public API enum added without #[non_exhaustive]",
-    description: "A new public API enum has been added without #[non_exhaustive], which may cause future breaking changes.",
+    description: "An enum has been added without #[non_exhaustive].",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
