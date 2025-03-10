@@ -8,7 +8,6 @@ info:
   env:
     CARGO_TERM_COLOR: never
     RUST_BACKTRACE: "0"
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -46,7 +45,7 @@ cargo [CARGO_VERSION] ([CARGO_VERSION_DETAILS])
 - Architecture: [ARCH]
 - Pointer width: [WIDTH]
 - Endian: [ENDIAN]
-- CPU features: [FEATURES]
+- CPU features: [FEATURES].1,ssse3
 - Host: [HOST_TRIPLE]
 
 

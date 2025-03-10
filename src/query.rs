@@ -1288,6 +1288,7 @@ add_lints!(
     proc_macro_marked_deprecated,
     proc_macro_now_doc_hidden,
     pub_api_sealed_trait_became_unconditionally_sealed,
+    pub_enum_should_be_non_exhaustive,
     pub_module_level_const_missing,
     pub_module_level_const_now_doc_hidden,
     pub_static_missing,

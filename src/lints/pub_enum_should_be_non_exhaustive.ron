@@ -1,0 +1,51 @@
+SemverQuery(
+    id: "pub_enum_should_be_non_exhaustive",
+    human_readable_name: "Public API enum added without #[non_exhaustive]",
+    description: "A new public API enum has been added without #[non_exhaustive], which may cause future breaking changes.",
+    required_update: Minor,
+    lint_level: Warn,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]){
+                item {
+                    ... on Enum {
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+        "true": true,
+        "non_exhaustive": "#[non_exhaustive]",
+    },
+    error_message: "A new public enum has been introduced without #[non_exhaustive]. Future additions of variants will be a breaking change. Consider adding #[non_exhaustive] to prevent this.",
+    per_result_error_template: Some("Public enum {{join \"::\" path}} introduced without #[non_exhaustive], making future changes breaking. Consider adding #[non_exhaustive]. Defined at {{span_filename}}:{{span_begin_line}}."),
+)
+
