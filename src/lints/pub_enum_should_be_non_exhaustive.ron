@@ -3,7 +3,7 @@ SemverQuery(
     human_readable_name: "Public API enum added without #[non_exhaustive]",
     description: "A new public API enum has been added without #[non_exhaustive], which may cause future breaking changes.",
     required_update: Minor,
-    lint_level: Warn,
+    lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
     query: r#"
     {
@@ -45,7 +45,6 @@ SemverQuery(
         "true": true,
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A new public enum has been introduced without #[non_exhaustive]. Future additions of variants will be a breaking change. Consider adding #[non_exhaustive] to prevent this.",
-    per_result_error_template: Some("Public enum {{join \"::\" path}} introduced without #[non_exhaustive], making future changes breaking. Consider adding #[non_exhaustive]. Defined at {{span_filename}}:{{span_begin_line}}."),
+    error_message: "A new public API enum has been added without #[non_exhaustive], which may cause future breaking changes.",
+    per_result_error_template: Some("Public enum {{join \"::\" path}} lacks #[non_exhaustive], in file {{span_filename}}:{{span_begin_line}}."),
 )
-
