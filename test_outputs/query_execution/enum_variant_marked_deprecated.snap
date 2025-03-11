@@ -1,0 +1,68 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_variant_marked_deprecated/": [
+    {
+      "name": String("NormalEnum"),
+      "path": List([
+        String("enum_variant_marked_deprecated"),
+        String("NormalEnum"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("VariantToBeDeprecated"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NormalEnum"),
+      "path": List([
+        String("enum_variant_marked_deprecated"),
+        String("NormalEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("VariantToBeDeprecatedWithMessage"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MixedVariantKinds"),
+      "path": List([
+        String("enum_variant_marked_deprecated"),
+        String("MixedVariantKinds"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("UnitVariant"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MixedVariantKinds"),
+      "path": List([
+        String("enum_variant_marked_deprecated"),
+        String("MixedVariantKinds"),
+      ]),
+      "span_begin_line": Uint64(40),
+      "span_end_line": Uint64(40),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariant"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MixedVariantKinds"),
+      "path": List([
+        String("enum_variant_marked_deprecated"),
+        String("MixedVariantKinds"),
+      ]),
+      "span_begin_line": Uint64(43),
+      "span_end_line": Uint64(46),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
