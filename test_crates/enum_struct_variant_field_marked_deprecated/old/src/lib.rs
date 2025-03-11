@@ -12,7 +12,11 @@ pub enum NormalEnum {
         normal_field: bool,
     },
     // Another variant type for comparison
-    TupleVariant(i32, i32),
+    TupleVariant(
+        // Will be marked as deprecated - not trigger
+        i32,
+        i32,
+    ),
     // Unit variant
     UnitVariant,
 }

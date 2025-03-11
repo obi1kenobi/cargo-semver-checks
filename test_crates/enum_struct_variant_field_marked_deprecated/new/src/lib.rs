@@ -14,7 +14,11 @@ pub enum NormalEnum {
         normal_field: bool,
     },
     // Another variant type for comparison
-    TupleVariant(i32, i32),
+    TupleVariant(
+        // Now deprecated - not trigger
+        #[deprecated] i32,
+        i32,
+    ),
     // Unit variant
     UnitVariant,
 }
