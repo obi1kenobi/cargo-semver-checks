@@ -1,0 +1,48 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_no_repr_variant_discriminant_changed/": [
+    {
+      "name": String("DiscriminantIsChangedAndVariantNoLongerNonExhaustive"),
+      "path": List([
+        String("enum_no_repr_variant_discriminant_changed"),
+        String("DiscriminantIsChangedAndVariantNoLongerNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(103),
+      "span_end_line": Uint64(103),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("First"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_tuple_variant_field_added/": [
+    {
+      "name": String("PublicEnum"),
+      "path": List([
+        String("enum_tuple_variant_field_added"),
+        String("PublicEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariantWithFieldAddedBecomesExhaustive"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_variant_unmarked_non_exhaustive/": [
+    {
+      "name": String("ExhaustiveEnum"),
+      "path": List([
+        String("enum_variant_unmarked_non_exhaustive"),
+        String("ExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("VariantA"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
