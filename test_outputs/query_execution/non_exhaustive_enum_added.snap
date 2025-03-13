@@ -1,0 +1,72 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/non_exhaustive_enum_added/": [
+    {
+      "name": String("NonExhaustiveEnum"),
+      "path": List([
+        String("non_exhaustive_enum_added"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/struct_becomes_enum/": [
+    {
+      "name": String("StructToEnum"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("StructToEnum"),
+      ]),
+      "span_begin_line": Uint64(63),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NonExhaustiveEmptyStructToEnum"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("NonExhaustiveEmptyStructToEnum"),
+      ]),
+      "span_begin_line": Uint64(84),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NonExhaustiveFieldlessUnit"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("NonExhaustiveFieldlessUnit"),
+      ]),
+      "span_begin_line": Uint64(97),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NonExhaustiveFieldlessTuple"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("NonExhaustiveFieldlessTuple"),
+      ]),
+      "span_begin_line": Uint64(102),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/struct_with_no_pub_fields_changed_type/": [
+    {
+      "name": String("PubNonExhaustiveStructChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubNonExhaustiveStructChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
