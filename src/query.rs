@@ -1359,6 +1359,7 @@ add_lints!(
     type_requires_more_generic_type_params,
     unconditionally_sealed_trait_became_pub_api_sealed,
     unconditionally_sealed_trait_became_unsealed,
+    union_added,
     union_field_added_with_all_pub_fields,
     union_field_added_with_non_pub_fields,
     union_field_missing,
