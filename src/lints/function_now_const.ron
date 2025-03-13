@@ -1,0 +1,52 @@
+SemverQuery(
+    id: "function_now_const",
+    human_readable_name: "pub fn has newly become const",
+    description: "A public function has newly become const",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/const_eval.html"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        const @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        const @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A publicly-visible function has newly become `const`",
+    per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+)
