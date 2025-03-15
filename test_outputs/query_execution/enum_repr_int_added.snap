@@ -1,0 +1,70 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_no_repr_variant_discriminant_changed/": [
+    {
+      "name": String("GainsRepr"),
+      "path": List([
+        String("enum_no_repr_variant_discriminant_changed"),
+        String("GainsRepr"),
+      ]),
+      "span_begin_line": Uint64(51),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("FieldlessChangesToExplicitDescriminant"),
+      "path": List([
+        String("enum_no_repr_variant_discriminant_changed"),
+        String("FieldlessChangesToExplicitDescriminant"),
+      ]),
+      "span_begin_line": Uint64(76),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_repr_int_added/": [
+    {
+      "name": String("EnumToU8Enum"),
+      "path": List([
+        String("enum_repr_int_added"),
+        String("EnumToU8Enum"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EnumToI32Enum"),
+      "path": List([
+        String("enum_repr_int_added"),
+        String("EnumToI32Enum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EnumToIsizeEnum"),
+      "path": List([
+        String("enum_repr_int_added"),
+        String("EnumToIsizeEnum"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EnumToUsizeEnum"),
+      "path": List([
+        String("enum_repr_int_added"),
+        String("EnumToUsizeEnum"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
