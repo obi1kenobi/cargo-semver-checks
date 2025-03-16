@@ -51,4 +51,7 @@ SemverQuery(
     },
     error_message: "A publicly-visible function now takes a different number of parameters.",
     per_result_error_template: Some("{{join \"::\" path}} now takes {{current_parameter_count}} parameters instead of {{old_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+    hint_template: r#"{{join "::" path}}( #parameters != {{old_parameter_count}} );"#,
+    ),
 )

@@ -1,0 +1,14 @@
+---
+source: src/query.rs
+description: "Lint `function_parameter_count_changed` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/parameter_count_changed/"]]
+filename = 'src/lib.rs'
+begin_line = 3
+hint = 'parameter_count_changed::function_with_a_parameter_added( #parameters != 1 );'
+
+[["./test_crates/parameter_count_changed/"]]
+filename = 'src/lib.rs'
+begin_line = 5
+hint = 'parameter_count_changed::function_with_parameters_removed( #parameters != 2 );'
