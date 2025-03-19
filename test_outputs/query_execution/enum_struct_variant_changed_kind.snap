@@ -1,0 +1,73 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_struct_variant_changed_kind/": [
+    {
+      "enum_name": String("TestTuple"),
+      "kind": String("StructVariant"),
+      "new_kind": String("TupleVariant"),
+      "path": List([
+        String("enum_struct_variant_changed_kind"),
+        String("TestTuple"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeTupleLike"),
+    },
+    {
+      "enum_name": String("TestUnit"),
+      "kind": String("StructVariant"),
+      "new_kind": String("PlainVariant"),
+      "path": List([
+        String("enum_struct_variant_changed_kind"),
+        String("TestUnit"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeUnitLike"),
+    },
+    {
+      "enum_name": String("TestMultipleFields"),
+      "kind": String("StructVariant"),
+      "new_kind": String("TupleVariant"),
+      "path": List([
+        String("enum_struct_variant_changed_kind"),
+        String("TestMultipleFields"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeTupleLike"),
+    },
+    {
+      "enum_name": String("TestBecomeDocHidden"),
+      "kind": String("StructVariant"),
+      "new_kind": String("TupleVariant"),
+      "path": List([
+        String("enum_struct_variant_changed_kind"),
+        String("TestBecomeDocHidden"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeTupleLike"),
+    },
+    {
+      "enum_name": String("TestBecomeNonExhaustive"),
+      "kind": String("StructVariant"),
+      "new_kind": String("TupleVariant"),
+      "path": List([
+        String("enum_struct_variant_changed_kind"),
+        String("TestBecomeNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeTupleLike"),
+    },
+  ],
+}
