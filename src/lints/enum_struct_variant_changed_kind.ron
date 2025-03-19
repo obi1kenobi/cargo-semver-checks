@@ -4,6 +4,8 @@ SemverQuery(
     description: "A pub enum struct variant with atleast one pub field changed kind",
     required_update: Major,
     lint_level: Deny,
+    // TODO: If the Rust reference gains a more detailed explanation of enum *variants*,
+    //       switch the explanation to point there instead. The current link isn't great.
     reference_link: Some("https://doc.rust-lang.org/reference/items/enumerations.html"),
     query: r#"
     {
