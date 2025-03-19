@@ -6,9 +6,9 @@ expression: "&actual_witnesses"
 [["./test_crates/parameter_count_changed/"]]
 filename = 'src/lib.rs'
 begin_line = 3
-hint = 'parameter_count_changed::function_with_a_parameter_added( #parameters != 1 );'
+hint = 'let witness = |_| parameter_count_changed::function_with_a_parameter_added(_);'
 
 [["./test_crates/parameter_count_changed/"]]
 filename = 'src/lib.rs'
 begin_line = 5
-hint = 'parameter_count_changed::function_with_parameters_removed( #parameters != 2 );'
+hint = 'let witness = |_ , _| parameter_count_changed::function_with_parameters_removed(_ , _);'

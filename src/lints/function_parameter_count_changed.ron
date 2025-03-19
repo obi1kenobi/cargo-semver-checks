@@ -19,6 +19,10 @@ SemverQuery(
                         }
 
                         old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters")
+
+                        parameter @fold {
+                        old_parameter_names: name @output
+                        }
                     }
                 }
             }
@@ -52,6 +56,6 @@ SemverQuery(
     error_message: "A publicly-visible function now takes a different number of parameters.",
     per_result_error_template: Some("{{join \"::\" path}} now takes {{current_parameter_count}} parameters instead of {{old_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
     witness: (
-    hint_template: r#"{{join "::" path}}( #parameters != {{old_parameter_count}} );"#,
+    hint_template: r#"let witness = |{{join " , " old_parameter_names}}| {{join "::" path}}({{join " , " old_parameter_names}});"#,
     ),
 )
