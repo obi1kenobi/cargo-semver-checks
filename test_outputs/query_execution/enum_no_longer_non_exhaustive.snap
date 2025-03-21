@@ -5,10 +5,10 @@ expression: "&query_execution_results"
 {
   "./test_crates/enum_no_longer_non_exhaustive/": [
     {
-      "name": String("SimpleEnum"),
+      "name": String("NonExhaustiveEnum"),
       "path": List([
         String("enum_no_longer_non_exhaustive"),
-        String("SimpleEnum"),
+        String("NonExhaustiveEnum"),
       ]),
       "span_begin_line": Uint64(3),
       "span_filename": String("src/lib.rs"),

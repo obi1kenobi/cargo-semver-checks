@@ -1,7 +1,7 @@
 SemverQuery(
     id: "enum_no_longer_non_exhaustive",
     human_readable_name: "enum no longer #[non_exhaustive]",
-    description: "A pub enum is no longer #[non_exhaustive]",
+    description: "A pub enum is no longer #[non_exhaustive]. Pattern-matching outside its crate is now exhaustive, potentially causing breaking changes if new variants are added.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
