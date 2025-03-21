@@ -6,7 +6,7 @@ expression: "&query_execution_results"
   "./test_crates/enum_struct_variant_field_marked_deprecated/": [
     {
       "enum_name": String("NormalEnum"),
-      "field_position": Int64(1),
+      "field_name": String("0"),
       "path": List([
         String("enum_struct_variant_field_marked_deprecated"),
         String("NormalEnum"),
@@ -20,7 +20,7 @@ expression: "&query_execution_results"
   "./test_crates/enum_tuple_variant_field_marked_deprecated/": [
     {
       "enum_name": String("TupleVariantEnum"),
-      "field_position": Int64(1),
+      "field_name": String("0"),
       "path": List([
         String("enum_tuple_variant_field_marked_deprecated"),
         String("TupleVariantEnum"),
@@ -32,7 +32,7 @@ expression: "&query_execution_results"
     },
     {
       "enum_name": String("TupleVariantEnum"),
-      "field_position": Int64(2),
+      "field_name": String("1"),
       "path": List([
         String("enum_tuple_variant_field_marked_deprecated"),
         String("TupleVariantEnum"),
@@ -44,7 +44,7 @@ expression: "&query_execution_results"
     },
     {
       "enum_name": String("TupleVariantEnum"),
-      "field_position": Int64(2),
+      "field_name": String("1"),
       "path": List([
         String("enum_tuple_variant_field_marked_deprecated"),
         String("TupleVariantEnum"),
@@ -56,7 +56,7 @@ expression: "&query_execution_results"
     },
     {
       "enum_name": String("EnumWithHiddenVariant"),
-      "field_position": Int64(1),
+      "field_name": String("0"),
       "path": List([
         String("enum_tuple_variant_field_marked_deprecated"),
         String("EnumWithHiddenVariant"),

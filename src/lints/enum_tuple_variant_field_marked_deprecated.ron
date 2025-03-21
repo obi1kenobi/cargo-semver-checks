@@ -27,7 +27,7 @@ SemverQuery(
                                 deprecated @filter(op: "!=", value: ["$true"])
 
                                 field {
-                                    field_position: position @output @tag
+                                    field_name: name @output @tag
                                     public_api_eligible @filter(op: "=", value: ["$true"])
                                     deprecated @filter(op: "!=", value: ["$true"])
                                 }
@@ -56,7 +56,7 @@ SemverQuery(
                                 deprecated @filter(op: "!=", value: ["$true"])
 
                                 field {
-                                    position @filter(op: "=", value: ["%field_position"])
+                                    name @filter(op: "=", value: ["%field_name"])
                                     public_api_eligible @filter(op: "=", value: ["$true"])
                                     deprecated @filter(op: "=", value: ["$true"])
 
@@ -78,5 +78,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A field in an enum's tuple variant is now #[deprecated]. Downstream crates will get a compiler warning when accessing this field.",
-    per_result_error_template: Some("field at position {{field_position}} in enum variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("field {{enum_name}}::{{variant_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
