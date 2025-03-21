@@ -31,17 +31,29 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/enum_variant_unmarked_non_exhaustive/": [
+  "./test_crates/enum_variant_no_longer_non_exhaustive/": [
     {
       "name": String("ExhaustiveEnum"),
       "path": List([
-        String("enum_variant_unmarked_non_exhaustive"),
+        String("enum_variant_no_longer_non_exhaustive"),
         String("ExhaustiveEnum"),
       ]),
       "span_begin_line": Uint64(4),
       "span_end_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
-      "variant_name": String("VariantA"),
+      "variant_name": String("Variant"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NonExhaustiveEnum"),
+      "path": List([
+        String("enum_variant_no_longer_non_exhaustive"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Variant"),
       "visibility_limit": String("public"),
     },
   ],

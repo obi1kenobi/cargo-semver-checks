@@ -1,7 +1,7 @@
 SemverQuery(
-    id: "enum_variant_unmarked_non_exhaustive",
-    human_readable_name: "enum variant unmarked #[non_exhaustive]",
-    description: "A Public API enum variant is no longer #[non_exhaustive]",
+    id: "enum_variant_no_longer_non_exhaustive",
+    human_readable_name: "enum variant no longer #[non_exhaustive]",
+    description: "A pub enum variant is no longer #[non_exhaustive], potentially causing breaking changes if new fields are added.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
@@ -12,7 +12,6 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         importable_path {
                             path @output @tag
@@ -59,6 +58,6 @@ SemverQuery(
         "non_exhaustive": "#[non_exhaustive]",
         "true": true,
     },
-    error_message: "The #[non_exhaustive] attribute has been removed from a variant of a public enum, forcing exhaustive pattern matching in downstream crates.",
+    error_message: "A pub enum variant is no longer #[non_exhaustive], potentially causing breaking changes if new fields are added.",
     per_result_error_template: Some("variant {{name}}:{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
