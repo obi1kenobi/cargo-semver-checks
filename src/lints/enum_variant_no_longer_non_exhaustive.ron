@@ -30,7 +30,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @output
+                        enum_name: name @output
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -59,5 +59,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A pub enum variant is no longer #[non_exhaustive], potentially causing breaking changes if new fields are added.",
-    per_result_error_template: Some("variant {{name}}:{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("variant {{enum_name}}:{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
 )

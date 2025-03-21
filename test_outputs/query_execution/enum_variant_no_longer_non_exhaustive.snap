@@ -5,7 +5,7 @@ expression: "&query_execution_results"
 {
   "./test_crates/enum_no_repr_variant_discriminant_changed/": [
     {
-      "name": String("DiscriminantIsChangedAndVariantNoLongerNonExhaustive"),
+      "enum_name": String("DiscriminantIsChangedAndVariantNoLongerNonExhaustive"),
       "path": List([
         String("enum_no_repr_variant_discriminant_changed"),
         String("DiscriminantIsChangedAndVariantNoLongerNonExhaustive"),
@@ -19,7 +19,7 @@ expression: "&query_execution_results"
   ],
   "./test_crates/enum_tuple_variant_field_added/": [
     {
-      "name": String("PublicEnum"),
+      "enum_name": String("PublicEnum"),
       "path": List([
         String("enum_tuple_variant_field_added"),
         String("PublicEnum"),
@@ -33,7 +33,7 @@ expression: "&query_execution_results"
   ],
   "./test_crates/enum_variant_no_longer_non_exhaustive/": [
     {
-      "name": String("ExhaustiveEnum"),
+      "enum_name": String("ExhaustiveEnum"),
       "path": List([
         String("enum_variant_no_longer_non_exhaustive"),
         String("ExhaustiveEnum"),
@@ -45,7 +45,7 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
     {
-      "name": String("NonExhaustiveEnum"),
+      "enum_name": String("NonExhaustiveEnum"),
       "path": List([
         String("enum_variant_no_longer_non_exhaustive"),
         String("NonExhaustiveEnum"),
