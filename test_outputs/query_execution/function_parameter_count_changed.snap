@@ -9,7 +9,7 @@ expression: "&query_execution_results"
       "name": String("function_with_a_parameter_added"),
       "old_parameter_count": Uint64(1),
       "old_parameter_names": List([
-        String("_"),
+        String("a"),
       ]),
       "path": List([
         String("parameter_count_changed"),
@@ -25,8 +25,8 @@ expression: "&query_execution_results"
       "name": String("function_with_parameters_removed"),
       "old_parameter_count": Uint64(2),
       "old_parameter_names": List([
-        String("_"),
-        String("_"),
+        String("a"),
+        String("b"),
       ]),
       "path": List([
         String("parameter_count_changed"),
