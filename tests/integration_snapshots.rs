@@ -166,9 +166,11 @@ fn set_snapshot_filters(settings: &mut insta::Settings) {
     // Turn dynamic time strings like [  0.123s] into [TIME] for reproducibility.
     settings.add_filter(r"\[\s*[\d\.]+s\]", "[TIME]");
     // Turn total number of checks into [TOTAL] to not fail when new lints are added.
-    settings.add_filter(r"\d+ checks", "[TOTAL] checks");
-    // Similarly, turn the number of passed checks to also not fail when new lints are added.
+    settings.add_filter(r"\d+ checks:", "[TOTAL] checks:");
+    // Similarly, turn the number of passed and skipped checks into placeholders,
+    // so we also don't fail when new lints are added.
     settings.add_filter(r"\d+ pass", "[PASS] pass");
+    settings.add_filter(r"\d+ skip", "[SKIP] skip");
     // Escape the root path (e.g., in lint spans) for deterministic results in different
     // build environments.
     let repo_root = get_root_path();
