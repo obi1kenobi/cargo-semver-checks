@@ -1,0 +1,44 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_struct_variant_field_marked_deprecated/": [
+    {
+      "enum_name": String("NormalEnum"),
+      "field_name": String("field_to_be_deprecated"),
+      "path": List([
+        String("enum_struct_variant_field_marked_deprecated"),
+        String("NormalEnum"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+    },
+    {
+      "enum_name": String("NormalEnum"),
+      "field_name": String("field_to_be_deprecated_with_message"),
+      "path": List([
+        String("enum_struct_variant_field_marked_deprecated"),
+        String("NormalEnum"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+    },
+    {
+      "enum_name": String("EnumWithAlreadyDeprecatedField"),
+      "field_name": String("field_to_be_deprecated"),
+      "path": List([
+        String("enum_struct_variant_field_marked_deprecated"),
+        String("EnumWithAlreadyDeprecatedField"),
+      ]),
+      "span_begin_line": Uint64(112),
+      "span_end_line": Uint64(112),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructVariant"),
+    },
+  ],
+}
