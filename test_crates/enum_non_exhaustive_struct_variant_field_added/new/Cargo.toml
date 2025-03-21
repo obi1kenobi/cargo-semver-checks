@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "enum_non_exhaustive_struct_variant_field_added"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
