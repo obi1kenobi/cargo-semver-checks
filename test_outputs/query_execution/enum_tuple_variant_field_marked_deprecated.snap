@@ -1,0 +1,70 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_struct_variant_field_marked_deprecated/": [
+    {
+      "enum_name": String("NormalEnum"),
+      "field_position": Int64(1),
+      "path": List([
+        String("enum_struct_variant_field_marked_deprecated"),
+        String("NormalEnum"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_end_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariant"),
+    },
+  ],
+  "./test_crates/enum_tuple_variant_field_marked_deprecated/": [
+    {
+      "enum_name": String("TupleVariantEnum"),
+      "field_position": Int64(1),
+      "path": List([
+        String("enum_tuple_variant_field_marked_deprecated"),
+        String("TupleVariantEnum"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariant"),
+    },
+    {
+      "enum_name": String("TupleVariantEnum"),
+      "field_position": Int64(2),
+      "path": List([
+        String("enum_tuple_variant_field_marked_deprecated"),
+        String("TupleVariantEnum"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariant"),
+    },
+    {
+      "enum_name": String("TupleVariantEnum"),
+      "field_position": Int64(2),
+      "path": List([
+        String("enum_tuple_variant_field_marked_deprecated"),
+        String("TupleVariantEnum"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AnotherTuple"),
+    },
+    {
+      "enum_name": String("EnumWithHiddenVariant"),
+      "field_position": Int64(1),
+      "path": List([
+        String("enum_tuple_variant_field_marked_deprecated"),
+        String("EnumWithHiddenVariant"),
+      ]),
+      "span_begin_line": Uint64(57),
+      "span_end_line": Uint64(57),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("NormalTuple"),
+    },
+  ],
+}
