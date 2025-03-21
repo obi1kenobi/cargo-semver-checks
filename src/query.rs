@@ -1232,6 +1232,7 @@ add_lints!(
     enum_marked_non_exhaustive,
     enum_missing,
     enum_must_use_added,
+    enum_no_longer_non_exhaustive,
     enum_no_repr_variant_discriminant_changed,
     enum_now_doc_hidden,
     enum_repr_int_changed,
