@@ -3,6 +3,18 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
+  "./test_crates/enum_no_longer_non_exhaustive/": [
+    {
+      "name": String("SimpleEnum"),
+      "path": List([
+        String("enum_no_longer_non_exhaustive"),
+        String("SimpleEnum"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_repr_variant_discriminant_changed/": [
     {
       "name": String("DiscriminantIsChangedButAVariantIsNonExhaustive"),
@@ -11,18 +23,6 @@ expression: "&query_execution_results"
         String("DiscriminantIsChangedButAVariantIsNonExhaustive"),
       ]),
       "span_begin_line": Uint64(23),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-  ],
-  "./test_crates/enum_unmarked_non_exhaustive/": [
-    {
-      "name": String("SimpleEnum"),
-      "path": List([
-        String("enum_unmarked_non_exhaustive"),
-        String("SimpleEnum"),
-      ]),
-      "span_begin_line": Uint64(3),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

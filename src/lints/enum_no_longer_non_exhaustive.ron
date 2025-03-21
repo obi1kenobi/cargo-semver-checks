@@ -1,7 +1,7 @@
 SemverQuery(
-    id: "enum_unmarked_non_exhaustive",
-    human_readable_name: "enum unmarked #[non_exhaustive]",
-    description: "A Public API enum is no longer #[non_exhaustive]",
+    id: "enum_no_longer_non_exhaustive",
+    human_readable_name: "enum no longer #[non_exhaustive]",
+    description: "A pub enum is no longer #[non_exhaustive]",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
@@ -12,7 +12,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        name @output @tag
+                        name @output
 
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
@@ -31,8 +31,6 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%name"])
-
                         attrs @filter(op: "contains", value: ["$non_exhaustive"])
                         
                         importable_path {
@@ -47,6 +45,6 @@ SemverQuery(
         "public": "public",
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A Public API enum is no longer #[non_exhaustive]. External code may assume all variants are known, causing breaking changes if new ones are added.",
+    error_message: "A pub enum is no longer #[non_exhaustive]. Pattern-matching outside its crate is now exhaustive, potentially causing breaking changes if new variants are added.",
     per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )
