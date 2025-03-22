@@ -1,7 +1,7 @@
 SemverQuery(
     id: "union_added",
     human_readable_name: "pub union added",
-    description: "A new public union has been added.",
+    description: "A new pub union has been added.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-new"),
@@ -42,6 +42,6 @@ SemverQuery(
         "zero": 0,
         "true": true,
     },
-    error_message: "A new public union has been added.",
+    error_message: "A new pub union has been added.",
     per_result_error_template: Some("union {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )
