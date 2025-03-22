@@ -5,21 +5,21 @@ expression: "&query_execution_results"
 {
   "./test_crates/pub_const_added/": [
     {
-      "name": String("NewConst"),
+      "name": String("NEW_PUB_CONST_IN_GLOBAL"),
       "path": List([
         String("pub_const_added"),
-        String("NewConst"),
+        String("NEW_PUB_CONST_IN_GLOBAL"),
       ]),
       "span_begin_line": Uint64(15),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
     {
-      "name": String("NewConstInModule"),
+      "name": String("NEW_PUB_CONST_IN_MODULE"),
       "path": List([
         String("pub_const_added"),
         String("my_module"),
-        String("NewConstInModule"),
+        String("NEW_PUB_CONST_IN_MODULE"),
       ]),
       "span_begin_line": Uint64(19),
       "span_filename": String("src/lib.rs"),
