@@ -1,7 +1,7 @@
 SemverQuery(
     id: "function_now_const",
     human_readable_name: "pub fn has newly become const",
-    description: "A public function has newly become const",
+    description: "A pub function has newly become const, which may change its evaluation behavior in some contexts.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/const_eval.html"),
@@ -47,6 +47,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A publicly-visible function has newly become `const`",
+    error_message: "A pub function has newly become `const`, which may change its evaluation behavior in some contexts.",
     per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )
