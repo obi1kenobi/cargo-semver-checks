@@ -8,6 +8,7 @@ snapshot_kind: text
     {
       "enum_name": String("UnitOnlyBecomesUndefined"),
       "field_name": String("a"),
+      "old_field_names": List([]),
       "path": List([
         String("enum_no_repr_variant_discriminant_changed"),
         String("UnitOnlyBecomesUndefined"),
@@ -22,6 +23,9 @@ snapshot_kind: text
     {
       "enum_name": String("AddedVariantField"),
       "field_name": String("y"),
+      "old_field_names": List([
+        String("x"),
+      ]),
       "path": List([
         String("enum_struct_field_hidden_from_public_api"),
         String("AddedVariantField"),
@@ -36,6 +40,9 @@ snapshot_kind: text
     {
       "enum_name": String("PubEnum"),
       "field_name": String("y"),
+      "old_field_names": List([
+        String("x"),
+      ]),
       "path": List([
         String("enum_struct_variant_field_added"),
         String("PubEnum"),
@@ -50,6 +57,10 @@ snapshot_kind: text
     {
       "enum_name": String("EnumWithAddition"),
       "field_name": String("c"),
+      "old_field_names": List([
+        String("a"),
+        String("b"),
+      ]),
       "path": List([
         String("repr_c_enum_struct_variant_fields_reordered"),
         String("EnumWithAddition"),
