@@ -78,7 +78,7 @@ SemverQuery(
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 field @fold {
-                                    old_field_names: name @output
+                                    baseline_field_names: name @output
                                 }
                             }
                         }
@@ -97,7 +97,7 @@ SemverQuery(
     per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: (
         hint_template: r#"match value {
-    {{ join "::" path }}::{{ variant_name }} { {{ join ", " old_field_names }} } => (),
+    {{ join "::" path }}::{{ variant_name }} { {{ join ", " baseline_field_names }} } => (),
     _ => (),
 }"#,
     )
