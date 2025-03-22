@@ -9,7 +9,7 @@ filename = 'src/lib.rs'
 begin_line = 8
 hint = '''
 match value {
-    enum_struct_variant_field_missing::Enum::FieldWillBeMissing{ bar, .. } => (),
+    enum_struct_variant_field_missing::Enum::FieldWillBeMissing { bar, .. } => (),
     _ => (),
 }'''
 
@@ -18,6 +18,6 @@ filename = 'src/lib.rs'
 begin_line = 68
 hint = '''
 match value {
-    repr_c_enum_struct_variant_fields_reordered::EnumWithRemoval::StructVariant{ a, .. } => (),
+    repr_c_enum_struct_variant_fields_reordered::EnumWithRemoval::StructVariant { a, .. } => (),
     _ => (),
 }'''
