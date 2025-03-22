@@ -1,7 +1,7 @@
 SemverQuery(
     id: "pub_const_added",
     human_readable_name: "pub const is added",
-    description: "A new pub const is added.",
+    description: "A new pub const item is added.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-new"),
@@ -43,6 +43,6 @@ SemverQuery(
         "zero": 0,
         "true": true,
     },
-    error_message: "A new public const is added.",
+    error_message: "A new pub const item is added.",
     per_result_error_template: Some("{{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
