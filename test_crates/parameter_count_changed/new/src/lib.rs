@@ -1,6 +1,6 @@
 #![no_std]
 
-pub fn function_with_a_parameter_added(_: (), _: ()) {}
+pub fn function_with_a_parameter_added(a: (), b: ()) {}
 
 pub fn function_with_parameters_removed() {}
 
