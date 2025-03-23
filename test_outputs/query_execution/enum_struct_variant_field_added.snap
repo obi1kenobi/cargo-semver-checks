@@ -6,6 +6,7 @@ snapshot_kind: text
 {
   "./test_crates/enum_no_repr_variant_discriminant_changed/": [
     {
+      "baseline_field_names": List([]),
       "enum_name": String("UnitOnlyBecomesUndefined"),
       "field_name": String("a"),
       "path": List([
@@ -20,6 +21,9 @@ snapshot_kind: text
   ],
   "./test_crates/enum_struct_field_hidden_from_public_api/": [
     {
+      "baseline_field_names": List([
+        String("x"),
+      ]),
       "enum_name": String("AddedVariantField"),
       "field_name": String("y"),
       "path": List([
@@ -34,6 +38,9 @@ snapshot_kind: text
   ],
   "./test_crates/enum_struct_variant_field_added/": [
     {
+      "baseline_field_names": List([
+        String("x"),
+      ]),
       "enum_name": String("PubEnum"),
       "field_name": String("y"),
       "path": List([
@@ -48,6 +55,10 @@ snapshot_kind: text
   ],
   "./test_crates/repr_c_enum_struct_variant_fields_reordered/": [
     {
+      "baseline_field_names": List([
+        String("a"),
+        String("b"),
+      ]),
       "enum_name": String("EnumWithAddition"),
       "field_name": String("c"),
       "path": List([
