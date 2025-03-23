@@ -79,4 +79,10 @@ SemverQuery(
     },
     error_message: "A field in an enum's struct variant is now #[deprecated]. Downstream crates will get a compiler warning when accessing this field.",
     per_result_error_template: Some("field {{enum_name}}::{{variant_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"match value {
+    {{ join "::" path }}::{{ variant_name }} { {{ field_name }}, .. } => (),
+    _ => (),
+}"#,
+    )
 )
