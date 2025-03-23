@@ -1,0 +1,41 @@
+---
+source: src/query.rs
+description: "Lint `enum_struct_variant_field_added` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+snapshot_kind: text
+---
+[["./test_crates/enum_no_repr_variant_discriminant_changed/"]]
+filename = 'src/lib.rs'
+begin_line = 87
+hint = '''
+match value {
+    enum_no_repr_variant_discriminant_changed::UnitOnlyBecomesUndefined::Struct {  } => (),
+    _ => (),
+}'''
+
+[["./test_crates/enum_struct_field_hidden_from_public_api/"]]
+filename = 'src/lib.rs'
+begin_line = 40
+hint = '''
+match value {
+    enum_struct_field_hidden_from_public_api::AddedVariantField::StructVariant { x } => (),
+    _ => (),
+}'''
+
+[["./test_crates/enum_struct_variant_field_added/"]]
+filename = 'src/lib.rs'
+begin_line = 6
+hint = '''
+match value {
+    enum_struct_variant_field_added::PubEnum::Foo { x } => (),
+    _ => (),
+}'''
+
+[["./test_crates/repr_c_enum_struct_variant_fields_reordered/"]]
+filename = 'src/lib.rs'
+begin_line = 65
+hint = '''
+match value {
+    repr_c_enum_struct_variant_fields_reordered::EnumWithAddition::StructVariant { a, b } => (),
+    _ => (),
+}'''
