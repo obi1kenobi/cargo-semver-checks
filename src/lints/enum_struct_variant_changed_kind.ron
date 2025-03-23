@@ -1,7 +1,7 @@
 SemverQuery(
     id: "enum_struct_variant_changed_kind",
     human_readable_name: "An enum struct variant changed kind",
-    description: "A pub enum struct variant with atleast one pub field changed kind",
+    description: "A pub enum struct variant with at least one pub field changed kind",
     required_update: Major,
     lint_level: Deny,
     // TODO: If the Rust reference gains a more detailed explanation of enum *variants*,
@@ -28,7 +28,7 @@ SemverQuery(
                                 attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
                                 variant_name: name @output @tag
 
-                                field @fold @transform(op: "count") @filter(op: "!=", value: ["$zero"]) {
+                                field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                                     public_api_eligible @filter(op: "=", value: ["$true"])
                                 }
                             }

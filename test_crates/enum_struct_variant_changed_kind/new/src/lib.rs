@@ -2,40 +2,40 @@
 
 // ---- Should be reported ----
 pub enum TestTuple {
-    WillBecomeTupleLike(i32)
+    WillBecomeTupleLike(i32),
 }
 
 pub enum TestUnit {
-    WillBecomeUnitLike
+    WillBecomeUnitLike,
 }
 
 pub enum TestMultipleFields {
-    WillBecomeTupleLike(i32, f64)
+    WillBecomeTupleLike(i32, f64),
 }
 
 pub enum TestBecomeDocHidden {
     #[doc(hidden)]
-    WillBecomeTupleLike(i32)
+    WillBecomeTupleLike(i32),
 }
 
 pub enum TestBecomeNonExhaustive {
     #[non_exhaustive]
-    WillBecomeTupleLike(i32)
+    WillBecomeTupleLike(i32),
 }
 
 // ---- Should not be reported ----
 pub enum TestEmptyStruct {
-    EmptyStruct
+    EmptyStruct,
 }
 
 pub enum TestTupleNonExhaustive {
     #[non_exhaustive]
-    WillBecomeTupleLike(i32)
+    WillBecomeTupleLike(i32),
 }
 
 pub enum TestDocHidden {
     #[doc(hidden)]
-    WillBecomeTupleLike(i32)
+    WillBecomeTupleLike(i32),
 }
 
 pub enum MultipleStayTheSame {
