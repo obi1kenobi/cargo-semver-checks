@@ -1,12 +1,12 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/function_marked_deprecated/": [
     {
       "name": String("function_to_deprecated"),
+      "parameters": List([]),
       "path": List([
         String("function_marked_deprecated"),
         String("function_to_deprecated"),
@@ -18,6 +18,9 @@ snapshot_kind: text
     },
     {
       "name": String("function_to_deprecated_message"),
+      "parameters": List([
+        String("input"),
+      ]),
       "path": List([
         String("function_marked_deprecated"),
         String("function_to_deprecated_message"),
