@@ -72,6 +72,6 @@ SemverQuery(
         "zero": 0,
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A pub enum's struct variant with atleast one pub field has changed to a different kind of enum variant, breaking possible instantiations and field accesses.",
+    error_message: "A pub enum's struct variant with at least one pub field has changed to a different kind of enum variant, breaking possible instantiations and field accesses.",
     per_result_error_template: Some("variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
