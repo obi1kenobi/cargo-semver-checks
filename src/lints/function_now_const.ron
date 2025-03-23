@@ -1,10 +1,10 @@
 SemverQuery(
-    id: "function_unsafe_added",
-    human_readable_name: "pub fn became unsafe",
-    description: "A function became unsafe to call.",
-    required_update: Major,
-    lint_level: Deny,
-    reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#calling-an-unsafe-function-or-method"),
+    id: "function_now_const",
+    human_readable_name: "pub fn has newly become const",
+    description: "A pub function has newly become `const`, allowing it to be used in a `const` context. Removing `const` later is a breaking change as it would prevent such usage.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/const_eval.html#r-const-eval.const-fn.usage"),
     query: r#"
     {
         CrateDiff {
@@ -12,7 +12,7 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        unsafe @filter(op: "!=", value: ["$true"])
+                        const @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @output @tag
@@ -26,7 +26,7 @@ SemverQuery(
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
-                        unsafe @filter(op: "=", value: ["$true"])
+                        const @filter(op: "=", value: ["$true"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -47,9 +47,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A publicly-visible function became `unsafe`, so calling it now requires an `unsafe` block.",
+    error_message: "A pub function has newly become `const`, allowing it to be used in a `const` context. Removing `const` later is a breaking change as it would prevent such usage.",
     per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
-    witness: (
-        hint_template: r#"let witness = {{join "::" path}}(...);"#,
-    ),
 )

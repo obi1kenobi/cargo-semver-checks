@@ -1,10 +1,10 @@
 SemverQuery(
-    id: "enum_struct_variant_field_missing",
-    human_readable_name: "pub enum struct variant's field removed or renamed" ,
-    description: "An enum's struct variant has a field that is no longer available under its prior name.",
-    required_update: Major,
+    id: "enum_struct_variant_field_marked_deprecated",
+    human_readable_name: "enum struct variant field #[deprecated] added",
+    description: "A field in an enum's struct variant has been newly marked with #[deprecated].",
+    required_update: Minor,
     lint_level: Deny,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-deprecated-attribute"),
     query: r#"
     {
         CrateDiff {
@@ -12,6 +12,8 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        deprecated @filter(op: "!=", value: ["$true"])
+                        enum_name: name @output
 
                         importable_path {
                             path @output @tag
@@ -22,10 +24,41 @@ SemverQuery(
                             ... on StructVariant {
                                 variant_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
+                                deprecated @filter(op: "!=", value: ["$true"])
 
                                 field {
                                     field_name: name @output @tag
                                     public_api_eligible @filter(op: "=", value: ["$true"])
+                                    deprecated @filter(op: "!=", value: ["$true"])
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        # Filter out deprecated enums since rustdoc automatically marks their fields as deprecated.
+                        # This ensures we only detect fields that are explicitly marked with #[deprecated].
+                        deprecated @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            ... on StructVariant {
+                                name @filter(op: "=", value: ["%variant_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                deprecated @filter(op: "!=", value: ["$true"])
+
+                                field {
+                                    name @filter(op: "=", value: ["%field_name"])
+                                    public_api_eligible @filter(op: "=", value: ["$true"])
+                                    deprecated @filter(op: "=", value: ["$true"])
 
                                     span_: span @optional {
                                         filename @output
@@ -38,39 +71,14 @@ SemverQuery(
                     }
                 }
             }
-            current {
-                item {
-                    ... on Enum {
-                        visibility_limit @filter(op: "=", value: ["$public"])
-                        enum_name: name @output
-
-                        importable_path {
-                            path @filter(op: "=", value: ["%path"])
-                            public_api @filter(op: "=", value: ["$true"])
-                        }
-
-                        variant {
-                            ... on StructVariant {
-                                name @filter(op: "=", value: ["%variant_name"])
-                                public_api_eligible @filter(op: "=", value: ["$true"])
-
-                                field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                                    name @filter(op: "=", value: ["%field_name"])
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }"#,
     arguments: {
         "public": "public",
         "true": true,
-        "zero": 0,
     },
-    error_message: "A publicly-visible enum has a struct variant whose field is no longer available under its prior name. It may have been renamed or removed entirely.",
-    per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A field in an enum's struct variant is now #[deprecated]. Downstream crates will get a compiler warning when accessing this field.",
+    per_result_error_template: Some("field {{enum_name}}::{{variant_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: (
         hint_template: r#"match value {
     {{ join "::" path }}::{{ variant_name }} { {{ field_name }}, .. } => (),
