@@ -68,14 +68,6 @@ SemverQuery(
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     name @filter(op: "=", value: ["%field_name"])
                                 }
-                            }
-                        }
-
-                        variant {
-                            ... on StructVariant {
-                                name @filter(op: "=", value: ["%variant_name"])
-                                attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
-                                public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 field @fold {
                                     baseline_field_names: name @output
