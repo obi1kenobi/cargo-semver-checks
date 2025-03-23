@@ -1265,6 +1265,7 @@ add_lints!(
     function_marked_deprecated,
     function_missing,
     function_must_use_added,
+    function_now_const,
     function_now_doc_hidden,
     function_parameter_count_changed,
     function_requires_different_const_generic_params,
