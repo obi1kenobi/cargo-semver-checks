@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "enum_added_without_non_exhaustive"
+name = "exhaustive_enum_added"
 version = "0.1.0"
 edition = "2021"
 
