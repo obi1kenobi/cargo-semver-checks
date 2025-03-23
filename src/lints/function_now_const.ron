@@ -1,10 +1,10 @@
 SemverQuery(
     id: "function_now_const",
     human_readable_name: "pub fn has newly become const",
-    description: "A pub function has newly become const, which may change its evaluation behavior in some contexts.",
+    description: "A pub function has newly become `const`, allowing it to be used in a `const` context. Removing `const` later is a breaking change as it would prevent such usage.",
     required_update: Minor,
     lint_level: Allow,
-    reference_link: Some("https://doc.rust-lang.org/reference/const_eval.html"),
+    reference_link: Some("https://doc.rust-lang.org/reference/const_eval.html#r-const-eval.const-fn.usage"),
     query: r#"
     {
         CrateDiff {
@@ -47,6 +47,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A pub function has newly become `const`, which may change its evaluation behavior in some contexts.",
+    error_message: "A pub function has newly become `const`, allowing it to be used in a `const` context. Removing `const` later is a breaking change as it would prevent such usage.",
     per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )
