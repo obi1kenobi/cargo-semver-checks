@@ -3,11 +3,11 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
-  "./test_crates/function_unsafe_removed/": [
+  "./test_crates/function_no_longer_unsafe/": [
     {
       "name": String("add"),
       "path": List([
-        String("function_unsafe_removed"),
+        String("function_no_longer_unsafe"),
         String("add"),
       ]),
       "span_begin_line": Uint64(3),

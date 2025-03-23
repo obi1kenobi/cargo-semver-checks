@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "function_unsafe_removed"
+name = "function_no_longer_unsafe"
 version = "0.1.0"
 edition = "2021"
 

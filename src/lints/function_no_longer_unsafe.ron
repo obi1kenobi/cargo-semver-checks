@@ -1,7 +1,7 @@
 SemverQuery(
-    id: "function_unsafe_removed",
+    id: "function_no_longer_unsafe",
     human_readable_name: "pub fn no longer unsafe",
-    description: "A public function is no longer unsafe to call",
+    description: "A pub function is no longer unsafe to call.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#calling-an-unsafe-function-or-method"),
@@ -47,6 +47,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A publicly-visible function is no longer `unsafe`, which may break safety assumptions in downstream code.",
+    error_message: "A pub function is no longer `unsafe`, which may break safety assumptions in downstream code.",
     per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )
