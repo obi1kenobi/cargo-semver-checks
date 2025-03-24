@@ -54,6 +54,6 @@ SemverQuery(
     error_message: "A function is now #[deprecated]. Downstream crates will get a compiler warning when using this function.",
     per_result_error_template: Some("function {{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
     witness: (
-        hint_template: r#"let witness = |{{join ", " parameters}}| {{join "::" path}}({{join ", " parameters}});"#,
+        hint_template: r#"let witness = {{#if parameters}}|{{join ", " parameters}}| {{/if}}{{join "::" path}}({{join ", " parameters}});"#,
     ),
 )
