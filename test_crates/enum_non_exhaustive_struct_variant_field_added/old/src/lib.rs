@@ -19,7 +19,7 @@ pub(crate) enum PrivateEnum {
 }
 
 // This enum's variant will become exhaustive while also gaining a field.
-// That should trigger a separate lint, and not this one.
+// It should trigger this lint.
 pub enum EnumWithNonExhaustiveVariant {
     #[non_exhaustive]
     NonExhaustiveVariant { x: i64 },
