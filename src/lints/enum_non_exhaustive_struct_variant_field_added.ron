@@ -1,7 +1,7 @@
 SemverQuery(
     id: "enum_non_exhaustive_struct_variant_field_added",
     human_readable_name: "pub enum #[non_exhaustive] struct variant field added",
-    description: "An enum's #[non_exhaustive] struct variant has a new field.",
+    description: "A pub enum's #[non_exhaustive] struct variant has a new field.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
@@ -21,7 +21,6 @@ SemverQuery(
 
                         variant {
                             ... on StructVariant {
-                                attrs @filter(op: "contains", value: ["$non_exhaustive"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
                                 variant_name: name @output @tag
 
@@ -71,6 +70,6 @@ SemverQuery(
         "zero": 0,
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "An enum's #[non_exhaustive] struct variant has a new field, which affects how it is constructed within its defining crate.",
+    error_message: "A pub enum's #[non_exhaustive] struct variant has a new field. Pattern matches that explicitly list fields will now fail to compile.",
     per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
