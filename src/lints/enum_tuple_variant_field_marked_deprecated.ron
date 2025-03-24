@@ -31,6 +31,10 @@ SemverQuery(
                                     public_api_eligible @filter(op: "=", value: ["$true"])
                                     deprecated @filter(op: "!=", value: ["$true"])
                                 }
+
+                                field @fold {
+                                    baseline_field_names: name @output
+                                }
                             }
                         }
                     }
@@ -79,4 +83,10 @@ SemverQuery(
     },
     error_message: "A field in an enum's tuple variant is now #[deprecated]. Downstream crates will get a compiler warning when accessing this field.",
     per_result_error_template: Some("field {{enum_name}}::{{variant_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"match value {
+    {{ join "::" path }}::{{ variant_name }} ({{#each baseline_field_names }}{{#if (eq this ../field_name)}}to_be_deprecated{{else}}_{{/if}}{{#unless @last }}, {{/unless}}{{/each}}) => (),
+    _ => (),
+}"#,
+    ),
 )
