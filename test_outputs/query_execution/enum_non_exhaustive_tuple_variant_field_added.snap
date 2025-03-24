@@ -5,14 +5,38 @@ expression: "&query_execution_results"
 {
   "./test_crates/enum_non_exhaustive_tuple_variant_field_added/": [
     {
-      "enum_name": String("PublicEnum"),
+      "enum_name": String("ExhaustiveEnum"),
       "field_name": String("2"),
       "path": List([
         String("enum_non_exhaustive_tuple_variant_field_added"),
-        String("PublicEnum"),
+        String("ExhaustiveEnum"),
       ]),
       "span_begin_line": Uint64(5),
       "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariantWithFieldAdded"),
+    },
+    {
+      "enum_name": String("NonExhaustiveEnum"),
+      "field_name": String("2"),
+      "path": List([
+        String("enum_non_exhaustive_tuple_variant_field_added"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariantWithFieldAdded"),
+    },
+    {
+      "enum_name": String("EnumWithNonExhaustiveVariant"),
+      "field_name": String("2"),
+      "path": List([
+        String("enum_non_exhaustive_tuple_variant_field_added"),
+        String("EnumWithNonExhaustiveVariant"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("TupleVariantWithFieldAdded"),
     },
@@ -43,6 +67,18 @@ expression: "&query_execution_results"
       "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("NonExhaustiveTupleVariantWithFieldAdded"),
+    },
+    {
+      "enum_name": String("PublicEnum"),
+      "field_name": String("2"),
+      "path": List([
+        String("enum_tuple_variant_field_added"),
+        String("PublicEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariantWithFieldAddedBecomesExhaustive"),
     },
   ],
 }
