@@ -1,4 +1,7 @@
-use handlebars::{handlebars_helper, Handlebars};
+use handlebars::{
+    handlebars_helper, to_json, BlockContext, Context, Handlebars, Helper, Output, RenderContext,
+    RenderError, RenderErrorReason, Renderable,
+};
 use serde_json::Value;
 
 // a helper to lowercase a string
@@ -59,6 +62,74 @@ handlebars_helper!(multiple_spans: |files: Value, begin_line_numbers: Value| {
     }
 });
 
+// a helper to loop n number of times. similar to #each, has @index, @first, and @last. does not set `this`
+// written without the handlebars_helper! for block access
+// this is largely based on the logic within #each itself
+fn repeat<'reg, 'rc>(
+    helper: &Helper<'rc>,
+    registry: &'reg Handlebars<'reg>,
+    ctx: &'rc Context,
+    render_ctx: &mut RenderContext<'reg, 'rc>,
+    output: &mut dyn Output,
+) -> Result<(), RenderError> {
+    let value = helper
+        .param(0)
+        .ok_or(RenderErrorReason::ParamNotFoundForIndex("repeat", 0))?;
+
+    let template = helper.template();
+
+    match template {
+        Some(template) => match *value.value() {
+            // If number encountered
+            Value::Number(ref count) => {
+                // Create block
+                let mut block = BlockContext::new();
+
+                if let Some(new_path) = value.context_path() {
+                    block.base_path_mut().clone_from(new_path);
+                } else {
+                    block.set_base_value(Value::Number(count.clone()));
+                }
+
+                render_ctx.push_block(block);
+
+                // Get range
+                let range = count
+                    .as_u64()
+                    .ok_or(RenderErrorReason::InvalidParamType("Uint64"))?;
+
+                // Loop over range
+                for index in 0..range {
+                    if let Some(ref mut block) = render_ctx.block_mut() {
+                        let is_first = index == 0u64;
+                        let is_last = index == range - 1;
+
+                        // Set local variables
+                        block.set_local_var("first", Value::Bool(is_first));
+                        block.set_local_var("last", Value::Bool(is_last));
+                        block.set_local_var("index", to_json(index));
+                    }
+
+                    // Render with current context
+                    template.render(registry, ctx, render_ctx, output)?;
+                }
+
+                Ok(())
+            }
+
+            // If any other type encountered
+            _ => {
+                if registry.strict_mode() {
+                    Err(RenderError::strict_error(value.relative_path()))
+                } else {
+                    Ok(())
+                }
+            }
+        },
+        None => Ok(()),
+    }
+}
+
 pub(crate) fn make_handlebars_registry() -> Handlebars<'static> {
     let mut registry = Handlebars::new();
     registry.set_strict_mode(true);
@@ -66,5 +137,6 @@ pub(crate) fn make_handlebars_registry() -> Handlebars<'static> {
     registry.register_helper("join", Box::new(join));
     registry.register_helper("unpack_if_singleton", Box::new(unpack_if_singleton));
     registry.register_helper("multiple_spans", Box::new(multiple_spans));
+    registry.register_helper("repeat", Box::new(repeat));
     registry
 }
