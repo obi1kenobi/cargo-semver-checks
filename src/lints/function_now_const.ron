@@ -1,10 +1,10 @@
 SemverQuery(
-    id: "function_parameter_count_changed",
-    human_readable_name: "pub fn parameter count changed",
-    description: "Parameter count of a function has changed.",
-    required_update: Major,
-    lint_level: Deny,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#fn-change-arity"),
+    id: "function_now_const",
+    human_readable_name: "pub fn has newly become const",
+    description: "A pub function has newly become `const`, allowing it to be used in a `const` context. Removing `const` later is a breaking change as it would prevent such usage.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/const_eval.html#r-const-eval.const-fn.usage"),
     query: r#"
     {
         CrateDiff {
@@ -12,14 +12,11 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        const @filter(op: "!=", value: ["$true"])
 
                         importable_path {
                             path @output @tag
                             public_api @filter(op: "=", value: ["$true"])
-                        }
-
-                        old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters") {
-                            names: name @output
                         }
                     }
                 }
@@ -29,8 +26,7 @@ SemverQuery(
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
-
-                        current_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"]) @output
+                        const @filter(op: "=", value: ["$true"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -51,9 +47,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A publicly-visible function now takes a different number of parameters.",
-    per_result_error_template: Some("{{join \"::\" path}} now takes {{current_parameter_count}} parameters instead of {{old_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
-    witness: (
-        hint_template: r#"let witness = |{{join ", " old_parameter_names}}| {{join "::" path}}({{join ", " old_parameter_names}});"#,
-    ),
+    error_message: "A pub function has newly become `const`, allowing it to be used in a `const` context. Removing `const` later is a breaking change as it would prevent such usage.",
+    per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )
