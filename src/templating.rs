@@ -65,7 +65,7 @@ handlebars_helper!(multiple_spans: |files: Value, begin_line_numbers: Value| {
 // a helper to loop n number of times. similar to #each, has @index, @first, and @last. does not set `this`
 // written without the handlebars_helper! for block access
 // this is largely based on the logic within #each itself
-fn times<'reg, 'rc>(
+fn repeat<'reg, 'rc>(
     helper: &Helper<'rc>,
     registry: &'reg Handlebars<'reg>,
     ctx: &'rc Context,
@@ -74,7 +74,7 @@ fn times<'reg, 'rc>(
 ) -> Result<(), RenderError> {
     let value = helper
         .param(0)
-        .ok_or(RenderErrorReason::ParamNotFoundForIndex("times", 0))?;
+        .ok_or(RenderErrorReason::ParamNotFoundForIndex("repeat", 0))?;
 
     let template = helper.template();
 
@@ -137,6 +137,6 @@ pub(crate) fn make_handlebars_registry() -> Handlebars<'static> {
     registry.register_helper("join", Box::new(join));
     registry.register_helper("unpack_if_singleton", Box::new(unpack_if_singleton));
     registry.register_helper("multiple_spans", Box::new(multiple_spans));
-    registry.register_helper("times", Box::new(times));
+    registry.register_helper("repeat", Box::new(repeat));
     registry
 }
