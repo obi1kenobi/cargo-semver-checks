@@ -68,6 +68,10 @@ SemverQuery(
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     name @filter(op: "=", value: ["%field_name"])
                                 }
+
+                                field @fold {
+                                    baseline_field_names: name @output
+                                }
                             }
                         }
                     }
@@ -83,4 +87,10 @@ SemverQuery(
     },
     error_message: "An enum's exhaustive struct variant has a new field, which has to be included when constructing or matching on this variant.",
     per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"match value {
+    {{ join "::" path }}::{{ variant_name }} { {{ join ", " baseline_field_names }} } => (),
+    _ => (),
+}"#,
+    )
 )
