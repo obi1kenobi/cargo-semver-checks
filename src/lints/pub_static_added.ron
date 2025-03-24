@@ -1,7 +1,7 @@
 SemverQuery(
     id: "pub_static_added",
     human_readable_name: "pub static is added",
-    description: "A new pub static is added.",
+    description: "A new pub static item has been added. Removing or modifying it later would be a breaking change.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-new"),
@@ -43,6 +43,6 @@ SemverQuery(
         "zero": 0,
         "true": true,
     },
-    error_message: "A new public static is added.",
+    error_message: "A new pub static item has been added. Removing or modifying it later would be a breaking change.",
     per_result_error_template: Some("{{name}} in file {{span_filename}}:{{span_begin_line}}"),
 )
