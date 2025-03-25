@@ -70,9 +70,7 @@ SemverQuery(
                                     name @filter(op: "=", value: ["%field_name"])
                                 }
                                 
-                                field @fold {
-                                    baseline_field_names: name @output
-                                }
+                                field @fold @transform(op: "count") @output(name: "field_count")
                             }
                         }
                     }
@@ -90,7 +88,7 @@ SemverQuery(
     per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: (
         hint_template: r#"match value {
-    {{ join "::" path }}::{{ variant_name }} ({{#each baseline_field_names }}_{{#unless @last}}, {{/unless}}{{/each}}) => (),
+    {{ join "::" path }}::{{ variant_name }} ({{#repeat field_count }}_{{#unless @last}}, {{/unless}}{{/repeat}}) => (),
     _ => (),
 }"#, 
     ),
