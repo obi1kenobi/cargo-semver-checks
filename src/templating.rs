@@ -62,6 +62,17 @@ handlebars_helper!(multiple_spans: |files: Value, begin_line_numbers: Value| {
     }
 });
 
+// a helper to convert arg to a string, submitted as a number, string, or bool
+handlebars_helper!(to_string: |arg: Value| {
+    match arg {
+        Value::Number(num) => num.to_string(),
+        Value::String(already_string) => already_string.to_string(),
+        Value::Bool(boolean) => boolean.to_string(),
+
+        _ => unreachable!("non-stringifiable value provided: {arg:?}")
+    }
+});
+
 // a helper to loop n number of times. similar to #each, has @index, @first, and @last. does not set `this`
 // written without the handlebars_helper! for block access
 // this is largely based on the logic within #each itself
@@ -137,6 +148,7 @@ pub(crate) fn make_handlebars_registry() -> Handlebars<'static> {
     registry.register_helper("join", Box::new(join));
     registry.register_helper("unpack_if_singleton", Box::new(unpack_if_singleton));
     registry.register_helper("multiple_spans", Box::new(multiple_spans));
+    registry.register_helper("to_string", Box::new(to_string));
     registry.register_helper("repeat", Box::new(repeat));
     registry
 }
