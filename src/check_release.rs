@@ -16,10 +16,17 @@ use crate::{
     CrateReport, GlobalConfig, ReleaseType, WitnessGeneration,
 };
 
+#[derive(Debug, PartialEq, Eq)]
+struct VersionChange {
+    update: ActualSemverUpdate,
+    /// Whether the version change is actual or minimum.
+    is_actual: bool,
+}
+
 fn classify_minimum_semver_version_change(
     current_version: Option<&str>,
     baseline_version: Option<&str>,
-) -> Option<ActualSemverUpdate> {
+) -> Option<VersionChange> {
     if let (Some(baseline), Some(current)) = (baseline_version, current_version) {
         let baseline_version =
             semver::Version::parse(baseline).expect("baseline not a valid version");
@@ -28,19 +35,16 @@ fn classify_minimum_semver_version_change(
         // Check if versions are identical (ignoring build metadata)
         if baseline_version.cmp_precedence(&current_version) == Ordering::Equal {
             // Determine minimum possible change based on SemVer rules
-            return Some(match (current_version.major, current_version.minor) {
-                (0, 0) => {
+            return Some(VersionChange {
+                update: match (current_version.major, current_version.minor) {
                     // For 0.0.z: Minimum next change must be major
-                    ActualSemverUpdate::Major
-                }
-                (0, _) => {
-                    // For 0.y.z (y > 0): Minimum next change is minor
-                    ActualSemverUpdate::Minor
-                }
-                (_, _) => {
-                    // For stable versions x.y.z (x ≥ 1): Minimum next change is patch
-                    ActualSemverUpdate::Patch
-                }
+                    (0, 0) => ActualSemverUpdate::Major,
+                    // For 0.y.z: Minimum next change must be minor
+                    (0, _) => ActualSemverUpdate::Minor,
+                    // For x.y.z: Minimum next change must be patch
+                    (_, _) => ActualSemverUpdate::Patch,
+                },
+                is_actual: false,
             });
         }
 
@@ -78,7 +82,10 @@ fn classify_minimum_semver_version_change(
             unreachable!("Versions are identical.");
         };
 
-        Some(update_kind)
+        Some(VersionChange {
+            update: update_kind,
+            is_actual: true,
+        })
     } else {
         None
     }
@@ -209,7 +216,10 @@ pub(super) fn run_check_release(
     let baseline_version = data_storage.baseline_crate().crate_version();
 
     let version_change = release_type
-        .map(Into::into)
+        .map(|rt| VersionChange {
+            update: rt.into(),
+            is_actual: true,
+        })
         .or_else(|| classify_minimum_semver_version_change(current_version, baseline_version))
         .unwrap_or_else(|| {
             config
@@ -217,9 +227,12 @@ pub(super) fn run_check_release(
                     "Could not determine whether crate version changed. Assuming no change.",
                 )
                 .expect("print failed");
-            ActualSemverUpdate::NotChanged
+            VersionChange {
+                update: ActualSemverUpdate::NotChanged,
+                is_actual: true,
+            }
         });
-    let change = match version_change {
+    let change = match version_change.update {
         ActualSemverUpdate::Major => "major",
         ActualSemverUpdate::Minor => "minor",
         ActualSemverUpdate::Patch => "patch",
@@ -230,12 +243,20 @@ pub(super) fn run_check_release(
         None => "",
     };
 
+    let change_type = if version_change.is_actual {
+        ""
+    } else {
+        "minimum "
+    };
+
     let index_storage = data_storage.create_indexes();
     let adapter = index_storage.create_adapter();
 
     let (queries_to_run, queries_to_skip): (Vec<_>, _) =
         SemverQuery::all_queries().into_values().partition(|query| {
-            !version_change.supports_requirement(overrides.effective_required_update(query))
+            !version_change
+                .update
+                .supports_requirement(overrides.effective_required_update(query))
                 && overrides.effective_lint_level(query) > LintLevel::Allow
         });
     let skipped_queries = queries_to_skip.len();
@@ -243,10 +264,11 @@ pub(super) fn run_check_release(
     config.shell_status(
         "Checking",
         format_args!(
-            "{crate_name} v{} -> v{} ({}{} change)",
+            "{crate_name} v{} -> v{} ({}{}{} change)",
             baseline_version.unwrap_or("unknown"),
             current_version.unwrap_or("unknown"),
             assume,
+            change_type,
             change
         ),
     )?;
@@ -461,7 +483,7 @@ pub(super) fn run_check_release(
 
         Ok(CrateReport {
             required_bump: required_bump.map(ReleaseType::from),
-            detected_bump: version_change,
+            detected_bump: version_change.update,
         })
     } else {
         config
@@ -487,7 +509,7 @@ pub(super) fn run_check_release(
         )?;
 
         Ok(CrateReport {
-            detected_bump: version_change,
+            detected_bump: version_change.update,
             required_bump: None,
         })
     }
@@ -510,7 +532,10 @@ mod test {
     fn classify_same_version() {
         let baseline = Some("1.0.0");
         let current = Some("1.0.0");
-        let expected = Some(ActualSemverUpdate::Patch);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Patch,
+            is_actual: false,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -519,7 +544,10 @@ mod test {
     fn classify_patch_changed() {
         let baseline = Some("1.0.0");
         let current = Some("1.0.1");
-        let expected = Some(ActualSemverUpdate::Patch);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Patch,
+            is_actual: true,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -528,7 +556,10 @@ mod test {
     fn classify_minor_changed() {
         let baseline = Some("1.0.0");
         let current = Some("1.1.0");
-        let expected = Some(ActualSemverUpdate::Minor);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Minor,
+            is_actual: true,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -537,7 +568,10 @@ mod test {
     fn classify_major_changed() {
         let baseline = Some("0.9.0");
         let current = Some("1.0.0");
-        let expected = Some(ActualSemverUpdate::Major);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Major,
+            is_actual: true,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -546,7 +580,10 @@ mod test {
     fn classify_zerover_minor_changed() {
         let baseline = Some("0.1.0");
         let current = Some("0.1.1");
-        let expected = Some(ActualSemverUpdate::Minor);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Minor,
+            is_actual: true,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -555,7 +592,10 @@ mod test {
     fn classify_zerover_major_changed() {
         let baseline = Some("0.1.0");
         let current = Some("0.2.0");
-        let expected = Some(ActualSemverUpdate::Major);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Major,
+            is_actual: true,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -564,7 +604,10 @@ mod test {
     fn classify_double_zerover_major_changed() {
         let baseline = Some("0.0.1");
         let current = Some("0.0.2");
-        let expected = Some(ActualSemverUpdate::Major);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Major,
+            is_actual: true,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -573,7 +616,10 @@ mod test {
     fn classify_pre_same() {
         let baseline = Some("1.0.0-alpha.0");
         let current = Some("1.0.0-alpha.0");
-        let expected = Some(ActualSemverUpdate::Patch);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Patch,
+            is_actual: false,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -582,7 +628,10 @@ mod test {
     fn classify_pre() {
         let baseline = Some("1.0.0-alpha.0");
         let current = Some("1.0.0-alpha.1");
-        let expected = Some(ActualSemverUpdate::Major);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Major,
+            is_actual: true,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -591,7 +640,10 @@ mod test {
     fn classify_same_version_with_pre() {
         let baseline = Some("1.0.0-alpha.1");
         let current = Some("1.0.0");
-        let expected = Some(ActualSemverUpdate::Major);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Major,
+            is_actual: true,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -600,7 +652,10 @@ mod test {
     fn classify_minor_changed_with_pre() {
         let baseline = Some("1.0.0");
         let current = Some("1.1.0-alpha.1");
-        let expected = Some(ActualSemverUpdate::Minor);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Minor,
+            is_actual: true,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -609,7 +664,10 @@ mod test {
     fn classify_zerover_same_version() {
         let baseline = Some("0.1.0");
         let current = Some("0.1.0");
-        let expected = Some(ActualSemverUpdate::Minor);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Minor,
+            is_actual: false,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -618,7 +676,10 @@ mod test {
     fn classify_zerover_zero_same_version() {
         let baseline = Some("0.0.1");
         let current = Some("0.0.1");
-        let expected = Some(ActualSemverUpdate::Major);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Major,
+            is_actual: false,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -627,7 +688,10 @@ mod test {
     fn classify_pre_zero_same() {
         let baseline = Some("0.1.0-alpha.0");
         let current = Some("0.1.0-alpha.0");
-        let expected = Some(ActualSemverUpdate::Minor);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Minor,
+            is_actual: false,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -636,7 +700,10 @@ mod test {
     fn classify_build_with_pre_same() {
         let baseline = Some("1.0.0-alpha.1+build.1");
         let current = Some("1.0.0-alpha.1+build.2");
-        let expected = Some(ActualSemverUpdate::Patch);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Patch,
+            is_actual: false,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -645,7 +712,10 @@ mod test {
     fn classify_build_zero_version() {
         let baseline = Some("0.1.0+build.1");
         let current = Some("0.1.0+build.2");
-        let expected = Some(ActualSemverUpdate::Minor);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Minor,
+            is_actual: false,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
@@ -654,7 +724,10 @@ mod test {
     fn classify_ignores_build() {
         let baseline = Some("1.0.0+hello");
         let current = Some("1.0.0+world");
-        let expected = Some(ActualSemverUpdate::Patch);
+        let expected = Some(VersionChange {
+            update: ActualSemverUpdate::Patch,
+            is_actual: false,
+        });
         let actual = classify_minimum_semver_version_change(baseline, current);
         assert_eq!(actual, expected);
     }
