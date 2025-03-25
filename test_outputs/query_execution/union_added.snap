@@ -1,0 +1,155 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/inherent_method_must_use_added/": [
+    {
+      "name": String("EnumToUnionWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("EnumToUnionWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("StructToUnionWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("StructToUnionWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(99),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NewUnionWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("union_inherent_method_must_use_added"),
+        String("NewUnionWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(71),
+      "span_filename": String("src/union_inherent_method_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_moved_to_trait_must_use_added/": [
+    {
+      "name": String("NewUnionWithTraitMustUseMethods"),
+      "path": List([
+        String("method_moved_to_trait_must_use_added"),
+        String("union_method_moved_to_trait_must_use_added"),
+        String("NewUnionWithTraitMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(155),
+      "span_filename": String("src/union_method_moved_to_trait_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/non_exhaustive_struct_changed_type/": [
+    {
+      "name": String("PubNonExhaustiveStructChangedToUnion"),
+      "path": List([
+        String("non_exhaustive_struct_changed_type"),
+        String("PubNonExhaustiveStructChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/struct_with_no_pub_fields_changed_type/": [
+    {
+      "name": String("PubStructChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PubNonExhaustiveStructChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubNonExhaustiveStructChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PubStructWithNonPubDocFieldChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithNonPubDocFieldChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PubStructWithPubFieldChangedToUnion"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithPubFieldChangedToUnion"),
+      ]),
+      "span_begin_line": Uint64(71),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/type_marked_deprecated/": [
+    {
+      "name": String("DeprecatedNewUnion"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("unions"),
+        String("DeprecatedNewUnion"),
+      ]),
+      "span_begin_line": Uint64(54),
+      "span_filename": String("src/unions.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/union_added/": [
+    {
+      "name": String("PubUnion"),
+      "path": List([
+        String("union_added"),
+        String("PubUnion"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/union_must_use_added/": [
+    {
+      "name": String("MustUseNewUnion"),
+      "path": List([
+        String("union_must_use_added"),
+        String("MustUseNewUnion"),
+      ]),
+      "span_begin_line": Uint64(62),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

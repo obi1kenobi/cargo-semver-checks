@@ -1,8 +1,8 @@
 #![no_std]
 
-pub fn function_with_a_parameter_added(_: ()) {}
+pub fn function_with_a_parameter_added(a: ()) {}
 
-pub fn function_with_parameters_removed(_: (), _: ()) {}
+pub fn function_with_parameters_removed(a: (), b: ()) {}
 
 fn private_function_with_a_parameter_added(_: ()) {}
 
