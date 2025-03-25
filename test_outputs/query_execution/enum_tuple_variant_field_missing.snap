@@ -6,13 +6,8 @@ snapshot_kind: text
 {
   "./test_crates/enum_struct_field_hidden_from_public_api/": [
     {
-      "baseline_field_names": List([
-        String("0"),
-        String("1"),
-        String("2"),
-        String("3"),
-      ]),
       "enum_name": String("RemovedHiddenFieldFromVariant"),
+      "field_count": Uint64(4),
       "field_name": String("3"),
       "path": List([
         String("enum_struct_field_hidden_from_public_api"),
@@ -26,12 +21,8 @@ snapshot_kind: text
   ],
   "./test_crates/enum_tuple_variant_field_missing/": [
     {
-      "baseline_field_names": List([
-        String("0"),
-        String("1"),
-        String("2"),
-      ]),
       "enum_name": String("PublicEnum"),
+      "field_count": Uint64(3),
       "field_name": String("2"),
       "path": List([
         String("enum_tuple_variant_field_missing"),
