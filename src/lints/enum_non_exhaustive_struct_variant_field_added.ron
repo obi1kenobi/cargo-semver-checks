@@ -70,6 +70,6 @@ SemverQuery(
         "zero": 0,
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A pub enum's #[non_exhaustive] struct variant has a new field. Pattern matches that explicitly list fields will now fail to compile.",
+    error_message: "A field was added to an enum's non-exhaustive struct variant.",
     per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
