@@ -11,6 +11,7 @@ info:
   env:
     CARGO_TERM_COLOR: never
     RUST_BACKTRACE: "0"
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -26,6 +27,6 @@ exit_code: 0
      Parsing cfg_conditional_compilation v0.1.0 (baseline)
       Parsed [TIME] (baseline)
     Checking cfg_conditional_compilation v0.1.0 -> v0.1.0 (no change)
-     Checked [TIME] [TOTAL] checks: [PASS] pass, 0 skip
+     Checked [TIME] [TOTAL] checks: [PASS] pass, [SKIP] skip
      Summary no semver update required
     Finished [TIME] cfg_conditional_compilation

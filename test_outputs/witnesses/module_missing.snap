@@ -1,0 +1,24 @@
+---
+source: src/query.rs
+description: "Lint `module_missing` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/module_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 10
+hint = 'use module_missing::bb::will_remove::*;'
+
+[["./test_crates/module_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 13
+hint = 'use module_missing::will_make_private::*;'
+
+[["./test_crates/trait_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 7
+hint = 'use trait_missing::my_pub_mod::*;'
+
+[["./test_crates/trait_missing_with_major_bump/"]]
+filename = 'src/lib.rs'
+begin_line = 7
+hint = 'use trait_missing_with_major_bump::my_pub_mod::*;'

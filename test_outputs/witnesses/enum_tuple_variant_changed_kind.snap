@@ -1,0 +1,77 @@
+---
+source: src/query.rs
+assertion_line: 847
+description: "Lint `enum_tuple_variant_changed_kind` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/enum_tuple_variant_changed_kind/"]]
+filename = 'src/lib.rs'
+begin_line = 5
+hint = '''
+match value {
+    enum_tuple_variant_changed_kind::TestStruct::WillBecomeStructLike(..) => (),
+    _ => (),
+}'''
+
+[["./test_crates/enum_tuple_variant_changed_kind/"]]
+filename = 'src/lib.rs'
+begin_line = 9
+hint = '''
+match value {
+    enum_tuple_variant_changed_kind::TestUnit::WillBecomeUnitLike(..) => (),
+    _ => (),
+}'''
+
+[["./test_crates/enum_tuple_variant_changed_kind/"]]
+filename = 'src/lib.rs'
+begin_line = 13
+hint = '''
+match value {
+    enum_tuple_variant_changed_kind::MultipleTest::WillBecomeStructLike(..) => (),
+    _ => (),
+}'''
+
+[["./test_crates/enum_tuple_variant_changed_kind/"]]
+filename = 'src/lib.rs'
+begin_line = 14
+hint = '''
+match value {
+    enum_tuple_variant_changed_kind::MultipleTest::WillBecomeUnitLike(..) => (),
+    _ => (),
+}'''
+
+[["./test_crates/enum_tuple_variant_changed_kind/"]]
+filename = 'src/lib.rs'
+begin_line = 20
+hint = '''
+match value {
+    enum_tuple_variant_changed_kind::TestBecomeDocHidden::WillBecomeStructLike(..) => (),
+    _ => (),
+}'''
+
+[["./test_crates/enum_tuple_variant_changed_kind/"]]
+filename = 'src/lib.rs'
+begin_line = 25
+hint = '''
+match value {
+    enum_tuple_variant_changed_kind::TestBecomeNonExhaustive::WillBecomeStructLike(..) => (),
+    _ => (),
+}'''
+
+[["./test_crates/enum_tuple_variant_field_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 7
+hint = '''
+match value {
+    enum_tuple_variant_field_missing::PublicEnum::TupleVariantBecomesPlain(..) => (),
+    _ => (),
+}'''
+
+[["./test_crates/enum_tuple_variant_field_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 9
+hint = '''
+match value {
+    enum_tuple_variant_field_missing::PublicEnum::TupleVariantBecomesStruct(..) => (),
+    _ => (),
+}'''

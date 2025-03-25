@@ -1,0 +1,63 @@
+SemverQuery(
+    id: "enum_variant_no_longer_non_exhaustive",
+    human_readable_name: "enum variant no longer #[non_exhaustive]",
+    description: "A pub enum variant is no longer #[non_exhaustive]. Future fields added to this variant will cause a breaking change.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            variant_name: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            attrs @filter(op: "contains", value: ["$non_exhaustive"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        enum_name: name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            name @filter(op: "=", value: ["%variant_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "non_exhaustive": "#[non_exhaustive]",
+        "true": true,
+    },
+    error_message: "A pub enum variant is no longer #[non_exhaustive]. Future fields added to this variant will cause a breaking change.",
+    per_result_error_template: Some("variant {{enum_name}}:{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+)
