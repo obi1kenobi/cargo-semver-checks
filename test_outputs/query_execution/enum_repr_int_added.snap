@@ -66,5 +66,45 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "name": String("CEnumToU8CEnum"),
+      "path": List([
+        String("enum_repr_int_added"),
+        String("CEnumToU8CEnum"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("CEnumToSeparateU8CEnum"),
+      "path": List([
+        String("enum_repr_int_added"),
+        String("CEnumToSeparateU8CEnum"),
+      ]),
+      "span_begin_line": Uint64(35),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("CEnumToCU8Enum"),
+      "path": List([
+        String("enum_repr_int_added"),
+        String("CEnumToCU8Enum"),
+      ]),
+      "span_begin_line": Uint64(41),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("CEnumToSeparateCU8Enum"),
+      "path": List([
+        String("enum_repr_int_added"),
+        String("CEnumToSeparateCU8Enum"),
+      ]),
+      "span_begin_line": Uint64(48),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
 }

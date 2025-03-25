@@ -24,14 +24,12 @@ pub enum EnumToUsizeEnum {
     Baz,
 }
 
-// This enum already has a repr attribute, so adding an integer repr to it should not trigger this lint.
 #[repr(u8, C)]
 pub enum CEnumToU8CEnum {
     Bar,
     Baz,
 }
 
-// This enum already has a repr attribute, so adding an integer repr to it should not trigger this lint.
 #[repr(u8)]
 #[repr(C)]
 pub enum CEnumToSeparateU8CEnum {
@@ -39,14 +37,12 @@ pub enum CEnumToSeparateU8CEnum {
     Baz,
 }
 
-// This enum already has a repr attribute, so adding an integer repr to it should not trigger this lint.
 #[repr(C, u8)]
 pub enum CEnumToCU8Enum {
     Bar,
     Baz,
 }
 
-// This enum already has a repr attribute, so adding an integer repr to it should not trigger this lint.
 #[repr(C)]
 #[repr(u8)]
 pub enum CEnumToSeparateCU8Enum {

@@ -1,7 +1,7 @@
 SemverQuery(
     id: "enum_repr_int_added",
     human_readable_name: "enum repr(u*)/repr(i*) added",
-    description: "An enum's repr attribute was added.",
+    description: "An enum gained an integer repr attribute.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/nomicon/other-reprs.html#repru-repri"),
@@ -38,7 +38,6 @@ SemverQuery(
             baseline {
                 item {
                     ... on Enum {
-
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
                         }
@@ -46,6 +45,9 @@ SemverQuery(
                         attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             content {
                                 base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "regex", value: ["$repr_regex"])
+                                }
                             }
                         }
                     }
@@ -60,6 +62,6 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "repr(u*) or repr(i*) was added to an enum. This changes its memory representation, and may break FFI use cases. Removing it in the future will cause a major breaking change.",
+    error_message: "repr(u*) or repr(i*) was added to an enum. Downstream code may now begin to depend on this enum's binary representation. Undoing this change in the future would be a major breaking change.",
     per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )
