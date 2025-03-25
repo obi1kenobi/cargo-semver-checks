@@ -1,7 +1,7 @@
 SemverQuery(
     id: "non_exhaustive_enum_added",
     human_readable_name: " #[non_exhaustive] pub enum added",
-    description: "A new pub enum with #[non_exhaustive] was added, preventing exhaustive pattern matching by external crates. Removing #[non_exhaustive] later would be a major breaking change.",
+    description: "A new #[non_exhaustive] pub enum was added. Pattern-matching on it outside of its crate must include a wildcard pattern like `_`, or it will fail to compile.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
@@ -45,6 +45,6 @@ SemverQuery(
         "true": true,
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A new pub enum with #[non_exhaustive] was added, preventing exhaustive pattern matching by external crates. Removing #[non_exhaustive] later would be a major breaking change.",
+    error_message: "A new #[non_exhaustive] pub enum was added. Pattern-matching on it outside of its crate must include a wildcard pattern like `_`, or it will fail to compile.",
     per_result_error_template: Some("enum {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )
