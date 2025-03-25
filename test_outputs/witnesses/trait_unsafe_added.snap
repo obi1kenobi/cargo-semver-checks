@@ -7,26 +7,26 @@ expression: "&actual_witnesses"
 filename = 'src/lib.rs'
 begin_line = 25
 hint = '''
-struct MyStruct;
-impl trait_method_unsafe_added::TraitBecomesUnsafe for MyStruct {...};'''
+struct Witness;
+impl trait_method_unsafe_added::TraitBecomesUnsafe for Witness {...}'''
 
 [["./test_crates/trait_missing/"]]
 filename = 'src/lib.rs'
 begin_line = 11
 hint = '''
-struct MyStruct;
-impl trait_missing::TraitBecomesUnsafe for MyStruct {...};'''
+struct Witness;
+impl trait_missing::TraitBecomesUnsafe for Witness {...}'''
 
 [["./test_crates/trait_missing_with_major_bump/"]]
 filename = 'src/lib.rs'
 begin_line = 11
 hint = '''
-struct MyStruct;
-impl trait_missing_with_major_bump::TraitBecomesUnsafe for MyStruct {...};'''
+struct Witness;
+impl trait_missing_with_major_bump::TraitBecomesUnsafe for Witness {...}'''
 
 [["./test_crates/trait_unsafe_added/"]]
 filename = 'src/lib.rs'
 begin_line = 4
 hint = '''
-struct MyStruct;
-impl trait_unsafe_added::TraitBecomesUnsafe for MyStruct {...};'''
+struct Witness;
+impl trait_unsafe_added::TraitBecomesUnsafe for Witness {...}'''
