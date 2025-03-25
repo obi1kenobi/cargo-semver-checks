@@ -50,4 +50,8 @@ SemverQuery(
     },
     error_message: "A publicly-visible trait became `unsafe`, so implementing it now requires an `unsafe impl` block.",
     per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"struct Witness;
+impl {{join "::" path}} for Witness {...}"#,
+    ),
 )
