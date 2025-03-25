@@ -34,6 +34,8 @@ SemverQuery(
                                         end_line @output
                                     }
                                 }
+
+                                field @fold @transform(op: "count") @output(name: "field_count")
                             }
                         }
                     }
@@ -72,4 +74,10 @@ SemverQuery(
     },
     error_message: "A field of a tuple variant in a pub enum has been removed.",
     per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"match value {
+    {{ join "::" path }}::{{ variant_name }}({{#repeat field_count }}{{#if (eq (to_string @index) ../field_name) }}witness{{else}}_{{/if}}{{#unless @last}}, {{/unless}}{{/repeat}}) => (),
+    _ => (),
+}"#,
+    ),
 )
