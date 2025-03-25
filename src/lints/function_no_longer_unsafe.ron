@@ -47,6 +47,6 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A pub function is no longer `unsafe`, which may break safety assumptions in downstream code.",
+    error_message: "A pub function is no longer `unsafe`. Calls to it that use an `unsafe` block may encounter `unused_unsafe` lints. Reverting this change would also be a major breaking change.",
     per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )
