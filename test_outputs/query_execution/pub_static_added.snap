@@ -3,6 +3,18 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
+  "./test_crates/pub_const_added/": [
+    {
+      "name": String("NEW_PUB_STATIC_IN_GLOBAL"),
+      "path": List([
+        String("pub_const_added"),
+        String("NEW_PUB_STATIC_IN_GLOBAL"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/pub_static_added/": [
     {
       "name": String("NEW_PUB_STATIC_IN_GLOBAL"),
