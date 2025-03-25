@@ -15,6 +15,18 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/enum_struct_variant_field_marked_deprecated/": [
+    {
+      "name": String("NewEnumWithDeprecatedFields"),
+      "path": List([
+        String("enum_struct_variant_field_marked_deprecated"),
+        String("NewEnumWithDeprecatedFields"),
+      ]),
+      "span_begin_line": Uint64(129),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_tuple_variant_field_added/": [
     {
       "name": String("BecomesPublicEnum"),

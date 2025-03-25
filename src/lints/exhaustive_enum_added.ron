@@ -1,7 +1,7 @@
 SemverQuery(
     id: "exhaustive_enum_added",
     human_readable_name: "exhaustive pub enum added",
-    description: "A new pub enum without #[non_exhaustive] was added, allowing exhaustive pattern matching outside its defining crate. Adding new variants to this enum will be a breaking change.",
+    description: "A new exhaustive enum was added. Future variants added to this enum will cause a breaking change.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
@@ -45,6 +45,6 @@ SemverQuery(
         "true": true,
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A new pub enum without #[non_exhaustive] was added, allowing exhaustive pattern matching outside its defining crate. Adding new variants to this enum will be a breaking change.",
+    error_message: "A new exhaustive enum was added. Future variants added to this enum will cause a breaking change.",
     per_result_error_template: Some("enum {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )
