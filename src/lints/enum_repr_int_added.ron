@@ -60,6 +60,6 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "repr(u*) or repr(i*) was added to an enum. This changes its memory representation and may break assumptions in downstream code.",
+    error_message: "repr(u*) or repr(i*) was added to an enum. This changes its memory representation, and may break FFI use cases. Removing it in the future will cause a major breaking change.",
     per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )
