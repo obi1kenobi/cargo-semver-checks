@@ -32,9 +32,7 @@ SemverQuery(
                                     deprecated @filter(op: "!=", value: ["$true"])
                                 }
 
-                                field @fold {
-                                    baseline_field_names: name @output
-                                }
+                                field @fold @transform(op: "count") @output(name: "field_count")
                             }
                         }
                     }
@@ -85,7 +83,7 @@ SemverQuery(
     per_result_error_template: Some("field {{enum_name}}::{{variant_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: (
         hint_template: r#"match value {
-    {{ join "::" path }}::{{ variant_name }} ({{#each baseline_field_names }}{{#if (eq this ../field_name)}}to_be_deprecated{{else}}_{{/if}}{{#unless @last }}, {{/unless}}{{/each}}) => (),
+    {{ join "::" path }}::{{ variant_name }} ({{#repeat field_count }}{{#if (eq (to_string @index) ../field_name)}}witness{{else}}_{{/if}}{{#unless @last }}, {{/unless}}{{/repeat}}) => (),
     _ => (),
 }"#,
     ),

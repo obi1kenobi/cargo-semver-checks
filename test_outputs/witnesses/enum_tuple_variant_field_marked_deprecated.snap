@@ -9,7 +9,7 @@ filename = 'src/lib.rs'
 begin_line = 19
 hint = '''
 match value {
-    enum_struct_variant_field_marked_deprecated::NormalEnum::TupleVariant (to_be_deprecated, _) => (),
+    enum_struct_variant_field_marked_deprecated::NormalEnum::TupleVariant (witness, _) => (),
     _ => (),
 }'''
 
@@ -18,7 +18,7 @@ filename = 'src/lib.rs'
 begin_line = 7
 hint = '''
 match value {
-    enum_tuple_variant_field_marked_deprecated::TupleVariantEnum::TupleVariant (to_be_deprecated, _, _) => (),
+    enum_tuple_variant_field_marked_deprecated::TupleVariantEnum::TupleVariant (witness, _, _) => (),
     _ => (),
 }'''
 
@@ -27,7 +27,7 @@ filename = 'src/lib.rs'
 begin_line = 8
 hint = '''
 match value {
-    enum_tuple_variant_field_marked_deprecated::TupleVariantEnum::TupleVariant (_, to_be_deprecated, _) => (),
+    enum_tuple_variant_field_marked_deprecated::TupleVariantEnum::TupleVariant (_, witness, _) => (),
     _ => (),
 }'''
 
@@ -36,7 +36,7 @@ filename = 'src/lib.rs'
 begin_line = 13
 hint = '''
 match value {
-    enum_tuple_variant_field_marked_deprecated::TupleVariantEnum::AnotherTuple (_, to_be_deprecated, _) => (),
+    enum_tuple_variant_field_marked_deprecated::TupleVariantEnum::AnotherTuple (_, witness, _) => (),
     _ => (),
 }'''
 
@@ -45,6 +45,6 @@ filename = 'src/lib.rs'
 begin_line = 57
 hint = '''
 match value {
-    enum_tuple_variant_field_marked_deprecated::EnumWithHiddenVariant::NormalTuple (to_be_deprecated, _) => (),
+    enum_tuple_variant_field_marked_deprecated::EnumWithHiddenVariant::NormalTuple (witness, _) => (),
     _ => (),
 }'''

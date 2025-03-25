@@ -5,11 +5,8 @@ expression: "&query_execution_results"
 {
   "./test_crates/enum_struct_variant_field_marked_deprecated/": [
     {
-      "baseline_field_names": List([
-        String("0"),
-        String("1"),
-      ]),
       "enum_name": String("NormalEnum"),
+      "field_count": Uint64(2),
       "field_name": String("0"),
       "path": List([
         String("enum_struct_variant_field_marked_deprecated"),
@@ -23,12 +20,8 @@ expression: "&query_execution_results"
   ],
   "./test_crates/enum_tuple_variant_field_marked_deprecated/": [
     {
-      "baseline_field_names": List([
-        String("0"),
-        String("1"),
-        String("2"),
-      ]),
       "enum_name": String("TupleVariantEnum"),
+      "field_count": Uint64(3),
       "field_name": String("0"),
       "path": List([
         String("enum_tuple_variant_field_marked_deprecated"),
@@ -40,12 +33,8 @@ expression: "&query_execution_results"
       "variant_name": String("TupleVariant"),
     },
     {
-      "baseline_field_names": List([
-        String("0"),
-        String("1"),
-        String("2"),
-      ]),
       "enum_name": String("TupleVariantEnum"),
+      "field_count": Uint64(3),
       "field_name": String("1"),
       "path": List([
         String("enum_tuple_variant_field_marked_deprecated"),
@@ -57,12 +46,8 @@ expression: "&query_execution_results"
       "variant_name": String("TupleVariant"),
     },
     {
-      "baseline_field_names": List([
-        String("0"),
-        String("1"),
-        String("2"),
-      ]),
       "enum_name": String("TupleVariantEnum"),
+      "field_count": Uint64(3),
       "field_name": String("1"),
       "path": List([
         String("enum_tuple_variant_field_marked_deprecated"),
@@ -74,11 +59,8 @@ expression: "&query_execution_results"
       "variant_name": String("AnotherTuple"),
     },
     {
-      "baseline_field_names": List([
-        String("0"),
-        String("1"),
-      ]),
       "enum_name": String("EnumWithHiddenVariant"),
+      "field_count": Uint64(2),
       "field_name": String("0"),
       "path": List([
         String("enum_tuple_variant_field_marked_deprecated"),
