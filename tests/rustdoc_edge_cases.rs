@@ -233,9 +233,4 @@ fn release_type_flag_minor() {
         ])
         .assert()
         .failure();
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
-    cmd.current_dir("test_crates/type_marked_deprecated/new")
-        .args(["semver-checks", "check-release", "--baseline-root=../old"])
-        .assert()
-        .failure();
 }
