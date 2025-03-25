@@ -17,6 +17,20 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/enum_struct_variant_changed_kind/": [
+    {
+      "enum_name": String("TestBecomeExhaustive"),
+      "path": List([
+        String("enum_struct_variant_changed_kind"),
+        String("TestBecomeExhaustive"),
+      ]),
+      "span_begin_line": Uint64(36),
+      "span_end_line": Uint64(36),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeTupleLike"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_tuple_variant_field_added/": [
     {
       "enum_name": String("PublicEnum"),
