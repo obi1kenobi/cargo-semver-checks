@@ -25,7 +25,6 @@ SemverQuery(
                             ... on StructVariant {
                                 kind: __typename @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
-                                attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
                                 variant_name: name @output @tag
 
                                 field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
@@ -70,8 +69,7 @@ SemverQuery(
         "public": "public",
         "true": true,
         "zero": 0,
-        "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A pub enum's struct variant with at least one pub field has changed to a different kind of enum variant, breaking possible instantiations and field accesses.",
+    error_message: "A pub enum's struct variant with at least one pub field has changed to a different kind of enum variant, breaking access to its pub fields.",
     per_result_error_template: Some("variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
