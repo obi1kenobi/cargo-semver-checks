@@ -68,7 +68,6 @@ handlebars_helper!(to_string: |arg: Value| {
         Value::Number(num) => num.to_string(),
         Value::String(already_string) => already_string.to_string(),
         Value::Bool(boolean) => boolean.to_string(),
-
         _ => unreachable!("non-stringifiable value provided: {arg:?}")
     }
 });
