@@ -52,6 +52,6 @@ SemverQuery(
     per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
     witness: (
         hint_template: r#"struct MyStruct;
-impl {{join "::" path}} for MyStruct {...};"#,
+impl {{join "::" path}} for MyStruct {...}"#,
     ),
 )
