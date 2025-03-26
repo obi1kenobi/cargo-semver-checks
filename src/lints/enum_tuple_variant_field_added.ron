@@ -69,6 +69,8 @@ SemverQuery(
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     name @filter(op: "=", value: ["%field_name"])
                                 }
+                                
+                                field @fold @transform(op: "count") @output(name: "field_count")
                             }
                         }
                     }
@@ -84,4 +86,10 @@ SemverQuery(
     },
     error_message: "An enum's exhaustive tuple variant has a new field, which has to be included when constructing or matching on this variant.",
     per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"match value {
+    {{ join "::" path }}::{{ variant_name }} ({{#repeat field_count }}_{{#unless @last}}, {{/unless}}{{/repeat}}) => (),
+    _ => (),
+}"#, 
+    ),
 )

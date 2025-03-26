@@ -47,4 +47,7 @@ SemverQuery(
     },
     error_message: "A publicly-visible module cannot be imported by its prior path. A `pub use` may have been removed, or the module may have been renamed, removed, or made non-public.",
     per_result_error_template: Some("mod {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"use {{join "::" path}}::*;"#,
+    ),
 )

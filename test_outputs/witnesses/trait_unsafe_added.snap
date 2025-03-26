@@ -1,0 +1,32 @@
+---
+source: src/query.rs
+description: "Lint `trait_unsafe_added` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/trait_method_unsafe_added/"]]
+filename = 'src/lib.rs'
+begin_line = 25
+hint = '''
+struct Witness;
+impl trait_method_unsafe_added::TraitBecomesUnsafe for Witness {...}'''
+
+[["./test_crates/trait_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 11
+hint = '''
+struct Witness;
+impl trait_missing::TraitBecomesUnsafe for Witness {...}'''
+
+[["./test_crates/trait_missing_with_major_bump/"]]
+filename = 'src/lib.rs'
+begin_line = 11
+hint = '''
+struct Witness;
+impl trait_missing_with_major_bump::TraitBecomesUnsafe for Witness {...}'''
+
+[["./test_crates/trait_unsafe_added/"]]
+filename = 'src/lib.rs'
+begin_line = 4
+hint = '''
+struct Witness;
+impl trait_unsafe_added::TraitBecomesUnsafe for Witness {...}'''
