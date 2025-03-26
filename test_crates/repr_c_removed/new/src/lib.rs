@@ -19,11 +19,11 @@ pub union CUnionToUnion {
 }
 
 #[repr(align(16))]
-pub struct Align16CStructToAlign16Struct {
+pub struct CAlign16StructToAlign16Struct {
     pub bar: usize,
 }
 
 #[repr(align(16))]
-pub union Align16CUnionToAlign16Union {
+pub union CAlign16UnionToAlign16Union {
     pub bar: usize,
 }

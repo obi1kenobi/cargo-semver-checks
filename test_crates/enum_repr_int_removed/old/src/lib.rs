@@ -52,12 +52,6 @@ pub enum I32ToU32Enum {
     Baz,
 }
 
-#[repr(u8, C)]
-pub enum U8CToU16CEnum {
-    Bar,
-    Baz,
-}
-
 #[repr(C, u8)]
 pub enum CU8ToCU16Enum {
     Bar,

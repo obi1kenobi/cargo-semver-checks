@@ -57,12 +57,12 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
     {
-      "name": String("Align16CStructToAlign16Struct"),
-      "old_attr": String("#[repr(align(16), C)]"),
+      "name": String("CAlign16StructToAlign16Struct"),
+      "old_attr": String("#[repr(C, align(16))]"),
       "owner_type": String("Struct"),
       "path": List([
         String("repr_c_removed"),
-        String("Align16CStructToAlign16Struct"),
+        String("CAlign16StructToAlign16Struct"),
       ]),
       "span_begin_line": Uint64(22),
       "span_end_line": Uint64(24),
@@ -70,12 +70,12 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
     {
-      "name": String("Align16CUnionToAlign16Union"),
-      "old_attr": String("#[repr(align(16), C)]"),
+      "name": String("CAlign16UnionToAlign16Union"),
+      "old_attr": String("#[repr(C, align(16))]"),
       "owner_type": String("Union"),
       "path": List([
         String("repr_c_removed"),
-        String("Align16CUnionToAlign16Union"),
+        String("CAlign16UnionToAlign16Union"),
       ]),
       "span_begin_line": Uint64(27),
       "span_end_line": Uint64(29),
