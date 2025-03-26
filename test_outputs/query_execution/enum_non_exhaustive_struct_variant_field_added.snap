@@ -1,0 +1,72 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_non_exhaustive_struct_variant_field_added/": [
+    {
+      "enum_name": String("ExhaustiveEnum"),
+      "field_name": String("y"),
+      "path": List([
+        String("enum_non_exhaustive_struct_variant_field_added"),
+        String("ExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Foo"),
+    },
+    {
+      "enum_name": String("NonExhaustiveEnum"),
+      "field_name": String("y"),
+      "path": List([
+        String("enum_non_exhaustive_struct_variant_field_added"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Foo"),
+    },
+    {
+      "enum_name": String("EnumWithNonExhaustiveVariant"),
+      "field_name": String("y"),
+      "path": List([
+        String("enum_non_exhaustive_struct_variant_field_added"),
+        String("EnumWithNonExhaustiveVariant"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("NonExhaustiveVariant"),
+    },
+  ],
+  "./test_crates/enum_struct_field_hidden_from_public_api/": [
+    {
+      "enum_name": String("AddedVariantField"),
+      "field_name": String("y"),
+      "path": List([
+        String("enum_struct_field_hidden_from_public_api"),
+        String("AddedVariantField"),
+      ]),
+      "span_begin_line": Uint64(50),
+      "span_end_line": Uint64(50),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("NonExhaustiveStructVariant"),
+    },
+  ],
+  "./test_crates/enum_struct_variant_field_added/": [
+    {
+      "enum_name": String("EnumWithNonExhaustiveVariant"),
+      "field_name": String("y"),
+      "path": List([
+        String("enum_struct_variant_field_added"),
+        String("EnumWithNonExhaustiveVariant"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Variant"),
+    },
+  ],
+}
