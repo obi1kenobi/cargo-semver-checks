@@ -1,18 +1,18 @@
 SemverQuery(
-    id: "enum_tuple_variant_field_missing",
-    human_readable_name: "pub enum tuple variant's field removed",
-    description: "A field has been removed from an enum's tuple variant.",
-    required_update: Major,
-    lint_level: Deny,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
+    id: "enum_non_exhaustive_struct_variant_field_added",
+    human_readable_name: "pub enum #[non_exhaustive] struct variant field added",
+    description: "A pub enum's #[non_exhaustive] struct variant has a new field.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
     query: r#"
     {
         CrateDiff {
-            baseline {
+            current {
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        enum_name: name @output @tag
+                        enum_name: name @output
 
                         importable_path {
                             path @output @tag
@@ -20,13 +20,12 @@ SemverQuery(
                         }
 
                         variant {
-                            ... on TupleVariant {
-                                variant_name: name @output @tag
+                            ... on StructVariant {
                                 public_api_eligible @filter(op: "=", value: ["$true"])
+                                variant_name: name @output @tag
 
                                 field {
                                     field_name: name @output @tag
-                                    public_api_eligible @filter(op: "=", value: ["$true"])
 
                                     span_: span @optional {
                                         filename @output
@@ -34,18 +33,15 @@ SemverQuery(
                                         end_line @output
                                     }
                                 }
-
-                                field @fold @transform(op: "count") @output(name: "field_count")
                             }
                         }
                     }
                 }
             }
-            current {
+            baseline {
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%enum_name"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -53,8 +49,9 @@ SemverQuery(
                         }
 
                         variant {
-                            ... on TupleVariant {
+                            ... on StructVariant {
                                 name @filter(op: "=", value: ["%variant_name"])
+                                attrs @filter(op: "contains", value: ["$non_exhaustive"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
@@ -71,13 +68,8 @@ SemverQuery(
         "public": "public",
         "true": true,
         "zero": 0,
+        "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A field of a tuple variant in a pub enum has been removed.",
-    per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
-    witness: (
-        hint_template: r#"match value {
-    {{ join "::" path }}::{{ variant_name }}({{#repeat field_count }}{{#if (eq (to_string @index) ../field_name) }}witness{{else}}_{{/if}}{{#unless @last}}, {{/unless}}{{/repeat}}) => (),
-    _ => (),
-}"#,
-    ),
+    error_message: "A field was added to an enum's non-exhaustive struct variant.",
+    per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
