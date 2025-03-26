@@ -1235,6 +1235,7 @@ add_lints!(
     enum_no_longer_non_exhaustive,
     enum_no_repr_variant_discriminant_changed,
     enum_non_exhaustive_struct_variant_field_added,
+    enum_non_exhaustive_tuple_variant_changed_kind,
     enum_now_doc_hidden,
     enum_repr_int_added,
     enum_repr_int_changed,
