@@ -17,17 +17,17 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/enum_non_exhaustive_struct_variant_field_added/": [
+  "./test_crates/enum_non_exhaustive_tuple_variant_changed_kind/": [
     {
-      "enum_name": String("EnumWithNonExhaustiveVariant"),
+      "enum_name": String("TestBecomeExhaustive"),
       "path": List([
-        String("enum_non_exhaustive_struct_variant_field_added"),
-        String("EnumWithNonExhaustiveVariant"),
+        String("enum_non_exhaustive_tuple_variant_changed_kind"),
+        String("TestBecomeExhaustive"),
       ]),
-      "span_begin_line": Uint64(24),
-      "span_end_line": Uint64(24),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
       "span_filename": String("src/lib.rs"),
-      "variant_name": String("NonExhaustiveVariant"),
+      "variant_name": String("WillBecomeStructLike"),
       "visibility_limit": String("public"),
     },
   ],
