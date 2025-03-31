@@ -1,0 +1,20 @@
+---
+source: src/query.rs
+assertion_line: 772
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/method_receiver_ref_mutability_increased/": [
+    {
+      "method_name": String("area"),
+      "method_visibility": String("public"),
+      "path": List([
+        String("method_receiver_ref_mutability_increased"),
+        String("Rectangle"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

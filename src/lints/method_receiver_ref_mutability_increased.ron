@@ -1,0 +1,95 @@
+SemverQuery(
+    id: "method_receiver_ref_mutability_increased",
+    human_readable_name: "method now requires '&mut self' instead of '&self'",
+    description: "Detecting method's receiver changes from &self to &mut self",
+    required_update: Major,   
+    lint_level: Deny,   
+    reference_link: "https://doc.rust-lang.org/book/ch05-03-method-syntax.html#defining-methods",
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
+                                method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+  
+                                receiver {
+                                    by_reference @filter(op: "=", value: ["$true"])
+                                    kind @filter(op: "=", value: ["$self_kind"])
+                                } 
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])   
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                         
+                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])  
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                receiver {
+                                    by_mut_reference @filter(op: "=", value: ["$true"])
+                                    kind @filter(op: "=", value: ["$self_kind"])
+                                }
+                            }
+                        }
+
+                        impl @fold {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])  
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                receiver {
+                                    by_mut_reference @filter(op: "=", value: ["$true"])
+                                    kind @filter(op: "=", value: ["$self_kind"])
+                                } 
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "public_or_default": ["public", "default"],
+        "true": true,
+        "zero": 0,
+        "self_kind" : "Self"
+    },
+    error_message: "A method's receiver type changed from '&Self' to '&mut Self'. Existing callers with immutable access will break.",
+    per_result_error_template: Some("Method '{{method_name}}' changed receiver from &Self to &mut Self in {{span_filename}}:{{span_begin_line}}"), 
+    witness: (
+        hint_template: "Method '{{span_filename}}:{{span_begin_line}}:{{method_name}}' now requires '&mut Self' instead of '&Self'."
+    ),
+)

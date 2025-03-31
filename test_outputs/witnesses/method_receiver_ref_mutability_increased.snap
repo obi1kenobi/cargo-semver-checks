@@ -1,0 +1,10 @@
+---
+source: src/query.rs
+assertion_line: 847
+description: "Lint `method_receiver_ref_mutability_increased` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/method_receiver_ref_mutability_increased/"]]
+filename = 'src/lib.rs'
+begin_line = 9
+hint = '''Method 'src/lib.rs:9:area' now requires '&mut Self' instead of '&Self'.'''

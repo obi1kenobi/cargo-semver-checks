@@ -1289,6 +1289,7 @@ add_lints!(
     macro_no_longer_exported,
     macro_now_doc_hidden,
     method_parameter_count_changed,
+    method_receiver_ref_mutability_increased,
     method_requires_different_const_generic_params,
     method_requires_different_generic_type_params,
     module_missing,

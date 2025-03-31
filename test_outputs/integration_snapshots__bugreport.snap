@@ -1,5 +1,6 @@
 ---
 source: tests/integration_snapshots.rs
+assertion_line: 44
 info:
   program: cargo-semver-checks
   args:
@@ -8,7 +9,6 @@ info:
   env:
     CARGO_TERM_COLOR: never
     RUST_BACKTRACE: "0"
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -27,7 +27,7 @@ cargo-semver-checks [VERSION] ([HASH])
 #### Command-line
 
 ```bash
-[EXECUTABLE_PATH] semver-checks --bugreport 
+'[EXECUTABLE_PATH]' semver-checks --bugreport 
 ```
 
 #### cargo version

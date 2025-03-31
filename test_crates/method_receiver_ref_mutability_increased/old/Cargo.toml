@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "method_receiver_ref_mutability_increased"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
