@@ -1,0 +1,84 @@
+SemverQuery(
+    id: "type_method_receiver_ref_now_mutable",
+    human_readable_name: "type method's receiver now requires mutable reference instead of immutable reference",
+    description: "A type method's receiver changed from '&self' to '&mut self'.",
+    required_update: Major,   
+    lint_level: Deny,   
+    reference_link: "https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html#mutable-references",
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        owner_type: __typename @tag @output
+                        
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            method {  
+                                method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+  
+                                receiver {
+                                    by_reference @filter(op: "=", value: ["$true"])
+                                    method_receiver_kind: kind @tag @output
+                                } 
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])   
+                        __typename @filter(op: "=", value: ["%owner_type"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                          
+
+                        inherent_impl {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            method { 
+                                name @filter(op: "=", value: ["%method_name"])  
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                
+                                receiver {
+                                    by_mut_reference @filter(op: "=", value: ["$true"])
+                                    kind @filter(op: "=", value: ["%method_receiver_kind"])
+                                } 
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public", 
+        "true": true, 
+    },
+    error_message: "A type method's receiver now requires a mutable reference instead of immutable one. Uses of this method that supplied the previous mutability state will be broken.",
+    per_result_error_template: Some("method {{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"), 
+    witness: (
+        hint_template: r#"make the reference mutable for method '{{ join "::" path }}::{{ method_name }}'"# 
+    ),
+)
