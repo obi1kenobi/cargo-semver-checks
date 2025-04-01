@@ -61,4 +61,16 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/pub_static_added/": [
+    {
+      "name": String("NEW_PUB_CONST_IN_GLOBAL"),
+      "path": List([
+        String("pub_static_added"),
+        String("NEW_PUB_CONST_IN_GLOBAL"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
