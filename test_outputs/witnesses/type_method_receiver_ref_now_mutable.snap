@@ -1,0 +1,10 @@
+---
+source: src/query.rs
+assertion_line: 847
+description: "Lint `type_method_receiver_ref_now_mutable` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/type_method_receiver_ref_now_mutable/"]]
+filename = 'src/lib.rs'
+begin_line = 9
+hint = "make the reference mutable for method 'type_method_receiver_ref_now_mutable::Rectangle::area'"

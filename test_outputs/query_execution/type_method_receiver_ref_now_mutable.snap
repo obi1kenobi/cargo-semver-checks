@@ -1,0 +1,22 @@
+---
+source: src/query.rs
+assertion_line: 772
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/type_method_receiver_ref_now_mutable/": [
+    {
+      "method_name": String("area"),
+      "method_receiver_kind": String("Self"),
+      "name": String("Rectangle"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("type_method_receiver_ref_now_mutable"),
+        String("Rectangle"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
