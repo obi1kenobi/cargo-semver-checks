@@ -21,25 +21,7 @@ pub enum EnumToUsizeEnum {
 }
 
 #[repr(C)]
-pub enum CEnumToU8CEnum {
-    Bar,
-    Baz,
-}
-
-#[repr(C)]
-pub enum CEnumToSeparateU8CEnum {
-    Bar,
-    Baz,
-}
-
-#[repr(C)]
 pub enum CEnumToCU8Enum {
-    Bar,
-    Baz,
-}
-
-#[repr(C)]
-pub enum CEnumToSeparateCU8Enum {
     Bar,
     Baz,
 }
