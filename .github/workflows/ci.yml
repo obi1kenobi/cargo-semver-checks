@@ -219,7 +219,7 @@ jobs:
         #
         #            Also make sure to update the MSRV in the cargo-semver-checks-action CI:
         #            https://github.com/obi1kenobi/cargo-semver-checks-action/blob/main/.github/workflows/test-action.yml#L18
-        toolchain: ["1.84", "stable", "beta"]
+        toolchain: ["1.84", "1.85", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
