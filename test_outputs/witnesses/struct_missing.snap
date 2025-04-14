@@ -1,0 +1,70 @@
+---
+source: src/query.rs
+description: "Lint `struct_missing` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+snapshot_kind: text
+---
+[["./test_crates/move_item_and_reexport/"]]
+filename = 'src/lib.rs'
+begin_line = 40
+hint = 'use move_item_and_reexport::NonEquivalentReorderedGenerics;'
+
+[["./test_crates/move_item_and_reexport/"]]
+filename = 'src/lib.rs'
+begin_line = 44
+hint = 'use move_item_and_reexport::NonEquivalentRemovedLifetime;'
+
+[["./test_crates/move_item_and_reexport/"]]
+filename = 'src/lib.rs'
+begin_line = 48
+hint = 'use move_item_and_reexport::NonEquivalentRemovedConst;'
+
+[["./test_crates/move_item_and_reexport/"]]
+filename = 'src/lib.rs'
+begin_line = 52
+hint = 'use move_item_and_reexport::NonEquivalentRemovedType;'
+
+[["./test_crates/repr_packed_added_removed/"]]
+filename = 'src/lib.rs'
+begin_line = 11
+hint = 'use repr_packed_added_removed::StructBecomesPackedAndPrivate;'
+
+[["./test_crates/repr_packed_added_removed/"]]
+filename = 'src/lib.rs'
+begin_line = 15
+hint = 'use repr_packed_added_removed::StructBecomesUnpackedAndPrivate;'
+
+[["./test_crates/semver_trick_self_referential/"]]
+filename = 'src/lib.rs'
+begin_line = 3
+hint = 'use semver_trick_self_referential::Example;'
+
+[["./test_crates/struct_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 3
+hint = 'use struct_missing::WillBeRemovedStruct;'
+
+[["./test_crates/struct_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 6
+hint = 'use struct_missing::PubUseRemovedStruct;'
+
+[["./test_crates/struct_now_doc_hidden/"]]
+filename = 'src/lib.rs'
+begin_line = 36
+hint = 'use struct_now_doc_hidden::PublicStructThatGoesPrivate;'
+
+[["./test_crates/struct_pub_field_missing/"]]
+filename = 'src/lib.rs'
+begin_line = 13
+hint = 'use struct_pub_field_missing::StructRemoved;'
+
+[["./test_crates/struct_with_no_pub_fields_changed_type/"]]
+filename = 'src/lib.rs'
+begin_line = 91
+hint = 'use struct_with_no_pub_fields_changed_type::PubStructChangedToType;'
+
+[["./test_crates/switch_to_reexport_as_underscore/"]]
+filename = 'src/lib.rs'
+begin_line = 6
+hint = 'use switch_to_reexport_as_underscore::Struct;'
