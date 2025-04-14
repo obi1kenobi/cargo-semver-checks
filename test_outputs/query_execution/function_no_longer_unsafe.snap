@@ -1,0 +1,32 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/function_no_longer_unsafe/": [
+    {
+      "name": String("add"),
+      "path": List([
+        String("function_no_longer_unsafe"),
+        String("add"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/safe_vs_unsafe_extern_fn/": [
+    {
+      "name": String("originally_legacy_now_unsafe_extern_and_safe"),
+      "path": List([
+        String("safe_vs_unsafe_extern_fn"),
+        String("originally_legacy_now_unsafe_extern_and_safe"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

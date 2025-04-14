@@ -1,9 +1,62 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
+  "./test_crates/enum_non_exhaustive_tuple_variant_changed_kind/": [
+    {
+      "enum_name": String("TestStructExhaustive"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("enum_non_exhaustive_tuple_variant_changed_kind"),
+        String("TestStructExhaustive"),
+      ]),
+      "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(38),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+    },
+    {
+      "enum_name": String("TestUnitExhaustive"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("PlainVariant"),
+      "path": List([
+        String("enum_non_exhaustive_tuple_variant_changed_kind"),
+        String("TestUnitExhaustive"),
+      ]),
+      "span_begin_line": Uint64(42),
+      "span_end_line": Uint64(42),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeUnitLike"),
+    },
+    {
+      "enum_name": String("MultipleTestExhaustive"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("enum_non_exhaustive_tuple_variant_changed_kind"),
+        String("MultipleTestExhaustive"),
+      ]),
+      "span_begin_line": Uint64(46),
+      "span_end_line": Uint64(46),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+    },
+    {
+      "enum_name": String("MultipleTestExhaustive"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("PlainVariant"),
+      "path": List([
+        String("enum_non_exhaustive_tuple_variant_changed_kind"),
+        String("MultipleTestExhaustive"),
+      ]),
+      "span_begin_line": Uint64(47),
+      "span_end_line": Uint64(47),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeUnitLike"),
+    },
+  ],
   "./test_crates/enum_tuple_variant_changed_kind/": [
     {
       "enum_name": String("TestStruct"),

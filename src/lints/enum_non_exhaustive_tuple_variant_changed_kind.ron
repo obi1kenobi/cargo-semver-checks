@@ -1,0 +1,77 @@
+SemverQuery(
+    id: "enum_non_exhaustive_tuple_variant_changed_kind",
+    human_readable_name: "An enum non exhaustive tuple variant changed kind",
+    description: "A pub enum's #[non_exhaustive] tuple variant with at least one pub field changed kind",
+    required_update: Major,
+    lint_level: Deny,
+    // TODO: If the Rust reference gains a more detailed explanation of enum *variants*,
+    //       switch the explanation to point there instead. The current link isn't great.    
+    reference_link: Some("https://doc.rust-lang.org/reference/items/enumerations.html"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        enum_name: name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            ... on TupleVariant {
+                                kind: __typename @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                attrs @filter(op: "contains", value: ["$non_exhaustive"])
+                                variant_name: name @output @tag
+
+                                field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                                    public_api_eligible @filter(op: "=", value: ["$true"])
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%enum_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # Don't check for exhaustiveness and public API eligibility here.
+                        # Variants that changed kind and gained `#[doc(hidden)]` should
+                        # report for both lints, since there is no implied continuity
+                        # between the old variant and the new one with the same name.
+                        variant {
+                            name @filter(op: "=", value: ["%variant_name"])
+                            new_kind: __typename @filter(op: "!=", value: ["%kind"]) @output
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+        "non_exhaustive": "#[non_exhaustive]",
+    },
+    error_message: "A pub enum's #[non_exhaustive] tuple variant with at least one pub field has changed to a different kind of enum variant, breaking possible pattern matches and field accesses.",
+    per_result_error_template: Some("variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+)
