@@ -46,6 +46,12 @@ SemverQuery(
                         variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             name @filter(op: "=", value: ["%variant_name"])
                         }
+
+                        variant @fold {
+                            baseline_variant_kinds: __typename @output
+
+                            baseline_variant_names: name @output
+                        }
                     }
                 }
             }
@@ -59,4 +65,9 @@ SemverQuery(
     },
     error_message: "A publicly-visible enum without #[non_exhaustive] has a new variant.",
     per_result_error_template: Some("variant {{enum_name}}:{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"match value { {{#each baseline_variant_kinds }}
+    {{ join "::" ../path }}::{{lookup ../baseline_variant_names @index}}{{#if (eq this "StructVariant")}} { .. }{{/if}}{{#if (eq this "TupleVariant")}}(..){{/if}} => (),{{/each}}
+}"#,
+    ),
 )

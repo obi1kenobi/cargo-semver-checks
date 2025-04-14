@@ -297,7 +297,7 @@ jobs:
           workspaces: 'semver'
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.8
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: build and cache
         run: |
@@ -347,7 +347,7 @@ jobs:
           workspaces: 'semver'
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.8
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: build and cache
         run: |
