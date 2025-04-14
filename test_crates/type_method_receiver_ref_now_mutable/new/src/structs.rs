@@ -11,7 +11,35 @@ impl PublicStruct {
     pub fn public_method(&mut self) {}
     pub fn public_method_require_box(self: &mut Box<Self>) {}
     pub fn public_method_require_pin(self: &mut Pin<&mut Self>) {}
-    pub fn public_method_require_pc_box(self:&mut Rc<Box<Self>>) {}
+    pub fn public_method_require_rc_box(self:&mut Rc<Box<Self>>) {}
+    fn private_method(&mut self) {}
+    #[doc(hidden)]
+    pub fn hidden_method(&mut self) {}
+}
+
+#[doc(hidden)]
+pub struct HiddenStruct {
+    value: i32,
+}
+
+impl HiddenStruct {
+    pub fn public_method(&mut self) {}
+    pub fn public_method_require_box(self: &mut Box<Self>) {}
+    pub fn public_method_require_pin(self: &mut Pin<&mut Self>) {}
+    pub fn public_method_require_rc_box(self:&mut Rc<Box<Self>>) {}
+    fn private_method(&mut self) {}
+}
+
+pub struct StructWithHiddenImpl {
+    value: i32,
+}
+
+#[doc(hidden)]
+impl StructWithHiddenImpl {
+    pub fn public_method(&mut self) {}
+    pub fn public_method_require_box(self: &mut Box<Self>) {}
+    pub fn public_method_require_pin(self: &mut Pin<&mut Self>) {}
+    pub fn public_method_require_rc_box(self:&mut Rc<Box<Self>>) {}
     fn private_method(&mut self) {}
 }
 
@@ -23,6 +51,6 @@ impl PrivateStruct {
     pub fn public_method(&mut self) {}
     pub fn public_method_require_box(self: &mut Box<Self>) {}
     pub fn public_method_require_pin(self: &mut Pin<&mut Self>) {}
-    pub fn public_method_require_pc_box(self:&mut Rc<Box<Self>>) {}
+    pub fn public_method_require_rc_box(self:&mut Rc<Box<Self>>) {}
     fn private_method(&mut self) {}
 }

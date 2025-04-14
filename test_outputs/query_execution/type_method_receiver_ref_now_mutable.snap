@@ -48,7 +48,7 @@ expression: "&query_execution_results"
       "span_filename": String("src/enums.rs"),
     },
     {
-      "method_name": String("public_method_require_pc_box"),
+      "method_name": String("public_method_require_rc_box"),
       "method_receiver_kind": String("Rc<Box<Self>>"),
       "name": String("PublicEnum"),
       "owner_type": String("Enum"),
@@ -104,7 +104,7 @@ expression: "&query_execution_results"
       "span_filename": String("src/structs.rs"),
     },
     {
-      "method_name": String("public_method_require_pc_box"),
+      "method_name": String("public_method_require_rc_box"),
       "method_receiver_kind": String("Rc<Box<Self>>"),
       "name": String("PublicStruct"),
       "owner_type": String("Struct"),
@@ -160,7 +160,7 @@ expression: "&query_execution_results"
       "span_filename": String("src/unions.rs"),
     },
     {
-      "method_name": String("public_method_require_pc_box"),
+      "method_name": String("public_method_require_rc_box"),
       "method_receiver_kind": String("Rc<Box<Self>>"),
       "name": String("PublicUnion"),
       "owner_type": String("Union"),
