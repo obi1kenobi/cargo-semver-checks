@@ -1,0 +1,101 @@
+---
+source: src/query.rs
+assertion_line: 772
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/pub_const_added/": [
+    {
+      "name": String("NEW_PUB_STATIC_IN_GLOBAL"),
+      "path": List([
+        String("pub_const_added"),
+        String("NEW_PUB_STATIC_IN_GLOBAL"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/pub_static_added/": [
+    {
+      "name": String("NEW_PUB_STATIC_IN_GLOBAL"),
+      "path": List([
+        String("pub_static_added"),
+        String("NEW_PUB_STATIC_IN_GLOBAL"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NEW_PUB_STATIC_IN_MODULE"),
+      "path": List([
+        String("pub_static_added"),
+        String("my_module"),
+        String("NEW_PUB_STATIC_IN_MODULE"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/pub_static_missing/": [
+    {
+      "name": String("PUB_STATIC_IN_GLOBAL_IS_RENAMED"),
+      "path": List([
+        String("pub_static_missing"),
+        String("PUB_STATIC_IN_GLOBAL_IS_RENAMED"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PUB_STATIC_IN_MODULE_IS_RENAMED"),
+      "path": List([
+        String("pub_static_missing"),
+        String("my_module"),
+        String("PUB_STATIC_IN_MODULE_IS_RENAMED"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PUB_STATIC_IN_NESTED_MODULE_IS_RENAMED"),
+      "path": List([
+        String("pub_static_missing"),
+        String("my_module"),
+        String("my_module_nested"),
+        String("PUB_STATIC_IN_NESTED_MODULE_IS_RENAMED"),
+      ]),
+      "span_begin_line": Uint64(25),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/pub_static_mut_now_immutable/": [
+    {
+      "name": String("STATIC_RENAMED"),
+      "path": List([
+        String("pub_static_mut_now_immutable"),
+        String("STATIC_RENAMED"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/pub_static_now_mutable/": [
+    {
+      "name": String("STATIC_RENAME"),
+      "path": List([
+        String("pub_static_now_mutable"),
+        String("STATIC_RENAME"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

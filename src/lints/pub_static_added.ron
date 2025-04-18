@@ -1,0 +1,46 @@
+SemverQuery(
+    id: "pub_static_added",
+    human_readable_name: "pub static is added",
+    description: "A new pub static item has been added. Removing or modifying it later would be a breaking change.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-new"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Static {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    # A GlobalValue is a supertype of Static and Constant
+                    ... on GlobalValue {
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+        "true": true,
+    },
+    error_message: "A new pub static item has been added. Removing or modifying it later would be a breaking change.",
+    per_result_error_template: Some("{{name}} in file {{span_filename}}:{{span_begin_line}}"),
+)
