@@ -15,6 +15,38 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/enum_repr_int_removed/": [
+    {
+      "name": String("U8CEnumToCEnum"),
+      "path": List([
+        String("enum_repr_int_removed"),
+        String("U8CEnumToCEnum"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("SeparateU8CEnumToCEnum"),
+      "path": List([
+        String("enum_repr_int_removed"),
+        String("SeparateU8CEnumToCEnum"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("SeparateCU8EnumToCEnum"),
+      "path": List([
+        String("enum_repr_int_removed"),
+        String("SeparateCU8EnumToCEnum"),
+      ]),
+      "span_begin_line": Uint64(42),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_struct_variant_field_marked_deprecated/": [
     {
       "name": String("NewEnumWithDeprecatedFields"),
@@ -120,6 +152,18 @@ expression: "&query_execution_results"
       ]),
       "span_begin_line": Uint64(155),
       "span_filename": String("src/enum_method_moved_to_trait_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/non_exhaustive_enum_added/": [
+    {
+      "name": String("ExhaustiveEnum"),
+      "path": List([
+        String("non_exhaustive_enum_added"),
+        String("ExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
   ],
