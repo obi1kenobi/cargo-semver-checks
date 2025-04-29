@@ -1553,7 +1553,7 @@ jobs:
       - name: Baseline is correct
         run: |
           cd semver
-          EXPECTED="$(echo -e "    Checking ref_slice v1.2.1 -> v1.2.1 (minimum patch change)")"
+          EXPECTED="$(echo -e "    Checking ref_slice v1.2.1 -> v1.2.1 (no change; assume patch)")"
           # Strip ANSI escapes for colors and bold text before comparing.
           RESULT="$(grep ' -> v1.' output | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g")"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
@@ -1653,7 +1653,7 @@ jobs:
       - name: Baseline is correct
         run: |
           cd semver
-          $EXPECTED = "    Checking ref_slice v1.2.1 -> v1.2.1 (minimum patch change)"
+          $EXPECTED = "    Checking ref_slice v1.2.1 -> v1.2.1 (no change; assume patch)"
           # Strip ANSI escapes for colors and bold text before comparing.
           cat output | grep ' -> v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g" | Out-File -FilePath check_line
           cat check_line
