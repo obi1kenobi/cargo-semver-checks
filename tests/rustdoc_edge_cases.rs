@@ -233,4 +233,12 @@ fn release_type_flag_minor() {
         ])
         .assert()
         .failure();
+
+    // Running the same command without the flag should pass.
+    // This is because the detected minimum version change is semver-minor,
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/type_marked_deprecated/new")
+        .args(["semver-checks", "check-release", "--baseline-root=../old"])
+        .assert()
+        .success();
 }

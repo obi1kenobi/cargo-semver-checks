@@ -43,7 +43,13 @@ fn classify_minimum_semver_version_change(
 
         // Check if versions are identical (ignoring build metadata)
         if baseline_version.cmp_precedence(&current_version) == Ordering::Equal {
-            // Determine minimum possible change based on SemVer rules
+            if !current_version.pre.is_empty() {
+                // we're on a pre-release: the minimum "next" change is major
+                return Some(VersionChange {
+                    level: ActualSemverUpdate::Major,
+                    kind: VersionChangeKind::Minimum,
+                });
+            }
             return Some(get_minimum_version_change(&current_version));
         }
 
@@ -230,6 +236,16 @@ pub(super) fn run_check_release(
     let current_version = data_storage.current_crate().crate_version();
     let baseline_version = data_storage.baseline_crate().crate_version();
 
+    // Determine the version change between baseline and current versions.
+    // This can happen in three ways:
+    // 1. User explicitly specified a release type (--release-type flag)
+    // 2. We can determine it from the version strings
+    // 3. We fall back to assuming no change
+    //
+    // Note: classify_minimum_semver_version_change() will return None in two cases:
+    // - When either baseline_version or current_version is None (unknown version)
+    // - When the versions can't be parsed as valid semver
+    // In these cases, we fall back to assuming no change, which is the most conservative approach.
     let version_change = release_type
         .map(|rt| VersionChange {
             level: rt.into(),
@@ -629,7 +645,7 @@ mod test {
         let baseline = Some("1.0.0-alpha.0");
         let current = Some("1.0.0-alpha.0");
         let expected = Some(VersionChange {
-            level: ActualSemverUpdate::Patch,
+            level: ActualSemverUpdate::Major,
             kind: VersionChangeKind::Minimum,
         });
         let actual = classify_minimum_semver_version_change(baseline, current);
@@ -701,7 +717,7 @@ mod test {
         let baseline = Some("0.1.0-alpha.0");
         let current = Some("0.1.0-alpha.0");
         let expected = Some(VersionChange {
-            level: ActualSemverUpdate::Minor,
+            level: ActualSemverUpdate::Major,
             kind: VersionChangeKind::Minimum,
         });
         let actual = classify_minimum_semver_version_change(baseline, current);
@@ -713,7 +729,7 @@ mod test {
         let baseline = Some("1.0.0-alpha.1+build.1");
         let current = Some("1.0.0-alpha.1+build.2");
         let expected = Some(VersionChange {
-            level: ActualSemverUpdate::Patch,
+            level: ActualSemverUpdate::Major,
             kind: VersionChangeKind::Minimum,
         });
         let actual = classify_minimum_semver_version_change(baseline, current);
