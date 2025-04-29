@@ -46,7 +46,7 @@ Failed in:
        Built [TIME] (baseline)
      Parsing cfg_conditional_compilation v0.1.0 (baseline)
       Parsed [TIME] (baseline)
-    Checking cfg_conditional_compilation v0.1.0 -> v0.1.0 (minimum minor change)
+    Checking cfg_conditional_compilation v0.1.0 -> v0.1.0 (no change; assume minor)
      Checked [TIME] [TOTAL] checks: [PASS] pass, 2 fail, 0 warn, [SKIP] skip
 
      Summary semver requires new major version: 2 major and 0 minor checks failed
