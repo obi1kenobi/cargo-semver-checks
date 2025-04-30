@@ -1,7 +1,6 @@
 ---
 source: src/snapshot_tests.rs
 expression: result
-snapshot_kind: text
 ---
 --- error ---
 aborting due to failure to build rustdoc for crate error v0.1.0
@@ -54,7 +53,7 @@ note: the following command can be used to reproduce the compilation error:
        Built [TIME] (baseline)
      Parsing no-error v0.1.0 (baseline)
       Parsed [TIME] (baseline)
-    Checking no-error v0.1.0 -> v0.1.0 (no change)
+    Checking no-error v0.1.0 -> v0.1.0 (no change; assume minor)
      Checked [TIME] [TOTAL] checks: [PASS] pass, 1 fail, 0 warn, [SKIP] skip
 
      Summary semver requires new major version: 1 major and 0 minor checks failed
