@@ -242,6 +242,8 @@ fn release_type_flag_minor() {
 
 /// This test ensures that minimum semver version changes for 0.y.z versions
 /// are detected correctly without the need for the `--release-type` flag.
+/// In this test, the crate has SemVer-minor lints, and the minimum possible
+/// SemVer bump is minor (due to the 0.y.z version), so no lints are raised.
 #[test]
 fn zerover_minor_flag_not_needed() {
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
