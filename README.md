@@ -270,12 +270,16 @@ are intentionally yanked. Please use the `cargo-semver-checks` crate instead.
 
 MSRV bumps are _not_ considered major changes.
 
-`cargo-semver-checks` has two Rust version bounds, since it depends on Rust
-both at compile-time and at runtime:
+Please go to our [Releases page](https://github.com/obi1kenobi/cargo-semver-checks/releases) to find the MSRV of the `cargo-semver-checks` version you are using.
 
-- The MSRV for _compiling_ `cargo-semver-checks` (_"compile MSRV"_) is currently Rust 1.70.
-  This is primarily determined by our dependencies' MSRVs.
-- The MSRV for _checking crates_ (_"runtime MSRV"_) is currently Rust 1.71.
+`cargo-semver-checks` has two Rust version bounds, since it depends on Rust
+both at compile-time and at runtime. These versions are _usually but not always_ the same:
+
+- The MSRV for _compiling_ `cargo-semver-checks` (_"compile MSRV"_) is listed in our `Cargo.toml` file.
+  This version governs which Rust version you can `cargo install` the project with,
+  and is primarily determined by our dependencies' MSRVs.
+- The MSRV for _checking crates_ (_"runtime MSRV"_) is the minimum Rust version
+  with which running `cargo-semver-checks` will succeed.
   This is determined based on the rustdoc JSON format versions and
   known bugs in older rustdoc versions.
 

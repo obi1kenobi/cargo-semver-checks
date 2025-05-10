@@ -1,7 +1,6 @@
 ---
 source: src/snapshot_tests.rs
 expression: result
-snapshot_kind: text
 ---
 success: false
 --- stdout ---
