@@ -1,0 +1,79 @@
+SemverQuery(
+    id: "type_method_receiver_ref_became_owned",
+    human_readable_name: "ImplOwner method's receiver changed from immutable reference to owned value",
+    description: "An ImplOwner method's receiver changed from an immutable reference to an owned value, transferring ownership and preventing further use of the instance after the call.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/associated-items.html?highlight=self#methods"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        owner_type: __typename @tag @output
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                method_name: name @output @tag
+
+                                receiver {
+                                    by_reference @filter(op: "=", value: ["$true"])
+                                    method_receiver_kind: kind @tag @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        __typename @filter(op: "=", value: ["%owner_type"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                receiver {
+                                    by_value @filter(op: "=", value: ["$true"])
+                                    kind @filter(op: "=", value: ["%method_receiver_kind"])
+                                }
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "An ImplOwner method's receiver changed from an immutable reference to an owned value, which may affect downstream crates, as it transfers ownership of the instance, preventing its further use.",
+    per_result_error_template: Some("method {{join \"::\" path}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
