@@ -479,7 +479,8 @@ impl RustdocFromGitRevision {
         config: &mut GlobalConfig,
     ) -> anyhow::Result<Self> {
         config.shell_status("Cloning", rev)?;
-        let repo = gix::discover(source)?;
+        let repo = gix::ThreadSafeRepository::discover_with_environment_overrides(source)
+            .map(gix::Repository::from)?;
 
         let tree_id = repo.rev_parse_single(&*format!("{rev}^{{tree}}"))?;
         let tree_dir = target.join(tree_id.to_string());
