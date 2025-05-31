@@ -59,7 +59,7 @@ SemverQuery(
         "true": true,
     },
     error_message: "A public unit struct has been changed to a normal (curly-braces) struct, which cannot be constructed using the same struct literal syntax.",
-    // per_result_error_template: Some("struct {{name}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("struct {{name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: (
             hint_template: r#"let witness = {{ join "::" path }};"#,
         ),
