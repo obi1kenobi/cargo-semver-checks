@@ -339,6 +339,10 @@ struct UnstableOptions {
     /// Enable printing witness hints, examples of potentially-broken downstream code.
     #[arg(long, hide = true)]
     witness_hints: bool,
+
+    /// Enable generating and testing witness programs, full examples of potentially-broken downstream code.
+    #[arg(long, id = "OUTPUT_DIR", hide = true)]
+    witnesses: Option<PathBuf>,
 }
 
 impl UnstableOptions {
@@ -360,10 +364,17 @@ impl UnstableOptions {
 
         // If this has a compilation error from adding or removing fields, see this function's
         // docstring for how to fix this function's implementation.
-        let Self { witness_hints } = self;
+        let Self {
+            witness_hints,
+            witnesses,
+        } = self;
 
         if *witness_hints {
             list.push("--witness-hints".into());
+        }
+
+        if witnesses.is_some() {
+            list.push("--witnesses <OUTPUT_DIR>".into())
         }
 
         list
