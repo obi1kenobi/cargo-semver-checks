@@ -249,10 +249,10 @@ fn run_cargo_doc(
     // This fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/589
     let rustflags = match std::env::var("RUSTFLAGS") {
         Ok(mut prior_rustflags) => {
-            prior_rustflags.push_str(" --cap-lints=allow");
+            prior_rustflags.push_str(" --cap-lints=warn");
             std::borrow::Cow::Owned(prior_rustflags)
         }
-        Err(_) => std::borrow::Cow::Borrowed("--cap-lints=allow"),
+        Err(_) => std::borrow::Cow::Borrowed("--cap-lints=warn"),
     };
 
     // Ensure we preserve `RUSTDOCFLAGS` if they are set.
