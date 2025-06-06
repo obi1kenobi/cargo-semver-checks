@@ -722,7 +722,7 @@ impl RustdocGenerator for RustdocFromRegistry {
             })
             .with_context(|| {
                 anyhow::format_err!(
-                    "Version {} of crate {} not found in registry",
+                    "crate {} version {} not found in registry",
                     crate_data.name,
                     base_version
                 )
