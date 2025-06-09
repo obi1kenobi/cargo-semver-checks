@@ -15,6 +15,7 @@ use super::progress::{CallbackHandler, ProgressCallbacks};
 #[derive(Debug, Clone)]
 pub(super) struct RegistryRequest<'a> {
     index_entry: &'a tame_index::IndexVersion,
+    pub(super) registry_name: Option<&'a str>,
 }
 
 #[derive(Debug, Clone)]
@@ -31,7 +32,7 @@ pub(super) enum RequestKind<'a> {
 impl RequestKind<'_> {
     pub(super) fn name(&self) -> anyhow::Result<&str> {
         Ok(match self {
-            Self::Registry(RegistryRequest { index_entry }) => &index_entry.name,
+            Self::Registry(RegistryRequest { index_entry, .. }) => &index_entry.name,
             Self::LocalProject(ProjectRequest { manifest }) => {
                 crate::manifest::get_package_name(manifest)?
             }
@@ -40,7 +41,7 @@ impl RequestKind<'_> {
 
     pub(super) fn version(&self) -> anyhow::Result<&str> {
         Ok(match self {
-            Self::Registry(RegistryRequest { index_entry }) => index_entry.version.as_str(),
+            Self::Registry(RegistryRequest { index_entry, .. }) => index_entry.version.as_str(),
             Self::LocalProject(ProjectRequest { manifest }) => {
                 crate::manifest::get_package_version(manifest)?
             }
@@ -213,6 +214,7 @@ pub(crate) struct CrateDataRequest<'a> {
 impl<'a> CrateDataRequest<'a> {
     pub(crate) fn from_index(
         index_entry: &'a tame_index::IndexVersion,
+        registry_name: Option<&'a str>,
         default_features: bool,
         extra_features: BTreeSet<Cow<'a, str>>,
         build_target: Option<&'a str>,
@@ -220,7 +222,10 @@ impl<'a> CrateDataRequest<'a> {
     ) -> Self {
         let features_fingerprint = make_features_hash(default_features, &extra_features);
         Self {
-            kind: RequestKind::Registry(RegistryRequest { index_entry }),
+            kind: RequestKind::Registry(RegistryRequest {
+                index_entry,
+                registry_name,
+            }),
             default_features,
             extra_features,
             build_target,
