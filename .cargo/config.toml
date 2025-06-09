@@ -8,4 +8,4 @@ registry = "sparse+https://csc-imaginary-registry.example.net/index/"
 replace-with = "csc-actual-registry-on-disk"
 
 [source.csc-actual-registry-on-disk]
-local-registry = "../test-local-registry"
+local-registry = "test_crates/custom_registry/test-local-registry"
