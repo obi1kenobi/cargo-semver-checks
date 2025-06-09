@@ -84,7 +84,6 @@ pub(super) fn generate_rustdoc(
             crate_name,
             version,
             request,
-            build_dir,
             placeholder_manifest_path.as_path(),
             &settings,
         ) {
@@ -170,14 +169,12 @@ fn run_cargo_update(
     crate_name: &str,
     version: &str,
     request: &CrateDataRequest<'_>,
-    build_dir: &Path,
     placeholder_manifest_path: &Path,
     settings: &GenerationSettings,
 ) -> CargoUpdateResult {
     let mut cmd = std::process::Command::new("cargo");
     cmd.stdout(std::process::Stdio::null()) // Don't pollute output
         .stderr(settings.stderr())
-        .current_dir(build_dir)
         .arg("update")
         .arg("--manifest-path")
         .arg(placeholder_manifest_path);
