@@ -190,13 +190,13 @@ impl CrateSource<'_> {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) enum CrateType<'a> {
+pub(crate) enum CrateType {
     Current,
     Baseline {
         /// When the baseline is being generated from registry
         /// and no specific version was chosen, we want to select a version
         /// that is the same or older than the version of the current crate.
-        highest_allowed_version: Option<&'a semver::Version>,
+        highest_allowed_version: Option<semver::Version>,
     },
 }
 
@@ -240,7 +240,7 @@ impl FeatureConfig {
 
 #[derive(Debug, Clone)]
 pub(crate) struct CrateDataForRustdoc<'a> {
-    pub(crate) crate_type: CrateType<'a>,
+    pub(crate) crate_type: CrateType,
     pub(crate) name: String,
     pub(crate) feature_config: &'a FeatureConfig,
     pub(crate) build_target: Option<&'a str>,
@@ -709,11 +709,11 @@ impl RustdocGenerator for RustdocFromRegistry {
         } else {
             choose_baseline_version(
                 &crate_,
-                match crate_data.crate_type {
+                match &crate_data.crate_type {
                     CrateType::Current => None,
                     CrateType::Baseline {
                         highest_allowed_version,
-                    } => highest_allowed_version,
+                    } => highest_allowed_version.as_ref(),
                 },
             )
             .into_terminal_result()?
