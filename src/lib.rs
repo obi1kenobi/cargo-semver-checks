@@ -557,7 +557,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                                 },
                                 &CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Baseline {
-                                        highest_allowed_version: Some(version),
+                                        highest_allowed_version: Some(version.clone()),
                                     },
                                     name: crate_name.clone(),
                                     feature_config: &self.baseline_feature_config,
