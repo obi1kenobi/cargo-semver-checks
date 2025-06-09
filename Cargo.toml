@@ -37,8 +37,8 @@ log = "0.4.25"
 fs-err = "3.0.0"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
-gix = { version = "0.70", default-features = false, features = ["max-performance-safe", "revision"] }
-tame-index = { version = "0.17", features = ["sparse"] }
+gix = { version = "0.72", default-features = false, features = ["max-performance-safe", "revision"] }
+tame-index = { version = "0.21", features = ["sparse"] }
 
 human-panic = "2.0.2"
 bugreport = "0.5.1"
