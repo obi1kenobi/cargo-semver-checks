@@ -473,14 +473,7 @@ impl Check {
                             },
                         ) {
                             Ok(data) => data,
-                            Err(TerminalError::WithAdvice(err, advice)) => {
-                                config.log_error(|config| {
-                                    writeln!(config.stderr(), "{advice}")?;
-                                    Ok(())
-                                })?;
-                                return Err(err);
-                            }
-                            Err(TerminalError::Other(err)) => return Err(err),
+                            Err(err) => return Err(log_terminal_error(config, err)),
                         };
 
                         let report = run_check_release(
@@ -598,14 +591,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                                 },
                             ) {
                                 Ok(data) => data,
-                                Err(TerminalError::WithAdvice(err, advice)) => {
-                                    config.log_error(|config| {
-                                        writeln!(config.stderr(), "{advice}")?;
-                                        Ok(())
-                                    })?;
-                                    return Err(err);
-                                }
-                                Err(TerminalError::Other(err)) => return Err(err),
+                                Err(err) => return Err(log_terminal_error(config, err)),
                             };
 
                             let result = Ok((
@@ -644,6 +630,22 @@ note: skipped the following crates since they have no library target: {skipped}"
         };
 
         Ok(Report { crate_reports })
+    }
+}
+
+#[cold]
+fn log_terminal_error(config: &mut GlobalConfig, err: TerminalError) -> anyhow::Error {
+    match err {
+        TerminalError::WithAdvice(err, advice) => {
+            if let Err(err) = config.log_error(|config| {
+                writeln!(config.stderr(), "{advice}")?;
+                Ok(())
+            }) {
+                return err;
+            }
+            err
+        }
+        TerminalError::Other(err) => err,
     }
 }
 
