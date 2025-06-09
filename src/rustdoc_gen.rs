@@ -635,6 +635,8 @@ impl RustdocFromRegistry {
                 let client = builder.build().context("failed to build HTTP client")?;
                 index::RemoteSparseIndex::new(sparse, client).into()
             }
+            #[cfg(feature = "local-registry-replacement")]
+            ComboIndexCache::Local(local) => local.into(),
             _ => bail!("encountered unknown cache type"),
         };
 
