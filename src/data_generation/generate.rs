@@ -33,7 +33,7 @@ impl GenerationSettings {
         }
     }
 
-    fn color_flag(&self) -> &'static str {
+    pub(crate) fn color_flag(&self) -> &'static str {
         if self.use_color {
             "--color=always"
         } else {
