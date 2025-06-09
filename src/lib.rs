@@ -538,36 +538,10 @@ note: skipped the following crates since they have no library target: {skipped}"
                             })?;
                             Ok((crate_name.clone(), None))
                         } else {
-                            let package_overrides =
-                                manifest::deserialize_lint_table(&selected.metadata)
-                                    .with_context(|| {
-                                        format!(
-                                    "package `{}`'s [package.metadata.cargo-semver-checks] table is invalid (at {})",
-                                    selected.name,
-                                    selected.manifest_path,
-                                )
-                                    })?;
-
-                            let mut overrides = OverrideStack::new();
-
-                            let selected_manifest = manifest::Manifest::parse(selected.manifest_path.clone().into_std_path_buf())?;
-                            // the key `lints.workspace` for the Cargo lints table
-                            let lint_workspace_key = selected_manifest.parsed.lints.is_some_and(|x| x.workspace);
-                            let metadata_workspace_key = package_overrides.as_ref().is_some_and(|x| x.workspace);
-
-                            if lint_workspace_key || metadata_workspace_key {
-                                if let Some(workspace) = &workspace_overrides {
-                                    for level in workspace {
-                                        overrides.push(level);
-                                    }
-                                }
-                            }
-
-                            if let Some(package) = package_overrides {
-                                for level in package.into_stack() {
-                                    overrides.push(&level);
-                                }
-                            }
+                            let overrides = overrides_for_workspace_package(
+                                selected,
+                                workspace_overrides.as_deref(),
+                            )?;
 
                             let start = std::time::Instant::now();
                             let data_storage = match generate_crate_data(
@@ -631,6 +605,37 @@ note: skipped the following crates since they have no library target: {skipped}"
 
         Ok(Report { crate_reports })
     }
+}
+
+fn overrides_for_workspace_package(
+    package: &cargo_metadata::Package,
+    workspace_overrides: Option<&[BTreeMap<String, QueryOverride>]>,
+) -> Result<OverrideStack, anyhow::Error> {
+    let lint_table = manifest::deserialize_lint_table(&package.metadata).with_context(|| {
+        format!(
+            "package `{}`'s [package.metadata.cargo-semver-checks] table is invalid (at {})",
+            package.name, package.manifest_path,
+        )
+    })?;
+    let selected_manifest =
+        manifest::Manifest::parse(package.manifest_path.clone().into_std_path_buf())?;
+    let lint_workspace_key = selected_manifest.parsed.lints.is_some_and(|x| x.workspace);
+    let metadata_workspace_key = lint_table.as_ref().is_some_and(|x| x.workspace);
+
+    let mut overrides = OverrideStack::new();
+    if lint_workspace_key || metadata_workspace_key {
+        if let Some(workspace) = workspace_overrides {
+            for level in workspace {
+                overrides.push(level);
+            }
+        }
+    }
+    if let Some(lint_table) = lint_table {
+        for level in lint_table.into_stack() {
+            overrides.push(&level);
+        }
+    }
+    Ok(overrides)
 }
 
 #[cold]
