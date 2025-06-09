@@ -443,7 +443,7 @@ impl Check {
                             // are semver-checked against each other.
                             vec!["<unknown>".to_string()]
                         }
-                        _ => panic!("couldn't deduce crate name, specify one through the package allow list"),
+                        _ => anyhow::bail!("couldn't deduce crate name, specify one through the package allow list"),
                     },
                     ScopeMode::AllowList(lst) => lst.clone(),
                 };
