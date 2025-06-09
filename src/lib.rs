@@ -436,15 +436,15 @@ impl Check {
             | RustdocSource::Revision(_, _)
             | RustdocSource::VersionFromRegistry(_) => {
                 let names = match &self.scope.mode {
-                    ScopeMode::DenyList(_) =>
-                        match &self.current.source {
-                            RustdocSource::Rustdoc(_) =>
-                                // This is a user-facing string.
-                                // For example, it appears when two pre-generated rustdoc files
-                                // are semver-checked against each other.
-                                vec!["<unknown>".to_string()],
-                            _ => panic!("couldn't deduce crate name, specify one through the package allow list")
+                    ScopeMode::DenyList(_) => match &self.current.source {
+                        RustdocSource::Rustdoc(_) => {
+                            // This is a user-facing string.
+                            // For example, it appears when two pre-generated rustdoc files
+                            // are semver-checked against each other.
+                            vec!["<unknown>".to_string()]
                         }
+                        _ => panic!("couldn't deduce crate name, specify one through the package allow list"),
+                    },
                     ScopeMode::AllowList(lst) => lst.clone(),
                 };
                 names
@@ -616,7 +616,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                                     crate_name,
                                     self.release_type,
                                     &overrides,
-                                    &self.witness_generation
+                                    &self.witness_generation,
                                 )?),
                             ));
                             config.shell_status(
@@ -805,7 +805,7 @@ fn generate_crate_data(
                 baseline_crate.version(),
                 current_rustdoc_version,
                 "Deleting and regenerating the baseline JSON file did not resolve the rustdoc \
-                version mismatch."
+                 version mismatch."
             );
         }
 
