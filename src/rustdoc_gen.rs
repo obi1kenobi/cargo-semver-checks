@@ -650,6 +650,58 @@ impl RustdocFromRegistry {
     pub fn set_version(&mut self, version: semver::Version) {
         self.version = Some(version);
     }
+
+    /// Downloading from the registry with correct authentication requires real Cargo,
+    /// so this uses `cargo info` to make Cargo fetch and cache the crate,
+    /// and then tries to get it from the cache.
+    ///
+    /// The global package lock must be unlocked before calling this.
+    fn custom_registry_download_fallback(
+        &self,
+        config: &mut GlobalConfig,
+        generation_settings: super::data_generation::GenerationSettings,
+        crate_name: &str,
+        validated_name: tame_index::KrateName<'_>,
+    ) -> Option<IndexKrate> {
+        let Some(registry_name) = &self.registry_name else {
+            return None;
+        };
+        config
+            .shell_status(
+                "Fallback",
+                format_args!(
+                    "Using `cargo` to fetch '{crate_name}' from the '{registry_name}' registry"
+                ),
+            )
+            .ok()?;
+        let fetched_ok = std::process::Command::new("cargo")
+            .args([
+                "info",
+                generation_settings.color_flag(),
+                "--registry",
+                registry_name,
+                crate_name,
+            ])
+            .stdin(std::process::Stdio::null())
+            .stderr(if generation_settings.pass_through_stderr {
+                std::process::Stdio::inherit()
+            } else {
+                std::process::Stdio::null()
+            })
+            .stdout(if config.is_verbose() {
+                std::process::Stdio::inherit()
+            } else {
+                std::process::Stdio::null()
+            })
+            .status()
+            .ok()?
+            .success();
+        if !fetched_ok {
+            return None;
+        }
+        let lock = acquire_cargo_global_package_lock(config).ok()?;
+        self.index.cached_krate(validated_name, &lock).ok()?
+    }
 }
 
 /// This is a basic fallback due to lack of auth handling in tame-index:
@@ -676,8 +728,8 @@ fn auth_headers_for_registry(
             Some(headers)
         }
         _ => {
-            config.shell_warn(format_args!(
-                "{var_name} is not set, there will be no auth for '{registry_name}' registry"
+            config.shell_note(format_args!(
+                "Set {var_name} env var to authenticate with the '{registry_name}' registry directly"
             ))?;
             None
         }
@@ -756,7 +808,18 @@ impl RustdocGenerator for RustdocFromRegistry {
             .as_str()
             .try_into()
             .expect("this should be impossible");
+
         let crate_ = self.index.krate(validated_name, false, &lock)
+            .inspect(|_| drop(lock))
+            .or_else(|err| {
+                match &err {
+                    // Use the fallback method in case of authentication errors
+                    tame_index::Error::Http(tame_index::HttpError::StatusCode { code, .. }) if code.as_u16() == 401 => {
+                        self.custom_registry_download_fallback(config, generation_settings, crate_name, validated_name)
+                    },
+                    _ => None,
+                }.ok_or(err).map(Some)
+            })
             .with_context(|| {
                 format!("failed to read {current_registry_name} index metadata for crate '{crate_name}'")
             }).into_terminal_result()?
@@ -767,7 +830,6 @@ impl RustdocGenerator for RustdocFromRegistry {
         https://github.com/obi1kenobi/cargo-semver-checks#does-the-crate-im-checking-have-to-be-published-on-cratesio",
             )
         }).into_terminal_result()?;
-        drop(lock);
 
         let base_version = if let Some(base) = &self.version {
             base.clone()
