@@ -116,6 +116,19 @@ fn renamed_lib_target() {
         .success();
 }
 
+#[test]
+#[cfg_attr(
+    not(feature = "local-registry-replacement"),
+    ignore = "--features local-registry-replacement"
+)]
+fn custom_registry() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/custom_registry/registry-hello")
+        .args(["semver-checks"])
+        .assert()
+        .success();
+}
+
 /// Ensure that semver-checking a crate that uses workspace-provided values works fine.
 #[test]
 fn crate_in_workspace() {
