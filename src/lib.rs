@@ -457,17 +457,17 @@ impl Check {
                             generation_settings,
                             &*current_loader,
                             &*baseline_loader,
-                            CrateDataForRustdoc {
+                            &CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Current,
-                                name: &name,
+                                name: name.clone(),
                                 feature_config: &self.current_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
-                            CrateDataForRustdoc {
+                            &CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Baseline {
                                     highest_allowed_version: version,
                                 },
-                                name: &name,
+                                name: name.clone(),
                                 feature_config: &self.baseline_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
@@ -549,17 +549,17 @@ note: skipped the following crates since they have no library target: {skipped}"
                                 generation_settings,
                                 &*current_loader,
                                 &*baseline_loader,
-                                CrateDataForRustdoc {
+                                &CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Current,
-                                    name: crate_name,
+                                    name: crate_name.clone(),
                                     feature_config: &self.current_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
-                                CrateDataForRustdoc {
+                                &CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Baseline {
                                         highest_allowed_version: Some(version),
                                     },
-                                    name: crate_name,
+                                    name: crate_name.clone(),
                                     feature_config: &self.baseline_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
@@ -764,17 +764,17 @@ fn generate_crate_data(
     generation_settings: data_generation::GenerationSettings,
     current_loader: &dyn rustdoc_gen::RustdocGenerator,
     baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
-    current_crate_data: rustdoc_gen::CrateDataForRustdoc,
-    baseline_crate_data: rustdoc_gen::CrateDataForRustdoc,
+    current_crate_data: &rustdoc_gen::CrateDataForRustdoc<'_>,
+    baseline_crate_data: &rustdoc_gen::CrateDataForRustdoc<'_>,
 ) -> Result<DataStorage, TerminalError> {
     let current_crate = current_loader.load_rustdoc(
         config,
         generation_settings,
         data_generation::CacheSettings::ReadWrite(()),
-        current_crate_data,
+        &current_crate_data,
     )?;
 
-    let baseline_crate_name = baseline_crate_data.name;
+    let baseline_crate_name = &baseline_crate_data.name;
     let current_rustdoc_version = current_crate.version();
 
     let baseline_crate = {
@@ -782,7 +782,7 @@ fn generate_crate_data(
             config,
             generation_settings,
             data_generation::CacheSettings::ReadWrite(()),
-            baseline_crate_data.clone(),
+            &baseline_crate_data,
         )?;
 
         // The baseline rustdoc JSON may have been cached; ensure its rustdoc version matches
@@ -805,7 +805,7 @@ fn generate_crate_data(
                 config,
                 generation_settings,
                 data_generation::CacheSettings::WriteOnly(()),
-                baseline_crate_data,
+                &baseline_crate_data,
             )?;
 
             assert_eq!(
