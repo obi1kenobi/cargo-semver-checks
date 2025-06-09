@@ -19,12 +19,14 @@ use directories::ProjectDirs;
 use itertools::Itertools;
 use serde::Serialize;
 
-use std::collections::{BTreeMap, HashSet};
+use std::collections::hash_map::Entry;
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Write as _;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 
 use check_release::run_check_release;
-use rustdoc_gen::CrateDataForRustdoc;
+use rustdoc_gen::{CrateDataForRustdoc, RustdocGenerator};
 
 pub use config::{FeatureFlag, GlobalConfig};
 pub use query::{
@@ -112,7 +114,7 @@ impl Rustdoc {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Serialize)]
+#[derive(Debug, Hash, PartialEq, Eq, Serialize)]
 enum RustdocSource {
     /// Path to the Rustdoc json file.
     /// Use this option when you have already generated the rustdoc file.
@@ -372,19 +374,19 @@ impl Check {
         config: &mut GlobalConfig,
         source: &RustdocSource,
         custom_registry_name: Option<&str>,
-    ) -> anyhow::Result<Box<dyn rustdoc_gen::RustdocGenerator>> {
+    ) -> anyhow::Result<Rc<dyn rustdoc_gen::RustdocGenerator>> {
         let target_dir = self.get_target_dir(source)?;
         Ok(match source {
             RustdocSource::Rustdoc(path) => {
-                Box::new(rustdoc_gen::RustdocFromFile::new(path.to_owned()))
+                Rc::new(rustdoc_gen::RustdocFromFile::new(path.to_owned()))
             }
             RustdocSource::Root(root) => {
-                Box::new(rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?)
+                Rc::new(rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?)
             }
             RustdocSource::Revision(root, rev) => {
                 let metadata = manifest_metadata_no_deps(root)?;
                 let source = metadata.workspace_root.as_std_path();
-                Box::new(rustdoc_gen::RustdocFromGitRevision::with_rev(
+                Rc::new(rustdoc_gen::RustdocFromGitRevision::with_rev(
                     source,
                     &target_dir,
                     rev,
@@ -401,7 +403,7 @@ impl Check {
                     let semver = semver::Version::parse(ver)?;
                     registry.set_version(semver);
                 }
-                Box::new(registry)
+                Rc::new(registry)
             }
         })
     }
@@ -545,7 +547,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                             let registry_name = if published_to_crates_io {
                                 None
                             } else {
-                                publish.and_then(|registries| registries.get(0))
+                                publish.and_then(|registries| registries.first())
                             };
                             Ok(Some(CrateToCheck {
                                 overrides,
@@ -573,29 +575,27 @@ note: skipped the following crates since they have no library target: {skipped}"
             }
         };
 
-        let custom_registry = crates_to_check.iter().find_map(|c| {
-            let registry = c.baseline_crate_data.registry_name.as_deref()?;
-            Some((registry, c.baseline_crate_data.name.as_str()))
-        });
-        if let Some((custom_registry_name, crate_name)) = custom_registry {
-            config.log_verbose(|config| {
-                config.shell_note(format_args!(
-                    "Using a custom registry '{custom_registry_name}' (because of '{crate_name}')"
-                ))
-            })?;
-        }
-        let custom_registry_name = custom_registry.unzip().0;
-
-        let current_loader =
-            self.get_rustdoc_generator(config, &self.current.source, custom_registry_name)?;
-        let baseline_loader =
-            self.get_rustdoc_generator(config, &self.baseline.source, custom_registry_name)?;
+        // Each crate in the workspace may use a different registry
+        let mut generators = HashMap::new();
 
         // Create a report for each crate.
         // We want to run all the checks, even if one returns `Err`.
         let all_outcomes: Vec<anyhow::Result<(String, CrateReport)>> = crates_to_check
-            .into_iter()
+            .iter()
             .map(|selected| {
+                let current_loader = self.get_rustdoc_generator_for_crate(
+                    &mut generators,
+                    config,
+                    &self.current.source,
+                    &selected.current_crate_data,
+                )?;
+                let baseline_loader = self.get_rustdoc_generator_for_crate(
+                    &mut generators,
+                    config,
+                    &self.baseline.source,
+                    &selected.baseline_crate_data,
+                )?;
+
                 let start = std::time::Instant::now();
                 let name = selected.current_crate_data.name.clone();
 
@@ -634,6 +634,36 @@ note: skipped the following crates since they have no library target: {skipped}"
         };
 
         Ok(Report { crate_reports })
+    }
+
+    fn get_rustdoc_generator_for_crate<'s>(
+        &self,
+        loaders: &mut HashMap<(&'s RustdocSource, Option<&'s str>), Rc<dyn RustdocGenerator>>,
+        config: &mut GlobalConfig,
+        source: &'s RustdocSource,
+        crate_data: &'s CrateDataForRustdoc<'_>,
+    ) -> Result<Rc<dyn RustdocGenerator>, anyhow::Error> {
+        let registry_name = if matches!(source, RustdocSource::VersionFromRegistry(_)) {
+            crate_data.registry_name.as_deref()
+        } else {
+            None
+        };
+        Ok(match loaders.entry((source, registry_name)) {
+            Entry::Occupied(occupied_entry) => occupied_entry.get().clone(),
+            Entry::Vacant(vacant_entry) => {
+                if let Some(registry_name) = registry_name {
+                    config.log_verbose(|config| {
+                        config.shell_note(format_args!(
+                            "Using a custom registry '{registry_name}' (because of '{}')",
+                            crate_data.name,
+                        ))
+                    })?;
+                }
+                vacant_entry
+                    .insert(self.get_rustdoc_generator(config, source, registry_name)?)
+                    .clone()
+            }
+        })
     }
 }
 
