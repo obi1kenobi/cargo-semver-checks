@@ -237,6 +237,12 @@ impl Scope {
     }
 }
 
+struct CrateToCheck<'a> {
+    overrides: OverrideStack,
+    current_crate_data: CrateDataForRustdoc<'a>,
+    baseline_crate_data: CrateDataForRustdoc<'a>,
+}
+
 /// Is the specified target able to be semver-checked as a library, of any sort.
 ///
 /// This is a broader definition than cargo's own "lib" definition, since we can also
@@ -423,15 +429,7 @@ impl Check {
             };
         }
 
-        let current_loader = self.get_rustdoc_generator(config, &self.current.source)?;
-        let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
-
-        // Create a report for each crate.
-        // We want to run all the checks, even if one returns `Err`.
-        let all_outcomes: Vec<anyhow::Result<(String, Option<CrateReport>)>> = match &self
-            .current
-            .source
-        {
+        let crates_to_check: Vec<CrateToCheck> = match &self.current.source {
             RustdocSource::Rustdoc(_)
             | RustdocSource::Revision(_, _)
             | RustdocSource::VersionFromRegistry(_) => {
@@ -450,45 +448,24 @@ impl Check {
                 names
                     .into_iter()
                     .map(|name| {
-                        let start = std::time::Instant::now();
                         let version = None;
-                        let data_storage = match generate_crate_data(
-                            config,
-                            generation_settings,
-                            &*current_loader,
-                            &*baseline_loader,
-                            &CrateDataForRustdoc {
+                        CrateToCheck {
+                            overrides: OverrideStack::new(),
+                            current_crate_data: CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Current,
                                 name: name.clone(),
                                 feature_config: &self.current_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
-                            &CrateDataForRustdoc {
+                            baseline_crate_data: CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Baseline {
                                     highest_allowed_version: version,
                                 },
-                                name: name.clone(),
+                                name,
                                 feature_config: &self.baseline_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
-                        ) {
-                            Ok(data) => data,
-                            Err(err) => return Err(log_terminal_error(config, err)),
-                        };
-
-                        let report = run_check_release(
-                            config,
-                            &data_storage,
-                            &name,
-                            self.release_type,
-                            &OverrideStack::new(),
-                            &self.witness_generation,
-                        )?;
-                        config.shell_status(
-                            "Finished",
-                            format_args!("[{:>8.3}s] {name}", start.elapsed().as_secs_f32()),
-                        )?;
-                        Ok((name, Some(report)))
+                        }
                     })
                     .collect()
             }
@@ -536,26 +513,22 @@ note: skipped the following crates since they have no library target: {skipped}"
                                     format_args!("{crate_name} v{version} (current)"),
                                 )
                             })?;
-                            Ok((crate_name.clone(), None))
+                            Ok(None)
                         } else {
                             let overrides = overrides_for_workspace_package(
                                 selected,
                                 workspace_overrides.as_deref(),
                             )?;
 
-                            let start = std::time::Instant::now();
-                            let data_storage = match generate_crate_data(
-                                config,
-                                generation_settings,
-                                &*current_loader,
-                                &*baseline_loader,
-                                &CrateDataForRustdoc {
+                            Ok(Some(CrateToCheck {
+                                overrides,
+                                current_crate_data: CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Current,
                                     name: crate_name.clone(),
                                     feature_config: &self.current_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
-                                &CrateDataForRustdoc {
+                                baseline_crate_data: CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Baseline {
                                         highest_allowed_version: Some(version.clone()),
                                     },
@@ -563,42 +536,55 @@ note: skipped the following crates since they have no library target: {skipped}"
                                     feature_config: &self.baseline_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
-                            ) {
-                                Ok(data) => data,
-                                Err(err) => return Err(log_terminal_error(config, err)),
-                            };
-
-                            let result = Ok((
-                                crate_name.clone(),
-                                Some(run_check_release(
-                                    config,
-                                    &data_storage,
-                                    crate_name,
-                                    self.release_type,
-                                    &overrides,
-                                    &self.witness_generation,
-                                )?),
-                            ));
-                            config.shell_status(
-                                "Finished",
-                                format_args!(
-                                    "[{:>8.3}s] {crate_name}",
-                                    start.elapsed().as_secs_f32()
-                                ),
-                            )?;
-                            result
+                            }))
                         }
                     })
-                    .collect()
+                    .filter_map(|res| res.transpose())
+                    .collect::<Result<Vec<_>, anyhow::Error>>()?
             }
         };
+
+        let current_loader = self.get_rustdoc_generator(config, &self.current.source)?;
+        let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
+
+        // Create a report for each crate.
+        // We want to run all the checks, even if one returns `Err`.
+        let all_outcomes: Vec<anyhow::Result<(String, CrateReport)>> = crates_to_check
+            .into_iter()
+            .map(|selected| {
+                let start = std::time::Instant::now();
+                let name = selected.current_crate_data.name.clone();
+
+                let data_storage = generate_crate_data(
+                    config,
+                    generation_settings,
+                    &*current_loader,
+                    &*baseline_loader,
+                    &selected.current_crate_data,
+                    &selected.baseline_crate_data,
+                )
+                .map_err(|err| log_terminal_error(config, err))?;
+
+                let report = run_check_release(
+                    config,
+                    &data_storage,
+                    &name,
+                    self.release_type,
+                    &selected.overrides,
+                    &self.witness_generation,
+                )?;
+                config.shell_status(
+                    "Finished",
+                    format_args!("[{:>8.3}s] {name}", start.elapsed().as_secs_f32()),
+                )?;
+                Ok((name, report))
+            })
+            .collect();
         let crate_reports: BTreeMap<String, CrateReport> = {
             let mut reports = BTreeMap::new();
             for outcome in all_outcomes {
                 let (name, outcome) = outcome?;
-                if let Some(outcome) = outcome {
-                    reports.insert(name, outcome);
-                }
+                reports.insert(name, outcome);
             }
             reports
         };
@@ -771,7 +757,7 @@ fn generate_crate_data(
         config,
         generation_settings,
         data_generation::CacheSettings::ReadWrite(()),
-        &current_crate_data,
+        current_crate_data,
     )?;
 
     let baseline_crate_name = &baseline_crate_data.name;
@@ -782,7 +768,7 @@ fn generate_crate_data(
             config,
             generation_settings,
             data_generation::CacheSettings::ReadWrite(()),
-            &baseline_crate_data,
+            baseline_crate_data,
         )?;
 
         // The baseline rustdoc JSON may have been cached; ensure its rustdoc version matches
@@ -805,7 +791,7 @@ fn generate_crate_data(
                 config,
                 generation_settings,
                 data_generation::CacheSettings::WriteOnly(()),
-                &baseline_crate_data,
+                baseline_crate_data,
             )?;
 
             assert_eq!(
