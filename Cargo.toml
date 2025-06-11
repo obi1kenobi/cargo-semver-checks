@@ -94,3 +94,7 @@ default = ["gix-reqwest"]
 # enable:
 gix-reqwest = ["tame-index/gix-reqwest"]
 gix-curl = ["tame-index/gix-curl"]
+
+# Support Cargo source replacement config which uses `local-registry` paths.
+# This is a different feature than the standard crates.io registry cache in `CARGO_HOME`.
+local-registry-replacement = ["tame-index/local"]
