@@ -45,6 +45,7 @@ impl GenerationSettings {
 pub(super) fn generate_rustdoc(
     request: &CrateDataRequest<'_>,
     build_dir: &Path,
+    target_dir: &Path,
     settings: GenerationSettings,
     callbacks: &mut CallbackHandler<'_>,
 ) -> Result<(PathBuf, cargo_metadata::Metadata), TerminalError> {
@@ -103,8 +104,6 @@ pub(super) fn generate_rustdoc(
     let metadata = cargo_metadata::MetadataCommand::new()
         .manifest_path(&placeholder_manifest_path)
         .exec()?;
-    let placeholder_target_directory = metadata.target_directory.as_path().as_std_path().to_owned();
-    let target_dir = placeholder_target_directory.as_path();
 
     let rustdoc_data = run_cargo_doc(
         request,
