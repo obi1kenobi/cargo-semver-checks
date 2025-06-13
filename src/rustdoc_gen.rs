@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::cmp::Ordering;
 use std::collections::{BTreeSet, HashMap};
 use std::path::PathBuf;
 
@@ -718,7 +719,15 @@ impl RustdocGenerator for RustdocFromRegistry {
             .versions
             .iter()
             .find(|v| {
-                semver::Version::parse(v.version.as_str()).ok().as_ref() == Some(&base_version)
+                // When publishing a crate, version metadata is ignored in comparisons.
+                // This means you cannot publish version x.y.z of a crate multiple times
+                // with different metadata - only one version with that base version number
+                // can exist in the registry.
+                // https://github.com/obi1kenobi/cargo-semver-checks/issues/1262
+                semver::Version::parse(v.version.as_str())
+                    .ok()
+                    .map(|parsed| parsed.cmp_precedence(&base_version))
+                    == Some(Ordering::Equal)
             })
             .with_context(|| {
                 anyhow::format_err!(
