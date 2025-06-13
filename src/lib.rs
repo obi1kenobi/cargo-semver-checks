@@ -429,7 +429,7 @@ impl Check {
             };
         }
 
-        let crates_to_check: Vec<CrateToCheck> = match &self.current.source {
+        let crates_to_check: Vec<CrateToCheck<'_>> = match &self.current.source {
             RustdocSource::Rustdoc(_)
             | RustdocSource::Revision(_, _)
             | RustdocSource::VersionFromRegistry(_) => {
