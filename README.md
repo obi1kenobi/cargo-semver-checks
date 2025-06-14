@@ -127,6 +127,38 @@ Custom registries are not currently supported
 ([#160](https://github.com/obi1kenobi/cargo-semver-checks/issues/160)), so crates published on
 registries other than crates.io should use one of the other approaches of generating the baseline.
 
+#### Git repository detection
+
+When looking up a git revision with `--baseline-rev`,
+`cargo-semver-checks` will walk up the current directory until it finds a `.git/` directory to resolve the revision and extract the corresponding worktree.
+You can use the following environment variables to influence the git repository detection:
+
+- [`GIT_CEILING_DIRECTORIES`]: a colon (`:`) separated list of absolute paths which `cargo-semver-checks` should not search for the `.git/` directory.
+  This can be used to prevent `cargo-semver-checks` from searching slow network mounted directories.
+  This environment variable cannot be used to prevent searching the current working directory,
+  or a directory explicitly set with [`GIT_DIR`].
+  If this is not set,
+  `cargo-semver-checks` will search the current working directory and any of its parents (up to the root directory).
+- [`GIT_DIR`]: explicitly set the location of the `.git/` directory
+  (if the value is a relative path, it is resolved from the current working directory).
+  If this is not set,
+  `cargo-semver-checks` will search the current working directory and any of its parents for the `.git/` directory.
+- [`GIT_DISCOVERY_ACROSS_FILESYSTEM`]: enable git repository detection across filesystems.
+  When automatically searching for the `.git/` directory,
+  `cargo-semver-checks` will not cross filesystem boundaries.
+  Set this environment variable to `true` to enable cross-filesystem detection.
+  This environment variable has no effect when setting [`GIT_DIR`] explicitly.
+
+[`GIT_CEILING_DIRECTORIES`]: https://git-scm.com/docs/git.html#Documentation/git.txt-codeGITCEILINGDIRECTORIEScode
+[`GIT_DIR`]: https://git-scm.com/docs/git.html#Documentation/git.txt-codeGITDIRcode
+[`GIT_DISCOVERY_ACROSS_FILESYSTEM`]: https://git-scm.com/docs/git.html#Documentation/git.txt-codeGITDISCOVERYACROSSFILESYSTEMcode
+
+Setting the `GIT_DIR` allows using `cargo-semver-checks` with a non-colocated [jujutsu](https://jj-vcs.github.io/jj/latest/) repository.
+
+```console
+GIT_DIR="$(jj root)/.jj/repo/store/git" cargo semver-checks --package "foo" --baseline-rev "foo/v0.1.0"
+```
+
 ### What features does `cargo-semver-checks` enable in the tested crates?
 
 By default, checking is done on all features except features named `unstable`, `nightly`, `bench`, `no_std`, or ones with prefix `_`, `unstable-`, or `unstable_`, as such names are commonly used for private or unstable features.

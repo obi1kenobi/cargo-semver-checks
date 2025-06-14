@@ -1473,6 +1473,96 @@ jobs:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject-current/target/semver-checks/cache
 
+  run-on-bare-repository:
+    # Test that overwriting the git repository detection with `GIT_DIR` works as expected by
+    # running on a bare clone of a repository.
+    name: "Semver: bare repository"
+    runs-on: ubuntu-latest
+    needs:
+      - build-binary
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          path: "semver"
+
+      - name: Checkout ref-slice fork major change
+        uses: actions/checkout@v4
+        with:
+          # NOTE: We cannot checkout a bare repository with the actions/checkout action
+          # (https://github.com/actions/checkout/issues/603), so we checkout a "normal" version
+          # and clone the local checkout into a bare repository.
+          fetch-depth: 0
+          persist-credentials: false
+          repository: "mgr0dzicki/cargo-semver-action-ref-slice"
+          ref: "major_change"
+          path: "subject-checkout"
+
+      - name: Setup bare repository worktree
+        run: |
+          set -euo pipefail
+          git clone --bare subject-checkout subject-bare
+          mkdir subject
+          git --git-dir subject-bare --work-tree subject checkout major_change .
+          test ! -e subject/.git
+
+      - name: Install rust
+        id: toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
+
+      - name: Restore binary
+        id: cache-binary
+        uses: actions/cache/restore@v4
+        with:
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/git-v1_2_1/
+            subject/target/semver-checks/local-ref_slice-1_2_1-01666ec060466c14/
+
+      - name: Run semver-checks with --baseline-rev
+        continue-on-error: true
+        run: |
+          cd semver
+          set -euo pipefail
+          GIT_DIR=../subject-bare ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --baseline-rev=v1.2.1 --verbose | tee output
+          touch unexpectedly_did_not_fail
+
+      - name: Check whether it failed
+        run: |
+          cd semver
+          if [ -f unexpectedly_did_not_fail ]; then exit 1; else exit 0; fi
+
+      - name: Check output
+        run: |
+          cd semver
+          EXPECTED="$(echo -e "--- failure function_missing: pub fn removed or renamed ---")"
+          RESULT="$(grep failure output | sort)"
+          diff <(echo "$RESULT") <(echo "$EXPECTED")
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v4
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
   run-on-ref-slice-fork:
     # Simulate testing an as-yet-unreleased crate version without an explicit baseline,
     # i.e. with the expectation that the largest crates.io version is used as a baseline.
