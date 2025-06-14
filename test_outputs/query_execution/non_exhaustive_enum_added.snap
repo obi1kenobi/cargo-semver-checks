@@ -3,6 +3,18 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
+  "./test_crates/exhaustive_enum_added/": [
+    {
+      "name": String("NonExhaustiveEnum"),
+      "path": List([
+        String("exhaustive_enum_added"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/non_exhaustive_enum_added/": [
     {
       "name": String("NonExhaustiveEnum"),

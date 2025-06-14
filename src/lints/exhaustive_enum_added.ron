@@ -1,0 +1,50 @@
+SemverQuery(
+    id: "exhaustive_enum_added",
+    human_readable_name: "exhaustive pub enum added",
+    description: "A new exhaustive pub enum was added. Future variants added to this enum will cause a breaking change.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output
+
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+            baseline @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                item {
+                    ... on Enum {
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+        "true": true,
+        "non_exhaustive": "#[non_exhaustive]",
+    },
+    error_message: "A new exhaustive pub enum was added. Future variants added to this enum will cause a breaking change. Consider adding #[non_exhaustive] to the enum if you plan to add new variants in the future.",
+    per_result_error_template: Some("enum {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+)
