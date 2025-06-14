@@ -361,6 +361,19 @@ mod tests {
         BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)>,
     > = OnceLock::new();
 
+    static CURRENT_TARGET_TRIPLE: std::sync::LazyLock<&str> = std::sync::LazyLock::new(|| {
+        let outcome = std::process::Command::new("rustc")
+            .arg("-vV")
+            .output()
+            .expect("failed to run `rustc -vV`");
+        let stdout = String::from_utf8(outcome.stdout).expect("stdout was not valid utf-8");
+        let target_triple = stdout
+            .lines()
+            .find_map(|line| line.strip_prefix("host: "))
+            .expect("failed to find host line");
+        target_triple.to_string().leak()
+    });
+
     fn get_test_crate_names() -> &'static [String] {
         TEST_CRATE_NAMES.get_or_init(initialize_test_crate_names)
     }
@@ -438,8 +451,8 @@ mod tests {
         get_all_test_crates()
             .par_iter()
             .map(|(key, (old_crate, new_crate))| {
-                let old_index = VersionedIndex::from_storage(old_crate);
-                let new_index = VersionedIndex::from_storage(new_crate);
+                let old_index = VersionedIndex::from_storage(old_crate, &CURRENT_TARGET_TRIPLE);
+                let new_index = VersionedIndex::from_storage(new_crate, &CURRENT_TARGET_TRIPLE);
                 (key.clone(), (old_index, new_index))
             })
             .collect()
