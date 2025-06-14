@@ -394,9 +394,10 @@ impl<'a> CrateDataRequest<'a> {
     /// A path-safe unique identified that includes the crate's name, version, and features.
     fn cache_slug(&self) -> anyhow::Result<String> {
         Ok(format!(
-            "{}-{}-{}",
+            "{}-{}-{}-{}",
             slugify(self.kind.name()?),
             slugify(self.kind.version()?),
+            slugify(self.build_target.unwrap_or("default")),
             &self.features_fingerprint,
         ))
     }

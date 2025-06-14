@@ -805,7 +805,29 @@ fn generate_crate_data(
         baseline_crate
     };
 
-    Ok(DataStorage::new(current_crate, baseline_crate))
+    // TODO: Temporary hack, until we stop supporting formats older than rustdoc v45.
+    // v45+ formats carry the target triple information in the rustdoc JSON itself.
+    let target_triple: &'static str = current_crate_data
+        .build_target
+        .map(ToString::to_string)
+        .unwrap_or_else(|| {
+            let outcome = std::process::Command::new("rustc")
+                .arg("-vV")
+                .output()
+                .expect("failed to run `rustc -vV`");
+            let stdout = String::from_utf8(outcome.stdout).expect("stdout was not valid utf-8");
+            let target_triple = stdout
+                .lines()
+                .find_map(|line| line.strip_prefix("host: "))
+                .expect("failed to find host line");
+            target_triple.to_string()
+        })
+        .leak();
+    Ok(DataStorage::new(
+        current_crate,
+        baseline_crate,
+        target_triple,
+    ))
 }
 
 fn manifest_path(project_root: &Path) -> anyhow::Result<PathBuf> {
