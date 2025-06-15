@@ -1,0 +1,22 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/unsafe_function_target_feature_added/": [
+    {
+      "feature": List([
+        String("avx2"),
+      ]),
+      "fn_name": String("feature_added"),
+      "path": List([
+        String("unsafe_function_target_feature_added"),
+        String("feature_added"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
