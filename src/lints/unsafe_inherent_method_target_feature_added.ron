@@ -25,7 +25,6 @@ SemverQuery(
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output @tag
                                 method_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
-                                unsafe @filter(op: "=", value: ["$true"])
 
                                 requires_feature @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                                     feature_names: name @output
