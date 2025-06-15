@@ -1328,6 +1328,7 @@ add_lints!(
     repr_packed_added,
     repr_packed_removed,
     repr_c_plain_struct_fields_reordered,
+    safe_function_target_feature_added,
     sized_impl_removed,
     static_became_unsafe,
     struct_field_marked_deprecated,

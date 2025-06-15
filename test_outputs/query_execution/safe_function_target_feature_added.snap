@@ -1,0 +1,30 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/safe_function_target_feature_added/": [
+    {
+      "name": String("compute"),
+      "path": List([
+        String("safe_function_target_feature_added"),
+        String("compute"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("will_become_unsafe"),
+      "path": List([
+        String("safe_function_target_feature_added"),
+        String("will_become_unsafe"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
