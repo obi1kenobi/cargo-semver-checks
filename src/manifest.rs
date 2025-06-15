@@ -86,7 +86,7 @@ pub(crate) struct LintTable {
     /// Optional key to indicate whether to opt-in to reading
     /// workspace lint configuration.  If not set in the TOML as
     /// `package.metadata.cargo-semver-checks.lints.workspace = true`,
-    /// this field is set to `false. (note that setting the key in the
+    /// this field is set to `false`. (note that setting the key in the
     /// TOML to false explicitly is invalid behavior and will be interpreted
     /// as just a missing field)
     ///
