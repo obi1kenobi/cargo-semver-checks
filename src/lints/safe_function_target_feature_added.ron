@@ -55,7 +55,7 @@ SemverQuery(
         "false": false,
         "zero": 0,
     },
-    error_message: "A safe function now requires CPU target features to be enabled.",
+    error_message: "A safe function now requires CPU target features to be enabled. It no longer implements Fn() traits as a result.",
     per_result_error_template: Some("function {{join \"::\" path}} requires {{join \", \" feature}} in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
