@@ -14,7 +14,10 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
 
-                        requires_feature @fold @transform(op: "count") @filter(op: "!=", value: ["$zero"])
+                        requires_feature @fold @transform(op: "count") @filter(op: "!=", value: ["$zero"]) {
+                            explicit @filter(op: "=", value: ["$true"])
+                            feature: name @output
+                        }
 
                         importable_path {
                             path @tag
