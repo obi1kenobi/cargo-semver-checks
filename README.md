@@ -153,11 +153,12 @@ You can use the following environment variables to influence the git repository 
 [`GIT_DIR`]: https://git-scm.com/docs/git.html#Documentation/git.txt-codeGITDIRcode
 [`GIT_DISCOVERY_ACROSS_FILESYSTEM`]: https://git-scm.com/docs/git.html#Documentation/git.txt-codeGITDISCOVERYACROSSFILESYSTEMcode
 
+#### Use with jujutsu
+
 Setting the `GIT_DIR` allows using `cargo-semver-checks` with a non-colocated [jujutsu](https://jj-vcs.github.io/jj/latest/) repository.
 
 ```console
 GIT_DIR="$(jj root)/.jj/repo/store/git" cargo semver-checks --package "foo" --baseline-rev "foo/v0.1.0"
-```
 
 ### What features does `cargo-semver-checks` enable in the tested crates?
 
