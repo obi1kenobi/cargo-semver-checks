@@ -117,7 +117,9 @@ Testing this crate requires rustdoc JSON output data, which is too large and var
 to check into git. It has to be generated locally before `cargo test` will succeed,
 and will be saved in a `localdata` gitignored directory in the repo root.
 
-To generate this data, please run `./scripts/regenerate_test_rustdocs.sh`.
+You can quickly set up the needed data by running
+`./scripts/download_prebuilt_test_rustdocs.sh`.
+If you prefer to generate it yourself, run `./scripts/regenerate_test_rustdocs.sh`.
 To use a specific toolchain, like beta or nightly, pass it as
 an argument: `./scripts/regenerate_test_rustdocs.sh +nightly`.
 
