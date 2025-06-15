@@ -1396,4 +1396,5 @@ add_lints!(
     union_now_doc_hidden,
     union_pub_field_now_doc_hidden,
     unit_struct_changed_kind,
+    unsafe_function_target_feature_added,
 );
