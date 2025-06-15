@@ -45,6 +45,8 @@ to the implementation of that query in the current version of the tool.
 - [Can I use `cargo-semver-checks` with `nightly` Rust?](#can-i-use-cargo-semver-checks-with-nightly-rust)
 - [What if my project needs stronger guarantees around supported Rust versions?](#what-if-my-project-needs-stronger-guarantees-around-supported-rust-versions)
 - [Does the crate I'm checking have to be published on crates.io?](#does-the-crate-im-checking-have-to-be-published-on-cratesio)
+  - [Git repository detection and configuration](#git-repository-detection-and-configuration)
+  - [Use with jujutsu](#use-with-jujutsu)
 - [What features does `cargo-semver-checks` enable in the tested crates?](#what-features-does-cargo-semver-checks-enable-in-the-tested-crates)
 - [My crate uses `--cfg` conditional compilation. Can `cargo-semver-checks` scan it?](#my-crate-uses---cfg-conditional-compilation-can-cargo-semver-checks-scan-it)
 - [Does `cargo-semver-checks` have false positives?](#does-cargo-semver-checks-have-false-positives)
@@ -127,38 +129,39 @@ Custom registries are not currently supported
 ([#160](https://github.com/obi1kenobi/cargo-semver-checks/issues/160)), so crates published on
 registries other than crates.io should use one of the other approaches of generating the baseline.
 
-#### Git repository detection
+#### Git repository detection and configuration
 
 When looking up a git revision with `--baseline-rev`,
 `cargo-semver-checks` will walk up the current directory until it finds a `.git/` directory to resolve the revision and extract the corresponding worktree.
-You can use the following environment variables to influence the git repository detection:
+You can use the following environment variables to influence git repository detection:
 
+- [`GIT_DIR`]: explicitly set the location of the `.git/` directory.
+  If the value is a relative path, it is resolved from the current working directory.
+  If this is not set,
+  `cargo-semver-checks` will search the current working directory and any of its parents for the `.git/` directory.
 - [`GIT_CEILING_DIRECTORIES`]: a colon (`:`) separated list of absolute paths which `cargo-semver-checks` should not search for the `.git/` directory.
   This can be used to prevent `cargo-semver-checks` from searching slow network mounted directories.
   This environment variable cannot be used to prevent searching the current working directory,
   or a directory explicitly set with [`GIT_DIR`].
   If this is not set,
   `cargo-semver-checks` will search the current working directory and any of its parents (up to the root directory).
-- [`GIT_DIR`]: explicitly set the location of the `.git/` directory
-  (if the value is a relative path, it is resolved from the current working directory).
-  If this is not set,
-  `cargo-semver-checks` will search the current working directory and any of its parents for the `.git/` directory.
 - [`GIT_DISCOVERY_ACROSS_FILESYSTEM`]: enable git repository detection across filesystems.
   By default, `cargo-semver-checks` will not cross filesystem
   boundaries when searching for the `.git/` directory.
   Set this environment variable to `true` to enable cross-filesystem detection.
   This environment variable has no effect when setting [`GIT_DIR`] explicitly.
 
-[`GIT_CEILING_DIRECTORIES`]: https://git-scm.com/docs/git.html#Documentation/git.txt-codeGITCEILINGDIRECTORIEScode
 [`GIT_DIR`]: https://git-scm.com/docs/git.html#Documentation/git.txt-codeGITDIRcode
+[`GIT_CEILING_DIRECTORIES`]: https://git-scm.com/docs/git.html#Documentation/git.txt-codeGITCEILINGDIRECTORIEScode
 [`GIT_DISCOVERY_ACROSS_FILESYSTEM`]: https://git-scm.com/docs/git.html#Documentation/git.txt-codeGITDISCOVERYACROSSFILESYSTEMcode
 
 #### Use with jujutsu
 
-Setting the `GIT_DIR` allows using `cargo-semver-checks` with a non-colocated [jujutsu](https://jj-vcs.github.io/jj/latest/) repository.
+Setting the `GIT_DIR` environment variable allows using `cargo-semver-checks` with a non-colocated [jujutsu](https://jj-vcs.github.io/jj/latest/) repository.
 
 ```console
 GIT_DIR="$(jj root)/.jj/repo/store/git" cargo semver-checks --package "foo" --baseline-rev "foo/v0.1.0"
+```
 
 ### What features does `cargo-semver-checks` enable in the tested crates?
 
