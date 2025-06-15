@@ -20,5 +20,21 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "feature_names": List([
+        String("avx"),
+      ]),
+      "method_name": String("becomes_safe"),
+      "method_visibility": String("public"),
+      "name": String("A"),
+      "path": List([
+        String("unsafe_inherent_method_target_feature_added"),
+        String("A"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
 }
