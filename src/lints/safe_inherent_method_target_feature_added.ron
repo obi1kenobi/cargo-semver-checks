@@ -1,7 +1,7 @@
 SemverQuery(
     id: "safe_inherent_method_target_feature_added",
     human_readable_name: "safe inherent method gained #[target_feature]",
-    description: "An inherent method that was previously safe now requires one or more target features to be enabled.",
+    description: "A safe inherent method now requires one or more target features to be enabled.",
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/codegen.html#the-target_feature-attribute"),
