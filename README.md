@@ -144,8 +144,8 @@ You can use the following environment variables to influence the git repository 
   If this is not set,
   `cargo-semver-checks` will search the current working directory and any of its parents for the `.git/` directory.
 - [`GIT_DISCOVERY_ACROSS_FILESYSTEM`]: enable git repository detection across filesystems.
-  When automatically searching for the `.git/` directory,
-  `cargo-semver-checks` will not cross filesystem boundaries.
+  By default, `cargo-semver-checks` will not cross filesystem
+  boundaries when searching for the `.git/` directory.
   Set this environment variable to `true` to enable cross-filesystem detection.
   This environment variable has no effect when setting [`GIT_DIR`] explicitly.
 
