@@ -1,0 +1,24 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/unsafe_inherent_method_target_feature_added/": [
+    {
+      "feature_names": List([
+        String("avx"),
+      ]),
+      "method_name": String("foo"),
+      "method_visibility": String("public"),
+      "name": String("A"),
+      "path": List([
+        String("unsafe_inherent_method_target_feature_added"),
+        String("A"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
