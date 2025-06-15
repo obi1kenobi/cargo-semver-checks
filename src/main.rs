@@ -411,6 +411,9 @@ struct CheckRelease {
             "baseline_features",
             "current_features",
             "all_features",
+            "baseline_version",
+            "baseline_rev",
+            "baseline_root",
         ]
     )]
     current_rustdoc: Option<PathBuf>,
@@ -748,4 +751,59 @@ fn all_unstable_features_are_hidden() {
             argument.get_id()
         );
     }
+}
+
+#[test]
+fn current_rustdoc_conflict_errors() {
+    use clap::CommandFactory as _;
+
+    // Only --current-rustdoc provided: missing required --baseline-rustdoc
+    assert!(Cargo::command()
+        .try_get_matches_from([
+            "cargo",
+            "semver-checks",
+            "check-release",
+            "--current-rustdoc",
+            "foo.json",
+        ])
+        .is_err());
+
+    // Conflicts with --baseline-version
+    assert!(Cargo::command()
+        .try_get_matches_from([
+            "cargo",
+            "semver-checks",
+            "check-release",
+            "--current-rustdoc",
+            "foo.json",
+            "--baseline-version",
+            "1.0.0",
+        ])
+        .is_err());
+
+    // Conflicts with --baseline-root
+    assert!(Cargo::command()
+        .try_get_matches_from([
+            "cargo",
+            "semver-checks",
+            "check-release",
+            "--current-rustdoc",
+            "foo.json",
+            "--baseline-root",
+            ".",
+        ])
+        .is_err());
+
+    // Conflicts with --baseline-rev
+    assert!(Cargo::command()
+        .try_get_matches_from([
+            "cargo",
+            "semver-checks",
+            "check-release",
+            "--current-rustdoc",
+            "foo.json",
+            "--baseline-rev",
+            "main",
+        ])
+        .is_err());
 }
