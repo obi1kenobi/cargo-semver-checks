@@ -32,7 +32,7 @@ impl GlobalConfig {
     /// `cargo-semver-checks`'s color output
     pub fn new() -> Self {
         let stdout_choice = anstream::stdout().current_choice();
-        let stderr_choice = anstream::stdout().current_choice();
+        let stderr_choice = anstream::stderr().current_choice();
 
         Self {
             level: None,
