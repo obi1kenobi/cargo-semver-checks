@@ -24,8 +24,8 @@ SemverQuery(
                             method_name: name @output @tag
 
                             requires_feature @fold
-                                            @transform(op: "count")
-                                            @filter(op: ">", value: ["$zero"]) {
+                                             @transform(op: "count")
+                                             @filter(op: ">", value: ["$zero"]) {
                                 explicit @filter(op: "=", value: ["$true"])
                                 globally_enabled @filter(op: "=", value: ["$false"])
                                 feature: name @output
