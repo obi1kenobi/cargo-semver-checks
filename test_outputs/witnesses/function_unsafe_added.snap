@@ -10,11 +10,6 @@ hint = 'let witness = function_unsafe_added::add(...);'
 
 [["./test_crates/safe_function_target_feature_added/"]]
 filename = 'src/lib.rs'
-begin_line = 4
-hint = 'let witness = safe_function_target_feature_added::compute(...);'
-
-[["./test_crates/safe_function_target_feature_added/"]]
-filename = 'src/lib.rs'
 begin_line = 9
 hint = 'let witness = safe_function_target_feature_added::will_become_unsafe(...);'
 
