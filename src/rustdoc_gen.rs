@@ -190,13 +190,13 @@ impl CrateSource<'_> {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) enum CrateType<'a> {
+pub(crate) enum CrateType {
     Current,
     Baseline {
         /// When the baseline is being generated from registry
         /// and no specific version was chosen, we want to select a version
         /// that is the same or older than the version of the current crate.
-        highest_allowed_version: Option<&'a semver::Version>,
+        highest_allowed_version: Option<semver::Version>,
     },
 }
 
@@ -240,8 +240,8 @@ impl FeatureConfig {
 
 #[derive(Debug, Clone)]
 pub(crate) struct CrateDataForRustdoc<'a> {
-    pub(crate) crate_type: CrateType<'a>,
-    pub(crate) name: &'a str,
+    pub(crate) crate_type: CrateType,
+    pub(crate) name: String,
     pub(crate) feature_config: &'a FeatureConfig,
     pub(crate) build_target: Option<&'a str>,
 }
@@ -252,7 +252,7 @@ fn generate_rustdoc(
     cache_settings: super::data_generation::CacheSettings<()>,
     target_root: PathBuf,
     crate_source: CrateSource,
-    crate_data: CrateDataForRustdoc,
+    crate_data: &CrateDataForRustdoc<'_>,
 ) -> Result<VersionedStorage, TerminalError> {
     let extra_features: BTreeSet<Cow<'_, str>> = crate_source
         .feature_list_from_config(config, crate_data.feature_config)
@@ -305,7 +305,7 @@ pub(crate) trait RustdocGenerator {
         config: &mut GlobalConfig,
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
-        crate_data: CrateDataForRustdoc,
+        crate_data: &CrateDataForRustdoc<'_>,
     ) -> Result<VersionedStorage, TerminalError>;
 }
 
@@ -326,7 +326,7 @@ impl RustdocGenerator for RustdocFromFile {
         _config: &mut GlobalConfig,
         _generation_settings: super::data_generation::GenerationSettings,
         _cache_settings: super::data_generation::CacheSettings<()>,
-        _crate_data: CrateDataForRustdoc,
+        _crate_data: &CrateDataForRustdoc<'_>,
     ) -> Result<VersionedStorage, TerminalError> {
         trustfall_rustdoc::load_rustdoc(&self.path, None)
             .map_err(anyhow::Error::from)
@@ -425,10 +425,10 @@ impl RustdocGenerator for RustdocFromProjectRoot {
         config: &mut GlobalConfig,
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
-        crate_data: CrateDataForRustdoc,
+        crate_data: &CrateDataForRustdoc<'_>,
     ) -> Result<VersionedStorage, TerminalError> {
-        let manifest: &Manifest = self.manifests.get(crate_data.name).ok_or_else(|| {
-            if let Some(duplicates) = self.duplicate_packages.get(crate_data.name) {
+        let manifest: &Manifest = self.manifests.get(&crate_data.name).ok_or_else(|| {
+            if let Some(duplicates) = self.duplicate_packages.get(&crate_data.name) {
                 let duplicates = duplicates.iter().map(|p| p.display()).join("\n  ");
                 let err = anyhow::anyhow!(
                     "package `{}` is ambiguous: it is defined by in multiple manifests within the root path {}\n\ndefined in:\n  {duplicates}",
@@ -524,7 +524,7 @@ impl RustdocGenerator for RustdocFromGitRevision {
         config: &mut GlobalConfig,
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
-        crate_data: CrateDataForRustdoc,
+        crate_data: &CrateDataForRustdoc<'_>,
     ) -> Result<VersionedStorage, TerminalError> {
         self.path
             .load_rustdoc(config, generation_settings, cache_settings, crate_data)
@@ -683,10 +683,15 @@ impl RustdocGenerator for RustdocFromRegistry {
         config: &mut GlobalConfig,
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
-        crate_data: CrateDataForRustdoc,
+        crate_data: &CrateDataForRustdoc<'_>,
     ) -> Result<VersionedStorage, TerminalError> {
         let lock = acquire_cargo_global_package_lock(config).into_terminal_result()?;
-        let crate_ = self.index.krate(crate_data.name.try_into().expect("this should be impossible"), false, &lock)
+        let validated_name = crate_data
+            .name
+            .as_str()
+            .try_into()
+            .expect("this should be impossible");
+        let crate_ = self.index.krate(validated_name, false, &lock)
             .with_context(|| {
                 format!("failed to read index metadata for crate '{}'", crate_data.name)
             }).into_terminal_result()?
@@ -705,11 +710,11 @@ impl RustdocGenerator for RustdocFromRegistry {
         } else {
             choose_baseline_version(
                 &crate_,
-                match crate_data.crate_type {
+                match &crate_data.crate_type {
                     CrateType::Current => None,
                     CrateType::Baseline {
                         highest_allowed_version,
-                    } => highest_allowed_version,
+                    } => highest_allowed_version.as_ref(),
                 },
             )
             .into_terminal_result()?
@@ -723,7 +728,7 @@ impl RustdocGenerator for RustdocFromRegistry {
             })
             .with_context(|| {
                 anyhow::format_err!(
-                    "Version {} of crate {} not found in registry",
+                    "crate {} version {} not found in registry",
                     crate_data.name,
                     base_version
                 )

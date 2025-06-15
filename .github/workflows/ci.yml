@@ -462,7 +462,7 @@ jobs:
 
           # Show what's in the cache.
           ls subject-new/target/semver-checks/cache/
-          EXPECTED_PREFIX='subject-new/target/semver-checks/cache/libp2p_core-0_37_0-ccce455725cbab73'
+          EXPECTED_PREFIX='subject-new/target/semver-checks/cache/libp2p_core-0_37_0-default-ccce455725cbab73'
           EXPECTED_CACHED_METADATA="${EXPECTED_PREFIX}.metadata.json"
           EXPECTED_CACHED_RUSTDOC="${EXPECTED_PREFIX}.json"
 
@@ -593,7 +593,7 @@ jobs:
           ls subject/target/semver-checks/cache/
 
           # The previous cached rustdoc should continue to exist.
-          PREVIOUS_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-5900ebf8bb9b9f8b'
+          PREVIOUS_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-default-5900ebf8bb9b9f8b'
           PREVIOUS_RUSTDOC="${PREVIOUS_PREFIX}.json"
           PREVIOUS_METADATA="${PREVIOUS_PREFIX}.metadata.json"
           if [ ! -f "$PREVIOUS_RUSTDOC" ]; then
@@ -606,7 +606,7 @@ jobs:
           fi
 
           # There should also be a new cached rustdoc file for the new feature settings.
-          NEW_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-6999ae87ca463ab3'
+          NEW_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-default-6999ae87ca463ab3'
           NEW_RUSTDOC="${NEW_PREFIX}.json"
           NEW_METADATA="${NEW_PREFIX}.metadata.json"
           if [ ! -f "$NEW_RUSTDOC" ]; then

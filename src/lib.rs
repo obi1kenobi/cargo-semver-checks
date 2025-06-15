@@ -237,6 +237,12 @@ impl Scope {
     }
 }
 
+struct CrateToCheck<'a> {
+    overrides: OverrideStack,
+    current_crate_data: CrateDataForRustdoc<'a>,
+    baseline_crate_data: CrateDataForRustdoc<'a>,
+}
+
 /// Is the specified target able to be semver-checked as a library, of any sort.
 ///
 /// This is a broader definition than cargo's own "lib" definition, since we can also
@@ -423,79 +429,43 @@ impl Check {
             };
         }
 
-        let current_loader = self.get_rustdoc_generator(config, &self.current.source)?;
-        let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
-
-        // Create a report for each crate.
-        // We want to run all the checks, even if one returns `Err`.
-        let all_outcomes: Vec<anyhow::Result<(String, Option<CrateReport>)>> = match &self
-            .current
-            .source
-        {
+        let crates_to_check: Vec<CrateToCheck<'_>> = match &self.current.source {
             RustdocSource::Rustdoc(_)
             | RustdocSource::Revision(_, _)
             | RustdocSource::VersionFromRegistry(_) => {
                 let names = match &self.scope.mode {
-                    ScopeMode::DenyList(_) =>
-                        match &self.current.source {
-                            RustdocSource::Rustdoc(_) =>
-                                // This is a user-facing string.
-                                // For example, it appears when two pre-generated rustdoc files
-                                // are semver-checked against each other.
-                                vec!["<unknown>".to_string()],
-                            _ => panic!("couldn't deduce crate name, specify one through the package allow list")
+                    ScopeMode::DenyList(_) => match &self.current.source {
+                        RustdocSource::Rustdoc(_) => {
+                            // This is a user-facing string.
+                            // For example, it appears when two pre-generated rustdoc files
+                            // are semver-checked against each other.
+                            vec!["<unknown>".to_string()]
                         }
+                        _ => anyhow::bail!("couldn't deduce crate name, specify one through the package allow list"),
+                    },
                     ScopeMode::AllowList(lst) => lst.clone(),
                 };
                 names
                     .into_iter()
                     .map(|name| {
-                        let start = std::time::Instant::now();
                         let version = None;
-                        let data_storage = match generate_crate_data(
-                            config,
-                            generation_settings,
-                            &*current_loader,
-                            &*baseline_loader,
-                            CrateDataForRustdoc {
+                        CrateToCheck {
+                            overrides: OverrideStack::new(),
+                            current_crate_data: CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Current,
-                                name: &name,
+                                name: name.clone(),
                                 feature_config: &self.current_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
-                            CrateDataForRustdoc {
+                            baseline_crate_data: CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Baseline {
                                     highest_allowed_version: version,
                                 },
-                                name: &name,
+                                name,
                                 feature_config: &self.baseline_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
-                        ) {
-                            Ok(data) => data,
-                            Err(TerminalError::WithAdvice(err, advice)) => {
-                                config.log_error(|config| {
-                                    writeln!(config.stderr(), "{advice}")?;
-                                    Ok(())
-                                })?;
-                                return Err(err);
-                            }
-                            Err(TerminalError::Other(err)) => return Err(err),
-                        };
-
-                        let report = run_check_release(
-                            config,
-                            &data_storage,
-                            &name,
-                            self.release_type,
-                            &OverrideStack::new(),
-                            &self.witness_generation,
-                        )?;
-                        config.shell_status(
-                            "Finished",
-                            format_args!("[{:>8.3}s] {name}", start.elapsed().as_secs_f32()),
-                        )?;
-                        Ok((name, Some(report)))
+                        }
                     })
                     .collect()
             }
@@ -543,107 +513,130 @@ note: skipped the following crates since they have no library target: {skipped}"
                                     format_args!("{crate_name} v{version} (current)"),
                                 )
                             })?;
-                            Ok((crate_name.clone(), None))
+                            Ok(None)
                         } else {
-                            let package_overrides =
-                                manifest::deserialize_lint_table(&selected.metadata)
-                                    .with_context(|| {
-                                        format!(
-                                    "package `{}`'s [package.metadata.cargo-semver-checks] table is invalid (at {})",
-                                    selected.name,
-                                    selected.manifest_path,
-                                )
-                                    })?;
+                            let overrides = overrides_for_workspace_package(
+                                selected,
+                                workspace_overrides.as_deref(),
+                            )?;
 
-                            let mut overrides = OverrideStack::new();
-
-                            let selected_manifest = manifest::Manifest::parse(selected.manifest_path.clone().into_std_path_buf())?;
-                            // the key `lints.workspace` for the Cargo lints table
-                            let lint_workspace_key = selected_manifest.parsed.lints.is_some_and(|x| x.workspace);
-                            let metadata_workspace_key = package_overrides.as_ref().is_some_and(|x| x.workspace);
-
-                            if lint_workspace_key || metadata_workspace_key {
-                                if let Some(workspace) = &workspace_overrides {
-                                    for level in workspace {
-                                        overrides.push(level);
-                                    }
-                                }
-                            }
-
-                            if let Some(package) = package_overrides {
-                                for level in package.into_stack() {
-                                    overrides.push(&level);
-                                }
-                            }
-
-                            let start = std::time::Instant::now();
-                            let data_storage = match generate_crate_data(
-                                config,
-                                generation_settings,
-                                &*current_loader,
-                                &*baseline_loader,
-                                CrateDataForRustdoc {
+                            Ok(Some(CrateToCheck {
+                                overrides,
+                                current_crate_data: CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Current,
-                                    name: crate_name,
+                                    name: crate_name.clone(),
                                     feature_config: &self.current_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
-                                CrateDataForRustdoc {
+                                baseline_crate_data: CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Baseline {
-                                        highest_allowed_version: Some(version),
+                                        highest_allowed_version: Some(version.clone()),
                                     },
-                                    name: crate_name,
+                                    name: crate_name.clone(),
                                     feature_config: &self.baseline_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
-                            ) {
-                                Ok(data) => data,
-                                Err(TerminalError::WithAdvice(err, advice)) => {
-                                    config.log_error(|config| {
-                                        writeln!(config.stderr(), "{advice}")?;
-                                        Ok(())
-                                    })?;
-                                    return Err(err);
-                                }
-                                Err(TerminalError::Other(err)) => return Err(err),
-                            };
-
-                            let result = Ok((
-                                crate_name.clone(),
-                                Some(run_check_release(
-                                    config,
-                                    &data_storage,
-                                    crate_name,
-                                    self.release_type,
-                                    &overrides,
-                                    &self.witness_generation
-                                )?),
-                            ));
-                            config.shell_status(
-                                "Finished",
-                                format_args!(
-                                    "[{:>8.3}s] {crate_name}",
-                                    start.elapsed().as_secs_f32()
-                                ),
-                            )?;
-                            result
+                            }))
                         }
                     })
-                    .collect()
+                    .filter_map(|res| res.transpose())
+                    .collect::<Result<Vec<_>, anyhow::Error>>()?
             }
         };
+
+        let current_loader = self.get_rustdoc_generator(config, &self.current.source)?;
+        let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
+
+        // Create a report for each crate.
+        // We want to run all the checks, even if one returns `Err`.
+        let all_outcomes: Vec<anyhow::Result<(String, CrateReport)>> = crates_to_check
+            .into_iter()
+            .map(|selected| {
+                let start = std::time::Instant::now();
+                let name = selected.current_crate_data.name.clone();
+
+                let data_storage = generate_crate_data(
+                    config,
+                    generation_settings,
+                    &*current_loader,
+                    &*baseline_loader,
+                    &selected.current_crate_data,
+                    &selected.baseline_crate_data,
+                )
+                .map_err(|err| log_terminal_error(config, err))?;
+
+                let report = run_check_release(
+                    config,
+                    &data_storage,
+                    &name,
+                    self.release_type,
+                    &selected.overrides,
+                    &self.witness_generation,
+                )?;
+                config.shell_status(
+                    "Finished",
+                    format_args!("[{:>8.3}s] {name}", start.elapsed().as_secs_f32()),
+                )?;
+                Ok((name, report))
+            })
+            .collect();
         let crate_reports: BTreeMap<String, CrateReport> = {
             let mut reports = BTreeMap::new();
             for outcome in all_outcomes {
                 let (name, outcome) = outcome?;
-                if let Some(outcome) = outcome {
-                    reports.insert(name, outcome);
-                }
+                reports.insert(name, outcome);
             }
             reports
         };
 
         Ok(Report { crate_reports })
+    }
+}
+
+fn overrides_for_workspace_package(
+    package: &cargo_metadata::Package,
+    workspace_overrides: Option<&[BTreeMap<String, QueryOverride>]>,
+) -> Result<OverrideStack, anyhow::Error> {
+    let lint_table = manifest::deserialize_lint_table(&package.metadata).with_context(|| {
+        format!(
+            "package `{}`'s [package.metadata.cargo-semver-checks] table is invalid (at {})",
+            package.name, package.manifest_path,
+        )
+    })?;
+    let selected_manifest =
+        manifest::Manifest::parse(package.manifest_path.clone().into_std_path_buf())?;
+    let lint_workspace_key = selected_manifest.parsed.lints.is_some_and(|x| x.workspace);
+    let metadata_workspace_key = lint_table.as_ref().is_some_and(|x| x.workspace);
+
+    let mut overrides = OverrideStack::new();
+    if lint_workspace_key || metadata_workspace_key {
+        if let Some(workspace) = workspace_overrides {
+            for level in workspace {
+                overrides.push(level);
+            }
+        }
+    }
+    if let Some(lint_table) = lint_table {
+        for level in lint_table.into_stack() {
+            overrides.push(&level);
+        }
+    }
+    Ok(overrides)
+}
+
+#[cold]
+fn log_terminal_error(config: &mut GlobalConfig, err: TerminalError) -> anyhow::Error {
+    match err {
+        TerminalError::WithAdvice(err, advice) => {
+            if let Err(err) = config.log_error(|config| {
+                writeln!(config.stderr(), "{advice}")?;
+                Ok(())
+            }) {
+                return err;
+            }
+            err
+        }
+        TerminalError::Other(err) => err,
     }
 }
 
@@ -757,8 +750,8 @@ fn generate_crate_data(
     generation_settings: data_generation::GenerationSettings,
     current_loader: &dyn rustdoc_gen::RustdocGenerator,
     baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
-    current_crate_data: rustdoc_gen::CrateDataForRustdoc,
-    baseline_crate_data: rustdoc_gen::CrateDataForRustdoc,
+    current_crate_data: &rustdoc_gen::CrateDataForRustdoc<'_>,
+    baseline_crate_data: &rustdoc_gen::CrateDataForRustdoc<'_>,
 ) -> Result<DataStorage, TerminalError> {
     let current_crate = current_loader.load_rustdoc(
         config,
@@ -767,7 +760,7 @@ fn generate_crate_data(
         current_crate_data,
     )?;
 
-    let baseline_crate_name = baseline_crate_data.name;
+    let baseline_crate_name = &baseline_crate_data.name;
     let current_rustdoc_version = current_crate.version();
 
     let baseline_crate = {
@@ -775,7 +768,7 @@ fn generate_crate_data(
             config,
             generation_settings,
             data_generation::CacheSettings::ReadWrite(()),
-            baseline_crate_data.clone(),
+            baseline_crate_data,
         )?;
 
         // The baseline rustdoc JSON may have been cached; ensure its rustdoc version matches
@@ -805,14 +798,36 @@ fn generate_crate_data(
                 baseline_crate.version(),
                 current_rustdoc_version,
                 "Deleting and regenerating the baseline JSON file did not resolve the rustdoc \
-                version mismatch."
+                 version mismatch."
             );
         }
 
         baseline_crate
     };
 
-    Ok(DataStorage::new(current_crate, baseline_crate))
+    // TODO: Temporary hack, until we stop supporting formats older than rustdoc v45.
+    // v45+ formats carry the target triple information in the rustdoc JSON itself.
+    let target_triple: &'static str = current_crate_data
+        .build_target
+        .map(ToString::to_string)
+        .unwrap_or_else(|| {
+            let outcome = std::process::Command::new("rustc")
+                .arg("-vV")
+                .output()
+                .expect("failed to run `rustc -vV`");
+            let stdout = String::from_utf8(outcome.stdout).expect("stdout was not valid utf-8");
+            let target_triple = stdout
+                .lines()
+                .find_map(|line| line.strip_prefix("host: "))
+                .expect("failed to find host line");
+            target_triple.to_string()
+        })
+        .leak();
+    Ok(DataStorage::new(
+        current_crate,
+        baseline_crate,
+        target_triple,
+    ))
 }
 
 fn manifest_path(project_root: &Path) -> anyhow::Result<PathBuf> {
