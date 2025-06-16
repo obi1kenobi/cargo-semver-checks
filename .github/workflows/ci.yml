@@ -1750,6 +1750,65 @@ jobs:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
+  # Semver test for sdl3-sys missing registry version baseline
+  run-on-sdl3-sys-version-not-found:
+    name: 'Semver: sdl3-sys missing baseline-version error'
+    runs-on: ubuntu-latest
+    needs:
+      - build-binary
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      - name: Checkout sdl3-sys
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: 'maia-s/sdl3-sys-rs'
+          ref: 'sdl3-sys-0.4'
+          path: 'subject'
+
+      - name: Install rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
+
+      - name: Restore binary
+        uses: actions/cache/restore@v4
+        with:
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
+      - name: Run semver-checks for missing version
+        continue-on-error: true
+        run: |
+          cd semver
+          set -euo pipefail
+          ../bins/cargo-semver-checks semver-checks check-release \
+            --manifest-path="../subject/sdl3-sys/Cargo.toml" \
+            --baseline-version 0.4.7 2>&1 | tee output
+          touch unexpectedly_did_not_fail
+
+      - name: Check whether it failed
+        run: |
+          cd semver
+          if [ -f unexpectedly_did_not_fail ]; then exit 1; else exit 0; fi
+
+      - name: Check error message
+        run: |
+          cd semver
+          grep 'error: Version sdl3-sys of crate 0.4.7 not found in registry' output
+
+      - name: Cleanup
+        run: |
+          cd semver
+          rm output
+          rm -f unexpectedly_did_not_fail
 
   run-on-perf-event-open-sys2:
     # cargo-semver-checks failed to find the generated rustdoc JSON
