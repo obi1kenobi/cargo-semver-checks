@@ -59,7 +59,6 @@ SemverQuery(
 
                                 requires_feature @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                                     explicit @filter(op: "=", value: ["$true"])
-                                    globally_enabled @filter(op: "=", value: ["$false"])
                                 }
 
                                 requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
