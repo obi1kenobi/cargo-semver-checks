@@ -1,0 +1,83 @@
+SemverQuery(
+    id: "inherent_method_requires_more_target_features",
+    human_readable_name: "method requires more target features",
+    description: "A method or associated function now requires additional CPU target features compared to the previous version.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/codegen.html#the-target_feature-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
+                                method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                requires_feature {
+                                    explicit @filter(op: "=", value: ["$true"])
+                                    globally_enabled @filter(op: "=", value: ["$false"])
+                                    new_feature: name @output @tag
+                                }
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                requires_feature @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                                    explicit @filter(op: "=", value: ["$true"])
+                                }
+
+                                requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                    name @filter(op: "=", value: ["%new_feature"])
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "false": false,
+        "zero": 0,
+    },
+    error_message: "A method or associated function now requires additional CPU target features to be enabled.",
+    per_result_error_template: Some("{{name}}::{{method_name}} requires {{new_feature}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
