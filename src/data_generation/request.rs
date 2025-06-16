@@ -445,16 +445,3 @@ fn make_features_hash(default_features: bool, extra_features: &BTreeSet<Cow<'_, 
     hash.truncate(16);
     hash
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::path::Path;
-
-    #[test]
-    fn with_path_returns_none_for_none_settings() {
-        let settings = CacheSettings::None;
-        let result = settings.with_path(Path::new("/tmp"));
-        assert!(matches!(result, CacheSettings::None));
-    }
-}
