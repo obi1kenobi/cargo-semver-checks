@@ -1361,6 +1361,7 @@ add_lints!(
     trait_method_parameter_count_changed,
     trait_method_requires_different_const_generic_params,
     trait_method_requires_different_generic_type_params,
+    trait_method_requires_more_target_features,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
     trait_mismatched_generic_lifetimes,
