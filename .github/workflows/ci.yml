@@ -2068,3 +2068,53 @@ jobs:
           # pass-through mutually-exclusive features from our dependencies such as:
           # https://github.com/obi1kenobi/cargo-semver-checks/pull/824
           feature-group: default-features
+
+  upload-prebuilt-test-rustdocs:
+    needs: ci-everything
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: ["1.85", "1.86", "stable"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install rust
+        id: toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          cache: false
+
+      - name: Restore test rustdocs
+        id: cache-test-rustdocs
+        uses: actions/cache/restore@v4
+        with:
+          path: localdata/test_data/
+          key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('test_crates/**/*.rs') }}
+
+      - name: Compute hash
+        id: hash
+        run: echo "hash=$(./scripts/hash_test_rustdocs_inputs.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Regenerate test rustdocs
+        if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
+        run: ./scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
+
+      - name: Compute artifact name
+        id: artifact
+        run: |
+          HASH="${{ steps.hash.outputs.hash }}"
+          TRIPLE="$(rustc -vV | grep '^host:' | awk '{print $2}')"
+          VERSION="$(rustc --version | awk '{print $2}')"
+          echo "name=test-rustdocs-$HASH-$TRIPLE-$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: localdata/test_data
+

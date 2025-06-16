@@ -1299,6 +1299,7 @@ add_lints!(
     inherent_method_missing,
     inherent_method_must_use_added,
     inherent_method_now_doc_hidden,
+    inherent_method_requires_more_target_features,
     inherent_method_unsafe_added,
     macro_marked_deprecated,
     macro_no_longer_exported,
@@ -1397,4 +1398,6 @@ add_lints!(
     union_now_doc_hidden,
     union_pub_field_now_doc_hidden,
     unit_struct_changed_kind,
+    unsafe_function_target_feature_added,
+    unsafe_trait_method_target_feature_added,
 );
