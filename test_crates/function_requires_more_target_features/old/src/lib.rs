@@ -21,8 +21,8 @@ fn private_function() {}
 #[target_feature(enable = "avx2")]
 pub fn implied_feature_function() {}
 
-#[target_feature(enable = "fma")]
+#[target_feature(enable = "bmi1")]
 pub fn globally_enabled_function() {}
 
-#[target_feature(enable = "avx")]
+#[target_feature(enable = "avx2")]
 pub fn replaced_feature_function() {}

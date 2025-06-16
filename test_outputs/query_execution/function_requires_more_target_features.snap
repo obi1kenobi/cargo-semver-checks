@@ -26,16 +26,5 @@ expression: "&query_execution_results"
       "span_end_line": Uint64(18),
       "span_filename": String("src/lib.rs"),
     },
-    {
-      "fn_name": String("replaced_feature_function"),
-      "new_feature": String("avx2"),
-      "path": List([
-        String("function_requires_more_target_features"),
-        String("replaced_feature_function"),
-      ]),
-      "span_begin_line": Uint64(33),
-      "span_end_line": Uint64(33),
-      "span_filename": String("src/lib.rs"),
-    },
   ],
 }
