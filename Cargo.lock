@@ -2489,9 +2489,9 @@ checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
 
 [[package]]
 name = "pest"
-version = "2.8.0"
+version = "2.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "198db74531d58c70a361c42201efde7e2591e976d518caf7662a47dc5720e7b6"
+checksum = "1db05f56d34358a8b1066f67cbb203ee3e7ed2ba674a6263a1d5ec6db2204323"
 dependencies = [
  "memchr",
  "thiserror 2.0.12",
@@ -2500,9 +2500,9 @@ dependencies = [
 
 [[package]]
 name = "pest_derive"
-version = "2.8.0"
+version = "2.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d725d9cfd79e87dccc9341a2ef39d1b6f6353d68c4b33c177febbe1a402c97c5"
+checksum = "bb056d9e8ea77922845ec74a1c4e8fb17e7c218cc4fc11a15c5d25e189aa40bc"
 dependencies = [
  "pest",
  "pest_generator",
@@ -2510,9 +2510,9 @@ dependencies = [
 
 [[package]]
 name = "pest_generator"
-version = "2.8.0"
+version = "2.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db7d01726be8ab66ab32f9df467ae8b1148906685bbe75c82d1e65d7f5b3f841"
+checksum = "87e404e638f781eb3202dc82db6760c8ae8a1eeef7fb3fa8264b2ef280504966"
 dependencies = [
  "pest",
  "pest_meta",
@@ -2523,11 +2523,10 @@ dependencies = [
 
 [[package]]
 name = "pest_meta"
-version = "2.8.0"
+version = "2.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f9f832470494906d1fca5329f8ab5791cc60beb230c74815dff541cbd2b5ca0"
+checksum = "edd1101f170f5903fde0914f899bb503d9ff5271d7ba76bbb70bea63690cc0d5"
 dependencies = [
- "once_cell",
  "pest",
  "sha2",
 ]
@@ -3213,12 +3212,9 @@ dependencies = [
 
 [[package]]
 name = "slab"
-version = "0.4.9"
+version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f92a496fb766b417c996b9c5e57daf2f7ad3b0bebe1ccfca4856390e3d3bb67"
-dependencies = [
- "autocfg",
-]
+checksum = "04dc19736151f35336d325007ac991178d504a119863a2fcb3758cdb5e52c50d"
 
 [[package]]
 name = "smallvec"
@@ -3654,9 +3650,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "37.4.0"
+version = "37.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa4ab15ba285628ed948f87ef3c6805990d725d3f7c2cca5d409dddd7708584a"
+checksum = "afeee4d777f3e0eb77b0faf9fdd30f4ecf85a48a36d364ee70adf622209ffdfa"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3669,9 +3665,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "39.2.0"
+version = "39.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e8913725231dc4404b6fee63781d093e69e5bdb4bf95da46be5c6f4eb2a59b1"
+checksum = "7b774f851bc6682de156531d27d362e56a337481be3cced57c50f6498f4f1bae"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3684,9 +3680,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "43.1.0"
+version = "43.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2139d656584eb0e716e5a01d8af802a4d0341ee85c97ad09cd42a00f0c77604a"
+checksum = "b804c6d211192844984caf699023547c34f6c8b5bfad46cd66dbf3786cae67b2"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3699,9 +3695,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "45.1.0"
+version = "45.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e8a8069758ba1489b06140658726b42577b356c214b56ad2af0e14184f45b46"
+checksum = "e122c3edf82b30bfad917e1fd8ff460bcc797f40fa038ba9fa45355427dbd0f1"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3713,9 +3709,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "46.1.0"
+version = "46.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bccf03cff80ae127558907bfabe97ec779312adaaa36b97fbf0db32063e304e4"
+checksum = "38023ca30c9b3606d5c8c74c552bb6510a87d4bbe221bf6ea07e6a7d22dfe363"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3765,11 +3761,11 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.12",
  "trustfall",
- "trustfall-rustdoc-adapter 37.4.0",
- "trustfall-rustdoc-adapter 39.2.0",
- "trustfall-rustdoc-adapter 43.1.0",
- "trustfall-rustdoc-adapter 45.1.0",
- "trustfall-rustdoc-adapter 46.1.0",
+ "trustfall-rustdoc-adapter 37.4.1",
+ "trustfall-rustdoc-adapter 39.2.1",
+ "trustfall-rustdoc-adapter 43.1.1",
+ "trustfall-rustdoc-adapter 45.1.1",
+ "trustfall-rustdoc-adapter 46.1.1",
 ]
 
 [[package]]
