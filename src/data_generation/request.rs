@@ -68,7 +68,7 @@ pub(crate) enum CacheSettings<T> {
 impl CacheSettings<()> {
     pub(crate) fn with_path<'a>(&self, path: &'a Path) -> CacheSettings<&'a Path> {
         match self {
-            CacheSettings::None => todo!(),
+            CacheSettings::None => CacheSettings::None,
             CacheSettings::ReadOnly(_) => CacheSettings::ReadOnly(path),
             CacheSettings::ReadWrite(_) => CacheSettings::ReadWrite(path),
             CacheSettings::WriteOnly(_) => CacheSettings::WriteOnly(path),
@@ -444,4 +444,17 @@ fn make_features_hash(default_features: bool, extra_features: &BTreeSet<Cow<'_, 
     // with approximately 2**32 feature configurations.
     hash.truncate(16);
     hash
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    fn with_path_returns_none_for_none_settings() {
+        let settings = CacheSettings::None;
+        let result = settings.with_path(Path::new("/tmp"));
+        assert!(matches!(result, CacheSettings::None));
+    }
 }
