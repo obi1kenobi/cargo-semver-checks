@@ -39,7 +39,6 @@ HASH="$(scripts/hash_test_rustdocs_inputs.sh)"
 
 ARTIFACT_NAME="test-rustdocs-$HASH-$TRIPLE-$VERSION"
 
-set -x
 RUNS_JSON="$(curl -s "https://api.github.com/repos/obi1kenobi/cargo-semver-checks/actions/workflows/ci.yml/runs?branch=main&status=success&per_page=1")"
 RUN_ID="$(echo "$RUNS_JSON" | jq -r '.workflow_runs[0].id')"
 
