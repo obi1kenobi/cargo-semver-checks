@@ -2104,19 +2104,17 @@ jobs:
         if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
         run: ./scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
 
-      - name: Package rustdocs
-        id: package
+      - name: Compute artifact name
+        id: artifact
         run: |
           HASH="${{ steps.hash.outputs.hash }}"
           TRIPLE="$(rustc -vV | grep '^host:' | awk '{print $2}')"
           VERSION="$(rustc --version | awk '{print $2}')"
-          TAR="test-rustdocs-$HASH-$TRIPLE-$VERSION.tar.gz"
-          tar -czf "$TAR" -C localdata test_data
-          echo "artifact=$TAR" >> "$GITHUB_OUTPUT"
+          echo "name=test-rustdocs-$HASH-$TRIPLE-$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.package.outputs.artifact }}
-          path: ${{ steps.package.outputs.artifact }}
+          name: ${{ steps.artifact.outputs.name }}
+          path: localdata/test_data
 
