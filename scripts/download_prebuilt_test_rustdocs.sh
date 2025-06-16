@@ -9,7 +9,7 @@ fi
 set -euo pipefail
 
 # 1. Is `gh` available?
-if ! command -v gha >/dev/null 2>&1; then
+if ! command -v gh >/dev/null 2>&1; then
     >&2 echo "The GitHub CLI ('gh') is required but was not found in your PATH."
     >&2 echo "If you use homebrew, you can install it with:"
     >&2 echo "    brew install gh"
