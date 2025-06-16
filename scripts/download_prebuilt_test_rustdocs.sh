@@ -17,7 +17,7 @@ HASH="$(scripts/hash_test_rustdocs_inputs.sh)"
 
 ARTIFACT_NAME="test-rustdocs-$HASH-$TRIPLE-$VERSION"
 
-RUNS_JSON="$(curl -s "https://api.github.com/repos/obi1kenobi/cargo-semver-checks/actions/runs?branch=main&status=success&per_page=1")"
+RUNS_JSON="$(curl -s "https://api.github.com/repos/obi1kenobi/cargo-semver-checks/actions/workflows/ci.yml/runs?branch=main&status=success&per_page=1")"
 RUN_ID="$(echo "$RUNS_JSON" | jq -r '.workflow_runs[0].id')"
 
 ARTIFACT_URL="$(curl -s "https://api.github.com/repos/obi1kenobi/cargo-semver-checks/actions/runs/$RUN_ID/artifacts" | jq -r --arg NAME "$ARTIFACT_NAME" '.artifacts[] | select(.name==$NAME) | .archive_download_url' | head -n1)"
@@ -28,11 +28,11 @@ if [[ -z "$ARTIFACT_URL" ]]; then
     exit 1
 fi
 
-mkdir -p localdata/test_data
+mkdir -p localdata
+
+curl -L "$ARTIFACT_URL" -o localdata/artifact.zip
+
 rm -rf localdata/test_data
-
-curl -L "$ARTIFACT_URL" -o artifact.tgz
-
-tar -xzf artifact.tgz -C localdata
-rm artifact.tgz
+unzip -q localdata/artifact.zip -d localdata
+rm localdata/artifact.zip
 
