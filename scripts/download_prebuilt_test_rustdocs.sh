@@ -8,6 +8,28 @@ fi
 
 set -euo pipefail
 
+# 1. Is `gh` available?
+if ! command -v gha >/dev/null 2>&1; then
+    >&2 echo "The GitHub CLI ('gh') is required but was not found in your PATH."
+    >&2 echo "If you use homebrew, you can install it with:"
+    >&2 echo "    brew install gh"
+    >&2 echo "Then authenticate with:"
+    >&2 echo "    gh auth login"
+    exit 1
+fi
+
+# 2. Is the user logged in?
+# `gh auth status` exits non‑zero when not authenticated, which would normally
+# stop the script because of `set -e`.  Capture the output instead and inspect it.
+GH_STATUS="$(gh auth status 2>&1 || true)"
+if ! grep -q 'Logged in to github\.com account' <<<"$GH_STATUS"; then
+    >&2 echo "The GitHub CLI is installed but not authenticated."
+    >&2 echo "Run:"
+    >&2 echo "    gh auth login"
+    >&2 echo "and try again."
+    exit 1
+fi
+
 TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null || { cd -- "$(dirname -- "${BASH_SOURCE[0]}")"/.. && pwd; })"
 cd "$TOPLEVEL"
 
@@ -17,6 +39,7 @@ HASH="$(scripts/hash_test_rustdocs_inputs.sh)"
 
 ARTIFACT_NAME="test-rustdocs-$HASH-$TRIPLE-$VERSION"
 
+set -x
 RUNS_JSON="$(curl -s "https://api.github.com/repos/obi1kenobi/cargo-semver-checks/actions/workflows/ci.yml/runs?branch=main&status=success&per_page=1")"
 RUN_ID="$(echo "$RUNS_JSON" | jq -r '.workflow_runs[0].id')"
 
@@ -30,9 +53,9 @@ fi
 
 mkdir -p localdata
 
-curl -L "$ARTIFACT_URL" -o localdata/artifact.zip
+gh api "$ARTIFACT_URL"
 
 rm -rf localdata/test_data
-unzip -q localdata/artifact.zip -d localdata
+mkdir -p localdata/test_data/
+unzip -q localdata/artifact.zip -d localdata/test_data/
 rm localdata/artifact.zip
-
