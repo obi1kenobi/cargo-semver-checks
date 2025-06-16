@@ -7,13 +7,13 @@ mod private {
 pub trait TraitA {
     #[target_feature(enable = "avx")]
     #[target_feature(enable = "avx2")]
-    unsafe fn safe_method(&self) {}
+    unsafe fn unsafe_method(&self) {}
 }
 
 pub trait TraitSealed: private::Sealed {
     #[target_feature(enable = "avx")]
     #[target_feature(enable = "avx2")]
-    unsafe fn sealed_method(&self) {}
+    unsafe fn sealed_trait_method(&self) {}
 }
 
 pub trait TraitImpliedFeature {
