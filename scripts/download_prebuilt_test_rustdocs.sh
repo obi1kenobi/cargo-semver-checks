@@ -52,7 +52,7 @@ fi
 
 mkdir -p localdata
 
-gh api "$ARTIFACT_URL"
+gh api "$ARTIFACT_URL" >localdata/artifact.zip
 
 rm -rf localdata/test_data
 mkdir -p localdata/test_data/
