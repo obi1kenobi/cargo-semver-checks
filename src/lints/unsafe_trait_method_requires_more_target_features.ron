@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "trait_method_requires_more_target_features",
+    id: "unsafe_trait_method_requires_more_target_features",
     human_readable_name: "pub trait method requires more target features",
     description: "A trait method now requires additional CPU target features compared to the previous version.",
     required_update: Major,

@@ -3,13 +3,13 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
-  "./test_crates/trait_method_requires_more_target_features/": [
+  "./test_crates/unsafe_trait_method_requires_more_target_features/": [
     {
       "method_name": String("unsafe_method"),
       "name": String("TraitA"),
       "new_feature": String("avx2"),
       "path": List([
-        String("trait_method_requires_more_target_features"),
+        String("unsafe_trait_method_requires_more_target_features"),
         String("TraitA"),
       ]),
       "span_begin_line": Uint64(10),
@@ -21,7 +21,7 @@ expression: "&query_execution_results"
       "name": String("TraitSealed"),
       "new_feature": String("avx2"),
       "path": List([
-        String("trait_method_requires_more_target_features"),
+        String("unsafe_trait_method_requires_more_target_features"),
         String("TraitSealed"),
       ]),
       "span_begin_line": Uint64(16),
