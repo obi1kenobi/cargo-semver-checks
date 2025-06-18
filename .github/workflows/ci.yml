@@ -315,6 +315,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
   build-binary-windows:
     # It could be easily combined into a single job with build-binary using the
@@ -408,6 +410,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Install rust
         id: toolchain
@@ -522,6 +526,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Install rust
         id: toolchain
@@ -663,6 +669,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -740,6 +748,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -812,6 +822,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -882,6 +894,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1002,6 +1016,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1063,6 +1079,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1123,6 +1141,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1379,6 +1399,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1500,6 +1522,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1588,6 +1612,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1787,6 +1813,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1849,6 +1877,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1913,6 +1943,8 @@ jobs:
         with:
           name: cargo-semver-checks-linux
           path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
