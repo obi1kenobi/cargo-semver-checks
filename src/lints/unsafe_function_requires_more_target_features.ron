@@ -1,7 +1,7 @@
 SemverQuery(
-    id: "function_requires_more_target_features",
-    human_readable_name: "fn requires more target features",
-    description: "A function now requires additional CPU target features compared to the previous version.",
+    id: "unsafe_function_requires_more_target_features",
+    human_readable_name: "unsafe fn requires more target features",
+    description: "An unsafe function now requires additional CPU target features compared to the previous version.",
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/codegen.html#the-target_feature-attribute"),
@@ -13,6 +13,9 @@ SemverQuery(
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         fn_name: name @output
+
+                        # We still want to lint even if the function has become safe.
+                        currently_unsafe: unsafe @output
 
                         importable_path {
                             path @output @tag
@@ -37,6 +40,7 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        unsafe @filter(op: "=", value: ["$true"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -61,7 +65,7 @@ SemverQuery(
         "false": false,
         "zero": 0,
     },
-    error_message: "A function now requires additional CPU target features to be enabled.",
+    error_message: "An unsafe function now requires additional CPU target features to be enabled.",
     per_result_error_template: Some("{{fn_name}} requires {{new_feature}} in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
