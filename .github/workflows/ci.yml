@@ -299,7 +299,7 @@ jobs:
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.9
 
-      - name: build and cache
+      - name: build
         run: |
           cd semver
 
@@ -310,11 +310,13 @@ jobs:
           mkdir ../bins
           mv target/debug/cargo-semver-checks ../bins/cargo-semver-checks
 
-      - name: cache binary
-        uses: actions/cache/save@v4
+      - name: upload binary
+        uses: actions/upload-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
   build-binary-windows:
     # It could be easily combined into a single job with build-binary using the
@@ -349,7 +351,7 @@ jobs:
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.9
 
-      - name: build and cache
+      - name: build
         run: |
           cd semver
 
@@ -360,11 +362,12 @@ jobs:
           mkdir ..\bins
           mv target\debug\cargo-semver-checks.exe ..\bins\cargo-semver-checks.exe
 
-      - name: cache binary
-        uses: actions/cache/save@v4
+      - name: upload binary
+        uses: actions/upload-artifact@v4
         with:
+          name: cargo-semver-checks-windows
           path: bins\
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+
 
   cross-version-caching:
     # Ensure that cached rustdoc JSON files from an mismatched rustdoc version
@@ -402,13 +405,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Install rust
         id: toolchain
@@ -518,13 +521,13 @@ jobs:
           ref: 'c479da812fd421260667c02049e6d11edd82c2dc'
           path: 'subject'
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Install rust
         id: toolchain
@@ -661,13 +664,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -740,13 +743,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -814,13 +817,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -886,13 +889,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1008,13 +1011,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1071,13 +1074,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1133,13 +1136,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1391,13 +1394,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1514,13 +1517,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1604,13 +1607,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1704,13 +1707,11 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-windows
           path: bins\
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
 
       - name: Restore rustdoc
         id: cache
@@ -1807,13 +1808,13 @@ jobs:
           cache: false
           rustflags: "-Dwarnings"  # set explicitly, to ensure we trigger the bug described above
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1871,13 +1872,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1937,13 +1938,13 @@ jobs:
           rustflags: ""
           cache: false
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
