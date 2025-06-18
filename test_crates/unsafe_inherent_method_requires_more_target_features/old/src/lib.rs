@@ -10,11 +10,14 @@ impl Foo {
     pub unsafe fn unsafe_method() {}
 
     #[target_feature(enable = "avx")]
-    fn private_method() {}
+    unsafe fn private_method() {}
 
     #[target_feature(enable = "avx2")]
-    pub fn implied_feature_method() {}
+    pub unsafe fn implied_feature_method() {}
 
     #[target_feature(enable = "fma")]
-    pub fn globally_enabled_method() {}
+    pub unsafe fn globally_enabled_method() {}
+
+    #[target_feature(enable = "avx")]
+    pub unsafe fn becomes_safe() {}
 }

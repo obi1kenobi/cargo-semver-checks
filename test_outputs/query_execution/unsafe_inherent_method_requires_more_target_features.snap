@@ -1,11 +1,11 @@
 ---
 source: src/query.rs
-assertion_line: 785
 expression: "&query_execution_results"
 ---
 {
   "./test_crates/unsafe_inherent_method_requires_more_target_features/": [
     {
+      "currently_unsafe": Boolean(true),
       "method_name": String("safe_method"),
       "method_visibility": String("public"),
       "name": String("Foo"),
@@ -14,11 +14,12 @@ expression: "&query_execution_results"
         String("unsafe_inherent_method_requires_more_target_features"),
         String("Foo"),
       ]),
-      "span_begin_line": Uint64(8),
-      "span_end_line": Uint64(8),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
     },
     {
+      "currently_unsafe": Boolean(true),
       "method_name": String("unsafe_method"),
       "method_visibility": String("public"),
       "name": String("Foo"),
@@ -27,8 +28,22 @@ expression: "&query_execution_results"
         String("unsafe_inherent_method_requires_more_target_features"),
         String("Foo"),
       ]),
-      "span_begin_line": Uint64(12),
-      "span_end_line": Uint64(12),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "currently_unsafe": Boolean(true),
+      "method_name": String("becomes_safe"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("unsafe_inherent_method_requires_more_target_features"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(34),
+      "span_end_line": Uint64(34),
       "span_filename": String("src/lib.rs"),
     },
   ],
