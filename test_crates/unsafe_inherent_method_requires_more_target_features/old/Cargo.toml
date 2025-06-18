@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "unsafe_inherent_method_requires_more_target_features"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
