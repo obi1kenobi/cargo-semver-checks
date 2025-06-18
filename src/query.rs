@@ -812,17 +812,27 @@ mod tests {
 
         let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
-            assert!(!transparent_results.is_empty());
+            // TODO: Remove this once rustdoc fixes this bug:
+            // https://github.com/rust-lang/rust/issues/142655
+            if matches!(
+                semver_query.id.as_str(),
+                "safe_function_target_feature_added" | "safe_inherent_method_target_feature_added"
+            ) {
+                // These queries don't have any results currently,
+                // since their results are obscured by the bug above.
+            } else {
+                assert!(!transparent_results.is_empty());
 
-            let flattened_actual_results: Vec<_> = transparent_results
-                .iter()
-                .flat_map(|(_key, value)| value)
-                .collect();
-            for semver_violation_result in flattened_actual_results {
-                registry
-                    .render_template(&template, semver_violation_result)
-                    .with_context(|| "Error instantiating semver query template.")
-                    .expect("could not materialize template");
+                let flattened_actual_results: Vec<_> = transparent_results
+                    .iter()
+                    .flat_map(|(_key, value)| value)
+                    .collect();
+                for semver_violation_result in flattened_actual_results {
+                    registry
+                        .render_template(&template, semver_violation_result)
+                        .with_context(|| "Error instantiating semver query template.")
+                        .expect("could not materialize template");
+                }
             }
         }
 
