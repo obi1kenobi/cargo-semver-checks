@@ -26,6 +26,11 @@ SemverQuery(
                                 method_name: name @tag @output
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
+                                # Don't trigger the lint if the method also became unsafe.
+                                # That's already breaking and we have a separate lint for that,
+                                # so let it take precedence.
+                                unsafe @filter(op: "!=", value: ["$true"])
+
                                 requires_feature @fold
                                                  @transform(op: "count")
                                                  @filter(op: ">", value: ["$zero"])
@@ -77,6 +82,6 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A safe inherent method now requires one or more CPU target features to be enabled. It can no longer be used via a Fn() trait.",
-    per_result_error_template: Some(r#"method {{join "::" path}}::{{method_name}} now requires {{join ", " new_target_feature}} in {{span_filename}}:{{span_begin_line}}"#),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} now requires {{join ", " new_target_feature}} in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

@@ -49,14 +49,14 @@ expression: "&query_execution_results"
   ],
   "./test_crates/safe_inherent_method_target_feature_added/": [
     {
-      "method_name": String("add_feature"),
+      "method_name": String("become_unsafe"),
       "method_visibility": String("public"),
       "name": String("Foo"),
       "non_matching_span_begin_line": List([
-        Uint64(7),
+        Uint64(8),
       ]),
       "non_matching_span_end_line": List([
-        Uint64(7),
+        Uint64(8),
       ]),
       "non_matching_span_filename": List([
         String("src/lib.rs"),
@@ -74,10 +74,10 @@ expression: "&query_execution_results"
       "method_visibility": String("public"),
       "name": String("Foo"),
       "non_matching_span_begin_line": List([
-        Uint64(12),
+        Uint64(15),
       ]),
       "non_matching_span_end_line": List([
-        Uint64(12),
+        Uint64(15),
       ]),
       "non_matching_span_filename": List([
         String("src/lib.rs"),

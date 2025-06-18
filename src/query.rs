@@ -775,6 +775,8 @@ mod tests {
         if matches!(
             query_name,
             "function_no_longer_unsafe"
+                | "inherent_method_unsafe_added"
+                | "safe_inherent_method_target_feature_added"
                 | "unsafe_function_requires_more_target_features"
                 | "unsafe_function_target_feature_added"
                 | "unsafe_inherent_method_requires_more_target_features"
