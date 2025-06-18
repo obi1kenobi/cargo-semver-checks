@@ -3,6 +3,7 @@
 pub struct A;
 
 impl A {
+    // Breaking change, this should lint.
     #[target_feature(enable = "avx")]
     pub unsafe fn foo() {}
 
@@ -10,10 +11,11 @@ impl A {
     #[target_feature(enable = "sse2")]
     pub unsafe fn sse2_method() {}
 
-    // Still a breaking change, even though it becomes safe.
+    // Still a breaking change for this lint, even though it becomes safe.
     #[target_feature(enable = "avx")]
     pub fn becomes_safe() {}
 
+    // Breaking change, but for a different lint.
     #[target_feature(enable = "avx")]
     pub fn safe() {}
 }
