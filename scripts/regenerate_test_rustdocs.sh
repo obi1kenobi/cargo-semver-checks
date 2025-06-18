@@ -51,7 +51,14 @@ else
     always_update=1
 fi
 
+PLACEHOLDER_DIR="$TARGET_DIR/placeholder"
+rm -rf "$PLACEHOLDER_DIR"
 mkdir -p "$TARGET_DIR"
+pushd "$TARGET_DIR" >/dev/null
+cargo new --lib placeholder
+cd placeholder
+cargo add --path ../../../test_crates/template/old/
+popd >/dev/null
 
 # Determine parallelism. Respect $NUM_JOBS if provided.
 NUM_JOBS=${NUM_JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)}
@@ -61,7 +68,6 @@ generate_rustdocs() {
     local crate_dir="$TOPLEVEL/test_crates/$crate"
     local pair="${crate%%/*}"
     local target="$TARGET_DIR/$crate/rustdoc.json"
-    local metadata="$TARGET_DIR/$crate/metadata.json"
 
     if [[ -z $always_update ]] && ! dir_is_newer_than_file "$crate_dir" "$target"; then
         printf 'No updates needed for %s.\n' "$crate"
@@ -80,11 +86,21 @@ generate_rustdocs() {
     RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --document-private-items --document-hidden-items --cap-lints "$CAP_LINTS" --output-format=json
     mkdir -p "$TARGET_DIR/$crate"
     mv "$RUSTDOC_OUTPUT_DIR/$pair.json" "$target"
-    $METADATA_CMD --manifest-path "$crate_dir/Cargo.toml" >"$metadata"
     popd >/dev/null
 }
-export TOPLEVEL TARGET_DIR RUSTDOC_OUTPUT_DIR RUSTDOC_CMD METADATA_CMD always_update
-export -f generate_rustdocs dir_is_newer_than_file
+
+generate_metadata() {
+    local crate="$1"
+    local metadata="$TARGET_DIR/$crate/metadata.json"
+
+    pushd "$PLACEHOLDER_DIR" >/dev/null
+    sed -i='' '$d' Cargo.toml
+    cargo add --path "../../../test_crates/$crate"
+    $METADATA_CMD >"$metadata"
+    popd >/dev/null
+}
+export TOPLEVEL TARGET_DIR RUSTDOC_OUTPUT_DIR RUSTDOC_CMD METADATA_CMD PLACEHOLDER_DIR always_update
+export -f generate_rustdocs generate_metadata dir_is_newer_than_file
 
 crate_jobs=()
 for crate_pair; do
@@ -102,5 +118,9 @@ for crate_pair; do
 done
 
 printf '%s\n' "${crate_jobs[@]}" | xargs -n1 -P "$NUM_JOBS" -I{} bash -c 'generate_rustdocs "$@"' _ {}
+
+for crate in "${crate_jobs[@]}"; do
+    generate_metadata "$crate"
+done
 
 unset CARGO_TARGET_DIR
