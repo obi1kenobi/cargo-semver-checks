@@ -51,60 +51,56 @@ else
     always_update=1
 fi
 
-PLACEHOLDER_DIR="$TARGET_DIR/placeholder"
-rm -rf "$PLACEHOLDER_DIR"
 mkdir -p "$TARGET_DIR"
-pushd "$TARGET_DIR"
-cargo new --lib placeholder
-cd placeholder
-cargo add --path ../../../test_crates/template/old/
-popd
 
+# Determine parallelism. Respect $NUM_JOBS if provided.
+NUM_JOBS=${NUM_JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)}
+
+generate_rustdocs() {
+    local crate="$1"
+    local crate_dir="$TOPLEVEL/test_crates/$crate"
+    local pair="${crate%%/*}"
+    local target="$TARGET_DIR/$crate/rustdoc.json"
+    local metadata="$TARGET_DIR/$crate/metadata.json"
+
+    if [[ -z $always_update ]] && ! dir_is_newer_than_file "$crate_dir" "$target"; then
+        printf 'No updates needed for %s.\n' "$crate"
+        return
+    fi
+
+    echo "Generating: $crate"
+
+    pushd "$crate_dir" >/dev/null
+
+    CAP_LINTS="warn"
+    if [[ "$crate" == "broken_rustdoc" ]]; then
+        CAP_LINTS="allow"
+    fi
+
+    RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --document-private-items --document-hidden-items --cap-lints "$CAP_LINTS" --output-format=json
+    mkdir -p "$TARGET_DIR/$crate"
+    mv "$RUSTDOC_OUTPUT_DIR/$pair.json" "$target"
+    $METADATA_CMD --manifest-path "$crate_dir/Cargo.toml" >"$metadata"
+    popd >/dev/null
+}
+export TOPLEVEL TARGET_DIR RUSTDOC_OUTPUT_DIR RUSTDOC_CMD METADATA_CMD always_update
+export -f generate_rustdocs dir_is_newer_than_file
+
+crate_jobs=()
 for crate_pair; do
-    # Strip all but last path component from crate_pair
     crate_pair=${crate_pair%/}
     crate_pair=${crate_pair##*/}
 
     if [[ -f "$TOPLEVEL/test_crates/$crate_pair/new/Cargo.toml" ]]; then
         if [[ -f "$TOPLEVEL/test_crates/$crate_pair/old/Cargo.toml" ]]; then
-            for crate_version in "new" "old"; do
-                crate="$crate_pair/$crate_version"
-                crate_dir=$TOPLEVEL/test_crates/$crate
-                target=$TARGET_DIR/$crate/rustdoc.json
-                metadata=$TARGET_DIR/$crate/metadata.json
-
-                if [[ -z $always_update ]] && ! dir_is_newer_than_file "$crate_dir" "$target"; then
-                    printf 'No updates needed for %s.\n' "$crate"
-                    continue
-                fi
-
-                echo "Generating: $crate"
-
-                pushd "$crate_dir"
-
-                # Determine whether to warn on lints or allow them.
-                CAP_LINTS="warn"
-                if [[ "$crate" == "broken_rustdoc" ]]; then
-                    # This crate *intentionally* has broken rustdoc.
-                    # Don't warn on it. The warnings and errors are thing being tested.
-                    CAP_LINTS="allow"
-                fi
-
-                RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --document-private-items --document-hidden-items --cap-lints "$CAP_LINTS" --output-format=json
-                mkdir -p "$TARGET_DIR/$crate"
-                mv "$RUSTDOC_OUTPUT_DIR/$crate_pair.json" "$target"
-                popd
-
-                pushd "$PLACEHOLDER_DIR"
-                sed -i='' '$d' Cargo.toml
-                cargo add --path "../../../test_crates/$crate"
-                $METADATA_CMD >"$metadata"
-                popd
-            done
+            crate_jobs+=("$crate_pair/new")
+            crate_jobs+=("$crate_pair/old")
         else
             echo >&2 "WARNING: $crate_pair/new/Cargo.toml exists but $crate_pair/old/Cargo.toml does not; skipping $crate_pair."
         fi
     fi
 done
+
+printf '%s\n' "${crate_jobs[@]}" | xargs -n1 -P "$NUM_JOBS" -I{} bash -c 'generate_rustdocs "$@"' _ {}
 
 unset CARGO_TARGET_DIR
