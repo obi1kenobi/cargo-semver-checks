@@ -91,4 +91,27 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/unsafe_inherent_method_target_feature_added/": [
+    {
+      "method_name": String("safe"),
+      "method_visibility": String("public"),
+      "name": String("A"),
+      "non_matching_span_begin_line": List([
+        Uint64(20),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(20),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("unsafe_inherent_method_target_feature_added"),
+        String("A"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
