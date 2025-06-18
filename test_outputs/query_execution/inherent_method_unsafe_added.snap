@@ -69,5 +69,26 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "method_name": String("safe_add_feature"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "non_matching_span_begin_line": List([
+        Uint64(12),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(12),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("safe_inherent_method_target_feature_added"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
 }
