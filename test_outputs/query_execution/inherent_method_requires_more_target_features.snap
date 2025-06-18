@@ -1,0 +1,35 @@
+---
+source: src/query.rs
+assertion_line: 785
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/inherent_method_requires_more_target_features/": [
+    {
+      "method_name": String("safe_method"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("inherent_method_requires_more_target_features"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("unsafe_method"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("inherent_method_requires_more_target_features"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

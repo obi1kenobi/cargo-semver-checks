@@ -68,7 +68,7 @@ pub(crate) enum CacheSettings<T> {
 impl CacheSettings<()> {
     pub(crate) fn with_path<'a>(&self, path: &'a Path) -> CacheSettings<&'a Path> {
         match self {
-            CacheSettings::None => todo!(),
+            CacheSettings::None => CacheSettings::None,
             CacheSettings::ReadOnly(_) => CacheSettings::ReadOnly(path),
             CacheSettings::ReadWrite(_) => CacheSettings::ReadWrite(path),
             CacheSettings::WriteOnly(_) => CacheSettings::WriteOnly(path),
