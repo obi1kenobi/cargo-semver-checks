@@ -20,9 +20,11 @@ SemverQuery(
                         }
 
                         method {
-                            unsafe @filter(op: "=", value: ["$true"])
                             public_api_eligible @filter(op: "=", value: ["$true"])
                             method_name: name @output @tag
+
+                            # We still want to lint even if the trait method has become safe.
+                            currently_unsafe: unsafe @output
 
                             requires_feature {
                                 explicit @filter(op: "=", value: ["$true"])

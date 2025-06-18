@@ -12,8 +12,10 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        unsafe @filter(op: "=", value: ["$true"])
                         fn_name: name @output
+
+                        # We still want to lint even if the function has since become safe.
+                        currently_unsafe: unsafe @output
 
                         importable_path {
                             path @output @tag
@@ -59,7 +61,7 @@ SemverQuery(
         "false": false,
         "zero": 0,
     },
-    error_message: "An unsafe function newly requires CPU target features to be enabled.",
-    per_result_error_template: Some("unsafe fn {{join \"::\" path}} requires {{join \", \" feature}} in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A function newly requires CPU target features to be enabled.",
+    per_result_error_template: Some("{{join \"::\" path}} requires {{join \", \" feature}} in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )

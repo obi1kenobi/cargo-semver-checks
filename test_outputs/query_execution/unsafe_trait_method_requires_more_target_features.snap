@@ -5,6 +5,7 @@ expression: "&query_execution_results"
 {
   "./test_crates/unsafe_trait_method_requires_more_target_features/": [
     {
+      "currently_unsafe": Boolean(true),
       "method_name": String("unsafe_method"),
       "name": String("TraitA"),
       "new_feature": String("avx2"),
@@ -17,6 +18,7 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
     },
     {
+      "currently_unsafe": Boolean(true),
       "method_name": String("sealed_trait_method"),
       "name": String("TraitSealed"),
       "new_feature": String("avx2"),

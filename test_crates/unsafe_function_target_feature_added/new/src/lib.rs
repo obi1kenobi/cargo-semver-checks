@@ -15,3 +15,8 @@ pub unsafe fn add_globally_enabled_feature() {}
 // Private unsafe function adds feature.
 #[target_feature(enable = "avx2")]
 unsafe fn private_feature_added() {}
+
+// The function became safe *and* added a non-implied, non-globally-enabled feature.
+// It should trigger the lint.
+#[target_feature(enable = "avx")]
+pub fn becomes_safe() {}

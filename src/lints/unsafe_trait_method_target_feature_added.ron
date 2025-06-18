@@ -19,9 +19,11 @@ SemverQuery(
                         }
 
                         method {
-                            unsafe @filter(op: "=", value: ["$true"])
                             public_api_eligible @filter(op: "=", value: ["$true"])
                             method_name: name @output @tag
+
+                            # We still want to lint even if the trait method has become safe.
+                            currently_unsafe: unsafe @output
 
                             requires_feature @fold
                                              @transform(op: "count")
@@ -68,7 +70,7 @@ SemverQuery(
         "false": false,
         "zero": 0,
     },
-    error_message: "An unsafe trait method newly requires CPU target features to be enabled.",
-    per_result_error_template: Some("unsafe trait method {{join \"::\" path}}::{{method_name}} requires {{join \", \" feature}} in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A trait method newly requires CPU target features to be enabled.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} requires {{join \", \" feature}} in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
