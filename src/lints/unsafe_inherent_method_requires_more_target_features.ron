@@ -25,6 +25,9 @@ SemverQuery(
                                 method_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
+                                # We still want to lint even if the function has since become safe.
+                                currently_unsafe: unsafe @output
+
                                 requires_feature {
                                     explicit @filter(op: "=", value: ["$true"])
                                     globally_enabled @filter(op: "=", value: ["$false"])

@@ -12,3 +12,6 @@ pub unsafe fn add_globally_enabled_feature() {}
 
 // Private unsafe function adding a feature should not trigger.
 unsafe fn private_feature_added() {}
+
+// This function becomes safe and adds target features. It should trigger the lint.
+pub unsafe fn becomes_safe() {}

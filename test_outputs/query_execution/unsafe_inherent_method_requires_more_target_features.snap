@@ -1,11 +1,11 @@
 ---
 source: src/query.rs
-assertion_line: 785
 expression: "&query_execution_results"
 ---
 {
   "./test_crates/unsafe_inherent_method_requires_more_target_features/": [
     {
+      "currently_unsafe": Boolean(true),
       "method_name": String("safe_method"),
       "method_visibility": String("public"),
       "name": String("Foo"),
@@ -19,6 +19,7 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
     },
     {
+      "currently_unsafe": Boolean(true),
       "method_name": String("unsafe_method"),
       "method_visibility": String("public"),
       "name": String("Foo"),

@@ -5,6 +5,7 @@ expression: "&query_execution_results"
 {
   "./test_crates/unsafe_trait_method_target_feature_added/": [
     {
+      "currently_unsafe": Boolean(true),
       "feature": List([
         String("avx2"),
       ]),
@@ -19,6 +20,7 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
     {
+      "currently_unsafe": Boolean(true),
       "feature": List([
         String("avx2"),
       ]),
