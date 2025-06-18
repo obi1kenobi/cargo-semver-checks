@@ -26,6 +26,9 @@ SemverQuery(
                                 method_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
+                                # We don't care if the method is still unsafe. Lint anyway.
+                                currently_unsafe: unsafe @output
+
                                 requires_feature @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                                     feature_names: name @output
                                     explicit @filter(op: "=", value: ["$true"])
