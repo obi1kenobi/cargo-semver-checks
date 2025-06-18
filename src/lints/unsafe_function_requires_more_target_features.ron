@@ -14,6 +14,9 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
                         fn_name: name @output
 
+                        # We still want to lint even if the function has become safe.
+                        currently_unsafe: unsafe @output
+
                         importable_path {
                             path @output @tag
                             public_api @filter(op: "=", value: ["$true"])
@@ -37,6 +40,7 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        unsafe @filter(op: "=", value: ["$true"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
