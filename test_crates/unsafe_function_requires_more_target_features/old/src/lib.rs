@@ -16,13 +16,19 @@ pub fn safe_function() {}
 pub unsafe fn unsafe_function() {}
 
 #[target_feature(enable = "avx")]
-fn private_function() {}
+unsafe fn private_function() {}
 
 #[target_feature(enable = "avx2")]
-pub fn implied_feature_function() {}
+pub unsafe fn implied_feature_function() {}
 
 #[target_feature(enable = "bmi1")]
-pub fn globally_enabled_function() {}
+pub unsafe fn globally_enabled_function() {}
 
 #[target_feature(enable = "avx2")]
-pub fn replaced_feature_function() {}
+pub unsafe fn replaced_with_narrower_feature() {}
+
+#[target_feature(enable = "avx")]
+pub unsafe fn replaced_with_broader_feature() {}
+
+#[target_feature(enable = "bmi1")]
+pub unsafe fn becomes_safe() {}
