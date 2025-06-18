@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "inherent_method_requires_more_target_features",
+    id: "unsafe_inherent_method_requires_more_target_features",
     human_readable_name: "method requires more target features",
     description: "A method or associated function now requires additional CPU target features compared to the previous version.",
     required_update: Major,
