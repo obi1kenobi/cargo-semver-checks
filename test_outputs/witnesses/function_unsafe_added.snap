@@ -15,7 +15,7 @@ hint = 'let witness = safe_function_target_feature_added::compute(...);'
 
 [["./test_crates/safe_function_target_feature_added/"]]
 filename = 'src/lib.rs'
-begin_line = 23
+begin_line = 17
 hint = 'let witness = safe_function_target_feature_added::will_become_unsafe(...);'
 
 [["./test_crates/safe_vs_unsafe_extern_fn/"]]
