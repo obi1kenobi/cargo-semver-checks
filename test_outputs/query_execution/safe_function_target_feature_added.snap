@@ -18,19 +18,5 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
-    {
-      "feature": List([
-        String("sse2"),
-      ]),
-      "name": String("will_become_unsafe"),
-      "path": List([
-        String("safe_function_target_feature_added"),
-        String("will_become_unsafe"),
-      ]),
-      "span_begin_line": Uint64(23),
-      "span_end_line": Uint64(25),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
   ],
 }

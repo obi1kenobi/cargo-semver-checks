@@ -11,14 +11,8 @@ pub fn compute(x: u32) -> u32 {
     x + 1
 }
 
-/// Proof that our witness demonstrates breakage:
-/// ```compile_fail
-/// fn witness() {
-///     let _: Box<dyn Fn(_) -> _> = Box::new(
-///         safe_function_target_feature_added::will_become_unsafe
-///     );
-/// }
-/// ```
+// Making a safe function `unsafe` is a breaking change regardless of `#[target_feature]`.
+// We have a lint for that, let it take precedence.
 #[target_feature(enable = "sse2")]
 pub unsafe fn will_become_unsafe(x: u32) -> u32 {
     x / 2

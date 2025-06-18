@@ -10,14 +10,6 @@ pub fn compute(x: u32) -> u32 {
     x + 1
 }
 
-/// Proof that our intended witness is valid on the original version:
-/// ```rust
-/// fn witness() {
-///     let _: Box<dyn Fn(_) -> _> = Box::new(
-///         safe_function_target_feature_added::will_become_unsafe
-///     );
-/// }
-/// ```
 pub fn will_become_unsafe(x: u32) -> u32 {
     x / 2
 }

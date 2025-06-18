@@ -14,6 +14,10 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
 
+                        # If the function has since become unsafe, that's already breaking.
+                        # Let that lint take precedence.
+                        unsafe @filter(op: "!=", value: ["$true"])
+
                         requires_feature @fold @transform(op: "count") @filter(op: "!=", value: ["$zero"]) {
                             explicit @filter(op: "=", value: ["$true"])
                             feature: name @output
@@ -56,6 +60,6 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A safe function now requires CPU target features to be enabled. It no longer implements Fn() traits as a result.",
-    per_result_error_template: Some("function {{join \"::\" path}} requires {{join \", \" feature}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{join \"::\" path}} requires {{join \", \" feature}} in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
