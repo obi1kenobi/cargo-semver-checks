@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "inherent_method_requires_more_target_features"
+name = "unsafe_inherent_method_requires_more_target_features"
 version = "0.1.0"
 edition = "2021"
 
