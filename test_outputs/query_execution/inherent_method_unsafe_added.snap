@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/inherent_method_unsafe_added/": [
@@ -41,6 +40,50 @@ snapshot_kind: text
       ]),
       "path": List([
         String("inherent_method_unsafe_added"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/safe_inherent_method_target_feature_added/": [
+    {
+      "method_name": String("become_unsafe"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "non_matching_span_begin_line": List([
+        Uint64(8),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(8),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("safe_inherent_method_target_feature_added"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("safe_add_feature"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "non_matching_span_begin_line": List([
+        Uint64(15),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(15),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("safe_inherent_method_target_feature_added"),
         String("Foo"),
       ]),
       "span_begin_line": Uint64(10),
