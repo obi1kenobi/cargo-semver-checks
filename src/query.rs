@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use ron::extensions::Extensions;
 use serde::{Deserialize, Serialize};
-use trustfall::TransparentValue;
+use trustfall::{FieldValue, TransparentValue};
 
 use crate::ReleaseType;
 
@@ -311,6 +311,37 @@ pub struct WitnessQuery {
     /// specified as [`InheritedValue::Constant`]s.
     #[serde(default)]
     pub arguments: BTreeMap<String, InheritedValue>,
+}
+
+impl WitnessQuery {
+    /// Returns [`arguments`](Self::arguments), mapping the [`InheritedValue`]s from
+    /// the given output map, which is the map of output [`FieldValue`]s from the previous query.
+    ///
+    /// Fails with an [`anyhow::Error`] if any requested inheritance keys are missing.
+    pub fn inherit_arguments_from(
+        &self,
+        source_map: &BTreeMap<std::sync::Arc<str>, FieldValue>,
+    ) -> anyhow::Result<BTreeMap<String, TransparentValue>> {
+        let mut mapped = BTreeMap::new();
+
+        for (key, value) in self.arguments.iter() {
+            let mapped_value = match value {
+                // Inherit an output
+                InheritedValue::Inherited { inherit } => source_map
+                    .get(inherit.as_str())
+                    .cloned()
+                    .map(Into::into)
+                    .ok_or(anyhow::anyhow!(
+                        "inherited output key `{inherit}` does not exist"
+                    ))?,
+                // Set a constant
+                InheritedValue::Constant(value) => value.clone(),
+            };
+            mapped.insert(key.clone(), mapped_value);
+        }
+
+        Ok(mapped)
+    }
 }
 
 /// Represents either a value inherited from a previous query, or a
