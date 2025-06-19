@@ -329,7 +329,7 @@ impl WitnessQuery {
                 // Inherit an output
                 InheritedValue::Inherited { inherit } => source_map
                     .get(inherit.as_str())
-                    .map(Clone::clone)
+                    .cloned()
                     .map(Into::into)
                     .ok_or(anyhow::anyhow!(
                         "inherited output key `{inherit}` does not exist"
