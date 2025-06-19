@@ -315,41 +315,29 @@ pub struct WitnessQuery {
 
 impl WitnessQuery {
     /// Returns [`arguments`](Self::arguments), mapping the [`InheritedValue`]s from
-    /// the given argument and output maps. The argument map is the map of arguments
-    /// used in the previous query. The output map is the map of output [`FieldValue`]s
-    /// from the previous query.
+    /// the given output map, which is the map of output [`FieldValue`]s from the previous query.
     ///
-    /// Fails with an [`anyhow::Error`] if the requested inheritance keys is missing.
+    /// Fails with an [`anyhow::Error`] if any requested inheritance keys are missing.
     pub fn inherit_arguments_from(
-        self,
-        argument_map: &BTreeMap<String, TransparentValue>,
-        output_map: &BTreeMap<std::sync::Arc<str>, FieldValue>,
+        &self,
+        source_map: &BTreeMap<std::sync::Arc<str>, FieldValue>,
     ) -> anyhow::Result<BTreeMap<String, TransparentValue>> {
         let mut mapped = BTreeMap::new();
 
-        // Ideally this should be an iterator method chain, not a for loop
-        // but this works for now
-        for (key, value) in self.arguments {
+        for (key, value) in self.arguments.iter() {
             let mapped_value = match value {
-                // Inherit an argument
-                InheritedValue::Inherited { inherit } => argument_map
-                    .get(&inherit)
-                    .map(Clone::clone) // TODO: Remove this clone if possible
-                    .ok_or(anyhow::anyhow!(
-                        "inherited argument key `{inherit}` does not exist"
-                    ))?,
                 // Inherit an output
-                InheritedValue::InheritOutput { from } => output_map
-                    .get(from.as_str())
-                    .map(Clone::clone) // TODO: Remove this clone if possible
+                InheritedValue::Inherited { inherit } => source_map
+                    .get(inherit.as_str())
+                    .map(Clone::clone)
                     .map(Into::into)
                     .ok_or(anyhow::anyhow!(
-                        "inherited output key `{from}` does not exist"
+                        "inherited output key `{inherit}` does not exist"
                     ))?,
                 // Set a constant
-                InheritedValue::Constant(value) => value,
+                InheritedValue::Constant(value) => value.clone(),
             };
-            mapped.insert(key, mapped_value);
+            mapped.insert(key.clone(), mapped_value);
         }
 
         Ok(mapped)
@@ -363,8 +351,6 @@ impl WitnessQuery {
 pub enum InheritedValue {
     /// Inherit the value from the previous output whose name is the given `String`.
     Inherited { inherit: String },
-    /// Inherit the value from the previous lint's output by whichever @output name is the given `String`.
-    InheritOutput { from: String },
     /// Provide the constant value specified here.
     Constant(TransparentValue),
 }
