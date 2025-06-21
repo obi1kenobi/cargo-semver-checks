@@ -4,7 +4,6 @@
 #[target_feature(enable = "avx2")]
 pub fn safe_function() {}
 
-
 #[target_feature(enable = "avx")]
 #[target_feature(enable = "avx2")]
 fn private_function() {}
