@@ -5,26 +5,14 @@ expression: "&query_execution_results"
 {
   "./test_crates/trait_method_target_feature_removed/": [
     {
-      "feature": String("avx2"),
+      "feature": String("bmi1"),
       "method_name": String("feature_removed"),
       "path": List([
         String("trait_method_target_feature_removed"),
-        String("TraitA"),
+        String("PublicApiSealed"),
       ]),
-      "span_begin_line": Uint64(21),
-      "span_end_line": Uint64(21),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
-      "feature": String("avx"),
-      "method_name": String("partial_feature_removed"),
-      "path": List([
-        String("trait_method_target_feature_removed"),
-        String("TraitE"),
-      ]),
-      "span_begin_line": Uint64(33),
-      "span_end_line": Uint64(33),
+      "span_begin_line": Uint64(55),
+      "span_end_line": Uint64(55),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -33,10 +21,10 @@ expression: "&query_execution_results"
       "method_name": String("feature_removed"),
       "path": List([
         String("trait_method_target_feature_removed"),
-        String("FeatureRemovedAndPubApiSealed"),
+        String("NoLongerPublicApiSealed"),
       ]),
-      "span_begin_line": Uint64(86),
-      "span_end_line": Uint64(86),
+      "span_begin_line": Uint64(67),
+      "span_end_line": Uint64(67),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

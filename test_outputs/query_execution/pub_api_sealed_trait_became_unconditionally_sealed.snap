@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/pub_api_sealed_trait_became_unconditionally_sealed/": [
@@ -88,6 +87,19 @@ snapshot_kind: text
       ]),
       "span_begin_line": Uint64(38),
       "span_end_line": Uint64(40),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_target_feature_removed/": [
+    {
+      "name": String("FeatureRemovedFromPubApiSealedToUnconditional"),
+      "path": List([
+        String("trait_method_target_feature_removed"),
+        String("FeatureRemovedFromPubApiSealedToUnconditional"),
+      ]),
+      "span_begin_line": Uint64(91),
+      "span_end_line": Uint64(93),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
