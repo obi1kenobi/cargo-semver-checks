@@ -811,6 +811,7 @@ mod tests {
                 | "safe_function_target_feature_added"
                 | "safe_inherent_method_target_feature_added"
                 | "safe_function_requires_more_target_features"
+                | "safe_inherent_method_requires_more_target_features"
                 | "unsafe_function_requires_more_target_features"
                 | "unsafe_function_target_feature_added"
                 | "unsafe_inherent_method_requires_more_target_features"
@@ -853,6 +854,7 @@ mod tests {
                 "safe_function_target_feature_added"
                     | "safe_inherent_method_target_feature_added"
                     | "safe_function_requires_more_target_features"
+                    | "safe_inherent_method_requires_more_target_features"
             ) {
                 // These queries don't have any results currently,
                 // since their results are obscured by the bug above.
@@ -1349,6 +1351,7 @@ add_lints!(
     function_requires_different_const_generic_params,
     function_requires_different_generic_type_params,
     safe_function_requires_more_target_features,
+    safe_inherent_method_requires_more_target_features,
     unsafe_function_requires_more_target_features,
     function_unsafe_added,
     global_value_marked_deprecated,
