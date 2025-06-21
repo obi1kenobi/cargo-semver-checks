@@ -15,8 +15,8 @@ dir_is_newer_than_file() {
     [[ ! -e $file ]] || [[ $(find "$dir" -newer "$file" -exec sh -c 'printf found; kill "$PPID"' \;) ]]
 }
 
-export CARGO_TARGET_DIR=/tmp/test_crates
-RUSTDOC_OUTPUT_DIR="$CARGO_TARGET_DIR/doc"
+CARGO_TARGET_DIR_BASE=/tmp/test_crates
+export CARGO_TARGET_DIR="$CARGO_TARGET_DIR_BASE"
 
 # Get the top-level directory of the project (the repo):
 # - If the user has cloned the git repo, ask git.
@@ -68,6 +68,7 @@ generate_rustdocs() {
     local crate_dir="$TOPLEVEL/test_crates/$crate"
     local pair="${crate%%/*}"
     local target="$TARGET_DIR/$crate/rustdoc.json"
+    local output_dir="$CARGO_TARGET_DIR/doc"
 
     if [[ -z $always_update ]] && ! dir_is_newer_than_file "$crate_dir" "$target"; then
         printf 'No updates needed for %s.\n' "$crate"
@@ -85,7 +86,7 @@ generate_rustdocs() {
 
     RUSTC_BOOTSTRAP=1 $RUSTDOC_CMD -- -Zunstable-options --document-private-items --document-hidden-items --cap-lints "$CAP_LINTS" --output-format=json
     mkdir -p "$TARGET_DIR/$crate"
-    mv "$RUSTDOC_OUTPUT_DIR/$pair.json" "$target"
+    mv "$output_dir/$pair.json" "$target"
     popd >/dev/null
 }
 
@@ -99,7 +100,7 @@ generate_metadata() {
     $METADATA_CMD >"$metadata"
     popd >/dev/null
 }
-export TOPLEVEL TARGET_DIR RUSTDOC_OUTPUT_DIR RUSTDOC_CMD METADATA_CMD PLACEHOLDER_DIR always_update
+export TOPLEVEL TARGET_DIR RUSTDOC_CMD METADATA_CMD PLACEHOLDER_DIR always_update
 export -f generate_rustdocs generate_metadata dir_is_newer_than_file
 
 crate_jobs=()
@@ -117,8 +118,17 @@ for crate_pair; do
     fi
 done
 
-printf '%s\n' "${crate_jobs[@]}" | xargs -n1 -P "$NUM_JOBS" -I{} bash -c 'generate_rustdocs "$@"' _ {}
+for i in $(seq 0 $((NUM_JOBS - 1))); do
+    (
+        export CARGO_TARGET_DIR="${CARGO_TARGET_DIR_BASE}/worker${i}"
+        for ((j=i; j<${#crate_jobs[@]}; j+=NUM_JOBS)); do
+            generate_rustdocs "${crate_jobs[j]}"
+        done
+    ) &
+done
+wait
 
+export CARGO_TARGET_DIR="$CARGO_TARGET_DIR_BASE"
 for crate in "${crate_jobs[@]}"; do
     generate_metadata "$crate"
 done
