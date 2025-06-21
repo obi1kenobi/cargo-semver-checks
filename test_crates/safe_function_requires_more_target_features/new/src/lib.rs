@@ -4,9 +4,6 @@
 #[target_feature(enable = "avx2")]
 pub fn safe_function() {}
 
-#[target_feature(enable = "avx")]
-#[target_feature(enable = "avx2")]
-pub fn second_function() {}
 
 #[target_feature(enable = "avx")]
 #[target_feature(enable = "avx2")]
