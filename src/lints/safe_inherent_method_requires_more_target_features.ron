@@ -81,7 +81,7 @@ SemverQuery(
         "false": false,
         "zero": 0,
     },
-    error_message: "A method or associated function now requires additional CPU target features to be enabled.",
+    error_message: "A method or associated function now requires additional CPU target features to be enabled. Calling it without an unsafe block now requires enabling that additional function.",
     per_result_error_template: Some("{{name}}::{{method_name}} requires {{new_feature}} in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
