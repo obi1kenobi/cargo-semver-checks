@@ -15,7 +15,7 @@ pub trait TraitB {
 }
 
 pub trait TraitE {
-    #[target_feature(enable = "avx", enable = "sse2")]
+    #[target_feature(enable = "avx", enable = "bmi1")]
     unsafe fn partial_feature_removed(&self) {}
 }
 
