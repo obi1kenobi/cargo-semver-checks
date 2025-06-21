@@ -1,9 +1,9 @@
 SemverQuery(
-    id: "trait_method_target_feature_removed",
-    human_readable_name: "pub trait method target feature removed",
-    description: "A method in a public, non-sealed trait no longer requires some #[target_feature].",
+    id: "pub_api_sealed_trait_method_target_feature_removed",
+    human_readable_name: "method in public API sealed trait had target feature removed",
+    description: "A method in a public API sealed trait no longer requires some #[target_feature].",
     required_update: Major,
-    lint_level: Deny,
+    lint_level: Warn,
     reference_link: Some("https://github.com/rust-lang/rust/issues/139368"),
     query: r#"
     {
@@ -12,7 +12,8 @@ SemverQuery(
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        public_api_sealed @filter(op: "=", value: ["$false"])
+                        public_api_sealed @filter(op: "=", value: ["$true"])
+                        unconditionally_sealed @filter(op: "=", value: ["$false"])
 
                         importable_path {
                             path @output @tag
