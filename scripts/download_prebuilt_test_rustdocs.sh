@@ -35,10 +35,13 @@ cd "$TOPLEVEL"
 
 TRIPLE="$(rustc -vV | grep '^host:' | awk '{print $2}')"
 VERSION="$(rustc --version | awk '{print $2}')"
+
+echo "Computing test data hash..."
 HASH="$(scripts/hash_test_rustdocs_inputs.sh)"
 
 ARTIFACT_NAME="test-rustdocs-$HASH-$TRIPLE-$VERSION"
 
+echo "Looking up prebuilt artifact $ARTIFACT_NAME ..."
 RUNS_JSON="$(curl -s "https://api.github.com/repos/obi1kenobi/cargo-semver-checks/actions/workflows/ci.yml/runs?branch=main&status=success&per_page=1")"
 RUN_ID="$(echo "$RUNS_JSON" | jq -r '.workflow_runs[0].id')"
 
@@ -52,9 +55,16 @@ fi
 
 mkdir -p localdata
 
+echo "Downloading artifact..."
 gh api "$ARTIFACT_URL" >localdata/artifact.zip
 
 rm -rf localdata/test_data
 mkdir -p localdata/test_data/
 unzip -q localdata/artifact.zip -d localdata/test_data/
+
+# Fake the mtime, since we know the test data is new enough: it matched the hash.
+find localdata/test_data -exec touch {} \;
+
 rm localdata/artifact.zip
+
+echo "Done!"
