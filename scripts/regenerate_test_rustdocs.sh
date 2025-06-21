@@ -51,17 +51,20 @@ else
     always_update=1
 fi
 
-PLACEHOLDER_DIR="$TARGET_DIR/placeholder"
-rm -rf "$PLACEHOLDER_DIR"
-mkdir -p "$TARGET_DIR"
-pushd "$TARGET_DIR" >/dev/null
-cargo new --lib placeholder
-cd placeholder
-cargo add --path ../../../test_crates/template/old/
-popd >/dev/null
-
 # Determine parallelism. Respect $NUM_JOBS if provided.
 NUM_JOBS=${NUM_JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)}
+
+PLACEHOLDER_DIR_BASE="$TARGET_DIR/placeholder"
+rm -rf "${PLACEHOLDER_DIR_BASE}"*
+mkdir -p "$TARGET_DIR"
+pushd "$TARGET_DIR" >/dev/null
+for i in $(seq 0 $((NUM_JOBS - 1))); do
+    cargo new --lib "placeholder${i}"
+    pushd "placeholder${i}" >/dev/null
+    cargo add --path ../../../test_crates/template/old/
+    popd >/dev/null
+done
+popd >/dev/null
 
 generate_rustdocs() {
     local crate="$1"
@@ -100,7 +103,7 @@ generate_metadata() {
     $METADATA_CMD >"$metadata"
     popd >/dev/null
 }
-export TOPLEVEL TARGET_DIR RUSTDOC_CMD METADATA_CMD PLACEHOLDER_DIR always_update
+export TOPLEVEL TARGET_DIR RUSTDOC_CMD METADATA_CMD PLACEHOLDER_DIR_BASE always_update
 export -f generate_rustdocs generate_metadata dir_is_newer_than_file
 
 crate_jobs=()
@@ -127,10 +130,14 @@ for i in $(seq 0 $((NUM_JOBS - 1))); do
     ) &
 done
 wait
-
-export CARGO_TARGET_DIR="$CARGO_TARGET_DIR_BASE"
-for crate in "${crate_jobs[@]}"; do
-    generate_metadata "$crate"
+for i in $(seq 0 $((NUM_JOBS - 1))); do
+    (
+        export PLACEHOLDER_DIR="${PLACEHOLDER_DIR_BASE}${i}"
+        for ((j=i; j<${#crate_jobs[@]}; j+=NUM_JOBS)); do
+            generate_metadata "${crate_jobs[j]}"
+        done
+    ) &
 done
+wait
 
-unset CARGO_TARGET_DIR
+unset CARGO_TARGET_DIR PLACEHOLDER_DIR
