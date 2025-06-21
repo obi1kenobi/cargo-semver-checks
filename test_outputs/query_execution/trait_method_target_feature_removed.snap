@@ -1,0 +1,33 @@
+---
+source: src/query.rs
+assertion_line: 829
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_target_feature_removed/": [
+    {
+      "feature": String("avx2"),
+      "method_name": String("feature_removed"),
+      "path": List([
+        String("trait_method_target_feature_removed"),
+        String("TraitA"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "feature": String("avx"),
+      "method_name": String("partial_feature_removed"),
+      "path": List([
+        String("trait_method_target_feature_removed"),
+        String("TraitE"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
