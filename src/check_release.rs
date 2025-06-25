@@ -11,6 +11,8 @@ use rayon::prelude::*;
 use trustfall::{FieldValue, TransparentValue};
 
 use crate::data_generation::DataStorage;
+use crate::witness_gen;
+use crate::Witness;
 use crate::{
     query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType, WitnessGeneration,
@@ -341,6 +343,34 @@ pub(super) fn run_check_release(
             Ok((semver_query, time_to_decide, results))
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
+
+    if let Some(ref _witness_dir) = witness_generation.witness_directory {
+        let _witness_results = all_results
+            .par_iter()
+            .map(
+                |(semver_query, _, lint_results)| match semver_query.witness {
+                    // Don't bother running the witness query unless both a witness query and template exist
+                    Some(Witness {
+                        witness_template: Some(_),
+                        witness_query: Some(ref witness_query),
+                        ..
+                    }) => (
+                        semver_query,
+                        witness_gen::run_witness_queries(&adapter, witness_query, lint_results),
+                    ),
+                    // If no witness query exists, we still want to forward the existing output
+                    _ => (
+                        semver_query,
+                        lint_results
+                            .clone()
+                            .into_iter()
+                            .map(Result::Ok)
+                            .collect_vec(),
+                    ),
+                },
+            )
+            .collect::<Vec<_>>();
+    }
 
     let mut results_with_errors = vec![];
     let mut results_with_warnings = vec![];
