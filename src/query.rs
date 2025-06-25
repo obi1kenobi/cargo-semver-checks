@@ -822,7 +822,7 @@ mod tests {
             return;
         }
 
-        // TODO: Remove this when Rust 1.88 is no longer supported by cargo-semver-checks.
+        // TODO: Remove this when Rust 1.89 is no longer supported by cargo-semver-checks.
         // A change in the rustdoc JSON representation for `#[must_use]` in that version
         // made the lint logic not match the attribute.
         if matches!(
@@ -834,9 +834,9 @@ mod tests {
                 | "trait_must_use_added"
                 | "union_must_use_added"
         ) && rustc_version::version()
-            .is_ok_and(|version| version.major == 1 && version.minor == 88)
+            .is_ok_and(|version| version.major == 1 && version.minor == 89)
         {
-            eprintln!("skipping query execution test for lint `{query_name}` because its rustdoc JSON representation isn't actually legal Rust");
+            eprintln!("skipping query execution test for lint `{query_name}` because its rustdoc JSON representation in Rust 1.89 isn't actually legal Rust");
             return;
         }
 
