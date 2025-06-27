@@ -1,3 +1,5 @@
+#![no_std]
+
 /// Now hidden from docs
 #[doc(hidden)]
 #[macro_export]

@@ -1,3 +1,5 @@
+#![no_std]
+
 // These macros will be marked deprecated
 #[macro_export]
 macro_rules! macro_to_deprecated {

@@ -1,4 +1,6 @@
-use std::convert::AsRef;
+#![no_std]
+
+use core::convert::AsRef;
 
 // Method of public trait becomes safe, should get reported.
 pub trait PubTrait {

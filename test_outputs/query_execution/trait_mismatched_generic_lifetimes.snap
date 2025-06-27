@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/trait_mismatched_generic_lifetimes/": [
@@ -16,8 +17,8 @@ expression: "&query_execution_results"
         String("trait_mismatched_generic_lifetimes"),
         String("NotGeneric"),
       ]),
-      "span_begin_line": Uint64(17),
-      "span_end_line": Uint64(17),
+      "span_begin_line": Uint64(19),
+      "span_end_line": Uint64(19),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -36,8 +37,8 @@ expression: "&query_execution_results"
         String("trait_mismatched_generic_lifetimes"),
         String("GainsLifetimes"),
       ]),
-      "span_begin_line": Uint64(19),
-      "span_end_line": Uint64(19),
+      "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(21),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -56,8 +57,8 @@ expression: "&query_execution_results"
         String("trait_mismatched_generic_lifetimes"),
         String("LosesLifetimes"),
       ]),
-      "span_begin_line": Uint64(21),
-      "span_end_line": Uint64(21),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -74,8 +75,8 @@ expression: "&query_execution_results"
         String("trait_mismatched_generic_lifetimes"),
         String("StopsBeingGeneric"),
       ]),
-      "span_begin_line": Uint64(23),
-      "span_end_line": Uint64(23),
+      "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(25),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

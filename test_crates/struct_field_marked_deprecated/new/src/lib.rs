@@ -1,14 +1,16 @@
+#![no_std]
+
 /// Normal case, should trigger the lint
 pub struct Plain {
     #[deprecated]
     pub field_becomes_deprecated: i64,
     #[deprecated = "This field will be removed in the next major version"]
-    pub field_with_deprecation_message: String,
+    pub field_with_deprecation_message: &'static str,
 }
 
 pub struct Tuple(
     #[deprecated] pub i64,
-    #[deprecated = "Use new_tuple_field instead"] pub String,
+    #[deprecated = "Use new_tuple_field instead"] pub &'static str,
 );
 
 /// Both the struct and its field here will become `#[deprecated]`.
@@ -18,14 +20,14 @@ pub struct BothBecomeDeprecated {
     #[deprecated]
     pub field_and_struct_deprecated: i64,
     #[deprecated = "Use new_api_field instead"]
-    pub field_with_message_struct_deprecated: String,
+    pub field_with_message_struct_deprecated: &'static str,
 }
 
 // Only the struct becomes deprecated, fields remain normal
 #[deprecated = "Use NewStruct instead"]
 pub struct StructBecomesDeprecated {
     pub field_stays_public: i64,
-    pub field_remains_undeprecated: String,
+    pub field_remains_undeprecated: &'static str,
 }
 
 // Test doc(hidden) interactions with deprecation
@@ -38,7 +40,7 @@ pub struct DocHiddenInteractions {
     // Gets both attributes at once
     #[doc(hidden)]
     #[deprecated]
-    pub field_becomes_both: String,
+    pub field_becomes_both: &'static str,
 
     // Only gets deprecated - should trigger the lint
     #[deprecated = "This field is deprecated"]
@@ -55,7 +57,7 @@ pub struct DocHiddenInteractions {
 
     // No change - stays deprecated - should not trigger the lint
     #[deprecated]
-    pub stays_deprecated: String,
+    pub stays_deprecated: &'static str,
 
     // Control field - no changes
     pub untouched_field: bool,
@@ -67,7 +69,7 @@ pub struct DocHiddenStruct {
     #[deprecated]
     pub field_becomes_deprecated: i32,
     #[deprecated = "Use new_api instead"]
-    pub another_field_deprecated: String,
+    pub another_field_deprecated: &'static str,
     pub untouched_field: bool,
 }
 
@@ -79,7 +81,7 @@ pub struct PrivateFieldCases {
 
     #[doc(hidden)]
     #[deprecated]
-    becomes_both_but_private: String,
+    becomes_both_but_private: &'static str,
 
     #[deprecated]
     normal_becomes_deprecated: bool,
@@ -93,5 +95,5 @@ struct PrivateStructCase {
 
     #[doc(hidden)]
     #[deprecated]
-    pub becomes_both_attrs: String,
+    pub becomes_both_attrs: &'static str,
 }

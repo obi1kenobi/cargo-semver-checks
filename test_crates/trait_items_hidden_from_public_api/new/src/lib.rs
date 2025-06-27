@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait PublicAPISealed {
     /// Changing the bounds on a hidden type of a public API sealed trait is non breaking
     #[doc(hidden)]

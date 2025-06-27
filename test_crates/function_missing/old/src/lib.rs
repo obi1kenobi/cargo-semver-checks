@@ -1,3 +1,5 @@
+#![no_std]
+
 pub fn will_be_removed_fn() {}
 
 pub mod my_pub_mod {

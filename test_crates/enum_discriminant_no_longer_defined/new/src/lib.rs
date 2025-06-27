@@ -1,3 +1,5 @@
+#![no_std]
+
 // It's not allowed to use `as isize` to cast another crate's enum when
 // the enum contains a non-exhaustive variant:
 //

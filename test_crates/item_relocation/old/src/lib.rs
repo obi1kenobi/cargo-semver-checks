@@ -1,3 +1,5 @@
+#![no_std]
+
 /// Testing that items exposed via `pub use` aren't falsely flagged as removed
 /// when they are relocated.
 ///

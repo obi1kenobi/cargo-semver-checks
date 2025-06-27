@@ -1,3 +1,5 @@
+#![no_std]
+
 // Public unsafe trait becomes safe, should get reported.
 pub unsafe trait TraitBecomesSafe {}
 

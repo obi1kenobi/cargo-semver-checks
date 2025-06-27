@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "enum_no_longer_non_exhaustive"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

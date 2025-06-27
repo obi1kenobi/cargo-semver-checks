@@ -1,3 +1,5 @@
+#![no_std]
+
 // Test Cases where #[doc(hidden)] is neither added or removed
 pub struct StructA {}
 

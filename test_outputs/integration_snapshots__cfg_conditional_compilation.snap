@@ -11,7 +11,6 @@ info:
   env:
     CARGO_TERM_COLOR: never
     RUSTDOCFLAGS: "--cfg custom"
-    RUSTFLAGS: "--cfg custom"
     RUST_BACKTRACE: "0"
 ---
 success: false
@@ -26,7 +25,7 @@ A publicly-visible enum without #[non_exhaustive] has a new variant.
        impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/enum_variant_added.ron
 
 Failed in:
-  variant Data:Bool in [ROOT]/test_crates/cfg_conditional_compilation/new/src/lib.rs:5
+  variant Data:Bool in [ROOT]/test_crates/cfg_conditional_compilation/new/src/lib.rs:7
 
 --- failure struct_missing: pub struct removed or renamed ---
 
@@ -36,7 +35,7 @@ A publicly-visible struct cannot be imported by its prior path. A `pub use` may 
        impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/struct_missing.ron
 
 Failed in:
-  struct cfg_conditional_compilation::Example, previously in file [ROOT]/test_crates/cfg_conditional_compilation/old/src/lib.rs:2
+  struct cfg_conditional_compilation::Example, previously in file [ROOT]/test_crates/cfg_conditional_compilation/old/src/lib.rs:4
 
 ----- stderr -----
     Building cfg_conditional_compilation v0.1.0 (current)
@@ -47,8 +46,8 @@ Failed in:
        Built [TIME] (baseline)
      Parsing cfg_conditional_compilation v0.1.0 (baseline)
       Parsed [TIME] (baseline)
-    Checking cfg_conditional_compilation v0.1.0 -> v0.1.0 (no change)
-     Checked [TIME] [TOTAL] checks: [PASS] pass, 2 fail, 0 warn, 0 skip
+    Checking cfg_conditional_compilation v0.1.0 -> v0.1.0 (no change; assume minor)
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 2 fail, 0 warn, [SKIP] skip
 
      Summary semver requires new major version: 2 major and 0 minor checks failed
     Finished [TIME] cfg_conditional_compilation

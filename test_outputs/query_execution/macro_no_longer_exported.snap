@@ -1,16 +1,17 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/declarative_macro_missing/": [
     {
       "name": String("will_no_longer_be_exported"),
       "non_exported_span_begin_line": List([
-        Uint64(1),
+        Uint64(3),
       ]),
       "non_exported_span_end_line": List([
-        Uint64(3),
+        Uint64(5),
       ]),
       "non_exported_span_filename": List([
         String("src/lib.rs"),
@@ -19,7 +20,7 @@ expression: "&query_execution_results"
         String("declarative_macro_missing"),
         String("will_no_longer_be_exported"),
       ]),
-      "span_begin_line": Uint64(7),
+      "span_begin_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
     },
   ],
@@ -27,10 +28,10 @@ expression: "&query_execution_results"
     {
       "name": String("example_macro"),
       "non_exported_span_begin_line": List([
-        Uint64(2),
+        Uint64(4),
       ]),
       "non_exported_span_end_line": List([
-        Uint64(6),
+        Uint64(8),
       ]),
       "non_exported_span_filename": List([
         String("src/lib.rs"),
@@ -39,18 +40,18 @@ expression: "&query_execution_results"
         String("macro_no_longer_exported"),
         String("example_macro"),
       ]),
-      "span_begin_line": Uint64(2),
+      "span_begin_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
     },
     {
       "name": String("some_macro"),
       "non_exported_span_begin_line": List([
-        Uint64(29),
-        Uint64(36),
-      ]),
-      "non_exported_span_end_line": List([
         Uint64(31),
         Uint64(38),
+      ]),
+      "non_exported_span_end_line": List([
+        Uint64(33),
+        Uint64(40),
       ]),
       "non_exported_span_filename": List([
         String("src/lib.rs"),
@@ -60,7 +61,7 @@ expression: "&query_execution_results"
         String("macro_no_longer_exported"),
         String("some_macro"),
       ]),
-      "span_begin_line": Uint64(26),
+      "span_begin_line": Uint64(28),
       "span_filename": String("src/lib.rs"),
     },
   ],
@@ -68,10 +69,10 @@ expression: "&query_execution_results"
     {
       "name": String("becomes_non_exported"),
       "non_exported_span_begin_line": List([
-        Uint64(36),
+        Uint64(38),
       ]),
       "non_exported_span_end_line": List([
-        Uint64(40),
+        Uint64(42),
       ]),
       "non_exported_span_filename": List([
         String("src/lib.rs"),
@@ -80,7 +81,7 @@ expression: "&query_execution_results"
         String("macro_now_doc_hidden"),
         String("becomes_non_exported"),
       ]),
-      "span_begin_line": Uint64(36),
+      "span_begin_line": Uint64(38),
       "span_filename": String("src/lib.rs"),
     },
   ],

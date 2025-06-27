@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait PublicAPISealed {
     /// Removing an associated type of a public API sealed trait is not breaking
     #[doc(hidden)]

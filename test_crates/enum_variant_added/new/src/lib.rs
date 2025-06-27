@@ -1,5 +1,13 @@
+#![no_std]
+
 pub enum EnumWithNewVariant {
     OldVariant,
+    
+    OldStructVariant {
+        x: i64,
+    },
+
+    OldTupleVariant(i64),
 
     NewVariant,
 }

@@ -1,0 +1,32 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_target_feature_removed/": [
+    {
+      "feature": String("bmi1"),
+      "method_name": String("feature_removed"),
+      "path": List([
+        String("trait_method_target_feature_removed"),
+        String("PublicApiSealed"),
+      ]),
+      "span_begin_line": Uint64(55),
+      "span_end_line": Uint64(55),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "feature": String("bmi1"),
+      "method_name": String("feature_removed"),
+      "path": List([
+        String("trait_method_target_feature_removed"),
+        String("NoLongerPublicApiSealed"),
+      ]),
+      "span_begin_line": Uint64(67),
+      "span_end_line": Uint64(67),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

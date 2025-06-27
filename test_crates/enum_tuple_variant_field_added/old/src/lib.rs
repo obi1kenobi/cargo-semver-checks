@@ -1,3 +1,5 @@
+#![no_std]
+
 pub enum PublicEnum {
     // The basic case - should get reported
     TupleVariantWithFieldAdded(i32, u8),

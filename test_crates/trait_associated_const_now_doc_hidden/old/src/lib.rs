@@ -1,3 +1,5 @@
+#![no_std]
+
 // Basic test case
 pub trait PubTraitA {
     const CONST_A: u8 = 0;

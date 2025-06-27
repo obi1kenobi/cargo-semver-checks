@@ -1,3 +1,5 @@
+#![no_std]
+
 mod internal {
     pub struct NewName;
 

@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait Example<const N: usize, const M: usize = 8> {}
 
 pub trait NotGenericAnymore<const N: usize> {}

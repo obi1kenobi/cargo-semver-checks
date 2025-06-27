@@ -13,7 +13,7 @@ A publicly-visible struct cannot be imported by its prior path. A `pub use` may 
        impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/struct_missing.ron
 
 Failed in:
-  struct semver_trick_self_referential::Example, previously in file [ROOT]/test_crates/semver_trick_self_referential/old/src/lib.rs:1
+  struct semver_trick_self_referential::Example, previously in file [ROOT]/test_crates/semver_trick_self_referential/old/src/lib.rs:3
 
 --- stderr ---
     Building semver_trick_self_referential v0.1.1 (current)

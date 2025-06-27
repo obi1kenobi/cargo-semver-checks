@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait TraitWithConstToBeDeprecated {
     // These constants are now deprecated and should be reported
     #[deprecated]

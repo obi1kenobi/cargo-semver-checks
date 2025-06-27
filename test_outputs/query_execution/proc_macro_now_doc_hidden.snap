@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/proc_macro_now_doc_hidden/": [
@@ -11,8 +12,8 @@ expression: "&query_execution_results"
         String("proc_macro_now_doc_hidden"),
         String("logging"),
       ]),
-      "span_begin_line": Uint64(6),
-      "span_end_line": Uint64(8),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -22,8 +23,8 @@ expression: "&query_execution_results"
         String("proc_macro_now_doc_hidden"),
         String("sql"),
       ]),
-      "span_begin_line": Uint64(13),
-      "span_end_line": Uint64(15),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(17),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -33,8 +34,8 @@ expression: "&query_execution_results"
         String("proc_macro_now_doc_hidden"),
         String("MyDerive"),
       ]),
-      "span_begin_line": Uint64(20),
-      "span_end_line": Uint64(22),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(24),
       "span_filename": String("src/lib.rs"),
     },
   ],

@@ -1,3 +1,5 @@
+#![no_std]
+
 pub const GlobalConstantA: i32 = 0;
 pub const GlobalConstantB: i32 = 0;
 

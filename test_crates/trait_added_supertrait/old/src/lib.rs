@@ -1,3 +1,7 @@
+//! Do not add `#![no_std]` here! This crate contains a test
+//! that ensures that switching between referring to the std and core exports of the same trait
+//! is a no-op and does not trigger lints.
+
 pub trait TraitOne {}
 pub trait TraitTwo {}
 

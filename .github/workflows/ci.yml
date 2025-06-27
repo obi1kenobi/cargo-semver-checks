@@ -219,7 +219,7 @@ jobs:
         #
         #            Also make sure to update the MSRV in the cargo-semver-checks-action CI:
         #            https://github.com/obi1kenobi/cargo-semver-checks-action/blob/main/.github/workflows/test-action.yml#L18
-        toolchain: ["1.83", "1.84", "stable", "beta"]
+        toolchain: ["1.85", "1.86", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -297,9 +297,9 @@ jobs:
           workspaces: 'semver'
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.7
+        uses: mozilla-actions/sccache-action@v0.0.9
 
-      - name: build and cache
+      - name: build
         run: |
           cd semver
 
@@ -310,11 +310,13 @@ jobs:
           mkdir ../bins
           mv target/debug/cargo-semver-checks ../bins/cargo-semver-checks
 
-      - name: cache binary
-        uses: actions/cache/save@v4
+      - name: upload binary
+        uses: actions/upload-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
   build-binary-windows:
     # It could be easily combined into a single job with build-binary using the
@@ -347,9 +349,9 @@ jobs:
           workspaces: 'semver'
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.7
+        uses: mozilla-actions/sccache-action@v0.0.9
 
-      - name: build and cache
+      - name: build
         run: |
           cd semver
 
@@ -360,11 +362,12 @@ jobs:
           mkdir ..\bins
           mv target\debug\cargo-semver-checks.exe ..\bins\cargo-semver-checks.exe
 
-      - name: cache binary
-        uses: actions/cache/save@v4
+      - name: upload binary
+        uses: actions/upload-artifact@v4
         with:
+          name: cargo-semver-checks-windows
           path: bins\
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+
 
   cross-version-caching:
     # Ensure that cached rustdoc JSON files from an mismatched rustdoc version
@@ -375,8 +378,8 @@ jobs:
     needs:
       - build-binary
     env:
-      OLDER_RUST: "1.83"  # Rust 1.83 uses rustdoc v35
-      NEWER_RUST: "1.84"  # Rust 1.84 uses rustdoc v36
+      OLDER_RUST: "1.85"  # Rust 1.85 uses rustdoc v37
+      NEWER_RUST: "1.86"  # Rust 1.86 uses rustdoc v39
     steps:
       - name: Put env vars in outputs
         id: vars
@@ -402,13 +405,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Install rust
         id: toolchain
@@ -462,7 +465,7 @@ jobs:
 
           # Show what's in the cache.
           ls subject-new/target/semver-checks/cache/
-          EXPECTED_PREFIX='subject-new/target/semver-checks/cache/libp2p_core-0_37_0-ccce455725cbab73'
+          EXPECTED_PREFIX='subject-new/target/semver-checks/cache/libp2p_core-0_37_0-default-ccce455725cbab73'
           EXPECTED_CACHED_METADATA="${EXPECTED_PREFIX}.metadata.json"
           EXPECTED_CACHED_RUSTDOC="${EXPECTED_PREFIX}.json"
 
@@ -518,13 +521,13 @@ jobs:
           ref: 'c479da812fd421260667c02049e6d11edd82c2dc'
           path: 'subject'
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Install rust
         id: toolchain
@@ -593,7 +596,7 @@ jobs:
           ls subject/target/semver-checks/cache/
 
           # The previous cached rustdoc should continue to exist.
-          PREVIOUS_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-5900ebf8bb9b9f8b'
+          PREVIOUS_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-default-5900ebf8bb9b9f8b'
           PREVIOUS_RUSTDOC="${PREVIOUS_PREFIX}.json"
           PREVIOUS_METADATA="${PREVIOUS_PREFIX}.metadata.json"
           if [ ! -f "$PREVIOUS_RUSTDOC" ]; then
@@ -606,7 +609,7 @@ jobs:
           fi
 
           # There should also be a new cached rustdoc file for the new feature settings.
-          NEW_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-6999ae87ca463ab3'
+          NEW_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-default-6999ae87ca463ab3'
           NEW_RUSTDOC="${NEW_PREFIX}.json"
           NEW_METADATA="${NEW_PREFIX}.metadata.json"
           if [ ! -f "$NEW_RUSTDOC" ]; then
@@ -661,13 +664,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -740,13 +743,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -814,13 +817,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -886,13 +889,13 @@ jobs:
       - name: Install protobuf-compiler
         run: sudo apt install protobuf-compiler
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1008,13 +1011,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1071,13 +1074,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1133,13 +1136,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1391,13 +1394,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1473,6 +1476,96 @@ jobs:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject-current/target/semver-checks/cache
 
+  run-on-bare-repository:
+    # Test that overwriting the git repository detection with `GIT_DIR` works as expected by
+    # running on a bare clone of a repository.
+    name: "Semver: bare repository"
+    runs-on: ubuntu-latest
+    needs:
+      - build-binary
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          path: "semver"
+
+      - name: Checkout ref-slice fork major change
+        uses: actions/checkout@v4
+        with:
+          # NOTE: We cannot checkout a bare repository with the actions/checkout action
+          # (https://github.com/actions/checkout/issues/603), so we checkout a "normal" version
+          # and clone the local checkout into a bare repository.
+          fetch-depth: 0
+          persist-credentials: false
+          repository: "mgr0dzicki/cargo-semver-action-ref-slice"
+          ref: "major_change"
+          path: "subject-checkout"
+
+      - name: Setup bare repository worktree
+        run: |
+          set -euo pipefail
+          git clone --bare subject-checkout subject-bare
+          mkdir subject
+          git --git-dir subject-bare --work-tree subject checkout major_change .
+          test ! -e subject/.git
+
+      - name: Install rust
+        id: toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
+
+      - name: Download binary
+        uses: actions/download-artifact@v4
+        with:
+          name: cargo-semver-checks-linux
+          path: bins/
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/git-v1_2_1/
+            subject/target/semver-checks/local-ref_slice-1_2_1-01666ec060466c14/
+
+      - name: Run semver-checks with --baseline-rev
+        continue-on-error: true
+        run: |
+          cd semver
+          set -euo pipefail
+          GIT_DIR=../subject-bare ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --baseline-rev=v1.2.1 --verbose | tee output
+          touch unexpectedly_did_not_fail
+
+      - name: Check whether it failed
+        run: |
+          cd semver
+          if [ -f unexpectedly_did_not_fail ]; then exit 1; else exit 0; fi
+
+      - name: Check output
+        run: |
+          cd semver
+          EXPECTED="$(echo -e "--- failure function_missing: pub fn removed or renamed ---")"
+          RESULT="$(grep failure output | sort)"
+          diff <(echo "$RESULT") <(echo "$EXPECTED")
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v4
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
   run-on-ref-slice-fork:
     # Simulate testing an as-yet-unreleased crate version without an explicit baseline,
     # i.e. with the expectation that the largest crates.io version is used as a baseline.
@@ -1514,13 +1607,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1553,7 +1646,7 @@ jobs:
       - name: Baseline is correct
         run: |
           cd semver
-          EXPECTED="$(echo -e "    Checking ref_slice v1.2.1 -> v1.2.1 (no change)")"
+          EXPECTED="$(echo -e "    Checking ref_slice v1.2.1 -> v1.2.1 (no change; assume patch)")"
           # Strip ANSI escapes for colors and bold text before comparing.
           RESULT="$(grep ' -> v1.' output | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g")"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
@@ -1614,13 +1707,11 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-windows
           path: bins\
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
 
       - name: Restore rustdoc
         id: cache
@@ -1653,7 +1744,7 @@ jobs:
       - name: Baseline is correct
         run: |
           cd semver
-          $EXPECTED = "    Checking ref_slice v1.2.1 -> v1.2.1 (no change)"
+          $EXPECTED = "    Checking ref_slice v1.2.1 -> v1.2.1 (no change; assume patch)"
           # Strip ANSI escapes for colors and bold text before comparing.
           cat output | grep ' -> v1.' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g" | Out-File -FilePath check_line
           cat check_line
@@ -1717,13 +1808,13 @@ jobs:
           cache: false
           rustflags: "-Dwarnings"  # set explicitly, to ensure we trigger the bug described above
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1781,13 +1872,13 @@ jobs:
           cache: false
           rustflags: ""
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1843,17 +1934,17 @@ jobs:
         id: toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: "1.82"
+          toolchain: "1.84"
           rustflags: ""
           cache: false
 
-      - name: Restore binary
-        id: cache-binary
-        uses: actions/cache/restore@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
+          name: cargo-semver-checks-linux
           path: bins/
-          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
 
       - name: Restore rustdoc
         id: cache
@@ -1886,7 +1977,7 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "error: rustc version is not high enough: >=1.83.0 needed, got 1.82.0")"
+          EXPECTED="$(echo -e "error: rustc version is not high enough: >=1.85.0 needed, got 1.84.1")"
           RESULT="$(grep 'error: rustc version' output)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
@@ -1978,3 +2069,53 @@ jobs:
           # pass-through mutually-exclusive features from our dependencies such as:
           # https://github.com/obi1kenobi/cargo-semver-checks/pull/824
           feature-group: default-features
+
+  upload-prebuilt-test-rustdocs:
+    needs: ci-everything
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: ["1.85", "1.86", "stable"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install rust
+        id: toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          cache: false
+
+      - name: Restore test rustdocs
+        id: cache-test-rustdocs
+        uses: actions/cache/restore@v4
+        with:
+          path: localdata/test_data/
+          key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('test_crates/**/*.rs') }}
+
+      - name: Compute hash
+        id: hash
+        run: echo "hash=$(./scripts/hash_test_rustdocs_inputs.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Regenerate test rustdocs
+        if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
+        run: ./scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
+
+      - name: Compute artifact name
+        id: artifact
+        run: |
+          HASH="${{ steps.hash.outputs.hash }}"
+          TRIPLE="$(rustc -vV | grep '^host:' | awk '{print $2}')"
+          VERSION="$(rustc --version | awk '{print $2}')"
+          echo "name=test-rustdocs-$HASH-$TRIPLE-$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: localdata/test_data
+

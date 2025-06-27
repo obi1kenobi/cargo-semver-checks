@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/method_moved_to_trait_must_use_added/": [
@@ -325,8 +326,8 @@ expression: "&query_execution_results"
         String("trait_method_added"),
         String("WillGainMethodWithoutDefault"),
       ]),
-      "span_begin_line": Uint64(7),
-      "span_end_line": Uint64(7),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -337,8 +338,8 @@ expression: "&query_execution_results"
         String("trait_method_added"),
         String("WillGainAnotherMethodWithoutDefault"),
       ]),
-      "span_begin_line": Uint64(12),
-      "span_end_line": Uint64(12),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -349,8 +350,8 @@ expression: "&query_execution_results"
         String("trait_method_added"),
         String("WillGainMultipleMethodsWithoutDefault"),
       ]),
-      "span_begin_line": Uint64(16),
-      "span_end_line": Uint64(16),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -361,8 +362,8 @@ expression: "&query_execution_results"
         String("trait_method_added"),
         String("WillGainMultipleMethodsWithoutDefault"),
       ]),
-      "span_begin_line": Uint64(17),
-      "span_end_line": Uint64(17),
+      "span_begin_line": Uint64(19),
+      "span_end_line": Uint64(19),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -373,8 +374,8 @@ expression: "&query_execution_results"
         String("trait_method_added"),
         String("WillGainMethodWithoutDefaultAndSeal"),
       ]),
-      "span_begin_line": Uint64(21),
-      "span_end_line": Uint64(21),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -385,8 +386,8 @@ expression: "&query_execution_results"
         String("trait_method_added"),
         String("WIllGainDocHiddenMethodWithoutDefault"),
       ]),
-      "span_begin_line": Uint64(26),
-      "span_end_line": Uint64(26),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

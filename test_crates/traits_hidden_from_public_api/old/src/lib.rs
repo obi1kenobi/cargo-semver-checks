@@ -1,3 +1,5 @@
+#![no_std]
+
 #[doc(hidden)]
 pub trait Example {
     /// Removing an associated type is not breaking for hidden traits.

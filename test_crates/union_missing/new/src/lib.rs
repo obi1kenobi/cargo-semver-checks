@@ -1,3 +1,5 @@
+#![no_std]
+
 union PubUnionBecomesPrivate {
     f1: i32,
 }

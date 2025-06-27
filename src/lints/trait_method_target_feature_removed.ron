@@ -1,0 +1,74 @@
+SemverQuery(
+    id: "trait_method_target_feature_removed",
+    human_readable_name: "pub trait method target feature removed",
+    description: "A method in a public, non-sealed trait no longer requires some #[target_feature].",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://github.com/rust-lang/rust/issues/139368"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        public_api_sealed @filter(op: "=", value: ["$false"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            method_name: name @output @tag
+
+                            requires_feature {
+                                explicit @filter(op: "=", value: ["$true"])
+                                globally_enabled @filter(op: "=", value: ["$false"])
+                                feature: name @output @tag
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        unconditionally_sealed @filter(op: "=", value: ["$false"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            name @filter(op: "=", value: ["%method_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                name @filter(op: "=", value: ["%feature"])
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "false": false,
+        "zero": 0,
+    },
+    error_message: "A trait method no longer requires the CPU target features it previously needed. Downstream implementations of this method may still require the previous set of target features without a compile error, so they will unexpectedly be imposing that additional safety requirement that the trait no longer imposes. New callers of this method on such impls may be unsound as a result, since they might adhere to the trait's narrower set of target features instead of the impl's wider set.",
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} removed requirement for {{feature}} in {{span_filename}}:{{span_begin_line}}"#),
+    witness: None,
+)

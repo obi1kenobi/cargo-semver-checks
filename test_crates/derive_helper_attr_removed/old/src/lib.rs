@@ -1,3 +1,5 @@
+#![no_std]
+
 use proc_macro::TokenStream;
 
 // Test case 1: Will have helper attribute removed

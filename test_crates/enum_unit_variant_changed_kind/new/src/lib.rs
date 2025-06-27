@@ -1,3 +1,5 @@
+#![no_std]
+
 // ---- Should be reported ----
 pub enum TestStruct {
     WillBecomeStructLike{}

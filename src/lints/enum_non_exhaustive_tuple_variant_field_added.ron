@@ -1,0 +1,76 @@
+SemverQuery(
+    id: "enum_non_exhaustive_tuple_variant_field_added",
+    human_readable_name: "pub enum #[non_exhaustive] tuple variant field added",
+    description: "A pub enum's #[non_exhaustive] tuple variant has a new field.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        enum_name: name @output @tag
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            ... on TupleVariant {
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                variant_name: name @output @tag
+
+                                field {
+                                    field_name: name @output @tag
+
+                                    span_: span @optional {
+                                        filename @output
+                                        begin_line @output
+                                        end_line @output
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @filter(op: "=", value: ["%enum_name"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            ... on TupleVariant {
+                                name @filter(op: "=", value: ["%variant_name"])
+                                attrs @filter(op: "contains", value: ["$non_exhaustive"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                    name @filter(op: "=", value: ["%field_name"])
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+        "non_exhaustive": "#[non_exhaustive]",
+    },
+    error_message: "A field was added to an enum's non-exhaustive tuple variant.",
+    per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+)

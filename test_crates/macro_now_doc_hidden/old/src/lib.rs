@@ -1,3 +1,5 @@
+#![no_std]
+
 /// A macro that will become hidden
 #[macro_export]
 macro_rules! will_be_hidden {

@@ -14,7 +14,7 @@ A publicly-visible function cannot be imported by its prior path. A `pub use` ma
        impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/function_missing.ron
 
 Failed in:
-  function no_error::my_fn, previously in file [ROOT]/test_crates/manifest_tests/workspace_baseline_conditional_compile_error/old/no-error/src/lib.rs:3
+  function no_error::my_fn, previously in file [ROOT]/test_crates/manifest_tests/workspace_baseline_conditional_compile_error/old/no-error/src/lib.rs:5
 
 --- stderr ---
     Building error v0.1.0 (current)
@@ -26,9 +26,9 @@ error: running cargo-doc on crate 'error' failed with output:
 -----
  Documenting error v0.1.0 ([ROOT]/test_crates/manifest_tests/workspace_baseline_conditional_compile_error/old/error)
 error: This crate has a compiler error.
- --> [ROOT]/test_crates/manifest_tests/workspace_baseline_conditional_compile_error/old/error/src/lib.rs:5:1
+ --> [ROOT]/test_crates/manifest_tests/workspace_baseline_conditional_compile_error/old/error/src/lib.rs:7:1
   |
-5 | compile_error!("This crate has a compiler error.");
+7 | compile_error!("This crate has a compiler error.");
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: could not document `error`
@@ -53,7 +53,7 @@ note: the following command can be used to reproduce the compilation error:
        Built [TIME] (baseline)
      Parsing no-error v0.1.0 (baseline)
       Parsed [TIME] (baseline)
-    Checking no-error v0.1.0 -> v0.1.0 (no change)
+    Checking no-error v0.1.0 -> v0.1.0 (no change; assume minor)
      Checked [TIME] [TOTAL] checks: [PASS] pass, 1 fail, 0 warn, [SKIP] skip
 
      Summary semver requires new major version: 1 major and 0 minor checks failed

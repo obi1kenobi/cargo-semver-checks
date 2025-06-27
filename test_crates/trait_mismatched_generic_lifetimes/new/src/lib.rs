@@ -1,3 +1,5 @@
+#![no_std]
+
 // All these changes are breaking.
 //
 // The best witness is using the trait in a bound:

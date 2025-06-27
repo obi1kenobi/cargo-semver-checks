@@ -1,3 +1,5 @@
+#![no_std]
+
 // Traits transitioning from Public API Sealed → Unsealed (Lint should detect these)
 pub mod public_api_sealed_to_unsealed {
     pub mod hidden {

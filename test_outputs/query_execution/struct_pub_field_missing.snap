@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/repr_c_plain_struct_fields_reordered/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("repr_c_plain_struct_fields_reordered"),
         String("StructWithRemoval"),
       ]),
-      "span_begin_line": Uint64(84),
-      "span_end_line": Uint64(84),
+      "span_begin_line": Uint64(86),
+      "span_end_line": Uint64(86),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("StructWithRemoval"),
       "struct_type": String("plain"),
@@ -24,8 +25,8 @@ expression: "&query_execution_results"
         String("struct_pub_field_missing"),
         String("FieldWillBeRemoved"),
       ]),
-      "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(5),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("FieldWillBeRemoved"),
       "struct_type": String("plain"),

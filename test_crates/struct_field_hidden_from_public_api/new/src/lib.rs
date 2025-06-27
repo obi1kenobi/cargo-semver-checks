@@ -1,3 +1,5 @@
+#![no_std]
+
 /// The relationship between semver and removing struct fields is complex.
 ///
 /// Removing hidden fields from a plain struct (whether hidden or not) is not a breaking change.
@@ -20,12 +22,12 @@ pub mod removals {
     }
 
     #[doc(hidden)]
-    pub struct HiddenTupleStruct(i64, String);
+    pub struct HiddenTupleStruct(i64, &'static str);
 
     pub struct VisibleTupleStructNoReordering(i64);
 
     /// The removal of the hidden field makes the fields behind it have different indexes.
-    pub struct VisibleTupleStructBreaking(i64, String, usize);
+    pub struct VisibleTupleStructBreaking(i64, &'static str, usize);
 }
 
 /// Adding fields to an exhaustive public API struct is always breaking,

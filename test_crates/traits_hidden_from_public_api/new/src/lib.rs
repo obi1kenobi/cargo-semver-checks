@@ -1,10 +1,12 @@
+#![no_std]
+
 #[doc(hidden)]
 pub trait Example {
     /// Changing the bounds on an associated type is not breaking for hidden traits.
     type Bounded: Send + Sync;
 
     /// Changing the type of an associated const is not breaking for hidden traits.
-    const CHANGED: String;
+    const CHANGED: &'static str;
 
     /// Removing the default value for an associated const is not breaking for hidden traits.
     const WITH_DEFAULT: i64;

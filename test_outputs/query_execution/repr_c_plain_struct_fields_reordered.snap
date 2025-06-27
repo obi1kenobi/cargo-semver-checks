@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/repr_c_plain_struct_fields_reordered/": [
@@ -13,38 +14,38 @@ expression: "&query_execution_results"
         String("PublicStruct"),
       ]),
       "position": Int64(2),
-      "span_begin_line": Uint64(4),
-      "span_end_line": Uint64(4),
-      "span_filename": String("src/lib.rs"),
-    },
-    {
-      "field_name": String("c"),
-      "name": String("PublicStruct"),
-      "new_position": Int64(2),
-      "path": List([
-        String("repr_c_plain_struct_fields_reordered"),
-        String("PublicStruct"),
-      ]),
-      "position": Int64(3),
-      "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(5),
-      "span_filename": String("src/lib.rs"),
-    },
-    {
-      "field_name": String("a"),
-      "name": String("PublicStruct"),
-      "new_position": Int64(3),
-      "path": List([
-        String("repr_c_plain_struct_fields_reordered"),
-        String("PublicStruct"),
-      ]),
-      "position": Int64(1),
       "span_begin_line": Uint64(6),
       "span_end_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
     },
     {
       "field_name": String("c"),
+      "name": String("PublicStruct"),
+      "new_position": Int64(2),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("PublicStruct"),
+      ]),
+      "position": Int64(3),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("a"),
+      "name": String("PublicStruct"),
+      "new_position": Int64(3),
+      "path": List([
+        String("repr_c_plain_struct_fields_reordered"),
+        String("PublicStruct"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("c"),
       "name": String("MixedVisibilityStruct"),
       "new_position": Int64(2),
       "path": List([
@@ -52,8 +53,8 @@ expression: "&query_execution_results"
         String("MixedVisibilityStruct"),
       ]),
       "position": Int64(3),
-      "span_begin_line": Uint64(57),
-      "span_end_line": Uint64(57),
+      "span_begin_line": Uint64(59),
+      "span_end_line": Uint64(59),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -65,8 +66,8 @@ expression: "&query_execution_results"
         String("MixedVisibilityStruct"),
       ]),
       "position": Int64(1),
-      "span_begin_line": Uint64(58),
-      "span_end_line": Uint64(58),
+      "span_begin_line": Uint64(60),
+      "span_end_line": Uint64(60),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -78,8 +79,8 @@ expression: "&query_execution_results"
         String("MultipleReprStruct"),
       ]),
       "position": Int64(2),
-      "span_begin_line": Uint64(71),
-      "span_end_line": Uint64(71),
+      "span_begin_line": Uint64(73),
+      "span_end_line": Uint64(73),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -91,8 +92,8 @@ expression: "&query_execution_results"
         String("MultipleReprStruct"),
       ]),
       "position": Int64(1),
-      "span_begin_line": Uint64(72),
-      "span_end_line": Uint64(72),
+      "span_begin_line": Uint64(74),
+      "span_end_line": Uint64(74),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -104,8 +105,8 @@ expression: "&query_execution_results"
         String("StructWithAddition"),
       ]),
       "position": Int64(2),
-      "span_begin_line": Uint64(78),
-      "span_end_line": Uint64(78),
+      "span_begin_line": Uint64(80),
+      "span_end_line": Uint64(80),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -117,8 +118,8 @@ expression: "&query_execution_results"
         String("StructWithAddition"),
       ]),
       "position": Int64(1),
-      "span_begin_line": Uint64(79),
-      "span_end_line": Uint64(79),
+      "span_begin_line": Uint64(81),
+      "span_end_line": Uint64(81),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -130,8 +131,8 @@ expression: "&query_execution_results"
         String("StructWithRemoval"),
       ]),
       "position": Int64(2),
-      "span_begin_line": Uint64(86),
-      "span_end_line": Uint64(86),
+      "span_begin_line": Uint64(88),
+      "span_end_line": Uint64(88),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -143,8 +144,8 @@ expression: "&query_execution_results"
         String("StructWithRemoval"),
       ]),
       "position": Int64(3),
-      "span_begin_line": Uint64(87),
-      "span_end_line": Uint64(87),
+      "span_begin_line": Uint64(89),
+      "span_end_line": Uint64(89),
       "span_filename": String("src/lib.rs"),
     },
   ],

@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/enum_no_repr_variant_discriminant_changed/": [
@@ -14,8 +15,8 @@ expression: "&query_execution_results"
         String("enum_no_repr_variant_discriminant_changed"),
         String("FieldlessWithDiscrimants"),
       ]),
-      "span_begin_line": Uint64(68),
-      "span_end_line": Uint64(68),
+      "span_begin_line": Uint64(70),
+      "span_end_line": Uint64(70),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Last"),
       "visibility_limit": String("public"),
@@ -32,8 +33,8 @@ expression: "&query_execution_results"
         String("enum_repr_variant_discriminant_changed"),
         String("ExplicitAndImplicitDiscriminantsAreChanged"),
       ]),
-      "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(5),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("First"),
       "visibility_limit": String("public"),
@@ -48,8 +49,8 @@ expression: "&query_execution_results"
         String("enum_repr_variant_discriminant_changed"),
         String("ExplicitAndImplicitDiscriminantsAreChanged"),
       ]),
-      "span_begin_line": Uint64(6),
-      "span_end_line": Uint64(6),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Second"),
       "visibility_limit": String("public"),
@@ -64,8 +65,8 @@ expression: "&query_execution_results"
         String("enum_repr_variant_discriminant_changed"),
         String("DiscriminantIsChanged"),
       ]),
-      "span_begin_line": Uint64(15),
-      "span_end_line": Uint64(15),
+      "span_begin_line": Uint64(17),
+      "span_end_line": Uint64(17),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("First"),
       "visibility_limit": String("public"),
@@ -80,8 +81,8 @@ expression: "&query_execution_results"
         String("enum_repr_variant_discriminant_changed"),
         String("DiscriminantIsChangedButAVariantIsNonExhaustive"),
       ]),
-      "span_begin_line": Uint64(24),
-      "span_end_line": Uint64(24),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(26),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Second"),
       "visibility_limit": String("public"),

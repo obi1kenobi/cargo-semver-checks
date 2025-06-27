@@ -1,3 +1,5 @@
+#![no_std]
+
 mod private {
     pub trait Sealed {}
     pub struct Token;

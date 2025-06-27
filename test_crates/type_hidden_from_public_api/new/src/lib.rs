@@ -1,3 +1,5 @@
+#![no_std]
+
 #[doc(hidden)]
 pub struct ExamplePlainStruct {
     pub x: i64,

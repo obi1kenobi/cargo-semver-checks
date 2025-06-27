@@ -1,3 +1,5 @@
+#![no_std]
+
 // These values will be marked deprecated
 pub const VALUE_TO_DEPRECATED: i32 = 42;
 pub static STATIC_TO_DEPRECATED: &str = "hello";

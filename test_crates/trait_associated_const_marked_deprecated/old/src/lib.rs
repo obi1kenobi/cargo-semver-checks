@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait TraitWithConstToBeDeprecated {
     // This associated constant will be marked deprecated
     const CONST_TO_DEPRECATED: i32 = 42;

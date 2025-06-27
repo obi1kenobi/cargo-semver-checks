@@ -1,3 +1,5 @@
+#![no_std]
+
 #![feature(associated_type_defaults)]
 pub trait RemovedTypeFromTrait {
     type Apple;

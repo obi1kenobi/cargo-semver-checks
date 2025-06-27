@@ -1,0 +1,94 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/safe_function_requires_more_target_features/": [
+    {
+      "currently_unsafe": Boolean(true),
+      "fn_name": String("safe_function"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("safe_function_requires_more_target_features"),
+        String("safe_function"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "currently_unsafe": Boolean(true),
+      "fn_name": String("replaced_with_broader_feature"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("safe_function_requires_more_target_features"),
+        String("replaced_with_broader_feature"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "currently_unsafe": Boolean(true),
+      "fn_name": String("becomes_unsafe"),
+      "new_feature": String("bmi2"),
+      "path": List([
+        String("safe_function_requires_more_target_features"),
+        String("becomes_unsafe"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(27),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/unsafe_function_requires_more_target_features/": [
+    {
+      "currently_unsafe": Boolean(true),
+      "fn_name": String("safe_function"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("unsafe_function_requires_more_target_features"),
+        String("safe_function"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "currently_unsafe": Boolean(true),
+      "fn_name": String("unsafe_function"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("unsafe_function_requires_more_target_features"),
+        String("unsafe_function"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "currently_unsafe": Boolean(true),
+      "fn_name": String("replaced_with_broader_feature"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("unsafe_function_requires_more_target_features"),
+        String("replaced_with_broader_feature"),
+      ]),
+      "span_begin_line": Uint64(45),
+      "span_end_line": Uint64(45),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "currently_unsafe": Boolean(true),
+      "fn_name": String("becomes_safe"),
+      "new_feature": String("bmi2"),
+      "path": List([
+        String("unsafe_function_requires_more_target_features"),
+        String("becomes_safe"),
+      ]),
+      "span_begin_line": Uint64(50),
+      "span_end_line": Uint64(50),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

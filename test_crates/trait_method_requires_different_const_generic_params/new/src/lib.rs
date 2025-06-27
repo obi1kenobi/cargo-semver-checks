@@ -1,3 +1,5 @@
+#![no_std]
+
 pub trait Example {
     fn becomes_generic<const N: usize>(data: [i64; N]) -> [i64; 4];
 

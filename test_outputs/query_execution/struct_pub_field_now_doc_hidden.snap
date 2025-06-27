@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/struct_now_doc_hidden/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("struct_now_doc_hidden"),
         String("PublicStructHiddenField"),
       ]),
-      "span_begin_line": Uint64(49),
-      "span_end_line": Uint64(55),
+      "span_begin_line": Uint64(51),
+      "span_end_line": Uint64(57),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("PublicStructHiddenField"),
     },
@@ -23,8 +24,8 @@ expression: "&query_execution_results"
         String("struct_pub_field_now_doc_hidden"),
         String("Plain"),
       ]),
-      "span_begin_line": Uint64(1),
-      "span_end_line": Uint64(4),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("Plain"),
     },
@@ -34,8 +35,8 @@ expression: "&query_execution_results"
         String("struct_pub_field_now_doc_hidden"),
         String("Tuple"),
       ]),
-      "span_begin_line": Uint64(6),
-      "span_end_line": Uint64(6),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("Tuple"),
     },
@@ -45,8 +46,8 @@ expression: "&query_execution_results"
         String("struct_pub_field_now_doc_hidden"),
         String("BothBecomeHidden"),
       ]),
-      "span_begin_line": Uint64(15),
-      "span_end_line": Uint64(18),
+      "span_begin_line": Uint64(17),
+      "span_end_line": Uint64(20),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("BothBecomeHidden"),
     },

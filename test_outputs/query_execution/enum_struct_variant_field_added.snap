@@ -1,60 +1,72 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/enum_no_repr_variant_discriminant_changed/": [
     {
+      "baseline_field_names": List([]),
       "enum_name": String("UnitOnlyBecomesUndefined"),
       "field_name": String("a"),
       "path": List([
         String("enum_no_repr_variant_discriminant_changed"),
         String("UnitOnlyBecomesUndefined"),
       ]),
-      "span_begin_line": Uint64(85),
-      "span_end_line": Uint64(85),
+      "span_begin_line": Uint64(87),
+      "span_end_line": Uint64(87),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Struct"),
     },
   ],
   "./test_crates/enum_struct_field_hidden_from_public_api/": [
     {
+      "baseline_field_names": List([
+        String("x"),
+      ]),
       "enum_name": String("AddedVariantField"),
       "field_name": String("y"),
       "path": List([
         String("enum_struct_field_hidden_from_public_api"),
         String("AddedVariantField"),
       ]),
-      "span_begin_line": Uint64(38),
-      "span_end_line": Uint64(38),
+      "span_begin_line": Uint64(40),
+      "span_end_line": Uint64(40),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("StructVariant"),
     },
   ],
   "./test_crates/enum_struct_variant_field_added/": [
     {
+      "baseline_field_names": List([
+        String("x"),
+      ]),
       "enum_name": String("PubEnum"),
       "field_name": String("y"),
       "path": List([
         String("enum_struct_variant_field_added"),
         String("PubEnum"),
       ]),
-      "span_begin_line": Uint64(4),
-      "span_end_line": Uint64(4),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Foo"),
     },
   ],
   "./test_crates/repr_c_enum_struct_variant_fields_reordered/": [
     {
+      "baseline_field_names": List([
+        String("a"),
+        String("b"),
+      ]),
       "enum_name": String("EnumWithAddition"),
       "field_name": String("c"),
       "path": List([
         String("repr_c_enum_struct_variant_fields_reordered"),
         String("EnumWithAddition"),
       ]),
-      "span_begin_line": Uint64(63),
-      "span_end_line": Uint64(63),
+      "span_begin_line": Uint64(65),
+      "span_end_line": Uint64(65),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("StructVariant"),
     },

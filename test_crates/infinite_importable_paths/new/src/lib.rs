@@ -1,3 +1,5 @@
+#![no_std]
+
 //! This package exports the functions:
 //! - `foo`
 //! - `nested::foo`

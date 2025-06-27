@@ -68,7 +68,7 @@ pub(crate) enum CacheSettings<T> {
 impl CacheSettings<()> {
     pub(crate) fn with_path<'a>(&self, path: &'a Path) -> CacheSettings<&'a Path> {
         match self {
-            CacheSettings::None => todo!(),
+            CacheSettings::None => CacheSettings::None,
             CacheSettings::ReadOnly(_) => CacheSettings::ReadOnly(path),
             CacheSettings::ReadWrite(_) => CacheSettings::ReadWrite(path),
             CacheSettings::WriteOnly(_) => CacheSettings::WriteOnly(path),
@@ -394,9 +394,10 @@ impl<'a> CrateDataRequest<'a> {
     /// A path-safe unique identified that includes the crate's name, version, and features.
     fn cache_slug(&self) -> anyhow::Result<String> {
         Ok(format!(
-            "{}-{}-{}",
+            "{}-{}-{}-{}",
             slugify(self.kind.name()?),
             slugify(self.kind.version()?),
+            slugify(self.build_target.unwrap_or("default")),
             &self.features_fingerprint,
         ))
     }

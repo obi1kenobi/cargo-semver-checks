@@ -1,3 +1,5 @@
+#![no_std]
+
 pub extern "C-unwind" fn unwind_function_becomes_non_unwind() {}
 
 pub extern "C" fn non_unwind_function_becomes_unwind() {}

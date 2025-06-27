@@ -1,6 +1,7 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/constructible_struct_adds_field/": [
@@ -10,8 +11,8 @@ expression: "&query_execution_results"
         String("constructible_struct_adds_field"),
         String("PlainStructGainsPrivateField"),
       ]),
-      "span_begin_line": Uint64(42),
-      "span_end_line": Uint64(42),
+      "span_begin_line": Uint64(44),
+      "span_end_line": Uint64(44),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("PlainStructGainsPrivateField"),
       "struct_type": String("plain"),
@@ -22,8 +23,8 @@ expression: "&query_execution_results"
         String("constructible_struct_adds_field"),
         String("TupleStructGainsPrivateField"),
       ]),
-      "span_begin_line": Uint64(47),
-      "span_end_line": Uint64(47),
+      "span_begin_line": Uint64(49),
+      "span_end_line": Uint64(49),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("TupleStructGainsPrivateField"),
       "struct_type": String("tuple"),
@@ -36,8 +37,8 @@ expression: "&query_execution_results"
         String("constructible_struct_adds_private_field"),
         String("ExhaustiveEmptyPlainStruct"),
       ]),
-      "span_begin_line": Uint64(2),
-      "span_end_line": Uint64(2),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("ExhaustiveEmptyPlainStruct"),
       "struct_type": String("plain"),
@@ -48,8 +49,8 @@ expression: "&query_execution_results"
         String("constructible_struct_adds_private_field"),
         String("ExhaustivePlainStruct"),
       ]),
-      "span_begin_line": Uint64(8),
-      "span_end_line": Uint64(8),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("ExhaustivePlainStruct"),
       "struct_type": String("plain"),
@@ -60,8 +61,8 @@ expression: "&query_execution_results"
         String("constructible_struct_adds_private_field"),
         String("ExhaustiveEmptyTupleStruct"),
       ]),
-      "span_begin_line": Uint64(11),
-      "span_end_line": Uint64(11),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("ExhaustiveEmptyTupleStruct"),
       "struct_type": String("tuple"),
@@ -72,8 +73,8 @@ expression: "&query_execution_results"
         String("constructible_struct_adds_private_field"),
         String("ExhaustiveTupleStruct"),
       ]),
-      "span_begin_line": Uint64(13),
-      "span_end_line": Uint64(13),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("ExhaustiveTupleStruct"),
       "struct_type": String("tuple"),

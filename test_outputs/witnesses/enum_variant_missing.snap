@@ -2,23 +2,24 @@
 source: src/query.rs
 description: "Lint `enum_variant_missing` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 expression: "&actual_witnesses"
+snapshot_kind: text
 ---
 [["./test_crates/enum_struct_variant_field_missing/"]]
 filename = 'src/lib.rs'
-begin_line = 14
+begin_line = 16
 hint = 'let witness = enum_struct_variant_field_missing::IgnoredEnum::StructVariantWillBeMissing {...};'
 
 [["./test_crates/enum_variant_missing/"]]
 filename = 'src/lib.rs'
-begin_line = 4
+begin_line = 6
 hint = 'let witness = enum_variant_missing::PlainVariantWillBeRemoved::Bar;'
 
 [["./test_crates/enum_variant_missing/"]]
 filename = 'src/lib.rs'
-begin_line = 10
+begin_line = 12
 hint = 'let witness = enum_variant_missing::TupleVariantWillBeRemoved::Bar(...);'
 
 [["./test_crates/enum_variant_missing/"]]
 filename = 'src/lib.rs'
-begin_line = 18
+begin_line = 20
 hint = 'let witness = enum_variant_missing::StructVariantWillBeRemoved::Bar {...};'

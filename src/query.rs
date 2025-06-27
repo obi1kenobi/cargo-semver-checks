@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use ron::extensions::Extensions;
 use serde::{Deserialize, Serialize};
-use trustfall::TransparentValue;
+use trustfall::{FieldValue, TransparentValue};
 
 use crate::ReleaseType;
 
@@ -313,6 +313,37 @@ pub struct WitnessQuery {
     pub arguments: BTreeMap<String, InheritedValue>,
 }
 
+impl WitnessQuery {
+    /// Returns [`arguments`](Self::arguments), mapping the [`InheritedValue`]s from
+    /// the given output map, which is the map of output [`FieldValue`]s from the previous query.
+    ///
+    /// Fails with an [`anyhow::Error`] if any requested inheritance keys are missing.
+    pub fn inherit_arguments_from(
+        &self,
+        source_map: &BTreeMap<std::sync::Arc<str>, FieldValue>,
+    ) -> anyhow::Result<BTreeMap<String, TransparentValue>> {
+        let mut mapped = BTreeMap::new();
+
+        for (key, value) in self.arguments.iter() {
+            let mapped_value = match value {
+                // Inherit an output
+                InheritedValue::Inherited { inherit } => source_map
+                    .get(inherit.as_str())
+                    .cloned()
+                    .map(Into::into)
+                    .ok_or(anyhow::anyhow!(
+                        "inherited output key `{inherit}` does not exist"
+                    ))?,
+                // Set a constant
+                InheritedValue::Constant(value) => value.clone(),
+            };
+            mapped.insert(key.clone(), mapped_value);
+        }
+
+        Ok(mapped)
+    }
+}
+
 /// Represents either a value inherited from a previous query, or a
 /// provided constant value.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -360,6 +391,19 @@ mod tests {
     static TEST_CRATE_INDEXES: OnceLock<
         BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)>,
     > = OnceLock::new();
+
+    static CURRENT_TARGET_TRIPLE: std::sync::LazyLock<&str> = std::sync::LazyLock::new(|| {
+        let outcome = std::process::Command::new("rustc")
+            .arg("-vV")
+            .output()
+            .expect("failed to run `rustc -vV`");
+        let stdout = String::from_utf8(outcome.stdout).expect("stdout was not valid utf-8");
+        let target_triple = stdout
+            .lines()
+            .find_map(|line| line.strip_prefix("host: "))
+            .expect("failed to find host line");
+        target_triple.to_string().leak()
+    });
 
     fn get_test_crate_names() -> &'static [String] {
         TEST_CRATE_NAMES.get_or_init(initialize_test_crate_names)
@@ -438,8 +482,8 @@ mod tests {
         get_all_test_crates()
             .par_iter()
             .map(|(key, (old_crate, new_crate))| {
-                let old_index = VersionedIndex::from_storage(old_crate);
-                let new_index = VersionedIndex::from_storage(new_crate);
+                let old_index = VersionedIndex::from_storage(old_crate, &CURRENT_TARGET_TRIPLE);
+                let new_index = VersionedIndex::from_storage(new_crate, &CURRENT_TARGET_TRIPLE);
                 (key.clone(), (old_index, new_index))
             })
             .collect()
@@ -755,11 +799,44 @@ mod tests {
             value.sort_unstable_by_key(key_func);
         }
 
-        // TODO: Remove this once Rust 1.85 is the oldest Rust supported by cargo-semver-checks.
-        if query_name == "static_became_unsafe"
-            && rustc_version::version().is_ok_and(|version| version < Version::new(1, 85, 0))
+        // TODO: Remove this once Rust 1.86 is the oldest Rust supported by cargo-semver-checks.
+        // These snapshots don't match on Rust 1.85.x because of, ironically, a regression
+        // in newer Rust that inappropriately considers `#[target_feature]` safe functions
+        // to be unsafe.
+        if matches!(
+            query_name,
+            "function_no_longer_unsafe"
+                | "function_unsafe_added"
+                | "inherent_method_unsafe_added"
+                | "safe_function_target_feature_added"
+                | "safe_inherent_method_target_feature_added"
+                | "safe_function_requires_more_target_features"
+                | "safe_inherent_method_requires_more_target_features"
+                | "unsafe_function_requires_more_target_features"
+                | "unsafe_function_target_feature_added"
+                | "unsafe_inherent_method_requires_more_target_features"
+                | "unsafe_inherent_method_target_feature_added"
+        ) && rustc_version::version().is_ok_and(|version| version < Version::new(1, 86, 0))
         {
-            eprintln!("skipping query execution test for lint `static_became_unsafe` since data for it isn't available in Rust prior to 1.85");
+            eprintln!("skipping query execution test for lint `{query_name}` since data for it isn't available in Rust prior to 1.86");
+            return;
+        }
+
+        // TODO: Remove this when Rust 1.89 is no longer supported by cargo-semver-checks.
+        // A change in the rustdoc JSON representation for `#[must_use]` in that version
+        // made the lint logic not match the attribute.
+        if matches!(
+            query_name,
+            "enum_must_use_added"
+                | "function_must_use_added"
+                | "inherent_method_must_use_added"
+                | "struct_must_use_added"
+                | "trait_must_use_added"
+                | "union_must_use_added"
+        ) && rustc_version::version()
+            .is_ok_and(|version| version.major == 1 && version.minor == 89)
+        {
+            eprintln!("skipping query execution test for lint `{query_name}` because its rustdoc JSON representation in Rust 1.89 isn't actually legal Rust");
             return;
         }
 
@@ -788,17 +865,30 @@ mod tests {
 
         let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
-            assert!(!transparent_results.is_empty());
+            // TODO: Remove this once rustdoc fixes this bug:
+            // https://github.com/rust-lang/rust/issues/142655
+            if matches!(
+                semver_query.id.as_str(),
+                "safe_function_target_feature_added"
+                    | "safe_inherent_method_target_feature_added"
+                    | "safe_function_requires_more_target_features"
+                    | "safe_inherent_method_requires_more_target_features"
+            ) {
+                // These queries don't have any results currently,
+                // since their results are obscured by the bug above.
+            } else {
+                assert!(!transparent_results.is_empty());
 
-            let flattened_actual_results: Vec<_> = transparent_results
-                .iter()
-                .flat_map(|(_key, value)| value)
-                .collect();
-            for semver_violation_result in flattened_actual_results {
-                registry
-                    .render_template(&template, semver_violation_result)
-                    .with_context(|| "Error instantiating semver query template.")
-                    .expect("could not materialize template");
+                let flattened_actual_results: Vec<_> = transparent_results
+                    .iter()
+                    .flat_map(|(_key, value)| value)
+                    .collect();
+                for semver_violation_result in flattened_actual_results {
+                    registry
+                        .render_template(&template, semver_violation_result)
+                        .with_context(|| "Error instantiating semver query template.")
+                        .expect("could not materialize template");
+                }
             }
         }
 
@@ -1232,23 +1322,34 @@ add_lints!(
     enum_marked_non_exhaustive,
     enum_missing,
     enum_must_use_added,
+    enum_no_longer_non_exhaustive,
     enum_no_repr_variant_discriminant_changed,
+    enum_non_exhaustive_struct_variant_field_added,
+    enum_non_exhaustive_tuple_variant_changed_kind,
+    enum_non_exhaustive_tuple_variant_field_added,
     enum_now_doc_hidden,
+    enum_repr_int_added,
     enum_repr_int_changed,
     enum_repr_int_removed,
     enum_repr_transparent_removed,
     enum_repr_variant_discriminant_changed,
+    enum_struct_variant_changed_kind,
     enum_struct_variant_field_added,
+    enum_struct_variant_field_marked_deprecated,
     enum_struct_variant_field_missing,
     enum_struct_variant_field_now_doc_hidden,
     enum_tuple_variant_changed_kind,
     enum_tuple_variant_field_added,
+    enum_tuple_variant_field_marked_deprecated,
     enum_tuple_variant_field_missing,
     enum_tuple_variant_field_now_doc_hidden,
     enum_unit_variant_changed_kind,
     enum_variant_added,
+    enum_variant_marked_deprecated,
     enum_variant_marked_non_exhaustive,
     enum_variant_missing,
+    enum_variant_no_longer_non_exhaustive,
+    exhaustive_enum_added,
     exported_function_changed_abi,
     feature_missing,
     feature_not_enabled_by_default,
@@ -1261,10 +1362,16 @@ add_lints!(
     function_marked_deprecated,
     function_missing,
     function_must_use_added,
+    function_no_longer_unsafe,
+    function_now_const,
     function_now_doc_hidden,
     function_parameter_count_changed,
     function_requires_different_const_generic_params,
     function_requires_different_generic_type_params,
+    trait_method_target_feature_removed,
+    safe_function_requires_more_target_features,
+    safe_inherent_method_requires_more_target_features,
+    unsafe_function_requires_more_target_features,
     function_unsafe_added,
     global_value_marked_deprecated,
     inherent_associated_const_now_doc_hidden,
@@ -1273,6 +1380,7 @@ add_lints!(
     inherent_method_missing,
     inherent_method_must_use_added,
     inherent_method_now_doc_hidden,
+    unsafe_inherent_method_requires_more_target_features,
     inherent_method_unsafe_added,
     macro_marked_deprecated,
     macro_no_longer_exported,
@@ -1281,6 +1389,7 @@ add_lints!(
     method_requires_different_const_generic_params,
     method_requires_different_generic_type_params,
     module_missing,
+    non_exhaustive_enum_added,
     non_exhaustive_struct_changed_type,
     partial_ord_enum_struct_variant_fields_reordered,
     partial_ord_enum_variants_reordered,
@@ -1288,8 +1397,11 @@ add_lints!(
     proc_macro_marked_deprecated,
     proc_macro_now_doc_hidden,
     pub_api_sealed_trait_became_unconditionally_sealed,
+    pub_api_sealed_trait_method_target_feature_removed,
+    pub_const_added,
     pub_module_level_const_missing,
     pub_module_level_const_now_doc_hidden,
+    pub_static_added,
     pub_static_missing,
     pub_static_mut_now_immutable,
     pub_static_now_doc_hidden,
@@ -1299,6 +1411,8 @@ add_lints!(
     repr_packed_added,
     repr_packed_removed,
     repr_c_plain_struct_fields_reordered,
+    safe_inherent_method_target_feature_added,
+    safe_function_target_feature_added,
     sized_impl_removed,
     static_became_unsafe,
     struct_field_marked_deprecated,
@@ -1331,6 +1445,7 @@ add_lints!(
     trait_method_parameter_count_changed,
     trait_method_requires_different_const_generic_params,
     trait_method_requires_different_generic_type_params,
+    unsafe_trait_method_requires_more_target_features,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
     trait_mismatched_generic_lifetimes,
@@ -1358,6 +1473,7 @@ add_lints!(
     type_requires_more_generic_type_params,
     unconditionally_sealed_trait_became_pub_api_sealed,
     unconditionally_sealed_trait_became_unsealed,
+    union_added,
     union_field_added_with_all_pub_fields,
     union_field_added_with_non_pub_fields,
     union_field_missing,
@@ -1366,4 +1482,7 @@ add_lints!(
     union_now_doc_hidden,
     union_pub_field_now_doc_hidden,
     unit_struct_changed_kind,
+    unsafe_function_target_feature_added,
+    unsafe_inherent_method_target_feature_added,
+    unsafe_trait_method_target_feature_added,
 );

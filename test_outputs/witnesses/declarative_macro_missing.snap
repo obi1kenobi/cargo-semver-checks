@@ -6,10 +6,10 @@ snapshot_kind: text
 ---
 [["./test_crates/declarative_macro_missing/"]]
 filename = 'src/lib.rs'
-begin_line = 2
+begin_line = 4
 hint = 'will_be_removed!(...);'
 
 [["./test_crates/macro_no_longer_exported/"]]
 filename = 'src/lib.rs'
-begin_line = 9
+begin_line = 11
 hint = 'will_be_hidden_and_not_exported!(...);'

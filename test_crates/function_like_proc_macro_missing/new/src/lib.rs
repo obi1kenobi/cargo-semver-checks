@@ -1,3 +1,5 @@
+#![no_std]
+
 use proc_macro::TokenStream;
 
 // make_answer is removed

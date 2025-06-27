@@ -1,3 +1,5 @@
+#![no_std]
+
 //Adding #[doc(hidden)] should not affect since the enum is not a part of public API
 enum NonPublicEnum {
     TupleVariant(#[doc(hidden)] i32, u8),

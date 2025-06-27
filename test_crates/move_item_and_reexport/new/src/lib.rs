@@ -1,3 +1,5 @@
+#![no_std]
+
 pub(crate) mod internal {
     // The following items will be relocated to the `internal` module,
     // but will get different flavors of re-exports to ensure the move is non-breaking.
@@ -13,7 +15,7 @@ pub(crate) mod internal {
     pub struct TypedefReexport;
 
     pub struct TypedefWithGenericsReexport<'a, const N: usize, T> {
-        _marker: std::marker::PhantomData<&'a [T; N]>,
+        _marker: core::marker::PhantomData<&'a [T; N]>,
     }
 
     // The following types will also be renamed as part of being moved,
@@ -25,26 +27,26 @@ pub(crate) mod internal {
     pub struct HasBeenRenamedTypedefReexport;
 
     pub struct HasBeenRenamedTypedefWithGenericsReexport<'a, const N: usize, T> {
-        _marker: std::marker::PhantomData<&'a [T; N]>,
+        _marker: core::marker::PhantomData<&'a [T; N]>,
     }
 
     // The following types will get moved, but their typedef re-exports
     // will alter the generics in ways that mean the new typedef isn't equivalent.
 
     pub struct NonEquivalentReorderedGenerics<'a, const N: usize, T> {
-        _marker: std::marker::PhantomData<&'a [T; N]>,
+        _marker: core::marker::PhantomData<&'a [T; N]>,
     }
 
     pub struct NonEquivalentRemovedLifetime<'a, const N: usize, T> {
-        _marker: std::marker::PhantomData<&'a [T; N]>,
+        _marker: core::marker::PhantomData<&'a [T; N]>,
     }
 
     pub struct NonEquivalentRemovedConst<'a, const N: usize, T> {
-        _marker: std::marker::PhantomData<&'a [T; N]>,
+        _marker: core::marker::PhantomData<&'a [T; N]>,
     }
 
     pub struct NonEquivalentRemovedType<'a, const N: usize, T> {
-        _marker: std::marker::PhantomData<&'a [T; N]>,
+        _marker: core::marker::PhantomData<&'a [T; N]>,
     }
 }
 

@@ -66,6 +66,7 @@ jobs:
         run: |
           set -euxo pipefail
 
+          # Update the rust-tests matrix
           yq '.jobs.rust-tests.strategy.matrix.toolchain' .github/workflows/ci.yml -o json | \
             python -m json.tool --compact | \
             sed 's/,/, /g' \
@@ -75,9 +76,9 @@ jobs:
               [$versions[] | select(. != "beta" and . != "stable")] as $numerical_versions |
               [$versions[] | select(. == "beta" or . == "stable")] as $non_numerical_versions |
               (
-                  [$numerical_versions[] | sub("\d+\.(\d+)(?:\.\d+)?", "${1}") | to_number]
-                  | sort
-                  | .[-1]
+                  [$numerical_versions[] | sub("\d+\.(\d+)(?:\.\d+)?", "${1}") | to_number] |
+                  sort |
+                  .[-1]
               ) as $max_named_minor |
               [$numerical_versions[], "1.\($max_named_minor + 1)", $non_numerical_versions[]] as $next_versions |
               $next_versions
@@ -88,8 +89,32 @@ jobs:
 
           CURRENT="$(< .current_versions sed 's/^/\\/g; s/\]/\\]/g')"
           NEXT="$(< .next_versions sed 's/^/\\/g; s/\]/\\]/g')"
-
           sed -i "s/$CURRENT/$NEXT/g" .github/workflows/ci.yml
+
+          # Update the upload-prebuilt-test-rustdocs matrix using the same next version
+          yq '.jobs.upload-prebuilt-test-rustdocs.strategy.matrix.toolchain' .github/workflows/ci.yml -o json | \
+            python -m json.tool --compact | \
+            sed 's/,/, /g' \
+            >.current_upload_versions
+
+          yq '.jobs.upload-prebuilt-test-rustdocs.strategy.matrix.toolchain as $versions |
+              [$versions[] | select(. != "beta" and . != "stable")] as $numerical_versions |
+              [$versions[] | select(. == "beta" or . == "stable")] as $non_numerical_versions |
+              (
+                  [$numerical_versions[] | sub("\d+\.(\d+)(?:\.\d+)?", "${1}") | to_number] |
+                  sort |
+                  .[-1]
+              ) as $max_named_minor |
+              [$numerical_versions[], "1.\($max_named_minor + 1)", $non_numerical_versions[]] as $next_versions |
+              $next_versions
+            ' .github/workflows/ci.yml -o json | \
+            python -m json.tool --compact | \
+            sed 's/,/, /g' \
+            >.next_upload_versions
+
+          CURRENT_UP="$(< .current_upload_versions sed 's/^/\\/g; s/\]/\\]/g')"
+          NEXT_UP="$(< .next_upload_versions sed 's/^/\\/g; s/\]/\\]/g')"
+          sed -i "s/$CURRENT_UP/$NEXT_UP/g" .github/workflows/ci.yml
 
       - name: upload ci.yml artifact for use in PR
         uses: actions/upload-artifact@v4

@@ -1,3 +1,5 @@
+#![no_std]
+
 // should trigger lint for becoming packed
 #[repr(packed)]
 pub struct StructBecomesPacked;

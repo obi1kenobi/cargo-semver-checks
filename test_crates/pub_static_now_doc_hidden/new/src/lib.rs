@@ -1,3 +1,5 @@
+#![no_std]
+
 pub static GlobalStaticA: i32 = 0;
 //Should be caught on adding #[doc(hidden)]
 #[doc(hidden)]

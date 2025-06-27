@@ -32,12 +32,12 @@ impl GlobalConfig {
     /// `cargo-semver-checks`'s color output
     pub fn new() -> Self {
         let stdout_choice = anstream::stdout().current_choice();
-        let stderr_choice = anstream::stdout().current_choice();
+        let stderr_choice = anstream::stderr().current_choice();
 
         Self {
             level: None,
             handlebars: make_handlebars_registry(),
-            minimum_rustc_version: semver::Version::new(1, 83, 0),
+            minimum_rustc_version: semver::Version::new(1, 85, 0),
             stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
             stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
             feature_flags: HashSet::new(),

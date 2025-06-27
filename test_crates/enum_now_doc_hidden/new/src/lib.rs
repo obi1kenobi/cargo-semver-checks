@@ -1,3 +1,5 @@
+#![no_std]
+
 mod MyNonPublicMod {
     // despite adding #[doc(hidden)], this enum is in a
     // private mod, so it isn't part of the crate's public

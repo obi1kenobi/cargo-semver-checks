@@ -1,3 +1,5 @@
+#![no_std]
+
 // Explicit discriminant changed values. By doing so, it changed the implicit
 // discriminant's value as well. Should be reported.
 #[repr(isize)]

@@ -1,3 +1,5 @@
+#![no_std]
+
 // This crate's test cases were separated into smaller files for easier
 // management and debugging. 
 

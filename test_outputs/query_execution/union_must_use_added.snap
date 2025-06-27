@@ -1,7 +1,7 @@
 ---
 source: src/query.rs
-assertion_line: 769
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/union_must_use_added/": [
@@ -12,8 +12,8 @@ expression: "&query_execution_results"
         String("union_must_use_added"),
         String("UnionToMustUseUnion"),
       ]),
-      "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(7),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
@@ -24,8 +24,8 @@ expression: "&query_execution_results"
         String("union_must_use_added"),
         String("UnionToMustUseMessageUnion"),
       ]),
-      "span_begin_line": Uint64(10),
-      "span_end_line": Uint64(12),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(14),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

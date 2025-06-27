@@ -1,19 +1,20 @@
 ---
 source: src/query.rs
-assertion_line: 769
 expression: "&query_execution_results"
+snapshot_kind: text
 ---
 {
   "./test_crates/enum_struct_field_hidden_from_public_api/": [
     {
       "enum_name": String("AddedVariantField"),
+      "field_count": Uint64(1),
       "field_name": String("1"),
       "path": List([
         String("enum_struct_field_hidden_from_public_api"),
         String("AddedVariantField"),
       ]),
-      "span_begin_line": Uint64(41),
-      "span_end_line": Uint64(41),
+      "span_begin_line": Uint64(43),
+      "span_end_line": Uint64(43),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("TupleVariant"),
     },
@@ -21,13 +22,14 @@ expression: "&query_execution_results"
   "./test_crates/enum_tuple_variant_field_added/": [
     {
       "enum_name": String("PublicEnum"),
+      "field_count": Uint64(2),
       "field_name": String("2"),
       "path": List([
         String("enum_tuple_variant_field_added"),
         String("PublicEnum"),
       ]),
-      "span_begin_line": Uint64(3),
-      "span_end_line": Uint64(3),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("TupleVariantWithFieldAdded"),
     },

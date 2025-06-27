@@ -1,9 +1,11 @@
+#![no_std]
+
 pub trait TraitWithTypeToBeDeprecated {
     // This associated type will be marked deprecated
     type TypeToDeprecated: Clone;
 
     // This associated type will be marked deprecated with a message
-    type TypeToDeprecatedMessage: ToString;
+    type TypeToDeprecatedMessage: Sync;
 
     // These types should not trigger the lint
     type TypeStaysNormal;

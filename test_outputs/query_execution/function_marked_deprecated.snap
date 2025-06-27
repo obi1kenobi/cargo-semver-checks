@@ -6,23 +6,27 @@ expression: "&query_execution_results"
   "./test_crates/function_marked_deprecated/": [
     {
       "name": String("function_to_deprecated"),
+      "parameters": List([]),
       "path": List([
         String("function_marked_deprecated"),
         String("function_to_deprecated"),
       ]),
-      "span_begin_line": Uint64(5),
-      "span_end_line": Uint64(7),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
     {
       "name": String("function_to_deprecated_message"),
+      "parameters": List([
+        String("input"),
+      ]),
       "path": List([
         String("function_marked_deprecated"),
         String("function_to_deprecated_message"),
       ]),
-      "span_begin_line": Uint64(10),
-      "span_end_line": Uint64(12),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(14),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
