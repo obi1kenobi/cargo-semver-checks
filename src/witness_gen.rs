@@ -47,10 +47,7 @@ fn run_witness_query(
             }
         })
         .with_context(|| {
-            format!(
-                "Error running witness query with input arguments {:?}",
-                arguments
-            )
+            format!("Error running witness query with input arguments {arguments:?}")
         })?;
 
     lint_result.extend(witness_results);
