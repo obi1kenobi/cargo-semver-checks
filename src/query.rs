@@ -6,6 +6,8 @@ use trustfall::{FieldValue, TransparentValue};
 
 use crate::ReleaseType;
 
+pub(crate) type QueryResults = BTreeMap<std::sync::Arc<str>, FieldValue>;
+
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum RequiredSemverUpdate {
@@ -331,7 +333,7 @@ impl WitnessQuery {
                     .get(inherit.as_str())
                     .cloned()
                     .ok_or(anyhow::anyhow!(
-                        "inherited output key `{inherit}` does not exist"
+                        "inherited output key `{inherit}` does not exist in {source_map:?}"
                     ))?,
                 // Set a constant
                 InheritedValue::Constant(value) => value.clone().into(),

@@ -8,12 +8,11 @@ use anyhow::Context;
 use clap::crate_version;
 use itertools::Itertools;
 use rayon::prelude::*;
-use trustfall::{FieldValue, TransparentValue};
-use trustfall_rustdoc::VersionedRustdocAdapter;
+use trustfall::TransparentValue;
 
 use crate::data_generation::DataStorage;
+use crate::query::QueryResults;
 use crate::witness_gen;
-use crate::Witness;
 use crate::{
     query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType, WitnessGeneration,
@@ -122,7 +121,7 @@ fn get_minimum_version_change(version: &semver::Version) -> VersionChange {
 fn print_triggered_lint(
     config: &mut GlobalConfig,
     semver_query: &SemverQuery,
-    results: Vec<BTreeMap<Arc<str>, FieldValue>>,
+    results: Vec<QueryResults>,
     witness_generation: &WitnessGeneration,
 ) -> anyhow::Result<()> {
     if let Some(ref_link) = semver_query.reference_link.as_deref() {
@@ -229,46 +228,6 @@ fn print_triggered_lint(
     }
 
     Ok(())
-}
-
-/// Helper function to map a given semver query, and its witness to a value for use in [`run_check_release`] to
-/// to an [`Option`].
-fn map_witness_queries<'query>(
-    semver_query: &'query SemverQuery,
-    lint_results: &Vec<BTreeMap<Arc<str>, FieldValue>>,
-    adapter: &VersionedRustdocAdapter,
-) -> Option<(
-    &'query SemverQuery,
-    Vec<anyhow::Result<BTreeMap<Arc<str>, FieldValue>>>,
-)> {
-    match semver_query.witness {
-        // Don't bother running the witness query unless both a witness query and template exist
-        Some(Witness {
-            witness_template: Some(_),
-            witness_query: Some(ref witness_query),
-            ..
-        }) => {
-            let witness_results = lint_results
-                .iter()
-                .cloned()
-                .map(|lint_result| {
-                    witness_gen::run_witness_query(&adapter, witness_query, lint_result)
-                })
-                .collect_vec();
-            Some((semver_query, witness_results))
-        }
-
-        // If no witness query exists, we still want to forward the existing output
-        Some(Witness {
-            witness_template: Some(_),
-            witness_query: None,
-            ..
-        }) => Some((
-            semver_query,
-            lint_results.iter().cloned().map(Result::Ok).collect_vec(),
-        )),
-        _ => None,
-    }
 }
 
 pub(super) fn run_check_release(
@@ -385,13 +344,8 @@ pub(super) fn run_check_release(
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
 
-    if let Some(ref _witness_dir) = witness_generation.witness_directory {
-        let _witness_results =
-            all_results
-                .par_iter()
-                .filter_map(|(semver_query, _, lint_results)| {
-                    map_witness_queries(&semver_query, lint_results, &adapter)
-                });
+    if let Some(ref witness_dir) = witness_generation.witness_directory {
+        witness_gen::run_witness_checks(config, witness_dir, &adapter, &all_results);
     }
 
     let mut results_with_errors = vec![];
