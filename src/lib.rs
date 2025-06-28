@@ -667,8 +667,7 @@ impl CrateReport {
                     // If user bumped the major version, any breaking change is accepted.
                     // So `required_bump` should be `None`.
                     ActualSemverUpdate::Major => panic!(
-                        "detected_bump is major, while required_bump is {:?}",
-                        required_bump
+                        "detected_bump is major, while required_bump is {required_bump:?}"
                     ),
                     ActualSemverUpdate::Minor => {
                         assert_eq!(required_bump, ReleaseType::Major);
