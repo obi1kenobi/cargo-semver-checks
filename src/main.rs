@@ -236,8 +236,7 @@ fn print_issue_url(config: &mut GlobalConfig) {
         Ok(c) => toml::to_string(&c).unwrap_or_else(|s| {
             writeln!(
                 config.stderr(),
-                "Error serializing cargo build configuration: {}",
-                s
+                "Error serializing cargo build configuration: {s}"
             )
             .expect("Failed to print error");
             String::default()
@@ -245,8 +244,7 @@ fn print_issue_url(config: &mut GlobalConfig) {
         Err(e) => {
             writeln!(
                 config.stderr(),
-                "Error loading cargo build configuration: {}",
-                e
+                "Error loading cargo build configuration: {e}"
             )
             .expect("Failed to print error");
             String::default()
