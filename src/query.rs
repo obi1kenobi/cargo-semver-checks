@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::Arc};
 
 use ron::extensions::Extensions;
 use serde::{Deserialize, Serialize};
@@ -312,7 +312,7 @@ pub struct WitnessQuery {
     /// These can be inherited from a previous query ([`InheritedValue::Inherited`]) or
     /// specified as [`InheritedValue::Constant`]s.
     #[serde(default)]
-    pub arguments: BTreeMap<String, InheritedValue>,
+    pub arguments: BTreeMap<Arc<str>, InheritedValue>,
 }
 
 impl WitnessQuery {
@@ -323,7 +323,7 @@ impl WitnessQuery {
     pub fn inherit_arguments_from(
         &self,
         source_map: &BTreeMap<std::sync::Arc<str>, FieldValue>,
-    ) -> anyhow::Result<BTreeMap<String, FieldValue>> {
+    ) -> anyhow::Result<BTreeMap<Arc<str>, FieldValue>> {
         let mut mapped = BTreeMap::new();
 
         for (key, value) in self.arguments.iter() {
@@ -338,7 +338,7 @@ impl WitnessQuery {
                 // Set a constant
                 InheritedValue::Constant(value) => value.clone().into(),
             };
-            mapped.insert(key.clone(), mapped_value);
+            mapped.insert(Arc::clone(key), mapped_value);
         }
 
         Ok(mapped)
