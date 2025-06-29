@@ -174,7 +174,7 @@ fn print_triggered_lint(
                 .context("Error instantiating semver query template.")
                 .expect("could not materialize template");
             config.log_info(|config| {
-                writeln!(config.stdout(), "  {}", message)?;
+                writeln!(config.stdout(), "  {message}")?;
                 Ok(())
             })?;
 
@@ -187,8 +187,7 @@ fn print_triggered_lint(
                     .join("\n");
                 writeln!(
                     config.stdout(),
-                    "\tlint rule output values:\n{}",
-                    indented_serde
+                    "\tlint rule output values:\n{indented_serde}"
                 )?;
                 Ok(())
             })?;
@@ -277,8 +276,8 @@ pub(super) fn run_check_release(
     };
 
     let change_message = match version_change.kind {
-        VersionChangeKind::Actual => format!("{}{} change", assume, change),
-        VersionChangeKind::Minimum => format!("no change; {}{}", assume, change),
+        VersionChangeKind::Actual => format!("{assume}{change} change"),
+        VersionChangeKind::Minimum => format!("no change; {assume}{change}"),
     };
 
     let index_storage = data_storage.create_indexes();

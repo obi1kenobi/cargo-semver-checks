@@ -17,7 +17,7 @@ fn run_on_crate_diff(
 ) {
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
 
-    cmd.current_dir(format!("test_crates/{}", test_crate_name))
+    cmd.current_dir(format!("test_crates/{test_crate_name}"))
         .args([
             "semver-checks",
             "check-release",
