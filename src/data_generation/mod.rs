@@ -58,7 +58,7 @@ pub(crate) struct IndexStorage<'a> {
 }
 
 impl IndexStorage<'_> {
-    pub(crate) fn create_adapter(&self) -> VersionedRustdocAdapter {
+    pub(crate) fn create_adapter(&self) -> VersionedRustdocAdapter<'_> {
         VersionedRustdocAdapter::new(&self.current_crate, Some(&self.baseline_crate))
             .expect("failed to construct adapter, this is a bug and should never happen")
     }

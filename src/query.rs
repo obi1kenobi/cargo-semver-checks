@@ -819,7 +819,25 @@ mod tests {
                 | "unsafe_inherent_method_target_feature_added"
         ) && rustc_version::version().is_ok_and(|version| version < Version::new(1, 86, 0))
         {
-            eprintln!("skipping query execution test for lint `static_became_unsafe` since data for it isn't available in Rust prior to 1.85");
+            eprintln!("skipping query execution test for lint `{query_name}` since data for it isn't available in Rust prior to 1.86");
+            return;
+        }
+
+        // TODO: Remove this when Rust 1.89 is no longer supported by cargo-semver-checks.
+        // A change in the rustdoc JSON representation for `#[must_use]` in that version
+        // made the lint logic not match the attribute.
+        if matches!(
+            query_name,
+            "enum_must_use_added"
+                | "function_must_use_added"
+                | "inherent_method_must_use_added"
+                | "struct_must_use_added"
+                | "trait_must_use_added"
+                | "union_must_use_added"
+        ) && rustc_version::version()
+            .is_ok_and(|version| version.major == 1 && version.minor == 89)
+        {
+            eprintln!("skipping query execution test for lint `{query_name}` because its rustdoc JSON representation in Rust 1.89 isn't actually legal Rust");
             return;
         }
 
