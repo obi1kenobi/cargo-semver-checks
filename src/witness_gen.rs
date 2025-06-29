@@ -148,6 +148,7 @@ fn map_to_witness_text<'query>(
     }
 }
 
+#[expect(clippy::type_complexity)]
 pub(crate) fn run_witness_checks(
     config: &GlobalConfig,
     _witness_dir: &Path,
