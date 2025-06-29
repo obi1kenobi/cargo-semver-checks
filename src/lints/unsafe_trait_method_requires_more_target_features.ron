@@ -32,6 +32,12 @@ SemverQuery(
                                 new_feature: name @output @tag
                             }
 
+                            # Don't trigger the lint if the function became uncallable on the current target triple.
+                            # We have a separate lint for that.
+                            requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                valid_for_current_target @filter(op: "=", value: ["$false"])
+                            }
+
                             span_: span @optional {
                                 filename @output
                                 begin_line @output
@@ -62,6 +68,12 @@ SemverQuery(
 
                             requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                 name @filter(op: "=", value: ["%new_feature"])
+                            }
+
+                            # Don't trigger the lint if the function wasn't callable on the current target triple.
+                            # Nothing could have been using it here in the first place, so there's nothing to break.
+                            requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                valid_for_current_target @filter(op: "=", value: ["$false"])
                             }
                         }
                     }
