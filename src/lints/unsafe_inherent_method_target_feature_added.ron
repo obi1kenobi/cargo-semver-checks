@@ -35,6 +35,12 @@ SemverQuery(
                                     globally_enabled @filter(op: "=", value: ["$false"])
                                 }
 
+                                # Don't trigger the lint if the function became uncallable on the current target triple.
+                                # We have a separate lint for that.
+                                requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                    valid_for_current_target @filter(op: "=", value: ["$false"])
+                                }
+
                                 span_: span @optional {
                                     filename @output
                                     begin_line @output
