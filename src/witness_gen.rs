@@ -21,7 +21,7 @@ use crate::{
 /// results with the existing lint results. Each query must match exactly once, and will fail with an
 /// [`anyhow::Error`] otherwise.
 ///
-/// Overlapping output keys between the [`WitnessQuery`] and the [`SemverQuery`](crate::query::SemverQuery)
+/// Overlapping output keys between the [`WitnessQuery`] and the [`SemverQuery`]
 /// will result in an error.
 fn run_witness_query(
     adapter: &VersionedRustdocAdapter,
