@@ -11,6 +11,7 @@ use rayon::prelude::*;
 use trustfall::{FieldValue, TransparentValue};
 
 use crate::data_generation::DataStorage;
+use crate::witness_gen;
 use crate::{
     query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType, WitnessGeneration,
@@ -340,6 +341,10 @@ pub(super) fn run_check_release(
             Ok((semver_query, time_to_decide, results))
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
+
+    if let Some(ref witness_dir) = witness_generation.witness_directory {
+        witness_gen::run_witness_checks(config, witness_dir, &adapter, &all_results);
+    }
 
     let mut results_with_errors = vec![];
     let mut results_with_warnings = vec![];

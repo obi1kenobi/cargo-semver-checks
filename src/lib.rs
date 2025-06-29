@@ -9,6 +9,7 @@ mod query;
 mod rustdoc_gen;
 mod templating;
 mod util;
+mod witness_gen;
 
 use anyhow::Context;
 use cargo_metadata::PackageId;

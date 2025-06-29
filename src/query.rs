@@ -321,7 +321,7 @@ impl WitnessQuery {
     pub fn inherit_arguments_from(
         &self,
         source_map: &BTreeMap<std::sync::Arc<str>, FieldValue>,
-    ) -> anyhow::Result<BTreeMap<Arc<str>, TransparentValue>> {
+    ) -> anyhow::Result<BTreeMap<Arc<str>, FieldValue>> {
         let mut mapped = BTreeMap::new();
 
         for (key, value) in self.arguments.iter() {
@@ -330,12 +330,11 @@ impl WitnessQuery {
                 InheritedValue::Inherited { inherit } => source_map
                     .get(inherit.as_str())
                     .cloned()
-                    .map(Into::into)
                     .ok_or(anyhow::anyhow!(
-                        "inherited output key `{inherit}` does not exist"
+                        "inherited output key `{inherit}` does not exist in {source_map:?}"
                     ))?,
                 // Set a constant
-                InheritedValue::Constant(value) => value.clone(),
+                InheritedValue::Constant(value) => value.clone().into(),
             };
             mapped.insert(Arc::clone(key), mapped_value);
         }
