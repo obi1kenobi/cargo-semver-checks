@@ -1,14 +1,19 @@
-use std::{collections::BTreeMap, path::Path, sync::Arc, time::Duration};
+use std::{
+    collections::{btree_map, BTreeMap},
+    path::Path,
+    sync::Arc,
+    time::Duration,
+};
 
 use anyhow::{Context, Result};
 use handlebars::Handlebars;
 use itertools::Itertools;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-use trustfall::TransparentValue;
+use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::VersionedRustdocAdapter;
 
 use crate::{
-    query::{QueryResults, Witness, WitnessQuery},
+    query::{Witness, WitnessQuery},
     GlobalConfig, SemverQuery,
 };
 
@@ -17,19 +22,18 @@ use crate::{
 /// [`anyhow::Error`] otherwise.
 ///
 /// Overlapping output keys between the [`WitnessQuery`] and the [`SemverQuery`](crate::query::SemverQuery)
-/// will result in the result from the [`WitnessQuery`] silently overriding the same key from the
-/// [`SemverQuery`](crate::query::SemverQuery).
+/// will result in an error.
 fn run_witness_query(
     adapter: &VersionedRustdocAdapter,
     witness_query: &WitnessQuery,
-    mut lint_result: QueryResults,
-) -> Result<QueryResults> {
+    mut lint_result: BTreeMap<Arc<str>, FieldValue>,
+) -> Result<BTreeMap<Arc<str>, FieldValue>> {
     let arguments = witness_query
         .inherit_arguments_from(&lint_result)
         .context("Error inheriting arguments in witness query")?;
 
     let witness_results = adapter
-        .run_query(&witness_query.query, arguments.clone())
+        .run_query(&witness_query.query, arguments)
         .and_then(|mut query_results| {
             if let Some(query_result) = query_results.next() {
                 match query_results.next() {
@@ -47,17 +51,33 @@ fn run_witness_query(
             }
         })
         .with_context(|| {
-            format!("Error running witness query with input arguments {arguments:?}")
+            format!(
+                "Error running witness query with input arguments {:?}",
+                witness_query.inherit_arguments_from(&lint_result).expect("failed to reconstruct witness query arguments while creating error")
+            )
         })?;
 
-    lint_result.extend(witness_results);
+    for (key, value) in witness_results {
+        match lint_result.entry(key) {
+            btree_map::Entry::Vacant(entry) => {
+                entry.insert(value);
+            }
+            btree_map::Entry::Occupied(entry) => anyhow::bail!(
+                "witness query tried to output to existing key `{}`, overriding `{:?}` with `{:?}`",
+                entry.key(),
+                entry.get(),
+                value,
+            ),
+        }
+    }
+
     Ok(lint_result)
 }
 
 fn generate_witness_text(
     handlebars: &Handlebars,
     witness_template: &str,
-    witness_results: QueryResults,
+    witness_results: BTreeMap<Arc<str>, FieldValue>,
 ) -> Result<String> {
     let pretty_witness_data: BTreeMap<Arc<str>, TransparentValue> = witness_results
         .into_iter()
@@ -72,7 +92,7 @@ fn generate_witness_text(
 fn map_to_witness_text<'query>(
     handlebars: &Handlebars,
     semver_query: &'query SemverQuery,
-    lint_results: &[QueryResults],
+    lint_results: &[BTreeMap<Arc<str>, FieldValue>],
     adapter: &VersionedRustdocAdapter,
 ) -> Option<(&'query SemverQuery, Vec<Result<String>>)> {
     match semver_query.witness {
@@ -88,16 +108,13 @@ fn map_to_witness_text<'query>(
                 .map(|lint_result| {
                     let witness_results = run_witness_query(adapter, witness_query, lint_result)
                         .with_context(|| {
-                            format!(
-                                "Error running witness query for {}: {}",
-                                semver_query.id, semver_query.human_readable_name
-                            )
+                            format!("Error running witness query for {}", semver_query.id)
                         })?;
                     generate_witness_text(handlebars, witness_template, witness_results)
                         .with_context(|| {
                             format!(
-                                "Error generating witness text for witness {}: {}",
-                                semver_query.id, semver_query.human_readable_name
+                                "Error generating witness text for witness {}",
+                                semver_query.id
                             )
                         })
                 })
@@ -119,8 +136,8 @@ fn map_to_witness_text<'query>(
                     generate_witness_text(handlebars, witness_template, lint_result).with_context(
                         || {
                             format!(
-                                "Error generating witness text for queryless witness {}: {}",
-                                semver_query.id, semver_query.human_readable_name
+                                "Error generating witness text for queryless witness {}",
+                                semver_query.id
                             )
                         },
                     )
@@ -135,7 +152,7 @@ pub(crate) fn run_witness_checks(
     config: &GlobalConfig,
     _witness_dir: &Path,
     adapter: &VersionedRustdocAdapter,
-    lint_results: &[(&SemverQuery, Duration, Vec<QueryResults>)],
+    lint_results: &[(&SemverQuery, Duration, Vec<BTreeMap<Arc<str>, FieldValue>>)],
 ) {
     // Have to pull out handlebars, since &GlobalConfig cannot be shared across threads
     let handlebars = config.handlebars();

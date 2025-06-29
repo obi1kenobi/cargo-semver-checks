@@ -8,10 +8,9 @@ use anyhow::Context;
 use clap::crate_version;
 use itertools::Itertools;
 use rayon::prelude::*;
-use trustfall::TransparentValue;
+use trustfall::{FieldValue, TransparentValue};
 
 use crate::data_generation::DataStorage;
-use crate::query::QueryResults;
 use crate::witness_gen;
 use crate::{
     query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
@@ -121,7 +120,7 @@ fn get_minimum_version_change(version: &semver::Version) -> VersionChange {
 fn print_triggered_lint(
     config: &mut GlobalConfig,
     semver_query: &SemverQuery,
-    results: Vec<QueryResults>,
+    results: Vec<BTreeMap<Arc<str>, FieldValue>>,
     witness_generation: &WitnessGeneration,
 ) -> anyhow::Result<()> {
     if let Some(ref_link) = semver_query.reference_link.as_deref() {

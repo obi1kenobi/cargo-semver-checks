@@ -6,8 +6,6 @@ use trustfall::{FieldValue, TransparentValue};
 
 use crate::ReleaseType;
 
-pub(crate) type QueryResults = BTreeMap<std::sync::Arc<str>, FieldValue>;
-
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum RequiredSemverUpdate {
