@@ -556,6 +556,13 @@ note: skipped the following crates since they have no library target: {skipped}"
                 let start = std::time::Instant::now();
                 let name = selected.current_crate_data.name.clone();
 
+                let current_data_request =
+                    generate_data_request(config, &*current_loader, &selected.current_crate_data)
+                        .map_err(|err| log_terminal_error(config, err))?;
+                let baseline_data_request =
+                    generate_data_request(config, &*baseline_loader, &selected.baseline_crate_data)
+                        .map_err(|err| log_terminal_error(config, err))?;
+
                 let data_storage = generate_crate_data(
                     config,
                     generation_settings,
@@ -563,6 +570,8 @@ note: skipped the following crates since they have no library target: {skipped}"
                     &*baseline_loader,
                     &selected.current_crate_data,
                     &selected.baseline_crate_data,
+                    &current_data_request,
+                    &baseline_data_request,
                 )
                 .map_err(|err| log_terminal_error(config, err))?;
 
@@ -745,6 +754,15 @@ impl WitnessGeneration {
     }
 }
 
+fn generate_data_request<'a>(
+    config: &mut GlobalConfig,
+    loader: &'a dyn rustdoc_gen::RustdocGenerator,
+    crate_data: &rustdoc_gen::CrateDataForRustdoc<'a>,
+) -> Result<Option<data_generation::CrateDataRequest<'a>>, TerminalError> {
+    loader.generate_data_request(config, crate_data)
+}
+
+#[expect(clippy::too_many_arguments)]
 fn generate_crate_data(
     config: &mut GlobalConfig,
     generation_settings: data_generation::GenerationSettings,
@@ -752,12 +770,14 @@ fn generate_crate_data(
     baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
     current_crate_data: &rustdoc_gen::CrateDataForRustdoc<'_>,
     baseline_crate_data: &rustdoc_gen::CrateDataForRustdoc<'_>,
+    current_data_request: &Option<data_generation::CrateDataRequest<'_>>,
+    baseline_data_request: &Option<data_generation::CrateDataRequest<'_>>,
 ) -> Result<DataStorage, TerminalError> {
     let current_crate = current_loader.load_rustdoc(
         config,
         generation_settings,
         data_generation::CacheSettings::ReadWrite(()),
-        current_crate_data,
+        current_data_request,
     )?;
 
     let baseline_crate_name = &baseline_crate_data.name;
@@ -768,7 +788,7 @@ fn generate_crate_data(
             config,
             generation_settings,
             data_generation::CacheSettings::ReadWrite(()),
-            baseline_crate_data,
+            baseline_data_request,
         )?;
 
         // The baseline rustdoc JSON may have been cached; ensure its rustdoc version matches
@@ -791,7 +811,7 @@ fn generate_crate_data(
                 config,
                 generation_settings,
                 data_generation::CacheSettings::WriteOnly(()),
-                baseline_crate_data,
+                baseline_data_request,
             )?;
 
             assert_eq!(

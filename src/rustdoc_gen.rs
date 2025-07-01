@@ -14,12 +14,8 @@ use crate::GlobalConfig;
 
 #[derive(Debug, Clone)]
 pub(crate) enum CrateSource<'a> {
-    Registry {
-        crate_: &'a tame_index::IndexVersion,
-    },
-    ManifestPath {
-        manifest: &'a Manifest,
-    },
+    Registry { crate_: tame_index::IndexVersion },
+    ManifestPath { manifest: &'a Manifest },
 }
 
 impl CrateSource<'_> {
@@ -246,14 +242,11 @@ pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) build_target: Option<&'a str>,
 }
 
-fn generate_rustdoc(
+pub(crate) fn generate_data_request<'a>(
     config: &mut GlobalConfig,
-    generation_settings: super::data_generation::GenerationSettings,
-    cache_settings: super::data_generation::CacheSettings<()>,
-    target_root: PathBuf,
-    crate_source: CrateSource,
-    crate_data: &CrateDataForRustdoc<'_>,
-) -> Result<VersionedStorage, TerminalError> {
+    crate_source: CrateSource<'a>,
+    crate_data: &CrateDataForRustdoc<'a>,
+) -> CrateDataRequest<'a> {
     let extra_features: BTreeSet<Cow<'_, str>> = crate_source
         .feature_list_from_config(config, crate_data.feature_config)
         .into_iter()
@@ -264,7 +257,7 @@ fn generate_rustdoc(
         FeaturesGroup::All | FeaturesGroup::Default | FeaturesGroup::Heuristic
     );
 
-    let request = match crate_source {
+    match crate_source {
         CrateSource::Registry { crate_, .. } => CrateDataRequest::from_index(
             crate_,
             default_features,
@@ -285,13 +278,21 @@ fn generate_rustdoc(
                 crate::rustdoc_gen::CrateType::Baseline { .. }
             ),
         ),
-    };
+    }
+}
 
+fn generate_rustdoc(
+    config: &mut GlobalConfig,
+    generation_settings: super::data_generation::GenerationSettings,
+    cache_settings: super::data_generation::CacheSettings<()>,
+    target_root: PathBuf,
+    data_request: &CrateDataRequest<'_>,
+) -> Result<VersionedStorage, TerminalError> {
     let cache_dir = target_root.join("cache");
     let cache_settings = cache_settings.with_path(cache_dir.as_path());
 
     let mut callbacks = crate::callbacks::Callbacks::new(config);
-    request.resolve(
+    data_request.resolve(
         &target_root,
         cache_settings,
         generation_settings,
@@ -300,12 +301,18 @@ fn generate_rustdoc(
 }
 
 pub(crate) trait RustdocGenerator {
+    fn generate_data_request<'data>(
+        &'data self,
+        config: &mut GlobalConfig,
+        crate_data: &CrateDataForRustdoc<'data>,
+    ) -> Result<Option<CrateDataRequest<'data>>, TerminalError>;
+
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
-        crate_data: &CrateDataForRustdoc<'_>,
+        data_request: &Option<CrateDataRequest<'_>>,
     ) -> Result<VersionedStorage, TerminalError>;
 }
 
@@ -321,12 +328,20 @@ impl RustdocFromFile {
 }
 
 impl RustdocGenerator for RustdocFromFile {
+    fn generate_data_request<'data>(
+        &'data self,
+        _config: &mut GlobalConfig,
+        _crate_data: &CrateDataForRustdoc<'data>,
+    ) -> Result<Option<CrateDataRequest<'data>>, TerminalError> {
+        Ok(None)
+    }
+
     fn load_rustdoc(
         &self,
         _config: &mut GlobalConfig,
         _generation_settings: super::data_generation::GenerationSettings,
         _cache_settings: super::data_generation::CacheSettings<()>,
-        _crate_data: &CrateDataForRustdoc<'_>,
+        _data_request: &Option<CrateDataRequest<'_>>,
     ) -> Result<VersionedStorage, TerminalError> {
         trustfall_rustdoc::load_rustdoc(&self.path, None)
             .map_err(anyhow::Error::from)
@@ -420,13 +435,11 @@ impl RustdocFromProjectRoot {
 }
 
 impl RustdocGenerator for RustdocFromProjectRoot {
-    fn load_rustdoc(
-        &self,
+    fn generate_data_request<'data>(
+        &'data self,
         config: &mut GlobalConfig,
-        generation_settings: super::data_generation::GenerationSettings,
-        cache_settings: super::data_generation::CacheSettings<()>,
-        crate_data: &CrateDataForRustdoc<'_>,
-    ) -> Result<VersionedStorage, TerminalError> {
+        crate_data: &CrateDataForRustdoc<'data>,
+    ) -> Result<Option<CrateDataRequest<'data>>, TerminalError> {
         let manifest: &Manifest = self.manifests.get(&crate_data.name).ok_or_else(|| {
             if let Some(duplicates) = self.duplicate_packages.get(&crate_data.name) {
                 let duplicates = duplicates.iter().map(|p| p.display()).join("\n  ");
@@ -455,13 +468,32 @@ impl RustdocGenerator for RustdocFromProjectRoot {
                 }
             }
         }).into_terminal_result()?;
+
+        Ok(Some(generate_data_request(
+            config,
+            CrateSource::ManifestPath { manifest },
+            crate_data,
+        )))
+    }
+
+    fn load_rustdoc(
+        &self,
+        config: &mut GlobalConfig,
+        generation_settings: super::data_generation::GenerationSettings,
+        cache_settings: super::data_generation::CacheSettings<()>,
+        data_request: &Option<CrateDataRequest<'_>>,
+    ) -> Result<VersionedStorage, TerminalError> {
+        let Some(data_request) = data_request else {
+            return Err(anyhow::anyhow!("`data_request` was unexpectedly `None`"))
+                .into_terminal_result();
+        };
+
         generate_rustdoc(
             config,
             generation_settings,
             cache_settings,
             self.target_root.clone(),
-            CrateSource::ManifestPath { manifest },
-            crate_data,
+            data_request,
         )
     }
 }
@@ -519,15 +551,23 @@ fn extract_tree(tree: gix::Id<'_>, target: &std::path::Path) -> anyhow::Result<(
 }
 
 impl RustdocGenerator for RustdocFromGitRevision {
+    fn generate_data_request<'data>(
+        &'data self,
+        config: &mut GlobalConfig,
+        crate_data: &CrateDataForRustdoc<'data>,
+    ) -> Result<Option<CrateDataRequest<'data>>, TerminalError> {
+        self.path.generate_data_request(config, crate_data)
+    }
+
     fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
-        crate_data: &CrateDataForRustdoc<'_>,
+        data_request: &Option<CrateDataRequest<'_>>,
     ) -> Result<VersionedStorage, TerminalError> {
         self.path
-            .load_rustdoc(config, generation_settings, cache_settings, crate_data)
+            .load_rustdoc(config, generation_settings, cache_settings, data_request)
     }
 }
 
@@ -678,13 +718,11 @@ fn choose_baseline_version(
 }
 
 impl RustdocGenerator for RustdocFromRegistry {
-    fn load_rustdoc(
-        &self,
+    fn generate_data_request<'data>(
+        &'data self,
         config: &mut GlobalConfig,
-        generation_settings: super::data_generation::GenerationSettings,
-        cache_settings: super::data_generation::CacheSettings<()>,
-        crate_data: &CrateDataForRustdoc<'_>,
-    ) -> Result<VersionedStorage, TerminalError> {
+        crate_data: &CrateDataForRustdoc<'data>,
+    ) -> Result<Option<CrateDataRequest<'data>>, TerminalError> {
         let lock = acquire_cargo_global_package_lock(config).into_terminal_result()?;
         let validated_name = crate_data
             .name
@@ -722,7 +760,7 @@ impl RustdocGenerator for RustdocFromRegistry {
 
         let crate_ = crate_
             .versions
-            .iter()
+            .into_iter()
             .find(|v| {
                 semver::Version::parse(v.version.as_str()).ok().as_ref() == Some(&base_version)
             })
@@ -735,13 +773,31 @@ impl RustdocGenerator for RustdocFromRegistry {
             })
             .into_terminal_result()?;
 
+        Ok(Some(generate_data_request(
+            config,
+            CrateSource::Registry { crate_ },
+            crate_data,
+        )))
+    }
+
+    fn load_rustdoc(
+        &self,
+        config: &mut GlobalConfig,
+        generation_settings: super::data_generation::GenerationSettings,
+        cache_settings: super::data_generation::CacheSettings<()>,
+        data_request: &Option<CrateDataRequest<'_>>,
+    ) -> Result<VersionedStorage, TerminalError> {
+        let Some(data_request) = data_request else {
+            return Err(anyhow::anyhow!("`data_request` was unexpectedly `None`"))
+                .into_terminal_result();
+        };
+
         generate_rustdoc(
             config,
             generation_settings,
             cache_settings,
             self.target_root.clone(),
-            CrateSource::Registry { crate_ },
-            crate_data,
+            data_request,
         )
     }
 }
