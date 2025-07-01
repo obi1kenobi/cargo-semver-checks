@@ -45,6 +45,7 @@ jobs:
       - run-on-ref-slice-fork-windows
       - run-on-tokio-explicit
       - run-on-tokio-implicit
+      - run-on-sdl3-sys-version-without-metadata
       - run-on-perf-event-open-sys2
       - fails-on-too-old-rustc
     if: ${{ success() || failure() }}  # Run this job even if a dependency has failed.
@@ -1841,6 +1842,66 @@ jobs:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
+  # Test that version without metadata now works for sdl3-sys
+  run-on-sdl3-sys-version-without-metadata:
+    name: 'Semver: sdl3-sys version without metadata should work'
+    runs-on: ubuntu-latest
+    needs:
+      - build-binary
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      - name: Checkout sdl3-sys
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: 'maia-s/sdl3-sys-rs'
+          ref: 'sdl3-sys-0.4'
+          path: 'subject'
+
+      - name: Install rust
+        id: toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
+
+      - name: Restore binary
+        uses: actions/cache/restore@v4
+        with:
+          path: bins/
+          key: bins-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
+      - name: Restore rustdoc
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
+
+      - name: Restore cargo index and rustdoc target dir
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            subject/target/semver-checks/local-sdl3_sys-0_4_9_SDL3_3_2_10
+
+      - name: Run semver-checks with version without metadata
+        run: |
+          cd subject/sdl3-sys
+          ../../bins/cargo-semver-checks semver-checks check-release \
+            --baseline-version 0.4.7 --verbose
+
+      - name: Save rustdoc
+        uses: actions/cache/save@v4
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          path: subject/target/semver-checks/cache
 
   run-on-perf-event-open-sys2:
     # cargo-semver-checks failed to find the generated rustdoc JSON
