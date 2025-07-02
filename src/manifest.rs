@@ -76,9 +76,17 @@ pub(crate) struct MetadataTable {
 /// or `[workspace.metadata]`.
 #[derive(Debug, Clone, Deserialize)]
 #[non_exhaustive]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct SemverChecksTable {
     /// Holds the `lints` table, if it is declared.
     pub(crate) lints: Option<LintTable>,
+    /// Corresponds to the `--default-features` CLI flag
+    pub(crate) default_features: Option<bool>,
+    /// Corresponds to the `--only-explicit-features` CLI flag
+    pub(crate) only_explicit_features: Option<bool>,
+    /// Corresponds to the `--features` CLI flag
+    #[serde(default, deserialize_with = "deserialize_features")]
+    pub(crate) features: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -91,7 +99,7 @@ pub(crate) struct LintTable {
     /// as just a missing field)
     ///
     /// Currently, we also read `lints.workspace`, but having this key
-    /// in a Cargo.toml manifest is invalid if there is no `[workspace.lints]
+    /// in a Cargo.toml manifest is invalid if there is no `[workspace.lints]`
     /// table in the workspace manifest.  Since we are storing our lint config in
     /// `[workspace.metadata.*]` for now, this could be the case.  If either this
     /// field is true or `lints.workspace` is set, we should read the workspace
@@ -166,7 +174,7 @@ impl LintTable {
 #[serde(untagged)]
 pub(crate) enum OverrideConfig {
     /// Specify both lint level and required update by name, e.g.
-    /// `lint_name = { level = "deny", required-update = "major" }
+    /// `lint_name = { level = "deny", required-update = "major" }`
     #[serde(rename_all = "kebab-case")]
     Both {
         level: LintLevel,
@@ -179,7 +187,7 @@ pub(crate) enum OverrideConfig {
         priority: i64,
     },
     /// Specify just lint level by name, with optional priority.
-    /// `lint_name = { level = "deny" }
+    /// `lint_name = { level = "deny" }`
     #[serde(rename_all = "kebab-case")]
     LintLevel {
         level: LintLevel,
@@ -187,7 +195,7 @@ pub(crate) enum OverrideConfig {
         priority: i64,
     },
     /// Specify just required update by name, with optional priority.
-    /// `lint_name = { required-update = "minor" }
+    /// `lint_name = { required-update = "minor" }`
     #[serde(rename_all = "kebab-case")]
     RequiredUpdate {
         required_update: RequiredSemverUpdate,
@@ -195,7 +203,7 @@ pub(crate) enum OverrideConfig {
         priority: i64,
     },
     /// Shorthand for specifying just a lint level and leaving
-    /// the other members (required_update and priority) as default: e.g.,
+    /// the other members (`required_update` and `priority`) as default: e.g.,
     /// `lint_name = "deny"`
     Shorthand(LintLevel),
 }
@@ -218,6 +226,23 @@ where
             Either set `lints.workspace = true` or omit the key entirely.",
         )),
     }
+}
+
+/// Deserializes the `features` a comma-separated string as an `Vec<Str>`
+fn deserialize_features<'de, D>(de: D) -> Result<Vec<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let option = Option::<String>::deserialize(de)?;
+    Ok(option
+        .map(|s| {
+            s.split(',')
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .map(String::from)
+                .collect()
+        })
+        .unwrap_or_default())
 }
 
 /// Helper function to deserialize an optional lint table from a [`serde_json::Value`]
@@ -248,6 +273,11 @@ mod tests {
             version = "1.2.3"
             edition = "2021"
 
+            [package.metadata.cargo-semver-checks]
+            default-features = false
+            only-explicit-features = true
+            features = "foo,bar"
+
             [package.metadata.cargo-semver-checks.lints]
             workspace = true
             two = "deny"
@@ -274,11 +304,15 @@ mod tests {
             .metadata
             .expect("Workspace metadata should be present");
 
-        let pkg_table = package_metadata
+        let pkg = package_metadata
             .config
-            .expect("Semver checks table should be present")
-            .lints
-            .expect("Lint table should be present");
+            .expect("Semver checks table should be present");
+
+        assert_eq!(pkg.default_features, Some(true));
+        assert_eq!(pkg.only_explicit_features, Some(false));
+        assert_eq!(pkg.features, vec!["foo".to_string(), "bar".to_string()]);
+
+        let pkg_table = pkg.lints.expect("Lint table should be present");
 
         assert!(
             pkg_table.workspace,
