@@ -118,7 +118,7 @@ impl fmt::Display for CommandResult {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.result {
             Ok(success) => writeln!(f, "success: {success}")?,
-            Err(e) => writeln!(f, "--- error ---\n{e}")?,
+            Err(e) => writeln!(f, "--- error ---\n{e:?}")?,
         };
 
         write!(f, "{}", self.output)

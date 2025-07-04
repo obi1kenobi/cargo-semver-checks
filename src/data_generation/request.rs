@@ -13,8 +13,8 @@ use super::generate::GenerationSettings;
 use super::progress::{CallbackHandler, ProgressCallbacks};
 
 #[derive(Debug, Clone)]
-pub(super) struct RegistryRequest {
-    index_entry: tame_index::IndexVersion,
+pub(super) struct RegistryRequest<'a> {
+    index_entry: &'a tame_index::IndexVersion,
 }
 
 #[derive(Debug, Clone)]
@@ -24,7 +24,7 @@ pub(super) struct ProjectRequest<'a> {
 
 #[derive(Debug, Clone)]
 pub(super) enum RequestKind<'a> {
-    Registry(RegistryRequest),
+    Registry(RegistryRequest<'a>),
     LocalProject(ProjectRequest<'a>),
 }
 
@@ -212,7 +212,7 @@ pub(crate) struct CrateDataRequest<'a> {
 
 impl<'a> CrateDataRequest<'a> {
     pub(crate) fn from_index(
-        index_entry: tame_index::IndexVersion,
+        index_entry: &'a tame_index::IndexVersion,
         default_features: bool,
         extra_features: BTreeSet<Cow<'a, str>>,
         build_target: Option<&'a str>,

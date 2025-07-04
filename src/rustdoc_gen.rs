@@ -2,7 +2,7 @@ use std::borrow::Cow;
 use std::collections::{BTreeSet, HashMap};
 use std::path::PathBuf;
 
-use anyhow::{bail, Context as _};
+use anyhow::{anyhow, bail, Context};
 use itertools::Itertools;
 use serde::Serialize;
 use tame_index::IndexKrate;
@@ -14,8 +14,12 @@ use crate::GlobalConfig;
 
 #[derive(Debug, Clone)]
 pub(crate) enum CrateSource<'a> {
-    Registry { crate_: tame_index::IndexVersion },
-    ManifestPath { manifest: &'a Manifest },
+    Registry {
+        versioned_krate: &'a tame_index::IndexVersion,
+    },
+    ManifestPath {
+        manifest: &'a Manifest,
+    },
 }
 
 impl CrateSource<'_> {
@@ -23,7 +27,13 @@ impl CrateSource<'_> {
     /// <https://doc.rust-lang.org/cargo/reference/features.html#the-features-section>
     pub(crate) fn regular_features(&self) -> Vec<String> {
         match self {
-            Self::Registry { crate_, .. } => crate_.features().map(|(k, _v)| k).cloned().collect(),
+            Self::Registry {
+                versioned_krate, ..
+            } => versioned_krate
+                .features()
+                .map(|(k, _v)| k)
+                .cloned()
+                .collect(),
             Self::ManifestPath { manifest } => manifest.parsed.features.keys().cloned().collect(),
         }
     }
@@ -32,7 +42,9 @@ impl CrateSource<'_> {
     /// <https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies>
     pub(crate) fn implicit_features(&self) -> std::collections::BTreeSet<String> {
         let mut implicit_features: std::collections::BTreeSet<_> = match self {
-            Self::Registry { crate_, .. } => crate_
+            Self::Registry {
+                versioned_krate, ..
+            } => versioned_krate
                 .dependencies()
                 .iter()
                 .filter(|dep| dep.is_optional())
@@ -61,7 +73,9 @@ impl CrateSource<'_> {
         };
 
         let feature_defns: Vec<&String> = match self {
-            Self::Registry { crate_, .. } => crate_.features().flat_map(|(_k, v)| v).collect(),
+            Self::Registry {
+                versioned_krate, ..
+            } => versioned_krate.features().flat_map(|(_k, v)| v).collect(),
             Self::ManifestPath { manifest } => {
                 manifest.parsed.features.values().flatten().collect()
             }
@@ -258,8 +272,10 @@ pub(crate) fn generate_data_request<'a>(
     );
 
     match crate_source {
-        CrateSource::Registry { crate_, .. } => CrateDataRequest::from_index(
-            crate_,
+        CrateSource::Registry {
+            versioned_krate, ..
+        } => CrateDataRequest::from_index(
+            versioned_krate,
             default_features,
             extra_features,
             crate_data.build_target,
@@ -278,6 +294,18 @@ pub(crate) fn generate_data_request<'a>(
                 crate::rustdoc_gen::CrateType::Baseline { .. }
             ),
         ),
+    }
+}
+
+fn terminal_context<C>(err: TerminalError, context: C) -> TerminalError
+where
+    C: std::fmt::Display + Send + Sync + 'static,
+{
+    match err {
+        TerminalError::WithAdvice(err, advice) => {
+            TerminalError::WithAdvice(err.context(context), advice)
+        }
+        TerminalError::Other(err) => TerminalError::Other(err.context(context)),
     }
 }
 
@@ -300,20 +328,188 @@ fn generate_rustdoc(
     )
 }
 
-pub(crate) trait RustdocGenerator {
-    fn generate_data_request<'data>(
-        &'data self,
-        config: &mut GlobalConfig,
-        crate_data: &CrateDataForRustdoc<'data>,
-    ) -> Result<Option<CrateDataRequest<'data>>, TerminalError>;
+pub(crate) enum RustdocGenerator {
+    File(RustdocFromFile),
+    ProjectRoot(RustdocFromProjectRoot),
+    GitRevision(RustdocFromGitRevision),
+    Registry(RustdocFromRegistry),
+}
 
-    fn load_rustdoc(
+impl From<RustdocFromFile> for RustdocGenerator {
+    fn from(value: RustdocFromFile) -> Self {
+        Self::File(value)
+    }
+}
+
+impl From<RustdocFromProjectRoot> for RustdocGenerator {
+    fn from(value: RustdocFromProjectRoot) -> Self {
+        Self::ProjectRoot(value)
+    }
+}
+
+impl From<RustdocFromGitRevision> for RustdocGenerator {
+    fn from(value: RustdocFromGitRevision) -> Self {
+        Self::GitRevision(value)
+    }
+}
+
+impl From<RustdocFromRegistry> for RustdocGenerator {
+    fn from(value: RustdocFromRegistry) -> Self {
+        Self::Registry(value)
+    }
+}
+
+/// A rustdoc generator coupled with any additional data it needs for the generation process
+pub(crate) enum CoupledRustdocGenerator<'a> {
+    // The file type only needs a generator
+    File {
+        generator: &'a RustdocFromFile,
+    },
+    // A ProjectRoot also needs the crate data
+    ProjectRoot {
+        generator: &'a RustdocFromProjectRoot,
+        crate_data: &'a CrateDataForRustdoc<'a>,
+    },
+    // This is a wrapper around a ProjectRoot
+    GitRevision {
+        generator: &'a RustdocFromGitRevision,
+        crate_data: &'a CrateDataForRustdoc<'a>,
+    },
+    // A Registry needs the crate data, as well as the list of crates from crates.io
+    Registry {
+        generator: &'a RustdocFromRegistry,
+        crate_data: &'a CrateDataForRustdoc<'a>,
+        krate: tame_index::IndexKrate,
+    },
+}
+
+impl<'a> CoupledRustdocGenerator<'a> {
+    /// Prepare a [`RustdocGenerator`] for rustdoc generation, coupling it with necessary data.
+    pub(crate) fn couple_data(
+        generator: &'a RustdocGenerator,
+        config: &mut GlobalConfig,
+        crate_data: &'a CrateDataForRustdoc<'a>,
+    ) -> Result<Self, TerminalError> {
+        match generator {
+            RustdocGenerator::File(generator) => Ok(Self::File { generator }),
+
+            RustdocGenerator::ProjectRoot(generator) => Ok(Self::ProjectRoot {
+                generator,
+                crate_data,
+            }),
+
+            RustdocGenerator::GitRevision(generator) => Ok(Self::GitRevision {
+                generator,
+                crate_data,
+            }),
+
+            RustdocGenerator::Registry(generator) => {
+                let krate = generator.get_krate(config, crate_data).map_err(|err| {
+                    terminal_context(
+                        err,
+                        "Error while retrieving index of crates from `RustdocFromRegistry`",
+                    )
+                })?;
+                Ok(Self::Registry {
+                    generator,
+                    crate_data,
+                    krate,
+                })
+            }
+        }
+    }
+
+    pub(crate) fn get_crate_data(&self) -> Option<&CrateDataForRustdoc<'_>> {
+        match self {
+            Self::File { .. } => None,
+            Self::ProjectRoot { crate_data, .. } => Some(crate_data),
+            Self::GitRevision { crate_data, .. } => Some(crate_data),
+            Self::Registry { crate_data, .. } => Some(crate_data),
+        }
+    }
+
+    pub(crate) fn generate_data_request(
+        &self,
+        config: &mut GlobalConfig,
+    ) -> Result<Option<CrateDataRequest<'_>>, TerminalError> {
+        let crate_source = match self {
+            Self::File { .. } => return Ok(None),
+            Self::ProjectRoot {
+                generator,
+                crate_data,
+            } => generator.get_crate_source(crate_data).map_err(|err| {
+                terminal_context(
+                    err,
+                    "Error while getting crate source from `RustdocFromProjectRoot`",
+                )
+            })?,
+            Self::GitRevision {
+                generator,
+                crate_data,
+            } => generator.get_crate_source(crate_data).map_err(|err| {
+                terminal_context(
+                    err,
+                    "Error while getting crate source from `RustdocFromGitRevision`",
+                )
+            })?,
+            Self::Registry {
+                generator,
+                crate_data,
+                krate,
+            } => generator
+                .get_crate_source(crate_data, krate)
+                .map_err(|err| {
+                    terminal_context(
+                        err,
+                        "Error while getting crate source from `RustdocFromRegistry`",
+                    )
+                })?,
+        };
+
+        // This should never error since the match case above always return early when there is no attached crate_data
+        let crate_data = self
+            .get_crate_data()
+            .ok_or(anyhow::anyhow!("The `crate_data` property on a `CoupledRustdocGenerator` was unexpectedly `None` while generating a data request"))
+            .into_terminal_result()?;
+
+        let data_request = generate_data_request(config, crate_source, crate_data);
+        Ok(Some(data_request))
+    }
+
+    pub(crate) fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
         data_request: &Option<CrateDataRequest<'_>>,
-    ) -> Result<VersionedStorage, TerminalError>;
+    ) -> Result<VersionedStorage, TerminalError> {
+        if let Self::File { generator } = self {
+            return generator.load_rustdoc();
+        }
+
+        let data_request = data_request
+            .as_ref()
+            .ok_or(anyhow!("The `data_request` argument for loading the rustdoc from a `CoupledRustdocGenerator` was unexpectedly `None`"))
+            .into_terminal_result()?;
+
+        let target_root = match self {
+            Self::ProjectRoot { generator, .. } => &generator.target_root,
+            Self::GitRevision { generator, .. } => &generator.path.target_root,
+            Self::Registry { generator, .. } => &generator.target_root,
+
+            Self::File { .. } => unreachable!(
+                "Matched on a `File` generator after already matching on a non-`File` generator"
+            ),
+        };
+
+        generate_rustdoc(
+            config,
+            generation_settings,
+            cache_settings,
+            target_root.clone(),
+            data_request,
+        )
+    }
 }
 
 #[derive(Debug)]
@@ -325,26 +521,15 @@ impl RustdocFromFile {
     pub(crate) fn new(path: PathBuf) -> Self {
         Self { path }
     }
-}
 
-impl RustdocGenerator for RustdocFromFile {
-    fn generate_data_request<'data>(
-        &'data self,
-        _config: &mut GlobalConfig,
-        _crate_data: &CrateDataForRustdoc<'data>,
-    ) -> Result<Option<CrateDataRequest<'data>>, TerminalError> {
-        Ok(None)
-    }
-
-    fn load_rustdoc(
-        &self,
-        _config: &mut GlobalConfig,
-        _generation_settings: super::data_generation::GenerationSettings,
-        _cache_settings: super::data_generation::CacheSettings<()>,
-        _data_request: &Option<CrateDataRequest<'_>>,
-    ) -> Result<VersionedStorage, TerminalError> {
+    pub(crate) fn load_rustdoc(&self) -> Result<VersionedStorage, TerminalError> {
         trustfall_rustdoc::load_rustdoc(&self.path, None)
-            .map_err(anyhow::Error::from)
+            .with_context(|| {
+                format!(
+                    "Error loading rustdoc for `RustdocFromFile` from `{:?}`",
+                    self.path
+                )
+            })
             .into_terminal_result()
     }
 }
@@ -432,15 +617,12 @@ impl RustdocFromProjectRoot {
             target_root: target_root.to_owned(),
         })
     }
-}
 
-impl RustdocGenerator for RustdocFromProjectRoot {
-    fn generate_data_request<'data>(
-        &'data self,
-        config: &mut GlobalConfig,
-        crate_data: &CrateDataForRustdoc<'data>,
-    ) -> Result<Option<CrateDataRequest<'data>>, TerminalError> {
-        let manifest: &Manifest = self.manifests.get(&crate_data.name).ok_or_else(|| {
+    fn get_crate_source(
+        &self,
+        crate_data: &CrateDataForRustdoc<'_>,
+    ) -> Result<CrateSource<'_>, TerminalError> {
+        let manifest = self.manifests.get(&crate_data.name).ok_or_else(|| {
             if let Some(duplicates) = self.duplicate_packages.get(&crate_data.name) {
                 let duplicates = duplicates.iter().map(|p| p.display()).join("\n  ");
                 let err = anyhow::anyhow!(
@@ -469,32 +651,7 @@ impl RustdocGenerator for RustdocFromProjectRoot {
             }
         }).into_terminal_result()?;
 
-        Ok(Some(generate_data_request(
-            config,
-            CrateSource::ManifestPath { manifest },
-            crate_data,
-        )))
-    }
-
-    fn load_rustdoc(
-        &self,
-        config: &mut GlobalConfig,
-        generation_settings: super::data_generation::GenerationSettings,
-        cache_settings: super::data_generation::CacheSettings<()>,
-        data_request: &Option<CrateDataRequest<'_>>,
-    ) -> Result<VersionedStorage, TerminalError> {
-        let Some(data_request) = data_request else {
-            return Err(anyhow::anyhow!("`data_request` was unexpectedly `None`"))
-                .into_terminal_result();
-        };
-
-        generate_rustdoc(
-            config,
-            generation_settings,
-            cache_settings,
-            self.target_root.clone(),
-            data_request,
-        )
+        Ok(CrateSource::ManifestPath { manifest })
     }
 }
 
@@ -523,6 +680,19 @@ impl RustdocFromGitRevision {
         let path = RustdocFromProjectRoot::new(&tree_dir, target)?;
         Ok(Self { path })
     }
+
+    pub(crate) fn get_crate_source(
+        &self,
+        crate_data: &CrateDataForRustdoc<'_>,
+    ) -> Result<CrateSource<'_>, TerminalError> {
+        // As a wrapper around RustdocFromProjectRoot, this just serves to provide additional error context
+        self.path.get_crate_source(crate_data).map_err(|err| {
+            terminal_context(
+                err,
+                "Error retrieving manifest from `RustdocFromGitRevision`",
+            )
+        })
+    }
 }
 
 fn extract_tree(tree: gix::Id<'_>, target: &std::path::Path) -> anyhow::Result<()> {
@@ -548,27 +718,6 @@ fn extract_tree(tree: gix::Id<'_>, target: &std::path::Path) -> anyhow::Result<(
     }
 
     Ok(())
-}
-
-impl RustdocGenerator for RustdocFromGitRevision {
-    fn generate_data_request<'data>(
-        &'data self,
-        config: &mut GlobalConfig,
-        crate_data: &CrateDataForRustdoc<'data>,
-    ) -> Result<Option<CrateDataRequest<'data>>, TerminalError> {
-        self.path.generate_data_request(config, crate_data)
-    }
-
-    fn load_rustdoc(
-        &self,
-        config: &mut GlobalConfig,
-        generation_settings: super::data_generation::GenerationSettings,
-        cache_settings: super::data_generation::CacheSettings<()>,
-        data_request: &Option<CrateDataRequest<'_>>,
-    ) -> Result<VersionedStorage, TerminalError> {
-        self.path
-            .load_rustdoc(config, generation_settings, cache_settings, data_request)
-    }
 }
 
 // From git2 crate
@@ -667,17 +816,83 @@ impl RustdocFromRegistry {
     pub fn set_version(&mut self, version: semver::Version) {
         self.version = Some(version);
     }
+
+    pub(crate) fn get_krate(
+        &self,
+        config: &mut GlobalConfig,
+        crate_data: &CrateDataForRustdoc<'_>,
+    ) -> Result<IndexKrate, TerminalError> {
+        let lock = acquire_cargo_global_package_lock(config).into_terminal_result()?;
+        let validated_name = crate_data
+            .name
+            .as_str()
+            .try_into()
+            .expect("this should be impossible");
+        let krate = self.index.krate(validated_name, false, &lock)
+            .with_context(|| {
+                format!("failed to read index metadata for crate '{}'", crate_data.name)
+            }).into_terminal_result()?
+            .with_context(|| {
+            anyhow::format_err!(
+                "{} not found in registry (crates.io). \
+        For workarounds check \
+        https://github.com/obi1kenobi/cargo-semver-checks#does-the-crate-im-checking-have-to-be-published-on-cratesio",
+                crate_data.name
+            )
+        }).into_terminal_result()?;
+        drop(lock);
+
+        Ok(krate)
+    }
+
+    fn get_crate_source<'a>(
+        &self,
+        crate_data: &CrateDataForRustdoc<'_>,
+        krate: &'a IndexKrate,
+    ) -> Result<CrateSource<'a>, TerminalError> {
+        let base_version = if let Some(base) = &self.version {
+            base.clone()
+        } else {
+            choose_baseline_version(
+                krate,
+                match &crate_data.crate_type {
+                    CrateType::Current => None,
+                    CrateType::Baseline {
+                        highest_allowed_version,
+                    } => highest_allowed_version.as_ref(),
+                },
+            )
+            .into_terminal_result()?
+        };
+
+        let versioned_krate = krate
+            .versions
+            .iter()
+            .find(|v| {
+                semver::Version::parse(v.version.as_str()).ok().as_ref() == Some(&base_version)
+            })
+            .with_context(|| {
+                anyhow::format_err!(
+                    "crate {} version {} not found in registry",
+                    crate_data.name,
+                    base_version
+                )
+            })
+            .into_terminal_result()?;
+
+        Ok(CrateSource::Registry { versioned_krate })
+    }
 }
 
 fn choose_baseline_version(
-    crate_: &IndexKrate,
+    krate: &IndexKrate,
     version_current: Option<&semver::Version>,
 ) -> anyhow::Result<semver::Version> {
     // Try to avoid pre-releases
     // - Breaking changes are allowed between them
     // - Most likely the user cares about the last official release
     if let Some(current) = version_current {
-        let mut instances = crate_
+        let mut instances = krate
             .versions
             .iter()
             .map(|iv| (iv.version.clone(), iv.is_yanked()))
@@ -696,109 +911,24 @@ fn choose_baseline_version(
             .with_context(|| {
                 anyhow::format_err!(
                     "No available baseline versions for {}@{}",
-                    crate_.name(),
+                    krate.name(),
                     current
                 )
             })
     } else {
         let instance = semver::Version::parse(
-            crate_
+            krate
                 .highest_normal_version()
                 .unwrap_or_else(|| {
                     // If there is no normal version (not yanked and not a pre-release)
                     // choosing the latest one anyway is more reasonable than throwing an
                     // error, as there is still a chance that it is what the user expects.
-                    crate_.highest_version()
+                    krate.highest_version()
                 })
                 .version
                 .as_str(),
         )?;
         Ok(instance)
-    }
-}
-
-impl RustdocGenerator for RustdocFromRegistry {
-    fn generate_data_request<'data>(
-        &'data self,
-        config: &mut GlobalConfig,
-        crate_data: &CrateDataForRustdoc<'data>,
-    ) -> Result<Option<CrateDataRequest<'data>>, TerminalError> {
-        let lock = acquire_cargo_global_package_lock(config).into_terminal_result()?;
-        let validated_name = crate_data
-            .name
-            .as_str()
-            .try_into()
-            .expect("this should be impossible");
-        let crate_ = self.index.krate(validated_name, false, &lock)
-            .with_context(|| {
-                format!("failed to read index metadata for crate '{}'", crate_data.name)
-            }).into_terminal_result()?
-            .with_context(|| {
-            anyhow::format_err!(
-                "{} not found in registry (crates.io). \
-        For workarounds check \
-        https://github.com/obi1kenobi/cargo-semver-checks#does-the-crate-im-checking-have-to-be-published-on-cratesio",
-                crate_data.name
-            )
-        }).into_terminal_result()?;
-        drop(lock);
-
-        let base_version = if let Some(base) = &self.version {
-            base.clone()
-        } else {
-            choose_baseline_version(
-                &crate_,
-                match &crate_data.crate_type {
-                    CrateType::Current => None,
-                    CrateType::Baseline {
-                        highest_allowed_version,
-                    } => highest_allowed_version.as_ref(),
-                },
-            )
-            .into_terminal_result()?
-        };
-
-        let crate_ = crate_
-            .versions
-            .into_iter()
-            .find(|v| {
-                semver::Version::parse(v.version.as_str()).ok().as_ref() == Some(&base_version)
-            })
-            .with_context(|| {
-                anyhow::format_err!(
-                    "crate {} version {} not found in registry",
-                    crate_data.name,
-                    base_version
-                )
-            })
-            .into_terminal_result()?;
-
-        Ok(Some(generate_data_request(
-            config,
-            CrateSource::Registry { crate_ },
-            crate_data,
-        )))
-    }
-
-    fn load_rustdoc(
-        &self,
-        config: &mut GlobalConfig,
-        generation_settings: super::data_generation::GenerationSettings,
-        cache_settings: super::data_generation::CacheSettings<()>,
-        data_request: &Option<CrateDataRequest<'_>>,
-    ) -> Result<VersionedStorage, TerminalError> {
-        let Some(data_request) = data_request else {
-            return Err(anyhow::anyhow!("`data_request` was unexpectedly `None`"))
-                .into_terminal_result();
-        };
-
-        generate_rustdoc(
-            config,
-            generation_settings,
-            cache_settings,
-            self.target_root.clone(),
-            data_request,
-        )
     }
 }
 
@@ -850,7 +980,7 @@ mod tests {
         current_version_name: Option<&str>,
         expected: &str,
     ) {
-        let crate_ = IndexKrate {
+        let krate = IndexKrate {
             versions: versions
                 .into_iter()
                 .map(|(version, yanked)| new_mock_version(version.parse().unwrap(), yanked))
@@ -860,7 +990,7 @@ mod tests {
             semver::Version::parse(version_name)
                 .expect("current_version_name used in assertion should encode a valid version")
         });
-        let chosen_baseline = choose_baseline_version(&crate_, current_version.as_ref())
+        let chosen_baseline = choose_baseline_version(&krate, current_version.as_ref())
             .expect("choose_baseline_version should not return any error in the test case");
         assert_eq!(chosen_baseline, expected.parse().unwrap());
     }

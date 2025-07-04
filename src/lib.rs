@@ -371,24 +371,20 @@ impl Check {
         &self,
         config: &mut GlobalConfig,
         source: &RustdocSource,
-    ) -> anyhow::Result<Box<dyn rustdoc_gen::RustdocGenerator>> {
+    ) -> anyhow::Result<rustdoc_gen::RustdocGenerator> {
         let target_dir = self.get_target_dir(source)?;
         Ok(match source {
             RustdocSource::Rustdoc(path) => {
-                Box::new(rustdoc_gen::RustdocFromFile::new(path.to_owned()))
+                rustdoc_gen::RustdocFromFile::new(path.to_owned()).into()
             }
             RustdocSource::Root(root) => {
-                Box::new(rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?)
+                rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?.into()
             }
             RustdocSource::Revision(root, rev) => {
                 let metadata = manifest_metadata_no_deps(root)?;
                 let source = metadata.workspace_root.as_std_path();
-                Box::new(rustdoc_gen::RustdocFromGitRevision::with_rev(
-                    source,
-                    &target_dir,
-                    rev,
-                    config,
-                )?)
+                rustdoc_gen::RustdocFromGitRevision::with_rev(source, &target_dir, rev, config)?
+                    .into()
             }
             RustdocSource::VersionFromRegistry(version) => {
                 let mut registry = rustdoc_gen::RustdocFromRegistry::new(&target_dir, config)?;
@@ -396,7 +392,7 @@ impl Check {
                     let semver = semver::Version::parse(ver)?;
                     registry.set_version(semver);
                 }
-                Box::new(registry)
+                registry.into()
             }
         })
     }
@@ -556,18 +552,31 @@ note: skipped the following crates since they have no library target: {skipped}"
                 let start = std::time::Instant::now();
                 let name = selected.current_crate_data.name.clone();
 
-                let current_data_request =
-                    generate_data_request(config, &*current_loader, &selected.current_crate_data)
-                        .map_err(|err| log_terminal_error(config, err))?;
-                let baseline_data_request =
-                    generate_data_request(config, &*baseline_loader, &selected.baseline_crate_data)
-                        .map_err(|err| log_terminal_error(config, err))?;
+                let current_loader = rustdoc_gen::CoupledRustdocGenerator::couple_data(
+                    &current_loader,
+                    config,
+                    &selected.current_crate_data,
+                )
+                .map_err(|err| log_terminal_error(config, err))?;
+                let baseline_loader = rustdoc_gen::CoupledRustdocGenerator::couple_data(
+                    &baseline_loader,
+                    config,
+                    &selected.baseline_crate_data,
+                )
+                .map_err(|err| log_terminal_error(config, err))?;
+
+                let current_data_request = current_loader
+                    .generate_data_request(config)
+                    .map_err(|err| log_terminal_error(config, err))?;
+                let baseline_data_request = baseline_loader
+                    .generate_data_request(config)
+                    .map_err(|err| log_terminal_error(config, err))?;
 
                 let data_storage = generate_crate_data(
                     config,
                     generation_settings,
-                    &*current_loader,
-                    &*baseline_loader,
+                    &current_loader,
+                    &baseline_loader,
                     &selected.current_crate_data,
                     &selected.baseline_crate_data,
                     &current_data_request,
@@ -754,20 +763,12 @@ impl WitnessGeneration {
     }
 }
 
-fn generate_data_request<'a>(
-    config: &mut GlobalConfig,
-    loader: &'a dyn rustdoc_gen::RustdocGenerator,
-    crate_data: &rustdoc_gen::CrateDataForRustdoc<'a>,
-) -> Result<Option<data_generation::CrateDataRequest<'a>>, TerminalError> {
-    loader.generate_data_request(config, crate_data)
-}
-
 #[expect(clippy::too_many_arguments)]
 fn generate_crate_data(
     config: &mut GlobalConfig,
     generation_settings: data_generation::GenerationSettings,
-    current_loader: &dyn rustdoc_gen::RustdocGenerator,
-    baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
+    current_loader: &rustdoc_gen::CoupledRustdocGenerator<'_>,
+    baseline_loader: &rustdoc_gen::CoupledRustdocGenerator<'_>,
     current_crate_data: &rustdoc_gen::CrateDataForRustdoc<'_>,
     baseline_crate_data: &rustdoc_gen::CrateDataForRustdoc<'_>,
     current_data_request: &Option<data_generation::CrateDataRequest<'_>>,
