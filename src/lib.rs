@@ -552,24 +552,24 @@ note: skipped the following crates since they have no library target: {skipped}"
                 let start = std::time::Instant::now();
                 let name = selected.current_crate_data.name.clone();
 
-                let current_loader = rustdoc_gen::CoupledRustdocGenerator::couple_data(
+                let current_loader = rustdoc_gen::StatefulRustdocGenerator::couple_data(
                     &current_loader,
                     config,
                     &selected.current_crate_data,
                 )
                 .map_err(|err| log_terminal_error(config, err))?;
-                let baseline_loader = rustdoc_gen::CoupledRustdocGenerator::couple_data(
+                let baseline_loader = rustdoc_gen::StatefulRustdocGenerator::couple_data(
                     &baseline_loader,
                     config,
                     &selected.baseline_crate_data,
                 )
                 .map_err(|err| log_terminal_error(config, err))?;
 
-                let current_data_request = current_loader
-                    .generate_data_request(config)
+                let current_loader = current_loader
+                    .ready_generator(config)
                     .map_err(|err| log_terminal_error(config, err))?;
-                let baseline_data_request = baseline_loader
-                    .generate_data_request(config)
+                let baseline_loader = baseline_loader
+                    .ready_generator(config)
                     .map_err(|err| log_terminal_error(config, err))?;
 
                 let data_storage = generate_crate_data(
@@ -577,10 +577,6 @@ note: skipped the following crates since they have no library target: {skipped}"
                     generation_settings,
                     &current_loader,
                     &baseline_loader,
-                    &selected.current_crate_data,
-                    &selected.baseline_crate_data,
-                    &current_data_request,
-                    &baseline_data_request,
                 )
                 .map_err(|err| log_terminal_error(config, err))?;
 
@@ -763,25 +759,19 @@ impl WitnessGeneration {
     }
 }
 
-#[expect(clippy::too_many_arguments)]
 fn generate_crate_data(
     config: &mut GlobalConfig,
     generation_settings: data_generation::GenerationSettings,
-    current_loader: &rustdoc_gen::CoupledRustdocGenerator<'_>,
-    baseline_loader: &rustdoc_gen::CoupledRustdocGenerator<'_>,
-    current_crate_data: &rustdoc_gen::CrateDataForRustdoc<'_>,
-    baseline_crate_data: &rustdoc_gen::CrateDataForRustdoc<'_>,
-    current_data_request: &Option<data_generation::CrateDataRequest<'_>>,
-    baseline_data_request: &Option<data_generation::CrateDataRequest<'_>>,
+    current_loader: &rustdoc_gen::StatefulRustdocGenerator<'_, rustdoc_gen::ReadyState<'_>>,
+    baseline_loader: &rustdoc_gen::StatefulRustdocGenerator<'_, rustdoc_gen::ReadyState<'_>>,
 ) -> Result<DataStorage, TerminalError> {
     let current_crate = current_loader.load_rustdoc(
         config,
         generation_settings,
         data_generation::CacheSettings::ReadWrite(()),
-        current_data_request,
     )?;
 
-    let baseline_crate_name = &baseline_crate_data.name;
+    let baseline_crate_name = &baseline_loader.get_crate_data().name;
     let current_rustdoc_version = current_crate.version();
 
     let baseline_crate = {
@@ -789,7 +779,6 @@ fn generate_crate_data(
             config,
             generation_settings,
             data_generation::CacheSettings::ReadWrite(()),
-            baseline_data_request,
         )?;
 
         // The baseline rustdoc JSON may have been cached; ensure its rustdoc version matches
@@ -812,7 +801,6 @@ fn generate_crate_data(
                 config,
                 generation_settings,
                 data_generation::CacheSettings::WriteOnly(()),
-                baseline_data_request,
             )?;
 
             assert_eq!(
@@ -828,7 +816,8 @@ fn generate_crate_data(
 
     // TODO: Temporary hack, until we stop supporting formats older than rustdoc v45.
     // v45+ formats carry the target triple information in the rustdoc JSON itself.
-    let target_triple: &'static str = current_crate_data
+    let target_triple: &'static str = current_loader
+        .get_crate_data()
         .build_target
         .map(ToString::to_string)
         .unwrap_or_else(|| {

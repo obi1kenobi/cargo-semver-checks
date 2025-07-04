@@ -2,7 +2,7 @@ use std::borrow::Cow;
 use std::collections::{BTreeSet, HashMap};
 use std::path::PathBuf;
 
-use anyhow::{anyhow, bail, Context};
+use anyhow::{bail, Context};
 use itertools::Itertools;
 use serde::Serialize;
 use tame_index::IndexKrate;
@@ -309,7 +309,7 @@ where
     }
 }
 
-fn generate_rustdoc(
+pub(crate) fn generate_rustdoc(
     config: &mut GlobalConfig,
     generation_settings: super::data_generation::GenerationSettings,
     cache_settings: super::data_generation::CacheSettings<()>,
@@ -359,156 +359,164 @@ impl From<RustdocFromRegistry> for RustdocGenerator {
     }
 }
 
-/// A rustdoc generator coupled with any additional data it needs for the generation process
-pub(crate) enum CoupledRustdocGenerator<'a> {
-    // The file type only needs a generator
+/// A rustdoc generator state machine, to progress through the states of processing
+pub(crate) struct StatefulRustdocGenerator<'a, S> {
+    coupled_state: S,
+    crate_data: &'a CrateDataForRustdoc<'a>,
+}
+
+pub(crate) enum CoupledState<'a> {
     File {
         generator: &'a RustdocFromFile,
     },
-    // A ProjectRoot also needs the crate data
     ProjectRoot {
         generator: &'a RustdocFromProjectRoot,
-        crate_data: &'a CrateDataForRustdoc<'a>,
     },
-    // This is a wrapper around a ProjectRoot
+    // GitRevision variant exists purely for improved errors
     GitRevision {
         generator: &'a RustdocFromGitRevision,
-        crate_data: &'a CrateDataForRustdoc<'a>,
     },
-    // A Registry needs the crate data, as well as the list of crates from crates.io
+    // Registry requests need a list of crate versions to query
     Registry {
         generator: &'a RustdocFromRegistry,
-        crate_data: &'a CrateDataForRustdoc<'a>,
         krate: tame_index::IndexKrate,
     },
 }
 
-impl<'a> CoupledRustdocGenerator<'a> {
+pub(crate) enum ReadyState<'a> {
+    // File source is maintained
+    File {
+        generator: &'a RustdocFromFile,
+    },
+
+    // These are the only values needed for rustdoc generation, and generation operations are not
+    // generator specific, meaning fallible operations will not gain additional context from the
+    // additional source context of multiple variants
+    Generator {
+        target_root: &'a PathBuf,
+        data_request: CrateDataRequest<'a>,
+    },
+}
+
+impl<'a, S> StatefulRustdocGenerator<'a, S> {
+    /// Retrieve the crate data for this generator
+    pub(crate) fn get_crate_data(&self) -> &CrateDataForRustdoc<'_> {
+        self.crate_data
+    }
+}
+
+impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
     /// Prepare a [`RustdocGenerator`] for rustdoc generation, coupling it with necessary data.
     pub(crate) fn couple_data(
         generator: &'a RustdocGenerator,
         config: &mut GlobalConfig,
         crate_data: &'a CrateDataForRustdoc<'a>,
     ) -> Result<Self, TerminalError> {
-        match generator {
-            RustdocGenerator::File(generator) => Ok(Self::File { generator }),
+        let coupled_data = match generator {
+            RustdocGenerator::File(generator) => CoupledState::File { generator },
 
-            RustdocGenerator::ProjectRoot(generator) => Ok(Self::ProjectRoot {
-                generator,
-                crate_data,
-            }),
+            RustdocGenerator::ProjectRoot(generator) => CoupledState::ProjectRoot { generator },
 
-            RustdocGenerator::GitRevision(generator) => Ok(Self::GitRevision {
-                generator,
-                crate_data,
-            }),
+            RustdocGenerator::GitRevision(generator) => CoupledState::GitRevision { generator },
 
             RustdocGenerator::Registry(generator) => {
                 let krate = generator.get_krate(config, crate_data).map_err(|err| {
                     terminal_context(
                         err,
-                        "Error while retrieving index of crates from `RustdocFromRegistry`",
+                        "failed to retrieve index of crate versions from registry",
                     )
                 })?;
-                Ok(Self::Registry {
-                    generator,
-                    crate_data,
-                    krate,
-                })
+                CoupledState::Registry { generator, krate }
             }
-        }
-    }
-
-    pub(crate) fn get_crate_data(&self) -> Option<&CrateDataForRustdoc<'_>> {
-        match self {
-            Self::File { .. } => None,
-            Self::ProjectRoot { crate_data, .. } => Some(crate_data),
-            Self::GitRevision { crate_data, .. } => Some(crate_data),
-            Self::Registry { crate_data, .. } => Some(crate_data),
-        }
-    }
-
-    pub(crate) fn generate_data_request(
-        &self,
-        config: &mut GlobalConfig,
-    ) -> Result<Option<CrateDataRequest<'_>>, TerminalError> {
-        let crate_source = match self {
-            Self::File { .. } => return Ok(None),
-            Self::ProjectRoot {
-                generator,
-                crate_data,
-            } => generator.get_crate_source(crate_data).map_err(|err| {
-                terminal_context(
-                    err,
-                    "Error while getting crate source from `RustdocFromProjectRoot`",
-                )
-            })?,
-            Self::GitRevision {
-                generator,
-                crate_data,
-            } => generator.get_crate_source(crate_data).map_err(|err| {
-                terminal_context(
-                    err,
-                    "Error while getting crate source from `RustdocFromGitRevision`",
-                )
-            })?,
-            Self::Registry {
-                generator,
-                crate_data,
-                krate,
-            } => generator
-                .get_crate_source(crate_data, krate)
-                .map_err(|err| {
-                    terminal_context(
-                        err,
-                        "Error while getting crate source from `RustdocFromRegistry`",
-                    )
-                })?,
         };
 
-        // This should never error since the match case above always return early when there is no attached crate_data
-        let crate_data = self
-            .get_crate_data()
-            .ok_or(anyhow::anyhow!("The `crate_data` property on a `CoupledRustdocGenerator` was unexpectedly `None` while generating a data request"))
-            .into_terminal_result()?;
-
-        let data_request = generate_data_request(config, crate_source, crate_data);
-        Ok(Some(data_request))
+        Ok(Self {
+            coupled_state: coupled_data,
+            crate_data,
+        })
     }
 
+    /// Ready a [`CoupledState`] for rustdoc generation, extracting necessary internal data,
+    /// and creating an appropriate data request
+    pub(crate) fn ready_generator(
+        &self,
+        config: &mut GlobalConfig,
+    ) -> Result<StatefulRustdocGenerator<'_, ReadyState<'_>>, TerminalError> {
+        let crate_data = self.crate_data;
+
+        let (crate_source, target_root) = match &self.coupled_state {
+            CoupledState::File { generator } => {
+                return Ok(StatefulRustdocGenerator {
+                    coupled_state: ReadyState::File { generator },
+                    crate_data,
+                })
+            }
+            CoupledState::ProjectRoot { generator } => {
+                let source = generator
+                    .get_crate_source(crate_data)
+                    .map_err(|err| terminal_context(err, "failed to retrieve local crate data"))?;
+                (source, &generator.target_root)
+            }
+            CoupledState::GitRevision { generator } => {
+                let source = generator.get_crate_source(crate_data).map_err(|err| {
+                    terminal_context(err, "failed to retrieve local crate data from git revision")
+                })?;
+                (source, &generator.path.target_root)
+            }
+            CoupledState::Registry { generator, krate } => {
+                let source = generator
+                    .get_crate_source(crate_data, krate)
+                    .map_err(|err| {
+                        terminal_context(err, "failed to retrieve crate data from registry")
+                    })?;
+                (source, &generator.target_root)
+            }
+        };
+
+        let data_request = generate_data_request(config, crate_source, crate_data);
+
+        Ok(StatefulRustdocGenerator {
+            coupled_state: ReadyState::Generator {
+                target_root,
+                data_request,
+            },
+            crate_data,
+        })
+    }
+}
+
+impl<'a> StatefulRustdocGenerator<'a, ReadyState<'a>> {
+    // TODO: Use the data request
+    #[expect(dead_code)]
+    /// Get the computed data request for this generator, if one exists
+    pub(crate) fn get_data_request(&self) -> Option<&CrateDataRequest<'_>> {
+        match &self.coupled_state {
+            ReadyState::File { .. } => None,
+            ReadyState::Generator { data_request, .. } => Some(data_request),
+        }
+    }
+
+    /// Load rustdoc from this generator into a [`VersionedStorage`]
     pub(crate) fn load_rustdoc(
         &self,
         config: &mut GlobalConfig,
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
-        data_request: &Option<CrateDataRequest<'_>>,
     ) -> Result<VersionedStorage, TerminalError> {
-        if let Self::File { generator } = self {
-            return generator.load_rustdoc();
-        }
+        match &self.coupled_state {
+            ReadyState::File { generator } => generator.load_rustdoc(),
 
-        let data_request = data_request
-            .as_ref()
-            .ok_or(anyhow!("The `data_request` argument for loading the rustdoc from a `CoupledRustdocGenerator` was unexpectedly `None`"))
-            .into_terminal_result()?;
-
-        let target_root = match self {
-            Self::ProjectRoot { generator, .. } => &generator.target_root,
-            Self::GitRevision { generator, .. } => &generator.path.target_root,
-            Self::Registry { generator, .. } => &generator.target_root,
-
-            Self::File { .. } => unreachable!(
-                "Matched on a `File` generator after already matching on a non-`File` generator"
+            ReadyState::Generator {
+                target_root,
+                data_request,
+            } => generate_rustdoc(
+                config,
+                generation_settings,
+                cache_settings,
+                target_root.to_path_buf(),
+                data_request,
             ),
-        };
-
-        generate_rustdoc(
-            config,
-            generation_settings,
-            cache_settings,
-            target_root.clone(),
-            data_request,
-        )
+        }
     }
 }
 

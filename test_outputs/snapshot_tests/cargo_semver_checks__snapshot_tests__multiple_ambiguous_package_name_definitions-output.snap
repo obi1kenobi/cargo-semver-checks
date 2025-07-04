@@ -3,7 +3,7 @@ source: src/snapshot_tests.rs
 expression: result
 ---
 --- error ---
-Error while getting crate source from `RustdocFromProjectRoot`
+failed to retrieve local crate data
 
 Caused by:
     package `example` is ambiguous: it is defined by in multiple manifests within the root path test_crates/manifest_tests/multiple_ambiguous_package_name_definitions
