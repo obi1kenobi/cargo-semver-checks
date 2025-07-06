@@ -13,8 +13,8 @@ use trustfall::{FieldValue, TransparentValue};
 use crate::data_generation::DataStorage;
 use crate::witness_gen;
 use crate::{
-    query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
     CrateReport, GlobalConfig, ReleaseType, WitnessGeneration,
+    query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
 };
 
 /// Represents a change between two semantic versions

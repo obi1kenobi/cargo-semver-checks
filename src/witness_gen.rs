@@ -1,5 +1,5 @@
 use std::{
-    collections::{btree_map, BTreeMap},
+    collections::{BTreeMap, btree_map},
     path::Path,
     sync::Arc,
     time::Duration,
@@ -13,8 +13,8 @@ use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::VersionedRustdocAdapter;
 
 use crate::{
-    query::{Witness, WitnessQuery},
     GlobalConfig, SemverQuery,
+    query::{Witness, WitnessQuery},
 };
 
 /// Runs the witness query of a given [`WitnessQuery`] a given lint query match, and merges the witness query

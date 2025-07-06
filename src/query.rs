@@ -371,7 +371,7 @@ mod tests {
     use serde::{Deserialize, Serialize};
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_rustdoc::{
-        load_rustdoc, VersionedIndex, VersionedRustdocAdapter, VersionedStorage,
+        VersionedIndex, VersionedRustdocAdapter, VersionedStorage, load_rustdoc,
     };
 
     use crate::query::{
@@ -412,8 +412,8 @@ mod tests {
         TEST_CRATE_RUSTDOCS.get_or_init(initialize_test_crate_rustdocs)
     }
 
-    fn get_all_test_crate_indexes(
-    ) -> &'static BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
+    fn get_all_test_crate_indexes()
+    -> &'static BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
         TEST_CRATE_INDEXES.get_or_init(initialize_test_crate_indexes)
     }
 
@@ -476,8 +476,8 @@ mod tests {
             .collect()
     }
 
-    fn initialize_test_crate_indexes(
-    ) -> BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
+    fn initialize_test_crate_indexes()
+    -> BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
         get_all_test_crates()
             .par_iter()
             .map(|(key, (old_crate, new_crate))| {
@@ -731,7 +731,9 @@ mod tests {
                 actual_output_name,
                 BTreeMap::from([(crate_pair_path, output)]),
             );
-            panic!("The query produced a non-empty output when it compared two crates with the same rustdoc.\n{output_difference}\n");
+            panic!(
+                "The query produced a non-empty output when it compared two crates with the same rustdoc.\n{output_difference}\n"
+            );
         }
     }
 
@@ -788,9 +790,15 @@ mod tests {
                     .map(|value: &FieldValue| value.as_usize().expect("begin line was not an int"));
                 match (filename, line) {
                     (Some(filename), Some(line)) => (Arc::clone(filename), line),
-                    (Some(_filename), None) => panic!("No `span_begin_line` was returned by the query, even though `span_filename` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                    (None, Some(_line)) => panic!("No `span_filename` was returned by the query, even though `span_begin_line` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                    (None, None) => panic!("A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    (Some(_filename), None) => panic!(
+                        "No `span_begin_line` was returned by the query, even though `span_filename` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                    ),
+                    (None, Some(_line)) => panic!(
+                        "No `span_filename` was returned by the query, even though `span_begin_line` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                    ),
+                    (None, None) => panic!(
+                        "A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                    ),
                 }
             }
         };
@@ -817,7 +825,9 @@ mod tests {
                 | "unsafe_inherent_method_target_feature_added"
         ) && rustc_version::version().is_ok_and(|version| version < Version::new(1, 86, 0))
         {
-            eprintln!("skipping query execution test for lint `{query_name}` since data for it isn't available in Rust prior to 1.86");
+            eprintln!(
+                "skipping query execution test for lint `{query_name}` since data for it isn't available in Rust prior to 1.86"
+            );
             return;
         }
 
@@ -835,7 +845,9 @@ mod tests {
         ) && rustc_version::version()
             .is_ok_and(|version| version.major == 1 && version.minor == 89)
         {
-            eprintln!("skipping query execution test for lint `{query_name}` because its rustdoc JSON representation in Rust 1.89 isn't actually legal Rust");
+            eprintln!(
+                "skipping query execution test for lint `{query_name}` because its rustdoc JSON representation in Rust 1.89 isn't actually legal Rust"
+            );
             return;
         }
 
@@ -1253,9 +1265,13 @@ mod tests {
                     (test_crate_times.last(), localdata_times.first())
                 {
                     if test_max > local_min {
-                        panic!("Files in the '{}' directory are newer than the local data generated by \n\
+                        panic!(
+                            "Files in the '{}' directory are newer than the local data generated by \n\
                             scripts/regenerate_test_rustdocs.sh in '{}'.\n\n\
-                            Run `scripts/regenerate_test_rustdocs.sh` to generate fresh local data.", test_crate_path.display(), localdata_path.display())
+                            Run `scripts/regenerate_test_rustdocs.sh` to generate fresh local data.",
+                            test_crate_path.display(),
+                            localdata_path.display()
+                        )
                     }
                 }
             }
