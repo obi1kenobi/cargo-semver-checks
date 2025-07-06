@@ -1,4 +1,4 @@
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 
 use std::{collections::HashSet, env, path::PathBuf};
 
@@ -12,6 +12,7 @@ use clap::{Args, CommandFactory, Parser, Subcommand};
 use std::io::Write;
 
 #[cfg(test)]
+#[allow(unsafe_code)]
 mod snapshot_tests;
 
 fn main() {
