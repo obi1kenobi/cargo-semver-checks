@@ -94,7 +94,9 @@ pub(super) fn generate_rustdoc(
                 return Err(TerminalError::Other(error));
             }
             CargoUpdateResult::ErrorReturned(_exit_status, message) => {
-                let error = anyhow::anyhow!("aborting due to failure to run 'cargo update' for crate {crate_name} v{version}");
+                let error = anyhow::anyhow!(
+                    "aborting due to failure to run 'cargo update' for crate {crate_name} v{version}"
+                );
                 return Err(TerminalError::WithAdvice(error, message));
             }
         }

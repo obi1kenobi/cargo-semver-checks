@@ -2,15 +2,15 @@ use std::borrow::Cow;
 use std::collections::{BTreeSet, HashMap};
 use std::path::PathBuf;
 
-use anyhow::{bail, Context as _};
+use anyhow::{Context as _, bail};
 use itertools::Itertools;
 use serde::Serialize;
 use tame_index::IndexKrate;
 use trustfall_rustdoc::VersionedStorage;
 
+use crate::GlobalConfig;
 use crate::data_generation::{CrateDataRequest, IntoTerminalResult as _, TerminalError};
 use crate::manifest::Manifest;
-use crate::GlobalConfig;
 
 #[derive(Debug, Clone)]
 pub(crate) enum CrateSource<'a> {
