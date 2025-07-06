@@ -1,0 +1,11 @@
+
+[registries.csc-imaginary-registry]
+credential-provider = ["cargo:token"]
+index = "sparse+https://csc-imaginary-registry.example.net/index/"
+
+[source.csc-imaginary-registry]
+registry = "sparse+https://csc-imaginary-registry.example.net/index/"
+replace-with = "csc-actual-registry-on-disk"
+
+[source.csc-actual-registry-on-disk]
+local-registry = "test_crates/custom_registry/test-local-registry"

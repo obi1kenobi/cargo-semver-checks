@@ -19,12 +19,14 @@ use directories::ProjectDirs;
 use itertools::Itertools;
 use serde::Serialize;
 
-use std::collections::{BTreeMap, HashSet};
+use std::collections::hash_map::Entry;
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Write as _;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 
 use check_release::run_check_release;
-use rustdoc_gen::CrateDataForRustdoc;
+use rustdoc_gen::{CrateDataForRustdoc, RustdocGenerator};
 
 pub use config::{FeatureFlag, GlobalConfig};
 pub use query::{
@@ -112,7 +114,7 @@ impl Rustdoc {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Serialize)]
+#[derive(Debug, Hash, PartialEq, Eq, Serialize)]
 enum RustdocSource {
     /// Path to the Rustdoc json file.
     /// Use this option when you have already generated the rustdoc file.
@@ -371,19 +373,20 @@ impl Check {
         &self,
         config: &mut GlobalConfig,
         source: &RustdocSource,
-    ) -> anyhow::Result<Box<dyn rustdoc_gen::RustdocGenerator>> {
+        custom_registry_name: Option<&str>,
+    ) -> anyhow::Result<Rc<dyn rustdoc_gen::RustdocGenerator>> {
         let target_dir = self.get_target_dir(source)?;
         Ok(match source {
             RustdocSource::Rustdoc(path) => {
-                Box::new(rustdoc_gen::RustdocFromFile::new(path.to_owned()))
+                Rc::new(rustdoc_gen::RustdocFromFile::new(path.to_owned()))
             }
             RustdocSource::Root(root) => {
-                Box::new(rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?)
+                Rc::new(rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?)
             }
             RustdocSource::Revision(root, rev) => {
                 let metadata = manifest_metadata_no_deps(root)?;
                 let source = metadata.workspace_root.as_std_path();
-                Box::new(rustdoc_gen::RustdocFromGitRevision::with_rev(
+                Rc::new(rustdoc_gen::RustdocFromGitRevision::with_rev(
                     source,
                     &target_dir,
                     rev,
@@ -391,12 +394,16 @@ impl Check {
                 )?)
             }
             RustdocSource::VersionFromRegistry(version) => {
-                let mut registry = rustdoc_gen::RustdocFromRegistry::new(&target_dir, config)?;
+                let mut registry = rustdoc_gen::RustdocFromRegistry::new(
+                    &target_dir,
+                    custom_registry_name,
+                    config,
+                )?;
                 if let Some(ver) = version {
                     let semver = semver::Version::parse(ver)?;
                     registry.set_version(semver);
                 }
-                Box::new(registry)
+                Rc::new(registry)
             }
         })
     }
@@ -461,6 +468,7 @@ impl Check {
                             current_crate_data: CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Current,
                                 name: name.clone(),
+                                registry_name: None,
                                 feature_config: &self.current_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
@@ -469,6 +477,7 @@ impl Check {
                                     highest_allowed_version: version,
                                 },
                                 name,
+                                registry_name: None,
                                 feature_config: &self.baseline_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
@@ -527,11 +536,25 @@ note: skipped the following crates since they have no library target: {skipped}"
                                 workspace_overrides.as_deref(),
                             )?;
 
+                            let source = selected.source.as_ref();
+                            let publish = selected.publish.as_deref();
+                            let published_to_crates_io =
+                                source.map(|s| s.is_crates_io()).unwrap_or_else(|| {
+                                    publish.is_none_or(|p| p.iter().any(|name| name == "crates-io"))
+                                });
+
+                            // registry name is needed to find its configuration in Cargo's config
+                            let registry_name = if published_to_crates_io {
+                                None
+                            } else {
+                                publish.and_then(|registries| registries.first())
+                            };
                             Ok(Some(CrateToCheck {
                                 overrides,
                                 current_crate_data: CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Current,
                                     name: crate_name.clone(),
+                                    registry_name: registry_name.map(From::from),
                                     feature_config: &self.current_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
@@ -540,6 +563,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                                         highest_allowed_version: Some(version.clone()),
                                     },
                                     name: crate_name.clone(),
+                                    registry_name: registry_name.map(From::from),
                                     feature_config: &self.baseline_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
@@ -551,14 +575,27 @@ note: skipped the following crates since they have no library target: {skipped}"
             }
         };
 
-        let current_loader = self.get_rustdoc_generator(config, &self.current.source)?;
-        let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
+        // Each crate in the workspace may use a different registry
+        let mut generators = HashMap::new();
 
         // Create a report for each crate.
         // We want to run all the checks, even if one returns `Err`.
         let all_outcomes: Vec<anyhow::Result<(String, CrateReport)>> = crates_to_check
-            .into_iter()
+            .iter()
             .map(|selected| {
+                let current_loader = self.get_rustdoc_generator_for_crate(
+                    &mut generators,
+                    config,
+                    &self.current.source,
+                    &selected.current_crate_data,
+                )?;
+                let baseline_loader = self.get_rustdoc_generator_for_crate(
+                    &mut generators,
+                    config,
+                    &self.baseline.source,
+                    &selected.baseline_crate_data,
+                )?;
+
                 let start = std::time::Instant::now();
                 let name = selected.current_crate_data.name.clone();
 
@@ -597,6 +634,36 @@ note: skipped the following crates since they have no library target: {skipped}"
         };
 
         Ok(Report { crate_reports })
+    }
+
+    fn get_rustdoc_generator_for_crate<'s>(
+        &self,
+        loaders: &mut HashMap<(&'s RustdocSource, Option<&'s str>), Rc<dyn RustdocGenerator>>,
+        config: &mut GlobalConfig,
+        source: &'s RustdocSource,
+        crate_data: &'s CrateDataForRustdoc<'_>,
+    ) -> Result<Rc<dyn RustdocGenerator>, anyhow::Error> {
+        let registry_name = if matches!(source, RustdocSource::VersionFromRegistry(_)) {
+            crate_data.registry_name.as_deref()
+        } else {
+            None
+        };
+        Ok(match loaders.entry((source, registry_name)) {
+            Entry::Occupied(occupied_entry) => occupied_entry.get().clone(),
+            Entry::Vacant(vacant_entry) => {
+                if let Some(registry_name) = registry_name {
+                    config.log_verbose(|config| {
+                        config.shell_note(format_args!(
+                            "Using a custom registry '{registry_name}' (because of '{}')",
+                            crate_data.name,
+                        ))
+                    })?;
+                }
+                vacant_entry
+                    .insert(self.get_rustdoc_generator(config, source, registry_name)?)
+                    .clone()
+            }
+        })
     }
 }
 

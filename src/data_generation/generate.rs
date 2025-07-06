@@ -33,7 +33,7 @@ impl GenerationSettings {
         }
     }
 
-    fn color_flag(&self) -> &'static str {
+    pub(crate) fn color_flag(&self) -> &'static str {
         if self.use_color {
             "--color=always"
         } else {
@@ -45,6 +45,7 @@ impl GenerationSettings {
 pub(super) fn generate_rustdoc(
     request: &CrateDataRequest<'_>,
     build_dir: &Path,
+    target_dir: &Path,
     settings: GenerationSettings,
     callbacks: &mut CallbackHandler<'_>,
 ) -> Result<(PathBuf, cargo_metadata::Metadata), TerminalError> {
@@ -105,8 +106,6 @@ pub(super) fn generate_rustdoc(
     let metadata = cargo_metadata::MetadataCommand::new()
         .manifest_path(&placeholder_manifest_path)
         .exec()?;
-    let placeholder_target_directory = metadata.target_directory.as_path().as_std_path().to_owned();
-    let target_dir = placeholder_target_directory.as_path();
 
     let rustdoc_data = run_cargo_doc(
         request,
@@ -536,11 +535,12 @@ fn create_placeholder_rustdoc_manifest(
         },
         dependencies: {
             let project_with_features: DependencyDetail = match &request.kind {
-                RequestKind::Registry { .. } => DependencyDetail {
+                RequestKind::Registry(registry_request) => DependencyDetail {
                     // We need the *exact* version as a dependency, or else cargo will
                     // give us the latest semver-compatible version which is not we want.
                     // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
                     version: Some(format!("={}", request.kind.version()?)),
+                    registry: registry_request.registry_name.map(From::from),
                     default_features: request.default_features,
                     features: request
                         .extra_features

@@ -1,0 +1,10 @@
+[package]
+name = "registry-hello"
+version = "0.1.3"
+edition = "2024"
+publish = ["csc-imaginary-registry"]
+
+[dependencies]
+example-dependency = { registry = "csc-imaginary-registry", version = "*" }
+
+[workspace]
