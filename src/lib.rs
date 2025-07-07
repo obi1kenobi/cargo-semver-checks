@@ -414,11 +414,15 @@ impl Check {
                 Ok(rustc_version) => {
                     if rustc_version < *rustc_version_needed {
                         let help = "HELP: to use the latest rustc, run `rustup update stable && cargo +stable semver-checks <args>`";
-                        anyhow::bail!("rustc version is not high enough: >={rustc_version_needed} needed, got {rustc_version}\n\n{help}");
+                        anyhow::bail!(
+                            "rustc version is not high enough: >={rustc_version_needed} needed, got {rustc_version}\n\n{help}"
+                        );
                     }
                 }
                 Err(error) => {
-                    let help = format!("HELP: to avoid errors please ensure rustc >={rustc_version_needed} is used");
+                    let help = format!(
+                        "HELP: to avoid errors please ensure rustc >={rustc_version_needed} is used"
+                    );
                     config.shell_warn(format_args!(
                         "failed to determine the current rustc version: {error}\n\n{help}"
                     ))?;
@@ -438,7 +442,9 @@ impl Check {
                             // are semver-checked against each other.
                             vec!["<unknown>".to_string()]
                         }
-                        _ => anyhow::bail!("couldn't deduce crate name, specify one through the package allow list"),
+                        _ => anyhow::bail!(
+                            "couldn't deduce crate name, specify one through the package allow list"
+                        ),
                     },
                     ScopeMode::AllowList(lst) => lst.clone(),
                 };

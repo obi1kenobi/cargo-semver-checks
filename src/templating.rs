@@ -1,6 +1,6 @@
 use handlebars::{
-    handlebars_helper, to_json, BlockContext, Context, Handlebars, Helper, Output, RenderContext,
-    RenderError, RenderErrorReason, Renderable,
+    BlockContext, Context, Handlebars, Helper, Output, RenderContext, RenderError,
+    RenderErrorReason, Renderable, handlebars_helper, to_json,
 };
 use serde_json::Value;
 

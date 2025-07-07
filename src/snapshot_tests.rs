@@ -136,12 +136,17 @@ impl fmt::Display for CommandResult {
 /// - `invocation` is a list of arguments of the command line invocation,
 ///   starting with `["cargo", "semver-checks"]`.
 fn assert_integration_test(test_name: &str, invocation: &[&str]) {
-    // remove the backtrace environment variable, as this may cause non-
-    // reproducible snapshots.
-    std::env::remove_var("RUST_BACKTRACE");
-    // remove the cargo verbosity variable, which gets passed to `cargo doc`
-    // and may create a nonreproducible environment.
-    std::env::remove_var("CARGO_TERM_VERBOSE");
+    // TODO: Avoid removing env vars, or generate the snapshot from a child process
+    //       whose environment we fully control.
+    // SAFETY: This is test-only code. If it misbehaves, it should only affect tests.
+    unsafe {
+        // remove the backtrace environment variable, as this may cause non-
+        // reproducible snapshots.
+        std::env::remove_var("RUST_BACKTRACE");
+        // remove the cargo verbosity variable, which gets passed to `cargo doc`
+        // and may create a nonreproducible environment.
+        std::env::remove_var("CARGO_TERM_VERBOSE");
+    }
 
     let stdout = StaticWriter::new();
     let stderr = StaticWriter::new();
