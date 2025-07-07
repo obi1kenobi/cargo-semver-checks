@@ -449,7 +449,7 @@ impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
                 return Ok(StatefulRustdocGenerator {
                     coupled_state: ReadyState::File { generator },
                     crate_data,
-                })
+                });
             }
             CoupledState::ProjectRoot { generator } => {
                 let source = generator
