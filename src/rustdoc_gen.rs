@@ -398,7 +398,7 @@ pub(crate) enum ReadyState<'a> {
     },
 }
 
-impl<'a, S> StatefulRustdocGenerator<'a, S> {
+impl<S> StatefulRustdocGenerator<'_, S> {
     /// Retrieve the crate data for this generator
     pub(crate) fn get_crate_data(&self) -> &CrateDataForRustdoc<'_> {
         self.crate_data
@@ -436,9 +436,9 @@ impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
         })
     }
 
-    /// Ready a [`CoupledState`] for rustdoc generation, extracting necessary internal data,
+    /// Prepare a [`CoupledState`] for rustdoc generation, extracting necessary internal data,
     /// and creating an appropriate data request
-    pub(crate) fn ready_generator(
+    pub(crate) fn prepare_generator(
         &self,
         config: &mut GlobalConfig,
     ) -> Result<StatefulRustdocGenerator<'_, ReadyState<'_>>, TerminalError> {
@@ -486,7 +486,7 @@ impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
 }
 
 impl<'a> StatefulRustdocGenerator<'a, ReadyState<'a>> {
-    // TODO: Use the data request
+    // TODO: Use the data request in the witness system
     #[expect(dead_code)]
     /// Get the computed data request for this generator, if one exists
     pub(crate) fn get_data_request(&self) -> Option<&CrateDataRequest<'_>> {
@@ -532,12 +532,7 @@ impl RustdocFromFile {
 
     pub(crate) fn load_rustdoc(&self) -> Result<VersionedStorage, TerminalError> {
         trustfall_rustdoc::load_rustdoc(&self.path, None)
-            .with_context(|| {
-                format!(
-                    "Error loading rustdoc for `RustdocFromFile` from `{:?}`",
-                    self.path
-                )
-            })
+            .with_context(|| format!("failed to load rustdoc from file at `{:?}`", self.path))
             .into_terminal_result()
     }
 }
@@ -697,7 +692,7 @@ impl RustdocFromGitRevision {
         self.path.get_crate_source(crate_data).map_err(|err| {
             terminal_context(
                 err,
-                "Error retrieving manifest from `RustdocFromGitRevision`",
+                "failed to retrieve manifest file from git revision source",
             )
         })
     }

@@ -566,10 +566,10 @@ note: skipped the following crates since they have no library target: {skipped}"
                 .map_err(|err| log_terminal_error(config, err))?;
 
                 let current_loader = current_loader
-                    .ready_generator(config)
+                    .prepare_generator(config)
                     .map_err(|err| log_terminal_error(config, err))?;
                 let baseline_loader = baseline_loader
-                    .ready_generator(config)
+                    .prepare_generator(config)
                     .map_err(|err| log_terminal_error(config, err))?;
 
                 let data_storage = generate_crate_data(
