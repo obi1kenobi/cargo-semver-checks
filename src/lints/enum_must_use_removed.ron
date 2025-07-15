@@ -1,0 +1,67 @@
+SemverQuery(
+    id: "enum_must_use_removed",
+    human_readable_name: "enum #[must_use] removed",
+    description: "An enum is no longer marked with #[must_use].",
+    required_update: Minor,
+    lint_level: Allow,
+    // TODO: Change the reference link to point to the cargo semver reference
+    //       once it has a section on attribute #[must_use].
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        attribute {
+                            old_attr: raw_attribute @output
+                            content {
+                                base @filter(op: "=", value: ["$must_use"])
+                            }
+                        }
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$must_use"])
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "must_use": "must_use",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "An enum is no longer #[must_use]. Downstream code that ignores its value will get a compiler lint if the crate is downgraded.",
+    per_result_error_template: Some("enum {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)
