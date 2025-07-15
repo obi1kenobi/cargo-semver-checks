@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/enum_missing/": [
@@ -24,6 +23,19 @@ snapshot_kind: text
       ]),
       "span_begin_line": Uint64(6),
       "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_must_use_removed/": [
+    {
+      "name": String("MustUseRemovedEnum"),
+      "path": List([
+        String("enum_must_use_removed"),
+        String("MustUseRemovedEnum"),
+      ]),
+      "span_begin_line": Uint64(56),
+      "span_end_line": Uint64(58),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
