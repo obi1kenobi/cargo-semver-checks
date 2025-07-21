@@ -837,6 +837,7 @@ mod tests {
         if matches!(
             query_name,
             "enum_must_use_added"
+                | "enum_must_use_removed"
                 | "function_must_use_added"
                 | "inherent_method_must_use_added"
                 | "struct_must_use_added"
