@@ -837,6 +837,7 @@ mod tests {
         if matches!(
             query_name,
             "enum_must_use_added"
+                | "enum_must_use_removed"
                 | "function_must_use_added"
                 | "inherent_method_must_use_added"
                 | "struct_must_use_added"
@@ -1337,6 +1338,7 @@ add_lints!(
     enum_marked_non_exhaustive,
     enum_missing,
     enum_must_use_added,
+    enum_must_use_removed,
     enum_no_longer_non_exhaustive,
     enum_no_repr_variant_discriminant_changed,
     enum_non_exhaustive_struct_variant_field_added,
