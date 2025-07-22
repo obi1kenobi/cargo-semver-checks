@@ -2827,9 +2827,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.5.14"
+version = "0.5.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de3a5d9f0aba1dbcec1cc47f0ff94a4b778fe55bca98a6dfa92e4e094e57b1c4"
+checksum = "7e8af0dde094006011e6a740d4879319439489813bd0bcdc7d821beaeeff48ec"
 dependencies = [
  "bitflags 2.9.1",
 ]
@@ -3848,9 +3848,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall_rustdoc"
-version = "0.30.0"
+version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f3a0cdad43349865674e83301e089524a55311d3a712a1296486d39160e95b7"
+checksum = "5aa83994ef803cb9fc979f3f0aaabd54ca22de18110fabd62506bd050d5447f9"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3862,6 +3862,7 @@ dependencies = [
  "trustfall-rustdoc-adapter 45.3.0",
  "trustfall-rustdoc-adapter 53.2.0",
  "trustfall-rustdoc-adapter 54.1.0",
+ "trustfall_core",
 ]
 
 [[package]]
