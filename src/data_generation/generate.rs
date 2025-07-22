@@ -375,7 +375,7 @@ fn run_cargo_doc(
     let subject_crate = metadata
         .packages
         .iter()
-        .find(|dep| dep.name == crate_name)
+        .find(|dep| dep.name.as_str() == crate_name)
         .ok_or_else(|| {
             if !observed_stderr_but_lib_msg_not_present {
                 anyhow::anyhow!("crate {crate_name} v{version} has no lib target, nothing to check")
