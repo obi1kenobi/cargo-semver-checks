@@ -30,7 +30,10 @@ impl Manifest {
     pub(crate) fn parse_standalone(path: std::path::PathBuf) -> anyhow::Result<Self> {
         let parsed = std::fs::read_to_string(&path)
             .map_err(anyhow::Error::from)
-            .and_then(|data| cargo_toml::Manifest::from_slice_with_metadata(data.as_bytes()).map_err(anyhow::Error::from))
+            .and_then(|data| {
+                cargo_toml::Manifest::from_slice_with_metadata(data.as_bytes())
+                    .map_err(anyhow::Error::from)
+            })
             .with_context(|| format!("failed when reading {}", path.display()))?;
 
         Ok(Self { path, parsed })

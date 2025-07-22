@@ -628,7 +628,10 @@ fn overrides_for_workspace_package(
         manifest::Manifest::parse_standalone(package.manifest_path.clone().into_std_path_buf())?;
 
     // N.B.: Do not use `==` here, because `==` is false for inherited values.
-    let use_workspace_lints = matches!(selected_manifest.parsed.lints, cargo_toml::Inheritable::Inherited);
+    let use_workspace_lints = matches!(
+        selected_manifest.parsed.lints,
+        cargo_toml::Inheritable::Inherited
+    );
     let metadata_workspace_key = lint_table.as_ref().is_some_and(|x| x.workspace);
 
     let mut overrides = OverrideStack::new();
