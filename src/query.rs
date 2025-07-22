@@ -622,7 +622,7 @@ mod tests {
 
     fn run_query_on_crate_pair(
         semver_query: &SemverQuery,
-        parsed_query: &IndexedQuery, // The parsed version of semver_query.
+        parsed_query: Arc<IndexedQuery>, // The parsed version of semver_query.
         crate_pair_name: &String,
         indexed_crate_new: &VersionedIndex<'_>,
         indexed_crate_old: &VersionedIndex<'_>,
@@ -631,7 +631,7 @@ mod tests {
             .expect("could not create adapter");
 
         let results_iter = adapter
-            .run_query(&semver_query.query, semver_query.arguments.clone())
+            .run_query_with_indexed_query(parsed_query.clone(), semver_query.arguments.clone())
             .unwrap();
 
         // Ensure span data inside `@fold` blocks is deterministically ordered,
@@ -710,7 +710,7 @@ mod tests {
     fn assert_no_false_positives_in_nonchanged_crate(
         query_name: &str,
         semver_query: &SemverQuery,
-        indexed_query: &IndexedQuery, // The parsed version of semver_query.
+        indexed_query: Arc<IndexedQuery>, // The parsed version of semver_query.
         indexed_crate: &VersionedIndex<'_>,
         crate_pair_name: &String,
         crate_version: &str,
@@ -769,7 +769,7 @@ mod tests {
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
-                    indexed_query,
+                    indexed_query.clone(),
                     current,
                     crate_pair_name,
                     "new",
@@ -777,7 +777,7 @@ mod tests {
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
-                    indexed_query,
+                    indexed_query.clone(),
                     baseline,
                     crate_pair_name,
                     "old",
@@ -785,7 +785,7 @@ mod tests {
 
                 run_query_on_crate_pair(
                     &semver_query,
-                    indexed_query,
+                    indexed_query.clone(),
                     crate_pair_name,
                     current,
                     baseline,
