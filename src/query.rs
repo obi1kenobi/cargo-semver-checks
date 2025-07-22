@@ -357,7 +357,7 @@ pub enum InheritedValue {
 #[cfg(test)]
 mod tests {
     use std::borrow::Cow;
-    use std::collections::BTreeSet;
+    use std::collections::{BTreeSet, HashMap};
     use std::ffi::OsStr;
     use std::path::PathBuf;
     use std::sync::{Arc, OnceLock};
@@ -370,6 +370,7 @@ mod tests {
     use semver::Version;
     use serde::{Deserialize, Serialize};
     use trustfall::{FieldValue, TransparentValue};
+    use trustfall_core::ir::IndexedQuery;
     use trustfall_rustdoc::{
         VersionedIndex, VersionedRustdocAdapter, VersionedStorage, load_rustdoc,
     };
@@ -621,6 +622,7 @@ mod tests {
 
     fn run_query_on_crate_pair(
         semver_query: &SemverQuery,
+        parsed_query: &IndexedQuery, // The parsed version of semver_query.
         crate_pair_name: &String,
         indexed_crate_new: &VersionedIndex<'_>,
         indexed_crate_old: &VersionedIndex<'_>,
@@ -638,8 +640,6 @@ mod tests {
         // - list-typed outputs
         // - with names ending in `_begin_line`
         // - located inside *one* `@fold` level (i.e. their component is directly under the root).
-        let parsed_query = trustfall_core::frontend::parse(adapter.schema(), &semver_query.query)
-            .expect("not a valid query");
         let fold_keys_and_targets: BTreeMap<&str, Vec<Arc<str>>> = parsed_query
             .outputs
             .iter()
@@ -710,12 +710,18 @@ mod tests {
     fn assert_no_false_positives_in_nonchanged_crate(
         query_name: &str,
         semver_query: &SemverQuery,
+        indexed_query: &IndexedQuery, // The parsed version of semver_query.
         indexed_crate: &VersionedIndex<'_>,
         crate_pair_name: &String,
         crate_version: &str,
     ) {
-        let (crate_pair_path, output) =
-            run_query_on_crate_pair(semver_query, crate_pair_name, indexed_crate, indexed_crate);
+        let (crate_pair_path, output) = run_query_on_crate_pair(
+            semver_query,
+            indexed_query,
+            crate_pair_name,
+            indexed_crate,
+            indexed_crate,
+        );
         if !output.is_empty() {
             // This `if` statement means that a false positive happened.
             // The query was ran on two identical crates (with the same rustdoc)
@@ -741,14 +747,29 @@ mod tests {
         let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query = SemverQuery::from_ron_str(&query_text).unwrap();
 
+        // Map of rustdoc version to parsed query.
+        let mut parsed_query_cache: HashMap<u32, Arc<IndexedQuery>> = HashMap::new();
+
         let mut query_execution_results: TestOutput = get_test_crate_names()
             .iter()
             .map(|crate_pair_name| {
                 let (baseline, current) = get_test_crate_indexes(crate_pair_name);
 
+                let adapter = VersionedRustdocAdapter::new(current, Some(baseline))
+                    .expect("could not create adapter");
+
+                let indexed_query =
+                    parsed_query_cache
+                        .entry(adapter.version())
+                        .or_insert_with(|| {
+                            trustfall_core::frontend::parse(adapter.schema(), &semver_query.query)
+                                .expect("Query failed to parse.")
+                        });
+
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
+                    indexed_query,
                     current,
                     crate_pair_name,
                     "new",
@@ -756,12 +777,19 @@ mod tests {
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
+                    indexed_query,
                     baseline,
                     crate_pair_name,
                     "old",
                 );
 
-                run_query_on_crate_pair(&semver_query, crate_pair_name, current, baseline)
+                run_query_on_crate_pair(
+                    &semver_query,
+                    indexed_query,
+                    crate_pair_name,
+                    current,
+                    baseline,
+                )
             })
             .filter(|(_crate_pair_name, output)| !output.is_empty())
             .collect();
