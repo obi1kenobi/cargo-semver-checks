@@ -626,7 +626,7 @@ mod tests {
         crate_pair_name: &String,
         indexed_crate_new: &VersionedIndex<'_>,
         indexed_crate_old: &VersionedIndex<'_>,
-        indexed_query: Arc<IndexedQuery>,
+        parsed_query: Arc<IndexedQuery>,
     ) -> (String, Vec<BTreeMap<String, FieldValue>>) {
         let adapter = VersionedRustdocAdapter::new(indexed_crate_new, Some(indexed_crate_old))
             .expect("could not create adapter");
@@ -641,7 +641,6 @@ mod tests {
         // - list-typed outputs
         // - with names ending in `_begin_line`
         // - located inside *one* `@fold` level (i.e. their component is directly under the root).
-        let parsed_query = indexed_query;
         let fold_keys_and_targets: BTreeMap<&str, Vec<Arc<str>>> = parsed_query
             .outputs
             .iter()
@@ -749,8 +748,8 @@ mod tests {
         let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query = SemverQuery::from_ron_str(&query_text).unwrap();
 
-        // Map of (version, query id) to query.
-        let mut parsed_query_cache: HashMap<(u32, String), Arc<IndexedQuery>> = HashMap::new();
+        // Map of rustdoc version to parsed query.
+        let mut parsed_query_cache: HashMap<u32, Arc<IndexedQuery>> = HashMap::new();
 
         let mut query_execution_results: TestOutput = get_test_crate_names()
             .iter()
@@ -761,7 +760,7 @@ mod tests {
                     .expect("could not create adapter");
 
                 let indexed_query = parsed_query_cache
-                    .entry((adapter.version(), semver_query.id.clone()))
+                    .entry(adapter.version())
                     .or_insert_with(|| {
                         trustfall_core::frontend::parse(adapter.schema(), &semver_query.query)
                             .expect("Query failed to parse.")
