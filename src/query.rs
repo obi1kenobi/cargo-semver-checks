@@ -359,7 +359,6 @@ mod tests {
     use std::borrow::Cow;
     use std::collections::{BTreeSet, HashMap};
     use std::ffi::OsStr;
-    use std::ops::Deref as _;
     use std::path::PathBuf;
     use std::sync::{Arc, OnceLock};
     use std::time::SystemTime;
@@ -623,10 +622,10 @@ mod tests {
 
     fn run_query_on_crate_pair(
         semver_query: &SemverQuery,
+        parsed_query: &IndexedQuery, // The parsed version of semver_query.
         crate_pair_name: &String,
         indexed_crate_new: &VersionedIndex<'_>,
         indexed_crate_old: &VersionedIndex<'_>,
-        parsed_query: Arc<IndexedQuery>,
     ) -> (String, Vec<BTreeMap<String, FieldValue>>) {
         let adapter = VersionedRustdocAdapter::new(indexed_crate_new, Some(indexed_crate_old))
             .expect("could not create adapter");
@@ -711,17 +710,17 @@ mod tests {
     fn assert_no_false_positives_in_nonchanged_crate(
         query_name: &str,
         semver_query: &SemverQuery,
+        indexed_query: &IndexedQuery, // The parsed version of semver_query.
         indexed_crate: &VersionedIndex<'_>,
         crate_pair_name: &String,
         crate_version: &str,
-        indexed_query: Arc<IndexedQuery>,
     ) {
         let (crate_pair_path, output) = run_query_on_crate_pair(
             semver_query,
+            indexed_query,
             crate_pair_name,
             indexed_crate,
             indexed_crate,
-            indexed_query,
         );
         if !output.is_empty() {
             // This `if` statement means that a false positive happened.
@@ -759,38 +758,37 @@ mod tests {
                 let adapter = VersionedRustdocAdapter::new(current, Some(baseline))
                     .expect("could not create adapter");
 
-                let indexed_query = parsed_query_cache
-                    .entry(adapter.version())
-                    .or_insert_with(|| {
-                        trustfall_core::frontend::parse(adapter.schema(), &semver_query.query)
-                            .expect("Query failed to parse.")
-                    })
-                    .deref()
-                    .clone();
+                let indexed_query =
+                    parsed_query_cache
+                        .entry(adapter.version())
+                        .or_insert_with(|| {
+                            trustfall_core::frontend::parse(adapter.schema(), &semver_query.query)
+                                .expect("Query failed to parse.")
+                        });
 
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
+                    indexed_query,
                     current,
                     crate_pair_name,
                     "new",
-                    indexed_query.clone(),
                 );
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
+                    indexed_query,
                     baseline,
                     crate_pair_name,
                     "old",
-                    indexed_query.clone(),
                 );
 
                 run_query_on_crate_pair(
                     &semver_query,
+                    indexed_query,
                     crate_pair_name,
                     current,
                     baseline,
-                    indexed_query,
                 )
             })
             .filter(|(_crate_pair_name, output)| !output.is_empty())
