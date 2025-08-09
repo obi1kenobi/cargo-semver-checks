@@ -29,4 +29,30 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/unsafe_function_requires_more_target_features/": [
+    {
+      "name": String("becomes_safe"),
+      "path": List([
+        String("unsafe_function_requires_more_target_features"),
+        String("becomes_safe"),
+      ]),
+      "span_begin_line": Uint64(50),
+      "span_end_line": Uint64(50),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/unsafe_function_target_feature_added/": [
+    {
+      "name": String("becomes_safe"),
+      "path": List([
+        String("unsafe_function_target_feature_added"),
+        String("becomes_safe"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
