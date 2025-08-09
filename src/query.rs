@@ -367,7 +367,6 @@ mod tests {
     use anyhow::Context;
     use fs_err::PathExt;
     use rayon::prelude::*;
-    use semver::Version;
     use serde::{Deserialize, Serialize};
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_core::ir::IndexedQuery;
@@ -832,31 +831,6 @@ mod tests {
         };
         for value in query_execution_results.values_mut() {
             value.sort_unstable_by_key(key_func);
-        }
-
-        // TODO: Remove this once Rust 1.86 is the oldest Rust supported by cargo-semver-checks.
-        // These snapshots don't match on Rust 1.85.x because of, ironically, a regression
-        // in newer Rust that inappropriately considers `#[target_feature]` safe functions
-        // to be unsafe.
-        if matches!(
-            query_name,
-            "function_no_longer_unsafe"
-                | "function_unsafe_added"
-                | "inherent_method_unsafe_added"
-                | "safe_function_target_feature_added"
-                | "safe_inherent_method_target_feature_added"
-                | "safe_function_requires_more_target_features"
-                | "safe_inherent_method_requires_more_target_features"
-                | "unsafe_function_requires_more_target_features"
-                | "unsafe_function_target_feature_added"
-                | "unsafe_inherent_method_requires_more_target_features"
-                | "unsafe_inherent_method_target_feature_added"
-        ) && rustc_version::version().is_ok_and(|version| version < Version::new(1, 86, 0))
-        {
-            eprintln!(
-                "skipping query execution test for lint `{query_name}` since data for it isn't available in Rust prior to 1.86"
-            );
-            return;
         }
 
         // TODO: Remove this when Rust 1.89 is no longer supported by cargo-semver-checks.

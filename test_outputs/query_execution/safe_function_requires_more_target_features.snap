@@ -2,4 +2,42 @@
 source: src/query.rs
 expression: "&query_execution_results"
 ---
-{}
+{
+  "./test_crates/safe_function_requires_more_target_features/": [
+    {
+      "fn_name": String("safe_function"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("safe_function_requires_more_target_features"),
+        String("safe_function"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "fn_name": String("replaced_with_broader_feature"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("safe_function_requires_more_target_features"),
+        String("replaced_with_broader_feature"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/unsafe_function_requires_more_target_features/": [
+    {
+      "fn_name": String("safe_function"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("unsafe_function_requires_more_target_features"),
+        String("safe_function"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
