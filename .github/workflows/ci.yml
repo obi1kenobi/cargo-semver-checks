@@ -406,7 +406,7 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -522,7 +522,7 @@ jobs:
           path: 'subject'
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -665,7 +665,7 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -744,7 +744,7 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -818,7 +818,7 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -890,7 +890,7 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1012,7 +1012,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1075,7 +1075,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1137,7 +1137,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1395,7 +1395,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1518,7 +1518,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1608,7 +1608,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1708,7 +1708,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-windows
           path: bins\
@@ -1809,7 +1809,7 @@ jobs:
           rustflags: "-Dwarnings"  # set explicitly, to ensure we trigger the bug described above
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1873,7 +1873,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1939,7 +1939,7 @@ jobs:
           cache: false
 
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-semver-checks-linux
           path: bins/

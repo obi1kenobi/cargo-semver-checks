@@ -145,7 +145,7 @@ jobs:
           persist-credentials: true
 
       - name: download ci.yml from update job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ci.yml
           path: .github/workflows/
