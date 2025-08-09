@@ -8,10 +8,10 @@ filename = 'src/lib.rs'
 begin_line = 3
 hint = 'let witness = function_unsafe_added::add(...);'
 
-[["./test_crates/safe_function_target_feature_added/"]]
+[["./test_crates/safe_function_requires_more_target_features/"]]
 filename = 'src/lib.rs'
-begin_line = 10
-hint = 'let witness = safe_function_target_feature_added::compute(...);'
+begin_line = 27
+hint = 'let witness = safe_function_requires_more_target_features::becomes_unsafe(...);'
 
 [["./test_crates/safe_function_target_feature_added/"]]
 filename = 'src/lib.rs'
