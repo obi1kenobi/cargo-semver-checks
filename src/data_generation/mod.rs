@@ -17,14 +17,8 @@ pub(crate) struct DataStorage {
 }
 
 impl DataStorage {
-    pub(crate) fn new(
-        current: VersionedStorage,
-        baseline: VersionedStorage,
-    ) -> Self {
-        Self {
-            current,
-            baseline,
-        }
+    pub(crate) fn new(current: VersionedStorage, baseline: VersionedStorage) -> Self {
+        Self { current, baseline }
     }
 
     pub(crate) fn current_crate(&self) -> &VersionedStorage {

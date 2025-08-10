@@ -825,10 +825,7 @@ fn generate_crate_data(
         baseline_crate
     };
 
-    Ok(DataStorage::new(
-        current_crate,
-        baseline_crate,
-    ))
+    Ok(DataStorage::new(current_crate, baseline_crate))
 }
 
 fn manifest_path(project_root: &Path) -> anyhow::Result<PathBuf> {
