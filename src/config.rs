@@ -37,7 +37,7 @@ impl GlobalConfig {
         Self {
             level: None,
             handlebars: make_handlebars_registry(),
-            minimum_rustc_version: semver::Version::new(1, 87, 0),
+            minimum_rustc_version: semver::Version::new(1, 88, 0),
             stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
             stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
             feature_flags: HashSet::new(),
