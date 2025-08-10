@@ -635,11 +635,11 @@ fn overrides_for_workspace_package(
     let metadata_workspace_key = lint_table.as_ref().is_some_and(|x| x.workspace);
 
     let mut overrides = OverrideStack::new();
-    if use_workspace_lints || metadata_workspace_key {
-        if let Some(workspace) = workspace_overrides {
-            for level in workspace {
-                overrides.push(level);
-            }
+    if (use_workspace_lints || metadata_workspace_key)
+        && let Some(workspace) = workspace_overrides
+    {
+        for level in workspace {
+            overrides.push(level);
         }
     }
     if let Some(lint_table) = lint_table {
