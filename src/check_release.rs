@@ -203,25 +203,25 @@ fn print_triggered_lint(
             })?;
         }
 
-        if let Some(witness) = &semver_query.witness {
-            if witness_generation.show_hints {
-                let message = config
-                    .handlebars()
-                    .render_template(&witness.hint_template, &pretty_result)
-                    .context("Error instantiating witness hint template.")?;
+        if let Some(witness) = &semver_query.witness
+            && witness_generation.show_hints
+        {
+            let message = config
+                .handlebars()
+                .render_template(&witness.hint_template, &pretty_result)
+                .context("Error instantiating witness hint template.")?;
 
-                config.log_info(|config| {
-                    let note = Style::new()
-                        .fg_color(Some(Color::Ansi(AnsiColor::Cyan)))
-                        .bold();
-                    writeln!(
-                        config.stdout(),
-                        "{note}note:{note:#} downstream code similar to the following would break:\n\
+            config.log_info(|config| {
+                let note = Style::new()
+                    .fg_color(Some(Color::Ansi(AnsiColor::Cyan)))
+                    .bold();
+                writeln!(
+                    config.stdout(),
+                    "{note}note:{note:#} downstream code similar to the following would break:\n\
                         {message}\n"
-                    )?;
-                    Ok(())
-                })?;
-            }
+                )?;
+                Ok(())
+            })?;
         }
     }
 

@@ -219,7 +219,7 @@ jobs:
         #
         #            Also make sure to update the MSRV in the cargo-semver-checks-action CI:
         #            https://github.com/obi1kenobi/cargo-semver-checks-action/blob/main/.github/workflows/test-action.yml#L18
-        toolchain: ["1.87", "1.88", "stable", "beta"]
+        toolchain: ["1.88", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -378,8 +378,8 @@ jobs:
     needs:
       - build-binary
     env:
-      OLDER_RUST: "1.87"  # Rust 1.87 uses rustdoc v43
-      NEWER_RUST: "1.88"  # Rust 1.88 uses rustdoc v45
+      OLDER_RUST: "1.88"  # Rust 1.88 uses rustdoc v45
+      NEWER_RUST: "1.89"  # Rust 1.89 uses rustdoc v53
     steps:
       - name: Put env vars in outputs
         id: vars
@@ -1934,7 +1934,7 @@ jobs:
         id: toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: "1.86"
+          toolchain: "1.87"
           rustflags: ""
           cache: false
 
@@ -1977,7 +1977,7 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "error: rustc version is not high enough: >=1.87.0 needed, got 1.86.0")"
+          EXPECTED="$(echo -e "error: rustc version is not high enough: >=1.88.0 needed, got 1.87.0")"
           RESULT="$(grep 'error: rustc version' output)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
@@ -2076,7 +2076,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toolchain: ["1.87", "1.88", "stable"]
+        toolchain: ["1.88", "stable"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

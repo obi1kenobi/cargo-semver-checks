@@ -635,11 +635,11 @@ fn overrides_for_workspace_package(
     let metadata_workspace_key = lint_table.as_ref().is_some_and(|x| x.workspace);
 
     let mut overrides = OverrideStack::new();
-    if use_workspace_lints || metadata_workspace_key {
-        if let Some(workspace) = workspace_overrides {
-            for level in workspace {
-                overrides.push(level);
-            }
+    if (use_workspace_lints || metadata_workspace_key)
+        && let Some(workspace) = workspace_overrides
+    {
+        for level in workspace {
+            overrides.push(level);
         }
     }
     if let Some(lint_table) = lint_table {
@@ -825,30 +825,7 @@ fn generate_crate_data(
         baseline_crate
     };
 
-    // TODO: Temporary hack, until we stop supporting formats older than rustdoc v45.
-    // v45+ formats carry the target triple information in the rustdoc JSON itself.
-    let target_triple: &'static str = current_loader
-        .get_crate_data()
-        .build_target
-        .map(ToString::to_string)
-        .unwrap_or_else(|| {
-            let outcome = std::process::Command::new("rustc")
-                .arg("-vV")
-                .output()
-                .expect("failed to run `rustc -vV`");
-            let stdout = String::from_utf8(outcome.stdout).expect("stdout was not valid utf-8");
-            let target_triple = stdout
-                .lines()
-                .find_map(|line| line.strip_prefix("host: "))
-                .expect("failed to find host line");
-            target_triple.to_string()
-        })
-        .leak();
-    Ok(DataStorage::new(
-        current_crate,
-        baseline_crate,
-        target_triple,
-    ))
+    Ok(DataStorage::new(current_crate, baseline_crate))
 }
 
 fn manifest_path(project_root: &Path) -> anyhow::Result<PathBuf> {

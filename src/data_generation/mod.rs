@@ -14,23 +14,11 @@ pub(crate) use request::{CacheSettings, CrateDataRequest};
 pub(crate) struct DataStorage {
     current: VersionedStorage,
     baseline: VersionedStorage,
-
-    // TODO: This is temporary, until we stop supporting formats older than rustdoc v45.
-    // v45+ formats carry target triple information embedded inside the rustdoc JSON file.
-    pub(crate) target_triple: &'static str,
 }
 
 impl DataStorage {
-    pub(crate) fn new(
-        current: VersionedStorage,
-        baseline: VersionedStorage,
-        target_triple: &'static str,
-    ) -> Self {
-        Self {
-            current,
-            baseline,
-            target_triple,
-        }
+    pub(crate) fn new(current: VersionedStorage, baseline: VersionedStorage) -> Self {
+        Self { current, baseline }
     }
 
     pub(crate) fn current_crate(&self) -> &VersionedStorage {
@@ -45,8 +33,8 @@ impl DataStorage {
 impl DataStorage {
     pub(crate) fn create_indexes(&self) -> IndexStorage<'_> {
         IndexStorage {
-            current_crate: VersionedIndex::from_storage(&self.current, self.target_triple),
-            baseline_crate: VersionedIndex::from_storage(&self.baseline, self.target_triple),
+            current_crate: VersionedIndex::from_storage(&self.current),
+            baseline_crate: VersionedIndex::from_storage(&self.baseline),
         }
     }
 }
