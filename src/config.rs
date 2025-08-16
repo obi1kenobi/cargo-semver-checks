@@ -1,9 +1,17 @@
 use anstream::{AutoStream, ColorChoice};
 use anstyle::{AnsiColor, Color, Reset, Style};
 use clap::ValueEnum;
-use std::{collections::HashSet, io::Write};
+use serde::Deserialize;
+use std::{
+    collections::{BTreeMap, HashSet},
+    io::Write,
+};
 
-use crate::templating::make_handlebars_registry;
+use crate::{
+    manifest::{LintTable, OverrideConfig},
+    templating::make_handlebars_registry,
+    LintLevel, RequiredSemverUpdate,
+};
 
 #[allow(dead_code)]
 pub struct GlobalConfig {
@@ -16,6 +24,7 @@ pub struct GlobalConfig {
     stdout: AutoStream<Box<dyn Write + 'static>>,
     stderr: AutoStream<Box<dyn Write + 'static>>,
     feature_flags: HashSet<FeatureFlag>,
+    lints: Option<LintConfig>,
 }
 
 impl Default for GlobalConfig {
@@ -41,6 +50,7 @@ impl GlobalConfig {
             stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
             stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
             feature_flags: HashSet::new(),
+            lints: None,
         }
     }
 
@@ -316,6 +326,17 @@ impl GlobalConfig {
     pub fn feature_flags(&self) -> &HashSet<FeatureFlag> {
         &self.feature_flags
     }
+
+    /// Override the linter configuration to use.
+    pub fn set_lint_config(&mut self, config: LintConfig) -> &mut Self {
+        self.lints.replace(config);
+        self
+    }
+
+    /// Returns the linter config override.
+    pub fn lint_config(&self) -> &Option<LintConfig> {
+        &self.lints
+    }
 }
 
 /// A feature flag for gating unstable `cargo-semver-checks` features.
@@ -400,6 +421,50 @@ impl ValueEnum for FeatureFlag {
                 .hide(self.stable)
                 .help(self.help),
         )
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct LintConfig {
+    #[serde(flatten)]
+    pub(crate) lints: BTreeMap<String, OverrideConfig>,
+}
+
+impl LintConfig {
+    /// Create a new empty lint config.
+    pub fn new() -> Self {
+        Self {
+            lints: BTreeMap::new(),
+        }
+    }
+
+    /// Add a lint configuration
+    pub fn set(
+        &mut self,
+        lint: impl Into<String>,
+        level: LintLevel,
+        required_update: RequiredSemverUpdate,
+        priority: i64,
+    ) -> &mut Self {
+        let lint = lint.into();
+        self.lints.insert(
+            lint,
+            OverrideConfig::Both {
+                level,
+                required_update,
+                priority,
+            },
+        );
+        self
+    }
+}
+
+impl Into<LintTable> for LintConfig {
+    fn into(self) -> LintTable {
+        LintTable {
+            workspace: false,
+            inner: self.lints,
+        }
     }
 }
 
@@ -626,5 +691,44 @@ mod tests {
             help: None,
             stable: false,
         }));
+    }
+
+    #[test]
+    fn test_deserialize_lint_config() {
+        let config = r#"
+            two = "deny"
+            three = { level = "warn", priority = 1 }
+            four = { required-update = "major" }
+            five = { required-update = "minor", level = "allow", priority = -1 }
+        "#;
+
+        let config: LintConfig =
+            toml::from_str(&config).expect("unable to deserialize lint config");
+        assert!(matches!(
+            config.lints["two"],
+            OverrideConfig::Shorthand(LintLevel::Deny)
+        ));
+        assert!(matches!(
+            config.lints["three"],
+            OverrideConfig::LintLevel {
+                level: LintLevel::Warn,
+                priority: 1,
+            }
+        ));
+        assert!(matches!(
+            config.lints["four"],
+            OverrideConfig::RequiredUpdate {
+                required_update: RequiredSemverUpdate::Major,
+                priority: 0,
+            }
+        ));
+        assert!(matches!(
+            config.lints["five"],
+            OverrideConfig::Both {
+                level: LintLevel::Allow,
+                required_update: RequiredSemverUpdate::Minor,
+                priority: -1,
+            }
+        ))
     }
 }
