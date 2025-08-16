@@ -123,7 +123,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
@@ -167,7 +167,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -226,7 +226,7 @@ jobs:
             experimental: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
@@ -281,7 +281,7 @@ jobs:
       RUSTC_WRAPPER: "sccache"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
@@ -333,7 +333,7 @@ jobs:
       RUSTC_WRAPPER: "sccache"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
@@ -388,13 +388,13 @@ jobs:
           echo "newer-rust=$NEWER_RUST" >> "$GITHUB_OUTPUT"
 
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -507,14 +507,14 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       # This is a fork of serde, modified to make feature `unstable` break semver.
       - name: Checkout fork of serde
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'staniewzki/serde'
@@ -640,13 +640,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -719,13 +719,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -793,13 +793,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -865,13 +865,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -933,13 +933,13 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'servo/core-foundation-rs'
@@ -991,13 +991,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout bevy
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
@@ -1054,13 +1054,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout bevy
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
@@ -1116,13 +1116,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout sqllogictest
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'risinglightdb/sqllogictest-rs'
@@ -1183,7 +1183,7 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
@@ -1207,7 +1207,7 @@ jobs:
           fi
 
       # - name: Checkout tokio
-      #   uses: actions/checkout@v4
+      #   uses: actions/checkout@v5
       #   with:
       #     persist-credentials: false
       #     repository: 'tokio-rs/tokio'
@@ -1279,7 +1279,7 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
@@ -1303,7 +1303,7 @@ jobs:
 
 
       # - name: Checkout tokio
-      #   uses: actions/checkout@v4
+      #   uses: actions/checkout@v5
       #   with:
       #     persist-credentials: false
       #     repository: 'tokio-rs/tokio'
@@ -1366,13 +1366,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout clap v3.2.0
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'clap-rs/clap'
@@ -1380,7 +1380,7 @@ jobs:
           path: 'subject-current'
 
       - name: Checkout clap v3.1.18
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'clap-rs/clap'
@@ -1485,13 +1485,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: true
           path: "semver"
 
       - name: Checkout ref-slice fork major change
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # NOTE: We cannot checkout a bare repository with the actions/checkout action
           # (https://github.com/actions/checkout/issues/603), so we checkout a "normal" version
@@ -1585,13 +1585,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: true
           path: 'semver'
 
       - name: Checkout ref-slice fork semver break
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
@@ -1687,13 +1687,13 @@ jobs:
       - build-binary-windows
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: true
           path: semver
 
       - name: Checkout ref-slice fork semver break
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
@@ -1788,13 +1788,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout libp2p
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'libp2p/rust-libp2p'
@@ -1852,13 +1852,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout phantomical/perf-event
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: 'phantomical/perf-event'
@@ -1916,14 +1916,14 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           path: 'semver'
 
       # rust-fnv is very lightweight and quite stable.
       - name: Checkout rust-fnv
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           repository: "servo/rust-fnv"
@@ -2016,7 +2016,7 @@ jobs:
       publish-tag: ${{ steps.tag.outputs.tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -2058,7 +2058,7 @@ jobs:
     if: needs.should-publish.outputs.is_new_version == 'yes'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -2079,7 +2079,7 @@ jobs:
         toolchain: ["1.88", "stable"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
