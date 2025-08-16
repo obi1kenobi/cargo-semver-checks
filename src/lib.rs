@@ -17,6 +17,7 @@ use clap::ValueEnum;
 use data_generation::{DataStorage, IntoTerminalResult as _, TerminalError};
 use directories::ProjectDirs;
 use itertools::Itertools;
+use manifest::LintTable;
 use serde::Serialize;
 
 use std::collections::{BTreeMap, HashSet};
@@ -26,7 +27,7 @@ use std::path::{Path, PathBuf};
 use check_release::run_check_release;
 use rustdoc_gen::CrateDataForRustdoc;
 
-pub use config::{FeatureFlag, GlobalConfig};
+pub use config::{FeatureFlag, GlobalConfig, LintConfig};
 pub use query::{
     ActualSemverUpdate, LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate,
     SemverQuery, Witness,
@@ -453,7 +454,16 @@ impl Check {
                     .map(|name| {
                         let version = None;
                         CrateToCheck {
-                            overrides: OverrideStack::new(),
+                            overrides: {
+                                let mut stack = OverrideStack::new();
+                                if let Some(lint_config) = config.lint_config() {
+                                    let table: LintTable = lint_config.clone().into();
+                                    table.into_stack().iter().for_each(|e| {
+                                        stack.push(e);
+                                    });
+                                }
+                                stack
+                            },
                             current_crate_data: CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Current,
                                 name: name.clone(),
