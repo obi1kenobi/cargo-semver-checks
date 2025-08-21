@@ -1398,6 +1398,7 @@ add_lints!(
     function_parameter_count_changed,
     function_requires_different_const_generic_params,
     function_requires_different_generic_type_params,
+    struct_must_use_removed,
     trait_method_target_feature_removed,
     safe_function_requires_more_target_features,
     safe_inherent_method_requires_more_target_features,
