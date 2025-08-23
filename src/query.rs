@@ -855,6 +855,7 @@ mod tests {
                 | "function_must_use_added"
                 | "inherent_method_must_use_added"
                 | "struct_must_use_added"
+                | "struct_must_use_removed"
                 | "trait_must_use_added"
                 | "union_must_use_added"
         ) && rustc_version::version()
