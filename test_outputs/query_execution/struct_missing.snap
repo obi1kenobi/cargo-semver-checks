@@ -120,6 +120,20 @@ snapshot_kind: text
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/struct_must_use_removed/": [
+    {
+      "name": String("MustUseRemovedStruct"),
+      "path": List([
+        String("struct_must_use_removed"),
+        String("MustUseRemovedStruct"),
+      ]),
+      "span_begin_line": Uint64(56),
+      "span_end_line": Uint64(58),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/struct_now_doc_hidden/": [
     {
       "name": String("PublicStructThatGoesPrivate"),
