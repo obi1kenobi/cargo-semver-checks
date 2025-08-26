@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
+use std::collections::BTreeMap;
 use std::io::Write as _;
-use std::{collections::BTreeMap, sync::Arc, time::Instant};
+use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use anstyle::{AnsiColor, Color, Reset, Style};
 
@@ -116,13 +118,24 @@ fn get_minimum_version_change(version: &semver::Version) -> VersionChange {
     }
 }
 
+/// Intermediate state in `run_check_release`
+pub(crate) struct LintResult<'a> {
+    pub semver_query: &'a SemverQuery,
+    pub query_results: Vec<BTreeMap<Arc<str>, FieldValue>>,
+    /// Duration of the query
+    pub time_to_decide: Duration,
+    /// Applied `OverrideStack`
+    pub effective_required_update: RequiredSemverUpdate,
+    pub effective_lint_level: LintLevel,
+}
+
 /// Helper function to print details about a triggered lint.
 fn print_triggered_lint(
     config: &mut GlobalConfig,
-    semver_query: &SemverQuery,
-    results: Vec<BTreeMap<Arc<str>, FieldValue>>,
+    lint_result: LintResult<'_>,
     witness_generation: &WitnessGeneration,
 ) -> anyhow::Result<()> {
+    let semver_query = lint_result.semver_query;
     if let Some(ref_link) = semver_query.reference_link.as_deref() {
         config.log_info(|config| {
             writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
@@ -162,7 +175,7 @@ fn print_triggered_lint(
         Ok(())
     })?;
 
-    for semver_violation_result in results {
+    for semver_violation_result in lint_result.query_results {
         let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
             .into_iter()
             .map(|(k, v)| (k, v.into()))
@@ -334,11 +347,17 @@ pub(super) fn run_check_release(
             let start_instant = std::time::Instant::now();
             // trustfall::execute_query(...) -> dyn Iterator (without Send)
             // thus the result must be collect()'ed
-            let results = adapter
+            let query_results = adapter
                 .run_query(&semver_query.query, semver_query.arguments.clone())?
                 .collect_vec();
             let time_to_decide = start_instant.elapsed();
-            Ok((semver_query, time_to_decide, results))
+            Ok(LintResult {
+                semver_query,
+                time_to_decide,
+                query_results,
+                effective_required_update: overrides.effective_required_update(semver_query),
+                effective_lint_level: overrides.effective_lint_level(semver_query),
+            })
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
 
@@ -348,25 +367,24 @@ pub(super) fn run_check_release(
 
     let mut results_with_errors = vec![];
     let mut results_with_warnings = vec![];
-    for (semver_query, time_to_decide, results) in all_results {
+    for result in all_results {
         config
             .log_verbose(|config| {
-                let category = match overrides.effective_required_update(semver_query) {
+                let category = match result.effective_required_update {
                     RequiredSemverUpdate::Major => "major",
                     RequiredSemverUpdate::Minor => "minor",
                 };
 
-                let (status, status_color) = match (
-                    results.is_empty(),
-                    overrides.effective_lint_level(semver_query),
-                ) {
-                    (true, _) => ("PASS", AnsiColor::Green),
-                    (false, LintLevel::Deny) => ("FAIL", AnsiColor::Red),
-                    (false, LintLevel::Warn) => ("WARN", AnsiColor::Yellow),
-                    (false, LintLevel::Allow) => unreachable!(
-                        "`LintLevel::Allow` lint was unexpectedly not skipped: {semver_query:?}"
-                    ),
-                };
+                let (status, status_color) =
+                    match (result.query_results.is_empty(), result.effective_lint_level) {
+                        (true, _) => ("PASS", AnsiColor::Green),
+                        (false, LintLevel::Deny) => ("FAIL", AnsiColor::Red),
+                        (false, LintLevel::Warn) => ("WARN", AnsiColor::Yellow),
+                        (false, LintLevel::Allow) => unreachable!(
+                            "`LintLevel::Allow` lint was unexpectedly not skipped: {:?}",
+                            result.semver_query
+                        ),
+                    };
 
                 writeln!(
                     config.stderr(),
@@ -376,20 +394,21 @@ pub(super) fn run_check_release(
                         .bold(),
                     status,
                     Reset,
-                    time_to_decide.as_secs_f32(),
+                    result.time_to_decide.as_secs_f32(),
                     category,
-                    semver_query.id
+                    result.semver_query.id
                 )?;
                 Ok(())
             })
             .expect("print failed");
 
-        if !results.is_empty() {
-            match overrides.effective_lint_level(semver_query) {
-                LintLevel::Deny => results_with_errors.push((semver_query, results)),
-                LintLevel::Warn => results_with_warnings.push((semver_query, results)),
+        if !result.query_results.is_empty() {
+            match result.effective_lint_level {
+                LintLevel::Deny => results_with_errors.push(result),
+                LintLevel::Warn => results_with_warnings.push(result),
                 LintLevel::Allow => unreachable!(
-                    "`LintLevel::Allow` lint was unexpectedly not skipped: {semver_query:?}"
+                    "`LintLevel::Allow` lint was unexpectedly not skipped: {:?}",
+                    result.semver_query
                 ),
             };
         }
@@ -423,34 +442,34 @@ pub(super) fn run_check_release(
         let mut required_versions = vec![];
         let mut suggested_versions = vec![];
 
-        for (semver_query, results) in results_with_errors {
-            required_versions.push(overrides.effective_required_update(semver_query));
+        for lint_result in results_with_errors {
+            required_versions.push(lint_result.effective_required_update);
             config.log_info(|config| {
                 writeln!(
                     config.stdout(),
                     "\n--- failure {}: {} ---\n",
-                    &semver_query.id,
-                    &semver_query.human_readable_name
+                    lint_result.semver_query.id,
+                    lint_result.semver_query.human_readable_name
                 )?;
                 Ok(())
             })?;
 
-            print_triggered_lint(config, semver_query, results, witness_generation)?;
+            print_triggered_lint(config, lint_result, witness_generation)?;
         }
 
-        for (semver_query, results) in results_with_warnings {
-            suggested_versions.push(overrides.effective_required_update(semver_query));
+        for lint_result in results_with_warnings {
+            suggested_versions.push(lint_result.effective_required_update);
             config.log_info(|config| {
                 writeln!(
                     config.stdout(),
                     "\n--- warning {}: {} ---\n",
-                    semver_query.id,
-                    semver_query.human_readable_name
+                    lint_result.semver_query.id,
+                    lint_result.semver_query.human_readable_name
                 )?;
                 Ok(())
             })?;
 
-            print_triggered_lint(config, semver_query, results, witness_generation)?;
+            print_triggered_lint(config, lint_result, witness_generation)?;
         }
 
         let required_bump = required_versions.iter().max().copied();
