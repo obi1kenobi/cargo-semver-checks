@@ -853,6 +853,7 @@ mod tests {
             "enum_must_use_added"
                 | "enum_must_use_removed"
                 | "function_must_use_added"
+                | "function_must_use_removed"
                 | "inherent_method_must_use_added"
                 | "struct_must_use_added"
                 | "struct_must_use_removed"
@@ -1393,6 +1394,7 @@ add_lints!(
     function_marked_deprecated,
     function_missing,
     function_must_use_added,
+    function_must_use_removed,
     function_no_longer_unsafe,
     function_now_const,
     function_now_doc_hidden,

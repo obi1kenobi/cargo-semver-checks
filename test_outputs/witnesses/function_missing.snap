@@ -38,3 +38,8 @@ hint = 'function_missing::will_be_removed_fn(...);'
 filename = 'src/lib.rs'
 begin_line = 6
 hint = 'function_missing::pub_use_removed_fn(...);'
+
+[["./test_crates/function_must_use_removed/"]]
+filename = 'src/lib.rs'
+begin_line = 46
+hint = 'function_must_use_removed::MustUseRemovedFunction(...);'
