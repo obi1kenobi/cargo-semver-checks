@@ -858,6 +858,7 @@ mod tests {
                 | "struct_must_use_removed"
                 | "trait_must_use_added"
                 | "union_must_use_added"
+                | "union_must_use_removed"
         ) && rustc_version::version()
             .is_ok_and(|version| version.major == 1 && version.minor == 89)
         {
@@ -1403,6 +1404,7 @@ add_lints!(
     trait_method_target_feature_removed,
     safe_function_requires_more_target_features,
     safe_inherent_method_requires_more_target_features,
+    union_must_use_removed,
     unsafe_function_requires_more_target_features,
     function_unsafe_added,
     global_value_marked_deprecated,
