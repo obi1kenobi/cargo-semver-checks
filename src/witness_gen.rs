@@ -150,12 +150,12 @@ pub(crate) fn run_witness_checks(
     config: &GlobalConfig,
     _witness_dir: &Path,
     adapter: &VersionedRustdocAdapter,
-    lint_results: &[LintResult<'_>],
+    lint_results: &[LintResult],
 ) {
     // Have to pull out handlebars, since &GlobalConfig cannot be shared across threads
     let handlebars = config.handlebars();
 
     lint_results.par_iter().for_each(|res| {
-        let _ = map_to_witness_text(handlebars, res.semver_query, &res.query_results, adapter);
+        let _ = map_to_witness_text(handlebars, &res.semver_query, &res.query_results, adapter);
     });
 }
