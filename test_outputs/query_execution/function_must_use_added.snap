@@ -30,4 +30,18 @@ snapshot_kind: text
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/function_must_use_removed/": [
+    {
+      "name": String("FunctionToMustUseFunction"),
+      "new_attr": String("#[must_use]"),
+      "path": List([
+        String("function_must_use_removed"),
+        String("FunctionToMustUseFunction"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
