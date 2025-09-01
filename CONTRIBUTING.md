@@ -419,9 +419,20 @@ expected output files to include the new items, and you can get back on track.
 
 ## Development Environment
 
+### Ensuring Rust and other requirements are installed
+
+To run `cargo-semver-checks`, you will of course need to
+[install Rust itself](https://doc.rust-lang.org/book/ch01-01-installation.html#installation). But without
+a linker, you will still get build errors. So be sure you also
+add the appropriate build prerequisites for your platform:
+[`build-essential`](https://packages.ubuntu.com/jammy/build-essential) (Ubuntu/Debian),
+[`base-devel`](https://archlinux.org/packages/core/any/base-devel/) (Arch),
+[the Xcode CLI tools](https://developer.apple.com/download/all/?q=command%20line%20tools) (macOS),
+or the [MSVC prerequisites](https://rust-lang.github.io/rustup/installation/windows-msvc.html) (Windows).
+
 ### Running required automation scripts
 
-While cargo-semver-checks is cross-platform, the development task automation scripts in the scripts
+While `cargo-semver-checks` is cross-platform, the development task automation scripts in the scripts
 directory require a `bash` shell to run.
 
 Windows users can get a bash + GNU command line environment via WSL or git bash.
