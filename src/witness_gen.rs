@@ -2,7 +2,6 @@ use std::{
     collections::{BTreeMap, btree_map},
     path::Path,
     sync::Arc,
-    time::Duration,
 };
 
 use anyhow::{Context, Result};
@@ -12,10 +11,9 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::VersionedRustdocAdapter;
 
-use crate::{
-    GlobalConfig, SemverQuery,
-    query::{Witness, WitnessQuery},
-};
+use crate::check_release::LintResult;
+use crate::query::{Witness, WitnessQuery};
+use crate::{GlobalConfig, SemverQuery};
 
 /// Runs the witness query of a given [`WitnessQuery`] a given lint query match, and merges the witness query
 /// results with the existing lint results. Each query must match exactly once, and will fail with an
@@ -148,19 +146,16 @@ fn map_to_witness_text<'query>(
     }
 }
 
-#[expect(clippy::type_complexity)]
 pub(crate) fn run_witness_checks(
     config: &GlobalConfig,
     _witness_dir: &Path,
     adapter: &VersionedRustdocAdapter,
-    lint_results: &[(&SemverQuery, Duration, Vec<BTreeMap<Arc<str>, FieldValue>>)],
+    lint_results: &[LintResult<'_>],
 ) {
     // Have to pull out handlebars, since &GlobalConfig cannot be shared across threads
     let handlebars = config.handlebars();
 
-    let _ = lint_results
-        .par_iter()
-        .filter_map(|(semver_query, _, query_results)| {
-            map_to_witness_text(handlebars, semver_query, query_results, adapter)
-        });
+    lint_results.par_iter().for_each(|res| {
+        let _ = map_to_witness_text(handlebars, res.semver_query, &res.query_results, adapter);
+    });
 }
