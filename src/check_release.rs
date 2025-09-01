@@ -13,11 +13,11 @@ use rayon::prelude::*;
 use trustfall::{FieldValue, TransparentValue};
 
 use crate::data_generation::DataStorage;
-use crate::witness_gen;
-use crate::{
-    CrateReport, GlobalConfig, ReleaseType, WitnessGeneration,
-    query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
+use crate::query::{
+    ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery,
 };
+use crate::witness_gen;
+use crate::{Bumps, CrateReport, GlobalConfig, ReleaseType, WitnessGeneration};
 
 /// Represents a change between two semantic versions
 #[derive(Debug, PartialEq, Eq)]
@@ -365,6 +365,25 @@ pub(super) fn run_check_release(
 
     let checks_duration = checks_start_instant.elapsed();
 
+    let mut required_bumps = Bumps { major: 0, minor: 0 };
+    let mut suggested_bumps = Bumps { major: 0, minor: 0 };
+    for result in &lint_results {
+        if !result.query_results.is_empty() {
+            let bump_stats = match result.effective_lint_level {
+                LintLevel::Deny => &mut required_bumps,
+                LintLevel::Warn => &mut suggested_bumps,
+                LintLevel::Allow => unreachable!(
+                    "`LintLevel::Allow` lint was unexpectedly not skipped: {:?}",
+                    result.semver_query
+                ),
+            };
+            match result.effective_required_update {
+                RequiredSemverUpdate::Major => bump_stats.major += 1,
+                RequiredSemverUpdate::Minor => bump_stats.minor += 1,
+            };
+        }
+    }
+
     let mut results_with_errors = vec![];
     let mut results_with_warnings = vec![];
     for result in &lint_results {
@@ -439,11 +458,7 @@ pub(super) fn run_check_release(
             )
             .expect("print failed");
 
-        let mut required_versions = vec![];
-        let mut suggested_versions = vec![];
-
         for lint_result in results_with_errors {
-            required_versions.push(lint_result.effective_required_update);
             config.log_info(|config| {
                 writeln!(
                     config.stdout(),
@@ -458,7 +473,6 @@ pub(super) fn run_check_release(
         }
 
         for lint_result in results_with_warnings {
-            suggested_versions.push(lint_result.effective_required_update);
             config.log_info(|config| {
                 writeln!(
                     config.stdout(),
@@ -472,24 +486,15 @@ pub(super) fn run_check_release(
             print_triggered_lint(config, lint_result, witness_generation)?;
         }
 
-        let required_bump = required_versions.iter().max().copied();
-        let suggested_bump = suggested_versions.iter().max().copied();
-
-        if let Some(required_bump) = required_bump {
+        if let Some(required_bump) = required_bumps.update_type() {
             writeln!(config.stderr())?;
             config.shell_print(
                 "Summary",
                 format_args!(
                     "semver requires new {} version: {} major and {} minor checks failed",
                     required_bump.as_str(),
-                    required_versions
-                        .iter()
-                        .filter(|x| *x == &RequiredSemverUpdate::Major)
-                        .count(),
-                    required_versions
-                        .iter()
-                        .filter(|x| *x == &RequiredSemverUpdate::Minor)
-                        .count(),
+                    required_bumps.major,
+                    required_bumps.minor,
                 ),
                 Color::Ansi(AnsiColor::Red),
                 true,
@@ -506,25 +511,21 @@ pub(super) fn run_check_release(
             unreachable!("Expected either warnings or errors to be produced.");
         }
 
-        if let Some(suggested_bump) = suggested_bump {
+        if let Some(suggested_bump) = suggested_bumps.update_type() {
             config.shell_print(
                 "Warning",
                 format_args!(
                     "produced {} major and {} minor level warnings",
-                    suggested_versions
-                        .iter()
-                        .filter(|x| *x == &RequiredSemverUpdate::Major)
-                        .count(),
-                    suggested_versions
-                        .iter()
-                        .filter(|x| *x == &RequiredSemverUpdate::Minor)
-                        .count(),
+                    suggested_bumps.major, suggested_bumps.minor,
                 ),
                 Color::Ansi(AnsiColor::Yellow),
                 true,
             )?;
 
-            if required_bump.is_none_or(|required_bump| required_bump < suggested_bump) {
+            if required_bumps
+                .update_type()
+                .is_none_or(|required_bump| required_bump < suggested_bump)
+            {
                 writeln!(
                     config.stderr(),
                     "{:12} produced warnings suggest new {} version",
@@ -535,7 +536,7 @@ pub(super) fn run_check_release(
         }
 
         Ok(CrateReport {
-            required_bump: required_bump.map(ReleaseType::from),
+            required_bumps,
             detected_bump: version_change.level,
         })
     } else {
@@ -563,7 +564,7 @@ pub(super) fn run_check_release(
 
         Ok(CrateReport {
             detected_bump: version_change.level,
-            required_bump: None,
+            required_bumps,
         })
     }
 }
