@@ -64,5 +64,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A union is no longer #[must_use]. Downstream code that ignores its value will get a compiler lint if the crate is downgraded.",
-    per_result_error_template: Some("function {{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
 )
