@@ -76,4 +76,17 @@ snapshot_kind: text
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/union_must_use_removed/": [
+    {
+      "name": String("MustUseRemovedUnion"),
+      "path": List([
+        String("union_must_use_removed"),
+        String("MustUseRemovedUnion"),
+      ]),
+      "span_begin_line": Uint64(61),
+      "span_end_line": Uint64(63),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
