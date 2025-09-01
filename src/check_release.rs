@@ -122,8 +122,8 @@ fn get_minimum_version_change(version: &semver::Version) -> VersionChange {
 pub(crate) struct LintResult<'a> {
     pub semver_query: &'a SemverQuery,
     pub query_results: Vec<BTreeMap<Arc<str>, FieldValue>>,
-    /// Duration of the query
-    pub time_to_decide: Duration,
+    /// How long it took to run the semver query
+    pub query_duration: Duration,
     /// Applied `OverrideStack`
     pub effective_required_update: RequiredSemverUpdate,
     pub effective_lint_level: LintLevel,
@@ -297,14 +297,15 @@ pub(super) fn run_check_release(
     let index_storage = data_storage.create_indexes();
     let adapter = index_storage.create_adapter();
 
-    let (queries_to_run, queries_to_skip): (Vec<_>, _) =
+    let (queries, queries_to_skip): (Vec<_>, _) =
         SemverQuery::all_queries().into_values().partition(|query| {
             !version_change
                 .level
                 .supports_requirement(overrides.effective_required_update(query))
                 && overrides.effective_lint_level(query) > LintLevel::Allow
         });
-    let skipped_queries = queries_to_skip.len();
+    let selected_checks = queries.len();
+    let skipped_checks = queries_to_skip.len();
 
     config.shell_status(
         "Checking",
@@ -321,19 +322,14 @@ pub(super) fn run_check_release(
             if current_num_threads == 1 {
                 config.shell_status(
                     "Starting",
-                    format_args!(
-                        "{} checks, {} unnecessary",
-                        queries_to_run.len(),
-                        skipped_queries
-                    ),
+                    format_args!("{} checks, {} unnecessary", selected_checks, skipped_checks),
                 )
             } else {
                 config.shell_status(
                     "Starting",
                     format_args!(
                         "{} checks, {} unnecessary on {current_num_threads} threads",
-                        queries_to_run.len(),
-                        skipped_queries
+                        selected_checks, skipped_checks
                     ),
                 )
             }
@@ -341,7 +337,7 @@ pub(super) fn run_check_release(
         .expect("print failed");
 
     let checks_start_instant = Instant::now();
-    let all_results = queries_to_run
+    let lint_results = queries
         .par_iter()
         .map(|semver_query| {
             let start_instant = std::time::Instant::now();
@@ -350,10 +346,10 @@ pub(super) fn run_check_release(
             let query_results = adapter
                 .run_query(&semver_query.query, semver_query.arguments.clone())?
                 .collect_vec();
-            let time_to_decide = start_instant.elapsed();
+            let query_duration = start_instant.elapsed();
             Ok(LintResult {
                 semver_query,
-                time_to_decide,
+                query_duration,
                 query_results,
                 effective_required_update: overrides.effective_required_update(semver_query),
                 effective_lint_level: overrides.effective_lint_level(semver_query),
@@ -362,14 +358,14 @@ pub(super) fn run_check_release(
         .collect::<anyhow::Result<Vec<_>>>()?;
 
     if let Some(ref witness_dir) = witness_generation.witness_directory {
-        witness_gen::run_witness_checks(config, witness_dir, &adapter, &all_results);
+        witness_gen::run_witness_checks(config, witness_dir, &adapter, &lint_results);
     }
 
     let checks_duration = checks_start_instant.elapsed();
 
     let mut results_with_errors = vec![];
     let mut results_with_warnings = vec![];
-    for result in all_results {
+    for result in lint_results {
         config
             .log_verbose(|config| {
                 let category = match result.effective_required_update {
@@ -396,7 +392,7 @@ pub(super) fn run_check_release(
                         .bold(),
                     status,
                     Reset,
-                    result.time_to_decide.as_secs_f32(),
+                    result.query_duration.as_secs_f32(),
                     category,
                     result.semver_query.id
                 )?;
@@ -430,11 +426,11 @@ pub(super) fn run_check_release(
                 format_args!(
                     "[{:>8.3}s] {} checks: {} pass, {} fail, {} warn, {} skip",
                     checks_duration.as_secs_f32(),
-                    queries_to_run.len(),
-                    queries_to_run.len() - results_with_errors.len() - results_with_warnings.len(),
+                    selected_checks,
+                    selected_checks - results_with_errors.len() - results_with_warnings.len(),
                     results_with_errors.len(),
                     results_with_warnings.len(),
-                    skipped_queries,
+                    skipped_checks,
                 ),
                 Color::Ansi(status_color),
                 true,
@@ -547,9 +543,9 @@ pub(super) fn run_check_release(
                 format_args!(
                     "[{:>8.3}s] {} checks: {} pass, {} skip",
                     checks_duration.as_secs_f32(),
-                    queries_to_run.len(),
-                    queries_to_run.len(),
-                    skipped_queries,
+                    selected_checks,
+                    selected_checks,
+                    skipped_checks,
                 ),
                 Color::Ansi(AnsiColor::Green),
                 true,
