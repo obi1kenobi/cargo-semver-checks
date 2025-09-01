@@ -4,7 +4,6 @@ SemverQuery(
     description: "A union is no longer marked with #[must_use].",
     required_update: Minor,
     lint_level: Allow,
-
     // TODO: Change the reference link to point to the cargo semver reference
     //       once it has a section on attribute #[must_use].
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute"),
