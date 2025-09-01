@@ -340,7 +340,7 @@ pub(super) fn run_check_release(
         })
         .expect("print failed");
 
-    let queries_start_instant = Instant::now();
+    let checks_start_instant = Instant::now();
     let all_results = queries_to_run
         .par_iter()
         .map(|semver_query| {
@@ -364,6 +364,8 @@ pub(super) fn run_check_release(
     if let Some(ref witness_dir) = witness_generation.witness_directory {
         witness_gen::run_witness_checks(config, witness_dir, &adapter, &all_results);
     }
+
+    let checks_duration = checks_start_instant.elapsed();
 
     let mut results_with_errors = vec![];
     let mut results_with_warnings = vec![];
@@ -427,7 +429,7 @@ pub(super) fn run_check_release(
                 "Checked",
                 format_args!(
                     "[{:>8.3}s] {} checks: {} pass, {} fail, {} warn, {} skip",
-                    queries_start_instant.elapsed().as_secs_f32(),
+                    checks_duration.as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len() - results_with_errors.len() - results_with_warnings.len(),
                     results_with_errors.len(),
@@ -544,7 +546,7 @@ pub(super) fn run_check_release(
                 "Checked",
                 format_args!(
                     "[{:>8.3}s] {} checks: {} pass, {} skip",
-                    queries_start_instant.elapsed().as_secs_f32(),
+                    checks_duration.as_secs_f32(),
                     queries_to_run.len(),
                     queries_to_run.len(),
                     skipped_queries,
