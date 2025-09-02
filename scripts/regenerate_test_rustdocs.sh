@@ -38,15 +38,24 @@ echo "Generating rustdoc with: $(cargo $TOOLCHAIN --version)"
 RUSTDOC_CMD="cargo $TOOLCHAIN rustdoc"
 METADATA_CMD="cargo $TOOLCHAIN metadata --format-version 1"
 
+crate_pairs=()
 if [[ $# -eq 0 ]]; then
     # Run rustdoc on test_crates/*/{new,old}/
-    set -- "$TOPLEVEL/test_crates/"*/
+    while IFS= read -r -d '' crate_path; do
+        crate_pairs+=("$crate_path")
+    done < <(find "$TOPLEVEL/test_crates" -mindepth 1 -maxdepth 1 -type d -print0)
     always_update=
 else
     # Run on whichever paths the user specified.
     if [[ $1 == '*' ]]; then
         # As a special case, run on everything if the user specified a literal (escaped) asterisk.
-        set -- "$TOPLEVEL/test_crates/"*/
+        while IFS= read -r -d '' crate_path; do
+            crate_pairs+=("$crate_path")
+        done < <(find "$TOPLEVEL/test_crates" -mindepth 1 -maxdepth 1 -type d -print0)
+    else
+        for arg in "$@"; do
+            crate_pairs+=("$arg")
+        done
     fi
     always_update=1
 fi
@@ -67,6 +76,8 @@ done
 popd >/dev/null
 
 generate_rustdocs() {
+    set -euo pipefail
+
     local crate="$1"
     local crate_dir="$TOPLEVEL/test_crates/$crate"
     local pair="${crate%%/*}"
@@ -94,12 +105,14 @@ generate_rustdocs() {
 }
 
 generate_metadata() {
+    set -euo pipefail
+
     local crate="$1"
     local metadata="$TARGET_DIR/$crate/metadata.json"
 
     pushd "$PLACEHOLDER_DIR" >/dev/null
     sed -i='' '$d' Cargo.toml
-    cargo add --path "../../../test_crates/$crate"
+    cargo $TOOLCHAIN add --path "../../../test_crates/$crate"
     $METADATA_CMD >"$metadata"
     popd >/dev/null
 }
@@ -107,7 +120,7 @@ export TOPLEVEL TARGET_DIR RUSTDOC_CMD METADATA_CMD PLACEHOLDER_DIR_BASE always_
 export -f generate_rustdocs generate_metadata dir_is_newer_than_file
 
 crate_jobs=()
-for crate_pair; do
+for crate_pair in "${crate_pairs[@]}"; do
     crate_pair=${crate_pair%/}
     crate_pair=${crate_pair##*/}
 
