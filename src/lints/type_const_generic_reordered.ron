@@ -1,0 +1,111 @@
+SemverQuery(
+    id: "type_const_generic_reordered",
+    human_readable_name: "type const generics were reordered",
+    description: "A type's definition now requires a generic type in the prior spot of a const generic.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/generics.html"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        owner_type: __typename @tag @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # The type takes the same number of const generic
+                        # and generic type parameters as before.
+                        # Otherwise other lints will trigger instead:
+                        # - `type_requires_more_const_generic_params`
+                        # - `type_requires_more_generic_type_params`
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @tag(name: "required_const_count")
+                                          @output(name: "required_const_count") {
+                            ... on GenericConstParameter {
+                                name
+                            }
+                        }
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @tag(name: "required_type_count")
+                                          @output(name: "required_type_count") {
+                            ... on GenericTypeParameter {
+                                name
+                            }
+                        }
+
+                        # But a generic type parameter at a specific position in the definition
+                        # has become a const generic instead. This is a breaking change.
+                        generic_parameter {
+                            ... on GenericConstParameter {
+                                const_name: name @output
+                                position @tag @output
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        __typename @filter(op: "=", value: ["%owner_type"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["%required_const_count"]) {
+                            ... on GenericConstParameter {
+                                name
+                            }
+                        }
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["%required_type_count"]) {
+                            ... on GenericTypeParameter {
+                                name
+                            }
+                        }
+
+                        generic_parameter {
+                            ... on GenericTypeParameter {
+                                type_name: name @output
+                                position @filter(op: "=", value: ["%position"])
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A type's definition now requires a generic type parameter where a const generic previously stood. Uses of this type that supplied that const generic will be broken since a generic type is now required instead.",
+    per_result_error_template: Some("{{owner_type}} {{name}} used to expect const {{const_name}} in the place of type {{type_name}} in {{span_filename}}:{{span_begin_line}}"),
+    // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
+    // for information about this field.
+    //
+    // The witness would be a type ascription with the old number
+    // of const generics, which is insufficient for the new definition.
+    witness: None,
+)
