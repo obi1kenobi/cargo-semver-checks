@@ -101,7 +101,7 @@ SemverQuery(
         "true": true,
     },
     error_message: "A type's definition now requires a generic type parameter where a const generic previously stood. Uses of this type that supplied that const generic will be broken since a generic type is now required instead.",
-    per_result_error_template: Some("{{owner_type}} {{name}} used to expect const {{const_name}} in the place of type {{type_name}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{lowercase owner_type}} {{name}} used to expect const {{const_name}} in the place of type {{type_name}} in {{span_filename}}:{{span_begin_line}}"),
     // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
     // for information about this field.
     //
