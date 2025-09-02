@@ -1473,6 +1473,8 @@ add_lints!(
     trait_associated_type_default_removed,
     trait_associated_type_marked_deprecated,
     trait_associated_type_now_doc_hidden,
+    trait_const_generic_reordered,
+    trait_generic_type_reordered,
     trait_marked_deprecated,
     trait_method_added,
     trait_method_const_generic_reordered,
