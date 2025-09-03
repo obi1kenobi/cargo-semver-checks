@@ -22,8 +22,9 @@ use serde::Serialize;
 use std::collections::{BTreeMap, HashSet};
 use std::io::Write as _;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
-use check_release::run_check_release;
+use check_release::{LintResult, run_check_release};
 use rustdoc_gen::CrateDataForRustdoc;
 
 pub use config::{FeatureFlag, GlobalConfig};
@@ -696,6 +697,16 @@ pub struct CrateReport {
     detected_bump: ActualSemverUpdate,
     /// Minimum additional bump (on top of `detected_bump`) required to respect semver.
     required_bumps: Bumps,
+    /// Numbers of warning-level lints requiring minor and major bumps
+    suggested_bumps: Bumps,
+    /// Detailed information about individual lints
+    lint_results: Vec<LintResult>,
+    /// How long it took to run the selected queries
+    checks_duration: Duration,
+    /// Number of queries run
+    selected_checks: usize,
+    /// Number of ignored queries
+    skipped_checks: usize,
 }
 
 impl CrateReport {
