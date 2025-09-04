@@ -105,15 +105,26 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/repr_align_added/": [
+  "./test_crates/repr_align_added_removed/": [
     {
       "name": String("EnumBecomesAlignedAndPrivate"),
       "path": List([
-        String("repr_align_added"),
+        String("repr_align_added_removed"),
         String("EnumBecomesAlignedAndPrivate"),
       ]),
-      "span_begin_line": Uint64(20),
-      "span_end_line": Uint64(22),
+      "span_begin_line": Uint64(43),
+      "span_end_line": Uint64(45),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EnumBecomesUnalignedAndPrivate"),
+      "path": List([
+        String("repr_align_added_removed"),
+        String("EnumBecomesUnalignedAndPrivate"),
+      ]),
+      "span_begin_line": Uint64(49),
+      "span_end_line": Uint64(51),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

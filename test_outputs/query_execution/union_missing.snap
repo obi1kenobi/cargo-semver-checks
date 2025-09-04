@@ -3,15 +3,26 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
-  "./test_crates/repr_align_added/": [
+  "./test_crates/repr_align_added_removed/": [
     {
       "name": String("UnionBecomesAlignedAndPrivate"),
       "path": List([
-        String("repr_align_added"),
+        String("repr_align_added_removed"),
         String("UnionBecomesAlignedAndPrivate"),
       ]),
-      "span_begin_line": Uint64(25),
-      "span_end_line": Uint64(27),
+      "span_begin_line": Uint64(87),
+      "span_end_line": Uint64(89),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionBecomesUnalignedAndPrivate"),
+      "path": List([
+        String("repr_align_added_removed"),
+        String("UnionBecomesUnalignedAndPrivate"),
+      ]),
+      "span_begin_line": Uint64(93),
+      "span_end_line": Uint64(95),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
