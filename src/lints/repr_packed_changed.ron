@@ -74,7 +74,7 @@ SemverQuery(
         "true": true,
         "types": ["Struct", "Union"],
     },
-    error_message: "repr(packed) value changed. This can break code that depends on the type's alignment or layout.",
-    per_result_error_template: Some("{{lowercase type}} {{name}} changed repr(packed) from {{old_packed}} to {{new_packed}} in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "The minimum alignment allowed for a type has changed. This can break code that depends on the type's alignment or layout.",
+    per_result_error_template: Some("{{lowercase type}} {{name}} changed from #[repr(packed({{old_packed}}))] to #[repr(packed({{new_packed}}))] in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )

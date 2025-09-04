@@ -7,7 +7,7 @@ expression: "&query_execution_results"
     {
       "name": String("StructPacked1"),
       "new_packed": String("2"),
-      "old_packed": String("1"),
+      "old_packed": String("4"),
       "path": List([
         String("repr_packed_changed"),
         String("StructPacked1"),
