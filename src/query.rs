@@ -1444,6 +1444,7 @@ add_lints!(
     repr_c_plain_struct_fields_reordered,
     repr_c_removed,
     repr_packed_added,
+    repr_packed_changed,
     repr_packed_removed,
     safe_function_requires_more_target_features,
     safe_function_target_feature_added,

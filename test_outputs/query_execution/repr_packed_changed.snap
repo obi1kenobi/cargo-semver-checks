@@ -1,0 +1,34 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/repr_packed_changed/": [
+    {
+      "name": String("StructPacked1"),
+      "new_packed": String("2"),
+      "old_packed": String("1"),
+      "path": List([
+        String("repr_packed_changed"),
+        String("StructPacked1"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Struct"),
+    },
+    {
+      "name": String("UnionPacked2"),
+      "new_packed": String("4"),
+      "old_packed": String("2"),
+      "path": List([
+        String("repr_packed_changed"),
+        String("UnionPacked2"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Union"),
+    },
+  ],
+}
