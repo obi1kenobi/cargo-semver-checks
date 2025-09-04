@@ -298,15 +298,15 @@ pub(super) fn run_check_release(
     let index_storage = data_storage.create_indexes();
     let adapter = index_storage.create_adapter();
 
-    let mut queries = SemverQuery::all_queries();
-    let all_queries_len = queries.len();
-    queries.retain(|_, query| {
+    let mut queries_to_run = SemverQuery::all_queries();
+    let all_queries_len = queries_to_run.len();
+    queries_to_run.retain(|_, query| {
         !version_change
             .level
             .supports_requirement(overrides.effective_required_update(query))
             && overrides.effective_lint_level(query) > LintLevel::Allow
     });
-    let selected_checks = queries.len();
+    let selected_checks = queries_to_run.len();
     let skipped_checks = all_queries_len - selected_checks;
 
     config.shell_status(
@@ -339,7 +339,7 @@ pub(super) fn run_check_release(
         .expect("print failed");
 
     let checks_start_instant = Instant::now();
-    let lint_results = queries
+    let lint_results = queries_to_run
         .into_par_iter()
         .map(|(_, semver_query)| {
             let start_instant = std::time::Instant::now();
