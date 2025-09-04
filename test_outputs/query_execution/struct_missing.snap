@@ -53,6 +53,32 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/repr_align_changed/": [
+    {
+      "name": String("WasPub"),
+      "path": List([
+        String("repr_align_changed"),
+        String("WasPub"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("Reexported"),
+      "path": List([
+        String("repr_align_changed"),
+        String("Reexported"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/repr_packed_added_removed/": [
     {
       "name": String("StructBecomesPackedAndPrivate"),
