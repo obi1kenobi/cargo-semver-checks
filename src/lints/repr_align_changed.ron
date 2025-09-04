@@ -74,7 +74,7 @@ SemverQuery(
         "types": ["Struct", "Enum", "Union"],
         "true": true,
     },
-    error_message: "A type's repr(align) changed to a different value.",
+    error_message: "A type's repr(align) changed to a different value. This can break code that depends on the type's alignment or layout.",
     per_result_error_template: Some("{{lowercase type}} {{name}} repr(align({{old_align}})) -> repr(align({{new_align}})) in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
