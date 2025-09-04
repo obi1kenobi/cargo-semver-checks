@@ -51,6 +51,19 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/repr_packed_changed/": [
+    {
+      "name": String("UnionPackedBecomesPrivate"),
+      "path": List([
+        String("repr_packed_changed"),
+        String("UnionPackedBecomesPrivate"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/union_field_missing/": [
     {
       "name": String("PubUnionBecomesPrivateAndPubFieldRemoved"),
