@@ -340,8 +340,8 @@ struct UnstableOptions {
     witness_hints: bool,
 
     /// Enable generating and testing witness programs, full examples of potentially-broken downstream code.
-    #[arg(long, id = "OUTPUT_DIR", hide = true)]
-    witnesses: Option<PathBuf>,
+    #[arg(long, hide = true)]
+    witnesses: bool,
 }
 
 impl UnstableOptions {
@@ -372,8 +372,8 @@ impl UnstableOptions {
             list.push("--witness-hints".into());
         }
 
-        if witnesses.is_some() {
-            list.push("--witnesses <OUTPUT_DIR>".into())
+        if *witnesses {
+            list.push("--witnesses".into())
         }
 
         list
@@ -642,6 +642,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
 
         let mut witness_generation = WitnessGeneration::new();
         witness_generation.show_hints = value.unstable_options.witness_hints;
+        witness_generation.generate_witnesses = value.unstable_options.witnesses;
         check.set_witness_generation(witness_generation);
 
         check

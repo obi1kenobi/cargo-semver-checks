@@ -235,6 +235,7 @@ pub(super) fn run_check_release(
     release_type: Option<ReleaseType>,
     overrides: &OverrideStack,
     witness_generation: &WitnessGeneration,
+    witness_data: witness_gen::WitnessGenerationData,
 ) -> anyhow::Result<CrateReport> {
     let current_version = data_storage.current_crate().crate_version();
     let baseline_version = data_storage.baseline_crate().crate_version();
@@ -342,8 +343,8 @@ pub(super) fn run_check_release(
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
 
-    if let Some(ref witness_dir) = witness_generation.witness_directory {
-        witness_gen::run_witness_checks(config, witness_dir, &adapter, &all_results);
+    if witness_generation.generate_witnesses {
+        witness_gen::run_witness_checks(config, witness_data, crate_name, &adapter, &all_results);
     }
 
     let mut results_with_errors = vec![];

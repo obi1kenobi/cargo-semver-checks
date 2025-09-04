@@ -1,7 +1,8 @@
 use anstream::{AutoStream, ColorChoice};
 use anstyle::{AnsiColor, Color, Reset, Style};
 use clap::ValueEnum;
-use std::{collections::HashSet, io::Write};
+use rand::Rng;
+use std::{collections::HashSet, io::Write, sync::LazyLock};
 
 use crate::templating::make_handlebars_registry;
 
@@ -9,6 +10,10 @@ use crate::templating::make_handlebars_registry;
 pub struct GlobalConfig {
     level: Option<log::Level>,
     handlebars: handlebars::Handlebars<'static>,
+    /// The unique ID for any particular run
+    ///
+    /// This value is lazily initialized on first access
+    run_id: LazyLock<String>,
     /// Minimum rustc version supported.
     ///
     /// This will be used to print an error if the user's rustc version is not high enough.
@@ -37,6 +42,13 @@ impl GlobalConfig {
         Self {
             level: None,
             handlebars: make_handlebars_registry(),
+            run_id: LazyLock::new(|| {
+                let rng = rand::rng();
+                rng.sample_iter(rand::distr::Alphanumeric)
+                    .take(16)
+                    .map(char::from)
+                    .collect()
+            }),
             minimum_rustc_version: semver::Version::new(1, 87, 0),
             stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
             stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
@@ -46,6 +58,10 @@ impl GlobalConfig {
 
     pub fn handlebars(&self) -> &handlebars::Handlebars<'static> {
         &self.handlebars
+    }
+
+    pub fn run_id(&self) -> &str {
+        &self.run_id
     }
 
     pub fn minimum_rustc_version(&self) -> &semver::Version {
