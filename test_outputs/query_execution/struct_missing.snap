@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/move_item_and_reexport/": [
@@ -54,6 +53,58 @@ snapshot_kind: text
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/repr_align_added_removed/": [
+    {
+      "name": String("StructBecomesAlignedAndPrivate"),
+      "path": List([
+        String("repr_align_added_removed"),
+        String("StructBecomesAlignedAndPrivate"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("StructBecomesUnalignedAndPrivate"),
+      "path": List([
+        String("repr_align_added_removed"),
+        String("StructBecomesUnalignedAndPrivate"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/repr_align_changed/": [
+    {
+      "name": String("WasPub"),
+      "path": List([
+        String("repr_align_changed"),
+        String("WasPub"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("Reexported"),
+      "path": List([
+        String("repr_align_changed"),
+        String("Reexported"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/repr_packed_added_removed/": [
     {
       "name": String("StructBecomesPackedAndPrivate"),
@@ -77,6 +128,20 @@ snapshot_kind: text
       "span_end_line": Uint64(15),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/repr_packed_changed/": [
+    {
+      "name": String("StructPackedBecomesPrivate"),
+      "path": List([
+        String("repr_packed_changed"),
+        String("StructPackedBecomesPrivate"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("tuple"),
       "visibility_limit": String("public"),
     },
   ],

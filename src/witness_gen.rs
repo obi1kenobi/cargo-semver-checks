@@ -200,7 +200,7 @@ pub(crate) fn run_witness_checks(
     witness_data: WitnessGenerationData,
     crate_name: &str,
     adapter: &VersionedRustdocAdapter,
-    lint_results: &[LintResult<'_>],
+    lint_results: &[LintResult],
 ) {
     let (_baseline_data, _current_data, target_dir) = match witness_data {
         WitnessGenerationData {
@@ -228,7 +228,7 @@ pub(crate) fn run_witness_checks(
     let _ = lint_results
         .par_iter()
         .filter_map(|res| {
-            map_to_witness_text(handlebars, res.semver_query, &res.query_results, adapter)
+            map_to_witness_text(handlebars, &res.semver_query, &res.query_results, adapter)
         })
         .flat_map(|(semver_query, witness_texts)| {
             witness_texts
