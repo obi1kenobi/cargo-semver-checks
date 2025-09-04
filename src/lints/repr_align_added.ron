@@ -16,6 +16,7 @@ SemverQuery(
                         name @output
 
                         attribute {
+                            repr_align: raw_attribute @output
                             content {
                                 base @filter(op: "=", value: ["$repr"])
                                 argument {

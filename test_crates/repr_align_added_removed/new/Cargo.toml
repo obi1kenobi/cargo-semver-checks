@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "repr_align_added_removed"
+name = "repr_align_added"
 version = "0.1.0"
 edition = "2021"
 
