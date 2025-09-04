@@ -15,6 +15,7 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
 
                         attribute {
+                            repr_align: raw_attribute @output
                             content {
                                 base @filter(op: "=", value: ["$repr"])
                                 argument {
@@ -69,6 +70,6 @@ SemverQuery(
         "types": ["Struct", "Enum", "Union"],
         "zero": 0,
     },
-    error_message: "repr(align) was removed from a type. This can break code that depends on the type's alignment or layout.",
+    error_message: "A type no longer declares a minimum alignment via repr(align). This can break code that depends on the type's alignment or layout.",
     per_result_error_template: Some("{{lowercase type}} {{name}} in {{span_filename}}:{{span_begin_line}}"),
 )

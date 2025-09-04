@@ -3,11 +3,11 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
-  "./test_crates/repr_align_added_removed/": [
+  "./test_crates/repr_align_removed/": [
     {
       "name": String("UnionBecomesAlignedAndPrivate"),
       "path": List([
-        String("repr_align_added_removed"),
+        String("repr_align_removed"),
         String("UnionBecomesAlignedAndPrivate"),
       ]),
       "span_begin_line": Uint64(87),
@@ -18,7 +18,7 @@ expression: "&query_execution_results"
     {
       "name": String("UnionBecomesUnalignedAndPrivate"),
       "path": List([
-        String("repr_align_added_removed"),
+        String("repr_align_removed"),
         String("UnionBecomesUnalignedAndPrivate"),
       ]),
       "span_begin_line": Uint64(93),

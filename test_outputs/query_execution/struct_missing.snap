@@ -53,11 +53,11 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/repr_align_added_removed/": [
+  "./test_crates/repr_align_removed/": [
     {
       "name": String("StructBecomesAlignedAndPrivate"),
       "path": List([
-        String("repr_align_added_removed"),
+        String("repr_align_removed"),
         String("StructBecomesAlignedAndPrivate"),
       ]),
       "span_begin_line": Uint64(11),
@@ -69,7 +69,7 @@ expression: "&query_execution_results"
     {
       "name": String("StructBecomesUnalignedAndPrivate"),
       "path": List([
-        String("repr_align_added_removed"),
+        String("repr_align_removed"),
         String("StructBecomesUnalignedAndPrivate"),
       ]),
       "span_begin_line": Uint64(15),

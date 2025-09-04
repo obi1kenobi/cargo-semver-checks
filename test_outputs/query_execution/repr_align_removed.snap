@@ -3,11 +3,11 @@ source: src/query.rs
 expression: "&query_execution_results"
 ---
 {
-  "./test_crates/repr_align_added_removed/": [
+  "./test_crates/repr_align_removed/": [
     {
       "name": String("StructBecomesUnaligned"),
       "path": List([
-        String("repr_align_added_removed"),
+        String("repr_align_removed"),
         String("StructBecomesUnaligned"),
       ]),
       "span_begin_line": Uint64(8),
@@ -18,7 +18,7 @@ expression: "&query_execution_results"
     {
       "name": String("EnumBecomesUnaligned"),
       "path": List([
-        String("repr_align_added_removed"),
+        String("repr_align_removed"),
         String("EnumBecomesUnaligned"),
       ]),
       "span_begin_line": Uint64(38),
@@ -29,7 +29,7 @@ expression: "&query_execution_results"
     {
       "name": String("UnionBecomesUnaligned"),
       "path": List([
-        String("repr_align_added_removed"),
+        String("repr_align_removed"),
         String("UnionBecomesUnaligned"),
       ]),
       "span_begin_line": Uint64(82),
