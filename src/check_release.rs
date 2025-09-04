@@ -119,8 +119,9 @@ fn get_minimum_version_change(version: &semver::Version) -> VersionChange {
 }
 
 /// Intermediate state in `run_check_release`
-pub(crate) struct LintResult<'a> {
-    pub semver_query: &'a SemverQuery,
+#[derive(Debug)]
+pub(crate) struct LintResult {
+    pub semver_query: SemverQuery,
     pub query_results: Vec<BTreeMap<Arc<str>, FieldValue>>,
     /// How long it took to run the semver query
     pub query_duration: Duration,
@@ -132,10 +133,10 @@ pub(crate) struct LintResult<'a> {
 /// Helper function to print details about a triggered lint.
 fn print_triggered_lint(
     config: &mut GlobalConfig,
-    lint_result: LintResult<'_>,
+    lint_result: &LintResult,
     witness_generation: &WitnessGeneration,
 ) -> anyhow::Result<()> {
-    let semver_query = lint_result.semver_query;
+    let semver_query = &lint_result.semver_query;
     if let Some(ref_link) = semver_query.reference_link.as_deref() {
         config.log_info(|config| {
             writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
@@ -175,10 +176,10 @@ fn print_triggered_lint(
         Ok(())
     })?;
 
-    for semver_violation_result in lint_result.query_results {
-        let pretty_result: BTreeMap<Arc<str>, TransparentValue> = semver_violation_result
-            .into_iter()
-            .map(|(k, v)| (k, v.into()))
+    for semver_violation_result in &lint_result.query_results {
+        let pretty_result: BTreeMap<&str, TransparentValue> = semver_violation_result
+            .iter()
+            .map(|(k, v)| (&**k, v.clone().into()))
             .collect();
 
         if let Some(template) = semver_query.per_result_error_template.as_deref() {
@@ -297,15 +298,16 @@ pub(super) fn run_check_release(
     let index_storage = data_storage.create_indexes();
     let adapter = index_storage.create_adapter();
 
-    let (queries_to_run, queries_to_skip): (Vec<_>, _) =
-        SemverQuery::all_queries().into_values().partition(|query| {
-            !version_change
-                .level
-                .supports_requirement(overrides.effective_required_update(query))
-                && overrides.effective_lint_level(query) > LintLevel::Allow
-        });
-    let selected_checks = queries_to_run.len();
-    let skipped_checks = queries_to_skip.len();
+    let mut queries = SemverQuery::all_queries();
+    let all_queries_len = queries.len();
+    queries.retain(|_, query| {
+        !version_change
+            .level
+            .supports_requirement(overrides.effective_required_update(query))
+            && overrides.effective_lint_level(query) > LintLevel::Allow
+    });
+    let selected_checks = queries.len();
+    let skipped_checks = all_queries_len - selected_checks;
 
     config.shell_status(
         "Checking",
@@ -337,9 +339,9 @@ pub(super) fn run_check_release(
         .expect("print failed");
 
     let checks_start_instant = Instant::now();
-    let lint_results = queries_to_run
-        .par_iter()
-        .map(|semver_query| {
+    let lint_results = queries
+        .into_par_iter()
+        .map(|(_, semver_query)| {
             let start_instant = std::time::Instant::now();
             // trustfall::execute_query(...) -> dyn Iterator (without Send)
             // thus the result must be collect()'ed
@@ -348,11 +350,11 @@ pub(super) fn run_check_release(
                 .collect_vec();
             let query_duration = start_instant.elapsed();
             Ok(LintResult {
+                effective_required_update: overrides.effective_required_update(&semver_query),
+                effective_lint_level: overrides.effective_lint_level(&semver_query),
                 semver_query,
                 query_duration,
                 query_results,
-                effective_required_update: overrides.effective_required_update(semver_query),
-                effective_lint_level: overrides.effective_lint_level(semver_query),
             })
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
@@ -365,7 +367,7 @@ pub(super) fn run_check_release(
 
     let mut results_with_errors = vec![];
     let mut results_with_warnings = vec![];
-    for result in lint_results {
+    for result in &lint_results {
         config
             .log_verbose(|config| {
                 let category = match result.effective_required_update {
