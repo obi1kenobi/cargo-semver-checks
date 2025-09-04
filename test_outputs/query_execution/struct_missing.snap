@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/move_item_and_reexport/": [
@@ -77,6 +76,20 @@ snapshot_kind: text
       "span_end_line": Uint64(15),
       "span_filename": String("src/lib.rs"),
       "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/repr_packed_changed/": [
+    {
+      "name": String("StructPackedBecomesPrivate"),
+      "path": List([
+        String("repr_packed_changed"),
+        String("StructPackedBecomesPrivate"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("tuple"),
       "visibility_limit": String("public"),
     },
   ],
