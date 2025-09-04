@@ -1,0 +1,80 @@
+SemverQuery(
+    id: "repr_align_changed",
+    human_readable_name: "repr(align(N)) changed",
+    description: "A struct, enum, or union changed its repr(align) value.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-align-n-change"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        type: __typename @filter(op: "one_of", value: ["$types"]) @output @tag
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$align"])
+                                    argument {
+                                        old_align: base @output @tag
+                                    }
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        __typename @filter(op: "=", value: ["%type"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$align"])
+                                    argument {
+                                        new_align: base @filter(op: "!=", value: ["%old_align"]) @output
+                                    }
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "repr": "repr",
+        "align": "align",
+        "types": ["Struct", "Enum", "Union"],
+        "true": true,
+    },
+    error_message: "A type's repr(align) changed to a different value. This can break code that depends on the type's alignment or layout.",
+    per_result_error_template: Some("{{lowercase type}} {{name}} repr(align({{old_align}})) -> repr(align({{new_align}})) in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
