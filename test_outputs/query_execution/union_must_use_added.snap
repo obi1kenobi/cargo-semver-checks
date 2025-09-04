@@ -30,4 +30,30 @@ snapshot_kind: text
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/union_must_use_removed/": [
+    {
+      "name": String("UnionToMustUseUnion"),
+      "new_attr": String("#[must_use]"),
+      "path": List([
+        String("union_must_use_removed"),
+        String("UnionToMustUseUnion"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToMustUseMessageUnion"),
+      "new_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("union_must_use_removed"),
+        String("UnionToMustUseMessageUnion"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }

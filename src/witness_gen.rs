@@ -3,7 +3,6 @@ use std::{
     fs,
     path::{Path, PathBuf},
     sync::Arc,
-    time::Duration,
 };
 
 use anyhow::{Context, Result};
@@ -13,11 +12,10 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::VersionedRustdocAdapter;
 
-use crate::{
-    GlobalConfig, SemverQuery,
-    data_generation::CrateDataRequest,
-    query::{Witness, WitnessQuery},
-};
+use crate::check_release::LintResult;
+use crate::data_generation::CrateDataRequest;
+use crate::query::{Witness, WitnessQuery};
+use crate::{GlobalConfig, SemverQuery};
 
 /// Higher level data used specifically in the generation of a witness program. Values of [`None`] will
 /// prevent witness generation, since the data is required for witness generation.
@@ -197,13 +195,12 @@ fn print_warning(config: &mut GlobalConfig, msg: impl std::fmt::Display) {
     });
 }
 
-#[expect(clippy::type_complexity)]
 pub(crate) fn run_witness_checks(
     config: &mut GlobalConfig,
     witness_data: WitnessGenerationData,
     crate_name: &str,
     adapter: &VersionedRustdocAdapter,
-    lint_results: &[(&SemverQuery, Duration, Vec<BTreeMap<Arc<str>, FieldValue>>)],
+    lint_results: &[LintResult<'_>],
 ) {
     let (_baseline_data, _current_data, target_dir) = match witness_data {
         WitnessGenerationData {
@@ -230,8 +227,8 @@ pub(crate) fn run_witness_checks(
 
     let _ = lint_results
         .par_iter()
-        .filter_map(|(semver_query, _, query_results)| {
-            map_to_witness_text(handlebars, semver_query, query_results, adapter)
+        .filter_map(|res| {
+            map_to_witness_text(handlebars, res.semver_query, &res.query_results, adapter)
         })
         .flat_map(|(semver_query, witness_texts)| {
             witness_texts

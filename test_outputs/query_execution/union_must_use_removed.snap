@@ -1,0 +1,58 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/union_must_use_added/": [
+    {
+      "name": String("MustUseUnionToUnion"),
+      "old_attr": String("#[must_use]"),
+      "path": List([
+        String("union_must_use_added"),
+        String("MustUseUnionToUnion"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MustUseMessageUnionToUnion"),
+      "old_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("union_must_use_added"),
+        String("MustUseMessageUnionToUnion"),
+      ]),
+      "span_begin_line": Uint64(34),
+      "span_end_line": Uint64(36),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/union_must_use_removed/": [
+    {
+      "name": String("MustUseUnionToUnion"),
+      "old_attr": String("#[must_use]"),
+      "path": List([
+        String("union_must_use_removed"),
+        String("MustUseUnionToUnion"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MustUseMessageUnionToUnion"),
+      "old_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("union_must_use_removed"),
+        String("MustUseMessageUnionToUnion"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

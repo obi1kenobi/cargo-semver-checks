@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout the source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -71,16 +71,16 @@ jobs:
       pull-requests: write
     steps:
       - name: checkout the source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: true
 
       - name: download Cargo.lock from update job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Cargo-lock
       - name: download cargo-update log from update job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: cargo-updates
 

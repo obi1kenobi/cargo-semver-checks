@@ -1,0 +1,98 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/function_generics_reordered/": [
+    {
+      "const_name": String("N"),
+      "name": String("one_each_type_first"),
+      "path": List([
+        String("function_generics_reordered"),
+        String("one_each_type_first"),
+      ]),
+      "position": Uint64(1),
+      "required_const_count": Uint64(1),
+      "required_type_count": Uint64(1),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "type_name": String("T"),
+    },
+    {
+      "const_name": String("N"),
+      "name": String("one_each_const_first"),
+      "path": List([
+        String("function_generics_reordered"),
+        String("one_each_const_first"),
+      ]),
+      "position": Uint64(2),
+      "required_const_count": Uint64(1),
+      "required_type_count": Uint64(1),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "type_name": String("T"),
+    },
+    {
+      "const_name": String("N"),
+      "name": String("lifetime_ignored"),
+      "path": List([
+        String("function_generics_reordered"),
+        String("lifetime_ignored"),
+      ]),
+      "position": Uint64(2),
+      "required_const_count": Uint64(1),
+      "required_type_count": Uint64(1),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "type_name": String("T"),
+    },
+    {
+      "const_name": String("M"),
+      "name": String("two_each_but_one_changed"),
+      "path": List([
+        String("function_generics_reordered"),
+        String("two_each_but_one_changed"),
+      ]),
+      "position": Uint64(4),
+      "required_const_count": Uint64(2),
+      "required_type_count": Uint64(2),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "type_name": String("U"),
+    },
+    {
+      "const_name": String("N"),
+      "name": String("two_each_two_changed"),
+      "path": List([
+        String("function_generics_reordered"),
+        String("two_each_two_changed"),
+      ]),
+      "position": Uint64(1),
+      "required_const_count": Uint64(2),
+      "required_type_count": Uint64(2),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "type_name": String("T"),
+    },
+    {
+      "const_name": String("M"),
+      "name": String("two_each_two_changed"),
+      "path": List([
+        String("function_generics_reordered"),
+        String("two_each_two_changed"),
+      ]),
+      "position": Uint64(4),
+      "required_const_count": Uint64(2),
+      "required_type_count": Uint64(2),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "type_name": String("U"),
+    },
+  ],
+}

@@ -47,6 +47,29 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/safe_inherent_method_requires_more_target_features/": [
+    {
+      "method_name": String("becomes_unsafe"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "non_matching_span_begin_line": List([
+        Uint64(19),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(19),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("safe_inherent_method_requires_more_target_features"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/safe_inherent_method_target_feature_added/": [
     {
       "method_name": String("become_unsafe"),
@@ -66,50 +89,6 @@ expression: "&query_execution_results"
         String("Foo"),
       ]),
       "span_begin_line": Uint64(6),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
-      "method_name": String("safe_add_feature"),
-      "method_visibility": String("public"),
-      "name": String("Foo"),
-      "non_matching_span_begin_line": List([
-        Uint64(15),
-      ]),
-      "non_matching_span_end_line": List([
-        Uint64(15),
-      ]),
-      "non_matching_span_filename": List([
-        String("src/lib.rs"),
-      ]),
-      "path": List([
-        String("safe_inherent_method_target_feature_added"),
-        String("Foo"),
-      ]),
-      "span_begin_line": Uint64(10),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-  ],
-  "./test_crates/unsafe_inherent_method_target_feature_added/": [
-    {
-      "method_name": String("safe"),
-      "method_visibility": String("public"),
-      "name": String("A"),
-      "non_matching_span_begin_line": List([
-        Uint64(20),
-      ]),
-      "non_matching_span_end_line": List([
-        Uint64(20),
-      ]),
-      "non_matching_span_filename": List([
-        String("src/lib.rs"),
-      ]),
-      "path": List([
-        String("unsafe_inherent_method_target_feature_added"),
-        String("A"),
-      ]),
-      "span_begin_line": Uint64(12),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

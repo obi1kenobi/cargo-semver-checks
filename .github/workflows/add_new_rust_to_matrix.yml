@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout the source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -136,7 +136,7 @@ jobs:
       pull-requests: write
     steps:
       - name: checkout the source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # We have to use a Personal Access Token (PAT) here.
           # We are going to open a PR with changes to workflows, which requires a special permission
@@ -145,7 +145,7 @@ jobs:
           persist-credentials: true
 
       - name: download ci.yml from update job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ci.yml
           path: .github/workflows/
