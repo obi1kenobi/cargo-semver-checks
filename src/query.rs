@@ -1440,6 +1440,7 @@ add_lints!(
     pub_static_mut_now_immutable,
     pub_static_now_doc_hidden,
     pub_static_now_mutable,
+    repr_align_added,
     repr_c_enum_struct_variant_fields_reordered,
     repr_c_plain_struct_fields_reordered,
     repr_c_removed,

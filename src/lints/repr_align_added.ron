@@ -1,0 +1,75 @@
+SemverQuery(
+    id: "repr_align_added",
+    human_readable_name: "repr(align) added",
+    description: "A struct, enum, or union gained a #[repr(align(N))] attribute.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-align-add"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on ImplOwner {
+                        type: __typename @filter(op: "one_of", value: ["$types"]) @output @tag
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        attribute {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$align"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        __typename @filter(op: "=", value: ["%type"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$align"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "align": "align",
+        "public": "public",
+        "repr": "repr",
+        "true": true,
+        "types": ["Struct", "Enum", "Union"],
+        "zero": 0,
+    },
+    error_message: "repr(align(N)) was added to a type. This changes its alignment and prevents it from being used inside repr(packed) types.",
+    per_result_error_template: Some("{{lowercase type}} {{name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

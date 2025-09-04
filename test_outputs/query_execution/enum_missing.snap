@@ -105,6 +105,19 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/repr_align_added_removed/": [
+    {
+      "name": String("EnumBecomesAlignedAndPrivate"),
+      "path": List([
+        String("repr_align_added_removed"),
+        String("EnumBecomesAlignedAndPrivate"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/switch_to_reexport_as_underscore/": [
     {
       "name": String("Enum"),
