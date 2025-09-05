@@ -22,7 +22,7 @@ Unstable options:
       --witness-hints
           Enable printing witness hints, examples of potentially-broken downstream code
 
-      --witnesses <OUTPUT_DIR>
+      --witnesses
           Enable generating and testing witness programs, full examples of potentially-broken downstream code
 
 ----- stderr -----

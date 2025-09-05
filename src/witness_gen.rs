@@ -1,6 +1,7 @@
 use std::{
     collections::{BTreeMap, btree_map},
-    path::Path,
+    fs,
+    path::{Path, PathBuf},
     sync::Arc,
 };
 
@@ -12,8 +13,31 @@ use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::VersionedRustdocAdapter;
 
 use crate::check_release::LintResult;
+use crate::data_generation::CrateDataRequest;
 use crate::query::{Witness, WitnessQuery};
 use crate::{GlobalConfig, SemverQuery};
+
+/// Higher level data used specifically in the generation of a witness program. Values of [`None`] will
+/// prevent witness generation, since the data is required for witness generation.
+pub(crate) struct WitnessGenerationData<'a> {
+    baseline: Option<&'a CrateDataRequest<'a>>,
+    current: Option<&'a CrateDataRequest<'a>>,
+    target_dir: Option<&'a Path>,
+}
+
+impl<'a> WitnessGenerationData<'a> {
+    pub(crate) fn new(
+        baseline: Option<&'a CrateDataRequest<'a>>,
+        current: Option<&'a CrateDataRequest<'a>>,
+        target_dir: Option<&'a Path>,
+    ) -> Self {
+        Self {
+            baseline,
+            current,
+            target_dir,
+        }
+    }
+}
 
 /// Runs the witness query of a given [`WitnessQuery`] a given lint query match, and merges the witness query
 /// results with the existing lint results. Each query must match exactly once, and will fail with an
@@ -50,7 +74,7 @@ fn run_witness_query(
         })
         .with_context(|| {
             format!(
-                "Error running witness query with input arguments {:?}",
+                "error running witness query with input arguments {:?}",
                 witness_query.inherit_arguments_from(&lint_result).expect("failed to reconstruct witness query arguments while creating error")
             )
         })?;
@@ -106,12 +130,12 @@ fn map_to_witness_text<'query>(
                 .map(|lint_result| {
                     let witness_results = run_witness_query(adapter, witness_query, lint_result)
                         .with_context(|| {
-                            format!("Error running witness query for {}", semver_query.id)
+                            format!("error running witness query for {}", semver_query.id)
                         })?;
                     generate_witness_text(handlebars, witness_template, witness_results)
                         .with_context(|| {
                             format!(
-                                "Error generating witness text for witness {}",
+                                "error generating witness text for witness {}",
                                 semver_query.id
                             )
                         })
@@ -134,7 +158,7 @@ fn map_to_witness_text<'query>(
                     generate_witness_text(handlebars, witness_template, lint_result).with_context(
                         || {
                             format!(
-                                "Error generating witness text for queryless witness {}",
+                                "error generating witness text for queryless witness {}",
                                 semver_query.id
                             )
                         },
@@ -146,16 +170,74 @@ fn map_to_witness_text<'query>(
     }
 }
 
+/// Generates a single witness crate
+fn generate_witness_crate(
+    witness_set_dir: &Path,
+    witness_name: &str,
+    index: usize,
+    _witness_text: String,
+) -> Result<PathBuf> {
+    let crate_path = witness_set_dir.join(format!("{witness_name}-{index}"));
+    fs::create_dir_all(&crate_path)
+        .with_context(|| format!("error creating witness at `{crate_path:?}`",))?;
+
+    // TODO: Finish crate generation, currently just generates an empty dir
+
+    Ok(crate_path)
+}
+
+/// Utility for printing a warning message
+fn print_warning(config: &mut GlobalConfig, msg: impl std::fmt::Display) {
+    // Ignore terminal printing errors
+    let _ = config.log_info(|config| {
+        config.shell_warn(msg)?;
+        Ok(())
+    });
+}
+
 pub(crate) fn run_witness_checks(
-    config: &GlobalConfig,
-    _witness_dir: &Path,
+    config: &mut GlobalConfig,
+    witness_data: WitnessGenerationData,
+    crate_name: &str,
     adapter: &VersionedRustdocAdapter,
     lint_results: &[LintResult],
 ) {
+    let (_baseline_data, _current_data, target_dir) = match witness_data {
+        WitnessGenerationData {
+            baseline: Some(baseline),
+            current: Some(current),
+            target_dir: Some(target_dir),
+        } => (baseline, current, target_dir),
+        _ => {
+            print_warning(
+                config,
+                format!(
+                    "encountered non-fatal error while creating witness program \
+                    {crate_name}: cannot process witness for this source type (root cause: witness data is not complete)",
+                ),
+            );
+            return;
+        }
+    };
+
+    let witness_set_dir = target_dir.join(format!("{}-{crate_name}", config.run_id()));
+
     // Have to pull out handlebars, since &GlobalConfig cannot be shared across threads
     let handlebars = config.handlebars();
 
-    lint_results.par_iter().for_each(|res| {
-        let _ = map_to_witness_text(handlebars, &res.semver_query, &res.query_results, adapter);
-    });
+    let _ = lint_results
+        .par_iter()
+        .filter_map(|res| {
+            map_to_witness_text(handlebars, &res.semver_query, &res.query_results, adapter)
+        })
+        .flat_map(|(semver_query, witness_texts)| {
+            witness_texts
+                .into_iter()
+                .enumerate()
+                .map(|(index, witness_text)| {
+                    generate_witness_crate(&witness_set_dir, &semver_query.id, index, witness_text?)
+                })
+                // This collect is necessary to convert the above synchronous Iter into a ParIter
+                .collect_vec()
+        });
 }

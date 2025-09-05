@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use std::collections::{BTreeSet, HashMap};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
 use itertools::Itertools;
@@ -486,13 +486,18 @@ impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
 }
 
 impl<'a> StatefulRustdocGenerator<'a, ReadyState<'a>> {
-    // TODO: Use the data request in the witness system
-    #[expect(dead_code)]
     /// Get the computed data request for this generator, if one exists
     pub(crate) fn get_data_request(&self) -> Option<&CrateDataRequest<'_>> {
         match &self.coupled_state {
             ReadyState::File { .. } => None,
             ReadyState::Generator { data_request, .. } => Some(data_request),
+        }
+    }
+
+    pub(crate) fn get_target_root(&self) -> Option<&Path> {
+        match &self.coupled_state {
+            ReadyState::File { .. } => None,
+            ReadyState::Generator { target_root, .. } => Some(target_root),
         }
     }
 

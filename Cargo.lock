@@ -354,6 +354,7 @@ dependencies = [
  "itertools 0.14.0",
  "log",
  "predicates",
+ "rand",
  "rayon",
  "regex",
  "ron 0.8.1",
