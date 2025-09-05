@@ -13,11 +13,11 @@ use rayon::prelude::*;
 use trustfall::{FieldValue, TransparentValue};
 
 use crate::data_generation::DataStorage;
-use crate::witness_gen;
-use crate::{
-    CrateReport, GlobalConfig, ReleaseType, WitnessGeneration,
-    query::{ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery},
+use crate::query::{
+    ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery,
 };
+use crate::witness_gen;
+use crate::{Bumps, CrateReport, GlobalConfig, ReleaseType, WitnessGeneration};
 
 /// Represents a change between two semantic versions
 #[derive(Debug, PartialEq, Eq)]
@@ -298,15 +298,15 @@ pub(super) fn run_check_release(
     let index_storage = data_storage.create_indexes();
     let adapter = index_storage.create_adapter();
 
-    let mut queries = SemverQuery::all_queries();
-    let all_queries_len = queries.len();
-    queries.retain(|_, query| {
+    let mut queries_to_run = SemverQuery::all_queries();
+    let all_queries_len = queries_to_run.len();
+    queries_to_run.retain(|_, query| {
         !version_change
             .level
             .supports_requirement(overrides.effective_required_update(query))
             && overrides.effective_lint_level(query) > LintLevel::Allow
     });
-    let selected_checks = queries.len();
+    let selected_checks = queries_to_run.len();
     let skipped_checks = all_queries_len - selected_checks;
 
     config.shell_status(
@@ -339,7 +339,7 @@ pub(super) fn run_check_release(
         .expect("print failed");
 
     let checks_start_instant = Instant::now();
-    let lint_results = queries
+    let lint_results = queries_to_run
         .into_par_iter()
         .map(|(_, semver_query)| {
             let start_instant = std::time::Instant::now();
@@ -365,9 +365,48 @@ pub(super) fn run_check_release(
 
     let checks_duration = checks_start_instant.elapsed();
 
+    let mut required_bumps = Bumps { major: 0, minor: 0 };
+    let mut suggested_bumps = Bumps { major: 0, minor: 0 };
+    for result in &lint_results {
+        if !result.query_results.is_empty() {
+            let bump_stats = match result.effective_lint_level {
+                LintLevel::Deny => &mut required_bumps,
+                LintLevel::Warn => &mut suggested_bumps,
+                LintLevel::Allow => unreachable!(
+                    "`LintLevel::Allow` lint was unexpectedly not skipped: {:?}",
+                    result.semver_query
+                ),
+            };
+            match result.effective_required_update {
+                RequiredSemverUpdate::Major => bump_stats.major += 1,
+                RequiredSemverUpdate::Minor => bump_stats.minor += 1,
+            };
+        }
+    }
+
+    let report = CrateReport {
+        lint_results,
+        checks_duration,
+        selected_checks,
+        skipped_checks,
+        required_bumps,
+        suggested_bumps,
+        detected_bump: version_change.level,
+    };
+
+    print_report(config, witness_generation, &report)?;
+    Ok(report)
+}
+
+fn print_report(
+    config: &mut GlobalConfig,
+    witness_generation: &WitnessGeneration,
+    report: &CrateReport,
+) -> anyhow::Result<()> {
     let mut results_with_errors = vec![];
     let mut results_with_warnings = vec![];
-    for result in &lint_results {
+
+    for result in &report.lint_results {
         config
             .log_verbose(|config| {
                 let category = match result.effective_required_update {
@@ -427,23 +466,21 @@ pub(super) fn run_check_release(
                 "Checked",
                 format_args!(
                     "[{:>8.3}s] {} checks: {} pass, {} fail, {} warn, {} skip",
-                    checks_duration.as_secs_f32(),
-                    selected_checks,
-                    selected_checks - results_with_errors.len() - results_with_warnings.len(),
+                    report.checks_duration.as_secs_f32(),
+                    report.selected_checks,
+                    report.selected_checks
+                        - results_with_errors.len()
+                        - results_with_warnings.len(),
                     results_with_errors.len(),
                     results_with_warnings.len(),
-                    skipped_checks,
+                    report.skipped_checks,
                 ),
                 Color::Ansi(status_color),
                 true,
             )
             .expect("print failed");
 
-        let mut required_versions = vec![];
-        let mut suggested_versions = vec![];
-
         for lint_result in results_with_errors {
-            required_versions.push(lint_result.effective_required_update);
             config.log_info(|config| {
                 writeln!(
                     config.stdout(),
@@ -458,7 +495,6 @@ pub(super) fn run_check_release(
         }
 
         for lint_result in results_with_warnings {
-            suggested_versions.push(lint_result.effective_required_update);
             config.log_info(|config| {
                 writeln!(
                     config.stdout(),
@@ -472,24 +508,15 @@ pub(super) fn run_check_release(
             print_triggered_lint(config, lint_result, witness_generation)?;
         }
 
-        let required_bump = required_versions.iter().max().copied();
-        let suggested_bump = suggested_versions.iter().max().copied();
-
-        if let Some(required_bump) = required_bump {
+        if let Some(required_bump) = report.required_bumps.update_type() {
             writeln!(config.stderr())?;
             config.shell_print(
                 "Summary",
                 format_args!(
                     "semver requires new {} version: {} major and {} minor checks failed",
                     required_bump.as_str(),
-                    required_versions
-                        .iter()
-                        .filter(|x| *x == &RequiredSemverUpdate::Major)
-                        .count(),
-                    required_versions
-                        .iter()
-                        .filter(|x| *x == &RequiredSemverUpdate::Minor)
-                        .count(),
+                    report.required_bumps.major,
+                    report.required_bumps.minor,
                 ),
                 Color::Ansi(AnsiColor::Red),
                 true,
@@ -506,25 +533,22 @@ pub(super) fn run_check_release(
             unreachable!("Expected either warnings or errors to be produced.");
         }
 
-        if let Some(suggested_bump) = suggested_bump {
+        if let Some(suggested_bump) = report.suggested_bumps.update_type() {
             config.shell_print(
                 "Warning",
                 format_args!(
                     "produced {} major and {} minor level warnings",
-                    suggested_versions
-                        .iter()
-                        .filter(|x| *x == &RequiredSemverUpdate::Major)
-                        .count(),
-                    suggested_versions
-                        .iter()
-                        .filter(|x| *x == &RequiredSemverUpdate::Minor)
-                        .count(),
+                    report.suggested_bumps.major, report.suggested_bumps.minor,
                 ),
                 Color::Ansi(AnsiColor::Yellow),
                 true,
             )?;
 
-            if required_bump.is_none_or(|required_bump| required_bump < suggested_bump) {
+            if report
+                .required_bumps
+                .update_type()
+                .is_none_or(|required_bump| required_bump < suggested_bump)
+            {
                 writeln!(
                     config.stderr(),
                     "{:12} produced warnings suggest new {} version",
@@ -533,21 +557,16 @@ pub(super) fn run_check_release(
                 )?;
             }
         }
-
-        Ok(CrateReport {
-            required_bump: required_bump.map(ReleaseType::from),
-            detected_bump: version_change.level,
-        })
     } else {
         config
             .shell_print(
                 "Checked",
                 format_args!(
                     "[{:>8.3}s] {} checks: {} pass, {} skip",
-                    checks_duration.as_secs_f32(),
-                    selected_checks,
-                    selected_checks,
-                    skipped_checks,
+                    report.checks_duration.as_secs_f32(),
+                    report.selected_checks,
+                    report.selected_checks,
+                    report.skipped_checks,
                 ),
                 Color::Ansi(AnsiColor::Green),
                 true,
@@ -560,12 +579,8 @@ pub(super) fn run_check_release(
             Color::Ansi(AnsiColor::Green),
             true,
         )?;
-
-        Ok(CrateReport {
-            detected_bump: version_change.level,
-            required_bump: None,
-        })
     }
+    Ok(())
 }
 
 #[cfg(test)]
