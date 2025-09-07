@@ -45,7 +45,7 @@ impl GlobalConfig {
             run_id: LazyLock::new(|| {
                 let rng = rand::rng();
                 rng.sample_iter(rand::distr::Alphanumeric)
-                    .take(16)
+                    .take(6)
                     .map(char::from)
                     .collect()
             }),

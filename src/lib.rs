@@ -760,7 +760,7 @@ pub struct WitnessGeneration {
     /// Whether to print witness hints, short examples that show why a change is breaking,
     /// while not necessarily buildable standalone programs.  See [`Witness::hint_template`].
     pub show_hints: bool,
-    /// Whether to generate witness programs, longer, fully valid and compilable examples
+    /// Whether to generate witness programs: longer, fully valid and compilable examples
     /// of a breaking change. See [`Witness::witness_template`] and [`Witness::witness_query`].
     pub generate_witnesses: bool,
 }

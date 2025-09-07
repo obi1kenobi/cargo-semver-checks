@@ -52,7 +52,7 @@ fn run_witness_query(
 ) -> Result<BTreeMap<Arc<str>, FieldValue>> {
     let arguments = witness_query
         .inherit_arguments_from(&lint_result)
-        .context("Error inheriting arguments in witness query")?;
+        .context("error inheriting arguments in witness query")?;
 
     let witness_results = adapter
         .run_query(&witness_query.query, arguments)
@@ -175,7 +175,7 @@ fn generate_witness_crate(
     witness_set_dir: &Path,
     witness_name: &str,
     index: usize,
-    _witness_text: String,
+    _witness_text: &str,
 ) -> Result<PathBuf> {
     let crate_path = witness_set_dir.join(format!("{witness_name}-{index}"));
     fs::create_dir_all(&crate_path)
@@ -184,6 +184,22 @@ fn generate_witness_crate(
     // TODO: Finish crate generation, currently just generates an empty dir
 
     Ok(crate_path)
+}
+
+fn run_single_witness_check(
+    witness_set_dir: &Path,
+    witness_name: &str,
+    index: usize,
+    witness_text: &str,
+    // TODO: Make this Result<WitnessResult>, such that Err means that we experienced some non-witness-checking error
+    // whereas Ok means that the Witness was succesfully checked, and WitnessResult contains the information on wether
+    // it was successful or failed. Currently just leaving it as Result<()> as a placeholder
+) -> Result<()> {
+    let _crate_path = generate_witness_crate(witness_set_dir, witness_name, index, witness_text)?;
+
+    // TODO: Check the witness crate that was generated
+
+    Ok(())
 }
 
 /// Utility for printing a warning message
@@ -225,19 +241,29 @@ pub(crate) fn run_witness_checks(
     // Have to pull out handlebars, since &GlobalConfig cannot be shared across threads
     let handlebars = config.handlebars();
 
-    let _ = lint_results
-        .par_iter()
-        .filter_map(|res| {
-            map_to_witness_text(handlebars, &res.semver_query, &res.query_results, adapter)
-        })
-        .flat_map(|(semver_query, witness_texts)| {
+    lint_results.par_iter().for_each(|lint_result| {
+        if let Some((semver_query, witness_texts)) = map_to_witness_text(
+            handlebars,
+            &lint_result.semver_query,
+            &lint_result.query_results,
+            adapter,
+        ) {
             witness_texts
                 .into_iter()
                 .enumerate()
-                .map(|(index, witness_text)| {
-                    generate_witness_crate(&witness_set_dir, &semver_query.id, index, witness_text?)
+                .for_each(|(index, witness_text)| {
+                    let _witness_result = witness_text.map(|witness_text| {
+                        run_single_witness_check(
+                            &witness_set_dir,
+                            &semver_query.id,
+                            index,
+                            &witness_text,
+                        )
+                    });
+
+                    // TODO: Save witness results and report them
+                    // Must be reported outside of the par_iter since GlobalConfig cannot be shared across threads
                 })
-                // This collect is necessary to convert the above synchronous Iter into a ParIter
-                .collect_vec()
-        });
+        }
+    });
 }
