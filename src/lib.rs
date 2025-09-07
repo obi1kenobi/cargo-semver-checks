@@ -579,6 +579,12 @@ note: skipped the following crates since they have no library target: {skipped}"
                     .prepare_generator(config)
                     .map_err(|err| log_terminal_error(config, err))?;
 
+                let witness_data = witness_gen::WitnessGenerationData::new(
+                    baseline_loader.get_data_request(),
+                    current_loader.get_data_request(),
+                    current_loader.get_target_root(),
+                );
+
                 let data_storage = generate_crate_data(
                     config,
                     generation_settings,
@@ -594,6 +600,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                     self.release_type,
                     &selected.overrides,
                     &self.witness_generation,
+                    witness_data,
                 )?;
                 config.shell_status(
                     "Finished",
@@ -784,9 +791,9 @@ pub struct WitnessGeneration {
     /// Whether to print witness hints, short examples that show why a change is breaking,
     /// while not necessarily buildable standalone programs.  See [`Witness::hint_template`].
     pub show_hints: bool,
-    /// Optional directory to write full witness examples to.  If this is `None`, full witnesses
-    /// will not be generated.  See [`Witness::witness_template`].
-    pub witness_directory: Option<PathBuf>,
+    /// Whether to generate witness programs: longer, fully valid and compilable examples
+    /// of a breaking change. See [`Witness::witness_template`] and [`Witness::witness_query`].
+    pub generate_witnesses: bool,
 }
 
 impl WitnessGeneration {
@@ -796,7 +803,7 @@ impl WitnessGeneration {
     pub const fn new() -> Self {
         Self {
             show_hints: false,
-            witness_directory: None,
+            generate_witnesses: false,
         }
     }
 }
