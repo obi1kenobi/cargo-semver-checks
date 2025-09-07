@@ -44,6 +44,16 @@ impl GlobalConfig {
             handlebars: make_handlebars_registry(),
             run_id: LazyLock::new(|| {
                 let rng = rand::rng();
+                // We can show that based on the Birthday Problem (https://en.wikipedia.org/wiki/Birthday_problem)
+                // that 6 characters is enough for the use case of cargo-semver-checks. Primarily, given that we simply
+                // want a decent guarantee of not encountering collisions of generated files, and are not looking
+                // for cryptographic security, we're looking for odds of collisions to be somewhere in the range
+                // of ranges that is 1-100K up to 1-1M. We are using alphanumeric characters for the ID, which means
+                // each character has 62 possibilities, and at 6 characters, that gives us a total set of about
+                // 5.7 * 10^10 permutations. Now, the Birthday Problem shows that given many instances, the odds of a
+                // collision dramatically increase. However, at 62^6 permutations, it will take ~200k instances for
+                // the probability of a collision to reach 50%, which gives us exactly the sort of collision odds
+                // we're looking for.
                 rng.sample_iter(rand::distr::Alphanumeric)
                     .take(6)
                     .map(char::from)

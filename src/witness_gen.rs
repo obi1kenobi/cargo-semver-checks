@@ -186,20 +186,24 @@ fn generate_witness_crate(
     Ok(crate_path)
 }
 
+/// Runs a single witness check, returning the result of the witness process
+///
+/// Err implies an error during the generation or checking of the witness
+/// Ok implies the witness was successfully generated and checked. The internal Result
+/// indicates if the witness was successful, or if it failed.
+///
+/// ## Note: The unit types in the return type are temporary placeholders until the witness system is complete
 fn run_single_witness_check(
     witness_set_dir: &Path,
     witness_name: &str,
     index: usize,
     witness_text: &str,
-    // TODO: Make this Result<WitnessResult>, such that Err means that we experienced some non-witness-checking error
-    // whereas Ok means that the Witness was succesfully checked, and WitnessResult contains the information on wether
-    // it was successful or failed. Currently just leaving it as Result<()> as a placeholder
-) -> Result<()> {
+) -> Result<Result<(), ()>> {
     let _crate_path = generate_witness_crate(witness_set_dir, witness_name, index, witness_text)?;
 
     // TODO: Check the witness crate that was generated
 
-    Ok(())
+    Ok(Ok(()))
 }
 
 /// Utility for printing a warning message
