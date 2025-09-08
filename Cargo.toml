@@ -25,20 +25,20 @@ cargo_metadata = "0.21.0"
 clap = { version = "4.5.26", features = ["derive", "cargo"] }
 serde_json = "1.0.137"
 anyhow = "1.0.95"
-ron = "0.8.1"
+ron = "0.11.0"
 serde = { version = "1.0.217", features = ["derive"] }
 semver = "1.0.25"
 handlebars = "6.3.0"
 atty = "0.2.14"
-clap-cargo = { version = "0.16.0", features = ["cargo_metadata"] }
+clap-cargo = { version = "0.17.0", features = ["cargo_metadata"] }
 ignore = "0.4.23"
 clap-verbosity-flag = "3.0.2"
 log = "0.4.25"
 fs-err = "3.0.0"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
-gix = { version = "0.72", default-features = false, features = ["max-performance-safe", "revision"] }
-tame-index = { version = "0.22", features = ["sparse"] }
+gix = { version = "0.73", default-features = false, features = ["max-performance-safe", "revision"] }
+tame-index = { version = "0.23", features = ["sparse"] }
 
 human-panic = "2.0.2"
 bugreport = "0.5.1"
