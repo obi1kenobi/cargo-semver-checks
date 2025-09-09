@@ -1,0 +1,32 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/async_impl_future_equivalence/": [
+    {
+      "name": String("switches_to_async"),
+      "path": List([
+        String("async_impl_future_equivalence"),
+        String("switches_to_async"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_now_returns_unit/": [
+    {
+      "name": String("public_fn"),
+      "path": List([
+        String("function_now_returns_unit"),
+        String("public_fn"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

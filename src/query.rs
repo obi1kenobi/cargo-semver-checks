@@ -1401,6 +1401,7 @@ add_lints!(
     function_no_longer_unsafe,
     function_now_const,
     function_now_doc_hidden,
+    function_now_returns_unit,
     function_parameter_count_changed,
     function_requires_different_const_generic_params,
     function_requires_different_generic_type_params,
