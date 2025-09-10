@@ -302,15 +302,6 @@ dependencies = [
 
 [[package]]
 name = "cargo-platform"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "84982c6c0ae343635a3a4ee6dedef965513735c8b183caa7289fa6e27399ebd4"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "cargo-platform"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8abf5d501fd757c2d2ee78d0cc40f606e92e3a63544420316565556ed28485e2"
@@ -329,7 +320,7 @@ dependencies = [
  "atty",
  "bugreport",
  "cargo-config2",
- "cargo_metadata 0.21.0",
+ "cargo_metadata",
  "cargo_toml",
  "clap",
  "clap-cargo",
@@ -381,27 +372,12 @@ dependencies = [
 
 [[package]]
 name = "cargo_metadata"
-version = "0.21.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cfca2aaa699835ba88faf58a06342a314a950d2b9686165e038286c30316868"
-dependencies = [
- "camino",
- "cargo-platform 0.2.0",
- "cargo-util-schemas",
- "semver",
- "serde",
- "serde_json",
- "thiserror 2.0.16",
-]
-
-[[package]]
-name = "cargo_metadata"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c3f56c207c76c07652489840ff98687dcf213de178ac0974660d6fefeaf5ec6"
 dependencies = [
  "camino",
- "cargo-platform 0.3.0",
+ "cargo-platform",
  "cargo-util-schemas",
  "semver",
  "serde",
@@ -453,12 +429,12 @@ dependencies = [
 
 [[package]]
 name = "clap-cargo"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db0bd7fba4da3bce65c1ddb068a9d632876c779d20c8b515fbce1e867fccce17"
+checksum = "ce5010f1505303ab5e680a48db64856a03161d8781e9eb1a6e553dc78f7e6b38"
 dependencies = [
  "anstyle",
- "cargo_metadata 0.22.0",
+ "cargo_metadata",
  "clap",
  "serde",
  "serde_json",
@@ -827,12 +803,12 @@ dependencies = [
 
 [[package]]
 name = "errno"
-version = "0.3.13"
+version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "778e2ac28f6c47af28e4907f13ffd1e1ddbd400980a9abd7c8df189bf578a5ad"
+checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.0",
 ]
 
 [[package]]
@@ -1002,7 +978,7 @@ dependencies = [
  "js-sys",
  "libc",
  "r-efi",
- "wasi 0.14.4+wasi-0.2.4",
+ "wasi 0.14.5+wasi-0.2.4",
  "wasm-bindgen",
 ]
 
@@ -2147,9 +2123,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.11.0"
+version = "2.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2481980430f9f78649238835720ddccc57e52df14ffce1c6f37391d61b563e9"
+checksum = "206a8042aec68fa4a62e8d3f7aa4ceb508177d9324faf261e1959e495b7a1921"
 dependencies = [
  "equivalent",
  "hashbrown",
@@ -2339,9 +2315,9 @@ dependencies = [
 
 [[package]]
 name = "linux-raw-sys"
-version = "0.9.4"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd945864f07fe9f5371a27ad7b52a172b4b499999f1d97574c9fa68373937e12"
+checksum = "df1d3c3b53da64cf5760482273a98e575c651a67eec7f77df96b5b642de8f039"
 
 [[package]]
 name = "litemap"
@@ -3063,15 +3039,15 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "1.0.8"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11181fbabf243db407ef8df94a6ce0b2f9a733bd8be4ad02b4eda9602296cac8"
+checksum = "cd15f8a2c5551a84d56efdc1cd049089e409ac19a3072d5037a17fd70719ff3e"
 dependencies = [
  "bitflags 2.9.4",
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.0",
 ]
 
 [[package]]
@@ -3132,11 +3108,11 @@ dependencies = [
 
 [[package]]
 name = "schannel"
-version = "0.1.27"
+version = "0.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f29ebaa345f945cec9fbbc532eb307f0fdad8161f281b6369539c8d84876b3d"
+checksum = "891d81b926048e76efe18581bf793546b4c0eaf8448d72be8de2bbee5fd166e1"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.0",
 ]
 
 [[package]]
@@ -3461,15 +3437,15 @@ dependencies = [
 
 [[package]]
 name = "tempfile"
-version = "3.21.0"
+version = "3.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15b61f8f20e3a6f7e0649d825294eaf317edce30f82cf6026e7e4cb9222a7d1e"
+checksum = "84fa4d11fadde498443cca10fd3ac23c951f0dc59e080e9f4b93d4df4e4eea53"
 dependencies = [
  "fastrand",
  "getrandom 0.3.3",
  "once_cell",
  "rustix",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.0",
 ]
 
 [[package]]
@@ -3788,11 +3764,11 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "45.4.0"
+version = "45.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31807083a92745492d154e863f6fbea451770696cc27aada95340641ac02410d"
+checksum = "dbe0acb3f1c1dc5b7f7d632a94b36932c2e303dd776d1df40224c0cf9c71bd25"
 dependencies = [
- "cargo_metadata 0.21.0",
+ "cargo_metadata",
  "cargo_toml",
  "indexmap",
  "rayon",
@@ -3803,11 +3779,11 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "53.3.0"
+version = "53.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ea7af7a1b32d634e632370b70c51ae98fab039b4bd27dd713f00c38ce1450bc"
+checksum = "228959c9d20359a2b93faf024902f5eb63515937f803bcb97be50d581c69014e"
 dependencies = [
- "cargo_metadata 0.21.0",
+ "cargo_metadata",
  "cargo_toml",
  "indexmap",
  "rayon",
@@ -3818,11 +3794,11 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "55.1.0"
+version = "55.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba61a52e948546189a2ca3f5d9a1a76c1bf977109da1518348b71b0bf8c1cddc"
+checksum = "afe9d942466eebc5493fd29ee1d7b151155793c479eb111160a0153e8e4662e9"
 dependencies = [
- "cargo_metadata 0.21.0",
+ "cargo_metadata",
  "cargo_toml",
  "indexmap",
  "rayon",
@@ -3833,11 +3809,11 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "56.0.0"
+version = "56.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9e29d548ad719af45ca599b7d20352c90f45fd951d27f689eeb3c64e2224a47"
+checksum = "5d7ce77d831e5abfae6ef2a7a2c398f90d83c81a77e3b25e561b327c1848376f"
 dependencies = [
- "cargo_metadata 0.21.0",
+ "cargo_metadata",
  "cargo_toml",
  "indexmap",
  "rayon",
@@ -3876,20 +3852,20 @@ dependencies = [
 
 [[package]]
 name = "trustfall_rustdoc"
-version = "0.33.1"
+version = "0.34.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17df09c3fa723924f69f1f6e6c8541be5ec95b1cda2449d5e5cf70f9be9e4361"
+checksum = "cb8ef79e075c98e9ddd4986cacd4cb9fb1a143d2b21d46cf92a573bd51e680f5"
 dependencies = [
  "anyhow",
- "cargo_metadata 0.21.0",
+ "cargo_metadata",
  "serde",
  "serde_json",
  "thiserror 2.0.16",
  "trustfall",
- "trustfall-rustdoc-adapter 45.4.0",
- "trustfall-rustdoc-adapter 53.3.0",
- "trustfall-rustdoc-adapter 55.1.0",
- "trustfall-rustdoc-adapter 56.0.0",
+ "trustfall-rustdoc-adapter 45.5.0",
+ "trustfall-rustdoc-adapter 53.4.0",
+ "trustfall-rustdoc-adapter 55.2.0",
+ "trustfall-rustdoc-adapter 56.1.0",
  "trustfall_core",
 ]
 
@@ -4058,9 +4034,18 @@ checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
 
 [[package]]
 name = "wasi"
-version = "0.14.4+wasi-0.2.4"
+version = "0.14.5+wasi-0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88a5f4a424faf49c3c2c344f166f0662341d470ea185e939657aaff130f0ec4a"
+checksum = "a4494f6290a82f5fe584817a676a34b9d6763e8d9d18204009fb31dceca98fd4"
+dependencies = [
+ "wasip2",
+]
+
+[[package]]
+name = "wasip2"
+version = "1.0.0+wasi-0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "03fa2761397e5bd52002cd7e73110c71af2109aca4e521a9f40473fe685b0a24"
 dependencies = [
  "wit-bindgen",
 ]
