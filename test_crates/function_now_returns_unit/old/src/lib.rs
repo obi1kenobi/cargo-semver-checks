@@ -29,3 +29,15 @@ pub async fn PublicAsyncFnNowSync() -> u32 {
 pub fn PublicFnNowAsync() -> u32 {
     0
 }
+
+// Conversions involving `impl Future`.
+
+pub fn PublicImplFutureNowAsync() -> impl core::future::Future<Output = ()> {
+    async {}
+}
+
+pub async fn PublicAsyncFnNowImplFuture() {}
+
+pub fn PublicImplFutureToUnit() -> impl core::future::Future<Output = ()> {
+    async {}
+}

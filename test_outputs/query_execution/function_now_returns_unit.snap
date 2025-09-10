@@ -24,5 +24,15 @@ expression: "&query_execution_results"
       "span_end_line": Uint64(14),
       "span_filename": String("src/lib.rs"),
     },
+    {
+      "function_name": String("PublicImplFutureToUnit"),
+      "path": List([
+        String("function_now_returns_unit"),
+        String("PublicImplFutureToUnit"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+    },
   ],
 }
