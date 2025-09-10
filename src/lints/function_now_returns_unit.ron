@@ -1,0 +1,60 @@
+SemverQuery(
+    id: "function_now_returns_unit",
+    human_readable_name: "pub fn now returns unit",
+    description: "A public function that previously returned a value now returns `()`.",
+    required_update: Major,
+    lint_level: Deny,
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        async @tag(name: "is_async")
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        return_value {
+                            is_unit @filter(op: "=", value: ["$false"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Function {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        function_name: name @output
+                        async @filter(op: "=", value: ["%is_async"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        return_value {
+                            is_unit @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "false": false,
+    },
+    error_message: "A public function now returns `()`.",
+    per_result_error_template: Some("function {{join \"::\" path}} now returns () in {{span_filename}}:{{span_begin_line}}"),
+)
