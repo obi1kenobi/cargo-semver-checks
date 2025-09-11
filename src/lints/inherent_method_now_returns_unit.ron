@@ -4,6 +4,9 @@ SemverQuery(
     description: "A method or associated fn now returns the unit type `()` instead of a value.",
     required_update: Major,
     lint_level: Deny,
+    // TODO: This misses functions that were `async` originally and are no longer async,
+    //       while also now returning `()`. The same is true of the related lints in the set.
+    //       Fixing this likely requires support for `@transform` on fields...?
     query: r#"
     {
         CrateDiff {
