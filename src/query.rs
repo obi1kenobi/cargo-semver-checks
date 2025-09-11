@@ -1415,6 +1415,7 @@ add_lints!(
     inherent_method_missing,
     inherent_method_must_use_added,
     inherent_method_now_doc_hidden,
+    inherent_method_now_returns_unit,
     inherent_method_unsafe_added,
     macro_marked_deprecated,
     macro_no_longer_exported,
