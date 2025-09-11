@@ -22,8 +22,9 @@ use serde::Serialize;
 use std::collections::{BTreeMap, HashSet};
 use std::io::Write as _;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
-use check_release::run_check_release;
+use check_release::{LintResult, run_check_release};
 use rustdoc_gen::CrateDataForRustdoc;
 
 pub use config::{FeatureFlag, GlobalConfig};
@@ -673,6 +674,28 @@ fn log_terminal_error(config: &mut GlobalConfig, err: TerminalError) -> anyhow::
     }
 }
 
+/// Summary of version bumps from queries
+#[derive(Debug)]
+struct Bumps {
+    major: u32,
+    minor: u32,
+}
+
+impl Bumps {
+    /// Minimum bump required to respect semver.
+    /// For example, if the crate contains breaking changes, this is [`Some(RequiredSemverUpdate::Major)`].
+    /// If no additional bump is required, this is [`Option::None`].
+    pub fn update_type(&self) -> Option<RequiredSemverUpdate> {
+        if self.major > 0 {
+            Some(RequiredSemverUpdate::Major)
+        } else if self.minor > 0 {
+            Some(RequiredSemverUpdate::Minor)
+        } else {
+            None
+        }
+    }
+}
+
 /// Report of semver check of one crate.
 #[non_exhaustive]
 #[derive(Debug)]
@@ -680,16 +703,24 @@ pub struct CrateReport {
     /// Bump between the current version and the baseline one.
     detected_bump: ActualSemverUpdate,
     /// Minimum additional bump (on top of `detected_bump`) required to respect semver.
-    /// For example, if the crate contains breaking changes, this is [`Some(ReleaseType::Major)`].
-    /// If no additional bump beyond the already-detected one is required, this is [`Option::None`].
-    required_bump: Option<ReleaseType>,
+    required_bumps: Bumps,
+    /// Numbers of warning-level lints requiring minor and major bumps
+    suggested_bumps: Bumps,
+    /// Detailed information about individual lints
+    lint_results: Vec<LintResult>,
+    /// How long it took to run the selected queries
+    checks_duration: Duration,
+    /// Number of queries run
+    selected_checks: usize,
+    /// Number of ignored queries
+    skipped_checks: usize,
 }
 
 impl CrateReport {
     /// Check if the semver check was successful.
     /// `true` if required bump <= detected bump.
     pub fn success(&self) -> bool {
-        match self.required_bump {
+        match self.required_bumps.update_type().map(ReleaseType::from) {
             // If `None`, no additional bump is required.
             None => true,
             // If `Some`, additional bump is required, so the report is not successful.
@@ -720,7 +751,7 @@ impl CrateReport {
     /// Minimum bump required to respect semver.
     /// It's [`Option::None`] if no bump is required beyond the already-detected bump.
     pub fn required_bump(&self) -> Option<ReleaseType> {
-        self.required_bump
+        self.required_bumps.update_type().map(ReleaseType::from)
     }
 
     /// Bump between the current version and the baseline one.
