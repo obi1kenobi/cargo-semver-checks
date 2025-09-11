@@ -4,7 +4,6 @@ SemverQuery(
     description: "A method or associated fn now returns the unit type `()` instead of a value.",
     required_update: Major,
     lint_level: Deny,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html"),
     query: r#"
     {
         CrateDiff {
@@ -26,10 +25,10 @@ SemverQuery(
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 return_value {
-                                    is_unit @filter(op: "=", value: ["$false"])
+                                    is_unit @filter(op: "!=", value: ["$true"])
                                 }
 
-                                span_: span @optional {
+                                baseline_span_: span @optional {
                                     filename @output
                                     begin_line @output
                                     end_line @output
@@ -61,7 +60,7 @@ SemverQuery(
                                     is_unit @filter(op: "=", value: ["$true"])
                                 }
 
-                                current_span_: span @optional {
+                                span_: span @optional {
                                     filename @output
                                     begin_line @output
                                 }
@@ -75,8 +74,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
-        "false": false,
     },
-    error_message: "A publicly-visible method now returns unit `()` instead of a value.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now returns unit, in file {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A publicly-visible method that used to return a value now returns `()`.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
