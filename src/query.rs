@@ -137,7 +137,7 @@ impl SemverQuery {
     pub fn from_ron_str(query_text: &str) -> ron::Result<Self> {
         let mut deserializer = ron::Deserializer::from_str_with_options(
             query_text,
-            ron::Options::default().with_default_extension(Extensions::IMPLICIT_SOME),
+            &ron::Options::default().with_default_extension(Extensions::IMPLICIT_SOME),
         )?;
 
         Self::deserialize(&mut deserializer)
