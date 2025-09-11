@@ -1,0 +1,53 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/inherent_method_now_returns_unit/": [
+    {
+      "current_span_begin_line": Uint64(6),
+      "current_span_filename": String("src/lib.rs"),
+      "method_name": String("public_to_unit"),
+      "method_visibility": String("public"),
+      "name": String("PublicStruct"),
+      "path": List([
+        String("inherent_method_now_returns_unit"),
+        String("PublicStruct"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_span_begin_line": Uint64(21),
+      "current_span_filename": String("src/lib.rs"),
+      "method_name": String("async_to_unit"),
+      "method_visibility": String("public"),
+      "name": String("PublicStruct"),
+      "path": List([
+        String("inherent_method_now_returns_unit"),
+        String("PublicStruct"),
+      ]),
+      "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_span_begin_line": Uint64(43),
+      "current_span_filename": String("src/lib.rs"),
+      "method_name": String("impl_future_to_unit"),
+      "method_visibility": String("public"),
+      "name": String("PublicStruct"),
+      "path": List([
+        String("inherent_method_now_returns_unit"),
+        String("PublicStruct"),
+      ]),
+      "span_begin_line": Uint64(41),
+      "span_end_line": Uint64(43),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
