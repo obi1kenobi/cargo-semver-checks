@@ -19,7 +19,7 @@ SemverQuery(
                         }
 
                         return_value {
-                            is_unit @filter(op: "=", value: ["$false"])
+                            is_unit @filter(op: "!=", value: ["$true"])
                         }
                     }
                 }
@@ -53,8 +53,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
-        "false": false,
     },
-    error_message: "A public function now returns `()`.",
-    per_result_error_template: Some("function {{join \"::\" path}} now returns () in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A public function that used to return a value now returns `()`.",
+    per_result_error_template: Some("{{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
 )
