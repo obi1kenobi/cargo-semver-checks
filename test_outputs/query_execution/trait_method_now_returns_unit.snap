@@ -1,0 +1,38 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_now_returns_unit/": [
+    {
+      "method_name": String("was_value"),
+      "path": List([
+        String("trait_method_now_returns_unit"),
+        String("Example"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("async_was_value"),
+      "path": List([
+        String("trait_method_now_returns_unit"),
+        String("Example"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("impl_future_to_unit"),
+      "path": List([
+        String("trait_method_now_returns_unit"),
+        String("Example"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
