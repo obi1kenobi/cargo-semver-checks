@@ -1,0 +1,45 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_default_impl_removed/": [
+    {
+      "method_name": String("method_default_impl_removed_and_becomes_non_obj_safe"),
+      "path": List([
+        String("trait_method_default_impl_removed"),
+        String("TraitD"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_return_value_added/": [
+    {
+      "method_name": String("method"),
+      "path": List([
+        String("trait_method_return_value_added"),
+        String("ReturnValueAdded"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_no_longer_dyn_compatible/": [
+    {
+      "method_name": String("by_ref"),
+      "path": List([
+        String("trait_no_longer_dyn_compatible"),
+        String("RefTrait"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
