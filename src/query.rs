@@ -137,7 +137,7 @@ impl SemverQuery {
     pub fn from_ron_str(query_text: &str) -> ron::Result<Self> {
         let mut deserializer = ron::Deserializer::from_str_with_options(
             query_text,
-            ron::Options::default().with_default_extension(Extensions::IMPLICIT_SOME),
+            &ron::Options::default().with_default_extension(Extensions::IMPLICIT_SOME),
         )?;
 
         Self::deserialize(&mut deserializer)
@@ -1401,6 +1401,7 @@ add_lints!(
     function_no_longer_unsafe,
     function_now_const,
     function_now_doc_hidden,
+    function_now_returns_unit,
     function_parameter_count_changed,
     function_requires_different_const_generic_params,
     function_requires_different_generic_type_params,
@@ -1414,6 +1415,7 @@ add_lints!(
     inherent_method_missing,
     inherent_method_must_use_added,
     inherent_method_now_doc_hidden,
+    inherent_method_now_returns_unit,
     inherent_method_unsafe_added,
     macro_marked_deprecated,
     macro_no_longer_exported,
@@ -1487,6 +1489,7 @@ add_lints!(
     trait_method_marked_deprecated,
     trait_method_missing,
     trait_method_now_doc_hidden,
+    trait_method_now_returns_unit,
     trait_method_parameter_count_changed,
     trait_method_requires_different_const_generic_params,
     trait_method_requires_different_generic_type_params,
