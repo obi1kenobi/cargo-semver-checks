@@ -39,6 +39,17 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "method_name": String("method"),
+      "path": List([
+        String("trait_method_return_value_added"),
+        String("NewlySealed"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
   "./test_crates/trait_no_longer_dyn_compatible/": [
     {

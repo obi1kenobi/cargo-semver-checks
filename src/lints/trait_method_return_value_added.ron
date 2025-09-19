@@ -36,8 +36,8 @@ SemverQuery(
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        public_api_sealed @filter(op: "!=", value: ["$true"])
-                        unconditionally_sealed @filter(op: "!=", value: ["$true"])
+                        # It doesn't matter if the trait is *currently* sealed or not.
+                        # If it *wasn't* sealed previously, downstream impls may exist.
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
