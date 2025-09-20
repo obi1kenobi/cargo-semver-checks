@@ -99,6 +99,19 @@ expression: "&query_execution_results"
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/trait_method_return_value_added/": [
+    {
+      "path": List([
+        String("trait_method_return_value_added"),
+        String("NewlySealed"),
+      ]),
+      "span_begin_line": Uint64(36),
+      "span_end_line": Uint64(38),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("PublicSealed"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_method_target_feature_removed/": [
     {
       "path": List([

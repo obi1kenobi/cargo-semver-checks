@@ -1,0 +1,3 @@
+# We aren't interested in lockfiles for the test crates.
+# They should work the same regardless of how they are locked.
+**/Cargo.lock

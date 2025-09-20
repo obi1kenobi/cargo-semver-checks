@@ -1,0 +1,38 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/function_now_returns_unit/": [
+    {
+      "function_name": String("PublicFnToUnit"),
+      "path": List([
+        String("function_now_returns_unit"),
+        String("PublicFnToUnit"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "function_name": String("PublicAsyncFnToUnit"),
+      "path": List([
+        String("function_now_returns_unit"),
+        String("PublicAsyncFnToUnit"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "function_name": String("PublicImplFutureToUnit"),
+      "path": List([
+        String("function_now_returns_unit"),
+        String("PublicImplFutureToUnit"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
