@@ -38,4 +38,16 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/trait_method_return_value_added/": [
+    {
+      "method_name": String("method"),
+      "path": List([
+        String("trait_method_return_value_added"),
+        String("AlreadyPublicApiSealed"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(33),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }
