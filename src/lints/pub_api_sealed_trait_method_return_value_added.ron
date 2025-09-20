@@ -1,0 +1,74 @@
+SemverQuery(
+    id: "pub_api_sealed_trait_method_return_value_added",
+    human_readable_name: "method in public API sealed trait return value added",
+    description: "A method in a public API sealed trait now returns a value instead of ().",
+    required_update: Major,
+    lint_level: Warn,
+    reference_link: None,
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        public_api_sealed @filter(op: "=", value: ["$true"])
+                        unconditionally_sealed @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            method_name: name @output @tag
+                            async @tag(name: "is_async")
+
+                            return_value {
+                                is_unit @filter(op: "=", value: ["$true"])
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        # It doesn't matter if the trait is currently sealed.
+                        # If the trait used to be only public-API sealed, downstream impls may exist.
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            name @filter(op: "=", value: ["%method_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            async @filter(op: "=", value: ["%is_async"])
+
+                            return_value {
+                                is_unit @filter(op: "!=", value: ["$true"])
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A method in a trait sealed for public API now returns a value. This isn't a SemVer-major breaking change, but downstream implementers may still be broken.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

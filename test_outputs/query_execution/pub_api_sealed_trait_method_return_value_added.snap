@@ -1,0 +1,41 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/pub_api_sealed_trait_method_return_value_added/": [
+    {
+      "method_name": String("method"),
+      "path": List([
+        String("pub_api_sealed_trait_method_return_value_added"),
+        String("public_api_sealed_return_value_added"),
+        String("ReturnsUnit"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("method"),
+      "path": List([
+        String("pub_api_sealed_trait_method_return_value_added"),
+        String("public_api_sealed_async_return_value_added"),
+        String("AsyncReturnsUnit"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("method"),
+      "path": List([
+        String("pub_api_sealed_trait_method_return_value_added"),
+        String("becomes_unconditionally_sealed"),
+        String("ReturnsUnit"),
+      ]),
+      "span_begin_line": Uint64(46),
+      "span_end_line": Uint64(46),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
