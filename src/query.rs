@@ -1433,6 +1433,7 @@ add_lints!(
     proc_macro_now_doc_hidden,
     pub_api_sealed_trait_became_unconditionally_sealed,
     pub_api_sealed_trait_became_unsealed,
+    pub_api_sealed_trait_method_return_value_added,
     pub_api_sealed_trait_method_target_feature_removed,
     pub_const_added,
     pub_module_level_const_missing,
