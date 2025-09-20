@@ -68,7 +68,7 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A method in a trait sealed for public API now returns a value. This isn't a SemVer-major breaking change, but downstream implementers may still be broken.",
+    error_message: "A method in a public API sealed trait now returns a value. This isn't a SemVer-major breaking change, but if downstream implementers exist anyway, they will be broken.",
     per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
