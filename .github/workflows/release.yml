@@ -25,6 +25,8 @@ jobs:
     name: Create release
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write     # Required for OIDC token exchange (Trusted Publishing)
     steps:
       - name: Checkout
         uses: actions/checkout@v5
