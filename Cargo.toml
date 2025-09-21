@@ -29,7 +29,6 @@ ron = "0.11.0"
 serde = { version = "1.0.217", features = ["derive"] }
 semver = "1.0.25"
 handlebars = "6.3.0"
-atty = "0.2.14"
 clap-cargo = { version = "0.17.0", features = ["cargo_metadata"] }
 ignore = "0.4.23"
 clap-verbosity-flag = "3.0.2"
