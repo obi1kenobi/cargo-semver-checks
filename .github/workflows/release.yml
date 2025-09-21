@@ -7,8 +7,6 @@ on:
         required: true
         type: string
     secrets:
-      CARGO_REGISTRY_TOKEN:
-        required: true
       TAGGER_GITHUB_TOKEN:
         required: true
 
