@@ -2005,7 +2005,6 @@ jobs:
     with:
       publish-tag: ${{ needs.should-publish.outputs.publish-tag }}
     secrets:
-      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
       TAGGER_GITHUB_TOKEN: ${{ secrets.TAGGER_GITHUB_TOKEN }}
 
   should-publish:
