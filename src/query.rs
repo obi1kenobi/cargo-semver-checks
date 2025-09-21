@@ -894,7 +894,7 @@ mod tests {
 
         let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
-            // TODO: Remove this once rustdoc fixes this bug:
+            // TODO: Remove this once Rust 1.90 is the oldest supported by cargo-semver-checks:
             // https://github.com/rust-lang/rust/issues/142655
             if matches!(
                 semver_query.id.as_str(),
