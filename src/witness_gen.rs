@@ -1,6 +1,7 @@
 use std::{
     collections::{BTreeMap, btree_map},
     fs,
+    io::Write,
     path::{Path, PathBuf},
     sync::Arc,
 };
@@ -12,10 +13,10 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::VersionedRustdocAdapter;
 
-use crate::check_release::LintResult;
-use crate::data_generation::CrateDataRequest;
+use crate::data_generation::{CrateDataRequest, ProjectRequest, RegistryRequest};
 use crate::query::{Witness, WitnessQuery};
 use crate::{GlobalConfig, SemverQuery};
+use crate::{check_release::LintResult, data_generation::RequestKind};
 
 /// Higher level data used specifically in the generation of a witness program. Values of [`None`] will
 /// prevent witness generation, since the data is required for witness generation.
@@ -36,6 +37,99 @@ impl<'a> WitnessGenerationData<'a> {
             current,
             target_dir,
         }
+    }
+}
+
+enum DependencyKind {
+    Registry { version: String },
+    Local { path: PathBuf },
+}
+
+struct WitnessDependency {
+    name: String,
+    kind: DependencyKind,
+}
+
+impl TryFrom<&CrateDataRequest<'_>> for WitnessDependency {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &CrateDataRequest<'_>) -> std::result::Result<Self, Self::Error> {
+        let this = match value.kind {
+            RequestKind::Registry(RegistryRequest { index_entry, .. }) => Self {
+                name: index_entry.name.to_string(),
+                kind: DependencyKind::Registry {
+                    version: index_entry.version.to_string(),
+                },
+            },
+            RequestKind::LocalProject(ProjectRequest { manifest, .. }) => Self {
+                name: manifest
+                    .parsed
+                    .package
+                    .as_ref()
+                    .map(|pkg| pkg.name.clone())
+                    .context("error retrieving manifest package, none is present")?,
+                kind: DependencyKind::Local {
+                    path: fs::canonicalize(
+                        manifest
+                            .path
+                            .parent()
+                            .context("error retrieving manifest path parent")?,
+                    )
+                    .context("error converting local path to absolute path")?,
+                },
+            },
+        };
+
+        Ok(this)
+    }
+}
+
+impl WitnessDependency {
+    fn to_dependency_string(&self) -> String {
+        match &self.kind {
+            DependencyKind::Registry { version } => {
+                format!(r#"{{ version = "{version}", package = "{}"}}"#, self.name)
+            }
+            DependencyKind::Local { path } => format!(
+                r#"{{ path = "{}", package = "{}" }}"#,
+                path.display(),
+                self.name
+            ),
+        }
+    }
+}
+
+struct DependencyData {
+    target_dir: PathBuf,
+    baseline: WitnessDependency,
+    current: WitnessDependency,
+}
+
+impl DependencyData {
+    fn parse_input(witness_data: WitnessGenerationData) -> Result<Self> {
+        let baseline_data = witness_data
+            .baseline
+            .context("error parsing witness data, missing baseline crate data")?;
+        let current_data = witness_data
+            .current
+            .context("error parsing witness data, missing current crate data")?;
+        let target_dir = witness_data
+            .target_dir
+            .map(|path| path.to_path_buf())
+            .context("error parsing witness data, missing target directory")?;
+
+        let baseline = baseline_data
+            .try_into()
+            .context("error parsing baseline dependency")?;
+        let current = current_data
+            .try_into()
+            .context("error parsing baseline dependency")?;
+
+        Ok(Self {
+            target_dir,
+            baseline,
+            current,
+        })
     }
 }
 
@@ -175,13 +269,63 @@ fn generate_witness_crate(
     witness_set_dir: &Path,
     witness_name: &str,
     index: usize,
-    _witness_text: &str,
+    witness_text: &str,
+    dependency_data: &DependencyData,
 ) -> Result<PathBuf> {
     let crate_path = witness_set_dir.join(format!("{witness_name}-{index}"));
-    fs::create_dir_all(&crate_path)
-        .with_context(|| format!("error creating witness at `{crate_path:?}`",))?;
+    let src_path = crate_path.join("src");
 
-    // TODO: Finish crate generation, currently just generates an empty dir
+    fs::create_dir_all(&src_path)
+        .with_context(|| format!("failed to create all directories in the path {src_path:?}",))?;
+
+    let mut manifest_file = fs::File::create(crate_path.join("Cargo.toml")).with_context(|| {
+        format!(
+            "failed to create witness crate cargo manifest {:?}",
+            crate_path.join("Cargo.toml")
+        )
+    })?;
+
+    let mut lib_file = fs::File::create(src_path.join("lib.rs")).with_context(|| {
+        format!(
+            "failed to create main witness file {:?}",
+            src_path.join("lib.rs")
+        )
+    })?;
+
+    write!(
+        manifest_file,
+        r#"[package]
+name = "{witness_name}-{index}"
+version = "1.0.0"
+edition = "2024"
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+baseline = []
+
+[dependencies]
+baseline = {}
+current = {}
+"#,
+        dependency_data.baseline.to_dependency_string(),
+        dependency_data.current.to_dependency_string()
+    )
+    .context("error writing to manifest file")?;
+
+    write!(
+        lib_file,
+        r#"#[cfg(feature = "baseline")]
+use baseline as {0};
+#[cfg(not(feature = "baseline"))]
+use current as {0};
+
+{1}
+"#,
+        dependency_data.baseline.name, witness_text
+    )
+    .context("error writing to main witness file")?;
 
     Ok(crate_path)
 }
@@ -198,8 +342,16 @@ fn run_single_witness_check(
     witness_name: &str,
     index: usize,
     witness_text: &str,
+    dependency_data: &DependencyData,
 ) -> Result<Result<(), ()>> {
-    let _crate_path = generate_witness_crate(witness_set_dir, witness_name, index, witness_text)?;
+    let _crate_path = generate_witness_crate(
+        witness_set_dir,
+        witness_name,
+        index,
+        witness_text,
+        dependency_data,
+    )
+    .with_context(|| format!("error generating witness crate `{witness_name}-{index}`"))?;
 
     // TODO: Check the witness crate that was generated
 
@@ -222,25 +374,23 @@ pub(crate) fn run_witness_checks(
     adapter: &VersionedRustdocAdapter,
     lint_results: &[LintResult],
 ) {
-    let (_baseline_data, _current_data, target_dir) = match witness_data {
-        WitnessGenerationData {
-            baseline: Some(baseline),
-            current: Some(current),
-            target_dir: Some(target_dir),
-        } => (baseline, current, target_dir),
-        _ => {
+    let dependency_data = match DependencyData::parse_input(witness_data) {
+        Ok(data) => data,
+        Err(err) => {
             print_warning(
                 config,
                 format!(
                     "encountered non-fatal error while creating witness program \
-                    {crate_name}: cannot process witness for this source type (root cause: witness data is not complete)",
+                    {crate_name}: {err} (root cause: {})",
+                    err.root_cause()
                 ),
             );
             return;
         }
     };
-
-    let witness_set_dir = target_dir.join(format!("{}-{crate_name}", config.run_id()));
+    let witness_set_dir = dependency_data
+        .target_dir
+        .join(format!("{}-{crate_name}", config.run_id()));
 
     // Have to pull out handlebars, since &GlobalConfig cannot be shared across threads
     let handlebars = config.handlebars();
@@ -262,6 +412,7 @@ pub(crate) fn run_witness_checks(
                             &semver_query.id,
                             index,
                             &witness_text,
+                            &dependency_data,
                         )
                     });
 

@@ -14,12 +14,12 @@ use super::progress::{CallbackHandler, ProgressCallbacks};
 
 #[derive(Debug, Clone)]
 pub(crate) struct RegistryRequest<'a> {
-    index_entry: &'a tame_index::IndexVersion,
+    pub(crate) index_entry: &'a tame_index::IndexVersion,
 }
 
 #[derive(Debug, Clone)]
 pub(crate) struct ProjectRequest<'a> {
-    pub(super) manifest: &'a Manifest,
+    pub(crate) manifest: &'a Manifest,
 }
 
 #[derive(Debug, Clone)]
