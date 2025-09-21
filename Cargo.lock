@@ -311,7 +311,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-semver-checks"
-version = "0.43.0"
+version = "0.44.0"
 dependencies = [
  "anstream",
  "anstyle",
