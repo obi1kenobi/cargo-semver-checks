@@ -1,0 +1,73 @@
+SemverQuery(
+    id: "trait_method_return_value_added",
+    human_readable_name: "pub trait method return value added",
+    description: "A method in an unsealed pub trait previously returned `()`, but now returns a value.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#major-trait-item-signature-changes"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        public_api_sealed @filter(op: "!=", value: ["$true"])
+                        unconditionally_sealed @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            method_name: name @output @tag
+                            async @tag(name: "is_async")
+
+                            return_value {
+                                is_unit @filter(op: "=", value: ["$true"])
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        # It doesn't matter if the trait is *currently* sealed or not.
+                        # If it *wasn't* sealed previously, downstream impls may exist.
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            name @filter(op: "=", value: ["%method_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            async @filter(op: "=", value: ["%is_async"])
+
+                            return_value {
+                                is_unit @filter(op: "!=", value: ["$true"])
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A trait method that previously returned `()` now returns a value. Since the trait is not sealed, downstream implementations of the trait will get compile errors.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+)

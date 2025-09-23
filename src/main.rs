@@ -127,7 +127,7 @@ fn main() {
 
                 // helper struct for rendering help for just the unstable options.
                 #[derive(Parser)]
-                #[clap(
+                #[command(
                     disable_help_flag = true,
                     help_template = "{options}",
                     mut_args = |arg| arg.hide(false),
@@ -332,7 +332,7 @@ struct SemverChecks {
 /// `cargo semver-checks -Z help` to show help messages
 /// instead, so a docstring help message will be shown then.
 #[derive(Debug, Clone, Args, Default, PartialEq, Eq)]
-#[clap(hide = true)]
+#[command(hide = true)]
 #[non_exhaustive]
 struct UnstableOptions {
     /// Enable printing witness hints, examples of potentially-broken downstream code.

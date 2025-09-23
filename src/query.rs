@@ -894,7 +894,7 @@ mod tests {
 
         let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
-            // TODO: Remove this once rustdoc fixes this bug:
+            // TODO: Remove this once Rust 1.90 is the oldest supported by cargo-semver-checks:
             // https://github.com/rust-lang/rust/issues/142655
             if matches!(
                 semver_query.id.as_str(),
@@ -1433,6 +1433,7 @@ add_lints!(
     proc_macro_now_doc_hidden,
     pub_api_sealed_trait_became_unconditionally_sealed,
     pub_api_sealed_trait_became_unsealed,
+    pub_api_sealed_trait_method_return_value_added,
     pub_api_sealed_trait_method_target_feature_removed,
     pub_const_added,
     pub_module_level_const_missing,
@@ -1489,9 +1490,11 @@ add_lints!(
     trait_method_marked_deprecated,
     trait_method_missing,
     trait_method_now_doc_hidden,
+    trait_method_now_returns_unit,
     trait_method_parameter_count_changed,
     trait_method_requires_different_const_generic_params,
     trait_method_requires_different_generic_type_params,
+    trait_method_return_value_added,
     trait_method_target_feature_removed,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,

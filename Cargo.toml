@@ -1,6 +1,6 @@
 [package]
 name = "cargo-semver-checks"
-version = "0.43.0"
+version = "0.44.0"
 edition = "2024"
 authors = ["Predrag Gruevski <obi1kenobi82@gmail.com>"]
 license = "Apache-2.0 OR MIT"
@@ -9,7 +9,7 @@ repository = "https://github.com/obi1kenobi/cargo-semver-checks"
 readme = "./README.md"
 keywords = ["semver", "linter", "check", "crate", "cargo"]
 categories = ["command-line-utilities", "development-tools::cargo-plugins"]
-rust-version = "1.88"
+rust-version = "1.89"
 exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "tests/"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -18,7 +18,7 @@ exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "t
 trustfall = "0.8.1"  # Ensure this matches the `trustfall_core` dev-dependency version below.
 # `cargo_metadata` is used at the API boundary of `trustfall_rustdoc`,
 # so ensure the version we use for `cargo_metadata` here matches what `trustfall_rustdoc` uses too.
-trustfall_rustdoc = { version = "0.34.0", default-features = false, features = ["v45", "v53", "v55", "v56", "rayon", "rustc-hash"] }
+trustfall_rustdoc = { version = "0.35.0", default-features = false, features = ["v53", "v55", "v56", "rayon", "rustc-hash"] }
 cargo_metadata = "0.22.0"
 # End of dependency block
 
@@ -29,7 +29,6 @@ ron = "0.11.0"
 serde = { version = "1.0.217", features = ["derive"] }
 semver = "1.0.25"
 handlebars = "6.3.0"
-atty = "0.2.14"
 clap-cargo = { version = "0.17.0", features = ["cargo_metadata"] }
 ignore = "0.4.23"
 clap-verbosity-flag = "3.0.2"
