@@ -401,6 +401,68 @@ mod tests {
         TEST_CRATE_RUSTDOCS.get_or_init(initialize_test_crate_rustdocs)
     }
 
+    #[test]
+    fn lint_files_have_matching_ids() {
+        let lints_dir = Path::new("src/lints");
+        let ron_files = collect_ron_files(lints_dir);
+
+        assert!(
+            !ron_files.is_empty(),
+            "expected at least one lint definition in {lints_dir:?}"
+        );
+
+        for path in ron_files {
+            let stem = path
+                .file_stem()
+                .and_then(OsStr::to_str)
+                .expect("lint file must have a valid UTF-8 stem");
+            assert!(
+                is_lower_snake_case(stem),
+                "lint file stem `{stem}` must be lower snake case"
+            );
+
+            let contents = fs_err::read_to_string(&path).expect("failed to read lint file");
+            let query = SemverQuery::from_ron_str(&contents).expect("failed to parse lint");
+            assert_eq!(
+                stem, query.id,
+                "lint id must match file stem for {:?}",
+                path
+            );
+        }
+    }
+
+    fn collect_ron_files(dir: &Path) -> Vec<PathBuf> {
+        let mut result = Vec::new();
+        let mut stack = vec![dir.to_path_buf()];
+
+        while let Some(current) = stack.pop() {
+            for entry in fs_err::read_dir(&current).expect("failed to read directory") {
+                let entry = entry.expect("failed to read directory entry");
+                let path = entry.path();
+                if entry
+                    .file_type()
+                    .expect("failed to determine file type")
+                    .is_dir()
+                {
+                    stack.push(path);
+                } else if path.extension() == Some(OsStr::new("ron")) {
+                    result.push(path);
+                }
+            }
+        }
+
+        result.sort();
+        result
+    }
+
+    fn is_lower_snake_case(value: &str) -> bool {
+        !value.is_empty()
+            && value.chars().all(|ch| ch.is_ascii_lowercase() || ch == '_')
+            && !value.starts_with('_')
+            && !value.ends_with('_')
+            && !value.contains("__")
+    }
+
     fn get_all_test_crate_indexes()
     -> &'static BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
         TEST_CRATE_INDEXES.get_or_init(initialize_test_crate_indexes)
