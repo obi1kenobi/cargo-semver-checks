@@ -458,7 +458,7 @@ mod tests {
         !value.is_empty()
             && value
                 .chars()
-                .all(|ch| ch.is_ascii_lowercase() || ch.is_ascii_digit() || ch == '_')
+                .all(|ch| ch.is_ascii_lowercase() || ch == '_')
             && !value.starts_with('_')
             && !value.ends_with('_')
             && !value.contains("__")
