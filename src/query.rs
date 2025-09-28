@@ -501,7 +501,7 @@ mod tests {
     fn load_package_manifest(manifest_dir: &Path) -> PackageManifest {
         let manifest_path = manifest_dir.join("Cargo.toml");
         let manifest_text =
-            fs::read_to_string(&manifest_path).expect("failed to load manifest for test crate");
+            fs_err::read_to_string(&manifest_path).expect("failed to load manifest for test crate");
         let manifest: Value = toml::from_str(&manifest_text)
             .unwrap_or_else(|e| panic!("failed to parse {}: {e}", manifest_path.display()));
 
