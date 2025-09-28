@@ -359,7 +359,6 @@ mod tests {
     use std::borrow::Cow;
     use std::collections::{BTreeSet, HashMap};
     use std::ffi::OsStr;
-    use std::fs;
     use std::path::PathBuf;
     use std::sync::{Arc, OnceLock};
     use std::time::SystemTime;
