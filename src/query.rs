@@ -369,6 +369,7 @@ mod tests {
     use rayon::prelude::*;
     use semver::Version;
     use serde::{Deserialize, Serialize};
+    use toml::Value;
     use trustfall::{FieldValue, TransparentValue};
     use trustfall_core::ir::IndexedQuery;
     use trustfall_rustdoc::{
@@ -487,6 +488,156 @@ mod tests {
         load_rustdoc(Path::new(&rustdoc_path), Some(metadata))
             .with_context(|| format!("Could not load {rustdoc_path} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?"))
             .expect("failed to load rustdoc")
+    }
+
+    #[derive(Debug, PartialEq, Eq)]
+    struct PackageManifest {
+        name: String,
+        version: String,
+        edition: String,
+    }
+
+    fn load_package_manifest(manifest_dir: &Path) -> PackageManifest {
+        let manifest_path = manifest_dir.join("Cargo.toml");
+        let manifest_text =
+            fs_err::read_to_string(&manifest_path).expect("failed to load manifest for test crate");
+        let manifest: Value = toml::from_str(&manifest_text)
+            .unwrap_or_else(|e| panic!("failed to parse {}: {e}", manifest_path.display()));
+
+        let package_table = manifest
+            .get("package")
+            .and_then(Value::as_table)
+            .unwrap_or_else(|| {
+                panic!(
+                    "manifest at {} missing [package] table",
+                    manifest_path.display()
+                )
+            });
+
+        let name = package_table
+            .get("name")
+            .and_then(Value::as_str)
+            .unwrap_or_else(|| {
+                panic!(
+                    "manifest at {} missing package.name",
+                    manifest_path.display()
+                )
+            })
+            .to_owned();
+        let version = package_table
+            .get("version")
+            .and_then(Value::as_str)
+            .unwrap_or_else(|| {
+                panic!(
+                    "manifest at {} missing package.version",
+                    manifest_path.display()
+                )
+            })
+            .to_owned();
+        let edition = package_table
+            .get("edition")
+            .and_then(Value::as_str)
+            .unwrap_or_else(|| {
+                panic!(
+                    "manifest at {} missing package.edition",
+                    manifest_path.display()
+                )
+            })
+            .to_owned();
+
+        let publish_value = package_table.get("publish").unwrap_or_else(|| {
+            panic!(
+                "manifest at {} missing package.publish",
+                manifest_path.display()
+            )
+        });
+        assert!(
+            matches!(publish_value, Value::Boolean(false)),
+            "manifest at {} must set package.publish = false",
+            manifest_path.display()
+        );
+
+        PackageManifest {
+            name,
+            version,
+            edition,
+        }
+    }
+
+    const VERSION_MISMATCH_ALLOWED: &[&str] = &[
+        "semver_trick_self_referential",
+        "trait_missing_with_major_bump",
+    ];
+
+    #[test]
+    fn test_crates_have_consistent_manifests() {
+        let base_path = Path::new("./test_crates");
+        let entries = fs_err::read_dir(base_path).expect("directory test_crates/ not found");
+        let mut checked_pairs = 0usize;
+
+        for entry in entries {
+            let entry = entry.expect("failed to read test_crates entry");
+            let path = entry.path();
+            if !entry
+                .metadata()
+                .expect("failed to read metadata for test_crates entry")
+                .is_dir()
+            {
+                continue;
+            }
+
+            let old_dir = path.join("old");
+            let new_dir = path.join("new");
+            if !(old_dir.is_dir() && new_dir.is_dir()) {
+                continue;
+            }
+
+            let dir_name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .expect("test_crate directory must be valid UTF-8");
+
+            let old_manifest = load_package_manifest(&old_dir);
+            let new_manifest = load_package_manifest(&new_dir);
+
+            let PackageManifest {
+                name: old_name,
+                version: old_version,
+                edition: old_edition,
+            } = old_manifest;
+            let PackageManifest {
+                name: new_name,
+                version: new_version,
+                edition: new_edition,
+            } = new_manifest;
+
+            assert_eq!(
+                old_name, dir_name,
+                "manifest name must match directory name for {dir_name}"
+            );
+            assert_eq!(
+                new_name, dir_name,
+                "manifest name must match directory name for {dir_name}"
+            );
+            assert_eq!(
+                old_edition, new_edition,
+                "old and new editions differ for {dir_name}"
+            );
+
+            if !VERSION_MISMATCH_ALLOWED.contains(&dir_name) {
+                assert_eq!(
+                    old_version, new_version,
+                    "old and new versions differ for {dir_name}"
+                );
+            }
+
+            checked_pairs += 1;
+        }
+
+        assert!(
+            checked_pairs > 0,
+            "expected to check at least one test crate pair"
+        );
     }
 
     #[test]
