@@ -573,7 +573,7 @@ mod tests {
     #[test]
     fn test_crates_have_consistent_manifests() {
         let base_path = Path::new("./test_crates");
-        let entries = fs::read_dir(base_path).expect("directory test_crates/ not found");
+        let entries = fs_err::read_dir(base_path).expect("directory test_crates/ not found");
         let mut checked_pairs = 0usize;
 
         for entry in entries {
