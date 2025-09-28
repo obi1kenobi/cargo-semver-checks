@@ -456,9 +456,7 @@ mod tests {
 
     fn is_lower_snake_case(value: &str) -> bool {
         !value.is_empty()
-            && value
-                .chars()
-                .all(|ch| ch.is_ascii_lowercase() || ch == '_')
+            && value.chars().all(|ch| ch.is_ascii_lowercase() || ch == '_')
             && !value.starts_with('_')
             && !value.ends_with('_')
             && !value.contains("__")
