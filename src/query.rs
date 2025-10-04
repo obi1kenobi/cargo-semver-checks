@@ -1419,6 +1419,56 @@ mod tests {
     }
 
     #[test]
+    fn lint_file_names_and_ids_match() {
+        let mut lints_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        lints_dir.push("src");
+        lints_dir.push("lints");
+
+        for entry in fs_err::read_dir(&lints_dir).expect("failed to read 'src/lints' directory") {
+            let entry = entry.expect("failed to examine file");
+            let path = entry.path();
+
+            if path.extension().and_then(OsStr::to_str) != Some("ron") {
+                continue;
+            }
+
+            let stem = path
+                .file_stem()
+                .and_then(OsStr::to_str)
+                .expect("failed to get file name as utf-8");
+
+            assert!(
+                stem.chars().all(|ch| ch.is_ascii_lowercase() || ch == '_'),
+                "lint file name '{stem}' is not snake_case"
+            );
+            assert!(
+                !stem.starts_with('_'),
+                "lint file name '{stem}' must not start with '_'"
+            );
+            assert!(
+                !stem.ends_with('_'),
+                "lint file name '{stem}' must not end with '_'"
+            );
+            assert!(
+                !stem.contains("__"),
+                "lint file name '{stem}' must not contain '__'"
+            );
+
+            let query_text =
+                fs_err::read_to_string(&path).expect("failed to read lint definition file");
+            let semver_query =
+                SemverQuery::from_ron_str(&query_text).expect("failed to parse lint definition");
+
+            assert_eq!(
+                stem,
+                semver_query.id,
+                "lint id does not match file name for {}",
+                path.display()
+            );
+        }
+    }
+
+    #[test]
     fn test_data_is_fresh() -> anyhow::Result<()> {
         // Adds the modification time of all files in `{dir}/**/*.{rs,toml,json}` to `set`, excluding
         // the `target` directory.
