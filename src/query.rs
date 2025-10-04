@@ -1229,6 +1229,9 @@ mod tests {
                     .all(|ch| ch.is_ascii_lowercase() || ch.is_ascii_digit() || ch == '_'),
                 "lint file name '{stem}' is not snake_case"
             );
+            assert!(!stem.starts_with('_'), "lint file name '{stem}' must not start with '_'");
+            assert!(!stem.ends_with('_'), "lint file name '{stem}' must not end with '_'");
+            assert!(!stem.contains("__"), "lint file name '{stem}' must not contain '__'");
 
             let query_text =
                 fs_err::read_to_string(&path).expect("failed to read lint definition file");
