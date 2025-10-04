@@ -887,7 +887,7 @@ fn manifest_path(project_root: &Path) -> anyhow::Result<PathBuf> {
         Ok(project_root.to_path_buf())
     } else {
         anyhow::bail!(
-            "path {} is not a directory or a manifest",
+            "path '{}' is not a directory or a manifest",
             project_root.display()
         )
     }
