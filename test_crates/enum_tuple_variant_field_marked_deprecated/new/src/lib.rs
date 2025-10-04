@@ -12,9 +12,6 @@ pub enum TupleVariantEnum {
     // This variant will have some fields marked as deprecated
     AnotherTuple(u64, #[deprecated] i16, char),
 
-    // This will remain unchanged
-    NormalTuple(f64, f32),
-
     // This variant will be entirely deprecated
     #[deprecated]
     VariantToBeDeprecated(#[deprecated] i32, u8, bool),
