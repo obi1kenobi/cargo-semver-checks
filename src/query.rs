@@ -1438,8 +1438,7 @@ mod tests {
                 .expect("failed to get file name as utf-8");
 
             assert!(
-                stem.chars()
-                    .all(|ch| ch.is_ascii_lowercase() || ch == '_'),
+                stem.chars().all(|ch| ch.is_ascii_lowercase() || ch == '_'),
                 "lint file name '{stem}' is not snake_case"
             );
             assert!(
