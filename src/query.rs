@@ -1226,7 +1226,7 @@ mod tests {
 
             assert!(
                 stem.chars()
-                    .all(|ch| ch.is_ascii_lowercase() || ch.is_ascii_digit() || ch == '_'),
+                    .all(|ch| ch.is_ascii_lowercase() || ch == '_'),
                 "lint file name '{stem}' is not snake_case"
             );
             assert!(!stem.starts_with('_'), "lint file name '{stem}' must not start with '_'");
