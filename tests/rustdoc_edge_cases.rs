@@ -260,7 +260,13 @@ fn zerover_minor_flag_not_needed() {
 fn unprefixed_cargo_toml_manifest_path_refers_to_current_working_directory() {
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/crate_in_workspace/")
-        .args(["semver-checks", "check-release", "--manifest-path", "Cargo.toml", "--baseline-root=."])
+        .args([
+            "semver-checks",
+            "check-release",
+            "--manifest-path",
+            "Cargo.toml",
+            "--baseline-root=.",
+        ])
         .assert()
         .success();
 }
