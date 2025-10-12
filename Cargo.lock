@@ -329,6 +329,7 @@ dependencies = [
  "regex",
  "ron 0.11.0",
  "rustc_version",
+ "rustdoc-types 0.56.0",
  "semver",
  "serde",
  "serde_json",

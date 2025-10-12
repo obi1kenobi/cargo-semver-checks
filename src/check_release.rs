@@ -14,7 +14,7 @@ use trustfall::{FieldValue, TransparentValue};
 
 use crate::data_generation::DataStorage;
 use crate::query::{
-    ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery,
+    ActualSemverUpdate, LintLevel, LintLogic, OverrideStack, RequiredSemverUpdate, SemverQuery,
 };
 use crate::witness_gen;
 use crate::{Bumps, CrateReport, GlobalConfig, ReleaseType, WitnessGeneration};
@@ -250,6 +250,7 @@ pub(super) fn run_check_release(
     overrides: &OverrideStack,
     witness_generation: &WitnessGeneration,
     witness_data: witness_gen::WitnessGenerationData,
+    witness_rustdoc_paths: witness_gen::WitnessRustdocPaths,
 ) -> anyhow::Result<CrateReport> {
     let current_version = data_storage.current_crate().crate_version();
     let baseline_version = data_storage.baseline_crate().crate_version();
@@ -361,7 +362,14 @@ pub(super) fn run_check_release(
         .collect::<anyhow::Result<Vec<_>>>()?;
 
     if witness_generation.generate_witnesses {
-        witness_gen::run_witness_checks(config, witness_data, crate_name, &adapter, &lint_results);
+        witness_gen::run_witness_checks(
+            config,
+            witness_data,
+            witness_rustdoc_paths,
+            crate_name,
+            &adapter,
+            &lint_results,
+        );
     }
 
     let checks_duration = checks_start_instant.elapsed();
@@ -369,7 +377,9 @@ pub(super) fn run_check_release(
     let mut required_bumps = Bumps { major: 0, minor: 0 };
     let mut suggested_bumps = Bumps { major: 0, minor: 0 };
     for result in &lint_results {
-        if !result.query_results.is_empty() {
+        if !result.query_results.is_empty()
+            && result.semver_query.lint_logic == LintLogic::UseStandard
+        {
             let bump_stats = match result.effective_lint_level {
                 LintLevel::Deny => &mut required_bumps,
                 LintLevel::Warn => &mut suggested_bumps,

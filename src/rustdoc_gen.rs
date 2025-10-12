@@ -11,6 +11,7 @@ use trustfall_rustdoc::VersionedStorage;
 use crate::GlobalConfig;
 use crate::data_generation::{CrateDataRequest, IntoTerminalResult as _, TerminalError};
 use crate::manifest::Manifest;
+use crate::witness_gen::CoupledRustdocPath;
 
 #[derive(Debug, Clone)]
 pub(crate) enum CrateSource<'a> {
@@ -315,7 +316,7 @@ pub(crate) fn generate_rustdoc(
     cache_settings: super::data_generation::CacheSettings<()>,
     target_root: PathBuf,
     data_request: &CrateDataRequest<'_>,
-) -> Result<VersionedStorage, TerminalError> {
+) -> Result<CoupledRustdocPath<VersionedStorage>, TerminalError> {
     let cache_dir = target_root.join("cache");
     let cache_settings = cache_settings.with_path(cache_dir.as_path());
 
@@ -507,9 +508,11 @@ impl<'a> StatefulRustdocGenerator<'a, ReadyState<'a>> {
         config: &mut GlobalConfig,
         generation_settings: super::data_generation::GenerationSettings,
         cache_settings: super::data_generation::CacheSettings<()>,
-    ) -> Result<VersionedStorage, TerminalError> {
+    ) -> Result<CoupledRustdocPath<VersionedStorage>, TerminalError> {
         match &self.coupled_state {
-            ReadyState::File { generator } => generator.load_rustdoc(),
+            ReadyState::File { generator } => generator
+                .load_rustdoc()
+                .map(|data| CoupledRustdocPath::new(data, generator.path.clone())),
 
             ReadyState::Generator {
                 target_root,

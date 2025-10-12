@@ -7,6 +7,7 @@ use trustfall_rustdoc::{LoadingError, VersionedStorage};
 
 use crate::manifest::Manifest;
 use crate::util::slugify;
+use crate::witness_gen::CoupledRustdocPath;
 
 use super::error::{IntoTerminalResult, TerminalError};
 use super::generate::GenerationSettings;
@@ -260,7 +261,7 @@ impl<'a> CrateDataRequest<'a> {
         cache_settings: CacheSettings<&'a Path>,
         generation_settings: GenerationSettings,
         callbacks: &'slf mut dyn ProgressCallbacks<'slf>,
-    ) -> Result<VersionedStorage, TerminalError> {
+    ) -> Result<CoupledRustdocPath<VersionedStorage>, TerminalError> {
         let mut callbacks = CallbackHandler::new(
             self.kind
                 .name()
@@ -407,16 +408,18 @@ fn load_rustdoc_with_optional_metadata(
     json_path: &Path,
     metadata: cargo_metadata::Metadata,
     callbacks: &mut CallbackHandler<'_>,
-) -> anyhow::Result<VersionedStorage> {
+) -> anyhow::Result<CoupledRustdocPath<VersionedStorage>> {
     match trustfall_rustdoc::load_rustdoc(json_path, Some(metadata)) {
-        Ok(data) => Ok(data),
+        Ok(data) => Ok(CoupledRustdocPath::new(data, json_path.to_path_buf())),
         Err(e @ LoadingError::MetadataParsing(..)) => {
             // Metadata parsing is brand new and might have unforeseen issues.
             // Be resilient: report the problem but don't crash --
             // instead, drop back to not checking manifest data.
             callbacks.non_fatal_error(anyhow::Error::from(e).context("skipping package metadata due to failure to load it; package manifest checks will not discover any breakage"));
 
-            trustfall_rustdoc::load_rustdoc(json_path, None).map_err(anyhow::Error::from)
+            trustfall_rustdoc::load_rustdoc(json_path, None)
+                .map(|data| CoupledRustdocPath::new(data, json_path.to_path_buf()))
+                .map_err(anyhow::Error::from)
         }
         Err(e) => Err(anyhow::Error::from(e)),
     }

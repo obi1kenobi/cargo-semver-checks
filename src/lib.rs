@@ -585,7 +585,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                     current_loader.get_target_root(),
                 );
 
-                let data_storage = generate_crate_data(
+                let (data_storage, witness_rustdoc_paths) = generate_crate_data(
                     config,
                     generation_settings,
                     &current_loader,
@@ -601,6 +601,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                     &selected.overrides,
                     &self.witness_generation,
                     witness_data,
+                    witness_rustdoc_paths,
                 )?;
                 config.shell_status(
                     "Finished",
@@ -813,7 +814,7 @@ fn generate_crate_data(
     generation_settings: data_generation::GenerationSettings,
     current_loader: &rustdoc_gen::StatefulRustdocGenerator<'_, rustdoc_gen::ReadyState<'_>>,
     baseline_loader: &rustdoc_gen::StatefulRustdocGenerator<'_, rustdoc_gen::ReadyState<'_>>,
-) -> Result<DataStorage, TerminalError> {
+) -> Result<(DataStorage, witness_gen::WitnessRustdocPaths), TerminalError> {
     let current_crate = current_loader.load_rustdoc(
         config,
         generation_settings,
@@ -863,7 +864,13 @@ fn generate_crate_data(
         baseline_crate
     };
 
-    Ok(DataStorage::new(current_crate, baseline_crate))
+    let (baseline_crate, baseline_path) = baseline_crate.decouple();
+    let (current_crate, current_path) = current_crate.decouple();
+
+    Ok((
+        DataStorage::new(current_crate, baseline_crate),
+        witness_gen::WitnessRustdocPaths::new(baseline_path, current_path),
+    ))
 }
 
 fn manifest_path(project_root: &Path) -> anyhow::Result<PathBuf> {
