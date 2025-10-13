@@ -28,7 +28,7 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
 
-                        current_signature: signature @filter(op: "!=", value: ["%signature"]) @output
+                        current_signature: signature @filter(op: "!=", value: ["%old_signature"]) @output
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -41,6 +41,9 @@ SemverQuery(
                             end_line @output
                         }
                     }
+                }
+            }
+        }
     }"#,
     arguments: {
         "public": "public",

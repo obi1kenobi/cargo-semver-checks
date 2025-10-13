@@ -6,6 +6,7 @@ use std::{
     io::Write,
     ops::Deref,
     path::{Path, PathBuf},
+    process::Stdio,
     sync::{Arc, Mutex},
 };
 
@@ -176,11 +177,17 @@ impl DependencyData {
     }
 }
 
-pub(crate) struct WitnessReport {
+pub(crate) struct WitnessResult<'a> {
+    query: &'a SemverQuery,
+    check_results: Vec<Result<WitnessCheckResult>>,
+}
+
+pub(crate) struct WitnessCheckResult {
     status: WitnessCheckStatus,
     logic_result: Option<WitnessLogicResult>,
 }
 
+#[derive(Debug)]
 pub(crate) enum WitnessCheckStatus {
     /// Indicates that `baseline` checked but `current` did not, which is the expected result
     BreakingChange,
@@ -335,6 +342,13 @@ fn map_to_witness_text<'query>(
                 .iter()
                 .cloned()
                 .map(|lint_result| {
+                    let (lint_result, query_logic_result) = run_extra_witness_queries(
+                        adapter,
+                        semver_query,
+                        lint_result,
+                        rustdoc_paths,
+                    )?;
+
                     let witness_text =
                         generate_witness_text(handlebars, witness_template, lint_result)
                             .with_context(|| {
@@ -426,6 +440,10 @@ fn cargo_check_witness(crate_path: &Path) -> Result<WitnessCheckStatus> {
     // FIXME: Update from static "cargo" to dynamic system in case cargo is not in $PATH or is not called `cargo`
     let exe = "cargo";
 
+    let crate_path = crate_path.join("Cargo.toml");
+
+    println!("TRY {}", crate_path.display()); // TODO: Remove this
+
     let baseline_status = std::process::Command::new(exe)
         .args([
             "check",
@@ -435,6 +453,8 @@ fn cargo_check_witness(crate_path: &Path) -> Result<WitnessCheckStatus> {
             "--features",
             "baseline",
         ])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .status()
         .with_context(|| {
             format!(
@@ -450,6 +470,8 @@ fn cargo_check_witness(crate_path: &Path) -> Result<WitnessCheckStatus> {
             "--manifest-path",
             &crate_path.display().to_string(),
         ])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .status()
         .with_context(|| {
             format!(
@@ -464,6 +486,8 @@ fn cargo_check_witness(crate_path: &Path) -> Result<WitnessCheckStatus> {
         (false, false) => WitnessCheckStatus::NeverCompiled,
         (false, true) => WitnessCheckStatus::InvertedBreak,
     };
+
+    println!("Got {check_status:?}"); // TODO: Remove this
 
     Ok(check_status)
 }
@@ -503,28 +527,18 @@ fn print_warning(config: &mut GlobalConfig, msg: impl std::fmt::Display) {
     });
 }
 
-pub(crate) fn run_witness_checks(
+pub(crate) fn run_witness_checks<'a>(
     config: &mut GlobalConfig,
     witness_data: WitnessGenerationData,
     rustdoc_paths: WitnessRustdocPaths,
     crate_name: &str,
     adapter: &VersionedRustdocAdapter,
-    lint_results: &[LintResult],
-) {
-    let dependency_data = match DependencyData::parse_input(witness_data) {
-        Ok(data) => data,
-        Err(err) => {
-            print_warning(
-                config,
-                format!(
-                    "encountered non-fatal error while creating witness program \
-                    {crate_name}: {err} (root cause: {})",
-                    err.root_cause()
-                ),
-            );
-            return;
-        }
-    };
+    lint_results: &'a [LintResult],
+) -> Result<Vec<WitnessResult<'a>>> {
+    let dependency_data = DependencyData::parse_input(witness_data).with_context(|| {
+        format!("failure creating witness, could not parse input for crate {crate_name}")
+    })?;
+
     let witness_set_dir = dependency_data
         .target_dir
         .join(format!("{}-{crate_name}", config.run_id()));
@@ -532,7 +546,7 @@ pub(crate) fn run_witness_checks(
     // Have to pull out handlebars, since &GlobalConfig cannot be shared across threads
     let handlebars = config.handlebars();
 
-    let all_lint_results = Mutex::new(vec![]);
+    let all_witness_results = Mutex::new(vec![]);
 
     lint_results.par_iter().for_each(|lint_result| {
         if let Some((semver_query, witness_texts)) = map_to_witness_text(
@@ -542,7 +556,7 @@ pub(crate) fn run_witness_checks(
             adapter,
             &rustdoc_paths,
         ) {
-            let mut witness_results = vec![];
+            let mut check_results = vec![];
 
             witness_texts
                 .into_iter()
@@ -561,17 +575,28 @@ pub(crate) fn run_witness_checks(
 
                     // TODO: Save witness results and report them
                     // Must be reported outside of the par_iter since GlobalConfig cannot be shared across threads
-                    witness_results.push(witness_result.map(|(status, logic_result)| {
-                        WitnessReport {
+                    check_results.push(witness_result.map(|(status, logic_result)| {
+                        WitnessCheckResult {
                             status,
                             logic_result,
                         }
                     }));
                 });
 
-            if let Ok(mut all_lint_results) = all_lint_results.lock() {
-                all_lint_results.push(witness_results);
+            if let Ok(mut all_witness_results) = all_witness_results.lock() {
+                all_witness_results.push(WitnessResult {
+                    query: &semver_query,
+                    check_results,
+                });
             }
         }
     });
+
+    // Discard the poisoning error in favour of an anyhow error.
+    //
+    // This can't just be done with [`Context`], since it requires that the attached error exists for `'static`,
+    // which the poisoning error does not, since it has reference to the borrowed [`SemverQuery`]s from the source.
+    all_witness_results
+        .into_inner()
+        .map_err(|_err| anyhow::anyhow!("failed to extract witness results, mutex is poisoned"))
 }

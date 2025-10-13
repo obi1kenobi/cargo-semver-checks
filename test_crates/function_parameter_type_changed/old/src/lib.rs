@@ -1,10 +1,7 @@
 #![no_std]
-// ^^^^^^^ This is used to massively decrease the generated rustdoc JSON size.
-// You can remove it if your test specifically requires `std` functionality.
-//
-// Usually, you can avoid depending on `std` by importing the same types from `core` instead:
-// `std::fmt::Debug` is the same as `core::fmt::Debug`,
-// `std::marker::PhantomData` is the same as `core::marker::PhantomData` etc.
-//
-// Similarly, unless you specifically need `String` for a test,
-// you can usually avoid it by using `&'static str` instead.
+
+// This should trigger the lint using witnesses
+pub fn function_with_parameter_changed(_: i32) {}
+
+// This should be detected by the lint, but should be ignored since it won't trigger the witness
+pub fn function_with_signature_changed(_param: ()) {}
