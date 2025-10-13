@@ -67,7 +67,6 @@ pub enum MultipleVariants {
     First { a: u8, b: u16 },
     Second { x: u32, y: u64 },
     Third(u8, u16), // tuple variant should be ignored
-    Fourth,         // unit variant should be ignored
 }
 
 // Test case: Used to derive PartialOrd but no longer does - should not trigger this lint

@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/derive_trait_impl_removed/": [
@@ -64,8 +63,8 @@ snapshot_kind: text
         String("partial_ord_enum_struct_variant_fields_reordered"),
         String("NoLongerPartialOrd"),
       ]),
-      "span_begin_line": Uint64(75),
-      "span_end_line": Uint64(77),
+      "span_begin_line": Uint64(74),
+      "span_end_line": Uint64(76),
       "span_filename": String("src/lib.rs"),
       "trait_name": String("PartialOrd"),
       "trait_path": List([

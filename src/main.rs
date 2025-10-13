@@ -557,10 +557,19 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             let project_root = if manifest.is_dir() {
                 manifest
             } else {
-                manifest
+                let parent = manifest
                     .parent()
-                    .expect("manifest path doesn't have a parent")
-                    .to_path_buf()
+                    .expect("manifest path doesn't have a parent");
+
+                // Special case: if `manifest` is `"Cargo.toml"` then
+                // Rust makes `parent` be the empty path.
+                // In that case, the argument meant `"./Cargo.toml"` so
+                // the parent is the current directory.
+                if parent.to_string_lossy().is_empty() {
+                    std::env::current_dir().expect("can't determine current directory")
+                } else {
+                    parent.to_path_buf()
+                }
             };
             (Rustdoc::from_root(&project_root), Some(project_root))
         } else {

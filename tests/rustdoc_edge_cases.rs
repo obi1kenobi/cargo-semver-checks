@@ -252,3 +252,21 @@ fn zerover_minor_flag_not_needed() {
         .assert()
         .success();
 }
+
+/// This test ensures that passing `--manifest-path Cargo.toml` doesn't cause a bug.
+/// This used to be an issue since computing the parent path of `Cargo.toml` produced
+/// an *empty string* instead of the current working directory.
+#[test]
+fn unprefixed_cargo_toml_manifest_path_refers_to_current_working_directory() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/crate_in_workspace/")
+        .args([
+            "semver-checks",
+            "check-release",
+            "--manifest-path",
+            "Cargo.toml",
+            "--baseline-root=.",
+        ])
+        .assert()
+        .success();
+}

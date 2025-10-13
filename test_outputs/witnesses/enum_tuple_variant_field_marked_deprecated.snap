@@ -2,7 +2,6 @@
 source: src/query.rs
 description: "Lint `enum_tuple_variant_field_marked_deprecated` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 expression: "&actual_witnesses"
-snapshot_kind: text
 ---
 [["./test_crates/enum_struct_variant_field_marked_deprecated/"]]
 filename = 'src/lib.rs'
@@ -42,7 +41,7 @@ match value {
 
 [["./test_crates/enum_tuple_variant_field_marked_deprecated/"]]
 filename = 'src/lib.rs'
-begin_line = 57
+begin_line = 54
 hint = '''
 match value {
     enum_tuple_variant_field_marked_deprecated::EnumWithHiddenVariant::NormalTuple (witness, _) => (),

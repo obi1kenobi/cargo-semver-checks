@@ -29,6 +29,7 @@ jobs:
       - lint
       - rust-tests
       - cargo-check-test-crates
+      - check-test-crate-lockfiles
       - cross-version-caching
       - cross-feature-caching
       - run-on-rust-libp2p
@@ -53,6 +54,7 @@ jobs:
         run: |
           echo "lint: ${{ needs.lint.result }}"
           echo "rust-tests: ${{ needs.rust-tests.result }}"
+          echo "check-test-crate-lockfiles: ${{ needs.check-test-crate-lockfiles.result }}"
           echo "cross-version-caching: ${{ needs.cross-version-caching.result }}"
           echo "cross-feature-caching: ${{ needs.cross-feature-caching.result }}"
           echo "run-on-rust-libp2p: ${{ needs.run-on-rust-libp2p.result }}"
@@ -80,6 +82,8 @@ jobs:
       - if: ${{ needs.lint.result != 'success' }}
         run: exit 1
       - if: ${{ needs.rust-tests.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.check-test-crate-lockfiles.result != 'success' }}
         run: exit 1
       - if: ${{ needs.cross-version-caching.result != 'success' }}
         run: exit 1
@@ -206,6 +210,28 @@ jobs:
             -type f -name 'Cargo.toml' \
             -print0 | \
           xargs -0 -n 1 cargo check --manifest-path
+
+  check-test-crate-lockfiles:
+    name: Ensure test crates have no Cargo.lock
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      - name: Ensure no Cargo.lock files are checked in test crates
+        working-directory: semver
+        run: |
+          files="$(git ls-files 'test_crates/**/Cargo.lock')"
+          if [ -n "$files" ]; then
+            echo "The following Cargo.lock files are present in test crates:"
+            echo "$files"
+            echo
+            echo "Please remove these files from version control."
+            exit 1
+          fi
 
   rust-tests:
     name: Run tests

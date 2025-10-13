@@ -84,5 +84,4 @@ pub enum MultiVariantEnum {
     First { b: u16, a: u8 },
     Second { y: u64, x: u32 },
     Third(u16, u8), // tuple variant reordered but should be ignored
-    Fourth,         // unit variant unchanged
 }
