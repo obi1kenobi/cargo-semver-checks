@@ -650,7 +650,13 @@ mod tests {
 
             let old_dir = path.join("old");
             let new_dir = path.join("new");
-            if !(old_dir.is_dir() && new_dir.is_dir()) {
+            let old_dir_manifest = old_dir.join("Cargo.toml");
+            let new_dir_manifest = new_dir.join("Cargo.toml");
+            if !(old_dir.is_dir()
+                && new_dir.is_dir()
+                && old_dir_manifest.is_file()
+                && new_dir_manifest.is_file())
+            {
                 continue;
             }
 
