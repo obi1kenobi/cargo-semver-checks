@@ -87,6 +87,30 @@ impl From<ReleaseType> for ActualSemverUpdate {
     }
 }
 
+/// Kind of logic to use for this lints
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Default)]
+pub enum LintLogic {
+    /// Use the result of the [`SemverQuery`] to determine success.
+    #[default]
+    UseStandard,
+
+    /// Use the result of the [`SemverQuery`] to run the [`Witness`]. The result of the witness
+    /// check is used to determine success.
+    UseWitness(WitnessLogic),
+}
+
+impl LintLogic {
+    pub fn is_standard(&self) -> bool {
+        self == &Self::UseStandard
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub enum WitnessLogic {
+    /// Expects a function signature outputted on `old_signature`
+    ExtractFuncArgs,
+}
+
 /// A query that can be executed on a pair of rustdoc output files,
 /// returning instances of a particular kind of semver violation.
 #[non_exhaustive]
@@ -128,6 +152,10 @@ pub struct SemverQuery {
     /// more information.
     #[serde(default)]
     pub witness: Option<Witness>,
+
+    // Optional specification of how to run the lint. See the [`LintLogic`] enum for more information.
+    #[serde(default)]
+    pub lint_logic: LintLogic,
 }
 
 impl SemverQuery {
@@ -377,8 +405,8 @@ mod tests {
     };
 
     use crate::query::{
-        InheritedValue, LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate,
-        SemverQuery,
+        InheritedValue, LintLevel, LintLogic, OverrideMap, OverrideStack, QueryOverride,
+        RequiredSemverUpdate, SemverQuery,
     };
     use crate::templating::make_handlebars_registry;
 
@@ -1209,6 +1237,7 @@ mod tests {
             error_message: String::new(),
             per_result_error_template: None,
             witness: None,
+            lint_logic: LintLogic::UseStandard,
         }
     }
 
@@ -1672,6 +1701,7 @@ add_lints!(
     function_now_doc_hidden,
     function_now_returns_unit,
     function_parameter_count_changed,
+    function_parameter_type_changed,
     function_requires_different_const_generic_params,
     function_requires_different_generic_type_params,
     function_unsafe_added,

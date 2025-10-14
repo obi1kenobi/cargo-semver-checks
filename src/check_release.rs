@@ -242,6 +242,7 @@ fn print_triggered_lint(
     Ok(())
 }
 
+#[expect(clippy::too_many_arguments)]
 pub(super) fn run_check_release(
     config: &mut GlobalConfig,
     data_storage: &DataStorage,
@@ -250,6 +251,7 @@ pub(super) fn run_check_release(
     overrides: &OverrideStack,
     witness_generation: &WitnessGeneration,
     witness_data: witness_gen::WitnessGenerationData,
+    witness_rustdoc_paths: witness_gen::WitnessRustdocPaths,
 ) -> anyhow::Result<CrateReport> {
     let current_version = data_storage.current_crate().crate_version();
     let baseline_version = data_storage.baseline_crate().crate_version();
@@ -360,16 +362,26 @@ pub(super) fn run_check_release(
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
 
-    if witness_generation.generate_witnesses {
-        witness_gen::run_witness_checks(config, witness_data, crate_name, &adapter, &lint_results);
-    }
+    let witness_results = if witness_generation.generate_witnesses {
+        let witness_results = witness_gen::run_witness_checks(
+            config,
+            witness_data,
+            witness_rustdoc_paths,
+            crate_name,
+            &adapter,
+            &lint_results,
+        );
+        Some(witness_results)
+    } else {
+        None
+    };
 
     let checks_duration = checks_start_instant.elapsed();
 
     let mut required_bumps = Bumps { major: 0, minor: 0 };
     let mut suggested_bumps = Bumps { major: 0, minor: 0 };
     for result in &lint_results {
-        if !result.query_results.is_empty() {
+        if !result.query_results.is_empty() && result.semver_query.lint_logic.is_standard() {
             let bump_stats = match result.effective_lint_level {
                 LintLevel::Deny => &mut required_bumps,
                 LintLevel::Warn => &mut suggested_bumps,
@@ -415,16 +427,19 @@ fn print_report(
                     RequiredSemverUpdate::Minor => "minor",
                 };
 
-                let (status, status_color) =
-                    match (result.query_results.is_empty(), result.effective_lint_level) {
-                        (true, _) => ("PASS", AnsiColor::Green),
-                        (false, LintLevel::Deny) => ("FAIL", AnsiColor::Red),
-                        (false, LintLevel::Warn) => ("WARN", AnsiColor::Yellow),
-                        (false, LintLevel::Allow) => unreachable!(
-                            "`LintLevel::Allow` lint was unexpectedly not skipped: {:?}",
-                            result.semver_query
-                        ),
-                    };
+                let (status, status_color) = match (
+                    result.query_results.is_empty()
+                        || !result.semver_query.lint_logic.is_standard(),
+                    result.effective_lint_level,
+                ) {
+                    (true, _) => ("PASS", AnsiColor::Green),
+                    (false, LintLevel::Deny) => ("FAIL", AnsiColor::Red),
+                    (false, LintLevel::Warn) => ("WARN", AnsiColor::Yellow),
+                    (false, LintLevel::Allow) => unreachable!(
+                        "`LintLevel::Allow` lint was unexpectedly not skipped: {:?}",
+                        result.semver_query
+                    ),
+                };
 
                 writeln!(
                     config.stderr(),
@@ -442,7 +457,7 @@ fn print_report(
             })
             .expect("print failed");
 
-        if !result.query_results.is_empty() {
+        if !result.query_results.is_empty() && result.semver_query.lint_logic.is_standard() {
             match result.effective_lint_level {
                 LintLevel::Deny => results_with_errors.push(result),
                 LintLevel::Warn => results_with_warnings.push(result),
