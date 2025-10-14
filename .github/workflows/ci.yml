@@ -214,7 +214,7 @@ jobs:
             -path 'test_crates/broken_rustdoc/*' -prune -o \
             -type f -name 'Cargo.toml' \
             -print0 | \
-          xargs -0 -n1 -I{} sh -c 'cd "$(dirname "$1")" && cargo check || exit 255' _ "{}"
+          xargs -0 -n1 -I{} sh -c 'set -x; cd "$(dirname "$1")" && cargo check || exit 255' _ "{}"
 
   check-test-crate-lockfiles:
     name: Ensure test crates have no Cargo.lock
