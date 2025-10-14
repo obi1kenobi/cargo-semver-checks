@@ -1762,41 +1762,41 @@ jobs:
 
           # Crate-level config: workspace-level invocation should fail because config lives in the crate.
           echo "[$PLATFORM] crate-level-config workspace manifest from repo root with --workspace (expected failure)"
-          run_expect_failure "workspaces/crate-level-config" \
+          run_expect_failure "workspaces/crate-level-check-both-check-and-doc-pass" \
             --manifest-path Cargo.toml \
             --baseline-root . \
             --workspace
           echo "[$PLATFORM] crate-level-config workspace manifest from repo root without --workspace (expected failure)"
-          run_expect_failure "workspaces/crate-level-config" \
+          run_expect_failure "workspaces/crate-level-check-both-check-and-doc-pass" \
             --manifest-path Cargo.toml \
             --baseline-root .
 
           # Crate-level config: even without --manifest-path, running from workspace root should still fail.
           echo "[$PLATFORM] crate-level-config workspace root implicit manifest with --workspace (expected failure)"
-          run_expect_failure "workspaces/crate-level-config" \
+          run_expect_failure "workspaces/crate-level-check-both-check-and-doc-pass" \
             --baseline-root . \
             --workspace
           echo "[$PLATFORM] crate-level-config workspace root implicit manifest without --workspace (expected failure)"
-          run_expect_failure "workspaces/crate-level-config" \
+          run_expect_failure "workspaces/crate-level-check-both-check-and-doc-pass" \
             --baseline-root .
 
           # Crate-level config: running inside the crate should succeed without the workspace wrapper.
           echo "[$PLATFORM] crate-level-config crate dir implicit manifest with --workspace"
-          run_expect_success "workspaces/crate-level-config/test-pkg" \
+          run_expect_success "workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
             --baseline-root . \
             --workspace
           echo "[$PLATFORM] crate-level-config crate dir implicit manifest without --workspace"
-          run_expect_success "workspaces/crate-level-config/test-pkg" \
+          run_expect_success "workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
             --baseline-root .
 
           # Crate-level config: from the crate we can target the workspace manifest and still succeed.
           echo "[$PLATFORM] crate-level-config crate dir targeting workspace manifest with --workspace"
-          run_expect_success "workspaces/crate-level-config/test-pkg" \
+          run_expect_success "workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
             --manifest-path ../Cargo.toml \
             --baseline-root ../ \
             --workspace
           echo "[$PLATFORM] crate-level-config crate dir targeting workspace manifest without --workspace"
-          run_expect_success "workspaces/crate-level-config/test-pkg" \
+          run_expect_success "workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
             --manifest-path ../Cargo.toml \
             --baseline-root ../
 
@@ -1966,41 +1966,41 @@ jobs:
 
           # Crate-level config: workspace-level invocation should fail because config lives in the crate.
           echo "[$PLATFORM] crate-level-config workspace manifest from repo root with --workspace (expected failure)"
-          run_expect_failure "workspaces/crate-level-config" \
+          run_expect_failure "workspaces/crate-level-check-both-check-and-doc-pass" \
             --manifest-path Cargo.toml \
             --baseline-root . \
             --workspace
           echo "[$PLATFORM] crate-level-config workspace manifest from repo root without --workspace (expected failure)"
-          run_expect_failure "workspaces/crate-level-config" \
+          run_expect_failure "workspaces/crate-level-check-both-check-and-doc-pass" \
             --manifest-path Cargo.toml \
             --baseline-root .
 
           # Crate-level config: even without --manifest-path, running from workspace root should still fail.
           echo "[$PLATFORM] crate-level-config workspace root implicit manifest with --workspace (expected failure)"
-          run_expect_failure "workspaces/crate-level-config" \
+          run_expect_failure "workspaces/crate-level-check-both-check-and-doc-pass" \
             --baseline-root . \
             --workspace
           echo "[$PLATFORM] crate-level-config workspace root implicit manifest without --workspace (expected failure)"
-          run_expect_failure "workspaces/crate-level-config" \
+          run_expect_failure "workspaces/crate-level-check-both-check-and-doc-pass" \
             --baseline-root .
 
           # Crate-level config: running inside the crate should succeed without the workspace wrapper.
           echo "[$PLATFORM] crate-level-config crate dir implicit manifest with --workspace"
-          run_expect_success "workspaces/crate-level-config/test-pkg" \
+          run_expect_success "workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
             --baseline-root . \
             --workspace
           echo "[$PLATFORM] crate-level-config crate dir implicit manifest without --workspace"
-          run_expect_success "workspaces/crate-level-config/test-pkg" \
+          run_expect_success "workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
             --baseline-root .
 
           # Crate-level config: from the crate we can target the workspace manifest and still succeed.
           echo "[$PLATFORM] crate-level-config crate dir targeting workspace manifest with --workspace"
-          run_expect_success "workspaces/crate-level-config/test-pkg" \
+          run_expect_success "workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
             --manifest-path ../Cargo.toml \
             --baseline-root ../ \
             --workspace
           echo "[$PLATFORM] crate-level-config crate dir targeting workspace manifest without --workspace"
-          run_expect_success "workspaces/crate-level-config/test-pkg" \
+          run_expect_success "workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
             --manifest-path ../Cargo.toml \
             --baseline-root ../
 
