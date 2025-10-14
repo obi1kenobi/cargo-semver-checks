@@ -202,6 +202,12 @@ jobs:
         # Exclude test crates that intentionally do not pass `cargo check`
         # in order to serve their test purpose.
         #
+        # Also exclude test crates `enum_repr_int_added`, `enum_repr_int_changed`,
+        # `enum_repr_int_removed`, and `repr_c_removed` since the "conflicting representation hints"
+        # warning seems to have become a hard error on 1.90 stable.
+        # When 1.90 is the oldest Rust we support, remove the problematic code and
+        # remove the exclusion of those crates from this list.
+        #
         # `xargs` stops immediately on exit 255, to make the problematic crate easier to spot.
         # We `cd` into the directory before running `cargo`, because crates like
         # `test_crates/crate_level_config_in_workspace/test-pkg/Cargo.toml` only pass `cargo check`
@@ -211,10 +217,14 @@ jobs:
             -path 'test_crates/manifest_tests/workspace_baseline_compile_error/*' -prune -o \
             -path 'test_crates/manifest_tests/workspace_baseline_conditional_compile_error/*' -prune -o \
             -path 'test_crates/feature_flags_validation/*' -prune -o \
+            -path 'test_crates/enum_repr_int_added/*' -prune -o \
+            -path 'test_crates/enum_repr_int_changed/*' -prune -o \
+            -path 'test_crates/enum_repr_int_removed/*' -prune -o \
+            -path 'test_crates/repr_c_removed/*' -prune -o \
             -path 'test_crates/broken_rustdoc/*' -prune -o \
             -type f -name 'Cargo.toml' \
             -print0 | \
-          xargs -0 -n1 -I{} sh -c 'set -x; cd "$(dirname "$1")" && cargo check || exit 255' _ "{}"
+          xargs -0 -n1 -I{} sh -c 'set -x; cd "$(dirname "$1")" && cargo +nightly check || exit 255' _ "{}"
 
   check-test-crate-lockfiles:
     name: Ensure test crates have no Cargo.lock
