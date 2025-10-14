@@ -1670,11 +1670,13 @@ jobs:
               cd "$dir"
               local log
               log="$(mktemp)"
+              set +e
               if "$BIN" semver-checks check-release "$@" >"$log" 2>&1; then
                 echo "Expected failure but command succeeded." >&2
                 cat "$log"
                 exit 1
               fi
+              set -e
               grep -F 'error: could not compile `test-pkg`' "$log"
               rm "$log"
             )
@@ -1874,11 +1876,13 @@ jobs:
               cd "$dir"
               local log
               log="$(mktemp)"
+              set +e
               if "$BIN" semver-checks check-release "$@" >"$log" 2>&1; then
                 echo "Expected failure but command succeeded." >&2
                 cat "$log"
                 exit 1
               fi
+              set -e
               grep -F 'error: could not compile `test-pkg`' "$log"
               rm "$log"
             )
