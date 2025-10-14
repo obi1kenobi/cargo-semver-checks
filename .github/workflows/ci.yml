@@ -1628,7 +1628,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'obi1kenobi/c-s-c-testcase-cargo-config-toml'
-          ref: '1c852b2f81dcc1cf13bc1d362c945628b17b25ba'
+          ref: '0761ce478e49153932e97e806c27f91883422ca4'
           path: 'semver'
 
       - name: Install rust
@@ -1660,6 +1660,7 @@ jobs:
             shift
             (
               cd "$dir"
+              pwd
               "$BIN" semver-checks check-release "$@"
             )
           }
@@ -1838,7 +1839,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'obi1kenobi/c-s-c-testcase-cargo-config-toml'
-          ref: '1c852b2f81dcc1cf13bc1d362c945628b17b25ba'
+          ref: '0761ce478e49153932e97e806c27f91883422ca4'
           path: 'semver'
 
       - name: Install rust
