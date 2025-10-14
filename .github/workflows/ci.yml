@@ -42,6 +42,7 @@ jobs:
       - run-on-bevy-gltf
       - run-on-clap
       - run-on-sqllogictest
+      - run-on-cargo-config-linux
       - run-on-ref-slice-fork
       - run-on-ref-slice-fork-windows
       - run-on-tokio-explicit
@@ -67,6 +68,7 @@ jobs:
           echo "run-on-bevy-gltf: ${{ needs.run-on-bevy-gltf.result }}"
           echo "run-on-clap: ${{ needs.run-on-clap.result }}"
           echo "run-on-sqllogictest: ${{ needs.run-on-sqllogictest.result }}"
+          echo "run-on-cargo-config-linux: ${{ needs.run-on-cargo-config-linux.result }}"
           echo "run-on-ref-slice-fork: ${{ needs.run-on-ref-slice-fork.result }}"
           echo "run-on-ref-slice-fork-windows: ${{ needs.run-on-ref-slice-fork-windows.result }}"
           echo "run-on-tokio-explicit: ${{ needs.run-on-tokio-explicit.result }}"
@@ -108,6 +110,8 @@ jobs:
       - if: ${{ needs.run-on-clap.result != 'success' }}
         run: exit 1
       - if: ${{ needs.run-on-sqllogictest.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-cargo-config-linux.result != 'success' }}
         run: exit 1
       - if: ${{ needs.run-on-ref-slice-fork.result != 'success' }}
         run: exit 1
@@ -201,15 +205,30 @@ jobs:
           RUSTFLAGS: -A dead_code -A deprecated -A unused -A private_bounds -A conflicting_repr_hints -A non_snake_case -A non_upper_case_globals
         # Exclude test crates that intentionally do not pass `cargo check`
         # in order to serve their test purpose.
+        #
+        # Also exclude test crates `enum_repr_int_added`, `enum_repr_int_changed`,
+        # `enum_repr_int_removed`, and `repr_c_removed` since the "conflicting representation hints"
+        # warning seems to have become a hard error on 1.90 stable.
+        # When 1.90 is the oldest Rust we support, remove the problematic code and
+        # remove the exclusion of those crates from this list.
+        #
+        # `xargs` stops immediately on exit 255, to make the problematic crate easier to spot.
+        # We `cd` into the directory before running `cargo`, because crates like
+        # `test_crates/crate_level_config_in_workspace/test-pkg/Cargo.toml` only pass `cargo check`
+        # when that command is run from inside their directory due to their `.cargo/config.toml`.
         run: |
           find test_crates/ \
             -path 'test_crates/manifest_tests/workspace_baseline_compile_error/*' -prune -o \
             -path 'test_crates/manifest_tests/workspace_baseline_conditional_compile_error/*' -prune -o \
             -path 'test_crates/feature_flags_validation/*' -prune -o \
+            -path 'test_crates/enum_repr_int_added/*' -prune -o \
+            -path 'test_crates/enum_repr_int_changed/*' -prune -o \
+            -path 'test_crates/enum_repr_int_removed/*' -prune -o \
+            -path 'test_crates/repr_c_removed/*' -prune -o \
             -path 'test_crates/broken_rustdoc/*' -prune -o \
             -type f -name 'Cargo.toml' \
             -print0 | \
-          xargs -0 -n 1 cargo check --manifest-path
+          xargs -0 -n1 -I{} sh -c 'set -x; cd "$(dirname "$1")" && cargo +nightly check || exit 255' _ "{}"
 
   check-test-crate-lockfiles:
     name: Ensure test crates have no Cargo.lock
@@ -1591,6 +1610,218 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+  run-on-cargo-config-linux:
+    # Validate that cargo-semver-checks respects Cargo configuration search order on Linux when
+    # provided with an explicit baseline path.
+    name: 'Semver: cargo config lookup (Linux)'
+    runs-on: ubuntu-latest
+    needs:
+      - build-binary
+    steps:
+      - name: Checkout cargo-config testcases
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          repository: 'obi1kenobi/c-s-c-testcase-cargo-config-toml'
+          ref: '0761ce478e49153932e97e806c27f91883422ca4'
+          path: 'semver'
+
+      - name: Install rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
+
+      - name: Download binary
+        uses: actions/download-artifact@v5
+        with:
+          name: cargo-semver-checks-linux
+          path: bins/
+
+      - name: Make binary executable
+        run: chmod +x bins/cargo-semver-checks
+
+      - name: Exercise cargo config combinations
+        run: |
+          set -euxo pipefail
+          BIN="$(pwd)/bins/cargo-semver-checks"
+
+          cd semver
+          TEST_ROOT="$(pwd)"
+          PLATFORM="linux"
+
+          run_expect_success() {
+            local dir="$1"
+            shift
+            (
+              cd "$dir"
+              pwd
+              "$BIN" semver-checks check-release "$@"
+            )
+          }
+
+          run_expect_failure() {
+            local dir="$1"
+            shift
+            (
+              cd "$dir"
+              local log
+              log="$(mktemp)"
+              set +e
+              if "$BIN" semver-checks check-release "$@" >"$log" 2>&1; then
+                echo "Expected failure but command succeeded." >&2
+                cat "$log"
+                exit 1
+              fi
+              set -e
+              cat "$log"
+              grep -F 'could not document `test-pkg`' "$log"
+              rm "$log"
+            )
+          }
+
+          # Higher-level config: workspace manifest inherits the config in the parent directory.
+          echo "[$PLATFORM] higher-level-config workspace manifest from repo root with --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/higher-level-config" \
+            --manifest-path workspace/Cargo.toml \
+            --baseline-root workspace/ \
+            --workspace
+          echo "[$PLATFORM] higher-level-config workspace manifest from repo root without --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/higher-level-config" \
+            --manifest-path workspace/Cargo.toml \
+            --baseline-root workspace/
+
+          # Higher-level config: member manifest also succeeds regardless of --workspace.
+          echo "[$PLATFORM] higher-level-config member manifest from repo root with --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/higher-level-config" \
+            --manifest-path workspace/test-pkg/Cargo.toml \
+            --baseline-root workspace/test-pkg/ \
+            --workspace
+          echo "[$PLATFORM] higher-level-config member manifest from repo root without --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/higher-level-config" \
+            --manifest-path workspace/test-pkg/Cargo.toml \
+            --baseline-root workspace/test-pkg/
+
+          # Higher-level config: from the workspace root the implicit manifest keeps working.
+          echo "[$PLATFORM] higher-level-config workspace root implicit manifest with --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/higher-level-config/workspace" \
+            --baseline-root . \
+            --workspace
+          echo "[$PLATFORM] higher-level-config workspace root implicit manifest without --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/higher-level-config/workspace" \
+            --baseline-root .
+
+          # Higher-level config: the crate directory still observes inherited config.
+          echo "[$PLATFORM] higher-level-config crate dir with inherited config and --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/higher-level-config/workspace/test-pkg" \
+            --baseline-root . \
+            --workspace
+          echo "[$PLATFORM] higher-level-config crate dir with inherited config without --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/higher-level-config/workspace/test-pkg" \
+            --baseline-root .
+
+          # Workspace-level config: explicit workspace manifest picks up config at workspace root.
+          echo "[$PLATFORM] workspace-level-config workspace manifest from repo root with --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/workspace-level-config" \
+            --manifest-path Cargo.toml \
+            --baseline-root . \
+            --workspace
+          echo "[$PLATFORM] workspace-level-config workspace manifest from repo root without --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/workspace-level-config" \
+            --manifest-path Cargo.toml \
+            --baseline-root .
+
+          # Workspace-level config: running from the workspace root without --manifest-path still works.
+          echo "[$PLATFORM] workspace-level-config workspace root implicit manifest with --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/workspace-level-config" \
+            --baseline-root . \
+            --workspace
+          echo "[$PLATFORM] workspace-level-config workspace root implicit manifest without --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/workspace-level-config" \
+            --baseline-root .
+
+          # Workspace-level config: the crate directory should succeed without an explicit manifest.
+          echo "[$PLATFORM] workspace-level-config crate dir implicit manifest with --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/workspace-level-config/test-pkg" \
+            --baseline-root . \
+            --workspace
+          echo "[$PLATFORM] workspace-level-config crate dir implicit manifest without --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/workspace-level-config/test-pkg" \
+            --baseline-root .
+
+          # Workspace-level config: pointing back to the workspace manifest from inside the crate should work.
+          echo "[$PLATFORM] workspace-level-config crate dir targeting workspace manifest with --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/workspace-level-config/test-pkg" \
+            --manifest-path ../Cargo.toml \
+            --baseline-root ../ \
+            --workspace
+          echo "[$PLATFORM] workspace-level-config crate dir targeting workspace manifest without --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/workspace-level-config/test-pkg" \
+            --manifest-path ../Cargo.toml \
+            --baseline-root ../
+
+          # Crate-level config: workspace-level invocation should fail because config lives in the crate.
+          echo "[$PLATFORM] crate-level-config workspace manifest from repo root with --workspace (expected failure)"
+          run_expect_failure "$TEST_ROOT/workspaces/crate-level-check-both-check-and-doc-pass" \
+            --manifest-path Cargo.toml \
+            --baseline-root . \
+            --workspace
+          echo "[$PLATFORM] crate-level-config workspace manifest from repo root without --workspace (expected failure)"
+          run_expect_failure "$TEST_ROOT/workspaces/crate-level-check-both-check-and-doc-pass" \
+            --manifest-path Cargo.toml \
+            --baseline-root .
+
+          # Crate-level config: even without --manifest-path, running from workspace root should still fail.
+          echo "[$PLATFORM] crate-level-config workspace root implicit manifest with --workspace (expected failure)"
+          run_expect_failure "$TEST_ROOT/workspaces/crate-level-check-both-check-and-doc-pass" \
+            --baseline-root . \
+            --workspace
+          echo "[$PLATFORM] crate-level-config workspace root implicit manifest without --workspace (expected failure)"
+          run_expect_failure "$TEST_ROOT/workspaces/crate-level-check-both-check-and-doc-pass" \
+            --baseline-root .
+
+          # Crate-level config: running inside the crate should succeed without the workspace wrapper.
+          echo "[$PLATFORM] crate-level-config crate dir implicit manifest with --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
+            --baseline-root . \
+            --workspace
+          echo "[$PLATFORM] crate-level-config crate dir implicit manifest without --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
+            --baseline-root .
+
+          # Crate-level config: from the crate we can target the workspace manifest and still succeed.
+          echo "[$PLATFORM] crate-level-config crate dir targeting workspace manifest with --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
+            --manifest-path ../Cargo.toml \
+            --baseline-root ../ \
+            --workspace
+          echo "[$PLATFORM] crate-level-config crate dir targeting workspace manifest without --workspace"
+          run_expect_success "$TEST_ROOT/workspaces/crate-level-check-both-check-and-doc-pass/test-pkg" \
+            --manifest-path ../Cargo.toml \
+            --baseline-root ../
+
+          # Repository root: higher-level config workspace fails because the crate misses cfg flags when run from here.
+          echo "[$PLATFORM] repo root targeting higher-level-config workspace manifest with --workspace (expected failure)"
+          run_expect_failure "$TEST_ROOT" \
+            --manifest-path workspaces/higher-level-config/workspace/Cargo.toml \
+            --baseline-root workspaces/higher-level-config/workspace/ \
+            --workspace
+          echo "[$PLATFORM] repo root targeting higher-level-config workspace manifest without --workspace (expected failure)"
+          run_expect_failure "$TEST_ROOT" \
+            --manifest-path workspaces/higher-level-config/workspace/Cargo.toml \
+            --baseline-root workspaces/higher-level-config/workspace/
+
+          # Repository root: workspace-level config also fails when invoked above the config directory.
+          echo "[$PLATFORM] repo root targeting workspace-level-config manifest with --workspace (expected failure)"
+          run_expect_failure "$TEST_ROOT" \
+            --manifest-path workspaces/workspace-level-config/Cargo.toml \
+            --baseline-root workspaces/workspace-level-config/ \
+            --workspace
+          echo "[$PLATFORM] repo root targeting workspace-level-config manifest without --workspace (expected failure)"
+          run_expect_failure "$TEST_ROOT" \
+            --manifest-path workspaces/workspace-level-config/Cargo.toml \
+            --baseline-root workspaces/workspace-level-config/
 
   run-on-ref-slice-fork:
     # Simulate testing an as-yet-unreleased crate version without an explicit baseline,
