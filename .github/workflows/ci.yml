@@ -1628,7 +1628,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'obi1kenobi/c-s-c-testcase-cargo-config-toml'
-          ref: 'e087e9fa508d9d21ed91b936553bccb32df0c5ed'
+          ref: '1c852b2f81dcc1cf13bc1d362c945628b17b25ba'
           path: 'semver'
 
       - name: Install rust
@@ -1834,7 +1834,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'obi1kenobi/c-s-c-testcase-cargo-config-toml'
-          ref: 'e087e9fa508d9d21ed91b936553bccb32df0c5ed'
+          ref: '1c852b2f81dcc1cf13bc1d362c945628b17b25ba'
           path: 'semver'
 
       - name: Install rust
