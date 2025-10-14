@@ -201,6 +201,11 @@ jobs:
           RUSTFLAGS: -A dead_code -A deprecated -A unused -A private_bounds -A conflicting_repr_hints -A non_snake_case -A non_upper_case_globals
         # Exclude test crates that intentionally do not pass `cargo check`
         # in order to serve their test purpose.
+        #
+        # `xargs` stops immediately on exit 255, to make the problematic crate easier to spot.
+        # We `cd` into the directory before running `cargo`, because crates like
+        # `test_crates/crate_level_config_in_workspace/test-pkg/Cargo.toml` only pass `cargo check`
+        # when that command is run from inside their directory due to their `.cargo/config.toml`.
         run: |
           find test_crates/ \
             -path 'test_crates/manifest_tests/workspace_baseline_compile_error/*' -prune -o \
@@ -209,7 +214,7 @@ jobs:
             -path 'test_crates/broken_rustdoc/*' -prune -o \
             -type f -name 'Cargo.toml' \
             -print0 | \
-          xargs -0 -n 1 cargo check --manifest-path
+          xargs -0 -n1 -I{} sh -c 'cd "$(dirname "$1")" && cargo check || exit 255' _ "{}"
 
   check-test-crate-lockfiles:
     name: Ensure test crates have no Cargo.lock
