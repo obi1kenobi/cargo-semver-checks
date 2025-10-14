@@ -609,7 +609,10 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             } else {
                 // Either there's a manually-set baseline root path, or fall through
                 // to the default behavior.
-                value.baseline_root.map(lenient_baseline_root).map(Rustdoc::from_root)
+                value
+                    .baseline_root
+                    .map(lenient_baseline_root)
+                    .map(Rustdoc::from_root)
             }
         };
         if let Some(baseline) = custom_baseline {
@@ -665,7 +668,9 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
 ///
 /// We know what they meant, so apply it.
 fn lenient_baseline_root(baseline_root: PathBuf) -> PathBuf {
-    if baseline_root.is_file() && baseline_root.file_name().and_then(OsStr::to_str) == Some("Cargo.toml") {
+    if baseline_root.is_file()
+        && baseline_root.file_name().and_then(OsStr::to_str) == Some("Cargo.toml")
+    {
         let parent = baseline_root.parent().expect("file doesn't have a parent");
         // Special case: if `baseline_root` is `"Cargo.toml"` then
         // Rust makes `parent` be the empty path.
