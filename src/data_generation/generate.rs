@@ -177,7 +177,7 @@ fn get_default_build_target_triple(config: &cargo_config2::Config) -> anyhow::Re
 
     // `build.target` from (merged) cargo config following its precedence rules is next.
     //
-    // Cargo support multiple build targets, but `cargo-semver-checks` does not.
+    // Cargo supports multiple build targets, but `cargo-semver-checks` does not.
     // If the cargo config sets multiple targets, we only look at the first one.
     // Tracking issue: https://github.com/obi1kenobi/cargo-semver-checks/issues/1470
     if let Some(first_build_target) = config
