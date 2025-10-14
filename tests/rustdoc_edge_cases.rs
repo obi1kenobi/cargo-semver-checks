@@ -279,11 +279,7 @@ fn crate_level_config_in_workspace() {
     // Running from its directory will result in cargo finding that file and using the config.
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/crate_level_config_in_workspace/test-pkg")
-        .args([
-            "semver-checks",
-            "check-release",
-            "--baseline-root=.",
-        ])
+        .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
         .success();
 
@@ -294,11 +290,7 @@ fn crate_level_config_in_workspace() {
     // This is consistent with `cargo check` and `cargo doc` on the workspace.
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/crate_level_config_in_workspace/")
-        .args([
-            "semver-checks",
-            "check-release",
-            "--baseline-root=.",
-        ])
+        .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
         .failure();
 }
