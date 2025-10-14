@@ -271,6 +271,43 @@ fn unprefixed_cargo_toml_manifest_path_refers_to_current_working_directory() {
         .success();
 }
 
+/// This test ensures that passing `--baseline-root ./path/Cargo.toml` doesn't cause a bug.
+/// Since `--manifest-path` takes a path, users may assume `--baseline-root` does as well.
+/// We strip `Cargo.toml` from the tail of the path if present.
+#[test]
+fn baseline_root_cargo_toml_path() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/")
+        .args([
+            "semver-checks",
+            "check-release",
+            "--manifest-path",
+            "crate_in_workspace/Cargo.toml",
+            "--baseline-root=crate_in_workspace/Cargo.toml",
+        ])
+        .assert()
+        .success();
+}
+
+/// This test ensures that passing `--baseline-root Cargo.toml` doesn't cause a bug.
+/// Since `--manifest-path` takes a path, users may assume `--baseline-root` does as well.
+/// We strip `Cargo.toml` from the tail of the path if present.
+/// When `Cargo.toml` is the only path component, we implicitly assume `.` is left after stripping.
+#[test]
+fn baseline_root_bare_cargo_toml_path() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/crate_in_workspace/")
+        .args([
+            "semver-checks",
+            "check-release",
+            "--manifest-path",
+            "Cargo.toml",
+            "--baseline-root=Cargo.toml",
+        ])
+        .assert()
+        .success();
+}
+
 /// Ensure that we can semver-check projects that won't compile without their `.cargo/config.toml`
 /// configuration, which e.g. might set required `--cfg` items.
 #[test]
@@ -279,11 +316,7 @@ fn crate_level_config_in_workspace() {
     // Running from its directory will result in cargo finding that file and using the config.
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/crate_level_config_in_workspace/test-pkg")
-        .args([
-            "semver-checks",
-            "check-release",
-            "--baseline-root=.",
-        ])
+        .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
         .success();
 
@@ -294,11 +327,7 @@ fn crate_level_config_in_workspace() {
     // This is consistent with `cargo check` and `cargo doc` on the workspace.
     let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
     cmd.current_dir("test_crates/crate_level_config_in_workspace/")
-        .args([
-            "semver-checks",
-            "check-release",
-            "--baseline-root=.",
-        ])
+        .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
         .failure();
 }
