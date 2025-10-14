@@ -1677,6 +1677,7 @@ jobs:
                 exit 1
               fi
               set -e
+              cat "$log"
               grep -F 'error: could not compile `test-pkg`' "$log"
               rm "$log"
             )
@@ -1883,6 +1884,7 @@ jobs:
                 exit 1
               fi
               set -e
+              cat "$log"
               grep -F 'error: could not compile `test-pkg`' "$log"
               rm "$log"
             )
