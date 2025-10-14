@@ -1678,7 +1678,7 @@ jobs:
               fi
               set -e
               cat "$log"
-              grep -F 'error: could not compile `test-pkg`' "$log"
+              grep -F 'error: could not document `test-pkg`' "$log"
               rm "$log"
             )
           }
@@ -1885,7 +1885,7 @@ jobs:
               fi
               set -e
               cat "$log"
-              grep -F 'error: could not compile `test-pkg`' "$log"
+              grep -F 'error: could not document `test-pkg`' "$log"
               rm "$log"
             )
           }
