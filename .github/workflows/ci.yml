@@ -1648,7 +1648,7 @@ jobs:
 
       - name: Exercise cargo config combinations
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           BIN="$(pwd)/bins/cargo-semver-checks"
 
           cd semver
@@ -1852,7 +1852,7 @@ jobs:
       - name: Exercise cargo config combinations
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           BIN="$(pwd)/bins/cargo-semver-checks.exe"
 
           cd semver
