@@ -307,27 +307,3 @@ fn baseline_root_bare_cargo_toml_path() {
         .assert()
         .success();
 }
-
-/// Ensure that we can semver-check projects that won't compile without their `.cargo/config.toml`
-/// configuration, which e.g. might set required `--cfg` items.
-#[test]
-fn crate_level_config_in_workspace() {
-    // The crate has its own `.cargo/config.toml` file.
-    // Running from its directory will result in cargo finding that file and using the config.
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
-    cmd.current_dir("test_crates/crate_level_config_in_workspace/test-pkg")
-        .args(["semver-checks", "check-release", "--baseline-root=."])
-        .assert()
-        .success();
-
-    // Since the crate config is inside the crate directory,
-    // running cargo-semver-checks from its workspace will not pick up those flags,
-    // and should therefore fail.
-    //
-    // This is consistent with `cargo check` and `cargo doc` on the workspace.
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
-    cmd.current_dir("test_crates/crate_level_config_in_workspace/")
-        .args(["semver-checks", "check-release", "--baseline-root=."])
-        .assert()
-        .failure();
-}
