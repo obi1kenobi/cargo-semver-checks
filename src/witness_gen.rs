@@ -7,13 +7,17 @@ use std::{
     ops::Deref,
     path::{Path, PathBuf},
     process::Stdio,
-    sync::{Arc, Mutex},
+    sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    },
+    time::{Duration, Instant},
 };
 
 use anyhow::{Context, Result};
 use handlebars::Handlebars;
 use itertools::Itertools;
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::VersionedRustdocAdapter;
 
@@ -177,14 +181,32 @@ impl DependencyData {
     }
 }
 
-pub(crate) struct WitnessResult<'a> {
-    query: &'a SemverQuery,
-    check_results: Vec<Result<WitnessCheckResult>>,
+#[derive(Debug)]
+pub(crate) struct WitnessReport {
+    /// Total amount of time to run witness checks
+    time_elapsed: Duration,
+    /// Total number of lints with witness checks
+    lints_with_checks: usize,
+    /// Total number of witnesses generated and run
+    generated_checks: usize,
+    /// Total number of errored witnesses
+    errored_checks: usize,
+    /// Total number of failed checks
+    failed_checks: usize,
+    /// Total number of succeeded witnesses
+    succeeded_checks: usize,
 }
 
+#[derive(Debug)]
+pub(crate) struct WitnessResult {
+    pub check_results: Vec<Result<WitnessCheckResult>>,
+    pub breaking_change_found: bool,
+}
+
+#[derive(Debug)]
 pub(crate) struct WitnessCheckResult {
-    status: WitnessCheckStatus,
-    logic_result: Option<WitnessLogicResult>,
+    pub status: WitnessCheckStatus,
+    pub logic_result: Option<WitnessLogicResult>,
 }
 
 #[derive(Debug)]
@@ -204,10 +226,14 @@ pub(crate) enum WitnessCheckStatus {
 
 impl WitnessCheckStatus {
     pub(crate) fn is_breaking(&self) -> bool {
-        match self {
-            WitnessCheckStatus::BreakingChange => true,
-            _ => false,
-        }
+        matches!(self, WitnessCheckStatus::BreakingChange)
+    }
+
+    pub(crate) fn errored(&self) -> bool {
+        matches!(
+            self,
+            WitnessCheckStatus::NeverCompiled | WitnessCheckStatus::InvertedBreak
+        )
     }
 }
 
@@ -283,6 +309,7 @@ fn generate_witness_text(
         .context("Error instantiating witness template.")
 }
 
+#[expect(clippy::complexity)]
 fn map_to_witness_text<'query>(
     handlebars: &Handlebars,
     semver_query: &'query SemverQuery,
@@ -358,7 +385,7 @@ fn map_to_witness_text<'query>(
                                 )
                             });
 
-                    witness_text.map(|text| (text, None))
+                    witness_text.map(|text| (text, query_logic_result))
                 })
                 .collect_vec(),
         )),
@@ -442,8 +469,6 @@ fn cargo_check_witness(crate_path: &Path) -> Result<WitnessCheckStatus> {
 
     let crate_path = crate_path.join("Cargo.toml");
 
-    println!("TRY {}", crate_path.display()); // TODO: Remove this
-
     let baseline_status = std::process::Command::new(exe)
         .args([
             "check",
@@ -487,8 +512,6 @@ fn cargo_check_witness(crate_path: &Path) -> Result<WitnessCheckStatus> {
         (false, true) => WitnessCheckStatus::InvertedBreak,
     };
 
-    println!("Got {check_status:?}"); // TODO: Remove this
-
     Ok(check_status)
 }
 
@@ -518,23 +541,15 @@ fn run_single_witness_check(
     Ok(check_status)
 }
 
-/// Utility for printing a warning message
-fn print_warning(config: &mut GlobalConfig, msg: impl std::fmt::Display) {
-    // Ignore terminal printing errors
-    let _ = config.log_info(|config| {
-        config.shell_warn(msg)?;
-        Ok(())
-    });
-}
-
-pub(crate) fn run_witness_checks<'a>(
+///
+pub(crate) fn run_witness_checks(
     config: &mut GlobalConfig,
     witness_data: WitnessGenerationData,
     rustdoc_paths: WitnessRustdocPaths,
     crate_name: &str,
     adapter: &VersionedRustdocAdapter,
-    lint_results: &'a [LintResult],
-) -> Result<Vec<WitnessResult<'a>>> {
+    lint_results: &mut [LintResult],
+) -> Result<WitnessReport> {
     let dependency_data = DependencyData::parse_input(witness_data).with_context(|| {
         format!("failure creating witness, could not parse input for crate {crate_name}")
     })?;
@@ -546,9 +561,13 @@ pub(crate) fn run_witness_checks<'a>(
     // Have to pull out handlebars, since &GlobalConfig cannot be shared across threads
     let handlebars = config.handlebars();
 
-    let all_witness_results = Mutex::new(vec![]);
-
-    lint_results.par_iter().for_each(|lint_result| {
+    let mut lints_with_checks = AtomicUsize::new(0);
+    let mut generated_checks = AtomicUsize::new(0);
+    let mut errored_checks = AtomicUsize::new(0);
+    let mut failed_checks = AtomicUsize::new(0);
+    let mut succeeded_checks = AtomicUsize::new(0);
+    let start_instant = Instant::now();
+    lint_results.par_iter_mut().for_each(|lint_result| {
         if let Some((semver_query, witness_texts)) = map_to_witness_text(
             handlebars,
             &lint_result.semver_query,
@@ -557,6 +576,7 @@ pub(crate) fn run_witness_checks<'a>(
             &rustdoc_paths,
         ) {
             let mut check_results = vec![];
+            let mut breaking_change_found = false;
 
             witness_texts
                 .into_iter()
@@ -573,8 +593,24 @@ pub(crate) fn run_witness_checks<'a>(
                         .map(|status| (status, logic_result))
                     });
 
-                    // TODO: Save witness results and report them
-                    // Must be reported outside of the par_iter since GlobalConfig cannot be shared across threads
+                    generated_checks.fetch_add(1, Ordering::Relaxed);
+
+                    // Identify if a breaking change was found
+                    if let Ok((status, _)) = &witness_result {
+                        if status.is_breaking() {
+                            succeeded_checks.fetch_add(1, Ordering::Relaxed);
+                            breaking_change_found = true;
+                        } else if status.errored() {
+                            errored_checks.fetch_add(1, Ordering::Relaxed);
+                        } else if semver_query.lint_logic.is_standard() {
+                            failed_checks.fetch_add(1, Ordering::Relaxed);
+                        } else {
+                            succeeded_checks.fetch_add(1, Ordering::Relaxed);
+                        }
+                    } else {
+                        errored_checks.fetch_add(1, Ordering::Relaxed);
+                    }
+
                     check_results.push(witness_result.map(|(status, logic_result)| {
                         WitnessCheckResult {
                             status,
@@ -583,20 +619,21 @@ pub(crate) fn run_witness_checks<'a>(
                     }));
                 });
 
-            if let Ok(mut all_witness_results) = all_witness_results.lock() {
-                all_witness_results.push(WitnessResult {
-                    query: &semver_query,
-                    check_results,
-                });
-            }
+            lint_result.witness_results = Some(WitnessResult {
+                check_results,
+                breaking_change_found,
+            });
+            lints_with_checks.fetch_add(1, Ordering::Relaxed);
         }
     });
+    let time_elapsed = start_instant.elapsed();
 
-    // Discard the poisoning error in favour of an anyhow error.
-    //
-    // This can't just be done with [`Context`], since it requires that the attached error exists for `'static`,
-    // which the poisoning error does not, since it has reference to the borrowed [`SemverQuery`]s from the source.
-    all_witness_results
-        .into_inner()
-        .map_err(|_err| anyhow::anyhow!("failed to extract witness results, mutex is poisoned"))
+    Ok(WitnessReport {
+        time_elapsed,
+        lints_with_checks: lints_with_checks.into_inner(),
+        generated_checks: generated_checks.into_inner(),
+        errored_checks: errored_checks.into_inner(),
+        failed_checks: failed_checks.into_inner(),
+        succeeded_checks: succeeded_checks.into_inner(),
+    })
 }

@@ -33,6 +33,8 @@ pub use query::{
     SemverQuery, Witness,
 };
 
+use crate::witness_gen::{WitnessReport, WitnessResult};
+
 /// Test a release for semver violations.
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Eq, Serialize)]
@@ -715,6 +717,8 @@ pub struct CrateReport {
     selected_checks: usize,
     /// Number of ignored queries
     skipped_checks: usize,
+    /// Witness report, if applicable
+    witness_report: Option<WitnessReport>,
 }
 
 impl CrateReport {

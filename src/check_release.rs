@@ -14,9 +14,9 @@ use trustfall::{FieldValue, TransparentValue};
 
 use crate::data_generation::DataStorage;
 use crate::query::{
-    ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery,
+    ActualSemverUpdate, LintLevel, LintLogic, OverrideStack, RequiredSemverUpdate, SemverQuery,
 };
-use crate::witness_gen;
+use crate::witness_gen::{self, WitnessResult};
 use crate::{Bumps, CrateReport, GlobalConfig, ReleaseType, WitnessGeneration};
 
 /// Represents a change between two semantic versions
@@ -123,6 +123,8 @@ fn get_minimum_version_change(version: &semver::Version) -> VersionChange {
 pub(crate) struct LintResult {
     pub semver_query: SemverQuery,
     pub query_results: Vec<BTreeMap<Arc<str>, FieldValue>>,
+    /// Any results from witnesses for this lint
+    pub witness_results: Option<WitnessResult>,
     /// How long it took to run the semver query
     pub query_duration: Duration,
     /// Applied `OverrideStack`
@@ -176,7 +178,18 @@ fn print_triggered_lint(
         Ok(())
     })?;
 
-    for semver_violation_result in &lint_result.query_results {
+    let results = match (
+        &lint_result.semver_query.lint_logic,
+        &lint_result.witness_results,
+    ) {
+        // If we are using standard logic, just use the query results
+        (LintLogic::UseStandard, _) => &lint_result.query_results,
+        // If we are using witness logic, we expect to find witness results
+        // (LintLogic::UseWitness(_), Some(witness_result)) =>
+        _ => todo!(),
+    };
+
+    for semver_violation_result in results {
         let pretty_result: BTreeMap<&str, TransparentValue> = semver_violation_result
             .iter()
             .map(|(k, v)| (&**k, v.clone().into()))
@@ -342,7 +355,7 @@ pub(super) fn run_check_release(
         .expect("print failed");
 
     let checks_start_instant = Instant::now();
-    let lint_results = queries_to_run
+    let mut lint_results = queries_to_run
         .into_par_iter()
         .map(|(_, semver_query)| {
             let start_instant = std::time::Instant::now();
@@ -355,33 +368,43 @@ pub(super) fn run_check_release(
             Ok(LintResult {
                 effective_required_update: overrides.effective_required_update(&semver_query),
                 effective_lint_level: overrides.effective_lint_level(&semver_query),
+                witness_results: None,
                 semver_query,
                 query_duration,
                 query_results,
             })
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
+    let checks_duration = checks_start_instant.elapsed();
 
-    let witness_results = if witness_generation.generate_witnesses {
+    let witness_report = if witness_generation.generate_witnesses {
         let witness_results = witness_gen::run_witness_checks(
             config,
             witness_data,
             witness_rustdoc_paths,
             crate_name,
             &adapter,
-            &lint_results,
+            &mut lint_results,
         );
-        Some(witness_results)
+
+        if let Err(error) = &witness_results {
+            config.log_info(|config| {
+                config.shell_warn(format!(
+                    "encountered non-fatal error while generating witnesses for crate {crate_name}: {error} (root cause: {})",
+                    error.root_cause()
+                ))
+            })?;
+        }
+
+        witness_results.ok()
     } else {
         None
     };
 
-    let checks_duration = checks_start_instant.elapsed();
-
     let mut required_bumps = Bumps { major: 0, minor: 0 };
     let mut suggested_bumps = Bumps { major: 0, minor: 0 };
     for result in &lint_results {
-        if !result.query_results.is_empty() && result.semver_query.lint_logic.is_standard() {
+        if !result.query_results.is_empty() {
             let bump_stats = match result.effective_lint_level {
                 LintLevel::Deny => &mut required_bumps,
                 LintLevel::Warn => &mut suggested_bumps,
@@ -390,10 +413,20 @@ pub(super) fn run_check_release(
                     result.semver_query
                 ),
             };
-            match result.effective_required_update {
-                RequiredSemverUpdate::Major => bump_stats.major += 1,
-                RequiredSemverUpdate::Minor => bump_stats.minor += 1,
-            };
+            if result.semver_query.lint_logic.is_standard() {
+                match result.effective_required_update {
+                    RequiredSemverUpdate::Major => bump_stats.major += 1,
+                    RequiredSemverUpdate::Minor => bump_stats.minor += 1,
+                };
+                // If we're using witness logic, only mark for bump if the witnesses ran, and if you can find
+            } else if let Some(witness_results) = &result.witness_results
+                && witness_results.breaking_change_found
+            {
+                match result.effective_required_update {
+                    RequiredSemverUpdate::Major => bump_stats.major += 1,
+                    RequiredSemverUpdate::Minor => bump_stats.minor += 1,
+                };
+            }
         }
     }
 
@@ -405,6 +438,7 @@ pub(super) fn run_check_release(
         required_bumps,
         suggested_bumps,
         detected_bump: version_change.level,
+        witness_report,
     };
 
     print_report(config, witness_generation, &report)?;
@@ -420,6 +454,17 @@ fn print_report(
     let mut results_with_warnings = vec![];
 
     for result in &report.lint_results {
+        let should_pass = match &result.semver_query.lint_logic {
+            LintLogic::UseStandard => result.query_results.is_empty(),
+            // If we are using witness lint logic, this should pass either if the
+            // witnesses never found any breaking changes, or if no witness results
+            // are present
+            LintLogic::UseWitness(_) => result
+                .witness_results
+                .as_ref()
+                .is_none_or(|witness| !witness.breaking_change_found),
+        };
+
         config
             .log_verbose(|config| {
                 let category = match result.effective_required_update {
@@ -427,11 +472,7 @@ fn print_report(
                     RequiredSemverUpdate::Minor => "minor",
                 };
 
-                let (status, status_color) = match (
-                    result.query_results.is_empty()
-                        || !result.semver_query.lint_logic.is_standard(),
-                    result.effective_lint_level,
-                ) {
+                let (status, status_color) = match (should_pass, result.effective_lint_level) {
                     (true, _) => ("PASS", AnsiColor::Green),
                     (false, LintLevel::Deny) => ("FAIL", AnsiColor::Red),
                     (false, LintLevel::Warn) => ("WARN", AnsiColor::Yellow),
@@ -457,7 +498,7 @@ fn print_report(
             })
             .expect("print failed");
 
-        if !result.query_results.is_empty() && result.semver_query.lint_logic.is_standard() {
+        if !result.query_results.is_empty() && !should_pass {
             match result.effective_lint_level {
                 LintLevel::Deny => results_with_errors.push(result),
                 LintLevel::Warn => results_with_warnings.push(result),
@@ -596,6 +637,24 @@ fn print_report(
             true,
         )?;
     }
+
+    // if let Some(witness_checks_duration) = report.witness_checks_duration {
+    //     config
+    //         .shell_print(
+    //             "Checked Witnesses",
+    //             format_args!(
+    //                 "[{:>8.3}s] {} checks: {} pass, {} skip",
+    //                 witness_checks_duration.as_secs_f32(),
+    //                 todo!(),
+    //                 todo!(),
+    //                 todo!(),
+    //             ),
+    //             Color::Ansi(AnsiColor::Green),
+    //             true,
+    //         )
+    //         .expect("print failed");
+    // }
+
     Ok(())
 }
 

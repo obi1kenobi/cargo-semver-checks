@@ -53,7 +53,10 @@ SemverQuery(
     per_result_error_template: Some("{{join \"::\" path}} now has the signature {{ current_signature }} instead of {{ old_signature }}, in {{span_filename}}:{{span_begin_line}}"),
     witness: (
             hint_template: r#""#,
-            witness_template: r#""#
+            witness_template: r#"fn witness({{#each baseline_arg_types}}val{{@index}}: {{this}}{{#unless @last}}, {{/unless}}{{/each}}) {
+    {{join "::" path}}({{#each baseline_arg_types}}val{{@index}}{{/each}});
+}
+            "#
         ),
     lint_logic: UseWitness( ExtractFuncArgs ),
 )

@@ -107,7 +107,7 @@ impl LintLogic {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum WitnessLogic {
-    /// Expects a function signature outputted on `old_signature`
+    /// Expects a full path on `path`
     ExtractFuncArgs,
 }
 
