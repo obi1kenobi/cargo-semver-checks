@@ -1,6 +1,6 @@
 #![deny(unsafe_code)]
 
-use std::{collections::HashSet, env, path::PathBuf};
+use std::{collections::HashSet, env, ffi::OsStr, io::Write as _, path::PathBuf};
 
 use anstyle::{AnsiColor, Color, Reset, Style};
 use cargo_config2::Config;
@@ -9,7 +9,6 @@ use cargo_semver_checks::{
     WitnessGeneration,
 };
 use clap::{Args, CommandFactory, Parser, Subcommand};
-use std::io::Write;
 
 #[cfg(test)]
 #[allow(unsafe_code)]
@@ -557,10 +556,19 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             let project_root = if manifest.is_dir() {
                 manifest
             } else {
-                manifest
+                let parent = manifest
                     .parent()
-                    .expect("manifest path doesn't have a parent")
-                    .to_path_buf()
+                    .expect("manifest path doesn't have a parent");
+
+                // Special case: if `manifest` is `"Cargo.toml"` then
+                // Rust makes `parent` be the empty path.
+                // In that case, the argument meant `"./Cargo.toml"` so
+                // the parent is the current directory.
+                if parent.to_string_lossy().is_empty() {
+                    std::env::current_dir().expect("can't determine current directory")
+                } else {
+                    parent.to_path_buf()
+                }
             };
             (Rustdoc::from_root(&project_root), Some(project_root))
         } else {
@@ -589,7 +597,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
                 Some(Rustdoc::from_registry(baseline_version))
             } else if let Some(baseline_rev) = value.baseline_rev {
                 let root = if let Some(baseline_root) = value.baseline_root {
-                    baseline_root
+                    lenient_baseline_root(baseline_root)
                 } else if let Some(current_root) = current_project_root {
                     current_root
                 } else {
@@ -601,7 +609,10 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             } else {
                 // Either there's a manually-set baseline root path, or fall through
                 // to the default behavior.
-                value.baseline_root.map(Rustdoc::from_root)
+                value
+                    .baseline_root
+                    .map(lenient_baseline_root)
+                    .map(Rustdoc::from_root)
             }
         };
         if let Some(baseline) = custom_baseline {
@@ -646,6 +657,32 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         check.set_witness_generation(witness_generation);
 
         check
+    }
+}
+
+/// Replace baseline root paths that point to `Cargo.toml` with ones to its directory.
+///
+/// Be lenient when people pass a path to a *manifest* to `--baseline-root`
+/// instead of a directory. They are confusing it with `--manifest-path` which
+/// requires a manifest instead of a directory.
+///
+/// We know what they meant, so apply it.
+fn lenient_baseline_root(baseline_root: PathBuf) -> PathBuf {
+    if baseline_root.is_file()
+        && baseline_root.file_name().and_then(OsStr::to_str) == Some("Cargo.toml")
+    {
+        let parent = baseline_root.parent().expect("file doesn't have a parent");
+        // Special case: if `baseline_root` is `"Cargo.toml"` then
+        // Rust makes `parent` be the empty path.
+        // In that case, the argument meant `"./Cargo.toml"` so
+        // the parent is the current directory.
+        if parent.to_string_lossy().is_empty() {
+            std::env::current_dir().expect("can't determine current directory")
+        } else {
+            parent.to_path_buf()
+        }
+    } else {
+        baseline_root
     }
 }
 

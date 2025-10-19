@@ -1,4 +1,5 @@
 [package]
+publish = false
 name = "enum_tuple_variant_field_added"
 version = "0.1.0"
 edition = "2021"

@@ -252,3 +252,58 @@ fn zerover_minor_flag_not_needed() {
         .assert()
         .success();
 }
+
+/// This test ensures that passing `--manifest-path Cargo.toml` doesn't cause a bug.
+/// This used to be an issue since computing the parent path of `Cargo.toml` produced
+/// an *empty string* instead of the current working directory.
+#[test]
+fn unprefixed_cargo_toml_manifest_path_refers_to_current_working_directory() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/crate_in_workspace/")
+        .args([
+            "semver-checks",
+            "check-release",
+            "--manifest-path",
+            "Cargo.toml",
+            "--baseline-root=.",
+        ])
+        .assert()
+        .success();
+}
+
+/// This test ensures that passing `--baseline-root ./path/Cargo.toml` doesn't cause a bug.
+/// Since `--manifest-path` takes a path, users may assume `--baseline-root` does as well.
+/// We strip `Cargo.toml` from the tail of the path if present.
+#[test]
+fn baseline_root_cargo_toml_path() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/")
+        .args([
+            "semver-checks",
+            "check-release",
+            "--manifest-path",
+            "crate_in_workspace/Cargo.toml",
+            "--baseline-root=crate_in_workspace/Cargo.toml",
+        ])
+        .assert()
+        .success();
+}
+
+/// This test ensures that passing `--baseline-root Cargo.toml` doesn't cause a bug.
+/// Since `--manifest-path` takes a path, users may assume `--baseline-root` does as well.
+/// We strip `Cargo.toml` from the tail of the path if present.
+/// When `Cargo.toml` is the only path component, we implicitly assume `.` is left after stripping.
+#[test]
+fn baseline_root_bare_cargo_toml_path() {
+    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    cmd.current_dir("test_crates/crate_in_workspace/")
+        .args([
+            "semver-checks",
+            "check-release",
+            "--manifest-path",
+            "Cargo.toml",
+            "--baseline-root=Cargo.toml",
+        ])
+        .assert()
+        .success();
+}

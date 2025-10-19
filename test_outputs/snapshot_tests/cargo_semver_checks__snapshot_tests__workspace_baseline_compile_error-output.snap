@@ -42,8 +42,9 @@ note: the following command can be used to reproduce the compilation error:
       cargo new --lib example &&
           cd example &&
           echo '[workspace]' >> Cargo.toml &&
-          cargo add --path test_crates/manifest_tests/workspace_baseline_compile_error/old/error &&
-          cargo check
+          cargo add --path [ROOT]/test_crates/manifest_tests/workspace_baseline_compile_error/old/error &&
+          cargo check &&
+          cargo doc
 
     Building no-error v0.1.0 (current)
        Built [TIME] (current)
