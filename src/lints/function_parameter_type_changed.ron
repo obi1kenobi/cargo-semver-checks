@@ -13,12 +13,12 @@ SemverQuery(
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
 
+                        old_signature: signature @tag @output
+
                         importable_path {
                             path @output @tag
                             public_api @filter(op: "=", value: ["$true"])
                         }
-
-                        old_signature: signature @tag @output
                     }
                 }
             }

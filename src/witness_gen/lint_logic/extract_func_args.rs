@@ -14,7 +14,7 @@ use crate::witness_gen::{WitnessRustdocPaths, lint_logic::rustdoc_fmt::FormatRus
 /// Expects a full path on `path`
 ///
 /// Inserts values to `baseline_arg_types`, `baseline_arg_names`, `current_arg_types` and `current_arg_names`
-pub(super) fn extract_func_args(
+pub(crate) fn extract_func_args(
     mut witness_results: BTreeMap<Arc<str>, FieldValue>,
     rustdoc_paths: &WitnessRustdocPaths,
 ) -> Result<BTreeMap<Arc<str>, FieldValue>> {

@@ -1,4 +1,5 @@
 mod lint_logic;
+pub(crate) mod results;
 
 use std::{
     collections::{BTreeMap, btree_map},
@@ -6,7 +7,7 @@ use std::{
     io::Write,
     ops::Deref,
     path::{Path, PathBuf},
-    process::Stdio,
+    process::{ExitStatus, Stdio},
     sync::{
         Arc,
         atomic::{AtomicUsize, Ordering},
@@ -16,21 +17,23 @@ use std::{
 
 use anyhow::{Context, Result};
 use handlebars::Handlebars;
-use itertools::Itertools;
+use itertools::Either;
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 use trustfall::{FieldValue, TransparentValue};
 use trustfall_rustdoc::VersionedRustdocAdapter;
 
-use crate::{GlobalConfig, SemverQuery};
+use crate::{
+    GlobalConfig, SemverQuery,
+    query::{LintLogic, WitnessLogic},
+    witness_gen::results::{WitnessChecksResultKind, WitnessLogicKinds},
+};
 use crate::{check_release::LintResult, data_generation::RequestKind};
 use crate::{
     data_generation::{CrateDataRequest, ProjectRequest, RegistryRequest},
-    witness_gen::lint_logic::run_extra_witness_queries,
-};
-use crate::{
     query::{Witness, WitnessQuery},
-    witness_gen::lint_logic::WitnessLogicResult,
 };
+
+use results::{WitnessCheckResult, WitnessCheckStatus};
 
 /// Higher level data used specifically in the generation of a witness program. Values of [`None`] will
 /// prevent witness generation, since the data is required for witness generation.
@@ -86,6 +89,22 @@ impl<T> CoupledRustdocPath<T> {
     pub fn decouple(self) -> (T, PathBuf) {
         (self.value, self.path)
     }
+}
+
+/// Diagnostic information about a single failed or errored witness check
+#[derive(Debug)]
+pub(crate) struct SingleWitnessCheckInfo {
+    pub witness_name: String,
+    pub index: usize,
+    // TODO: Add more collected diagnostic information
+}
+
+/// Diagnostics information with exit statuses attached
+#[derive(Debug)]
+pub(crate) struct SingleWitnessCheckExtraInfo {
+    pub info: SingleWitnessCheckInfo,
+    pub baseline_status: ExitStatus,
+    pub current_status: ExitStatus,
 }
 
 enum DependencyKind {
@@ -183,57 +202,217 @@ impl DependencyData {
 
 #[derive(Debug)]
 pub(crate) struct WitnessReport {
+    /// Path in which the witnesses were generated
+    pub witness_set_dir: PathBuf,
     /// Total amount of time to run witness checks
-    time_elapsed: Duration,
+    pub time_elapsed: Duration,
     /// Total number of lints with witness checks
-    lints_with_checks: usize,
+    pub lints_with_checks: usize,
     /// Total number of witnesses generated and run
-    generated_checks: usize,
+    pub generated_checks: usize,
     /// Total number of errored witnesses
-    errored_checks: usize,
+    pub errored_checks: usize,
     /// Total number of failed checks
-    failed_checks: usize,
+    pub failed_checks: usize,
+    /// Total number of failed checks which were repurposed for informing lint behaviour
+    pub repurposed_failed_checks: usize,
     /// Total number of succeeded witnesses
-    succeeded_checks: usize,
+    pub succeeded_checks: usize,
 }
 
-#[derive(Debug)]
-pub(crate) struct WitnessResult {
-    pub check_results: Vec<Result<WitnessCheckResult>>,
-    pub breaking_change_found: bool,
+struct WitnessReportBuilder {
+    witness_set_dir: PathBuf,
+    start_instant: Instant,
+    lints_with_checks: AtomicUsize,
+    generated_checks: AtomicUsize,
+    errored_checks: AtomicUsize,
+    failed_checks: AtomicUsize,
+    repurposed_failed_checks: AtomicUsize,
+    succeeded_checks: AtomicUsize,
 }
 
-#[derive(Debug)]
-pub(crate) struct WitnessCheckResult {
-    pub status: WitnessCheckStatus,
-    pub logic_result: Option<WitnessLogicResult>,
+impl WitnessReport {
+    pub fn failed(&self) -> bool {
+        self.errored_checks > 0 || self.failed_checks > 0
+    }
 }
 
-#[derive(Debug)]
-pub(crate) enum WitnessCheckStatus {
-    /// Indicates that `baseline` checked but `current` did not, which is the expected result
-    BreakingChange,
-
-    /// Indicated that the witness always checked successfully.
-    NoBreakingChange,
-
-    /// Indicates that the witness never checked successfully
-    NeverCompiled,
-
-    /// Indicates the unexpected result of `current` checking successfully, while `baseline` does not
-    InvertedBreak,
-}
-
-impl WitnessCheckStatus {
-    pub(crate) fn is_breaking(&self) -> bool {
-        matches!(self, WitnessCheckStatus::BreakingChange)
+impl WitnessReportBuilder {
+    fn new(witness_set_dir: impl Into<PathBuf>) -> Self {
+        Self {
+            witness_set_dir: witness_set_dir.into(),
+            start_instant: Instant::now(),
+            lints_with_checks: AtomicUsize::new(0),
+            generated_checks: AtomicUsize::new(0),
+            errored_checks: AtomicUsize::new(0),
+            failed_checks: AtomicUsize::new(0),
+            repurposed_failed_checks: AtomicUsize::new(0),
+            succeeded_checks: AtomicUsize::new(0),
+        }
     }
 
-    pub(crate) fn errored(&self) -> bool {
-        matches!(
-            self,
-            WitnessCheckStatus::NeverCompiled | WitnessCheckStatus::InvertedBreak
-        )
+    fn lint_checked(&self) {
+        self.lints_with_checks.fetch_add(1, Ordering::Relaxed);
+    }
+
+    fn ran_check(&self, status: &Result<WitnessCheckStatus>, logic: &LintLogic) {
+        self.generated_checks.fetch_add(1, Ordering::Relaxed);
+        match status {
+            Ok(WitnessCheckStatus::BreakingChange) => {
+                self.succeeded_checks.fetch_add(1, Ordering::Relaxed);
+            }
+            Ok(WitnessCheckStatus::NoBreakingChange { .. }) => {
+                if logic.is_standard() {
+                    self.failed_checks.fetch_add(1, Ordering::Relaxed);
+                } else {
+                    self.repurposed_failed_checks
+                        .fetch_add(1, Ordering::Relaxed);
+                }
+            }
+            Ok(WitnessCheckStatus::ErroredCase { .. }) | Err(_) => {
+                self.errored_checks.fetch_add(1, Ordering::Relaxed);
+            }
+        }
+    }
+
+    fn finalize(self) -> WitnessReport {
+        WitnessReport {
+            witness_set_dir: self.witness_set_dir,
+            time_elapsed: self.start_instant.elapsed(),
+            lints_with_checks: self.lints_with_checks.into_inner(),
+            generated_checks: self.generated_checks.into_inner(),
+            errored_checks: self.errored_checks.into_inner(),
+            failed_checks: self.failed_checks.into_inner(),
+            repurposed_failed_checks: self.repurposed_failed_checks.into_inner(),
+            succeeded_checks: self.succeeded_checks.into_inner(),
+        }
+    }
+}
+
+enum WitnessTextResults {
+    StandardLogic(Vec<Result<String>>),
+    WitnessLogic(WitnessLogicTextResults),
+}
+
+enum WitnessLogicTextResults {
+    // Only one variant is present of right now, though this is meant as a future-proof system to allow
+    // for new types of witness logic
+    ExtractFuncArgs(WitnessLogicTextResult<BTreeMap<Arc<str>, FieldValue>>),
+}
+
+type WitnessLogicTextResult<T> = Vec<Result<(String, T)>>;
+
+impl WitnessLogicTextResults {
+    fn is_empty(&self) -> bool {
+        match self {
+            Self::ExtractFuncArgs(text_and_values) => text_and_values.is_empty(),
+        }
+    }
+}
+
+impl WitnessTextResults {
+    fn is_empty(&self) -> bool {
+        match self {
+            Self::StandardLogic(texts) => texts.is_empty(),
+            Self::WitnessLogic(witness_logic_result) => witness_logic_result.is_empty(),
+        }
+    }
+
+    fn run_witness_checks(
+        self,
+        witness_set_dir: &Path,
+        dependency_data: &DependencyData,
+        report_builder: &WitnessReportBuilder,
+        semver_query: &SemverQuery,
+    ) -> Option<WitnessCheckResult> {
+        if self.is_empty() {
+            return None;
+        }
+
+        let mut breaking_change_found = false;
+        let mut errored_check = false;
+
+        // Use a closure here instead of a function in order to capture the large number of surrounding variables.
+        // This is done purely due to the large potential number of [`WitnessLogic`] variants. As more systems
+        // are added, we need to implement system-specific logic, so having a ton of consistent values captured
+        // by a closure is a lot faster to read and write than a function that takes those values directly
+        let mut check_witness = |index: usize, witness_text: String| {
+            let witness_result = run_single_witness_check(
+                witness_set_dir,
+                &semver_query.id,
+                index,
+                &witness_text,
+                dependency_data,
+            );
+
+            report_builder.ran_check(&witness_result, &semver_query.lint_logic);
+
+            // Check for breaking change, with short circuit on if one has already been found
+            if !breaking_change_found
+                && witness_result
+                    .as_ref()
+                    .is_ok_and(|result| result.is_breaking())
+            {
+                breaking_change_found = true;
+            }
+
+            witness_result
+        };
+
+        let check_results = match self {
+            Self::StandardLogic(texts) => {
+                let mut results = vec![];
+                texts
+                    .into_iter()
+                    .enumerate()
+                    .for_each(|(index, text_result)| {
+                        let witness_result =
+                            text_result.and_then(|text| check_witness(index, text));
+
+                        // Check for an error, with a short circuit on if one has already been found
+                        if !errored_check
+                            && (witness_result.is_err()
+                                || witness_result
+                                    .as_ref()
+                                    .is_ok_and(|status| status.errored() || !status.is_breaking()))
+                        {
+                            errored_check = true;
+                        }
+
+                        results.push(witness_result);
+                    });
+                WitnessChecksResultKind::Standard(results)
+            }
+            Self::WitnessLogic(WitnessLogicTextResults::ExtractFuncArgs(texts_and_values)) => {
+                let mut results = vec![];
+                texts_and_values
+                    .into_iter()
+                    .enumerate()
+                    .for_each(|(index, text_value_result)| {
+                        let witness_result = text_value_result.and_then(|(text, extracted)| {
+                            check_witness(index, text).map(|result| (result, extracted))
+                        });
+
+                        // Check for an error, with a short circuit on if one has already been found
+                        if !errored_check && witness_result.is_err()
+                            || witness_result
+                                .as_ref()
+                                .is_ok_and(|(status, _)| status.errored())
+                        {
+                            errored_check = true;
+                        }
+
+                        results.push(witness_result);
+                    });
+                WitnessChecksResultKind::WitnessLogic(WitnessLogicKinds::ExtractFuncArgs(results))
+            }
+        };
+
+        Some(WitnessCheckResult {
+            check_results,
+            has_errored_check: errored_check,
+            breaking_change_found,
+        })
     }
 }
 
@@ -309,6 +488,48 @@ fn generate_witness_text(
         .context("Error instantiating witness template.")
 }
 
+fn run_extra_logic_and_textgen(
+    handlebars: &Handlebars,
+    handlebars_template: &str,
+    queried_values: impl Iterator<Item = Result<BTreeMap<Arc<str>, FieldValue>>>,
+    semver_query: &SemverQuery,
+    rustdoc_paths: &WitnessRustdocPaths,
+) -> WitnessTextResults {
+    match semver_query.lint_logic {
+        LintLogic::UseStandard => {
+            let texts = queried_values
+                .map(|result| {
+                    result.and_then(|values| {
+                        generate_witness_text(handlebars, handlebars_template, values)
+                    })
+                })
+                .collect();
+            WitnessTextResults::StandardLogic(texts)
+        }
+        LintLogic::UseWitness(WitnessLogic::ExtractFuncArgs) => {
+            let texts_and_values = queried_values
+                .map(|result| {
+                    result
+                        .and_then(|values| lint_logic::extract_func_args(values, rustdoc_paths))
+                        .and_then(|values| {
+                            Ok((
+                                generate_witness_text(
+                                    handlebars,
+                                    handlebars_template,
+                                    values.clone(),
+                                )?,
+                                values,
+                            ))
+                        })
+                })
+                .collect();
+            WitnessTextResults::WitnessLogic(WitnessLogicTextResults::ExtractFuncArgs(
+                texts_and_values,
+            ))
+        }
+    }
+}
+
 #[expect(clippy::complexity)]
 fn map_to_witness_text<'query>(
     handlebars: &Handlebars,
@@ -316,81 +537,37 @@ fn map_to_witness_text<'query>(
     lint_results: &[BTreeMap<Arc<str>, FieldValue>],
     adapter: &VersionedRustdocAdapter,
     rustdoc_paths: &WitnessRustdocPaths,
-) -> Option<(
-    &'query SemverQuery,
-    Vec<Result<(String, Option<WitnessLogicResult>)>>,
-)> {
-    match semver_query.witness {
+) -> Option<WitnessTextResults> {
+    let (template, iter) = match &semver_query.witness {
         // Don't bother running the witness query unless both a witness query and template exist
         Some(Witness {
-            witness_template: Some(ref witness_template),
-            witness_query: Some(ref witness_query),
+            witness_template: Some(witness_template),
+            witness_query: Some(witness_query),
             ..
-        }) => {
-            let witness_results = lint_results
-                .iter()
-                .cloned()
-                .map(|lint_result| {
-                    let witness_results = run_witness_query(adapter, witness_query, lint_result)
-                        .with_context(|| {
-                            format!("error running witness query for {}", semver_query.id)
-                        })?;
-
-                    let (witness_results, query_logic_result) = run_extra_witness_queries(
-                        adapter,
-                        semver_query,
-                        witness_results,
-                        rustdoc_paths,
-                    )?;
-
-                    let witness_text =
-                        generate_witness_text(handlebars, witness_template, witness_results)
-                            .with_context(|| {
-                                format!(
-                                    "error generating witness text for witness {}",
-                                    semver_query.id
-                                )
-                            });
-
-                    witness_text.map(|text| (text, query_logic_result))
-                })
-                .collect_vec();
-            Some((semver_query, witness_results))
-        }
+        }) => (
+            witness_template,
+            Either::Left(lint_results.iter().cloned().map(|lint_result| {
+                run_witness_query(adapter, witness_query, lint_result)
+                    .with_context(|| format!("error running witness query for {}", semver_query.id))
+            })),
+        ),
 
         // If no witness query exists, we still want to forward the existing output
         Some(Witness {
-            witness_template: Some(ref witness_template),
+            witness_template: Some(witness_template),
             witness_query: None,
             ..
-        }) => Some((
-            semver_query,
-            lint_results
-                .iter()
-                .cloned()
-                .map(|lint_result| {
-                    let (lint_result, query_logic_result) = run_extra_witness_queries(
-                        adapter,
-                        semver_query,
-                        lint_result,
-                        rustdoc_paths,
-                    )?;
+        }) => (
+            witness_template,
+            Either::Right(lint_results.iter().cloned().map(Ok)),
+        ),
+        _ => return None,
+    };
 
-                    let witness_text =
-                        generate_witness_text(handlebars, witness_template, lint_result)
-                            .with_context(|| {
-                                format!(
-                                    "error generating witness text for queryless witness {}",
-                                    semver_query.id
-                                )
-                            });
+    let text_results =
+        run_extra_logic_and_textgen(handlebars, template, iter, semver_query, rustdoc_paths);
 
-                    witness_text.map(|text| (text, query_logic_result))
-                })
-                .collect_vec(),
-        )),
-        _ => None,
-    }
+    Some(text_results)
 }
 
 /// Generates a single witness crate
@@ -463,7 +640,10 @@ use current as {0};
     Ok(crate_path)
 }
 
-fn cargo_check_witness(crate_path: &Path) -> Result<WitnessCheckStatus> {
+fn cargo_check_witness<F>(crate_path: &Path, build_diagnostics: F) -> Result<WitnessCheckStatus>
+where
+    F: Fn() -> SingleWitnessCheckInfo,
+{
     // FIXME: Update from static "cargo" to dynamic system in case cargo is not in $PATH or is not called `cargo`
     let exe = "cargo";
 
@@ -507,9 +687,12 @@ fn cargo_check_witness(crate_path: &Path) -> Result<WitnessCheckStatus> {
 
     let check_status = match (baseline_status.success(), current_status.success()) {
         (true, false) => WitnessCheckStatus::BreakingChange,
-        (true, true) => WitnessCheckStatus::NoBreakingChange,
-        (false, false) => WitnessCheckStatus::NeverCompiled,
-        (false, true) => WitnessCheckStatus::InvertedBreak,
+        (true, true) => WitnessCheckStatus::NoBreakingChange(build_diagnostics()),
+        (false, _) => WitnessCheckStatus::ErroredCase(SingleWitnessCheckExtraInfo {
+            info: build_diagnostics(),
+            baseline_status,
+            current_status,
+        }),
     };
 
     Ok(check_status)
@@ -536,12 +719,23 @@ fn run_single_witness_check(
     )
     .with_context(|| format!("error generating witness crate `{witness_name}-{index}`"))?;
 
-    let check_status = cargo_check_witness(&crate_path)?;
+    let check_status = cargo_check_witness(
+        &crate_path,
+        // Currently the diagnostics are initialized here. If additional diagnostic information is added,
+        // consider hoisting initialization elsewhere.
+        || SingleWitnessCheckInfo {
+            witness_name: witness_name.to_string(),
+            index,
+        },
+    )?;
 
     Ok(check_status)
 }
 
+/// Run all witness checks, returning a [`WitnessReport`], which contains details about the witnesses that were run.
 ///
+/// All [`WitnessResult`]s are added in place to `lint_results` retroactively, overriding [`LintResult::witness_results`].
+/// Any [`LintResult`] with a `witness_result` of [`Some`] will contain at least one value.
 pub(crate) fn run_witness_checks(
     config: &mut GlobalConfig,
     witness_data: WitnessGenerationData,
@@ -561,79 +755,28 @@ pub(crate) fn run_witness_checks(
     // Have to pull out handlebars, since &GlobalConfig cannot be shared across threads
     let handlebars = config.handlebars();
 
-    let mut lints_with_checks = AtomicUsize::new(0);
-    let mut generated_checks = AtomicUsize::new(0);
-    let mut errored_checks = AtomicUsize::new(0);
-    let mut failed_checks = AtomicUsize::new(0);
-    let mut succeeded_checks = AtomicUsize::new(0);
-    let start_instant = Instant::now();
+    let report = WitnessReportBuilder::new(&witness_set_dir);
     lint_results.par_iter_mut().for_each(|lint_result| {
-        if let Some((semver_query, witness_texts)) = map_to_witness_text(
+        let witness_check_result = map_to_witness_text(
             handlebars,
             &lint_result.semver_query,
             &lint_result.query_results,
             adapter,
             &rustdoc_paths,
-        ) {
-            let mut check_results = vec![];
-            let mut breaking_change_found = false;
-
-            witness_texts
-                .into_iter()
-                .enumerate()
-                .for_each(|(index, text_result)| {
-                    let witness_result = text_result.and_then(|(witness_text, logic_result)| {
-                        run_single_witness_check(
-                            &witness_set_dir,
-                            &semver_query.id,
-                            index,
-                            &witness_text,
-                            &dependency_data,
-                        )
-                        .map(|status| (status, logic_result))
-                    });
-
-                    generated_checks.fetch_add(1, Ordering::Relaxed);
-
-                    // Identify if a breaking change was found
-                    if let Ok((status, _)) = &witness_result {
-                        if status.is_breaking() {
-                            succeeded_checks.fetch_add(1, Ordering::Relaxed);
-                            breaking_change_found = true;
-                        } else if status.errored() {
-                            errored_checks.fetch_add(1, Ordering::Relaxed);
-                        } else if semver_query.lint_logic.is_standard() {
-                            failed_checks.fetch_add(1, Ordering::Relaxed);
-                        } else {
-                            succeeded_checks.fetch_add(1, Ordering::Relaxed);
-                        }
-                    } else {
-                        errored_checks.fetch_add(1, Ordering::Relaxed);
-                    }
-
-                    check_results.push(witness_result.map(|(status, logic_result)| {
-                        WitnessCheckResult {
-                            status,
-                            logic_result,
-                        }
-                    }));
-                });
-
-            lint_result.witness_results = Some(WitnessResult {
-                check_results,
-                breaking_change_found,
-            });
-            lints_with_checks.fetch_add(1, Ordering::Relaxed);
+        )
+        .and_then(|text_result| {
+            text_result.run_witness_checks(
+                &witness_set_dir,
+                &dependency_data,
+                &report,
+                &lint_result.semver_query,
+            )
+        });
+        if let Some(witness_check_result) = witness_check_result {
+            lint_result.witness_results = Some(witness_check_result);
+            report.lint_checked();
         }
     });
-    let time_elapsed = start_instant.elapsed();
 
-    Ok(WitnessReport {
-        time_elapsed,
-        lints_with_checks: lints_with_checks.into_inner(),
-        generated_checks: generated_checks.into_inner(),
-        errored_checks: errored_checks.into_inner(),
-        failed_checks: failed_checks.into_inner(),
-        succeeded_checks: succeeded_checks.into_inner(),
-    })
+    Ok(report.finalize())
 }

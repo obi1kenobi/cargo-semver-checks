@@ -145,6 +145,7 @@ fn repeat<'reg, 'rc>(
 pub(crate) fn make_handlebars_registry() -> Handlebars<'static> {
     let mut registry = Handlebars::new();
     registry.set_strict_mode(true);
+    registry.register_escape_fn(handlebars::no_escape);
     registry.register_helper("lowercase", Box::new(lowercase));
     registry.register_helper("join", Box::new(join));
     registry.register_helper("unpack_if_singleton", Box::new(unpack_if_singleton));

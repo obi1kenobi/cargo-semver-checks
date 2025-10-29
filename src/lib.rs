@@ -33,7 +33,7 @@ pub use query::{
     SemverQuery, Witness,
 };
 
-use crate::witness_gen::{WitnessReport, WitnessResult};
+use crate::witness_gen::WitnessReport;
 
 /// Test a release for semver violations.
 #[non_exhaustive]
@@ -725,6 +725,15 @@ impl CrateReport {
     /// Check if the semver check was successful.
     /// `true` if required bump <= detected bump.
     pub fn success(&self) -> bool {
+        // If witnesses ran, and at least one witness failed or errored
+        if self
+            .witness_report
+            .as_ref()
+            .is_some_and(|report| report.failed())
+        {
+            return false;
+        }
+
         match self.required_bumps.update_type().map(ReleaseType::from) {
             // If `None`, no additional bump is required.
             None => true,

@@ -8,7 +8,7 @@ use anstyle::{AnsiColor, Color, Reset, Style};
 
 use anyhow::Context;
 use clap::crate_version;
-use itertools::Itertools;
+use itertools::{Either, Itertools};
 use rayon::prelude::*;
 use trustfall::{FieldValue, TransparentValue};
 
@@ -16,7 +16,10 @@ use crate::data_generation::DataStorage;
 use crate::query::{
     ActualSemverUpdate, LintLevel, LintLogic, OverrideStack, RequiredSemverUpdate, SemverQuery,
 };
-use crate::witness_gen::{self, WitnessResult};
+use crate::witness_gen::{
+    self,
+    results::{WitnessCheckResult, WitnessChecksResultKind, WitnessLogicKinds},
+};
 use crate::{Bumps, CrateReport, GlobalConfig, ReleaseType, WitnessGeneration};
 
 /// Represents a change between two semantic versions
@@ -124,12 +127,27 @@ pub(crate) struct LintResult {
     pub semver_query: SemverQuery,
     pub query_results: Vec<BTreeMap<Arc<str>, FieldValue>>,
     /// Any results from witnesses for this lint
-    pub witness_results: Option<WitnessResult>,
+    pub witness_results: Option<WitnessCheckResult>,
     /// How long it took to run the semver query
     pub query_duration: Duration,
     /// Applied `OverrideStack`
     pub effective_required_update: RequiredSemverUpdate,
     pub effective_lint_level: LintLevel,
+}
+
+impl LintResult {
+    pub fn should_pass(&self) -> bool {
+        match &self.semver_query.lint_logic {
+            LintLogic::UseStandard => self.query_results.is_empty(),
+            // If we are using witness lint logic, this should pass either if the
+            // witnesses never found any breaking changes, or if no witness results
+            // are present
+            LintLogic::UseWitness(_) => self
+                .witness_results
+                .as_ref()
+                .is_none_or(|witness| !witness.breaking_change_found),
+        }
+    }
 }
 
 /// Helper function to print details about a triggered lint.
@@ -178,22 +196,32 @@ fn print_triggered_lint(
         Ok(())
     })?;
 
-    let results = match (
-        &lint_result.semver_query.lint_logic,
-        &lint_result.witness_results,
-    ) {
-        // If we are using standard logic, just use the query results
-        (LintLogic::UseStandard, _) => &lint_result.query_results,
-        // If we are using witness logic, we expect to find witness results
-        // (LintLogic::UseWitness(_), Some(witness_result)) =>
-        _ => todo!(),
+    // Boxed dynamic dispatch is only used for witness-based lints which override the lint results,
+    // and is used since each Vec/Iterator can have its own type signature of other correlated information,
+    // and as such will end up having its own mapping function.
+    let results: Either<_, Box<dyn Iterator<Item = _>>> = match &lint_result.witness_results {
+        None => Either::Left(lint_result.query_results.iter()),
+        Some(WitnessCheckResult { check_results, .. }) => match check_results {
+            WitnessChecksResultKind::Standard(_) => Either::Left(lint_result.query_results.iter()),
+            WitnessChecksResultKind::WitnessLogic(WitnessLogicKinds::ExtractFuncArgs(results)) => {
+                Either::Right(Box::new(
+                    // These errors are addressed elwhere too, they can be ignored here
+                    results.iter().filter_map(|result| {
+                        result
+                            .as_ref()
+                            .ok()
+                            .and_then(|(status, values)| status.is_breaking().then_some(values))
+                    }),
+                ))
+            }
+        },
     };
 
     for semver_violation_result in results {
-        let pretty_result: BTreeMap<&str, TransparentValue> = semver_violation_result
+        let pretty_result = semver_violation_result
             .iter()
             .map(|(k, v)| (&**k, v.clone().into()))
-            .collect();
+            .collect::<BTreeMap<&str, TransparentValue>>();
 
         if let Some(template) = semver_query.per_result_error_template.as_deref() {
             let message = config
@@ -253,6 +281,88 @@ fn print_triggered_lint(
     }
 
     Ok(())
+}
+
+fn print_errored_or_failed_witness(
+    config: &mut GlobalConfig,
+    check_result: &WitnessCheckResult,
+) -> anyhow::Result<()> {
+    let failures = check_result.get_errors_and_failures();
+
+    // Only [`LintLogic::UseStandard`] logic cares about failures. They are repurposed in [`LintLogic::UseWitness`]
+    // to inform lint success.
+    if check_result.is_standard_logic() && !failures.failed_status.is_empty() {
+        config.log_info(|config| {
+            writeln!(config.stdout(), "{}Failed:{}", Style::new().bold(), Reset)?;
+            Ok(())
+        })?;
+
+        for check_info in &failures.failed_status {
+            config.log_info(|config| {
+                        writeln!(
+                            config.stdout(),
+                            "  validation witness {}-{} failed, no breaking change occured when cargo-semver-checks detected one",
+                            check_info.witness_name,
+                            check_info.index
+                        )?;
+                        Ok(())
+                    })?;
+        }
+
+        config.log_info(|config| {
+            writeln!(config.stdout())?;
+            Ok(())
+        })?;
+    }
+
+    if !failures.errored_status.is_empty() || !failures.errors.is_empty() {
+        config.log_info(|config| {
+            writeln!(config.stdout(), "{}Errored:{}", Style::new().bold(), Reset,)?;
+            Ok(())
+        })?;
+
+        for check_info in failures.errored_status {
+            config.log_info(|config| {
+                    writeln!(
+                        config.stdout(),
+                        "  witness {}-{} failed as an error, where baseline check {}, and current check {}",
+                        check_info.info.witness_name,
+                        check_info.info.index,
+                        format_exit_status(&check_info.baseline_status),
+                        format_exit_status(&check_info.current_status),
+                    )?;
+                    Ok(())
+                })?;
+        }
+
+        for err in failures.errors {
+            config.log_info(|config| {
+                writeln!(
+                    config.stdout(),
+                    "  witness failed as an error with the error message: {err} (root cause: {})",
+                    err.root_cause()
+                )?;
+                Ok(())
+            })?;
+        }
+
+        config.log_info(|config| {
+            writeln!(config.stdout())?;
+            Ok(())
+        })?;
+    }
+
+    Ok(())
+}
+
+fn format_exit_status(status: &std::process::ExitStatus) -> String {
+    if status.success() {
+        "exited successfully".to_string()
+    } else if let Some(code) = status.code() {
+        format!("exited with error code {code}")
+    } else {
+        "exited with an unknown error".to_string()
+    }
 }
 
 #[expect(clippy::too_many_arguments)]
@@ -418,7 +528,7 @@ pub(super) fn run_check_release(
                     RequiredSemverUpdate::Major => bump_stats.major += 1,
                     RequiredSemverUpdate::Minor => bump_stats.minor += 1,
                 };
-                // If we're using witness logic, only mark for bump if the witnesses ran, and if you can find
+                // If we're using witness logic, only mark for bump if the witnesses ran, and if a breaking change was found
             } else if let Some(witness_results) = &result.witness_results
                 && witness_results.breaking_change_found
             {
@@ -454,17 +564,6 @@ fn print_report(
     let mut results_with_warnings = vec![];
 
     for result in &report.lint_results {
-        let should_pass = match &result.semver_query.lint_logic {
-            LintLogic::UseStandard => result.query_results.is_empty(),
-            // If we are using witness lint logic, this should pass either if the
-            // witnesses never found any breaking changes, or if no witness results
-            // are present
-            LintLogic::UseWitness(_) => result
-                .witness_results
-                .as_ref()
-                .is_none_or(|witness| !witness.breaking_change_found),
-        };
-
         config
             .log_verbose(|config| {
                 let category = match result.effective_required_update {
@@ -472,15 +571,16 @@ fn print_report(
                     RequiredSemverUpdate::Minor => "minor",
                 };
 
-                let (status, status_color) = match (should_pass, result.effective_lint_level) {
-                    (true, _) => ("PASS", AnsiColor::Green),
-                    (false, LintLevel::Deny) => ("FAIL", AnsiColor::Red),
-                    (false, LintLevel::Warn) => ("WARN", AnsiColor::Yellow),
-                    (false, LintLevel::Allow) => unreachable!(
-                        "`LintLevel::Allow` lint was unexpectedly not skipped: {:?}",
-                        result.semver_query
-                    ),
-                };
+                let (status, status_color) =
+                    match (result.should_pass(), result.effective_lint_level) {
+                        (true, _) => ("PASS", AnsiColor::Green),
+                        (false, LintLevel::Deny) => ("FAIL", AnsiColor::Red),
+                        (false, LintLevel::Warn) => ("WARN", AnsiColor::Yellow),
+                        (false, LintLevel::Allow) => unreachable!(
+                            "`LintLevel::Allow` lint was unexpectedly not skipped: {:?}",
+                            result.semver_query
+                        ),
+                    };
 
                 writeln!(
                     config.stderr(),
@@ -498,7 +598,7 @@ fn print_report(
             })
             .expect("print failed");
 
-        if !result.query_results.is_empty() && !should_pass {
+        if !result.query_results.is_empty() && !result.should_pass() {
             match result.effective_lint_level {
                 LintLevel::Deny => results_with_errors.push(result),
                 LintLevel::Warn => results_with_warnings.push(result),
@@ -638,22 +738,62 @@ fn print_report(
         )?;
     }
 
-    // if let Some(witness_checks_duration) = report.witness_checks_duration {
-    //     config
-    //         .shell_print(
-    //             "Checked Witnesses",
-    //             format_args!(
-    //                 "[{:>8.3}s] {} checks: {} pass, {} skip",
-    //                 witness_checks_duration.as_secs_f32(),
-    //                 todo!(),
-    //                 todo!(),
-    //                 todo!(),
-    //             ),
-    //             Color::Ansi(AnsiColor::Green),
-    //             true,
-    //         )
-    //         .expect("print failed");
-    // }
+    if let Some(witness_report) = &report.witness_report {
+        writeln!(config.stderr())?;
+        let status_color = if witness_report.failed() {
+            AnsiColor::Red
+        } else {
+            AnsiColor::Green
+        };
+        config
+            .shell_print(
+                "Witnesses",
+                format_args!(
+                    "[{:>8.3}s] {} witnesses for {} lints: {} succeeded, {} repurposed failures, {} failed, {} errored",
+                    witness_report.time_elapsed.as_secs_f32(),
+                    witness_report.generated_checks,
+                    witness_report.lints_with_checks,
+                    witness_report.succeeded_checks,
+                    witness_report.repurposed_failed_checks,
+                    witness_report.failed_checks,
+                    witness_report.errored_checks
+                ),
+                Color::Ansi(status_color),
+                true,
+            )?;
+        config.log_info(|config| {
+            // TODO: Add more information here about witnesses
+            writeln!(
+                config.stdout(),
+                "\n{}Information:{}\nWitnesses of failures have been generated, if applicable.\n{:>12} {}\n",
+                Style::new().bold(),
+                Reset,
+                "path:",
+                witness_report.witness_set_dir.display()
+            )?;
+            Ok(())
+        })?;
+
+        for (lint_result, check_result) in report.lint_results.iter().filter_map(|result| {
+            result
+                .witness_results
+                .as_ref()
+                .and_then(|check_result| check_result.has_errored_check.then_some(check_result))
+                .map(|check_result| (result, check_result))
+        }) {
+            config.log_info(|config| {
+                writeln!(
+                    config.stdout(),
+                    "\n--- witness failure {}: {} ---\n",
+                    lint_result.semver_query.id,
+                    lint_result.semver_query.human_readable_name
+                )?;
+                Ok(())
+            })?;
+
+            print_errored_or_failed_witness(config, check_result)?;
+        }
+    }
 
     Ok(())
 }
