@@ -514,7 +514,7 @@ fn run_cargo_doc(
 
         writeln!(
             message,
-            "note: the following command can be used to reproduce the compilation error:"
+            "note: the following command can be used to reproduce the error:"
         )
         .expect("formatting failed");
 
