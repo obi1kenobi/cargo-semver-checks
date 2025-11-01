@@ -367,7 +367,6 @@ mod tests {
     use anyhow::Context;
     use fs_err::PathExt;
     use rayon::prelude::*;
-    use semver::Version;
     use serde::{Deserialize, Serialize};
     use toml::Value;
     use trustfall::{FieldValue, TransparentValue};
@@ -1040,54 +1039,6 @@ mod tests {
             value.sort_unstable_by_key(key_func);
         }
 
-        // TODO: Remove this once Rust 1.90 is the oldest Rust supported by cargo-semver-checks.
-        // These snapshots don't match on older Rust because of a bug
-        // that inappropriately considers `#[target_feature]` safe functions to be unsafe.
-        if matches!(
-            query_name,
-            "function_no_longer_unsafe"
-                | "function_unsafe_added"
-                | "inherent_method_unsafe_added"
-                | "safe_function_requires_more_target_features"
-                | "safe_function_target_feature_added"
-                | "safe_inherent_method_requires_more_target_features"
-                | "safe_inherent_method_target_feature_added"
-                | "unsafe_function_requires_more_target_features"
-                | "unsafe_function_target_feature_added"
-                | "unsafe_inherent_method_requires_more_target_features"
-                | "unsafe_inherent_method_target_feature_added"
-        ) && rustc_version::version().is_ok_and(|version| version < Version::new(1, 90, 0))
-        {
-            eprintln!(
-                "skipping query execution test for lint `{query_name}` due to bug in its version of rustdoc"
-            );
-            return;
-        }
-
-        // TODO: Remove this when Rust 1.89 is no longer supported by cargo-semver-checks.
-        // A change in the rustdoc JSON representation for `#[must_use]` in that version
-        // made the lint logic not match the attribute.
-        if matches!(
-            query_name,
-            "enum_must_use_added"
-                | "enum_must_use_removed"
-                | "function_must_use_added"
-                | "function_must_use_removed"
-                | "inherent_method_must_use_added"
-                | "struct_must_use_added"
-                | "struct_must_use_removed"
-                | "trait_must_use_added"
-                | "union_must_use_added"
-                | "union_must_use_removed"
-        ) && rustc_version::version()
-            .is_ok_and(|version| version.major == 1 && version.minor == 89)
-        {
-            eprintln!(
-                "skipping query execution test for lint `{query_name}` because its rustdoc JSON representation in Rust 1.89 isn't actually legal Rust"
-            );
-            return;
-        }
-
         insta::with_settings!(
             {
                 prepend_module_to_snapshot => false,
@@ -1113,30 +1064,18 @@ mod tests {
 
         let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
-            // TODO: Remove this once Rust 1.90 is the oldest supported by cargo-semver-checks:
-            // https://github.com/rust-lang/rust/issues/142655
-            if matches!(
-                semver_query.id.as_str(),
-                "safe_function_target_feature_added"
-                    | "safe_inherent_method_target_feature_added"
-                    | "safe_function_requires_more_target_features"
-                    | "safe_inherent_method_requires_more_target_features"
-            ) {
-                // These queries don't have any results currently,
-                // since their results are obscured by the bug above.
-            } else {
-                assert!(!transparent_results.is_empty());
+            assert!(!transparent_results.is_empty());
 
-                let flattened_actual_results: Vec<_> = transparent_results
-                    .iter()
-                    .flat_map(|(_key, value)| value)
-                    .collect();
-                for semver_violation_result in flattened_actual_results {
-                    registry
-                        .render_template(&template, semver_violation_result)
-                        .with_context(|| "Error instantiating semver query template.")
-                        .expect("could not materialize template");
-                }
+            let flattened_actual_results: Vec<_> = transparent_results
+                .iter()
+                .flat_map(|(_key, value)| value)
+                .collect();
+            for semver_violation_result in flattened_actual_results {
+                registry
+                    .render_template(&template, semver_violation_result)
+                    .with_context(|| "Error instantiating semver query template.")
+                    .expect("could not materialize template");
+
             }
         }
 
