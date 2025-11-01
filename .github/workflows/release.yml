@@ -56,7 +56,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          persist-credentials: false
+          persist-credentials: true
+          token: ${{ secrets.TAGGER_GITHUB_TOKEN }}
 
       - name: Tag the version
         env:
