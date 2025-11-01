@@ -1,6 +1,6 @@
 [package]
 name = "cargo-semver-checks"
-version = "0.44.0"
+version = "0.45.0"
 edition = "2024"
 authors = ["Predrag Gruevski <obi1kenobi82@gmail.com>"]
 license = "Apache-2.0 OR MIT"
@@ -18,8 +18,8 @@ exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "t
 trustfall = "0.8.1"  # Ensure this matches the `trustfall_core` dev-dependency version below.
 # `cargo_metadata` is used at the API boundary of `trustfall_rustdoc`,
 # so ensure the version we use for `cargo_metadata` here matches what `trustfall_rustdoc` uses too.
-trustfall_rustdoc = { version = "0.35.0", default-features = false, features = ["v53", "v55", "v56", "rayon", "rustc-hash"] }
-cargo_metadata = "0.22.0"
+trustfall_rustdoc = { version = "0.36.0", default-features = false, features = ["v53", "v55", "v56", "rayon", "rustc-hash"] }
+cargo_metadata = "0.23.0"
 # End of dependency block
 
 clap = { version = "4.5.26", features = ["derive", "cargo"] }
@@ -29,15 +29,15 @@ ron = "0.11.0"
 serde = { version = "1.0.217", features = ["derive"] }
 semver = "1.0.25"
 handlebars = "6.3.0"
-clap-cargo = { version = "0.17.0", features = ["cargo_metadata"] }
+clap-cargo = { version = "0.18.0", features = ["cargo_metadata"] }
 ignore = "0.4.23"
 clap-verbosity-flag = "3.0.2"
 log = "0.4.25"
 fs-err = "3.0.0"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
-gix = { version = "0.73", default-features = false, features = ["max-performance-safe", "revision"] }
-tame-index = { version = "0.23", features = ["sparse"] }
+gix = { version = "0.74", default-features = false, features = ["max-performance-safe", "revision"] }
+tame-index = { version = "0.24", features = ["sparse"] }
 
 human-panic = "2.0.2"
 bugreport = "0.5.1"

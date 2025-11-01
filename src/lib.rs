@@ -686,7 +686,7 @@ struct Bumps {
 
 impl Bumps {
     /// Minimum bump required to respect semver.
-    /// For example, if the crate contains breaking changes, this is [`Some(RequiredSemverUpdate::Major)`].
+    /// For example, if the crate contains breaking changes, this is `Some(RequiredSemverUpdate::Major)`.
     /// If no additional bump is required, this is [`Option::None`].
     pub fn update_type(&self) -> Option<RequiredSemverUpdate> {
         if self.major > 0 {

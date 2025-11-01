@@ -514,16 +514,21 @@ fn run_cargo_doc(
 
         writeln!(
             message,
-            "note: the following command can be used to reproduce the compilation error:"
+            "note: the following command can be used to reproduce the error:"
         )
         .expect("formatting failed");
 
         let repro_base = produce_repro_workspace_shell_commands(request);
+        let build_target_flag = if let Some(build_target) = request.build_target {
+            format!(" --target {build_target}")
+        } else {
+            String::new()
+        };
         writeln!(
             message,
             "\
-{repro_base}cargo check &&
-          cargo doc"
+{repro_base}cargo check{build_target_flag} &&
+          cargo doc{build_target_flag}"
         )
         .expect("formatting failed");
 
