@@ -1075,7 +1075,6 @@ mod tests {
                     .render_template(&template, semver_violation_result)
                     .with_context(|| "Error instantiating semver query template.")
                     .expect("could not materialize template");
-
             }
         }
 
