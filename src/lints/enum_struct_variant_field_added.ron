@@ -93,7 +93,7 @@ SemverQuery(
     _ => (),
 }"#,
         witness_template: r#"fn witness_fn(witness: {{ join "::" path}}) {
-    match value {
+    match witness {
         {{ join "::" path }}::{{ variant_name }} { {{ join ", " baseline_field_names }} } => (),
         _ => (),
     }
