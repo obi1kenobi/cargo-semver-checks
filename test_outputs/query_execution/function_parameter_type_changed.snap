@@ -399,6 +399,45 @@ expression: "&query_execution_results"
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "current_signature": String("fn explicit_arg_to_impl_trait(_: impl Into<i64>)"),
+      "name": String("explicit_arg_to_impl_trait"),
+      "old_signature": String("fn explicit_arg_to_impl_trait(_: i64)"),
+      "path": List([
+        String("function_parameter_type_changed"),
+        String("explicit_arg_to_impl_trait"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_signature": String("fn impl_trait_to_generic<T: Into<i64>>(_: T)"),
+      "name": String("impl_trait_to_generic"),
+      "old_signature": String("fn impl_trait_to_generic(_: impl Into<i64>)"),
+      "path": List([
+        String("function_parameter_type_changed"),
+        String("impl_trait_to_generic"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_signature": String("fn impl_trait_to_generic_where_bound<T>(_: T) where T: Into<i64>"),
+      "name": String("impl_trait_to_generic_where_bound"),
+      "old_signature": String("fn impl_trait_to_generic_where_bound(_: impl Into<i64>)"),
+      "path": List([
+        String("function_parameter_type_changed"),
+        String("impl_trait_to_generic_where_bound"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
   "./test_crates/function_requires_different_const_generic_params/": [
     {
