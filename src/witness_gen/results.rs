@@ -6,10 +6,17 @@ use trustfall::FieldValue;
 
 use crate::witness_gen::{SingleWitnessCheckExtraInfo, SingleWitnessCheckInfo};
 
+/// Contains data about the result of running a specific witness check for all lint results. Includes
+/// additional data if this lint runs with [`LintLogic::UseWitness`](crate::query::LintLogic::UseWitness)
+/// logic, specific to the witness logic employed.
 #[derive(Debug)]
 pub(crate) struct WitnessCheckResult {
     pub check_results: WitnessChecksResultKind,
+
+    /// Indicates if any check errored, or failed without being repurposed.
     pub has_errored_check: bool,
+
+    /// Indicates if a breaking change was found using the witness check.
     pub breaking_change_found: bool,
 }
 
@@ -21,7 +28,10 @@ impl WitnessCheckResult {
         }
     }
 
+    /// Partitions the contained data to create a [`WitnessFailures`] report.
     pub fn get_errors_and_failures(&self) -> WitnessFailures<'_> {
+        // Partition into witness runs that were run and collected a status, and those that never ran
+        // due to an early error.
         let (statuses, errors): (Vec<_>, Vec<_>) = match &self.check_results {
             WitnessChecksResultKind::Standard(results) => {
                 results.iter().map(Result::as_ref).partition_result()
@@ -34,6 +44,8 @@ impl WitnessCheckResult {
             }
         };
 
+        // Partition into witness statuses that failed (no breaking change) and those that errored.
+        // Successes are discarded.
         let (failed_status, errored_status): (Vec<_>, Vec<_>) = statuses
             .iter()
             .filter_map(|status| match status {
@@ -51,25 +63,34 @@ impl WitnessCheckResult {
     }
 }
 
+/// Report about a particular lint's witness failures. Contains vectors with errors and diagnostic
+/// data.
 pub(crate) struct WitnessFailures<'a> {
     pub errors: Vec<&'a anyhow::Error>,
     pub failed_status: Vec<&'a SingleWitnessCheckInfo>,
     pub errored_status: Vec<&'a SingleWitnessCheckExtraInfo>,
 }
 
+/// Contains data about the check statuses for all runs of a witness. Also contains additional data
+/// as necessary about the results of witness logic that was run.
 #[derive(Debug)]
 pub(crate) enum WitnessChecksResultKind {
     Standard(Vec<Result<WitnessCheckStatus>>),
     WitnessLogic(WitnessLogicKinds),
 }
 
+/// Data about witness logic runs. May contain any form of additional data on top of the check status.
 #[derive(Debug)]
 pub(crate) enum WitnessLogicKinds {
+    /// Includes the modified version of the lint's data map, including any data injected by extracting
+    /// the function arguments.
     ExtractFuncArgs(WitnessLogicKind<BTreeMap<Arc<str>, FieldValue>>),
 }
 
 type WitnessLogicKind<T> = Vec<Result<(WitnessCheckStatus, T)>>;
 
+/// The resulting status of a successfully run witness check. Specifically, indicates if a breaking change
+/// was discovered or not.
 #[derive(Debug)]
 pub(crate) enum WitnessCheckStatus {
     /// Indicates that `baseline` checked but `current` did not, which is the expected result
@@ -91,7 +112,7 @@ impl WitnessCheckStatus {
         matches!(self, WitnessCheckStatus::BreakingChange)
     }
 
-    pub(crate) fn errored(&self) -> bool {
+    pub(crate) fn is_errored(&self) -> bool {
         matches!(self, WitnessCheckStatus::ErroredCase { .. })
     }
 }
