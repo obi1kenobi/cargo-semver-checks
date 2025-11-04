@@ -9,6 +9,7 @@ mod query;
 mod rustdoc_gen;
 mod templating;
 mod util;
+mod witness_gen;
 
 use anyhow::Context;
 use cargo_metadata::PackageId;
@@ -21,8 +22,9 @@ use serde::Serialize;
 use std::collections::{BTreeMap, HashSet};
 use std::io::Write as _;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
-use check_release::run_check_release;
+use check_release::{LintResult, run_check_release};
 use rustdoc_gen::CrateDataForRustdoc;
 
 pub use config::{FeatureFlag, GlobalConfig};
@@ -237,6 +239,12 @@ impl Scope {
     }
 }
 
+struct CrateToCheck<'a> {
+    overrides: OverrideStack,
+    current_crate_data: CrateDataForRustdoc<'a>,
+    baseline_crate_data: CrateDataForRustdoc<'a>,
+}
+
 /// Is the specified target able to be semver-checked as a library, of any sort.
 ///
 /// This is a broader definition than cargo's own "lib" definition, since we can also
@@ -364,24 +372,20 @@ impl Check {
         &self,
         config: &mut GlobalConfig,
         source: &RustdocSource,
-    ) -> anyhow::Result<Box<dyn rustdoc_gen::RustdocGenerator>> {
+    ) -> anyhow::Result<rustdoc_gen::RustdocGenerator> {
         let target_dir = self.get_target_dir(source)?;
         Ok(match source {
             RustdocSource::Rustdoc(path) => {
-                Box::new(rustdoc_gen::RustdocFromFile::new(path.to_owned()))
+                rustdoc_gen::RustdocFromFile::new(path.to_owned()).into()
             }
             RustdocSource::Root(root) => {
-                Box::new(rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?)
+                rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?.into()
             }
             RustdocSource::Revision(root, rev) => {
                 let metadata = manifest_metadata_no_deps(root)?;
                 let source = metadata.workspace_root.as_std_path();
-                Box::new(rustdoc_gen::RustdocFromGitRevision::with_rev(
-                    source,
-                    &target_dir,
-                    rev,
-                    config,
-                )?)
+                rustdoc_gen::RustdocFromGitRevision::with_rev(source, &target_dir, rev, config)?
+                    .into()
             }
             RustdocSource::VersionFromRegistry(version) => {
                 let mut registry = rustdoc_gen::RustdocFromRegistry::new(&target_dir, config)?;
@@ -389,7 +393,7 @@ impl Check {
                     let semver = semver::Version::parse(ver)?;
                     registry.set_version(semver);
                 }
-                Box::new(registry)
+                registry.into()
             }
         })
     }
@@ -411,11 +415,15 @@ impl Check {
                 Ok(rustc_version) => {
                     if rustc_version < *rustc_version_needed {
                         let help = "HELP: to use the latest rustc, run `rustup update stable && cargo +stable semver-checks <args>`";
-                        anyhow::bail!("rustc version is not high enough: >={rustc_version_needed} needed, got {rustc_version}\n\n{help}");
+                        anyhow::bail!(
+                            "rustc version is not high enough: >={rustc_version_needed} needed, got {rustc_version}\n\n{help}"
+                        );
                     }
                 }
                 Err(error) => {
-                    let help = format!("HELP: to avoid errors please ensure rustc >={rustc_version_needed} is used");
+                    let help = format!(
+                        "HELP: to avoid errors please ensure rustc >={rustc_version_needed} is used"
+                    );
                     config.shell_warn(format_args!(
                         "failed to determine the current rustc version: {error}\n\n{help}"
                     ))?;
@@ -423,79 +431,45 @@ impl Check {
             };
         }
 
-        let current_loader = self.get_rustdoc_generator(config, &self.current.source)?;
-        let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
-
-        // Create a report for each crate.
-        // We want to run all the checks, even if one returns `Err`.
-        let all_outcomes: Vec<anyhow::Result<(String, Option<CrateReport>)>> = match &self
-            .current
-            .source
-        {
+        let crates_to_check: Vec<CrateToCheck<'_>> = match &self.current.source {
             RustdocSource::Rustdoc(_)
             | RustdocSource::Revision(_, _)
             | RustdocSource::VersionFromRegistry(_) => {
                 let names = match &self.scope.mode {
-                    ScopeMode::DenyList(_) =>
-                        match &self.current.source {
-                            RustdocSource::Rustdoc(_) =>
-                                // This is a user-facing string.
-                                // For example, it appears when two pre-generated rustdoc files
-                                // are semver-checked against each other.
-                                vec!["<unknown>".to_string()],
-                            _ => panic!("couldn't deduce crate name, specify one through the package allow list")
+                    ScopeMode::DenyList(_) => match &self.current.source {
+                        RustdocSource::Rustdoc(_) => {
+                            // This is a user-facing string.
+                            // For example, it appears when two pre-generated rustdoc files
+                            // are semver-checked against each other.
+                            vec!["<unknown>".to_string()]
                         }
+                        _ => anyhow::bail!(
+                            "couldn't deduce crate name, specify one through the package allow list"
+                        ),
+                    },
                     ScopeMode::AllowList(lst) => lst.clone(),
                 };
                 names
                     .into_iter()
                     .map(|name| {
-                        let start = std::time::Instant::now();
                         let version = None;
-                        let data_storage = match generate_crate_data(
-                            config,
-                            generation_settings,
-                            &*current_loader,
-                            &*baseline_loader,
-                            CrateDataForRustdoc {
+                        CrateToCheck {
+                            overrides: OverrideStack::new(),
+                            current_crate_data: CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Current,
-                                name: &name,
+                                name: name.clone(),
                                 feature_config: &self.current_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
-                            CrateDataForRustdoc {
+                            baseline_crate_data: CrateDataForRustdoc {
                                 crate_type: rustdoc_gen::CrateType::Baseline {
                                     highest_allowed_version: version,
                                 },
-                                name: &name,
+                                name,
                                 feature_config: &self.baseline_feature_config,
                                 build_target: self.build_target.as_deref(),
                             },
-                        ) {
-                            Ok(data) => data,
-                            Err(TerminalError::WithAdvice(err, advice)) => {
-                                config.log_error(|config| {
-                                    writeln!(config.stderr(), "{advice}")?;
-                                    Ok(())
-                                })?;
-                                return Err(err);
-                            }
-                            Err(TerminalError::Other(err)) => return Err(err),
-                        };
-
-                        let report = run_check_release(
-                            config,
-                            &data_storage,
-                            &name,
-                            self.release_type,
-                            &OverrideStack::new(),
-                            &self.witness_generation,
-                        )?;
-                        config.shell_status(
-                            "Finished",
-                            format_args!("[{:>8.3}s] {name}", start.elapsed().as_secs_f32()),
-                        )?;
-                        Ok((name, Some(report)))
+                        }
                     })
                     .collect()
             }
@@ -543,107 +517,182 @@ note: skipped the following crates since they have no library target: {skipped}"
                                     format_args!("{crate_name} v{version} (current)"),
                                 )
                             })?;
-                            Ok((crate_name.clone(), None))
+                            Ok(None)
                         } else {
-                            let package_overrides =
-                                manifest::deserialize_lint_table(&selected.metadata)
-                                    .with_context(|| {
-                                        format!(
-                                    "package `{}`'s [package.metadata.cargo-semver-checks] table is invalid (at {})",
-                                    selected.name,
-                                    selected.manifest_path,
-                                )
-                                    })?;
+                            let overrides = overrides_for_workspace_package(
+                                selected,
+                                workspace_overrides.as_deref(),
+                            )?;
 
-                            let mut overrides = OverrideStack::new();
-
-                            let selected_manifest = manifest::Manifest::parse(selected.manifest_path.clone().into_std_path_buf())?;
-                            // the key `lints.workspace` for the Cargo lints table
-                            let lint_workspace_key = selected_manifest.parsed.lints.is_some_and(|x| x.workspace);
-                            let metadata_workspace_key = package_overrides.as_ref().is_some_and(|x| x.workspace);
-
-                            if lint_workspace_key || metadata_workspace_key {
-                                if let Some(workspace) = &workspace_overrides {
-                                    for level in workspace {
-                                        overrides.push(level);
-                                    }
-                                }
-                            }
-
-                            if let Some(package) = package_overrides {
-                                for level in package.into_stack() {
-                                    overrides.push(&level);
-                                }
-                            }
-
-                            let start = std::time::Instant::now();
-                            let data_storage = match generate_crate_data(
-                                config,
-                                generation_settings,
-                                &*current_loader,
-                                &*baseline_loader,
-                                CrateDataForRustdoc {
+                            Ok(Some(CrateToCheck {
+                                overrides,
+                                current_crate_data: CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Current,
-                                    name: crate_name,
+                                    name: crate_name.to_string(),
                                     feature_config: &self.current_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
-                                CrateDataForRustdoc {
+                                baseline_crate_data: CrateDataForRustdoc {
                                     crate_type: rustdoc_gen::CrateType::Baseline {
-                                        highest_allowed_version: Some(version),
+                                        highest_allowed_version: Some(version.clone()),
                                     },
-                                    name: crate_name,
+                                    name: crate_name.to_string(),
                                     feature_config: &self.baseline_feature_config,
                                     build_target: self.build_target.as_deref(),
                                 },
-                            ) {
-                                Ok(data) => data,
-                                Err(TerminalError::WithAdvice(err, advice)) => {
-                                    config.log_error(|config| {
-                                        writeln!(config.stderr(), "{advice}")?;
-                                        Ok(())
-                                    })?;
-                                    return Err(err);
-                                }
-                                Err(TerminalError::Other(err)) => return Err(err),
-                            };
-
-                            let result = Ok((
-                                crate_name.clone(),
-                                Some(run_check_release(
-                                    config,
-                                    &data_storage,
-                                    crate_name,
-                                    self.release_type,
-                                    &overrides,
-                                    &self.witness_generation
-                                )?),
-                            ));
-                            config.shell_status(
-                                "Finished",
-                                format_args!(
-                                    "[{:>8.3}s] {crate_name}",
-                                    start.elapsed().as_secs_f32()
-                                ),
-                            )?;
-                            result
+                            }))
                         }
                     })
-                    .collect()
+                    .filter_map(|res| res.transpose())
+                    .collect::<Result<Vec<_>, anyhow::Error>>()?
             }
         };
+
+        let current_loader = self.get_rustdoc_generator(config, &self.current.source)?;
+        let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
+
+        // Create a report for each crate.
+        // We want to run all the checks, even if one returns `Err`.
+        let all_outcomes: Vec<anyhow::Result<(String, CrateReport)>> = crates_to_check
+            .into_iter()
+            .map(|selected| {
+                let start = std::time::Instant::now();
+                let name = selected.current_crate_data.name.clone();
+
+                let current_loader = rustdoc_gen::StatefulRustdocGenerator::couple_data(
+                    &current_loader,
+                    config,
+                    &selected.current_crate_data,
+                )
+                .map_err(|err| log_terminal_error(config, err))?;
+                let baseline_loader = rustdoc_gen::StatefulRustdocGenerator::couple_data(
+                    &baseline_loader,
+                    config,
+                    &selected.baseline_crate_data,
+                )
+                .map_err(|err| log_terminal_error(config, err))?;
+
+                let current_loader = current_loader
+                    .prepare_generator(config)
+                    .map_err(|err| log_terminal_error(config, err))?;
+                let baseline_loader = baseline_loader
+                    .prepare_generator(config)
+                    .map_err(|err| log_terminal_error(config, err))?;
+
+                let witness_data = witness_gen::WitnessGenerationData::new(
+                    baseline_loader.get_data_request(),
+                    current_loader.get_data_request(),
+                    current_loader.get_target_root(),
+                );
+
+                let data_storage = generate_crate_data(
+                    config,
+                    generation_settings,
+                    &current_loader,
+                    &baseline_loader,
+                )
+                .map_err(|err| log_terminal_error(config, err))?;
+
+                let report = run_check_release(
+                    config,
+                    &data_storage,
+                    &name,
+                    self.release_type,
+                    &selected.overrides,
+                    &self.witness_generation,
+                    witness_data,
+                )?;
+                config.shell_status(
+                    "Finished",
+                    format_args!("[{:>8.3}s] {name}", start.elapsed().as_secs_f32()),
+                )?;
+                Ok((name, report))
+            })
+            .collect();
         let crate_reports: BTreeMap<String, CrateReport> = {
             let mut reports = BTreeMap::new();
             for outcome in all_outcomes {
                 let (name, outcome) = outcome?;
-                if let Some(outcome) = outcome {
-                    reports.insert(name, outcome);
-                }
+                reports.insert(name, outcome);
             }
             reports
         };
 
         Ok(Report { crate_reports })
+    }
+}
+
+fn overrides_for_workspace_package(
+    package: &cargo_metadata::Package,
+    workspace_overrides: Option<&[BTreeMap<String, QueryOverride>]>,
+) -> Result<OverrideStack, anyhow::Error> {
+    let lint_table = manifest::deserialize_lint_table(&package.metadata).with_context(|| {
+        format!(
+            "package `{}`'s [package.metadata.cargo-semver-checks] table is invalid (at {})",
+            package.name, package.manifest_path,
+        )
+    })?;
+    let selected_manifest =
+        manifest::Manifest::parse_standalone(package.manifest_path.clone().into_std_path_buf())?;
+
+    // N.B.: Do not use `==` here, because `==` is false for inherited values.
+    let use_workspace_lints = matches!(
+        selected_manifest.parsed.lints,
+        cargo_toml::Inheritable::Inherited
+    );
+    let metadata_workspace_key = lint_table.as_ref().is_some_and(|x| x.workspace);
+
+    let mut overrides = OverrideStack::new();
+    if (use_workspace_lints || metadata_workspace_key)
+        && let Some(workspace) = workspace_overrides
+    {
+        for level in workspace {
+            overrides.push(level);
+        }
+    }
+    if let Some(lint_table) = lint_table {
+        for level in lint_table.into_stack() {
+            overrides.push(&level);
+        }
+    }
+    Ok(overrides)
+}
+
+#[cold]
+fn log_terminal_error(config: &mut GlobalConfig, err: TerminalError) -> anyhow::Error {
+    match err {
+        TerminalError::WithAdvice(err, advice) => {
+            if let Err(err) = config.log_error(|config| {
+                writeln!(config.stderr(), "{advice}")?;
+                Ok(())
+            }) {
+                return err;
+            }
+            err
+        }
+        TerminalError::Other(err) => err,
+    }
+}
+
+/// Summary of version bumps from queries
+#[derive(Debug)]
+struct Bumps {
+    major: u32,
+    minor: u32,
+}
+
+impl Bumps {
+    /// Minimum bump required to respect semver.
+    /// For example, if the crate contains breaking changes, this is `Some(RequiredSemverUpdate::Major)`.
+    /// If no additional bump is required, this is [`Option::None`].
+    pub fn update_type(&self) -> Option<RequiredSemverUpdate> {
+        if self.major > 0 {
+            Some(RequiredSemverUpdate::Major)
+        } else if self.minor > 0 {
+            Some(RequiredSemverUpdate::Minor)
+        } else {
+            None
+        }
     }
 }
 
@@ -654,16 +703,24 @@ pub struct CrateReport {
     /// Bump between the current version and the baseline one.
     detected_bump: ActualSemverUpdate,
     /// Minimum additional bump (on top of `detected_bump`) required to respect semver.
-    /// For example, if the crate contains breaking changes, this is [`Some(ReleaseType::Major)`].
-    /// If no additional bump beyond the already-detected one is required, this is [`Option::None`].
-    required_bump: Option<ReleaseType>,
+    required_bumps: Bumps,
+    /// Numbers of warning-level lints requiring minor and major bumps
+    suggested_bumps: Bumps,
+    /// Detailed information about individual lints
+    lint_results: Vec<LintResult>,
+    /// How long it took to run the selected queries
+    checks_duration: Duration,
+    /// Number of queries run
+    selected_checks: usize,
+    /// Number of ignored queries
+    skipped_checks: usize,
 }
 
 impl CrateReport {
     /// Check if the semver check was successful.
     /// `true` if required bump <= detected bump.
     pub fn success(&self) -> bool {
-        match self.required_bump {
+        match self.required_bumps.update_type().map(ReleaseType::from) {
             // If `None`, no additional bump is required.
             None => true,
             // If `Some`, additional bump is required, so the report is not successful.
@@ -673,10 +730,9 @@ impl CrateReport {
                 match self.detected_bump {
                     // If user bumped the major version, any breaking change is accepted.
                     // So `required_bump` should be `None`.
-                    ActualSemverUpdate::Major => panic!(
-                        "detected_bump is major, while required_bump is {:?}",
-                        required_bump
-                    ),
+                    ActualSemverUpdate::Major => {
+                        panic!("detected_bump is major, while required_bump is {required_bump:?}")
+                    }
                     ActualSemverUpdate::Minor => {
                         assert_eq!(required_bump, ReleaseType::Major);
                     }
@@ -695,7 +751,7 @@ impl CrateReport {
     /// Minimum bump required to respect semver.
     /// It's [`Option::None`] if no bump is required beyond the already-detected bump.
     pub fn required_bump(&self) -> Option<ReleaseType> {
-        self.required_bump
+        self.required_bumps.update_type().map(ReleaseType::from)
     }
 
     /// Bump between the current version and the baseline one.
@@ -735,9 +791,9 @@ pub struct WitnessGeneration {
     /// Whether to print witness hints, short examples that show why a change is breaking,
     /// while not necessarily buildable standalone programs.  See [`Witness::hint_template`].
     pub show_hints: bool,
-    /// Optional directory to write full witness examples to.  If this is `None`, full witnesses
-    /// will not be generated.  See [`Witness::witness_template`].
-    pub witness_directory: Option<PathBuf>,
+    /// Whether to generate witness programs: longer, fully valid and compilable examples
+    /// of a breaking change. See [`Witness::witness_template`] and [`Witness::witness_query`].
+    pub generate_witnesses: bool,
 }
 
 impl WitnessGeneration {
@@ -747,7 +803,7 @@ impl WitnessGeneration {
     pub const fn new() -> Self {
         Self {
             show_hints: false,
-            witness_directory: None,
+            generate_witnesses: false,
         }
     }
 }
@@ -755,19 +811,16 @@ impl WitnessGeneration {
 fn generate_crate_data(
     config: &mut GlobalConfig,
     generation_settings: data_generation::GenerationSettings,
-    current_loader: &dyn rustdoc_gen::RustdocGenerator,
-    baseline_loader: &dyn rustdoc_gen::RustdocGenerator,
-    current_crate_data: rustdoc_gen::CrateDataForRustdoc,
-    baseline_crate_data: rustdoc_gen::CrateDataForRustdoc,
+    current_loader: &rustdoc_gen::StatefulRustdocGenerator<'_, rustdoc_gen::ReadyState<'_>>,
+    baseline_loader: &rustdoc_gen::StatefulRustdocGenerator<'_, rustdoc_gen::ReadyState<'_>>,
 ) -> Result<DataStorage, TerminalError> {
     let current_crate = current_loader.load_rustdoc(
         config,
         generation_settings,
         data_generation::CacheSettings::ReadWrite(()),
-        current_crate_data,
     )?;
 
-    let baseline_crate_name = baseline_crate_data.name;
+    let baseline_crate_name = &baseline_loader.get_crate_data().name;
     let current_rustdoc_version = current_crate.version();
 
     let baseline_crate = {
@@ -775,7 +828,6 @@ fn generate_crate_data(
             config,
             generation_settings,
             data_generation::CacheSettings::ReadWrite(()),
-            baseline_crate_data.clone(),
         )?;
 
         // The baseline rustdoc JSON may have been cached; ensure its rustdoc version matches
@@ -798,14 +850,13 @@ fn generate_crate_data(
                 config,
                 generation_settings,
                 data_generation::CacheSettings::WriteOnly(()),
-                baseline_crate_data,
             )?;
 
             assert_eq!(
                 baseline_crate.version(),
                 current_rustdoc_version,
                 "Deleting and regenerating the baseline JSON file did not resolve the rustdoc \
-                version mismatch."
+                 version mismatch."
             );
         }
 
@@ -836,7 +887,7 @@ fn manifest_path(project_root: &Path) -> anyhow::Result<PathBuf> {
         Ok(project_root.to_path_buf())
     } else {
         anyhow::bail!(
-            "path {} is not a directory or a manifest",
+            "path '{}' is not a directory or a manifest",
             project_root.display()
         )
     }

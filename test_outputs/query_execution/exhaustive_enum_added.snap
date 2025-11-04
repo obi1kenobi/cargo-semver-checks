@@ -1,0 +1,333 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_must_use_added/": [
+    {
+      "name": String("MustUseNewEnum"),
+      "path": List([
+        String("enum_must_use_added"),
+        String("MustUseNewEnum"),
+      ]),
+      "span_begin_line": Uint64(62),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_repr_int_removed/": [
+    {
+      "name": String("U8CEnumToCEnum"),
+      "path": List([
+        String("enum_repr_int_removed"),
+        String("U8CEnumToCEnum"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("SeparateU8CEnumToCEnum"),
+      "path": List([
+        String("enum_repr_int_removed"),
+        String("SeparateU8CEnumToCEnum"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("SeparateCU8EnumToCEnum"),
+      "path": List([
+        String("enum_repr_int_removed"),
+        String("SeparateCU8EnumToCEnum"),
+      ]),
+      "span_begin_line": Uint64(42),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_struct_variant_field_marked_deprecated/": [
+    {
+      "name": String("NewEnumWithDeprecatedFields"),
+      "path": List([
+        String("enum_struct_variant_field_marked_deprecated"),
+        String("NewEnumWithDeprecatedFields"),
+      ]),
+      "span_begin_line": Uint64(129),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_tuple_variant_field_added/": [
+    {
+      "name": String("BecomesPublicEnum"),
+      "path": List([
+        String("enum_tuple_variant_field_added"),
+        String("BecomesPublicEnum"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_tuple_variant_field_missing/": [
+    {
+      "name": String("BecomesPublicEnum"),
+      "path": List([
+        String("enum_tuple_variant_field_missing"),
+        String("BecomesPublicEnum"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_variant_marked_deprecated/": [
+    {
+      "name": String("NewEnumWithDeprecatedVariants"),
+      "path": List([
+        String("enum_variant_marked_deprecated"),
+        String("NewEnumWithDeprecatedVariants"),
+      ]),
+      "span_begin_line": Uint64(81),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/exhaustive_enum_added/": [
+    {
+      "name": String("NewEnum"),
+      "path": List([
+        String("exhaustive_enum_added"),
+        String("NewEnum"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/inherent_method_must_use_added/": [
+    {
+      "name": String("NewEnumWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("enum_inherent_method_must_use_added"),
+        String("NewEnumWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(71),
+      "span_filename": String("src/enum_inherent_method_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("StructToEnumWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("StructToEnumWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(68),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToEnumWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("UnionToEnumWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(130),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_moved_to_trait_must_use_added/": [
+    {
+      "name": String("NewEnumWithTraitMustUseMethods"),
+      "path": List([
+        String("method_moved_to_trait_must_use_added"),
+        String("enum_method_moved_to_trait_must_use_added"),
+        String("NewEnumWithTraitMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(155),
+      "span_filename": String("src/enum_method_moved_to_trait_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/non_exhaustive_enum_added/": [
+    {
+      "name": String("ExhaustiveEnum"),
+      "path": List([
+        String("non_exhaustive_enum_added"),
+        String("ExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/non_exhaustive_struct_changed_type/": [
+    {
+      "name": String("PubNonExhaustiveStructChangedToEnum"),
+      "path": List([
+        String("non_exhaustive_struct_changed_type"),
+        String("PubNonExhaustiveStructChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/nonbreaking_item_rename/": [
+    {
+      "name": String("NewEnum"),
+      "path": List([
+        String("nonbreaking_item_rename"),
+        String("NewEnum"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/struct_becomes_enum/": [
+    {
+      "name": String("PubFieldTuple"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("PubFieldTuple"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PubFieldStruct"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("PubFieldStruct"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("ConstructibleFieldlessUnit"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("ConstructibleFieldlessUnit"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("ConstructibleFieldlessTuple"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("ConstructibleFieldlessTuple"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("ConstructibleFieldlessStruct"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("ConstructibleFieldlessStruct"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("TupleToEnum"),
+      "path": List([
+        String("struct_becomes_enum"),
+        String("TupleToEnum"),
+      ]),
+      "span_begin_line": Uint64(47),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/struct_with_no_pub_fields_changed_type/": [
+    {
+      "name": String("PubStructChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PubStructWithNonPubDocFieldChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithNonPubDocFieldChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithNonPubDocFieldAndNonPubFieldChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PubStructWithPubFieldChangedToEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructWithPubFieldChangedToEnum"),
+      ]),
+      "span_begin_line": Uint64(64),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PubStructChangedToNoFieldsEnum"),
+      "path": List([
+        String("struct_with_no_pub_fields_changed_type"),
+        String("PubStructChangedToNoFieldsEnum"),
+      ]),
+      "span_begin_line": Uint64(82),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/switch_away_from_reexport_as_underscore/": [
+    {
+      "name": String("Enum"),
+      "path": List([
+        String("switch_away_from_reexport_as_underscore"),
+        String("Enum"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/type_marked_deprecated/": [
+    {
+      "name": String("DeprecatedNewEnum"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("enums"),
+        String("DeprecatedNewEnum"),
+      ]),
+      "span_begin_line": Uint64(54),
+      "span_filename": String("src/enums.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

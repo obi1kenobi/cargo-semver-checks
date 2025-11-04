@@ -1,0 +1,58 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/function_must_use_added/": [
+    {
+      "name": String("MustUseFunctionToFunction"),
+      "old_attr": String("#[must_use]"),
+      "path": List([
+        String("function_must_use_added"),
+        String("MustUseFunctionToFunction"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MustUseMessageFunctionToFunction"),
+      "old_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("function_must_use_added"),
+        String("MustUseMessageFunctionToFunction"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_must_use_removed/": [
+    {
+      "name": String("MustUseFunctionToFunction"),
+      "old_attr": String("#[must_use]"),
+      "path": List([
+        String("function_must_use_removed"),
+        String("MustUseFunctionToFunction"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MustUseMessageFunctionToFunction"),
+      "old_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("function_must_use_removed"),
+        String("MustUseMessageFunctionToFunction"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

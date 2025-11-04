@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/trait_added_supertrait/": [
@@ -97,6 +96,43 @@ snapshot_kind: text
       "span_end_line": Uint64(24),
       "span_filename": String("src/lib.rs"),
       "supertrait": String("Sealed"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_return_value_added/": [
+    {
+      "path": List([
+        String("trait_method_return_value_added"),
+        String("NewlySealed"),
+      ]),
+      "span_begin_line": Uint64(36),
+      "span_end_line": Uint64(38),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("PublicSealed"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_target_feature_removed/": [
+    {
+      "path": List([
+        String("trait_method_target_feature_removed"),
+        String("FeatureRemovedAndSealed"),
+      ]),
+      "span_begin_line": Uint64(78),
+      "span_end_line": Uint64(80),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("Sealed"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "path": List([
+        String("trait_method_target_feature_removed"),
+        String("FeatureRemovedAndPubApiSealed"),
+      ]),
+      "span_begin_line": Uint64(85),
+      "span_end_line": Uint64(87),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("Hidden"),
       "visibility_limit": String("public"),
     },
   ],

@@ -1,0 +1,42 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/unsafe_inherent_method_target_feature_added/": [
+    {
+      "currently_unsafe": Boolean(true),
+      "feature_names": List([
+        String("avx"),
+      ]),
+      "method_name": String("foo"),
+      "method_visibility": String("public"),
+      "name": String("A"),
+      "path": List([
+        String("unsafe_inherent_method_target_feature_added"),
+        String("A"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "currently_unsafe": Boolean(false),
+      "feature_names": List([
+        String("avx"),
+      ]),
+      "method_name": String("becomes_safe"),
+      "method_visibility": String("public"),
+      "name": String("A"),
+      "path": List([
+        String("unsafe_inherent_method_target_feature_added"),
+        String("A"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

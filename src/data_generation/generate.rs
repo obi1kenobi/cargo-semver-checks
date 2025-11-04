@@ -84,7 +84,6 @@ pub(super) fn generate_rustdoc(
             crate_name,
             version,
             request,
-            build_dir,
             placeholder_manifest_path.as_path(),
             &settings,
         ) {
@@ -95,7 +94,9 @@ pub(super) fn generate_rustdoc(
                 return Err(TerminalError::Other(error));
             }
             CargoUpdateResult::ErrorReturned(_exit_status, message) => {
-                let error = anyhow::anyhow!("aborting due to failure to run 'cargo update' for crate {crate_name} v{version}");
+                let error = anyhow::anyhow!(
+                    "aborting due to failure to run 'cargo update' for crate {crate_name} v{version}"
+                );
                 return Err(TerminalError::WithAdvice(error, message));
             }
         }
@@ -135,6 +136,8 @@ fn produce_repro_workspace_shell_commands(request: &CrateDataRequest<'_>) -> Str
                 .path
                 .parent()
                 .expect("source Cargo.toml had no parent path")
+                .canonicalize()
+                .expect("failed to canonicalize path")
                 .to_str()
                 .expect("failed to create path string")
         ),
@@ -165,19 +168,167 @@ enum CargoUpdateResult {
     ErrorReturned(std::process::ExitStatus, String),
 }
 
+/// Determine the default target triple configured in the environment.
+fn get_default_build_target_triple(config: &cargo_config2::Config) -> anyhow::Result<String> {
+    // If `CARGO_BUILD_TARGET` is set, it dominates other options.
+    if let Ok(value) = std::env::var("CARGO_BUILD_TARGET") {
+        return Ok(value);
+    }
+
+    // `build.target` from (merged) cargo config following its precedence rules is next.
+    //
+    // Cargo supports multiple build targets, but `cargo-semver-checks` does not.
+    // If the cargo config sets multiple targets, we only look at the first one.
+    // Tracking issue: https://github.com/obi1kenobi/cargo-semver-checks/issues/1470
+    if let Some(first_build_target) = config
+        .build
+        .target
+        .iter()
+        .flat_map(|triples| triples.iter())
+        .next()
+    {
+        return Ok(first_build_target.triple().to_string());
+    }
+
+    // No build target set in cargo config. We're using the implied host target then,
+    // ask rustc what that is:
+    // ```
+    // $ rustc --print host-tuple
+    // x86_64-unknown-linux-gnu
+    // ```
+    let cmd_output = std::process::Command::new("rustc")
+        .args(["--print", "host-tuple"])
+        .output()
+        .context("'rustc --print host-tuple' failed, is Rust installed correctly?")?;
+
+    let mut triple = String::from_utf8(cmd_output.stdout)
+        .context("'rustc --print host-tuple' output is not legal UTF-8")?;
+    triple.truncate(triple.trim_end().len());
+
+    Ok(triple)
+}
+
+struct Flags {
+    rustflags: String,
+    rustdocflags: String,
+}
+
+fn decode_cargo_flags(encoded: String) -> String {
+    const SEPARATOR: char = char::from_u32(0x1f).unwrap();
+    if !encoded.contains(SEPARATOR) {
+        // Only a single flag, nothing to do.
+        return encoded;
+    }
+
+    encoded.split(SEPARATOR).join(" ")
+}
+
+impl Flags {
+    // Matching cargo's behavior:
+    // https://doc.rust-lang.org/cargo/reference/config.html#buildrustflags
+    // https://doc.rust-lang.org/cargo/reference/environment-variables.html
+    fn determine_rustflags(
+        config: &cargo_config2::Config,
+        target_triple: &str,
+    ) -> anyhow::Result<String> {
+        // First, check env vars.
+        // `CARGO_BUILD_RUSTFLAGS` or `CARGO_ENCODED_RUSTFLAGS` or `RUSTFLAGS`
+        if let Ok(rustflags) = std::env::var("CARGO_BUILD_RUSTFLAGS") {
+            return Ok(rustflags);
+        }
+        if let Ok(encoded_rustflags) = std::env::var("CARGO_ENCODED_RUSTFLAGS") {
+            // Flags are separated by `0x1f` (ASCII Unit Separator).
+            // https://doc.rust-lang.org/cargo/reference/environment-variables.html
+            //
+            // HACK(predrag): We decode the flags for now. This is arguably incorrect,
+            // and we should maybe instead encode all our flags to the `0x1f`-separated form.
+            return Ok(decode_cargo_flags(encoded_rustflags));
+        }
+        if let Ok(rustflags) = std::env::var("RUSTFLAGS") {
+            return Ok(rustflags);
+        }
+
+        // Nothing in env vars. Per the cargo docs, the next option is:
+        // All matching `target.<triple>.rustflags` and `target.<cfg>.rustflags` config entries
+        // joined together.
+        if let Some(flags) = config.rustflags(target_triple)? {
+            return Ok(flags.encode_space_separated()?);
+        }
+
+        // Nothing in target-specific rustflags. Per the cargo docs,
+        // the last option is `build.rustflags`.
+        Ok(config
+            .build
+            .rustflags
+            .as_ref()
+            .map(|flags| flags.encode_space_separated())
+            .transpose()?
+            .unwrap_or_default())
+    }
+
+    // Matching cargo's behavior:
+    // https://doc.rust-lang.org/cargo/reference/config.html#buildrustdocflags
+    // https://doc.rust-lang.org/cargo/reference/environment-variables.html
+    fn determine_rustdocflags(
+        config: &cargo_config2::Config,
+        target_triple: &str,
+    ) -> anyhow::Result<String> {
+        // First, check env vars.
+        // `CARGO_BUILD_RUSTDOCFLAGS` or `CARGO_ENCODED_RUSTDOCFLAGS` or `RUSTDOCFLAGS`
+        if let Ok(rustdocflags) = std::env::var("CARGO_BUILD_RUSTDOCFLAGS") {
+            return Ok(rustdocflags);
+        }
+        if let Ok(encoded_rustdocflags) = std::env::var("CARGO_ENCODED_RUSTDOCFLAGS") {
+            // Flags are separated by `0x1f` (ASCII Unit Separator).
+            // https://doc.rust-lang.org/cargo/reference/environment-variables.html
+            //
+            // HACK(predrag): We decode the flags for now. This is arguably incorrect,
+            // and we should maybe instead encode all our flags to the `0x1f`-separated form.
+            return Ok(decode_cargo_flags(encoded_rustdocflags));
+        }
+        if let Ok(rustdocflags) = std::env::var("RUSTDOCFLAGS") {
+            return Ok(rustdocflags);
+        }
+
+        // Nothing in env vars. Per the cargo docs, the next option is:
+        // All matching `target.<triple>.rustdocflags` config entries joined together.
+        if let Some(flags) = config.rustdocflags(target_triple)? {
+            return Ok(flags.encode_space_separated()?);
+        }
+
+        // Nothing in target-specific rustdocflags. Per the cargo docs,
+        // the last option is `build.rustdocflags`.
+        Ok(config
+            .build
+            .rustdocflags
+            .as_ref()
+            .map(|flags| flags.encode_space_separated())
+            .transpose()?
+            .unwrap_or_default())
+    }
+
+    fn from_env_and_config() -> anyhow::Result<Self> {
+        let config = cargo_config2::Config::load().context("failed to inspect cargo config")?;
+        let triple = get_default_build_target_triple(&config)?;
+
+        Ok(Self {
+            rustflags: Self::determine_rustflags(&config, &triple)?,
+            rustdocflags: Self::determine_rustdocflags(&config, &triple)?,
+        })
+    }
+}
+
 /// Run `cargo update` inside a placeholder workspace.
 fn run_cargo_update(
     crate_name: &str,
     version: &str,
     request: &CrateDataRequest<'_>,
-    build_dir: &Path,
     placeholder_manifest_path: &Path,
     settings: &GenerationSettings,
 ) -> CargoUpdateResult {
     let mut cmd = std::process::Command::new("cargo");
     cmd.stdout(std::process::Stdio::null()) // Don't pollute output
         .stderr(settings.stderr())
-        .current_dir(build_dir)
         .arg("update")
         .arg("--manifest-path")
         .arg(placeholder_manifest_path);
@@ -243,16 +394,22 @@ fn run_cargo_doc(
 ) -> Result<PathBuf, TerminalError> {
     let pkg_spec = format!("{crate_name}@{version}");
 
+    // Load the current rustflags and rustdocflags settings.
+    // We'll want to modify them.
+    let Flags {
+        rustflags: mut prior_rustflags,
+        rustdocflags: mut prior_rustdocflags,
+    } = Flags::from_env_and_config().into_terminal_result()?;
+
     // Generating rustdoc JSON for a crate also involves checking that crate's dependencies.
     // The check is done by rustc, not rustdoc, so it's subject to `RUSTFLAGS` not `RUSTDOCFLAGS`.
     // We don't want rustc to fail that check if the user has set `RUSTFLAGS="-Dwarnings"` here.
     // This fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/589
-    let rustflags = match std::env::var("RUSTFLAGS") {
-        Ok(mut prior_rustflags) => {
-            prior_rustflags.push_str(" --cap-lints=allow");
-            std::borrow::Cow::Owned(prior_rustflags)
-        }
-        Err(_) => std::borrow::Cow::Borrowed("--cap-lints=allow"),
+    let rustflags = if !prior_rustflags.is_empty() {
+        prior_rustflags.push_str(" --cap-lints=allow");
+        std::borrow::Cow::Owned(prior_rustflags)
+    } else {
+        std::borrow::Cow::Borrowed("--cap-lints=allow")
     };
 
     // Ensure we preserve `RUSTDOCFLAGS` if they are set.
@@ -260,13 +417,12 @@ fn run_cargo_doc(
     // in order to toggle what functionality is compiled into the scanned crate.
     // Suggested in: https://github.com/obi1kenobi/cargo-semver-checks/discussions/1012
     let extra_rustdocflags = "-Z unstable-options --document-private-items --document-hidden-items --output-format=json --cap-lints=allow";
-    let rustdocflags = match std::env::var("RUSTDOCFLAGS") {
-        Ok(mut prior_rustdocflags) => {
-            prior_rustdocflags.push(' ');
-            prior_rustdocflags.push_str(extra_rustdocflags);
-            std::borrow::Cow::Owned(prior_rustdocflags)
-        }
-        Err(_) => std::borrow::Cow::Borrowed(extra_rustdocflags),
+    let rustdocflags = if !prior_rustdocflags.is_empty() {
+        prior_rustdocflags.push(' ');
+        prior_rustdocflags.push_str(extra_rustdocflags);
+        std::borrow::Cow::Owned(prior_rustdocflags)
+    } else {
+        std::borrow::Cow::Borrowed(extra_rustdocflags)
     };
 
     // Run the rustdoc generation command on the placeholder crate,
@@ -337,14 +493,44 @@ fn run_cargo_doc(
             "      and is unlikely to be a bug in cargo-semver-checks"
         )
         .expect("formatting failed");
+
+        if rustflags.contains("--cfg") {
+            writeln!(
+                message,
+                "note: RUSTFLAGS appears to contain '--cfg' arguments."
+            )
+            .expect("formatting failed");
+            writeln!(
+                message,
+                "      Rustdoc only uses '--cfg' options in RUSTDOCFLAGS."
+            )
+            .expect("formatting failed");
+            writeln!(
+                message,
+                "      Setting the same flags in RUSTDOCFLAGS may resolve the problem."
+            )
+            .expect("formatting failed");
+        }
+
         writeln!(
             message,
-            "note: the following command can be used to reproduce the compilation error:"
+            "note: the following command can be used to reproduce the error:"
         )
         .expect("formatting failed");
 
         let repro_base = produce_repro_workspace_shell_commands(request);
-        writeln!(message, "{repro_base}cargo check").expect("formatting failed");
+        let build_target_flag = if let Some(build_target) = request.build_target {
+            format!(" --target {build_target}")
+        } else {
+            String::new()
+        };
+        writeln!(
+            message,
+            "\
+{repro_base}cargo check{build_target_flag} &&
+          cargo doc{build_target_flag}"
+        )
+        .expect("formatting failed");
 
         return Err(TerminalError::WithAdvice(
             anyhow::anyhow!(
@@ -376,7 +562,7 @@ fn run_cargo_doc(
     let subject_crate = metadata
         .packages
         .iter()
-        .find(|dep| dep.name == crate_name)
+        .find(|dep| dep.name.as_str() == crate_name)
         .ok_or_else(|| {
             if !observed_stderr_but_lib_msg_not_present {
                 anyhow::anyhow!("crate {crate_name} v{version} has no lib target, nothing to check")

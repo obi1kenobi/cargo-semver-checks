@@ -6,6 +6,9 @@ info:
     - semver-checks
     - "-Z"
     - help
+  env:
+    CARGO_TERM_COLOR: never
+    RUST_BACKTRACE: "0"
 ---
 success: true
 exit_code: 0
@@ -18,5 +21,8 @@ unstable-options    Enables the use of unstable CLI flags.
 Unstable options:
       --witness-hints
           Enable printing witness hints, examples of potentially-broken downstream code
+
+      --witnesses
+          Enable generating and testing witness programs, full examples of potentially-broken downstream code
 
 ----- stderr -----

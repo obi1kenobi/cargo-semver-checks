@@ -1,6 +1,6 @@
 use handlebars::{
-    handlebars_helper, to_json, BlockContext, Context, Handlebars, Helper, Output, RenderContext,
-    RenderError, RenderErrorReason, Renderable,
+    BlockContext, Context, Handlebars, Helper, Output, RenderContext, RenderError,
+    RenderErrorReason, Renderable, handlebars_helper, to_json,
 };
 use serde_json::Value;
 
@@ -124,6 +124,8 @@ fn repeat<'reg, 'rc>(
                     template.render(registry, ctx, render_ctx, output)?;
                 }
 
+                render_ctx.pop_block();
+
                 Ok(())
             }
 
@@ -150,4 +152,28 @@ pub(crate) fn make_handlebars_registry() -> Handlebars<'static> {
     registry.register_helper("to_string", Box::new(to_string));
     registry.register_helper("repeat", Box::new(repeat));
     registry
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn repeat_helper_does_not_leak_block_context() {
+        let registry = make_handlebars_registry();
+
+        // Basic rendering works as expected.
+        let rendered = registry
+            .render_template("{{#repeat 2}}{{@index}}{{/repeat}}", &serde_json::json!({}))
+            .expect("render failed");
+        assert_eq!(rendered, "01");
+
+        // Referencing `@index` outside the helper should be an error.
+        registry
+            .render_template(
+                "{{#repeat 1}}{{@index}}{{/repeat}}{{@index}}",
+                &serde_json::json!({}),
+            )
+            .expect_err("block context leaked outside of repeat helper");
+    }
 }

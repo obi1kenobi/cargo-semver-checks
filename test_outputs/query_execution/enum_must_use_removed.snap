@@ -1,0 +1,58 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/enum_must_use_added/": [
+    {
+      "name": String("MustUseEnumToEnum"),
+      "old_attr": String("#[must_use]"),
+      "path": List([
+        String("enum_must_use_added"),
+        String("MustUseEnumToEnum"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MustUseMessageEnumToEnum"),
+      "old_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("enum_must_use_added"),
+        String("MustUseMessageEnumToEnum"),
+      ]),
+      "span_begin_line": Uint64(34),
+      "span_end_line": Uint64(36),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_must_use_removed/": [
+    {
+      "name": String("MustUseEnumToEnum"),
+      "old_attr": String("#[must_use]"),
+      "path": List([
+        String("enum_must_use_removed"),
+        String("MustUseEnumToEnum"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MustUseMessageEnumToEnum"),
+      "old_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("enum_must_use_removed"),
+        String("MustUseMessageEnumToEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

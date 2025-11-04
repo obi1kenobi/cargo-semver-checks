@@ -1,0 +1,38 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/unsafe_trait_method_target_feature_added/": [
+    {
+      "currently_unsafe": Boolean(true),
+      "feature": List([
+        String("avx2"),
+      ]),
+      "method_name": String("feature_added"),
+      "path": List([
+        String("unsafe_trait_method_target_feature_added"),
+        String("TraitA"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "currently_unsafe": Boolean(true),
+      "feature": List([
+        String("avx2"),
+      ]),
+      "method_name": String("sealed_trait_method_feature_added"),
+      "path": List([
+        String("unsafe_trait_method_target_feature_added"),
+        String("TraitD"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

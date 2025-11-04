@@ -1,0 +1,82 @@
+SemverQuery(
+    id: "unsafe_trait_method_target_feature_added",
+    human_readable_name: "unsafe trait method target feature added",
+    description: "An unsafe trait method now requires specific target features.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/codegen.html#the-target_feature-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            method_name: name @output @tag
+
+                            # We still want to lint even if the trait method has become safe.
+                            currently_unsafe: unsafe @output
+
+                            requires_feature @fold
+                                             @transform(op: "count")
+                                             @filter(op: ">", value: ["$zero"]) {
+                                explicit @filter(op: "=", value: ["$true"])
+                                globally_enabled @filter(op: "=", value: ["$false"])
+                                feature: name @output
+                            }
+
+                            # Don't trigger the lint if the function became uncallable on the current target triple.
+                            # We have a separate lint for that.
+                            requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                valid_for_current_target @filter(op: "=", value: ["$false"])
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            unsafe @filter(op: "=", value: ["$true"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            name @filter(op: "=", value: ["%method_name"])
+
+                            requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "false": false,
+        "zero": 0,
+    },
+    error_message: "A trait method newly requires CPU target features to be enabled.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} requires {{join \", \" feature}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

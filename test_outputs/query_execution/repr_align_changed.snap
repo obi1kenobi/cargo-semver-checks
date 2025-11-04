@@ -1,0 +1,47 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/repr_align_changed/": [
+    {
+      "name": String("StructAlignChanged"),
+      "new_align": String("16"),
+      "old_align": String("8"),
+      "path": List([
+        String("repr_align_changed"),
+        String("StructAlignChanged"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Struct"),
+    },
+    {
+      "name": String("EnumAlignChanged"),
+      "new_align": String("32"),
+      "old_align": String("8"),
+      "path": List([
+        String("repr_align_changed"),
+        String("EnumAlignChanged"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Enum"),
+    },
+    {
+      "name": String("UnionAlignChanged"),
+      "new_align": String("64"),
+      "old_align": String("8"),
+      "path": List([
+        String("repr_align_changed"),
+        String("UnionAlignChanged"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Union"),
+    },
+  ],
+}

@@ -8,13 +8,13 @@
 
 ## Making your first contribution
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > **We have a zero-tolerance policy for low-quality AI-generated contributions.**
 >
 > It's very easy to use AI to generate low-quality "contributions" that are not carefully considered and do not meet the quality bar for inclusion in the codebase.
 > Such "contributions" do not benefit the project's stakeholders — in fact, they are a drain on maintainers' and reviewers' time and energy.
 > Instead, the "contributions" serve to boost the contributor's GitHub statistics or achieve other personal goals, at the expense of the project and its stakeholders.
-> 
+>
 > Contributions that appear to be low-quality AI slop will be rejected without further explanation. Further contributions by the same authors will also be rejected without review or explanation, as the good faith assumption has already been breached once.
 > We express no opinion on AI assistance *in general*, and do not ban AI tools outright — we merely require that you take personal responsibility for the contribution's quality instead of relying on "the AI thought it was a good idea."
 
@@ -117,14 +117,22 @@ Testing this crate requires rustdoc JSON output data, which is too large and var
 to check into git. It has to be generated locally before `cargo test` will succeed,
 and will be saved in a `localdata` gitignored directory in the repo root.
 
-To generate this data, please run `./scripts/regenerate_test_rustdocs.sh`.
-To use a specific toolchain, like beta or nightly, pass it as
+If you already use GitHub's `gh` CLI tool, you can quickly set up the needed test data by running
+`./scripts/download_prebuilt_test_rustdocs.sh`.
+If you instead prefer to generate the data yourself, run `./scripts/regenerate_test_rustdocs.sh`.
+There are several hundred test crates whose data needs to be generated, so generating everything
+from scratch may take a while — we recommend setting up `gh` instead.
+
+After the initial setup, `./scripts/regenerate_test_rustdocs.sh` is smart enough to
+only incrementally generate test data as needed instead of regenerating everything each time.
+
+To generate test data for a specific toolchain, like beta or nightly, pass it as
 an argument: `./scripts/regenerate_test_rustdocs.sh +nightly`.
 
 ## What are those `.snap` or `.snap.new` files generated via `cargo test`
 
 As part of our overall testing strategy, we use a technique called "snapshot testing."
-The tool we use for this ([`insta`](https://insta.rs/docs/)) is user friendly and has mutliple ways to interact with it:
+The tool we use for this ([`insta`](https://insta.rs/docs/)) is user friendly and has multiple ways to interact with it:
 
 These snapshots are by default written to `.snap.new` files (because `INSTA_UPDATE` explained below defaults to `auto`) if they differ and fail the testcase.
 Reviewing them is possible via these options:
@@ -411,9 +419,20 @@ expected output files to include the new items, and you can get back on track.
 
 ## Development Environment
 
+### Ensuring Rust and other requirements are installed
+
+To run `cargo-semver-checks`, you will of course need to
+[install Rust itself](https://doc.rust-lang.org/book/ch01-01-installation.html#installation). But without
+a linker, you will still get build errors. So be sure you also
+add the appropriate build prerequisites for your platform:
+[`build-essential`](https://packages.ubuntu.com/jammy/build-essential) (Ubuntu/Debian),
+[`base-devel`](https://archlinux.org/packages/core/any/base-devel/) (Arch),
+[the Xcode CLI tools](https://developer.apple.com/download/all/?q=command%20line%20tools) (macOS),
+or the [MSVC prerequisites](https://rust-lang.github.io/rustup/installation/windows-msvc.html) (Windows).
+
 ### Running required automation scripts
 
-While cargo-semver-checks is cross-platform, the development task automation scripts in the scripts
+While `cargo-semver-checks` is cross-platform, the development task automation scripts in the scripts
 directory require a `bash` shell to run.
 
 Windows users can get a bash + GNU command line environment via WSL or git bash.

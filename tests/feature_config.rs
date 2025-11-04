@@ -1,4 +1,4 @@
-use assert_cmd::{assert::Assert, Command};
+use assert_cmd::{Command, assert::Assert};
 
 struct CargoSemverChecks {
     args: Vec<String>,

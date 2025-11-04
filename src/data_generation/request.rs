@@ -13,17 +13,17 @@ use super::generate::GenerationSettings;
 use super::progress::{CallbackHandler, ProgressCallbacks};
 
 #[derive(Debug, Clone)]
-pub(super) struct RegistryRequest<'a> {
+pub(crate) struct RegistryRequest<'a> {
     index_entry: &'a tame_index::IndexVersion,
 }
 
 #[derive(Debug, Clone)]
-pub(super) struct ProjectRequest<'a> {
+pub(crate) struct ProjectRequest<'a> {
     pub(super) manifest: &'a Manifest,
 }
 
 #[derive(Debug, Clone)]
-pub(super) enum RequestKind<'a> {
+pub(crate) enum RequestKind<'a> {
     Registry(RegistryRequest<'a>),
     LocalProject(ProjectRequest<'a>),
 }
@@ -68,7 +68,7 @@ pub(crate) enum CacheSettings<T> {
 impl CacheSettings<()> {
     pub(crate) fn with_path<'a>(&self, path: &'a Path) -> CacheSettings<&'a Path> {
         match self {
-            CacheSettings::None => todo!(),
+            CacheSettings::None => CacheSettings::None,
             CacheSettings::ReadOnly(_) => CacheSettings::ReadOnly(path),
             CacheSettings::ReadWrite(_) => CacheSettings::ReadWrite(path),
             CacheSettings::WriteOnly(_) => CacheSettings::WriteOnly(path),
@@ -194,7 +194,7 @@ impl<'a> CacheUse<'a> {
 
 #[derive(Debug, Clone)]
 pub(crate) struct CrateDataRequest<'a> {
-    pub(super) kind: RequestKind<'a>,
+    pub(crate) kind: RequestKind<'a>,
 
     // N.B.: `--no-default-features --feature default` is not the same as using default features,
     //       since it will fail if the crate has no "default" feature definition.
@@ -394,9 +394,10 @@ impl<'a> CrateDataRequest<'a> {
     /// A path-safe unique identified that includes the crate's name, version, and features.
     fn cache_slug(&self) -> anyhow::Result<String> {
         Ok(format!(
-            "{}-{}-{}",
+            "{}-{}-{}-{}",
             slugify(self.kind.name()?),
             slugify(self.kind.version()?),
+            slugify(self.build_target.unwrap_or("default")),
             &self.features_fingerprint,
         ))
     }

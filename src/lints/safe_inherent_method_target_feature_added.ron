@@ -1,0 +1,93 @@
+SemverQuery(
+    id: "safe_inherent_method_target_feature_added",
+    human_readable_name: "safe inherent method gained #[target_feature]",
+    description: "A safe inherent method now requires one or more target features to be enabled.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/codegen.html#the-target_feature-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output
+                        owner_type: __typename @tag @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
+                                method_name: name @tag @output
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                # Don't trigger the lint if the method also became unsafe.
+                                # That's already breaking and we have a separate lint for that,
+                                # so let it take precedence.
+                                unsafe @filter(op: "!=", value: ["$true"])
+
+                                requires_feature @fold
+                                                 @transform(op: "count")
+                                                 @filter(op: ">", value: ["$zero"])
+                                                 @output(name: "new_required_feature_count") {
+                                    explicit @filter(op: "=", value: ["$true"])
+                                    new_target_feature: name @output
+                                }
+
+                                # Don't trigger the lint if the function became uncallable on the current target triple.
+                                # We have a separate lint for that.
+                                requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                                    valid_for_current_target @filter(op: "=", value: ["$false"])
+                                }
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        __typename @filter(op: "=", value: ["%owner_type"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                unsafe @filter(op: "=", value: ["$false"])
+
+                                requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "false": false,
+        "zero": 0,
+    },
+    error_message: "A safe inherent method now requires one or more CPU target features to be enabled. It can no longer be used via a Fn() trait.",
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} now requires {{join ", " new_target_feature}} in {{span_filename}}:{{span_begin_line}}"#),
+    witness: None,
+)

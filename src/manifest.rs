@@ -12,11 +12,28 @@ pub(crate) struct Manifest {
 }
 
 impl Manifest {
+    /// Parse the manifest, applying workspace inheritance and heuristics from surrounding files.
     pub(crate) fn parse(path: std::path::PathBuf) -> anyhow::Result<Self> {
         // Parsing via `cargo_toml::Manifest::from_path()` is preferable to parsing from a string,
         // because inspection of surrounding files is sometimes necessary to determine
         // the existence of lib targets and ensure proper handling of workspace inheritance.
         let parsed = cargo_toml::Manifest::from_path_with_metadata(&path)
+            .with_context(|| format!("failed when reading {}", path.display()))?;
+
+        Ok(Self { path, parsed })
+    }
+
+    /// Parse the manifest without using the filesystem or applying workspace inheritance.
+    ///
+    /// This allows the caller to check which fields were set to be inherited,
+    /// and which were missing or set explicitly.
+    pub(crate) fn parse_standalone(path: std::path::PathBuf) -> anyhow::Result<Self> {
+        let parsed = std::fs::read_to_string(&path)
+            .map_err(anyhow::Error::from)
+            .and_then(|data| {
+                cargo_toml::Manifest::from_slice_with_metadata(data.as_bytes())
+                    .map_err(anyhow::Error::from)
+            })
             .with_context(|| format!("failed when reading {}", path.display()))?;
 
         Ok(Self { path, parsed })
@@ -86,7 +103,7 @@ pub(crate) struct LintTable {
     /// Optional key to indicate whether to opt-in to reading
     /// workspace lint configuration.  If not set in the TOML as
     /// `package.metadata.cargo-semver-checks.lints.workspace = true`,
-    /// this field is set to `false. (note that setting the key in the
+    /// this field is set to `false`. (note that setting the key in the
     /// TOML to false explicitly is invalid behavior and will be interpreted
     /// as just a missing field)
     ///

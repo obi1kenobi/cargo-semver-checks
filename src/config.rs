@@ -1,7 +1,8 @@
 use anstream::{AutoStream, ColorChoice};
 use anstyle::{AnsiColor, Color, Reset, Style};
 use clap::ValueEnum;
-use std::{collections::HashSet, io::Write};
+use rand::Rng;
+use std::{collections::HashSet, io::Write, sync::LazyLock};
 
 use crate::templating::make_handlebars_registry;
 
@@ -9,6 +10,10 @@ use crate::templating::make_handlebars_registry;
 pub struct GlobalConfig {
     level: Option<log::Level>,
     handlebars: handlebars::Handlebars<'static>,
+    /// The unique ID for any particular run
+    ///
+    /// This value is lazily initialized on first access
+    run_id: LazyLock<String>,
     /// Minimum rustc version supported.
     ///
     /// This will be used to print an error if the user's rustc version is not high enough.
@@ -32,12 +37,29 @@ impl GlobalConfig {
     /// `cargo-semver-checks`'s color output
     pub fn new() -> Self {
         let stdout_choice = anstream::stdout().current_choice();
-        let stderr_choice = anstream::stdout().current_choice();
+        let stderr_choice = anstream::stderr().current_choice();
 
         Self {
             level: None,
             handlebars: make_handlebars_registry(),
-            minimum_rustc_version: semver::Version::new(1, 85, 0),
+            run_id: LazyLock::new(|| {
+                let rng = rand::rng();
+                // We can show that based on the Birthday Problem (https://en.wikipedia.org/wiki/Birthday_problem)
+                // that 6 characters is enough for the use case of cargo-semver-checks. Primarily, given that we simply
+                // want a decent guarantee of not encountering collisions of generated files, and are not looking
+                // for cryptographic security, we're looking for odds of collisions to be somewhere in the range
+                // of ranges that is 1-100K up to 1-1M. We are using alphanumeric characters for the ID, which means
+                // each character has 62 possibilities, and at 6 characters, that gives us a total set of about
+                // 5.7 * 10^10 permutations. Now, the Birthday Problem shows that given many instances, the odds of a
+                // collision dramatically increase. However, at 62^6 permutations, it will take ~200k instances for
+                // the probability of a collision to reach 50%, which gives us exactly the sort of collision odds
+                // we're looking for.
+                rng.sample_iter(rand::distr::Alphanumeric)
+                    .take(6)
+                    .map(char::from)
+                    .collect()
+            }),
+            minimum_rustc_version: semver::Version::new(1, 90, 0),
             stdout: AutoStream::new(Box::new(std::io::stdout()), stdout_choice),
             stderr: AutoStream::new(Box::new(std::io::stderr()), stderr_choice),
             feature_flags: HashSet::new(),
@@ -46,6 +68,10 @@ impl GlobalConfig {
 
     pub fn handlebars(&self) -> &handlebars::Handlebars<'static> {
         &self.handlebars
+    }
+
+    pub fn run_id(&self) -> &str {
+        &self.run_id
     }
 
     pub fn minimum_rustc_version(&self) -> &semver::Version {

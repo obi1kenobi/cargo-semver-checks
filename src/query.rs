@@ -1,8 +1,8 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::Arc};
 
 use ron::extensions::Extensions;
 use serde::{Deserialize, Serialize};
-use trustfall::TransparentValue;
+use trustfall::{FieldValue, TransparentValue};
 
 use crate::ReleaseType;
 
@@ -137,7 +137,7 @@ impl SemverQuery {
     pub fn from_ron_str(query_text: &str) -> ron::Result<Self> {
         let mut deserializer = ron::Deserializer::from_str_with_options(
             query_text,
-            ron::Options::default().with_default_extension(Extensions::IMPLICIT_SOME),
+            &ron::Options::default().with_default_extension(Extensions::IMPLICIT_SOME),
         )?;
 
         Self::deserialize(&mut deserializer)
@@ -310,7 +310,37 @@ pub struct WitnessQuery {
     /// These can be inherited from a previous query ([`InheritedValue::Inherited`]) or
     /// specified as [`InheritedValue::Constant`]s.
     #[serde(default)]
-    pub arguments: BTreeMap<String, InheritedValue>,
+    pub arguments: BTreeMap<Arc<str>, InheritedValue>,
+}
+
+impl WitnessQuery {
+    /// Returns [`arguments`](Self::arguments), mapping the [`InheritedValue`]s from
+    /// the given output map, which is the map of output [`FieldValue`]s from the previous query.
+    ///
+    /// Fails with an [`anyhow::Error`] if any requested inheritance keys are missing.
+    pub fn inherit_arguments_from(
+        &self,
+        source_map: &BTreeMap<std::sync::Arc<str>, FieldValue>,
+    ) -> anyhow::Result<BTreeMap<Arc<str>, FieldValue>> {
+        let mut mapped = BTreeMap::new();
+
+        for (key, value) in self.arguments.iter() {
+            let mapped_value = match value {
+                // Inherit an output
+                InheritedValue::Inherited { inherit } => source_map
+                    .get(inherit.as_str())
+                    .cloned()
+                    .ok_or(anyhow::anyhow!(
+                        "inherited output key `{inherit}` does not exist in {source_map:?}"
+                    ))?,
+                // Set a constant
+                InheritedValue::Constant(value) => value.clone().into(),
+            };
+            mapped.insert(Arc::clone(key), mapped_value);
+        }
+
+        Ok(mapped)
+    }
 }
 
 /// Represents either a value inherited from a previous query, or a
@@ -327,7 +357,7 @@ pub enum InheritedValue {
 #[cfg(test)]
 mod tests {
     use std::borrow::Cow;
-    use std::collections::BTreeSet;
+    use std::collections::{BTreeSet, HashMap};
     use std::ffi::OsStr;
     use std::path::PathBuf;
     use std::sync::{Arc, OnceLock};
@@ -337,11 +367,12 @@ mod tests {
     use anyhow::Context;
     use fs_err::PathExt;
     use rayon::prelude::*;
-    use semver::Version;
     use serde::{Deserialize, Serialize};
+    use toml::Value;
     use trustfall::{FieldValue, TransparentValue};
+    use trustfall_core::ir::IndexedQuery;
     use trustfall_rustdoc::{
-        load_rustdoc, VersionedIndex, VersionedRustdocAdapter, VersionedStorage,
+        VersionedIndex, VersionedRustdocAdapter, VersionedStorage, load_rustdoc,
     };
 
     use crate::query::{
@@ -369,8 +400,70 @@ mod tests {
         TEST_CRATE_RUSTDOCS.get_or_init(initialize_test_crate_rustdocs)
     }
 
-    fn get_all_test_crate_indexes(
-    ) -> &'static BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
+    #[test]
+    fn lint_files_have_matching_ids() {
+        let lints_dir = Path::new("src/lints");
+        let ron_files = collect_ron_files(lints_dir);
+
+        assert!(
+            !ron_files.is_empty(),
+            "expected at least one lint definition in {lints_dir:?}"
+        );
+
+        for path in ron_files {
+            let stem = path
+                .file_stem()
+                .and_then(OsStr::to_str)
+                .expect("lint file must have a valid UTF-8 stem");
+            assert!(
+                is_lower_snake_case(stem),
+                "lint file stem `{stem}` must be lower snake case"
+            );
+
+            let contents = fs_err::read_to_string(&path).expect("failed to read lint file");
+            let query = SemverQuery::from_ron_str(&contents).expect("failed to parse lint");
+            assert_eq!(
+                stem, query.id,
+                "lint id must match file stem for {:?}",
+                path
+            );
+        }
+    }
+
+    fn collect_ron_files(dir: &Path) -> Vec<PathBuf> {
+        let mut result = Vec::new();
+        let mut stack = vec![dir.to_path_buf()];
+
+        while let Some(current) = stack.pop() {
+            for entry in fs_err::read_dir(&current).expect("failed to read directory") {
+                let entry = entry.expect("failed to read directory entry");
+                let path = entry.path();
+                if entry
+                    .file_type()
+                    .expect("failed to determine file type")
+                    .is_dir()
+                {
+                    stack.push(path);
+                } else if path.extension() == Some(OsStr::new("ron")) {
+                    result.push(path);
+                }
+            }
+        }
+
+        result.sort();
+        result
+    }
+
+    fn is_lower_snake_case(value: &str) -> bool {
+        !value.is_empty()
+            && value.chars().all(|ch| ch.is_ascii_lowercase() || ch == '_')
+            && !value.starts_with('_')
+            && !value.ends_with('_')
+            && !value.contains("__")
+    }
+
+    fn get_all_test_crate_indexes()
+    -> &'static BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
         TEST_CRATE_INDEXES.get_or_init(initialize_test_crate_indexes)
     }
 
@@ -433,8 +526,8 @@ mod tests {
             .collect()
     }
 
-    fn initialize_test_crate_indexes(
-    ) -> BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
+    fn initialize_test_crate_indexes()
+    -> BTreeMap<String, (VersionedIndex<'static>, VersionedIndex<'static>)> {
         get_all_test_crates()
             .par_iter()
             .map(|(key, (old_crate, new_crate))| {
@@ -456,6 +549,162 @@ mod tests {
         load_rustdoc(Path::new(&rustdoc_path), Some(metadata))
             .with_context(|| format!("Could not load {rustdoc_path} file, did you forget to run ./scripts/regenerate_test_rustdocs.sh ?"))
             .expect("failed to load rustdoc")
+    }
+
+    #[derive(Debug, PartialEq, Eq)]
+    struct PackageManifest {
+        name: String,
+        version: String,
+        edition: String,
+    }
+
+    fn load_package_manifest(manifest_dir: &Path) -> PackageManifest {
+        let manifest_path = manifest_dir.join("Cargo.toml");
+        let manifest_text =
+            fs_err::read_to_string(&manifest_path).expect("failed to load manifest for test crate");
+        let manifest: Value = toml::from_str(&manifest_text)
+            .unwrap_or_else(|e| panic!("failed to parse {}: {e}", manifest_path.display()));
+
+        let package_table = manifest
+            .get("package")
+            .and_then(Value::as_table)
+            .unwrap_or_else(|| {
+                panic!(
+                    "manifest at {} missing [package] table",
+                    manifest_path.display()
+                )
+            });
+
+        let name = package_table
+            .get("name")
+            .and_then(Value::as_str)
+            .unwrap_or_else(|| {
+                panic!(
+                    "manifest at {} missing package.name",
+                    manifest_path.display()
+                )
+            })
+            .to_owned();
+        let version = package_table
+            .get("version")
+            .and_then(Value::as_str)
+            .unwrap_or_else(|| {
+                panic!(
+                    "manifest at {} missing package.version",
+                    manifest_path.display()
+                )
+            })
+            .to_owned();
+        let edition = package_table
+            .get("edition")
+            .and_then(Value::as_str)
+            .unwrap_or_else(|| {
+                panic!(
+                    "manifest at {} missing package.edition",
+                    manifest_path.display()
+                )
+            })
+            .to_owned();
+
+        let publish_value = package_table.get("publish").unwrap_or_else(|| {
+            panic!(
+                "manifest at {} missing package.publish",
+                manifest_path.display()
+            )
+        });
+        assert!(
+            matches!(publish_value, Value::Boolean(false)),
+            "manifest at {} must set package.publish = false",
+            manifest_path.display()
+        );
+
+        PackageManifest {
+            name,
+            version,
+            edition,
+        }
+    }
+
+    const VERSION_MISMATCH_ALLOWED: &[&str] = &[
+        "semver_trick_self_referential",
+        "trait_missing_with_major_bump",
+    ];
+
+    #[test]
+    fn test_crates_have_consistent_manifests() {
+        let base_path = Path::new("./test_crates");
+        let entries = fs_err::read_dir(base_path).expect("directory test_crates/ not found");
+        let mut checked_pairs = 0usize;
+
+        for entry in entries {
+            let entry = entry.expect("failed to read test_crates entry");
+            let path = entry.path();
+            if !entry
+                .metadata()
+                .expect("failed to read metadata for test_crates entry")
+                .is_dir()
+            {
+                continue;
+            }
+
+            let old_dir = path.join("old");
+            let new_dir = path.join("new");
+            let old_dir_manifest = old_dir.join("Cargo.toml");
+            let new_dir_manifest = new_dir.join("Cargo.toml");
+            if !(old_dir.is_dir()
+                && new_dir.is_dir()
+                && old_dir_manifest.is_file()
+                && new_dir_manifest.is_file())
+            {
+                continue;
+            }
+
+            let dir_name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .expect("test_crate directory must be valid UTF-8");
+
+            let old_manifest = load_package_manifest(&old_dir);
+            let new_manifest = load_package_manifest(&new_dir);
+
+            let PackageManifest {
+                name: old_name,
+                version: old_version,
+                edition: old_edition,
+            } = old_manifest;
+            let PackageManifest {
+                name: new_name,
+                version: new_version,
+                edition: new_edition,
+            } = new_manifest;
+
+            assert_eq!(
+                old_name, dir_name,
+                "manifest name must match directory name for {dir_name}"
+            );
+            assert_eq!(
+                new_name, dir_name,
+                "manifest name must match directory name for {dir_name}"
+            );
+            assert_eq!(
+                old_edition, new_edition,
+                "old and new editions differ for {dir_name}"
+            );
+
+            if !VERSION_MISMATCH_ALLOWED.contains(&dir_name) {
+                assert_eq!(
+                    old_version, new_version,
+                    "old and new versions differ for {dir_name}"
+                );
+            }
+
+            checked_pairs += 1;
+        }
+
+        assert!(
+            checked_pairs > 0,
+            "expected to check at least one test crate pair"
+        );
     }
 
     #[test]
@@ -578,6 +827,7 @@ mod tests {
 
     fn run_query_on_crate_pair(
         semver_query: &SemverQuery,
+        parsed_query: Arc<IndexedQuery>, // The parsed version of semver_query.
         crate_pair_name: &String,
         indexed_crate_new: &VersionedIndex<'_>,
         indexed_crate_old: &VersionedIndex<'_>,
@@ -586,7 +836,7 @@ mod tests {
             .expect("could not create adapter");
 
         let results_iter = adapter
-            .run_query(&semver_query.query, semver_query.arguments.clone())
+            .run_query_with_indexed_query(parsed_query.clone(), semver_query.arguments.clone())
             .unwrap();
 
         // Ensure span data inside `@fold` blocks is deterministically ordered,
@@ -595,8 +845,6 @@ mod tests {
         // - list-typed outputs
         // - with names ending in `_begin_line`
         // - located inside *one* `@fold` level (i.e. their component is directly under the root).
-        let parsed_query = trustfall_core::frontend::parse(adapter.schema(), &semver_query.query)
-            .expect("not a valid query");
         let fold_keys_and_targets: BTreeMap<&str, Vec<Arc<str>>> = parsed_query
             .outputs
             .iter()
@@ -667,12 +915,18 @@ mod tests {
     fn assert_no_false_positives_in_nonchanged_crate(
         query_name: &str,
         semver_query: &SemverQuery,
+        indexed_query: Arc<IndexedQuery>, // The parsed version of semver_query.
         indexed_crate: &VersionedIndex<'_>,
         crate_pair_name: &String,
         crate_version: &str,
     ) {
-        let (crate_pair_path, output) =
-            run_query_on_crate_pair(semver_query, crate_pair_name, indexed_crate, indexed_crate);
+        let (crate_pair_path, output) = run_query_on_crate_pair(
+            semver_query,
+            indexed_query,
+            crate_pair_name,
+            indexed_crate,
+            indexed_crate,
+        );
         if !output.is_empty() {
             // This `if` statement means that a false positive happened.
             // The query was ran on two identical crates (with the same rustdoc)
@@ -688,7 +942,9 @@ mod tests {
                 actual_output_name,
                 BTreeMap::from([(crate_pair_path, output)]),
             );
-            panic!("The query produced a non-empty output when it compared two crates with the same rustdoc.\n{output_difference}\n");
+            panic!(
+                "The query produced a non-empty output when it compared two crates with the same rustdoc.\n{output_difference}\n"
+            );
         }
     }
 
@@ -696,14 +952,29 @@ mod tests {
         let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query = SemverQuery::from_ron_str(&query_text).unwrap();
 
+        // Map of rustdoc version to parsed query.
+        let mut parsed_query_cache: HashMap<u32, Arc<IndexedQuery>> = HashMap::new();
+
         let mut query_execution_results: TestOutput = get_test_crate_names()
             .iter()
             .map(|crate_pair_name| {
                 let (baseline, current) = get_test_crate_indexes(crate_pair_name);
 
+                let adapter = VersionedRustdocAdapter::new(current, Some(baseline))
+                    .expect("could not create adapter");
+
+                let indexed_query =
+                    parsed_query_cache
+                        .entry(adapter.version())
+                        .or_insert_with(|| {
+                            trustfall_core::frontend::parse(adapter.schema(), &semver_query.query)
+                                .expect("Query failed to parse.")
+                        });
+
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
+                    indexed_query.clone(),
                     current,
                     crate_pair_name,
                     "new",
@@ -711,12 +982,19 @@ mod tests {
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
                     &semver_query,
+                    indexed_query.clone(),
                     baseline,
                     crate_pair_name,
                     "old",
                 );
 
-                run_query_on_crate_pair(&semver_query, crate_pair_name, current, baseline)
+                run_query_on_crate_pair(
+                    &semver_query,
+                    indexed_query.clone(),
+                    crate_pair_name,
+                    current,
+                    baseline,
+                )
             })
             .filter(|(_crate_pair_name, output)| !output.is_empty())
             .collect();
@@ -745,22 +1023,20 @@ mod tests {
                     .map(|value: &FieldValue| value.as_usize().expect("begin line was not an int"));
                 match (filename, line) {
                     (Some(filename), Some(line)) => (Arc::clone(filename), line),
-                    (Some(_filename), None) => panic!("No `span_begin_line` was returned by the query, even though `span_filename` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                    (None, Some(_line)) => panic!("No `span_filename` was returned by the query, even though `span_begin_line` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
-                    (None, None) => panic!("A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."),
+                    (Some(_filename), None) => panic!(
+                        "No `span_begin_line` was returned by the query, even though `span_filename` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                    ),
+                    (None, Some(_line)) => panic!(
+                        "No `span_filename` was returned by the query, even though `span_begin_line` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                    ),
+                    (None, None) => panic!(
+                        "A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                    ),
                 }
             }
         };
         for value in query_execution_results.values_mut() {
             value.sort_unstable_by_key(key_func);
-        }
-
-        // TODO: Remove this once Rust 1.85 is the oldest Rust supported by cargo-semver-checks.
-        if query_name == "static_became_unsafe"
-            && rustc_version::version().is_ok_and(|version| version < Version::new(1, 85, 0))
-        {
-            eprintln!("skipping query execution test for lint `static_became_unsafe` since data for it isn't available in Rust prior to 1.85");
-            return;
         }
 
         insta::with_settings!(
@@ -1087,6 +1363,56 @@ mod tests {
     }
 
     #[test]
+    fn lint_file_names_and_ids_match() {
+        let mut lints_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        lints_dir.push("src");
+        lints_dir.push("lints");
+
+        for entry in fs_err::read_dir(&lints_dir).expect("failed to read 'src/lints' directory") {
+            let entry = entry.expect("failed to examine file");
+            let path = entry.path();
+
+            if path.extension().and_then(OsStr::to_str) != Some("ron") {
+                continue;
+            }
+
+            let stem = path
+                .file_stem()
+                .and_then(OsStr::to_str)
+                .expect("failed to get file name as utf-8");
+
+            assert!(
+                stem.chars().all(|ch| ch.is_ascii_lowercase() || ch == '_'),
+                "lint file name '{stem}' is not snake_case"
+            );
+            assert!(
+                !stem.starts_with('_'),
+                "lint file name '{stem}' must not start with '_'"
+            );
+            assert!(
+                !stem.ends_with('_'),
+                "lint file name '{stem}' must not end with '_'"
+            );
+            assert!(
+                !stem.contains("__"),
+                "lint file name '{stem}' must not contain '__'"
+            );
+
+            let query_text =
+                fs_err::read_to_string(&path).expect("failed to read lint definition file");
+            let semver_query =
+                SemverQuery::from_ron_str(&query_text).expect("failed to parse lint definition");
+
+            assert_eq!(
+                stem,
+                semver_query.id,
+                "lint id does not match file name for {}",
+                path.display()
+            );
+        }
+    }
+
+    #[test]
     fn test_data_is_fresh() -> anyhow::Result<()> {
         // Adds the modification time of all files in `{dir}/**/*.{rs,toml,json}` to `set`, excluding
         // the `target` directory.
@@ -1162,12 +1488,15 @@ mod tests {
                 // file, it is potentially stale
                 if let (Some(test_max), Some(local_min)) =
                     (test_crate_times.last(), localdata_times.first())
+                    && test_max > local_min
                 {
-                    if test_max > local_min {
-                        panic!("Files in the '{}' directory are newer than the local data generated by \n\
+                    panic!(
+                        "Files in the '{}' directory are newer than the local data generated by \n\
                             scripts/regenerate_test_rustdocs.sh in '{}'.\n\n\
-                            Run `scripts/regenerate_test_rustdocs.sh` to generate fresh local data.", test_crate_path.display(), localdata_path.display())
-                    }
+                            Run `scripts/regenerate_test_rustdocs.sh` to generate fresh local data.",
+                        test_crate_path.display(),
+                        localdata_path.display()
+                    )
                 }
             }
         }
@@ -1232,6 +1561,7 @@ add_lints!(
     enum_marked_non_exhaustive,
     enum_missing,
     enum_must_use_added,
+    enum_must_use_removed,
     enum_no_longer_non_exhaustive,
     enum_no_repr_variant_discriminant_changed,
     enum_non_exhaustive_struct_variant_field_added,
@@ -1259,21 +1589,26 @@ add_lints!(
     enum_variant_marked_non_exhaustive,
     enum_variant_missing,
     enum_variant_no_longer_non_exhaustive,
+    exhaustive_enum_added,
     exported_function_changed_abi,
     feature_missing,
     feature_not_enabled_by_default,
     function_abi_no_longer_unwind,
     function_abi_now_unwind,
     function_changed_abi,
+    function_const_generic_reordered,
     function_const_removed,
     function_export_name_changed,
+    function_generic_type_reordered,
     function_like_proc_macro_missing,
     function_marked_deprecated,
     function_missing,
     function_must_use_added,
+    function_must_use_removed,
     function_no_longer_unsafe,
     function_now_const,
     function_now_doc_hidden,
+    function_now_returns_unit,
     function_parameter_count_changed,
     function_requires_different_const_generic_params,
     function_requires_different_generic_type_params,
@@ -1281,10 +1616,13 @@ add_lints!(
     global_value_marked_deprecated,
     inherent_associated_const_now_doc_hidden,
     inherent_associated_pub_const_missing,
+    inherent_method_const_generic_reordered,
     inherent_method_const_removed,
+    inherent_method_generic_type_reordered,
     inherent_method_missing,
     inherent_method_must_use_added,
     inherent_method_now_doc_hidden,
+    inherent_method_now_returns_unit,
     inherent_method_unsafe_added,
     macro_marked_deprecated,
     macro_no_longer_exported,
@@ -1301,6 +1639,9 @@ add_lints!(
     proc_macro_marked_deprecated,
     proc_macro_now_doc_hidden,
     pub_api_sealed_trait_became_unconditionally_sealed,
+    pub_api_sealed_trait_became_unsealed,
+    pub_api_sealed_trait_method_return_value_added,
+    pub_api_sealed_trait_method_target_feature_removed,
     pub_const_added,
     pub_module_level_const_missing,
     pub_module_level_const_now_doc_hidden,
@@ -1309,17 +1650,26 @@ add_lints!(
     pub_static_mut_now_immutable,
     pub_static_now_doc_hidden,
     pub_static_now_mutable,
+    repr_align_added,
+    repr_align_changed,
+    repr_align_removed,
     repr_c_enum_struct_variant_fields_reordered,
+    repr_c_plain_struct_fields_reordered,
     repr_c_removed,
     repr_packed_added,
+    repr_packed_changed,
     repr_packed_removed,
-    repr_c_plain_struct_fields_reordered,
+    safe_function_requires_more_target_features,
+    safe_function_target_feature_added,
+    safe_inherent_method_requires_more_target_features,
+    safe_inherent_method_target_feature_added,
     sized_impl_removed,
     static_became_unsafe,
     struct_field_marked_deprecated,
     struct_marked_non_exhaustive,
     struct_missing,
     struct_must_use_added,
+    struct_must_use_removed,
     struct_now_doc_hidden,
     struct_pub_field_missing,
     struct_pub_field_now_doc_hidden,
@@ -1337,15 +1687,22 @@ add_lints!(
     trait_associated_type_default_removed,
     trait_associated_type_marked_deprecated,
     trait_associated_type_now_doc_hidden,
+    trait_const_generic_reordered,
+    trait_generic_type_reordered,
     trait_marked_deprecated,
     trait_method_added,
+    trait_method_const_generic_reordered,
     trait_method_default_impl_removed,
+    trait_method_generic_type_reordered,
     trait_method_marked_deprecated,
     trait_method_missing,
     trait_method_now_doc_hidden,
+    trait_method_now_returns_unit,
     trait_method_parameter_count_changed,
     trait_method_requires_different_const_generic_params,
     trait_method_requires_different_generic_type_params,
+    trait_method_return_value_added,
+    trait_method_target_feature_removed,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
     trait_mismatched_generic_lifetimes,
@@ -1359,13 +1716,14 @@ add_lints!(
     trait_removed_supertrait,
     trait_requires_more_const_generic_params,
     trait_requires_more_generic_type_params,
-    pub_api_sealed_trait_became_unsealed,
     trait_unsafe_added,
     trait_unsafe_removed,
     tuple_struct_to_plain_struct,
     type_allows_fewer_const_generic_params,
     type_allows_fewer_generic_type_params,
     type_associated_const_marked_deprecated,
+    type_const_generic_reordered,
+    type_generic_type_reordered,
     type_marked_deprecated,
     type_method_marked_deprecated,
     type_method_receiver_ref_became_owned,
@@ -1380,7 +1738,14 @@ add_lints!(
     union_field_missing,
     union_missing,
     union_must_use_added,
+    union_must_use_removed,
     union_now_doc_hidden,
     union_pub_field_now_doc_hidden,
     unit_struct_changed_kind,
+    unsafe_function_requires_more_target_features,
+    unsafe_function_target_feature_added,
+    unsafe_inherent_method_requires_more_target_features,
+    unsafe_inherent_method_target_feature_added,
+    unsafe_trait_method_requires_more_target_features,
+    unsafe_trait_method_target_feature_added,
 );

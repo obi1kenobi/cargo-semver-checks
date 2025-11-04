@@ -38,12 +38,13 @@ error: could not document `error`
 error: failed to build rustdoc for crate error v0.1.0
 note: this is usually due to a compilation error in the crate,
       and is unlikely to be a bug in cargo-semver-checks
-note: the following command can be used to reproduce the compilation error:
+note: the following command can be used to reproduce the error:
       cargo new --lib example &&
           cd example &&
           echo '[workspace]' >> Cargo.toml &&
-          cargo add --path test_crates/manifest_tests/workspace_baseline_conditional_compile_error/old/error --no-default-features &&
-          cargo check
+          cargo add --path [ROOT]/test_crates/manifest_tests/workspace_baseline_conditional_compile_error/old/error --no-default-features &&
+          cargo check &&
+          cargo doc
 
     Building no-error v0.1.0 (current)
        Built [TIME] (current)

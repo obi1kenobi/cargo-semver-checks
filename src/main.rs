@@ -1,6 +1,6 @@
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 
-use std::{collections::HashSet, env, path::PathBuf};
+use std::{collections::HashSet, env, ffi::OsStr, io::Write as _, path::PathBuf};
 
 use anstyle::{AnsiColor, Color, Reset, Style};
 use cargo_config2::Config;
@@ -9,9 +9,9 @@ use cargo_semver_checks::{
     WitnessGeneration,
 };
 use clap::{Args, CommandFactory, Parser, Subcommand};
-use std::io::Write;
 
 #[cfg(test)]
+#[allow(unsafe_code)]
 mod snapshot_tests;
 
 fn main() {
@@ -126,7 +126,7 @@ fn main() {
 
                 // helper struct for rendering help for just the unstable options.
                 #[derive(Parser)]
-                #[clap(
+                #[command(
                     disable_help_flag = true,
                     help_template = "{options}",
                     mut_args = |arg| arg.hide(false),
@@ -236,8 +236,7 @@ fn print_issue_url(config: &mut GlobalConfig) {
         Ok(c) => toml::to_string(&c).unwrap_or_else(|s| {
             writeln!(
                 config.stderr(),
-                "Error serializing cargo build configuration: {}",
-                s
+                "Error serializing cargo build configuration: {s}"
             )
             .expect("Failed to print error");
             String::default()
@@ -245,8 +244,7 @@ fn print_issue_url(config: &mut GlobalConfig) {
         Err(e) => {
             writeln!(
                 config.stderr(),
-                "Error loading cargo build configuration: {}",
-                e
+                "Error loading cargo build configuration: {e}"
             )
             .expect("Failed to print error");
             String::default()
@@ -333,12 +331,16 @@ struct SemverChecks {
 /// `cargo semver-checks -Z help` to show help messages
 /// instead, so a docstring help message will be shown then.
 #[derive(Debug, Clone, Args, Default, PartialEq, Eq)]
-#[clap(hide = true)]
+#[command(hide = true)]
 #[non_exhaustive]
 struct UnstableOptions {
     /// Enable printing witness hints, examples of potentially-broken downstream code.
     #[arg(long, hide = true)]
     witness_hints: bool,
+
+    /// Enable generating and testing witness programs, full examples of potentially-broken downstream code.
+    #[arg(long, hide = true)]
+    witnesses: bool,
 }
 
 impl UnstableOptions {
@@ -360,10 +362,17 @@ impl UnstableOptions {
 
         // If this has a compilation error from adding or removing fields, see this function's
         // docstring for how to fix this function's implementation.
-        let Self { witness_hints } = self;
+        let Self {
+            witness_hints,
+            witnesses,
+        } = self;
 
         if *witness_hints {
             list.push("--witness-hints".into());
+        }
+
+        if *witnesses {
+            list.push("--witnesses".into())
         }
 
         list
@@ -400,6 +409,9 @@ struct CheckRelease {
             "baseline_features",
             "current_features",
             "all_features",
+            "baseline_version",
+            "baseline_rev",
+            "baseline_root",
         ]
     )]
     current_rustdoc: Option<PathBuf>,
@@ -544,10 +556,19 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             let project_root = if manifest.is_dir() {
                 manifest
             } else {
-                manifest
+                let parent = manifest
                     .parent()
-                    .expect("manifest path doesn't have a parent")
-                    .to_path_buf()
+                    .expect("manifest path doesn't have a parent");
+
+                // Special case: if `manifest` is `"Cargo.toml"` then
+                // Rust makes `parent` be the empty path.
+                // In that case, the argument meant `"./Cargo.toml"` so
+                // the parent is the current directory.
+                if parent.to_string_lossy().is_empty() {
+                    std::env::current_dir().expect("can't determine current directory")
+                } else {
+                    parent.to_path_buf()
+                }
             };
             (Rustdoc::from_root(&project_root), Some(project_root))
         } else {
@@ -576,7 +597,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
                 Some(Rustdoc::from_registry(baseline_version))
             } else if let Some(baseline_rev) = value.baseline_rev {
                 let root = if let Some(baseline_root) = value.baseline_root {
-                    baseline_root
+                    lenient_baseline_root(baseline_root)
                 } else if let Some(current_root) = current_project_root {
                     current_root
                 } else {
@@ -588,7 +609,10 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             } else {
                 // Either there's a manually-set baseline root path, or fall through
                 // to the default behavior.
-                value.baseline_root.map(Rustdoc::from_root)
+                value
+                    .baseline_root
+                    .map(lenient_baseline_root)
+                    .map(Rustdoc::from_root)
             }
         };
         if let Some(baseline) = custom_baseline {
@@ -629,9 +653,36 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
 
         let mut witness_generation = WitnessGeneration::new();
         witness_generation.show_hints = value.unstable_options.witness_hints;
+        witness_generation.generate_witnesses = value.unstable_options.witnesses;
         check.set_witness_generation(witness_generation);
 
         check
+    }
+}
+
+/// Replace baseline root paths that point to `Cargo.toml` with ones to its directory.
+///
+/// Be lenient when people pass a path to a *manifest* to `--baseline-root`
+/// instead of a directory. They are confusing it with `--manifest-path` which
+/// requires a manifest instead of a directory.
+///
+/// We know what they meant, so apply it.
+fn lenient_baseline_root(baseline_root: PathBuf) -> PathBuf {
+    if baseline_root.is_file()
+        && baseline_root.file_name().and_then(OsStr::to_str) == Some("Cargo.toml")
+    {
+        let parent = baseline_root.parent().expect("file doesn't have a parent");
+        // Special case: if `baseline_root` is `"Cargo.toml"` then
+        // Rust makes `parent` be the empty path.
+        // In that case, the argument meant `"./Cargo.toml"` so
+        // the parent is the current directory.
+        if parent.to_string_lossy().is_empty() {
+            std::env::current_dir().expect("can't determine current directory")
+        } else {
+            parent.to_path_buf()
+        }
+    } else {
+        baseline_root
     }
 }
 
@@ -737,4 +788,67 @@ fn all_unstable_features_are_hidden() {
             argument.get_id()
         );
     }
+}
+
+#[test]
+fn current_rustdoc_conflict_errors() {
+    use clap::CommandFactory as _;
+
+    // Only --current-rustdoc provided: missing required --baseline-rustdoc
+    assert!(
+        Cargo::command()
+            .try_get_matches_from([
+                "cargo",
+                "semver-checks",
+                "check-release",
+                "--current-rustdoc",
+                "foo.json",
+            ])
+            .is_err()
+    );
+
+    // Conflicts with --baseline-version
+    assert!(
+        Cargo::command()
+            .try_get_matches_from([
+                "cargo",
+                "semver-checks",
+                "check-release",
+                "--current-rustdoc",
+                "foo.json",
+                "--baseline-version",
+                "1.0.0",
+            ])
+            .is_err()
+    );
+
+    // Conflicts with --baseline-root
+    assert!(
+        Cargo::command()
+            .try_get_matches_from([
+                "cargo",
+                "semver-checks",
+                "check-release",
+                "--current-rustdoc",
+                "foo.json",
+                "--baseline-root",
+                ".",
+            ])
+            .is_err()
+    );
+
+    // Conflicts with --baseline-rev
+    assert!(
+        Cargo::command()
+            .try_get_matches_from([
+                "cargo",
+                "semver-checks",
+                "check-release",
+                "--current-rustdoc",
+                "foo.json",
+                "--baseline-rev",
+                "main",
+            ])
+            .is_err()
+    );
 }

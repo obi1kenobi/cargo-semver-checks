@@ -1,0 +1,44 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/repr_align_added_removed/": [
+    {
+      "name": String("StructBecomesAligned"),
+      "path": List([
+        String("repr_align_added_removed"),
+        String("StructBecomesAligned"),
+      ]),
+      "repr_align": String("#[repr(align(8))]"),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Struct"),
+    },
+    {
+      "name": String("EnumBecomesAligned"),
+      "path": List([
+        String("repr_align_added_removed"),
+        String("EnumBecomesAligned"),
+      ]),
+      "repr_align": String("#[repr(align(8))]"),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(35),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Enum"),
+    },
+    {
+      "name": String("UnionBecomesAligned"),
+      "path": List([
+        String("repr_align_added_removed"),
+        String("UnionBecomesAligned"),
+      ]),
+      "repr_align": String("#[repr(align(8))]"),
+      "span_begin_line": Uint64(77),
+      "span_end_line": Uint64(79),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Union"),
+    },
+  ],
+}
