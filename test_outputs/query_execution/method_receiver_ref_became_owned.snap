@@ -1,0 +1,34 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/method_receiver_changes/": [
+    {
+      "method_name": String("box_ref_to_owned"),
+      "name": String("PublicStruct"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_receiver_changes"),
+        String("PublicStruct"),
+      ]),
+      "receiver_kind": String("Box<Self>"),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("box_ref_to_owned"),
+      "name": String("PublicEnum"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("method_receiver_changes"),
+        String("PublicEnum"),
+      ]),
+      "receiver_kind": String("Box<Self>"),
+      "span_begin_line": Uint64(66),
+      "span_end_line": Uint64(68),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
