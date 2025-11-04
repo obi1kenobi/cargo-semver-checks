@@ -1,0 +1,58 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/method_receiver_changes/": [
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("method_to_assoc_fn"),
+      "name": String("PublicStruct"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_receiver_changes"),
+        String("PublicStruct"),
+      ]),
+      "span_begin_line": Uint64(56),
+      "span_end_line": Uint64(56),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_receiver_by_mut_reference": Boolean(true),
+      "baseline_receiver_by_reference": Boolean(false),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("method_to_assoc_fn"),
+      "name": String("PublicEnum"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("method_receiver_changes"),
+        String("PublicEnum"),
+      ]),
+      "span_begin_line": Uint64(112),
+      "span_end_line": Uint64(112),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/parameter_count_changed/": [
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("method_goes_from_taking_self_arg_to_explicit_arg"),
+      "name": String("StructWithMethods"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("parameter_count_changed"),
+        String("StructWithMethods"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

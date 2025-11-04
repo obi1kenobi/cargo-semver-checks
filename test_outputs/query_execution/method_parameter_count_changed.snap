@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/parameter_count_changed/": [
@@ -30,7 +29,7 @@ snapshot_kind: text
     },
     {
       "current_parameter_count": List([
-        Uint64(2),
+        Uint64(1),
       ]),
       "method_name": String("method_with_a_parameter_added"),
       "method_visibility": String("public"),
@@ -41,7 +40,7 @@ snapshot_kind: text
       "non_matching_span_filename": List([
         String("src/lib.rs"),
       ]),
-      "old_parameter_count": Uint64(1),
+      "old_parameter_count": Uint64(0),
       "path": List([
         String("parameter_count_changed"),
         String("StructWithMethods"),
@@ -53,7 +52,7 @@ snapshot_kind: text
     },
     {
       "current_parameter_count": List([
-        Uint64(3),
+        Uint64(2),
       ]),
       "method_name": String("method_with_a_parameter_removed"),
       "method_visibility": String("public"),
@@ -64,7 +63,7 @@ snapshot_kind: text
       "non_matching_span_filename": List([
         String("src/lib.rs"),
       ]),
-      "old_parameter_count": Uint64(4),
+      "old_parameter_count": Uint64(3),
       "path": List([
         String("parameter_count_changed"),
         String("StructWithMethods"),
@@ -76,18 +75,18 @@ snapshot_kind: text
     },
     {
       "current_parameter_count": List([
-        Uint64(3),
+        Uint64(1),
       ]),
-      "method_name": String("moved_trait_provided_method"),
+      "method_name": String("method_goes_from_taking_self_arg_to_explicit_arg"),
       "method_visibility": String("public"),
       "name": String("StructWithMethods"),
       "non_matching_span_begin_line": List([
-        Uint64(20),
+        Uint64(18),
       ]),
       "non_matching_span_filename": List([
         String("src/lib.rs"),
       ]),
-      "old_parameter_count": Uint64(2),
+      "old_parameter_count": Uint64(0),
       "path": List([
         String("parameter_count_changed"),
         String("StructWithMethods"),
@@ -99,24 +98,47 @@ snapshot_kind: text
     },
     {
       "current_parameter_count": List([
-        Uint64(1),
+        Uint64(2),
+      ]),
+      "method_name": String("moved_trait_provided_method"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "non_matching_span_begin_line": List([
+        Uint64(22),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_parameter_count": Uint64(1),
+      "path": List([
+        String("parameter_count_changed"),
+        String("StructWithMethods"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_parameter_count": List([
+        Uint64(0),
       ]),
       "method_name": String("moved_method"),
       "method_visibility": String("public"),
       "name": String("StructWithMethods"),
       "non_matching_span_begin_line": List([
-        Uint64(30),
+        Uint64(32),
       ]),
       "non_matching_span_filename": List([
         String("src/lib.rs"),
       ]),
-      "old_parameter_count": Uint64(2),
+      "old_parameter_count": Uint64(1),
       "path": List([
         String("parameter_count_changed"),
         String("StructWithMethods"),
       ]),
-      "span_begin_line": Uint64(22),
-      "span_end_line": Uint64(22),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

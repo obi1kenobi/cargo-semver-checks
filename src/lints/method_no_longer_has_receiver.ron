@@ -1,0 +1,79 @@
+SemverQuery(
+    id: "method_no_longer_has_receiver",
+    human_readable_name: "method became associated function by losing receiver",
+    description: "A method has lost its receiver and can now only be invoked as an associated function, instead of as a method on a value.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/associated-items.html#methods"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        owner_type: __typename @tag @output
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                method_name: name @output @tag
+
+                                baseline_receiver_: receiver {
+                                    by_reference @output
+                                    by_mut_reference @output
+                                    by_value @output
+                                    kind @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        __typename @filter(op: "=", value: ["%owner_type"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                receiver @fold @transform(op: "count") @filter(op: "=", value: ["$zero"])
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A method has lost its receiver. Now it can only be invoked as an associated function, instead of as a method on a value.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} no longer takes {{#if baseline_receiver_by_reference }}&{{/if}}{{#if baseline_receiver_by_mut_reference }}&mut {{/if}}{{baseline_receiver_kind}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
