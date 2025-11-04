@@ -328,9 +328,9 @@ enum WitnessTextResults {
 }
 
 enum WitnessLogicTextResults {
-    // Only one variant is present of right now, though this is meant as a future-proof system to allow
-    // for new types of witness logic
-    ExtractFuncArgs(WitnessLogicTextResult<BTreeMap<Arc<str>, FieldValue>>),
+    /// For any case where the only additional witness logic is the injection of one or more values into
+    /// the outputted lint values
+    InjectedAdditionalValues(WitnessLogicTextResult<BTreeMap<Arc<str>, FieldValue>>),
 }
 
 type WitnessLogicTextResult<T> = Vec<Result<(String, T)>>;
@@ -338,7 +338,7 @@ type WitnessLogicTextResult<T> = Vec<Result<(String, T)>>;
 impl WitnessLogicTextResults {
     fn is_empty(&self) -> bool {
         match self {
-            Self::ExtractFuncArgs(text_and_values) => text_and_values.is_empty(),
+            Self::InjectedAdditionalValues(text_and_values) => text_and_values.is_empty(),
         }
     }
 }
@@ -416,7 +416,9 @@ impl WitnessTextResults {
                     });
                 WitnessChecksResultKind::Standard(results)
             }
-            Self::WitnessLogic(WitnessLogicTextResults::ExtractFuncArgs(texts_and_values)) => {
+            Self::WitnessLogic(WitnessLogicTextResults::InjectedAdditionalValues(
+                texts_and_values,
+            )) => {
                 let mut results = vec![];
                 texts_and_values
                     .into_iter()
@@ -443,7 +445,9 @@ impl WitnessTextResults {
 
                         results.push(witness_result);
                     });
-                WitnessChecksResultKind::WitnessLogic(WitnessLogicKinds::ExtractFuncArgs(results))
+                WitnessChecksResultKind::WitnessLogic(WitnessLogicKinds::InjectedAdditionalValues(
+                    results,
+                ))
             }
         };
 
@@ -562,7 +566,28 @@ fn run_extra_logic_and_textgen(
                         })
                 })
                 .collect();
-            WitnessTextResults::WitnessLogic(WitnessLogicTextResults::ExtractFuncArgs(
+            WitnessTextResults::WitnessLogic(WitnessLogicTextResults::InjectedAdditionalValues(
+                texts_and_values,
+            ))
+        }
+        LintLogic::UseWitness(WitnessLogic::ExtractMethodArgs) => {
+            let texts_and_values = queried_values
+                .map(|result| {
+                    result
+                        .and_then(|values| lint_logic::extract_method_args(values, rustdoc_paths))
+                        .and_then(|values| {
+                            Ok((
+                                generate_witness_text(
+                                    handlebars,
+                                    handlebars_template,
+                                    values.clone(),
+                                )?,
+                                values,
+                            ))
+                        })
+                })
+                .collect();
+            WitnessTextResults::WitnessLogic(WitnessLogicTextResults::InjectedAdditionalValues(
                 texts_and_values,
             ))
         }

@@ -203,7 +203,9 @@ fn print_triggered_lint(
         None => Either::Left(lint_result.query_results.iter()),
         Some(WitnessCheckResult { check_results, .. }) => match check_results {
             WitnessChecksResultKind::Standard(_) => Either::Left(lint_result.query_results.iter()),
-            WitnessChecksResultKind::WitnessLogic(WitnessLogicKinds::ExtractFuncArgs(results)) => {
+            WitnessChecksResultKind::WitnessLogic(WitnessLogicKinds::InjectedAdditionalValues(
+                results,
+            )) => {
                 Either::Right(Box::new(
                     // These errors are addressed elwhere too, they can be ignored here
                     results.iter().filter_map(|result| {

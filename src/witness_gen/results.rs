@@ -36,12 +36,12 @@ impl WitnessCheckResult {
             WitnessChecksResultKind::Standard(results) => {
                 results.iter().map(Result::as_ref).partition_result()
             }
-            WitnessChecksResultKind::WitnessLogic(WitnessLogicKinds::ExtractFuncArgs(results)) => {
-                results
-                    .iter()
-                    .map(|result| result.as_ref().map(|(status, _)| status))
-                    .partition_result()
-            }
+            WitnessChecksResultKind::WitnessLogic(WitnessLogicKinds::InjectedAdditionalValues(
+                results,
+            )) => results
+                .iter()
+                .map(|result| result.as_ref().map(|(status, _)| status))
+                .partition_result(),
         };
 
         // Partition into witness statuses that failed (no breaking change) and those that errored.
@@ -82,9 +82,9 @@ pub(crate) enum WitnessChecksResultKind {
 /// Data about witness logic runs. May contain any form of additional data on top of the check status.
 #[derive(Debug)]
 pub(crate) enum WitnessLogicKinds {
-    /// Includes the modified version of the lint's data map, including any data injected by extracting
-    /// the function arguments.
-    ExtractFuncArgs(WitnessLogicKind<BTreeMap<Arc<str>, FieldValue>>),
+    /// For any case where the only additional witness logic is the injection of one or more values into
+    /// the outputted lint values
+    InjectedAdditionalValues(WitnessLogicKind<BTreeMap<Arc<str>, FieldValue>>),
 }
 
 type WitnessLogicKind<T> = Vec<Result<(WitnessCheckStatus, T)>>;

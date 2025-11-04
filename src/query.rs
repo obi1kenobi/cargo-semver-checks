@@ -109,6 +109,8 @@ impl LintLogic {
 pub enum WitnessLogic {
     /// Expects a full path on `path`
     ExtractFuncArgs,
+    /// Expects a full path to the ImplOwner on `path`, the name of the Impl on `impl_name`, and a method name on `method_name`
+    ExtractMethodArgs,
 }
 
 /// A query that can be executed on a pair of rustdoc output files,
@@ -1681,6 +1683,7 @@ add_lints!(
     macro_now_doc_hidden,
     method_no_longer_has_receiver,
     method_parameter_count_changed,
+    method_parameter_type_changed,
     method_receiver_mut_ref_became_owned,
     method_receiver_ref_became_mut,
     method_receiver_ref_became_owned,

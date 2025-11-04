@@ -1,13 +1,16 @@
 //! Logic for [`WitnessLogic::ExtractFuncArgs`](crate::query::WitnessLogic::ExtractFuncArgs)
 
-use std::{collections::BTreeMap, fs::File, io::Read, path::Path, sync::Arc};
+use std::{collections::BTreeMap, sync::Arc};
 
 use anyhow::{Context, Result};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rustdoc_types::{Crate, Function, Item, ItemEnum, ItemKind};
 use trustfall::FieldValue;
 
-use crate::witness_gen::{WitnessRustdocPaths, lint_logic::rustdoc_fmt::FormatRustdoc};
+use crate::witness_gen::{
+    WitnessRustdocPaths,
+    lint_logic::{insert_new_result, load_file_data, rustdoc_fmt::FormatRustdoc},
+};
 
 /// Extracts the function arguments from the rustdoc data
 ///
@@ -77,32 +80,6 @@ pub(crate) fn extract_func_args(
     Ok(witness_results)
 }
 
-fn load_file_data(path: &Path) -> Result<Crate> {
-    let mut file_data = String::new();
-    File::open(path)
-        .with_context(|| {
-            format!(
-                "error opening rustdoc file {} for witness checks",
-                path.display()
-            )
-        })?
-        .read_to_string(&mut file_data)
-        .with_context(|| {
-            format!(
-                "error reading rustdoc file {} for witness checks",
-                path.display()
-            )
-        })?;
-
-    // TODO: Detect version, currently just always uses v56 as a default
-    serde_json::from_str(&file_data).with_context(|| {
-        format!(
-            "error parsing rustdoc file {} with version v56 for witness checks",
-            path.display()
-        )
-    })
-}
-
 fn find_function<'a>(full_path: &[Arc<str>], rustdoc: &'a Crate) -> Result<&'a Function> {
     let (id, _) = rustdoc
         .paths
@@ -130,20 +107,6 @@ fn find_function<'a>(full_path: &[Arc<str>], rustdoc: &'a Crate) -> Result<&'a F
         }) => Ok(func),
         _ => unreachable!(
             "id is matched as being function and as existing, that should not vary here"
-        ),
-    }
-}
-
-fn insert_new_result(
-    results: &mut BTreeMap<Arc<str>, FieldValue>,
-    key: &str,
-    value: FieldValue,
-) -> Result<()> {
-    let key = Arc::from(key);
-    match results.insert(Arc::clone(&key), value) {
-        None => Ok(()),
-        Some(_) => anyhow::bail!(
-            "error inserting new value in witness results at `{key}`, entry is occupied"
         ),
     }
 }

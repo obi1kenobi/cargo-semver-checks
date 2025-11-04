@@ -5,6 +5,7 @@ expression: "&query_execution_results"
 {
   "./test_crates/function_parameter_type_changed/": [
     {
+<<<<<<< HEAD
       "baseline_arg_names": List([
         String("_"),
       ]),
@@ -17,10 +18,10 @@ expression: "&query_execution_results"
       "current_arg_types": List([
         String("i64"),
       ]),
-      "current_signature": String("fn function_with_parameter_changed(_: i64)"),
+      "current_signature": String("fn function_with_parameter_changed(_: i64, _: i32)"),
       "name": String("function_with_parameter_changed"),
       "new_unsafe": Boolean(false),
-      "old_signature": String("fn function_with_parameter_changed(_: i32)"),
+      "old_signature": String("fn function_with_parameter_changed(_: i32, _: i32)"),
       "old_unsafe": Boolean(false),
       "path": List([
         String("function_parameter_type_changed"),
