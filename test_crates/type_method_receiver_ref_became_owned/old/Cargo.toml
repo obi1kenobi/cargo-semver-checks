@@ -1,7 +1,0 @@
-[package]
-publish = false
-name = "type_method_receiver_ref_became_owned"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
