@@ -1631,6 +1631,7 @@ add_lints!(
     method_receiver_mut_ref_became_owned,
     method_receiver_ref_became_mut,
     method_receiver_ref_became_owned,
+    method_receiver_type_changed,
     method_requires_different_const_generic_params,
     method_requires_different_generic_type_params,
     module_missing,
