@@ -14,6 +14,8 @@ impl StructWithMethods {
     pub fn method_with_a_parameter_added(&self, _: ()) {}
 
     pub fn method_with_a_parameter_removed(&self, _: (), _: ()) {}
+
+    pub fn method_goes_from_taking_self_arg_to_explicit_arg(value: &Self) {}
 }
 
 pub trait Bar {

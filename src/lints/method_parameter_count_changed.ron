@@ -24,7 +24,9 @@ SemverQuery(
                                 method_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
-                                old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters")
+                                old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters") {
+                                    name @filter(op: "!=", value: ["$self"])
+                                }
 
                                 span_: span @optional {
                                     filename @output
@@ -78,7 +80,9 @@ SemverQuery(
                                 name @filter(op: "=", value: ["%method_name"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
-                                parameter @fold @transform(op: "count") @filter(op: "=", value: ["%parameters"])
+                                parameter @fold @transform(op: "count") @filter(op: "=", value: ["%parameters"]) {
+                                    name @filter(op: "!=", value: ["$self"])
+                                }
                             }
                         }
 
@@ -90,7 +94,9 @@ SemverQuery(
                                 name @filter(op: "=", value: ["%method_name"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
-                                current_parameter_: parameter @fold @transform(op: "count") @output
+                                current_parameter_: parameter @fold @transform(op: "count") @output {
+                                    name @filter(op: "!=", value: ["$self"])
+                                }
 
                                 non_matching_span_: span @optional {
                                     filename @output
@@ -106,9 +112,10 @@ SemverQuery(
     arguments: {
         "public": "public",
         "public_or_default": ["public", "default"],
+        "self": "self",
         "true": true,
         "zero": 0,
     },
-    error_message: "A publicly-visible method now takes a different number of parameters.",
+    error_message: "A publicly-visible method now takes a different number of parameters, not counting the receiver (self) parameter.",
     per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes {{unpack_if_singleton current_parameter_count}} parameters instead of {{old_parameter_count}}, in {{multiple_spans non_matching_span_filename non_matching_span_begin_line}}"),
 )

@@ -52,6 +52,10 @@ impl PublicStruct {
     pub fn owned_rc_to_refmut_box(self: Rc<Self>) {
         let _ = self;
     }
+
+    pub fn method_to_assoc_fn(&self) {
+        let _ = self;
+    }
 }
 
 pub enum PublicEnum {
@@ -106,6 +110,10 @@ impl PublicEnum {
     pub fn owned_rc_to_refmut_box(self: Rc<Self>) {
         let _ = self;
     }
+
+    pub fn method_to_assoc_fn(&mut self) {
+        let _ = self;
+    }
 }
 
 #[doc(hidden)]
@@ -157,6 +165,10 @@ impl HiddenStruct {
     }
 
     pub fn owned_rc_to_refmut_box(self: Rc<Self>) {
+        let _ = self;
+    }
+
+    pub fn method_to_assoc_fn(&self) {
         let _ = self;
     }
 }
@@ -223,6 +235,11 @@ impl HiddenEnumMethods {
 
     #[doc(hidden)]
     pub fn owned_rc_to_refmut_box(self: Rc<Self>) {
+        let _ = self;
+    }
+
+    #[doc(hidden)]
+    pub fn method_to_assoc_fn(&self) {
         let _ = self;
     }
 }
