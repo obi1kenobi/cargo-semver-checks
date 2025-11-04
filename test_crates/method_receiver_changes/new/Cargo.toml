@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "method_receiver_changes"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
