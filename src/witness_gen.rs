@@ -9,7 +9,7 @@ use std::{
     path::{Path, PathBuf},
     process::{ExitStatus, Stdio},
     sync::{
-        Arc,
+        Arc, OnceLock,
         atomic::{AtomicUsize, Ordering},
     },
     time::{Duration, Instant},
@@ -97,6 +97,7 @@ impl<T> CoupledRustdocPath<T> {
 /// Diagnostic information about a single failed or errored witness check
 #[derive(Debug)]
 pub(crate) struct SingleWitnessCheckInfo {
+    pub crate_path: PathBuf,
     pub witness_name: String,
     pub index: usize,
     // TODO: Add more collected diagnostic information
@@ -230,6 +231,8 @@ pub(crate) struct WitnessReport {
     pub repurposed_failed_checks: usize,
     /// Total number of succeeded witnesses
     pub succeeded_checks: usize,
+
+    pub deletion_error: Result<()>,
 }
 
 struct WitnessReportBuilder {
@@ -241,6 +244,7 @@ struct WitnessReportBuilder {
     failed_checks: AtomicUsize,
     repurposed_failed_checks: AtomicUsize,
     succeeded_checks: AtomicUsize,
+    deletion_error: OnceLock<anyhow::Error>,
 }
 
 impl WitnessReport {
@@ -261,6 +265,7 @@ impl WitnessReportBuilder {
             failed_checks: AtomicUsize::new(0),
             repurposed_failed_checks: AtomicUsize::new(0),
             succeeded_checks: AtomicUsize::new(0),
+            deletion_error: OnceLock::new(),
         }
     }
 
@@ -288,6 +293,17 @@ impl WitnessReportBuilder {
         }
     }
 
+    /// Helper to delete a witness crate. If any deletion so far has failed, we play it safe
+    /// and refuse
+    fn delete_if_allowed(&self, crate_path: &Path) {
+        if self.deletion_error.get().is_none()
+            && let Err(err) = delete_witness_crate(crate_path)
+        {
+            // Ignore oncelock set error, we've already errored, but it's not a problem
+            let _ = self.deletion_error.set(err);
+        }
+    }
+
     fn finalize(self) -> WitnessReport {
         WitnessReport {
             witness_set_dir: self.witness_set_dir,
@@ -298,6 +314,10 @@ impl WitnessReportBuilder {
             failed_checks: self.failed_checks.into_inner(),
             repurposed_failed_checks: self.repurposed_failed_checks.into_inner(),
             succeeded_checks: self.succeeded_checks.into_inner(),
+            deletion_error: match self.deletion_error.into_inner() {
+                Some(err) => Err(err),
+                None => Ok(()),
+            },
         }
     }
 }
@@ -413,6 +433,12 @@ impl WitnessTextResults {
                                 .is_ok_and(|(status, _)| status.is_errored())
                         {
                             errored_check = true;
+                        }
+
+                        // Delete any unecessary witness crates
+                        if let Ok((WitnessCheckStatus::NoBreakingChange(info), _)) = &witness_result
+                        {
+                            report_builder.delete_if_allowed(&info.crate_path);
                         }
 
                         results.push(witness_result);
@@ -758,12 +784,50 @@ fn run_single_witness_check(
         // Currently the diagnostics are initialized here. If additional diagnostic information is added,
         // consider hoisting initialization elsewhere.
         || SingleWitnessCheckInfo {
+            crate_path: crate_path.clone(),
             witness_name: witness_name.to_string(),
             index,
         },
     )?;
 
     Ok(check_status)
+}
+
+/// Tries to delete a witness crate, deleting only the expected files and directories. If any extra files
+/// or directories are created or placed in the witness, then the witness will not successfully be deleted.
+///
+/// This is specifically to avoid accidents with deleting incorrect files.
+fn delete_witness_crate(crate_path: &Path) -> Result<()> {
+    let src_path = crate_path.join("src");
+
+    fs::remove_file(src_path.join("lib.rs"))
+        .with_context(|| format!("failed to delete {}", src_path.join("lib.rs").display()))?;
+
+    fs::remove_file(crate_path.join("Cargo.toml")).with_context(|| {
+        format!(
+            "failed to delete {}",
+            crate_path.join("Cargo.toml").display()
+        )
+    })?;
+
+    fs::remove_file(crate_path.join("Cargo.lock")).with_context(|| {
+        format!(
+            "failed to delete {}",
+            crate_path.join("Cargo.lock").display()
+        )
+    })?;
+
+    // This is the only use of `remove_dir_all` in this function, again to try and minimize incorrect file deletions.
+    fs::remove_dir_all(crate_path.join("target"))
+        .with_context(|| format!("failed to delete {}", crate_path.join("target").display()))?;
+
+    fs::remove_dir(src_path)
+        .with_context(|| format!("failed to delete {}", crate_path.join("src").display()))?;
+
+    fs::remove_dir(crate_path)
+        .with_context(|| format!("failed to delete {}", crate_path.display()))?;
+
+    Ok(())
 }
 
 /// Run all witness checks, returning a [`WitnessReport`], which contains details about the witnesses that were run.

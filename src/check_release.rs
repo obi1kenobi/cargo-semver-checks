@@ -774,6 +774,21 @@ fn print_report(
             Ok(())
         })?;
 
+        if let Err(err) = &witness_report.deletion_error {
+            config.log_info(|config| {
+            writeln!(
+                config.stdout(),
+                "\n{}Warning:{}\nA witness failed to delete successfully. Any other witnesses that \
+                would have been deleted were not deleted.\n{:>12} {err} (root cause: {})\n",
+                Style::new().bold(),
+                Reset,
+                "error:",
+                err.root_cause()
+            )?;
+            Ok(())
+        })?;
+        }
+
         for (lint_result, check_result) in report.lint_results.iter().filter_map(|result| {
             result
                 .witness_results
