@@ -585,13 +585,11 @@ fn map_to_witness_text<'query>(
 
 /// Generates a single witness crate
 fn generate_witness_crate(
-    witness_set_dir: &Path,
-    witness_name: &str,
-    index: usize,
+    crate_path: &Path,
+    witness_crate_name: &str,
     witness_text: &str,
-    dependency_data: &DependencyData,
-) -> Result<PathBuf> {
-    let crate_path = witness_set_dir.join(format!("{witness_name}-{index}"));
+    dependency: &WitnessDependency,
+) -> Result<()> {
     let src_path = crate_path.join("src");
 
     fs::create_dir_all(&src_path).with_context(|| {
@@ -618,7 +616,7 @@ fn generate_witness_crate(
     write!(
         manifest_file,
         r#"[package]
-name = "{witness_name}-{index}"
+name = "{witness_crate_name}"
 version = "1.0.0"
 edition = "2024"
 
@@ -629,45 +627,45 @@ path = "src/lib.rs"
 baseline = []
 
 [dependencies]
-baseline = {}
-current = {}
+source = {}
 "#,
-        dependency_data.baseline.to_dependency_string(),
-        dependency_data.current.to_dependency_string()
+        dependency.to_dependency_string(),
     )
     .context("error writing to manifest file")?;
 
     write!(
         lib_file,
-        r#"#[cfg(feature = "baseline")]
-use baseline as {0};
-#[cfg(not(feature = "baseline"))]
-use current as {0};
+        r#"use source as {0};
 
 {1}
 "#,
-        dependency_data.baseline.name, witness_text
+        dependency.name, witness_text
     )
     .context("error writing to main witness file")?;
 
-    Ok(crate_path)
+    Ok(())
 }
 
-fn cargo_check_witness<F>(crate_path: &Path, build_diagnostics: F) -> Result<WitnessCheckStatus>
+fn cargo_check_witness<F>(
+    baseline_crate_path: &Path,
+    current_crate_path: &Path,
+    build_diagnostics: F,
+) -> Result<WitnessCheckStatus>
 where
     F: Fn() -> SingleWitnessCheckInfo,
 {
     // FIXME: Update from static "cargo" to dynamic system in case cargo is not in $PATH or is not called `cargo`
     let exe = "cargo";
 
-    let crate_path = crate_path.join("Cargo.toml");
+    let baseline_crate_path = baseline_crate_path.join("Cargo.toml");
+    let current_crate_path = current_crate_path.join("Cargo.toml");
 
     let baseline_status = std::process::Command::new(exe)
         .args([
             "check",
             "--quiet",
             "--manifest-path",
-            &crate_path.display().to_string(),
+            &baseline_crate_path.display().to_string(),
             "--features",
             "baseline",
         ])
@@ -677,7 +675,7 @@ where
         .with_context(|| {
             format!(
                 "error checking witness crate with baseline at {}",
-                crate_path.display()
+                baseline_crate_path.display()
             )
         })?;
 
@@ -686,7 +684,7 @@ where
             "check",
             "--quiet",
             "--manifest-path",
-            &crate_path.display().to_string(),
+            &current_crate_path.display().to_string(),
         ])
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -694,7 +692,7 @@ where
         .with_context(|| {
             format!(
                 "error checking witness crate with current at {}",
-                crate_path.display()
+                current_crate_path.display()
             )
         })?;
 
@@ -723,17 +721,40 @@ fn run_single_witness_check(
     witness_text: &str,
     dependency_data: &DependencyData,
 ) -> Result<WitnessCheckStatus> {
-    let crate_path = generate_witness_crate(
-        witness_set_dir,
-        witness_name,
-        index,
+    let crates_name = format!("{witness_name}-{index}");
+    let crates_path = witness_set_dir.join(&crates_name);
+
+    let baseline_crate_path = crates_path.join("baseline_witness");
+    generate_witness_crate(
+        &baseline_crate_path,
+        &crates_name,
         witness_text,
-        dependency_data,
+        &dependency_data.baseline,
     )
-    .with_context(|| format!("error generating witness crate `{witness_name}-{index}`"))?;
+    .with_context(|| {
+        format!(
+            "error generating witness crate in `{}`",
+            crates_path.join("baseline_witness").display()
+        )
+    })?;
+
+    let current_crate_path = crates_path.join("current_witness");
+    generate_witness_crate(
+        &current_crate_path,
+        &crates_name,
+        witness_text,
+        &dependency_data.current,
+    )
+    .with_context(|| {
+        format!(
+            "error generating witness crate in `{}`",
+            crates_path.join("current_witness").display()
+        )
+    })?;
 
     let check_status = cargo_check_witness(
-        &crate_path,
+        &baseline_crate_path,
+        &current_crate_path,
         // Currently the diagnostics are initialized here. If additional diagnostic information is added,
         // consider hoisting initialization elsewhere.
         || SingleWitnessCheckInfo {
