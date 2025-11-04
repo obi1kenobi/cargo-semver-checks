@@ -1,0 +1,79 @@
+SemverQuery(
+    id: "method_receiver_ref_became_mut",
+    human_readable_name: "method receiver changed from immutable to mutable reference",
+    description: "A method's receiver changed from &self to &mut self.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/associated-items.html#methods"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        owner_type: __typename @tag @output
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                method_name: name @output @tag
+
+                                receiver {
+                                    by_reference @filter(op: "=", value: ["$true"])
+                                    receiver_kind: kind @tag @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        __typename @filter(op: "=", value: ["%owner_type"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                receiver {
+                                    by_mut_reference @filter(op: "=", value: ["$true"])
+                                    kind @filter(op: "=", value: ["%receiver_kind"])
+                                }
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A method's receiver changed from an immutable reference to a mutable one.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes &mut {{receiver_kind}}, not &{{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
