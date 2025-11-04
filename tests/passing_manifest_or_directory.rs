@@ -1,7 +1,7 @@
 use assert_cmd::Command;
 
 fn check_paths(current_path: &'static str, baseline_path: &'static str) {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd: Command = assert_cmd::cargo::cargo_bin_cmd!("cargo-semver-checks");
     cmd.args([
         "semver-checks",
         "check-release",

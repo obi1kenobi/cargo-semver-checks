@@ -12,7 +12,6 @@
 
 use std::path::{Path, PathBuf};
 
-use assert_cmd::cargo::CommandCargoExt;
 use insta_cmd::Command;
 
 /// Create a snapshot of the output of a `cargo semver-checks` invocation, using [`insta_cmd`].
@@ -28,8 +27,7 @@ fn assert_integration_test(
     modify: impl FnOnce(&mut Command, &mut insta::Settings),
 ) {
     let mut settings = insta::Settings::clone_current();
-    let mut cmd =
-        Command::cargo_bin("cargo-semver-checks").expect("failed to get cargo-semver-checks");
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("cargo-semver-checks"));
 
     // never use color for more readable snapshots
     cmd.env("CARGO_TERM_COLOR", "never");
@@ -203,11 +201,7 @@ fn get_root_path() -> PathBuf {
 
 /// Helper function to get a canonicalized version of the cargo executable bin.
 fn executable_path() -> PathBuf {
-    Path::new(
-        Command::cargo_bin("cargo-semver-checks")
-            .expect("expected cargo-semver-checks")
-            .get_program(),
-    )
-    .canonicalize()
-    .expect("error canonicalizing")
+    assert_cmd::cargo::cargo_bin!("cargo-semver-checks")
+        .canonicalize()
+        .expect("error canonicalizing")
 }
