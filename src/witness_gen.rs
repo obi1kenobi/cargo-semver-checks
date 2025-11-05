@@ -97,7 +97,7 @@ impl<T> CoupledRustdocPath<T> {
 /// Diagnostic information about a single failed or errored witness check
 #[derive(Debug)]
 pub(crate) struct SingleWitnessCheckInfo {
-    pub crate_path: PathBuf,
+    pub crates_path: PathBuf,
     pub witness_name: String,
     pub index: usize,
     // TODO: Add more collected diagnostic information
@@ -231,7 +231,7 @@ pub(crate) struct WitnessReport {
     pub repurposed_failed_checks: usize,
     /// Total number of succeeded witnesses
     pub succeeded_checks: usize,
-
+    /// Represents any error during the deletion of an unecessary witness crate
     pub deletion_error: Result<()>,
 }
 
@@ -438,7 +438,7 @@ impl WitnessTextResults {
                         // Delete any unecessary witness crates
                         if let Ok((WitnessCheckStatus::NoBreakingChange(info), _)) = &witness_result
                         {
-                            report_builder.delete_if_allowed(&info.crate_path);
+                            report_builder.delete_if_allowed(&info.crates_path);
                         }
 
                         results.push(witness_result);
@@ -784,7 +784,7 @@ fn run_single_witness_check(
         // Currently the diagnostics are initialized here. If additional diagnostic information is added,
         // consider hoisting initialization elsewhere.
         || SingleWitnessCheckInfo {
-            crate_path: crate_path.clone(),
+            crates_path: crates_path.clone(),
             witness_name: witness_name.to_string(),
             index,
         },
