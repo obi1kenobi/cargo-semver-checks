@@ -12,6 +12,7 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @tag
 
                         old_signature: signature @tag @output
 
@@ -19,6 +20,15 @@ SemverQuery(
                             path @output @tag
                             public_api @filter(op: "=", value: ["$true"])
                         }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @tag(name: "old_required_generic_count")
+
+                        parameter @fold @transform(op: "count") @tag(name: "old_parameter_count")
+
+                        old_unsafe: unsafe @output
+
                     }
                 }
             }
@@ -26,7 +36,7 @@ SemverQuery(
                 item {
                     ... on Function {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @output
+                        name @filter(op: "=", value:["%name"]) @output
 
                         current_signature: signature @filter(op: "!=", value: ["%old_signature"]) @output
 
@@ -34,6 +44,14 @@ SemverQuery(
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
                         }
+
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["%old_required_generic_count"])
+
+                        parameter @fold @transform(op: "count") @filter(op: "=", value: ["%old_parameter_count"])
+
+                        new_unsafe: unsafe @output
 
                         span_: span @optional {
                             filename @output
@@ -53,8 +71,8 @@ SemverQuery(
     per_result_error_template: Some("{{join \"::\" path}} now has the signature {{ current_signature }} instead of {{ old_signature }}, in {{span_filename}}:{{span_begin_line}}"),
     witness: (
             hint_template: r#"{{join "::" path}}({{#each baseline_arg_types}}val{{@index}}{{/each}});"#,
-            witness_template: r#"fn witness({{#each baseline_arg_types}}val{{@index}}: {{this}}{{#unless @last}}, {{/unless}}{{/each}}) {
-    {{join "::" path}}({{#each baseline_arg_types}}val{{@index}}{{/each}});
+            witness_template: r#"{{#if (or old_unsafe new_unsafe)}}unsafe {{/if}}fn witness({{#each baseline_arg_types}}val{{@index}}: {{this}}{{#unless @last}}, {{/unless}}{{/each}}) {
+    {{join "::" path}}({{#each baseline_arg_types}}val{{@index}}{{#unless @last}}, {{/unless}}{{/each}});
 }
             "#
         ),

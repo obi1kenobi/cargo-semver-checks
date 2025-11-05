@@ -854,6 +854,7 @@ mod tests {
     }
 
     fn run_query_on_crate_pair(
+        handlebars: &handlebars::Handlebars<'_>,
         semver_query: &SemverQuery,
         parsed_query: Arc<IndexedQuery>, // The parsed version of semver_query.
         crate_pair_name: &String,
@@ -866,6 +867,22 @@ mod tests {
         let results_iter = adapter
             .run_query_with_indexed_query(parsed_query.clone(), semver_query.arguments.clone())
             .unwrap();
+
+        let results_iter = if semver_query.lint_logic.is_standard() {
+            results_iter
+        } else {
+            Box::new(
+                crate::witness_gen::tests::run_witness_logic_test(
+                    handlebars,
+                    crate::witness_gen::tests::load_witness_test_info(&crate_pair_name),
+                    &adapter,
+                    semver_query,
+                    results_iter.collect(),
+                )
+                .expect("witness dependent lint failed")
+                .into_iter(),
+            )
+        };
 
         // Ensure span data inside `@fold` blocks is deterministically ordered,
         // since the underlying adapter is non-deterministic due to its iteration over hashtables.
@@ -941,6 +958,7 @@ mod tests {
     }
 
     fn assert_no_false_positives_in_nonchanged_crate(
+        handlebars: &handlebars::Handlebars<'_>,
         query_name: &str,
         semver_query: &SemverQuery,
         indexed_query: Arc<IndexedQuery>, // The parsed version of semver_query.
@@ -949,6 +967,7 @@ mod tests {
         crate_version: &str,
     ) {
         let (crate_pair_path, output) = run_query_on_crate_pair(
+            handlebars,
             semver_query,
             indexed_query,
             crate_pair_name,
@@ -983,6 +1002,8 @@ mod tests {
         // Map of rustdoc version to parsed query.
         let mut parsed_query_cache: HashMap<u32, Arc<IndexedQuery>> = HashMap::new();
 
+        let registry = make_handlebars_registry();
+
         let mut query_execution_results: TestOutput = get_test_crate_names()
             .iter()
             .map(|crate_pair_name| {
@@ -1000,6 +1021,7 @@ mod tests {
                         });
 
                 assert_no_false_positives_in_nonchanged_crate(
+                    &registry,
                     query_name,
                     &semver_query,
                     indexed_query.clone(),
@@ -1008,6 +1030,7 @@ mod tests {
                     "new",
                 );
                 assert_no_false_positives_in_nonchanged_crate(
+                    &registry,
                     query_name,
                     &semver_query,
                     indexed_query.clone(),
@@ -1017,6 +1040,7 @@ mod tests {
                 );
 
                 run_query_on_crate_pair(
+                    &registry,
                     &semver_query,
                     indexed_query.clone(),
                     crate_pair_name,
@@ -1092,7 +1116,6 @@ mod tests {
                 })
                 .collect();
 
-        let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
             assert!(!transparent_results.is_empty());
 

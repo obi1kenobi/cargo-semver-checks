@@ -814,3 +814,138 @@ pub(crate) fn run_witness_checks(
 
     Ok(report.finalize())
 }
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use super::*;
+
+    /// Runs a witness check for tests, extracting values.
+    ///
+    /// Returns Ok if *all* witnesses successfully generated and ran without errors, returns Err otherwise
+    pub(crate) fn run_witness_logic_test(
+        handlebars: &handlebars::Handlebars,
+        witness_test_info: WitnessTestInfo<'_>,
+        adapter: &VersionedRustdocAdapter,
+        semver_query: &SemverQuery,
+        query_results: Vec<BTreeMap<Arc<str>, FieldValue>>,
+    ) -> Result<Vec<BTreeMap<Arc<str>, FieldValue>>> {
+        use itertools::Itertools;
+
+        if semver_query.lint_logic.is_standard() {
+            anyhow::bail!("ran run_witness_logic_check when the semver query uses standard logic");
+        }
+
+        if query_results.is_empty() {
+            return Ok(vec![]);
+        }
+
+        let rustdoc_paths = WitnessRustdocPaths::from(&witness_test_info);
+        let dependency_data = DependencyData::from(&witness_test_info);
+
+        // We skip run ID for tests, we will delete this directory afterwards, eliminating risk for collision.
+        let witness_set_dir = dependency_data
+            .target_dir
+            .join(format!("witness-{}", witness_test_info.name));
+
+        // This report is inevitably discarded
+        let report = WitnessReportBuilder::new(&witness_set_dir);
+        let witness_texts = map_to_witness_text(
+            handlebars,
+            semver_query,
+            &query_results,
+            adapter,
+            &rustdoc_paths,
+        )
+        .context("failed to make witness texts, option was None")?;
+
+        let witness_check_result = witness_texts.run_witness_checks(
+            &witness_set_dir,
+            &dependency_data,
+            &report,
+            semver_query,
+        );
+
+        fs::remove_dir_all(witness_test_info.current_root.join("target"))
+            .expect("should remove testing witness target directory successfully");
+
+        let witness_logic_kind = match witness_check_result.map(|result| result.check_results) {
+            None => return Ok(vec![]),
+            Some(WitnessChecksResultKind::WitnessLogic(witness_logic_result)) => {
+                witness_logic_result
+            }
+            Some(_) => anyhow::bail!(
+                "unexpectedly produced StandardLogic result for WitnessLogic semver query"
+            ),
+        };
+
+        match witness_logic_kind {
+            WitnessLogicKinds::ExtractFuncArgs(results) => results
+                .into_iter()
+                .filter_map_ok(|(status, values)| status.is_breaking().then_some(values))
+                .collect::<Result<Vec<_>>>(),
+        }
+    }
+
+    #[derive(Debug)]
+    pub(crate) struct WitnessTestInfo<'a> {
+        name: &'a str,
+
+        baseline_root: PathBuf,
+        current_root: PathBuf,
+
+        baseline_rustdoc: PathBuf,
+        current_rustdoc: PathBuf,
+    }
+
+    pub(crate) fn load_witness_test_info<'a>(crate_pair: &'a str) -> WitnessTestInfo<'a> {
+        let baseline_rustdoc = PathBuf::from(format!(
+            "./localdata/test_data/{crate_pair}/old/rustdoc.json"
+        ));
+        let current_rustdoc = PathBuf::from(format!(
+            "./localdata/test_data/{crate_pair}/new/rustdoc.json"
+        ));
+        let baseline_root = PathBuf::from(format!("./test_crates/{crate_pair}/old"))
+            .canonicalize()
+            .expect("failed to canonicalize baseline root");
+        let current_root = PathBuf::from(format!("./test_crates/{crate_pair}/new"))
+            .canonicalize()
+            .expect("failed to canonicalize current root");
+
+        WitnessTestInfo {
+            name: crate_pair,
+            baseline_root,
+            current_root,
+            baseline_rustdoc,
+            current_rustdoc,
+        }
+    }
+
+    impl From<&WitnessTestInfo<'_>> for WitnessRustdocPaths {
+        fn from(value: &WitnessTestInfo) -> Self {
+            WitnessRustdocPaths {
+                baseline: value.baseline_rustdoc.clone(),
+                current: value.current_rustdoc.clone(),
+            }
+        }
+    }
+
+    impl From<&WitnessTestInfo<'_>> for DependencyData {
+        fn from(value: &WitnessTestInfo) -> Self {
+            DependencyData {
+                target_dir: value.current_root.join("target").join("semver-checks"),
+                baseline: WitnessDependency {
+                    name: value.name.to_string(),
+                    kind: DependencyKind::Local {
+                        path: value.baseline_root.clone(),
+                    },
+                },
+                current: WitnessDependency {
+                    name: value.name.to_string(),
+                    kind: DependencyKind::Local {
+                        path: value.current_root.clone(),
+                    },
+                },
+            }
+        }
+    }
+}
