@@ -1101,8 +1101,6 @@ mod tests {
             }
         );
 
-        // TODO: Run witness tests. Currently only the standard lint result is snapshotted, any values
-        // injected by the UseWitness logic system are not included here.
         let transparent_results: BTreeMap<_, Vec<BTreeMap<_, TransparentValue>>> =
             query_execution_results
                 .into_iter()
@@ -1131,12 +1129,7 @@ mod tests {
             }
         }
 
-        // TODO: Run witness tests. Currently only UseStandard lint logic can definitely generate a witness
-        // hint here. Specifically, since we're not running UseWitness logic here, we can't guarantee that
-        // the hint doesn't rely on a value injected by the witness logic.
-        if let Some(witness) = semver_query.witness
-            && semver_query.lint_logic.is_standard()
-        {
+        if let Some(witness) = semver_query.witness {
             let actual_witnesses: BTreeMap<_, BTreeSet<_>> = transparent_results
                 .iter()
                 .map(|(k, v)| {
@@ -1153,7 +1146,6 @@ mod tests {
                                     _ => unreachable!("Missing span_begin_line Int, this should be validated above"),
                                 };
 
-                                // TODO: Run witness queries and generate full witness here.
                                 WitnessOutput {
                                     filename: filename.to_string(),
                                     begin_line,
