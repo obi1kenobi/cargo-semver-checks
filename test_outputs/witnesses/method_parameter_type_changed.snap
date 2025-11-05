@@ -1,0 +1,34 @@
+---
+source: src/query.rs
+description: "Lint `method_parameter_type_changed` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+expression: "&actual_witnesses"
+---
+[["./test_crates/method_parameter_type_changed/"]]
+filename = 'src/lib.rs'
+begin_line = 7
+hint = 'let witness = |receiver, val0, val1| method_parameter_type_changed::StructWithMethods::parameter_changed_value(receiver, val0, val1)};'
+
+[["./test_crates/method_parameter_type_changed/"]]
+filename = 'src/lib.rs'
+begin_line = 8
+hint = 'let witness = |receiver, val0, val1| method_parameter_type_changed::StructWithMethods::parameter_changed_ref(receiver, val0, val1)};'
+
+[["./test_crates/method_parameter_type_changed/"]]
+filename = 'src/lib.rs'
+begin_line = 9
+hint = 'let witness = |receiver, val0, val1| method_parameter_type_changed::StructWithMethods::parameter_changed_mut_ref(receiver, val0, val1)};'
+
+[["./test_crates/method_parameter_type_changed/"]]
+filename = 'src/lib.rs'
+begin_line = 14
+hint = 'let witness = |receiver, val0| method_parameter_type_changed::StructWithMethods::moved_to_trait_and_changed_value(receiver, val0)};'
+
+[["./test_crates/method_parameter_type_changed/"]]
+filename = 'src/lib.rs'
+begin_line = 15
+hint = 'let witness = |receiver, val0| method_parameter_type_changed::StructWithMethods::moved_to_trait_and_changed_ref(receiver, val0)};'
+
+[["./test_crates/method_parameter_type_changed/"]]
+filename = 'src/lib.rs'
+begin_line = 16
+hint = 'let witness = |receiver, val0| method_parameter_type_changed::StructWithMethods::moved_to_trait_and_changed_mut_ref(receiver, val0)};'

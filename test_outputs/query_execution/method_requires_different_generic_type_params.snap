@@ -1,9 +1,126 @@
 ---
 source: src/query.rs
 expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
+  "./test_crates/method_parameter_type_changed/": [
+    {
+      "method_name": String("impl_trait_to_generic"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "new_required_type_count": List([
+        Uint64(1),
+      ]),
+      "new_required_types": List([
+        List([
+          String("T"),
+        ]),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(38),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_required_type_count": Uint64(0),
+      "old_required_types": List([]),
+      "path": List([
+        String("method_parameter_type_changed"),
+        String("StructWithMethods"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("moved_to_trait_impl_trait_to_generic"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "new_required_type_count": List([
+        Uint64(1),
+      ]),
+      "new_required_types": List([
+        List([
+          String("T"),
+        ]),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(69),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_required_type_count": Uint64(0),
+      "old_required_types": List([]),
+      "path": List([
+        String("method_parameter_type_changed"),
+        String("StructWithMethods"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("impl_trait_to_generic_where_bound"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "new_required_type_count": List([
+        Uint64(1),
+      ]),
+      "new_required_types": List([
+        List([
+          String("T"),
+        ]),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(41),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_required_type_count": Uint64(0),
+      "old_required_types": List([]),
+      "path": List([
+        String("method_parameter_type_changed"),
+        String("StructWithMethods"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(27),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("moved_to_trait_impl_trait_to_generic_where_bound"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "new_required_type_count": List([
+        Uint64(1),
+      ]),
+      "new_required_types": List([
+        List([
+          String("T"),
+        ]),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(72),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_required_type_count": Uint64(0),
+      "old_required_types": List([]),
+      "path": List([
+        String("method_parameter_type_changed"),
+        String("StructWithMethods"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/method_requires_different_generic_type_params/": [
     {
       "method_name": String("previously_not_generic"),

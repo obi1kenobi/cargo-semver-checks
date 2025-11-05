@@ -1,0 +1,257 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/method_parameter_type_changed/": [
+    {
+      "baseline_arg_names": List([
+        String("_"),
+        String("_"),
+      ]),
+      "baseline_arg_types": List([
+        String("i32"),
+        String("i32"),
+      ]),
+      "current_signature": List([
+        String("fn parameter_changed_value(self: Self, _: i64, _: i32)"),
+      ]),
+      "impl_name": Null,
+      "method_name": String("parameter_changed_value"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "new_unsafe": List([
+        Boolean(false),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(30),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_signature": String("fn parameter_changed_value(self: Self, _: i32, _: i32)"),
+      "old_unsafe": Boolean(false),
+      "path": List([
+        String("method_parameter_type_changed"),
+        String("StructWithMethods"),
+      ]),
+      "receiver_by_mut_reference": Boolean(false),
+      "receiver_by_reference": Boolean(false),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "trait_paths": List([
+        Null,
+      ]),
+      "visibility_limit": String("public"),
+    },
+    {
+      "baseline_arg_names": List([
+        String("_"),
+        String("_"),
+      ]),
+      "baseline_arg_types": List([
+        String("i32"),
+        String("i32"),
+      ]),
+      "current_signature": List([
+        String("fn parameter_changed_ref(self: &Self, _: i64, _: i32)"),
+      ]),
+      "impl_name": Null,
+      "method_name": String("parameter_changed_ref"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "new_unsafe": List([
+        Boolean(false),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(31),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_signature": String("fn parameter_changed_ref(self: &Self, _: i32, _: i32)"),
+      "old_unsafe": Boolean(false),
+      "path": List([
+        String("method_parameter_type_changed"),
+        String("StructWithMethods"),
+      ]),
+      "receiver_by_mut_reference": Boolean(false),
+      "receiver_by_reference": Boolean(true),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "trait_paths": List([
+        Null,
+      ]),
+      "visibility_limit": String("public"),
+    },
+    {
+      "baseline_arg_names": List([
+        String("_"),
+        String("_"),
+      ]),
+      "baseline_arg_types": List([
+        String("i32"),
+        String("i32"),
+      ]),
+      "current_signature": List([
+        String("fn parameter_changed_mut_ref(self: &mut Self, _: i64, _: i32)"),
+      ]),
+      "impl_name": Null,
+      "method_name": String("parameter_changed_mut_ref"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "new_unsafe": List([
+        Boolean(false),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(32),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_signature": String("fn parameter_changed_mut_ref(self: &mut Self, _: i32, _: i32)"),
+      "old_unsafe": Boolean(false),
+      "path": List([
+        String("method_parameter_type_changed"),
+        String("StructWithMethods"),
+      ]),
+      "receiver_by_mut_reference": Boolean(true),
+      "receiver_by_reference": Boolean(false),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "trait_paths": List([
+        Null,
+      ]),
+      "visibility_limit": String("public"),
+    },
+    {
+      "baseline_arg_names": List([
+        String("_"),
+      ]),
+      "baseline_arg_types": List([
+        String("i32"),
+      ]),
+      "current_signature": List([
+        String("fn moved_to_trait_and_changed_value(self: Self, _: i64)"),
+      ]),
+      "impl_name": Null,
+      "method_name": String("moved_to_trait_and_changed_value"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "new_unsafe": List([
+        Boolean(false),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(56),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_signature": String("fn moved_to_trait_and_changed_value(self: Self, _: i32)"),
+      "old_unsafe": Boolean(false),
+      "path": List([
+        String("method_parameter_type_changed"),
+        String("StructWithMethods"),
+      ]),
+      "receiver_by_mut_reference": Boolean(false),
+      "receiver_by_reference": Boolean(false),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "trait_paths": List([
+        List([
+          String("method_parameter_type_changed"),
+          String("TraitWithMethods"),
+        ]),
+      ]),
+      "visibility_limit": String("public"),
+    },
+    {
+      "baseline_arg_names": List([
+        String("_"),
+      ]),
+      "baseline_arg_types": List([
+        String("i32"),
+      ]),
+      "current_signature": List([
+        String("fn moved_to_trait_and_changed_ref(self: &Self, _: i64)"),
+      ]),
+      "impl_name": Null,
+      "method_name": String("moved_to_trait_and_changed_ref"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "new_unsafe": List([
+        Boolean(false),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(57),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_signature": String("fn moved_to_trait_and_changed_ref(self: &Self, _: i32)"),
+      "old_unsafe": Boolean(false),
+      "path": List([
+        String("method_parameter_type_changed"),
+        String("StructWithMethods"),
+      ]),
+      "receiver_by_mut_reference": Boolean(false),
+      "receiver_by_reference": Boolean(true),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "trait_paths": List([
+        List([
+          String("method_parameter_type_changed"),
+          String("TraitWithMethods"),
+        ]),
+      ]),
+      "visibility_limit": String("public"),
+    },
+    {
+      "baseline_arg_names": List([
+        String("_"),
+      ]),
+      "baseline_arg_types": List([
+        String("i32"),
+      ]),
+      "current_signature": List([
+        String("fn moved_to_trait_and_changed_mut_ref(self: &mut Self, _: i64)"),
+      ]),
+      "impl_name": Null,
+      "method_name": String("moved_to_trait_and_changed_mut_ref"),
+      "method_visibility": String("public"),
+      "name": String("StructWithMethods"),
+      "new_unsafe": List([
+        Boolean(false),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(58),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_signature": String("fn moved_to_trait_and_changed_mut_ref(self: &mut Self, _: i32)"),
+      "old_unsafe": Boolean(false),
+      "path": List([
+        String("method_parameter_type_changed"),
+        String("StructWithMethods"),
+      ]),
+      "receiver_by_mut_reference": Boolean(true),
+      "receiver_by_reference": Boolean(false),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "trait_paths": List([
+        List([
+          String("method_parameter_type_changed"),
+          String("TraitWithMethods"),
+        ]),
+      ]),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

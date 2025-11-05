@@ -92,5 +92,11 @@ SemverQuery(
     {{ join "::" path }}::{{ variant_name }} { {{ join ", " baseline_field_names }} } => (),
     _ => (),
 }"#,
+        witness_template: r#"fn witness_fn(witness: {{ join "::" path}}) {
+    match witness {
+        {{ join "::" path }}::{{ variant_name }} { {{ join ", " baseline_field_names }} } => (),
+        _ => (),
+    }
+}"#
     )
 )

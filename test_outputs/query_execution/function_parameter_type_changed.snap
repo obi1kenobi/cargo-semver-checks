@@ -1,0 +1,39 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/function_parameter_type_changed/": [
+    {
+      "baseline_arg_names": List([
+        String("_"),
+        String("_"),
+      ]),
+      "baseline_arg_types": List([
+        String("i32"),
+        String("i32"),
+      ]),
+      "current_arg_names": List([
+        String("_"),
+        String("_"),
+      ]),
+      "current_arg_types": List([
+        String("i64"),
+        String("i32"),
+      ]),
+      "current_signature": String("fn function_with_parameter_changed(_: i64, _: i32)"),
+      "name": String("function_with_parameter_changed"),
+      "new_unsafe": Boolean(false),
+      "old_signature": String("fn function_with_parameter_changed(_: i32, _: i32)"),
+      "old_unsafe": Boolean(false),
+      "path": List([
+        String("function_parameter_type_changed"),
+        String("function_with_parameter_changed"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

@@ -87,6 +87,32 @@ impl From<ReleaseType> for ActualSemverUpdate {
     }
 }
 
+/// Kind of logic to use for this lints
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Default)]
+pub enum LintLogic {
+    /// Use the result of the [`SemverQuery`] to determine success.
+    #[default]
+    UseStandard,
+
+    /// Use the result of the [`SemverQuery`] to run the [`Witness`]. The result of the witness
+    /// check is used to determine success.
+    UseWitness(WitnessLogic),
+}
+
+impl LintLogic {
+    pub fn is_standard(&self) -> bool {
+        self == &Self::UseStandard
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub enum WitnessLogic {
+    /// Expects a full path on `path`
+    ExtractFuncArgs,
+    /// Expects a full path to the ImplOwner on `path`, the name of the Impl on `impl_name`, and a method name on `method_name`
+    ExtractMethodArgs,
+}
+
 /// A query that can be executed on a pair of rustdoc output files,
 /// returning instances of a particular kind of semver violation.
 #[non_exhaustive]
@@ -128,6 +154,10 @@ pub struct SemverQuery {
     /// more information.
     #[serde(default)]
     pub witness: Option<Witness>,
+
+    // Optional specification of how to run the lint. See the [`LintLogic`] enum for more information.
+    #[serde(default)]
+    pub lint_logic: LintLogic,
 }
 
 impl SemverQuery {
@@ -376,8 +406,8 @@ mod tests {
     };
 
     use crate::query::{
-        InheritedValue, LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate,
-        SemverQuery,
+        InheritedValue, LintLevel, LintLogic, OverrideMap, OverrideStack, QueryOverride,
+        RequiredSemverUpdate, SemverQuery,
     };
     use crate::templating::make_handlebars_registry;
 
@@ -826,6 +856,7 @@ mod tests {
     }
 
     fn run_query_on_crate_pair(
+        handlebars: &handlebars::Handlebars<'_>,
         semver_query: &SemverQuery,
         parsed_query: Arc<IndexedQuery>, // The parsed version of semver_query.
         crate_pair_name: &String,
@@ -838,6 +869,22 @@ mod tests {
         let results_iter = adapter
             .run_query_with_indexed_query(parsed_query.clone(), semver_query.arguments.clone())
             .unwrap();
+
+        let results_iter = if semver_query.lint_logic.is_standard() {
+            results_iter
+        } else {
+            Box::new(
+                crate::witness_gen::tests::run_witness_logic_test(
+                    handlebars,
+                    crate::witness_gen::tests::load_witness_test_info(crate_pair_name),
+                    &adapter,
+                    semver_query,
+                    results_iter.collect(),
+                )
+                .expect("witness dependent lint failed")
+                .into_iter(),
+            )
+        };
 
         // Ensure span data inside `@fold` blocks is deterministically ordered,
         // since the underlying adapter is non-deterministic due to its iteration over hashtables.
@@ -913,6 +960,7 @@ mod tests {
     }
 
     fn assert_no_false_positives_in_nonchanged_crate(
+        handlebars: &handlebars::Handlebars<'_>,
         query_name: &str,
         semver_query: &SemverQuery,
         indexed_query: Arc<IndexedQuery>, // The parsed version of semver_query.
@@ -921,6 +969,7 @@ mod tests {
         crate_version: &str,
     ) {
         let (crate_pair_path, output) = run_query_on_crate_pair(
+            handlebars,
             semver_query,
             indexed_query,
             crate_pair_name,
@@ -955,6 +1004,8 @@ mod tests {
         // Map of rustdoc version to parsed query.
         let mut parsed_query_cache: HashMap<u32, Arc<IndexedQuery>> = HashMap::new();
 
+        let registry = make_handlebars_registry();
+
         let mut query_execution_results: TestOutput = get_test_crate_names()
             .iter()
             .map(|crate_pair_name| {
@@ -972,6 +1023,7 @@ mod tests {
                         });
 
                 assert_no_false_positives_in_nonchanged_crate(
+                    &registry,
                     query_name,
                     &semver_query,
                     indexed_query.clone(),
@@ -980,6 +1032,7 @@ mod tests {
                     "new",
                 );
                 assert_no_false_positives_in_nonchanged_crate(
+                    &registry,
                     query_name,
                     &semver_query,
                     indexed_query.clone(),
@@ -989,6 +1042,7 @@ mod tests {
                 );
 
                 run_query_on_crate_pair(
+                    &registry,
                     &semver_query,
                     indexed_query.clone(),
                     crate_pair_name,
@@ -1062,7 +1116,6 @@ mod tests {
                 })
                 .collect();
 
-        let registry = make_handlebars_registry();
         if let Some(template) = semver_query.per_result_error_template {
             assert!(!transparent_results.is_empty());
 
@@ -1095,7 +1148,6 @@ mod tests {
                                     _ => unreachable!("Missing span_begin_line Int, this should be validated above"),
                                 };
 
-                                // TODO: Run witness queries and generate full witness here.
                                 WitnessOutput {
                                     filename: filename.to_string(),
                                     begin_line,
@@ -1147,6 +1199,7 @@ mod tests {
             error_message: String::new(),
             per_result_error_template: None,
             witness: None,
+            lint_logic: LintLogic::UseStandard,
         }
     }
 
@@ -1610,6 +1663,7 @@ add_lints!(
     function_now_doc_hidden,
     function_now_returns_unit,
     function_parameter_count_changed,
+    function_parameter_type_changed,
     function_requires_different_const_generic_params,
     function_requires_different_generic_type_params,
     function_unsafe_added,
@@ -1629,6 +1683,7 @@ add_lints!(
     macro_now_doc_hidden,
     method_no_longer_has_receiver,
     method_parameter_count_changed,
+    method_parameter_type_changed,
     method_receiver_mut_ref_became_owned,
     method_receiver_ref_became_mut,
     method_receiver_ref_became_owned,

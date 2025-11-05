@@ -8,7 +8,9 @@ use trustfall_rustdoc::{VersionedIndex, VersionedRustdocAdapter, VersionedStorag
 pub(crate) use error::{IntoTerminalResult, TerminalError};
 pub(crate) use generate::GenerationSettings;
 pub(crate) use progress::ProgressCallbacks;
-pub(crate) use request::{CacheSettings, CrateDataRequest};
+pub(crate) use request::{
+    CacheSettings, CrateDataRequest, ProjectRequest, RegistryRequest, RequestKind,
+};
 
 #[derive(Debug)]
 pub(crate) struct DataStorage {
