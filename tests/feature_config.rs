@@ -20,7 +20,7 @@ impl CargoSemverChecks {
     }
 
     fn command(&self) -> Command {
-        Command::cargo_bin("cargo-semver-checks").unwrap()
+        assert_cmd::cargo::cargo_bin_cmd!("cargo-semver-checks")
     }
 
     fn add_arg(&mut self, arg: &str) -> &mut Self {

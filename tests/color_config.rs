@@ -15,7 +15,7 @@ fn run_on_crate_diff(
     color_env_var: Option<&'static str>,
     assert_colors: bool,
 ) {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd: Command = assert_cmd::cargo::cargo_bin_cmd!("cargo-semver-checks");
 
     cmd.current_dir(format!("test_crates/{test_crate_name}"))
         .args([
