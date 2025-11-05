@@ -954,8 +954,8 @@ pub(crate) mod tests {
             semver_query,
         );
 
-        fs::remove_dir_all(witness_test_info.current_root.join("target"))
-            .expect("should remove testing witness target directory successfully");
+        // fs::remove_dir_all(witness_test_info.current_root.join("target"))
+        //     .expect("should remove testing witness target directory successfully");
 
         let witness_logic_kind = match witness_check_result.map(|result| result.check_results) {
             None => return Ok(vec![]),
@@ -968,7 +968,7 @@ pub(crate) mod tests {
         };
 
         match witness_logic_kind {
-            WitnessLogicKinds::ExtractFuncArgs(results) => results
+            WitnessLogicKinds::InjectedAdditionalValues(results) => results
                 .into_iter()
                 .filter_map_ok(|(status, values)| status.is_breaking().then_some(values))
                 .collect::<Result<Vec<_>>>(),

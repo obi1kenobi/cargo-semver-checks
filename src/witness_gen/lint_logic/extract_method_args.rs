@@ -16,7 +16,7 @@ use crate::witness_gen::{
 ///
 /// Expects a full path to the ImplOwner on `path`, the name of the Impl on `impl_name`, and a method name on `method_name`
 ///
-/// Inserts values to `baseline_arg_types`, `baseline_arg_names`, `current_arg_types` and `current_arg_names`
+/// Inserts values to `baseline_arg_types`, `baseline_arg_names`
 pub(crate) fn extract_method_args(
     mut witness_results: BTreeMap<Arc<str>, FieldValue>,
     rustdoc_paths: &WitnessRustdocPaths,
@@ -59,25 +59,15 @@ pub(crate) fn extract_method_args(
         .collect::<Result<Vec<Arc<str>>>>()?;
 
     let baseline = load_file_data(&rustdoc_paths.baseline)?;
-    let current = load_file_data(&rustdoc_paths.current)?;
 
     let baseline_method = find_method(&path, impl_name, method_name, &baseline)
         .context("failed to extract baseline method while extracting method args")?;
-    let current_method = find_method(&path, impl_name, method_name, &current)
-        .context("failed to extract current method while extracting method args")?;
 
     let mut baseline_types = vec![];
     let mut baseline_names = vec![];
     for (name, arg_type) in baseline_method.sig.inputs.iter().skip(1) {
         baseline_types.push(FieldValue::String(arg_type.format_rustdoc()?.into()));
         baseline_names.push(FieldValue::String(name.as_str().into()));
-    }
-
-    let mut current_types = vec![];
-    let mut current_names = vec![];
-    for (name, arg_type) in current_method.sig.inputs.iter().skip(1) {
-        current_types.push(FieldValue::String(arg_type.format_rustdoc()?.into()));
-        current_names.push(FieldValue::String(name.as_str().into()));
     }
 
     insert_new_result(
@@ -89,16 +79,6 @@ pub(crate) fn extract_method_args(
         &mut witness_results,
         "baseline_arg_names",
         FieldValue::List(baseline_names.into()),
-    )?;
-    insert_new_result(
-        &mut witness_results,
-        "current_arg_types",
-        FieldValue::List(current_types.into()),
-    )?;
-    insert_new_result(
-        &mut witness_results,
-        "current_arg_names",
-        FieldValue::List(current_names.into()),
     )?;
 
     Ok(witness_results)

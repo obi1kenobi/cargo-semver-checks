@@ -5,18 +5,21 @@ expression: "&query_execution_results"
 {
   "./test_crates/function_parameter_type_changed/": [
     {
-<<<<<<< HEAD
       "baseline_arg_names": List([
+        String("_"),
         String("_"),
       ]),
       "baseline_arg_types": List([
         String("i32"),
+        String("i32"),
       ]),
       "current_arg_names": List([
+        String("_"),
         String("_"),
       ]),
       "current_arg_types": List([
         String("i64"),
+        String("i32"),
       ]),
       "current_signature": String("fn function_with_parameter_changed(_: i64, _: i32)"),
       "name": String("function_with_parameter_changed"),
