@@ -874,7 +874,7 @@ mod tests {
             Box::new(
                 crate::witness_gen::tests::run_witness_logic_test(
                     handlebars,
-                    crate::witness_gen::tests::load_witness_test_info(&crate_pair_name),
+                    crate::witness_gen::tests::load_witness_test_info(crate_pair_name),
                     &adapter,
                     semver_query,
                     results_iter.collect(),
