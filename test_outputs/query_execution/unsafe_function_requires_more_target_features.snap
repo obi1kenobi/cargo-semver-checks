@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-expression: "&query_execution_results"
 ---
 {
   "./test_crates/unsafe_function_requires_more_target_features/": [

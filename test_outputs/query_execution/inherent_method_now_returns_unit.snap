@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-expression: "&query_execution_results"
 ---
 {
   "./test_crates/inherent_method_now_returns_unit/": [

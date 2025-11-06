@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-expression: "&query_execution_results"
 ---
 {
   "./test_crates/pub_api_sealed_trait_became_unconditionally_sealed/": [
