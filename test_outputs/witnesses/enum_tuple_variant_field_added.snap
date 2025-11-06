@@ -2,7 +2,6 @@
 source: src/query.rs
 description: "Lint `enum_tuple_variant_field_added` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 expression: "&actual_witnesses"
-snapshot_kind: text
 ---
 [["./test_crates/enum_struct_field_hidden_from_public_api/"]]
 filename = 'src/lib.rs'
