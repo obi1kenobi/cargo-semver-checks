@@ -2,8 +2,7 @@ use assert_cmd::Command;
 use predicates::boolean::PredicateBooleanExt;
 
 fn command_for_crate(crate_name: &'static str) -> Command {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks")
-        .expect("cargo semver-checks command should exist");
+    let mut cmd: Command = assert_cmd::cargo::cargo_bin_cmd!("cargo-semver-checks");
 
     cmd.current_dir(format!("test_crates/manifest_tests/{crate_name}"))
         .args([
@@ -18,8 +17,7 @@ fn command_for_crate(crate_name: &'static str) -> Command {
 }
 
 fn command_for_workspace(workspace: &str, package: &str) -> Command {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks")
-        .expect("cargo semver-checks command should exist");
+    let mut cmd: Command = assert_cmd::cargo::cargo_bin_cmd!("cargo-semver-checks");
 
     cmd.current_dir(format!("test_crates/manifest_tests/{workspace}"))
         .args([

@@ -1,6 +1,6 @@
 use handlebars::{
     BlockContext, Context, Handlebars, Helper, Output, RenderContext, RenderError,
-    RenderErrorReason, Renderable, handlebars_helper, to_json,
+    RenderErrorReason, Renderable, handlebars_helper, no_escape, to_json,
 };
 use serde_json::Value;
 
@@ -145,6 +145,7 @@ fn repeat<'reg, 'rc>(
 pub(crate) fn make_handlebars_registry() -> Handlebars<'static> {
     let mut registry = Handlebars::new();
     registry.set_strict_mode(true);
+    registry.register_escape_fn(no_escape);
     registry.register_helper("lowercase", Box::new(lowercase));
     registry.register_helper("join", Box::new(join));
     registry.register_helper("unpack_if_singleton", Box::new(unpack_if_singleton));
@@ -175,5 +176,14 @@ mod tests {
                 &serde_json::json!({}),
             )
             .expect_err("block context leaked outside of repeat helper");
+    }
+
+    #[test]
+    fn templates_do_not_html_escape_output() {
+        let registry = make_handlebars_registry();
+        let rendered = registry
+            .render_template("{{value}}", &serde_json::json!({"value": "Pin<&mut Self>"}))
+            .expect("render failed");
+        assert_eq!(rendered, "Pin<&mut Self>");
     }
 }

@@ -1,11 +1,15 @@
 use assert_cmd::Command;
 
+fn cargo_semver_checks() -> Command {
+    assert_cmd::cargo::cargo_bin_cmd!("cargo-semver-checks")
+}
+
 /// This test checks whether the tool correctly detects
 /// implicit features defined by target-specific dependencies.
 /// https://github.com/obi1kenobi/cargo-semver-checks/issues/369
 #[test]
 fn detects_target_dependencies() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/target_specific_dependencies")
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
@@ -17,7 +21,7 @@ fn detects_target_dependencies() {
 /// https://github.com/obi1kenobi/cargo-semver-checks/issues/432
 #[test]
 fn lib_target_with_dashes() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/lib-target-with-dashes")
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
@@ -28,7 +32,7 @@ fn lib_target_with_dashes() {
 /// since they have no library API and therefore nothing we can semver-check.
 #[test]
 fn proc_macro_target() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/proc_macro_crate")
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .env_remove("RUST_BACKTRACE")
@@ -46,7 +50,7 @@ note: skipped the following crates since they have no library target: proc_macro
 /// since they have no library API and therefore nothing we can semver-check.
 #[test]
 fn bin_target_only() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/bin_target_only")
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .env_remove("RUST_BACKTRACE")
@@ -63,7 +67,7 @@ note: skipped the following crates since they have no library target: bin_target
 /// Ensure that crates whose library target is `doc = false` can still be semver-checked.
 #[test]
 fn doc_false_lib_target() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/doc_false_lib_target")
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .env_remove("RUST_BACKTRACE")
@@ -75,7 +79,7 @@ fn doc_false_lib_target() {
 /// can be semver-checked correctly.
 #[test]
 fn rlib_target() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/rlib_target")
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
@@ -86,7 +90,7 @@ fn rlib_target() {
 /// can be semver-checked correctly.
 #[test]
 fn staticlib_target() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/staticlib_target")
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
@@ -97,7 +101,7 @@ fn staticlib_target() {
 /// can be semver-checked correctly.
 #[test]
 fn dylib_target() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/dylib_target")
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
@@ -109,7 +113,7 @@ fn dylib_target() {
 /// https://github.com/obi1kenobi/cargo-semver-checks/issues/432
 #[test]
 fn renamed_lib_target() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/renamed_lib_target")
         .args(["semver-checks", "check-release", "--baseline-root=."])
         .assert()
@@ -120,7 +124,7 @@ fn renamed_lib_target() {
 #[test]
 fn crate_in_workspace() {
     // Run at workspace level.
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/crate_in_workspace")
         .args([
             "semver-checks",
@@ -132,7 +136,7 @@ fn crate_in_workspace() {
         .success();
 
     // Run at workspace level but point out the crate explicitly.
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/crate_in_workspace")
         .args([
             "semver-checks",
@@ -147,7 +151,7 @@ fn crate_in_workspace() {
 
     // Run at workspace level then point out a crate without a lib target.
     // This should produce an error and a non-zero exit code.
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/crate_in_workspace")
         .args([
             "semver-checks",
@@ -175,7 +179,7 @@ note: skipped the following crates since they have no library target: non_lib_cr
 fn release_type_flag_major() {
     // This run checks a crate with a major breaking change that doesn't bump the version.
     // It should pass without errors because of `--release-type=major`.
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/enum_missing/new")
         .args([
             "semver-checks",
@@ -187,7 +191,7 @@ fn release_type_flag_major() {
         .success();
 
     // Running the same command with `--release-type=minor` or without that flag fails both times.
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/enum_missing/new")
         .args([
             "semver-checks",
@@ -197,7 +201,7 @@ fn release_type_flag_major() {
         ])
         .assert()
         .failure();
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/enum_missing/new")
         .args(["semver-checks", "check-release", "--baseline-root=../old"])
         .assert()
@@ -211,7 +215,7 @@ fn release_type_flag_major() {
 fn release_type_flag_minor() {
     // This run checks a crate with deprecations (semver-minor) that doesn't bump the version.
     // It should pass without errors because of `--release-type=minor`.
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/type_marked_deprecated/new")
         .args([
             "semver-checks",
@@ -223,7 +227,7 @@ fn release_type_flag_minor() {
         .success();
 
     // Running the same command with `--release-type=patch` or without that flag fails both times.
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/type_marked_deprecated/new")
         .args([
             "semver-checks",
@@ -233,7 +237,7 @@ fn release_type_flag_minor() {
         ])
         .assert()
         .failure();
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/type_marked_deprecated/new")
         .args(["semver-checks", "check-release", "--baseline-root=../old"])
         .assert()
@@ -246,7 +250,7 @@ fn release_type_flag_minor() {
 /// SemVer bump is minor (due to the 0.y.z version), so no lints are raised.
 #[test]
 fn zerover_minor_flag_not_needed() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/function_marked_deprecated/new")
         .args(["semver-checks", "check-release", "--baseline-root=../old"])
         .assert()
@@ -258,7 +262,7 @@ fn zerover_minor_flag_not_needed() {
 /// an *empty string* instead of the current working directory.
 #[test]
 fn unprefixed_cargo_toml_manifest_path_refers_to_current_working_directory() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/crate_in_workspace/")
         .args([
             "semver-checks",
@@ -276,7 +280,7 @@ fn unprefixed_cargo_toml_manifest_path_refers_to_current_working_directory() {
 /// We strip `Cargo.toml` from the tail of the path if present.
 #[test]
 fn baseline_root_cargo_toml_path() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/")
         .args([
             "semver-checks",
@@ -295,7 +299,7 @@ fn baseline_root_cargo_toml_path() {
 /// When `Cargo.toml` is the only path component, we implicitly assume `.` is left after stripping.
 #[test]
 fn baseline_root_bare_cargo_toml_path() {
-    let mut cmd = Command::cargo_bin("cargo-semver-checks").unwrap();
+    let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/crate_in_workspace/")
         .args([
             "semver-checks",
