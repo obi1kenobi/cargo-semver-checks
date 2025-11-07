@@ -8,8 +8,8 @@ snapshot_kind: text
     {
       "method_name": String("method_default_impl_removed_and_becomes_sealed"),
       "name": String("TraitE"),
-      "new_parameter_count": Uint64(2),
-      "old_parameter_count": Uint64(1),
+      "new_parameter_count": Uint64(1),
+      "old_parameter_count": Uint64(0),
       "path": List([
         String("trait_method_default_impl_removed"),
         String("TraitE"),
@@ -54,8 +54,8 @@ snapshot_kind: text
     {
       "method_name": String("method"),
       "name": String("TraitMethodBecomesSealed"),
-      "new_parameter_count": Uint64(2),
-      "old_parameter_count": Uint64(1),
+      "new_parameter_count": Uint64(1),
+      "old_parameter_count": Uint64(0),
       "path": List([
         String("trait_newly_sealed"),
         String("TraitMethodBecomesSealed"),
