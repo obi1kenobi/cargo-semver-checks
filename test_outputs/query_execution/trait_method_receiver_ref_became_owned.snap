@@ -1,0 +1,37 @@
+---
+source: src/query.rs
+assertion_line: 1048
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_receiver_changes/": [
+    {
+      "method_name": String("box_ref_to_owned"),
+      "name": String("PublicTrait"),
+      "path": List([
+        String("trait_method_receiver_changes"),
+        String("PublicTrait"),
+      ]),
+      "receiver_kind": String("Box<Self>"),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_no_longer_dyn_compatible/": [
+    {
+      "method_name": String("by_ref"),
+      "name": String("RefTrait"),
+      "path": List([
+        String("trait_no_longer_dyn_compatible"),
+        String("RefTrait"),
+      ]),
+      "receiver_kind": String("Self"),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
