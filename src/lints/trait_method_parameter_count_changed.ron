@@ -23,7 +23,9 @@ SemverQuery(
                             method_name: name @output @tag
                             public_api_eligible @filter(op: "=", value: ["$true"])
 
-                            old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters")
+                            old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters") {
+                                name @filter(op: "!=", value: ["$self"])
+                            }
                         }
                     }
                 }
@@ -41,7 +43,9 @@ SemverQuery(
                         method {
                             name @filter(op: "=", value: ["%method_name"])
 
-                            new_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"]) @output
+                            new_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"]) @output {
+                                name @filter(op: "!=", value: ["$self"])
+                            }
 
                             span_: span @optional {
                                 filename @output
@@ -56,6 +60,7 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
+        "self": "self",
         "true": true,
     },
     // TODO: This has a false-positive edge case, because it assumes the trait method
