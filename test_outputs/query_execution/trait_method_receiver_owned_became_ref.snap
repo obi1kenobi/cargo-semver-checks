@@ -1,0 +1,58 @@
+---
+source: src/query.rs
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_receiver_changes/": [
+    {
+      "method_name": String("pin_owned_to_ref"),
+      "path": List([
+        String("trait_method_receiver_changes"),
+        String("PublicTrait"),
+      ]),
+      "receiver_kind": String("Pin<&mut Self>"),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_receiver_sealedness/": [
+    {
+      "method_name": String("owned_to_ref"),
+      "path": List([
+        String("trait_method_receiver_sealedness"),
+        String("UnsealedTrait"),
+      ]),
+      "receiver_kind": String("Self"),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("owned_to_ref"),
+      "path": List([
+        String("trait_method_receiver_sealedness"),
+        String("PublicApiSealedTrait"),
+      ]),
+      "receiver_kind": String("Self"),
+      "span_begin_line": Uint64(40),
+      "span_end_line": Uint64(40),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("owned_to_ref"),
+      "path": List([
+        String("trait_method_receiver_sealedness"),
+        String("UnconditionallySealedTrait"),
+      ]),
+      "receiver_kind": String("Self"),
+      "span_begin_line": Uint64(66),
+      "span_end_line": Uint64(66),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

@@ -1,32 +1,30 @@
 SemverQuery(
-    id: "pub_api_sealed_trait_method_return_value_added",
-    human_readable_name: "method in public API sealed trait return value added",
-    description: "A method in a public API sealed trait now returns a value instead of ().",
+    id: "trait_method_receiver_owned_became_mut_ref",
+    human_readable_name: "trait method receiver changed from owned self to mutable reference",
+    description: "A method in a pub trait changed its receiver from self to &mut self.",
     required_update: Major,
-    lint_level: Warn,
-    reference_link: None,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#trait-item-signature"),
     query: r#"
     {
         CrateDiff {
             baseline {
                 item {
                     ... on Trait {
-                        visibility_limit @filter(op: "=", value: ["$public"])
-                        public_api_sealed @filter(op: "=", value: ["$true"])
-                        unconditionally_sealed @filter(op: "!=", value: ["$true"])
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
 
                         importable_path {
-                            path @output @tag
+                            path @tag @output
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
                         method {
-                            public_api_eligible @filter(op: "=", value: ["$true"])
                             method_name: name @output @tag
-                            async @tag(name: "is_async")
+                            public_api_eligible @filter(op: "=", value: ["$true"])
 
-                            return_value {
-                                is_unit @filter(op: "=", value: ["$true"])
+                            receiver {
+                                by_value @filter(op: "=", value: ["$true"])
+                                receiver_kind: kind @tag @output
                             }
                         }
                     }
@@ -36,8 +34,6 @@ SemverQuery(
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        # It doesn't matter if the trait is currently sealed.
-                        # If the trait used to be only public-API sealed, downstream impls may exist.
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -47,10 +43,10 @@ SemverQuery(
                         method {
                             name @filter(op: "=", value: ["%method_name"])
                             public_api_eligible @filter(op: "=", value: ["$true"])
-                            async @filter(op: "=", value: ["%is_async"])
 
-                            return_value {
-                                is_unit @filter(op: "!=", value: ["$true"])
+                            receiver {
+                                by_mut_reference @filter(op: "=", value: ["$true"])
+                                kind @filter(op: "=", value: ["%receiver_kind"])
                             }
 
                             span_: span @optional {
@@ -68,7 +64,9 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A method in a public API sealed trait now returns a value. This isn't a SemVer-major change, but if downstream implementers exist anyway, they will be broken.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A trait method in an unsealed trait now takes &mut self instead of taking ownership. This breaks calls that use fully-qualified syntax, as well as any downstream implementations of the trait.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes &mut {{receiver_kind}} instead of {{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"),
+    // `value.method()` would work;
+    // the breakage is `Trait::method(value)` which has to be `Trait::method(&mut value)`
     witness: None,
 )
