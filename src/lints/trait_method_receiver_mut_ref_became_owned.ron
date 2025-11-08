@@ -1,0 +1,71 @@
+SemverQuery(
+    id: "trait_method_receiver_mut_ref_became_owned",
+    human_readable_name: "trait method receiver changed from mutable reference to owned value",
+    description: "A trait method's receiver changed from &mut self to self, transferring ownership as part of the call.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#trait-item-signature"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        name @output
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            method_name: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            receiver {
+                                by_mut_reference @filter(op: "=", value: ["$true"])
+                                receiver_kind: kind @tag @output
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            name @filter(op: "=", value: ["%method_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            receiver {
+                                by_value @filter(op: "=", value: ["$true"])
+                                kind @filter(op: "=", value: ["%receiver_kind"])
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A trait method's receiver changed from a mutable reference to an owned value. Ownership is transferred as part of the call, which is a breaking change.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes {{receiver_kind}}, not &mut {{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
