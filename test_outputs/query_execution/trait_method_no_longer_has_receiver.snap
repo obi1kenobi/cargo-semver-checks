@@ -1,0 +1,24 @@
+---
+source: src/query.rs
+assertion_line: 1048
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_receiver_changes/": [
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("method_to_assoc_fn"),
+      "name": String("PublicTrait"),
+      "path": List([
+        String("trait_method_receiver_changes"),
+        String("PublicTrait"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_end_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

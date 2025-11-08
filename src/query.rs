@@ -1703,6 +1703,7 @@ add_lints!(
     trait_method_missing,
     trait_method_now_doc_hidden,
     trait_method_now_returns_unit,
+    trait_method_no_longer_has_receiver,
     trait_method_parameter_count_changed,
     trait_method_receiver_mut_ref_became_owned,
     trait_method_receiver_ref_became_mut,
