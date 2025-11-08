@@ -1,0 +1,21 @@
+---
+source: src/query.rs
+assertion_line: 1048
+expression: "&query_execution_results"
+---
+{
+  "./test_crates/trait_method_receiver_sealedness/": [
+    {
+      "method_name": String("mut_to_ref"),
+      "path": List([
+        String("trait_method_receiver_sealedness"),
+        String("PublicApiSealedTrait"),
+      ]),
+      "receiver_kind": String("Self"),
+      "span_begin_line": Uint64(39),
+      "span_end_line": Uint64(39),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
