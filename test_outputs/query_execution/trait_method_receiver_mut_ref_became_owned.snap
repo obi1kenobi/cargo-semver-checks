@@ -1,7 +1,6 @@
 ---
 source: src/query.rs
 assertion_line: 1048
-expression: "&query_execution_results"
 ---
 {
   "./test_crates/trait_method_receiver_changes/": [
