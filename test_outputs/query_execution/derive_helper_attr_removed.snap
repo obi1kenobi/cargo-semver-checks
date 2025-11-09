@@ -1,7 +1,5 @@
 ---
 source: src/query.rs
-expression: "&query_execution_results"
-snapshot_kind: text
 ---
 {
   "./test_crates/derive_helper_attr_removed/": [

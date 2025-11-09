@@ -1043,6 +1043,7 @@ mod tests {
             {
                 prepend_module_to_snapshot => false,
                 snapshot_path => "../test_outputs/query_execution",
+                omit_expression => true,
             },
             {
                 insta::assert_ron_snapshot!(query_name, &query_execution_results);

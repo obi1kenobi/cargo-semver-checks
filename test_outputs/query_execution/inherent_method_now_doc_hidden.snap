@@ -1,7 +1,5 @@
 ---
 source: src/query.rs
-assertion_line: 769
-expression: "&query_execution_results"
 ---
 {
   "./test_crates/inherent_method_now_doc_hidden/": [
