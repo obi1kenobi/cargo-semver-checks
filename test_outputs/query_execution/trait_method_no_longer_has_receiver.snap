@@ -1,8 +1,39 @@
 ---
 source: src/query.rs
-assertion_line: 1048
 ---
 {
+  "./test_crates/trait_method_parameter_count_changed/": [
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("receiver_becomes_parameter"),
+      "name": String("Example"),
+      "path": List([
+        String("trait_method_parameter_count_changed"),
+        String("Example"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_end_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("receiver_becomes_parameter"),
+      "name": String("SealedExample"),
+      "path": List([
+        String("trait_method_parameter_count_changed"),
+        String("SealedExample"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_end_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
   "./test_crates/trait_method_receiver_changes/": [
     {
       "baseline_receiver_by_mut_reference": Boolean(false),

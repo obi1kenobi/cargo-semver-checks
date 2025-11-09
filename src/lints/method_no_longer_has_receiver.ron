@@ -32,6 +32,12 @@ SemverQuery(
                                     by_value @output
                                     kind @output
                                 }
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
                             }
                         }
                     }
@@ -48,15 +54,55 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        inherent_impl {
+                        # We use "impl" instead of "inherent_impl" here because
+                        # turning a method into an associated function is not necessarily
+                        # a breaking change: an in-scope trait (e.g. from a prelude)
+                        # could provide the *method* form after the original inherent method
+                        # becomes an associated function (i.e. no longer has a receiver).
+                        #
+                        # Method names are not unique on an ImplOwner! It's perfectly valid to have
+                        # both an inherent method `foo()` as well as a trait-provided method
+                        # `<Self as Bar>::foo()` at the same time.
+                        #
+                        # Because of the above, this check has to be written as
+                        # "there is no method with that name that takes a receiver"
+                        # rather than the (incorrect!) alternative
+                        # "the named method does not take a receiver."
+                        #
+                        # The above by itself is still not enough: say if the method was removed,
+                        # that still makes the "there is no method ..." statement true.
+                        # So we add an additional clause demanding that a method by that name
+                        # with appropriate visibility actually exists.
+                        #
+                        # An analogous quirk exists in the `method_parameter_count_changed` lint.
+                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             method {
-                                visibility_limit @filter(op: "=", value: ["$public"])
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                            }
+                        }
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                receiver @fold @transform(op: "count") @filter(op: ">", value: ["$zero"])
+                            }
+                        }
+
+                        # Get the non-matching methods by that name so we can report them
+                        # in the lint error message.
+                        impl @fold {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 receiver @fold @transform(op: "count") @filter(op: "=", value: ["$zero"])
 
-                                span_: span @optional {
+                                non_matching_span_: span @optional {
                                     filename @output
                                     begin_line @output
                                     end_line @output
@@ -70,10 +116,11 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
+        "public_or_default": ["public", "default"],
         "true": true,
         "zero": 0,
     },
     error_message: "A method has lost its receiver. Now it can only be invoked as an associated function, instead of as a method on a value.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} no longer takes {{#if baseline_receiver_by_reference }}&{{/if}}{{#if baseline_receiver_by_mut_reference }}&mut {{/if}}{{baseline_receiver_kind}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} no longer takes {{#if baseline_receiver_by_reference }}&{{/if}}{{#if baseline_receiver_by_mut_reference }}&mut {{/if}}{{baseline_receiver_kind}} in {{multiple_spans non_matching_span_filename non_matching_span_begin_line}}"),
     witness: None,
 )
