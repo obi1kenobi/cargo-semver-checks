@@ -24,6 +24,8 @@ SemverQuery(
                                 method_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
+                                receiver @fold @transform(op: "count") @tag(name: "has_receiver") @output(name: "has_receiver")
+
                                 old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters") {
                                     name @filter(op: "!=", value: ["$self"])
                                 }
@@ -67,11 +69,15 @@ SemverQuery(
                         # that still makes the "there is no method ..." statement true.
                         # So we add an additional clause demanding that a method by that name
                         # with appropriate visibility actually exists.
+                        #
+                        # An analogous quirk exists in the `method_no_longer_has_receiver` lint.
                         impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                receiver @fold @transform(op: "count") @filter(op: "=", value: ["%has_receiver"])
                             }
                         }
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
@@ -79,6 +85,8 @@ SemverQuery(
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                receiver @fold @transform(op: "count") @filter(op: "=", value: ["%has_receiver"])
 
                                 parameter @fold @transform(op: "count") @filter(op: "=", value: ["%parameters"]) {
                                     name @filter(op: "!=", value: ["$self"])
@@ -98,9 +106,12 @@ SemverQuery(
                                     name @filter(op: "!=", value: ["$self"])
                                 }
 
+                                receiver @fold @transform(op: "count") @output(name: "found_receiver")
+
                                 non_matching_span_: span @optional {
                                     filename @output
                                     begin_line @output
+                                    end_line @output
                                 }
                             }
                         }

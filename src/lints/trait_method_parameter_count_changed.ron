@@ -26,6 +26,8 @@ SemverQuery(
                             old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters") {
                                 name @filter(op: "!=", value: ["$self"])
                             }
+
+                            receiver @fold @transform(op: "count") @tag(name: "has_receiver") @output(name: "has_receiver")
                         }
                     }
                 }
@@ -46,6 +48,8 @@ SemverQuery(
                             new_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"]) @output {
                                 name @filter(op: "!=", value: ["$self"])
                             }
+
+                            receiver @fold @transform(op: "count") @filter(op: "=", value: ["%has_receiver"])
 
                             span_: span @optional {
                                 filename @output

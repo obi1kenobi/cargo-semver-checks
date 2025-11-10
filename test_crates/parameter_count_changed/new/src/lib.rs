@@ -59,3 +59,36 @@ trait DuplicateMethodTrait {
 }
 
 impl DuplicateMethodTrait for DuplicateMethodNames {}
+
+pub struct ReceiverChanges;
+
+impl ReceiverChanges {
+    // This isn't breaking, because callers had to use fully-qualified notation before,
+    // and now they can merely *also* use the method-style syntax sugar.
+    pub fn parameter_becomes_receiver(&self) {}
+
+    // This is breaking: calling via the receiver doesn't work anymore.
+    pub fn receiver_becomes_parameter(_x: &Self) {}
+}
+
+pub trait ProvideMethod {
+    fn provided_method(&self) {}
+}
+
+pub struct MethodGoesToTrait;
+
+impl ProvideMethod for MethodGoesToTrait {}
+
+impl MethodGoesToTrait {
+    /// Turning this method into an associated function is not a major breaking change by itself,
+    /// because `pub trait ProvideMethod` has a matching method (not associated fn) that
+    /// method-like calls will dispatch to.
+    ///
+    /// Proof:
+    /// ```rust
+    /// fn proof(x: MethodGoesToTrait) {
+    ///     x.provided_method();
+    /// }
+    /// ```
+    pub fn provided_method(_value: &Self) {}
+}

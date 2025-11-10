@@ -10,13 +10,22 @@ source: src/query.rs
       "baseline_receiver_kind": String("Self"),
       "method_name": String("method_to_assoc_fn"),
       "name": String("PublicStruct"),
+      "non_matching_span_begin_line": List([
+        Uint64(56),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(56),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "owner_type": String("Struct"),
       "path": List([
         String("method_receiver_changes"),
         String("PublicStruct"),
       ]),
       "span_begin_line": Uint64(56),
-      "span_end_line": Uint64(56),
+      "span_end_line": Uint64(58),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -26,13 +35,22 @@ source: src/query.rs
       "baseline_receiver_kind": String("Self"),
       "method_name": String("method_to_assoc_fn"),
       "name": String("PublicEnum"),
+      "non_matching_span_begin_line": List([
+        Uint64(112),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(112),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "owner_type": String("Enum"),
       "path": List([
         String("method_receiver_changes"),
         String("PublicEnum"),
       ]),
-      "span_begin_line": Uint64(112),
-      "span_end_line": Uint64(112),
+      "span_begin_line": Uint64(114),
+      "span_end_line": Uint64(116),
       "span_filename": String("src/lib.rs"),
     },
   ],
@@ -44,6 +62,15 @@ source: src/query.rs
       "baseline_receiver_kind": String("Self"),
       "method_name": String("method_goes_from_taking_self_arg_to_explicit_arg"),
       "name": String("StructWithMethods"),
+      "non_matching_span_begin_line": List([
+        Uint64(18),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(18),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "owner_type": String("Struct"),
       "path": List([
         String("parameter_count_changed"),
@@ -51,6 +78,31 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(18),
       "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("receiver_becomes_parameter"),
+      "name": String("ReceiverChanges"),
+      "non_matching_span_begin_line": List([
+        Uint64(71),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(71),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("parameter_count_changed"),
+        String("ReceiverChanges"),
+      ]),
+      "span_begin_line": Uint64(63),
+      "span_end_line": Uint64(63),
       "span_filename": String("src/lib.rs"),
     },
   ],
