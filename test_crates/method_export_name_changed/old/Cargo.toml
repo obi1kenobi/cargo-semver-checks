@@ -1,0 +1,5 @@
+[package]
+name = "method_export_name_changed"
+version = "0.0.1"
+edition = "2024"
+publish = false
