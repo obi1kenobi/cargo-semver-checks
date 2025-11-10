@@ -8,29 +8,27 @@ SemverQuery(
     query: r#"{
     CrateDiff {
         baseline {
-            item {
-                ... on Function {
-                    export_name @filter(op: "is_not_null") @tag
-                    abi_: abi {
-                        raw_name @tag @output
-                    }
+            ffi_exported_function {
+                export_name @filter(op: "is_not_null") @tag
+
+                abi_: abi {
+                    raw_name @tag @output
                 }
             }
         }
         current {
-            item {
-                ... on Function {
-                    name @output
-                    export_name @filter(op: "=", value: ["%export_name"]) @output
-                    new_abi_: abi {
-                        raw_name @filter(op: "!=", value: ["%raw_name"]) @output
-                    }
+            ffi_exported_function {
+                name @output
+                export_name @filter(op: "=", value: ["%export_name"]) @output
 
-                    span_: span @optional {
-                        filename @output
-                        begin_line @output
-                        end_line @output
-                    }
+                new_abi_: abi {
+                    raw_name @filter(op: "!=", value: ["%raw_name"]) @output
+                }
+
+                span_: span @optional {
+                    filename @output
+                    begin_line @output
+                    end_line @output
                 }
             }
         }
