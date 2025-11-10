@@ -21,7 +21,7 @@ mod private {
     pub trait Sealed {}
 }
 
-pub trait SealedExample {
+pub trait SealedExample: private::Sealed {
     // This is breaking for unsealed traits, because the impl has to match.
     fn parameter_becomes_receiver(x: &Self);
 

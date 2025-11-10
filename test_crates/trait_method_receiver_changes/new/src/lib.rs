@@ -28,6 +28,8 @@ pub trait PublicTrait {
     fn owned_rc_to_refmut_box(self: &mut Box<Self>);
 
     fn method_to_assoc_fn();
+
+    fn assoc_fn_to_method(&self);
 }
 
 #[doc(hidden)]
@@ -57,6 +59,8 @@ pub trait HiddenTrait {
     fn owned_rc_to_refmut_box(self: &mut Box<Self>);
 
     fn method_to_assoc_fn();
+
+    fn assoc_fn_to_method(&self);
 }
 
 pub trait HiddenMethods {
@@ -98,4 +102,32 @@ pub trait HiddenMethods {
 
     #[doc(hidden)]
     fn method_to_assoc_fn();
+
+    #[doc(hidden)]
+    fn assoc_fn_to_method(&self);
+}
+
+pub trait PublicApiSealedTrait: SealSuper {
+    fn assoc_fn_to_method(&self);
+}
+
+#[doc(hidden)]
+pub trait HiddenPublicApiSealedTrait: SealSuper {
+    fn assoc_fn_to_method(&self);
+}
+
+pub trait PublicApiSealedTraitWithHiddenMethods: SealSuper {
+    #[doc(hidden)]
+    fn hidden_assoc_fn_to_method(&self);
+}
+
+pub trait UnconditionallySealedTrait: private::Sealed {
+    fn assoc_fn_to_method(&self);
+}
+
+#[doc(hidden)]
+pub trait SealSuper {}
+
+mod private {
+    pub trait Sealed {}
 }
