@@ -13,6 +13,7 @@ SemverQuery(
                     ... on Function {
                         importable_path {
                             path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         export_name @output @tag @filter(op: "is_not_null")
@@ -29,6 +30,7 @@ SemverQuery(
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         span_: span @optional {
@@ -42,7 +44,8 @@ SemverQuery(
         }
     }"#,
     arguments: {
+        "true": true,
     },
-    error_message: "The ABI export name of a function has been changed or removed through the #[no_mangle] or #[export_name] attributes.",
+    error_message: "A function that was accessible both via the ABI and via the public API is no longer accessible via the same ABI symbol name. The behavior of the public API and ABI has diverged.",
     per_result_error_template: Some("function {{join \"::\" path}} no longer has ABI name {{export_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
