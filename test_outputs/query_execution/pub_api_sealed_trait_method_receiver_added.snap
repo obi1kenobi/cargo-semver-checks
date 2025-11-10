@@ -1,0 +1,22 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/trait_method_receiver_changes/": [
+    {
+      "current_receiver_by_mut_reference": Boolean(false),
+      "current_receiver_by_reference": Boolean(true),
+      "current_receiver_by_value": Boolean(false),
+      "current_receiver_kind": String("Self"),
+      "method_name": String("assoc_fn_to_method"),
+      "path": List([
+        String("trait_method_receiver_changes"),
+        String("PublicApiSealedTrait"),
+      ]),
+      "span_begin_line": Uint64(111),
+      "span_end_line": Uint64(111),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
