@@ -1629,6 +1629,7 @@ add_lints!(
     macro_no_longer_exported,
     macro_now_doc_hidden,
     method_no_longer_has_receiver,
+    method_export_name_changed,
     method_parameter_count_changed,
     method_receiver_mut_ref_became_owned,
     method_receiver_ref_became_mut,
