@@ -16,4 +16,9 @@ mod abi_only {
 
     #[unsafe(no_mangle)]
     pub extern "C" fn abi_no_longer_unwind() {}
+
+    #[unsafe(no_mangle)]
+    #[target_feature(enable = "avx")]
+    #[target_feature(enable = "avx2")]
+    pub unsafe extern "C" fn requires_more_target_features() {}
 }
