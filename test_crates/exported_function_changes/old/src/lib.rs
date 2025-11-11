@@ -20,4 +20,7 @@ mod abi_only {
     #[unsafe(no_mangle)]
     #[target_feature(enable = "avx")]
     pub unsafe extern "C" fn requires_more_target_features() {}
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn target_feature_added() {}
 }

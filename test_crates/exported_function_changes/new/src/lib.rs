@@ -21,4 +21,8 @@ mod abi_only {
     #[target_feature(enable = "avx")]
     #[target_feature(enable = "avx2")]
     pub unsafe extern "C" fn requires_more_target_features() {}
+
+    #[unsafe(no_mangle)]
+    #[target_feature(enable = "avx2")]
+    pub unsafe extern "C" fn target_feature_added() {}
 }
