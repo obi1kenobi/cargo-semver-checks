@@ -5,16 +5,18 @@ assertion_line: 1049
 {
   "./test_crates/function_changed_abi/": [
     {
+      "baseline_abi_name": String("C"),
       "baseline_abi_raw_name": String("C"),
       "method_name": String("trait_c_becomes_rust"),
       "name": String("TraitWithAbi"),
+      "new_abi_name": String("Rust"),
       "new_abi_raw_name": String("Rust"),
       "path": List([
         String("function_changed_abi"),
         String("TraitWithAbi"),
       ]),
-      "span_begin_line": Uint64(33),
-      "span_end_line": Uint64(33),
+      "span_begin_line": Uint64(32),
+      "span_end_line": Uint64(32),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

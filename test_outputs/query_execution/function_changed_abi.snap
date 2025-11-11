@@ -1,12 +1,15 @@
 ---
 source: src/query.rs
+assertion_line: 1049
 ---
 {
   "./test_crates/exported_function_changed_abi/": [
     {
       "abi_name": String("Rust"),
+      "abi_raw_name": String("Rust"),
       "name": String("public_null_export_name_func_will_become_c"),
       "new_abi_name": String("C"),
+      "new_abi_raw_name": String("C"),
       "path": List([
         String("exported_function_changed_abi"),
         String("public_null_export_name_func_will_become_c"),
@@ -20,8 +23,10 @@ source: src/query.rs
   "./test_crates/function_changed_abi/": [
     {
       "abi_name": String("C"),
+      "abi_raw_name": String("C"),
       "name": String("c_function_becomes_rust"),
       "new_abi_name": String("Rust"),
+      "new_abi_raw_name": String("Rust"),
       "path": List([
         String("function_changed_abi"),
         String("c_function_becomes_rust"),
@@ -33,8 +38,10 @@ source: src/query.rs
     },
     {
       "abi_name": String("C"),
+      "abi_raw_name": String("C"),
       "name": String("c_function_becomes_rust_implicitly"),
       "new_abi_name": String("Rust"),
+      "new_abi_raw_name": String("Rust"),
       "path": List([
         String("function_changed_abi"),
         String("c_function_becomes_rust_implicitly"),
@@ -46,8 +53,10 @@ source: src/query.rs
     },
     {
       "abi_name": String("Rust"),
+      "abi_raw_name": String("Rust"),
       "name": String("rust_function_becomes_c"),
       "new_abi_name": String("C"),
+      "new_abi_raw_name": String("C"),
       "path": List([
         String("function_changed_abi"),
         String("rust_function_becomes_c"),
@@ -59,8 +68,10 @@ source: src/query.rs
     },
     {
       "abi_name": String("Rust"),
+      "abi_raw_name": String("Rust"),
       "name": String("implicit_rust_function_becomes_c"),
       "new_abi_name": String("C"),
+      "new_abi_raw_name": String("C"),
       "path": List([
         String("function_changed_abi"),
         String("implicit_rust_function_becomes_c"),
@@ -72,8 +83,10 @@ source: src/query.rs
     },
     {
       "abi_name": String("C"),
+      "abi_raw_name": String("C"),
       "name": String("implicit_c_function_becomes_rust"),
       "new_abi_name": String("Rust"),
+      "new_abi_raw_name": String("Rust"),
       "path": List([
         String("function_changed_abi"),
         String("implicit_c_function_becomes_rust"),
@@ -85,8 +98,10 @@ source: src/query.rs
     },
     {
       "abi_name": String("system"),
+      "abi_raw_name": String("system"),
       "name": String("system_function_becomes_c"),
       "new_abi_name": String("C"),
+      "new_abi_raw_name": String("C"),
       "path": List([
         String("function_changed_abi"),
         String("system_function_becomes_c"),

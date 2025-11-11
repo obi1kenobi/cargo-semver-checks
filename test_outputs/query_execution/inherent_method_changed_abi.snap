@@ -5,9 +5,11 @@ assertion_line: 1049
 {
   "./test_crates/function_changed_abi/": [
     {
+      "baseline_abi_name": String("C"),
       "baseline_abi_raw_name": String("C"),
       "method_name": String("inherent_c_becomes_rust"),
       "name": String("InherentType"),
+      "new_abi_name": String("Rust"),
       "new_abi_raw_name": String("Rust"),
       "owner_type": String("Struct"),
       "path": List([

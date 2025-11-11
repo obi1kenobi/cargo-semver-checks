@@ -1,0 +1,22 @@
+---
+source: src/query.rs
+assertion_line: 1049
+---
+{
+  "./test_crates/function_abi_no_longer_unwind/": [
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("inherent_non_unwind_becomes_unwind"),
+      "name": String("InherentUnwindToggles"),
+      "new_abi_raw_name": String("C-unwind"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("function_abi_no_longer_unwind"),
+        String("InherentUnwindToggles"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
