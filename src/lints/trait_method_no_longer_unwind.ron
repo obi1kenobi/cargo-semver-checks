@@ -1,0 +1,72 @@
+SemverQuery(
+    id: "trait_method_no_longer_unwind",
+    human_readable_name: "trait method ABI is no longer unwind-capable",
+    description: "A public trait method changed from an unwind-capable ABI to the same ABI without unwind support. Downstream code that unwinds across that ABI boundary would now hit undefined behavior.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://rust-lang.github.io/rfcs/2945-c-unwind-abi.html"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            method_name: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            new_abi_: abi {
+                                name @tag(name: "abi_name")
+                                raw_name @output
+                                unwind @filter(op: "!=", value: ["$true"])
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            name @filter(op: "=", value: ["%method_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            abi_: abi {
+                                name @filter(op: "=", value: ["%abi_name"])
+                                raw_name @output
+                                unwind @filter(op: "=", value: ["$true"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A public trait method lost its unwind-capable ABI. Any unwinding across the trait method boundary would now be undefined behavior.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"),
+)
