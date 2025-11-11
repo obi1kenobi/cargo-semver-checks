@@ -38,5 +38,5 @@ SemverQuery(
         // No arguments!
     },
     error_message: "A function with an export_name has changed ABI.",
-    per_result_error_template: Some("fn {{name}} with export_name {{export_name}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{name}} exported as {{export_name}} changed from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"),
 )

@@ -76,4 +76,24 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/exported_function_changes/": [
+    {
+      "abi_raw_name": String("C"),
+      "export_name": String("abi_now_unwind"),
+      "name": String("abi_now_unwind"),
+      "new_abi_raw_name": String("C-unwind"),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C-unwind"),
+      "export_name": String("abi_no_longer_unwind"),
+      "name": String("abi_no_longer_unwind"),
+      "new_abi_raw_name": String("C"),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }

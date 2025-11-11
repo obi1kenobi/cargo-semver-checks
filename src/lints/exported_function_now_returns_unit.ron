@@ -1,0 +1,46 @@
+SemverQuery(
+    id: "exported_function_now_returns_unit",
+    human_readable_name: "exported fn now returns unit",
+    description: "An exported function that previously returned a value now returns `()`.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#fn-change-signature"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                ffi_exported_function {
+                    export_name @tag
+                    async @tag(name: "is_async")
+
+                    return_value {
+                        is_unit @filter(op: "!=", value: ["$true"])
+                    }
+                }
+            }
+            current {
+                ffi_exported_function {
+                    name @output
+                    export_name @filter(op: "=", value: ["%export_name"]) @output
+                    async @filter(op: "=", value: ["%is_async"])
+
+                    return_value {
+                        is_unit @filter(op: "=", value: ["$true"])
+                    }
+
+                    span_: span @optional {
+                        filename @output
+                        begin_line @output
+                        end_line @output
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "true": true,
+    },
+    error_message: "An exported function that previously returned a value now returns `()`.",
+    per_result_error_template: Some("{{name}} exported as {{export_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
