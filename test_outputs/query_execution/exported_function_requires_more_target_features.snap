@@ -1,0 +1,15 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/exported_function_changes/": [
+    {
+      "export_name": String("requires_more_target_features"),
+      "fn_name": String("requires_more_target_features"),
+      "new_feature": String("avx2"),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

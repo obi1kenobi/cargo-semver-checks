@@ -1,0 +1,19 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/exported_function_changes/": [
+    {
+      "current_parameter_count": Uint64(2),
+      "export_name": String("parameter_count_changed"),
+      "name": String("parameter_count_changed"),
+      "old_parameter_count": Uint64(1),
+      "old_parameter_names": List([
+        String("a"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

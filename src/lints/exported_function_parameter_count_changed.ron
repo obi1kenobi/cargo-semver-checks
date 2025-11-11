@@ -1,0 +1,40 @@
+SemverQuery(
+    id: "exported_function_parameter_count_changed",
+    human_readable_name: "exported fn parameter count changed",
+    description: "An exported function (via #[no_mangle] or #[export_name]) now requires a different number of parameters.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#fn-change-arity"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                ffi_exported_function {
+                    export_name @tag
+
+                    old_parameter_: parameter @fold @transform(op: "count") @output @tag(name: "parameters") {
+                        names: name @output
+                    }
+                }
+            }
+            current {
+                ffi_exported_function {
+                    name @output
+                    export_name @filter(op: "=", value: ["%export_name"]) @output
+
+                    current_parameter_: parameter @fold @transform(op: "count") @filter(op: "!=", value: ["%parameters"]) @output
+
+                    span_: span @optional {
+                        filename @output
+                        begin_line @output
+                        end_line @output
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {},
+    error_message: "An exported function now takes a different number of parameters, which changes its ABI contract.",
+    per_result_error_template: Some("{{name}} exported as {{export_name}} now takes {{current_parameter_count}} parameters instead of {{old_parameter_count}}, in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

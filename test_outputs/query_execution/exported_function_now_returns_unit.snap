@@ -1,0 +1,14 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/exported_function_changes/": [
+    {
+      "export_name": String("return_value_removed"),
+      "name": String("return_value_removed"),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

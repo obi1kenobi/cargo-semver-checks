@@ -62,7 +62,7 @@ Follow these rules when drafting queries:
 ## Arguments & reusable constants
 - Declare every `$parameter` inside the `arguments` map.
 - Reuse shared constants such as `"public"`, `true`, or `0` instead of inlining literals directly in the query.
-- Prefer to write queries to reuse values, for example using `= $true` and `!= $true` instead of defining separate `$true` and `$false` arguments.
+- Prefer to reuse values in queries, for example using `= $true` and `!= $true` instead of defining separate `$true` and `$false` arguments.
 
 ## Messaging & witnesses
 - `error_message` should concisely describe the change and why it matters to downstream users.
