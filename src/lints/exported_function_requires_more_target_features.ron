@@ -1,0 +1,63 @@
+SemverQuery(
+    id: "exported_function_requires_more_target_features",
+    human_readable_name: "exported fn requires more target features",
+    description: "An exported function now requires additional CPU target features before it can be called.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/codegen.html#the-target_feature-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                ffi_exported_function {
+                    ... on Function {
+                        export_name @output @tag
+                        fn_name: name @output
+
+                        requires_feature {
+                            explicit @filter(op: "=", value: ["$true"])
+                            globally_enabled @filter(op: "!=", value: ["$true"])
+                            new_feature: name @output @tag
+                        }
+
+                        requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            valid_for_current_target @filter(op: "!=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                ffi_exported_function {
+                    ... on Function {
+                        export_name @filter(op: "=", value: ["%export_name"])
+
+                        requires_feature @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            explicit @filter(op: "=", value: ["$true"])
+                        }
+
+                        requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%new_feature"])
+                        }
+
+                        requires_feature @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            valid_for_current_target @filter(op: "!=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "An exported function now requires additional CPU target features before it can be called.",
+    per_result_error_template: Some("{{fn_name}} exported as {{export_name}} now requires {{new_feature}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

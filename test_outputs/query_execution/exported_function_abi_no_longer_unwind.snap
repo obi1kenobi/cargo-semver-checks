@@ -1,0 +1,27 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/exported_function_changed_abi/": [
+    {
+      "abi_new_raw_name": String("C"),
+      "abi_old_raw_name": String("C-unwind"),
+      "export_name": String("exported_c_unwind_func_that_will_become_c"),
+      "name": String("exported_c_unwind_func_that_will_become_c"),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/exported_function_changes/": [
+    {
+      "abi_new_raw_name": String("C"),
+      "abi_old_raw_name": String("C-unwind"),
+      "export_name": String("abi_no_longer_unwind"),
+      "name": String("abi_no_longer_unwind"),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

@@ -62,7 +62,7 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: "A method that was accessible via both the public API and an ABI export is no longer accessible via the same ABI symbol name.",
+    error_message: "A method that was accessible via both the public API and an ABI export is no longer accessible via the same ABI symbol name. The ABI and public API have diverged.",
     per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} no longer has ABI name {{export_name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )

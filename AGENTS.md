@@ -61,3 +61,5 @@ Before proposing a code change:
 If adding new test crates, snapshots, and/or new lints, then additionally:
 - Ensure `RUSTFLAGS="-A dead_code -A deprecated -A unused -A private_bounds" cargo check --manifest-path=<path-to-new-crate-cargo-toml>` passes without warnings on each new test crate.
 - Run `./scripts/regenerate_test_rustdocs.sh` then use `insta` and `cargo-insta` appropriately to update any snapshots. Review the snapshots to ensure they are correct and expected for the code change you propsed.
+
+If you added a new lint and its snapshot file shows no matches, then either your new test crate code is wrong (or missing) or the lint query isn't working as expected. Lint additions that don't match any test cases will not be accepted, so do not ignore the problem: either debug and fix it, or say you got stuck and ask for help.

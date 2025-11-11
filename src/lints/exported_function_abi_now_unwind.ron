@@ -1,0 +1,48 @@
+SemverQuery(
+    id: "exported_function_abi_now_unwind",
+    human_readable_name: "exported function ABI is now unwind-capable",
+    description: "An exported function switched from a non-unwind ABI to the same ABI that permits unwinding.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://rust-lang.github.io/rfcs/2945-c-unwind-abi.html"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                ffi_exported_function {
+                    name @output
+                    export_name @output @tag
+
+                    abi {
+                        abi_name: name @tag
+                        abi_new_raw_name: raw_name @output
+                        unwind @filter(op: "=", value: ["$true"])
+                    }
+
+                    span_: span @optional {
+                        filename @output
+                        begin_line @output
+                        end_line @output
+                    }
+                }
+            }
+            baseline {
+                ffi_exported_function {
+                    export_name @filter(op: "=", value: ["%export_name"])
+
+                    abi {
+                        name @filter(op: "=", value: ["%abi_name"])
+                        abi_old_raw_name: raw_name @output
+                        unwind @filter(op: "!=", value: ["$true"])
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "true": true,
+    },
+    error_message: "An exported function switched from a non-unwind ABI to the unwind-capable variant, which may surprise callers.",
+    per_result_error_template: Some("{{name}} exported as {{export_name}} changed from {{abi_old_raw_name}} to {{abi_new_raw_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
