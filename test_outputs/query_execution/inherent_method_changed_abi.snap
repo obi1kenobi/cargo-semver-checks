@@ -1,0 +1,22 @@
+---
+source: src/query.rs
+assertion_line: 1049
+---
+{
+  "./test_crates/function_changed_abi/": [
+    {
+      "baseline_abi_raw_name": String("C"),
+      "method_name": String("inherent_c_becomes_rust"),
+      "name": String("InherentType"),
+      "new_abi_raw_name": String("Rust"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("function_changed_abi"),
+        String("InherentType"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

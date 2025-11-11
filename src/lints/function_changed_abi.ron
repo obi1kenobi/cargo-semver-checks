@@ -55,4 +55,7 @@ SemverQuery(
     },
     error_message: "A publicly-visible function changed its ABI.",
     per_result_error_template: Some("{{join \"::\" path}} changed ABI from {{abi_name}} to {{new_abi_name}} in {{span_filename}}:{{span_begin_line}}"),
+    // Idea for what the witness looks like:
+    // https://github.com/obi1kenobi/cargo-semver-checks/issues/1281
+    witness: None,
 )
