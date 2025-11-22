@@ -22,7 +22,7 @@ jobs:
       PR_TITLE: "chore: updating snapshots for branch ${{ github.event.inputs.branch }}"
     steps:
       - name: Checkout the source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           # We have to use a Personal Access Token (PAT) here.
           # PRs opened from a workflow using the standard `GITHUB_TOKEN` in GitHub Actions
