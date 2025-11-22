@@ -22,7 +22,7 @@ jobs:
       PR_TITLE: "chore: apply lint fixes for ${{ github.event.inputs.branch }}"
     steps:
       - name: Checkout the source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
           ref: ${{ env.OLD_BRANCH }}
