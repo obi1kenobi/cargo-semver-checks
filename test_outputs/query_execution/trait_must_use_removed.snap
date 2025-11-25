@@ -1,0 +1,57 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/trait_must_use_added/": [
+    {
+      "name": String("MustUseTraitToTrait"),
+      "old_attr": String("#[must_use]"),
+      "path": List([
+        String("trait_must_use_added"),
+        String("MustUseTraitToTrait"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MustUseMessageTraitToTrait"),
+      "old_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("trait_must_use_added"),
+        String("MustUseMessageTraitToTrait"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_must_use_removed/": [
+    {
+      "name": String("MustUseTraitToTrait"),
+      "old_attr": String("#[must_use]"),
+      "path": List([
+        String("trait_must_use_removed"),
+        String("MustUseTraitToTrait"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("MustUseMessageTraitToTrait"),
+      "old_attr": String("#[must_use = \"Foo\"]"),
+      "path": List([
+        String("trait_must_use_removed"),
+        String("MustUseMessageTraitToTrait"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

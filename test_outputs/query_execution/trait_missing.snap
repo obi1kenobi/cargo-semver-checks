@@ -161,6 +161,19 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/trait_must_use_removed/": [
+    {
+      "name": String("MustUseRemovedTrait"),
+      "path": List([
+        String("trait_must_use_removed"),
+        String("MustUseRemovedTrait"),
+      ]),
+      "span_begin_line": Uint64(40),
+      "span_end_line": Uint64(40),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_newly_sealed/": [
     {
       "name": String("TraitBecomesPrivateAndSealed"),
