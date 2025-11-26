@@ -34,6 +34,38 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/inherent_method_must_use_removed/": [
+    {
+      "current_typename": String("Enum"),
+      "name": String("StructToEnumWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_removed"),
+        String("item_type_changed_inherent_method_must_use_removed"),
+        String("StructToEnumWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(68),
+      "span_end_line": Uint64(70),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_typename": String("Union"),
+      "name": String("StructToUnionWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_removed"),
+        String("item_type_changed_inherent_method_must_use_removed"),
+        String("StructToUnionWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(99),
+      "span_end_line": Uint64(101),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/struct_becomes_enum/": [
     {
       "current_typename": String("Enum"),

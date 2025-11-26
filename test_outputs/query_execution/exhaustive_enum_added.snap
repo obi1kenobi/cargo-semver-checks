@@ -141,6 +141,30 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/inherent_method_must_use_removed/": [
+    {
+      "name": String("StructToEnumWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_removed"),
+        String("item_type_changed_inherent_method_must_use_removed"),
+        String("StructToEnumWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(68),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToEnumWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_removed"),
+        String("item_type_changed_inherent_method_must_use_removed"),
+        String("UnionToEnumWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(130),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/method_moved_to_trait_must_use_added/": [
     {
       "name": String("NewEnumWithTraitMustUseMethods"),
