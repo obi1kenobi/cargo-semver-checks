@@ -104,6 +104,32 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/inherent_method_must_use_removed/": [
+    {
+      "name": String("EnumToStructWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_removed"),
+        String("item_type_changed_inherent_method_must_use_removed"),
+        String("EnumToStructWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EnumToUnionWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_removed"),
+        String("item_type_changed_inherent_method_must_use_removed"),
+        String("EnumToUnionWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(35),
+      "span_end_line": Uint64(37),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/repr_align_added_removed/": [
     {
       "name": String("EnumBecomesAlignedAndPrivate"),
