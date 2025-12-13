@@ -117,7 +117,7 @@ jobs:
           sed -i "s/$CURRENT_UP/$NEXT_UP/g" .github/workflows/ci.yml
 
       - name: upload ci.yml artifact for use in PR
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ci.yml
           path: .github/workflows/ci.yml
