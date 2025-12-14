@@ -17,12 +17,12 @@ Check(
   ),
   release_type: None,
   current_feature_config: FeatureConfig(
-    features_group: None,
+    features_group: r#None,
     extra_features: [],
     is_baseline: false,
   ),
   baseline_feature_config: FeatureConfig(
-    features_group: None,
+    features_group: r#None,
     extra_features: [],
     is_baseline: true,
   ),
