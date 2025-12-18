@@ -87,6 +87,10 @@ impl GlobalConfig {
         self.level.is_some() && self.level.unwrap() >= log::Level::Info
     }
 
+    pub fn is_warn(&self) -> bool {
+        self.level.is_some() && self.level.unwrap() >= log::Level::Warn
+    }
+
     pub fn is_error(&self) -> bool {
         self.level.is_some() && self.level.unwrap() >= log::Level::Error
     }
@@ -124,6 +128,16 @@ impl GlobalConfig {
         callback: impl FnOnce(&mut Self) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
         if self.is_info() {
+            callback(self)?;
+        }
+        Ok(())
+    }
+
+    pub fn log_warn(
+        &mut self,
+        callback: impl FnOnce(&mut Self) -> anyhow::Result<()>,
+    ) -> anyhow::Result<()> {
+        if self.is_warn() {
             callback(self)?;
         }
         Ok(())
