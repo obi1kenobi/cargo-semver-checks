@@ -1,24 +1,23 @@
 ---
 source: src/query.rs
 description: "Lint `macro_no_longer_exported` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
-expression: "&actual_witnesses"
 ---
 [["./test_crates/declarative_macro_missing/"]]
-filename = 'src/lib.rs'
+filename = "src/lib.rs"
 begin_line = 9
-hint = 'will_no_longer_be_exported!(...);'
+hint = "will_no_longer_be_exported!(...);"
 
 [["./test_crates/macro_no_longer_exported/"]]
-filename = 'src/lib.rs'
+filename = "src/lib.rs"
 begin_line = 4
-hint = 'example_macro!(...);'
+hint = "example_macro!(...);"
 
 [["./test_crates/macro_no_longer_exported/"]]
-filename = 'src/lib.rs'
+filename = "src/lib.rs"
 begin_line = 28
-hint = 'some_macro!(...);'
+hint = "some_macro!(...);"
 
 [["./test_crates/macro_now_doc_hidden/"]]
-filename = 'src/lib.rs'
+filename = "src/lib.rs"
 begin_line = 38
-hint = 'becomes_non_exported!(...);'
+hint = "becomes_non_exported!(...);"
