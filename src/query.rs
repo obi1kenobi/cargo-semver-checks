@@ -1114,6 +1114,7 @@ mod tests {
                 {
                     prepend_module_to_snapshot => false,
                     snapshot_path => "../test_outputs/witnesses",
+                    omit_expression => true,
                     description => format!(
                         "Lint `{query_name}` did not have the expected witness output.\n\
                         See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\n\
@@ -1121,7 +1122,9 @@ mod tests {
                     ),
                 },
                 {
-                    insta::assert_toml_snapshot!(query_name, &actual_witnesses);
+                    let formatted_witnesses = toml::to_string_pretty(&actual_witnesses)
+                        .expect("failed to serialize witness snapshots as TOML");
+                    insta::assert_snapshot!(query_name, formatted_witnesses);
                 }
             );
         }

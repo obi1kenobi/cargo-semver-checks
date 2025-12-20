@@ -1,14 +1,13 @@
 ---
 source: src/query.rs
 description: "Lint `function_marked_deprecated` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
-expression: "&actual_witnesses"
 ---
 [["./test_crates/function_marked_deprecated/"]]
-filename = 'src/lib.rs'
+filename = "src/lib.rs"
 begin_line = 7
-hint = 'let witness = function_marked_deprecated::function_to_deprecated();'
+hint = "let witness = function_marked_deprecated::function_to_deprecated();"
 
 [["./test_crates/function_marked_deprecated/"]]
-filename = 'src/lib.rs'
+filename = "src/lib.rs"
 begin_line = 12
-hint = 'let witness = |input| function_marked_deprecated::function_to_deprecated_message(input);'
+hint = "let witness = |input| function_marked_deprecated::function_to_deprecated_message(input);"
