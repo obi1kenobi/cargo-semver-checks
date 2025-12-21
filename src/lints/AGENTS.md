@@ -72,6 +72,7 @@ Follow these rules when drafting queries:
 ## Duplicate suppression & scope hygiene
 - Filter out items that other lints already cover (for example, doc-hidden or `#[non_exhaustive]` changes) so diagnostics do not overlap. Document unusual exclusions inline.
 - Ensure queries only surface public, importable items to avoid false positives from private or unreachable APIs.
+- Avoid negative test cases where the old/new code is identical; those are redundant since we already test old-old and new-new comparisons to ensure zero lint results.
 
 ## Meta comments
 
