@@ -2,6 +2,18 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/enum_changed_kind/": [
+    {
+      "name": String("EnumToUnion"),
+      "path": List([
+        String("enum_changed_kind"),
+        String("EnumToUnion"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/inherent_method_must_use_added/": [
     {
       "name": String("EnumToUnionWithMustUseMethods"),

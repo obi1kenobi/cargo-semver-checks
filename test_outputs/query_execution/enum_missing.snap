@@ -2,6 +2,30 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/enum_changed_kind/": [
+    {
+      "name": String("EnumToFunction"),
+      "path": List([
+        String("enum_changed_kind"),
+        String("EnumToFunction"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EnumToModule"),
+      "path": List([
+        String("enum_changed_kind"),
+        String("EnumToModule"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_missing/": [
     {
       "name": String("WillBeRemovedEnum"),
@@ -75,58 +99,6 @@ source: src/query.rs
       "span_begin_line": Uint64(28),
       "span_end_line": Uint64(30),
       "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-  ],
-  "./test_crates/inherent_method_must_use_added/": [
-    {
-      "name": String("EnumToStructWithMustUseMethods"),
-      "path": List([
-        String("inherent_method_must_use_added"),
-        String("item_type_changed_inherent_method_must_use_added"),
-        String("EnumToStructWithMustUseMethods"),
-      ]),
-      "span_begin_line": Uint64(8),
-      "span_end_line": Uint64(10),
-      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
-      "name": String("EnumToUnionWithMustUseMethods"),
-      "path": List([
-        String("inherent_method_must_use_added"),
-        String("item_type_changed_inherent_method_must_use_added"),
-        String("EnumToUnionWithMustUseMethods"),
-      ]),
-      "span_begin_line": Uint64(35),
-      "span_end_line": Uint64(37),
-      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
-      "visibility_limit": String("public"),
-    },
-  ],
-  "./test_crates/inherent_method_must_use_removed/": [
-    {
-      "name": String("EnumToStructWithMustUseMethods"),
-      "path": List([
-        String("inherent_method_must_use_removed"),
-        String("item_type_changed_inherent_method_must_use_removed"),
-        String("EnumToStructWithMustUseMethods"),
-      ]),
-      "span_begin_line": Uint64(8),
-      "span_end_line": Uint64(10),
-      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
-      "name": String("EnumToUnionWithMustUseMethods"),
-      "path": List([
-        String("inherent_method_must_use_removed"),
-        String("item_type_changed_inherent_method_must_use_removed"),
-        String("EnumToUnionWithMustUseMethods"),
-      ]),
-      "span_begin_line": Uint64(35),
-      "span_end_line": Uint64(37),
-      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
       "visibility_limit": String("public"),
     },
   ],
