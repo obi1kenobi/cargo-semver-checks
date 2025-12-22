@@ -1,0 +1,57 @@
+SemverQuery(
+    id: "enum_changed_kind",
+    human_readable_name: "pub enum changed kind",
+    description: "A public enum was replaced by a struct, union, or trait at the same import path.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://github.com/obi1kenobi/cargo-semver-checks/issues/302"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Importable {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        new_kind: __typename @filter(op: "one_of", value: ["$replacement_kinds"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "replacement_kinds": ["Struct", "Union", "Trait"],
+        "true": true,
+    },
+    error_message: "A public enum has been replaced by a different kind of item at the same path, which breaks code that relied on the enum's variants and representation.",
+    per_result_error_template: Some("enum {{join \"::\" path}} became {{lowercase new_kind}} in {{span_filename}}:{{span_begin_line}}"),
+    // TODO: Witness idea:
+    // - if the enum has at least one variant, generate a match on a value of that enum.
+    // - if the enum has no variants and is not non-exhaustive, match on Option<Enum> with only None.
+    // - unresolved: no-variant non-exhaustive enums.
+    witness: None,
+)
