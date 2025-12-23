@@ -1,0 +1,53 @@
+SemverQuery(
+    id: "trait_changed_kind",
+    human_readable_name: "pub trait changed kind",
+    description: "A public trait was replaced by a struct, enum, or union at the same import path.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: None,
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Importable {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        new_kind: __typename @filter(op: "one_of", value: ["$replacement_kinds"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "replacement_kinds": ["Struct", "Enum", "Union"],
+        "true": true,
+    },
+    error_message: "A public trait was replaced by a struct, enum, or union at the same import path.",
+    per_result_error_template: Some("trait {{join \"::\" path}} became {{lowercase new_kind}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
