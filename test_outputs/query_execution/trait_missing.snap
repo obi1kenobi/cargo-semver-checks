@@ -137,6 +137,17 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "name": String("DocHiddenReplacement"),
+      "path": List([
+        String("trait_missing"),
+        String("DocHiddenReplacement"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
   "./test_crates/trait_missing_with_major_bump/": [
     {
