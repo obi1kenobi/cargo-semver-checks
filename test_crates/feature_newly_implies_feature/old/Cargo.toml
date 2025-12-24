@@ -23,6 +23,11 @@ already_transitive_root = ["already_transitive_mid"]
 already_transitive_mid = ["already_transitive_leaf"]
 already_transitive_leaf = []
 
+# A transitive implication is added without a new direct edge from the root feature.
+transitive_only_root = ["transitive_only_mid"]
+transitive_only_mid = []
+transitive_only_leaf = []
+
 # Unstable-looking features should be ignored by the lint.
 unstable_enabler = []
 stable_from_unstable_enabler = []

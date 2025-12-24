@@ -4,18 +4,36 @@ source: src/query.rs
 {
   "./test_crates/feature_newly_implies_feature/": [
     {
-      "direct_implied_feature_name": String("direct_add_leaf"),
       "feature_name": String("direct_add_root"),
       "implied_feature_name": String("direct_add_leaf"),
       "ordering_key": String("direct_add_root"),
       "ordering_key1": String("direct_add_leaf"),
     },
     {
-      "direct_implied_feature_name": String("transitive_mid"),
+      "feature_name": String("transitive_only_mid"),
+      "implied_feature_name": String("transitive_only_leaf"),
+      "ordering_key": String("transitive_only_mid"),
+      "ordering_key1": String("transitive_only_leaf"),
+    },
+    {
       "feature_name": String("transitive_root"),
       "implied_feature_name": String("transitive_mid"),
       "ordering_key": String("transitive_root"),
       "ordering_key1": String("transitive_mid"),
+    },
+  ],
+  "./test_crates/feature_no_longer_implies_feature/": [
+    {
+      "feature_name": String("bridge"),
+      "implied_feature_name": String("leaf"),
+      "ordering_key": String("bridge"),
+      "ordering_key1": String("leaf"),
+    },
+    {
+      "feature_name": String("rerouted"),
+      "implied_feature_name": String("bridge"),
+      "ordering_key": String("rerouted"),
+      "ordering_key1": String("bridge"),
     },
   ],
 }

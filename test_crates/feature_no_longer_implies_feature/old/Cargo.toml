@@ -1,0 +1,22 @@
+[package]
+publish = false
+name = "feature_no_longer_implies_feature"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[features]
+default = ["std"]
+std = []
+extras = ["alloc", "serde"]
+alloc = []
+serde = []
+
+# `rerouted` used to enable `leaf` directly, but will do so transitively in the new version.
+rerouted = ["leaf"]
+bridge = []
+leaf = []
+internal = ["_private"]
+_private = []
+unstable-extras = ["alloc", "serde"]

@@ -1,14 +1,14 @@
 SemverQuery(
-    id: "feature_newly_implies_feature",
-    human_readable_name: "package feature now enables another feature",
-    description: "A feature now enables another feature in this package's Cargo.toml.",
-    required_update: Minor,
-    lint_level: Allow,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#cargo-feature-add"),
+    id: "feature_no_longer_implies_feature",
+    human_readable_name: "package feature no longer enables another feature",
+    description: "A feature no longer enables another feature in this package's Cargo.toml.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#cargo-feature-remove-another"),
     query: r#"
     {
         CrateDiff {
-            current {
+            baseline {
                 feature {
                     # Until cargo ships with support for private and/or unstable feature names,
                     # we'll rely on feature names to detect whether to flag feature changes.
@@ -22,7 +22,8 @@ SemverQuery(
                     # Cargo tracking issues:
                     # - unstable/nightly features: https://github.com/rust-lang/cargo/issues/10881
                     # - private/hidden features: https://github.com/rust-lang/cargo/issues/10882
-                    # Exclude the `default` feature to keep this lint scoped to explicit features.
+                    # Exclude the `default` feature so default-feature changes are handled by
+                    # the `feature_not_enabled_by_default` lint.
                     feature_name: name @tag
                                        @filter(op: "not_regex", value: ["$unstable_feature_pattern"])
                                        @filter(op: "not_has_prefix", value: ["$underscore"])
@@ -37,7 +38,6 @@ SemverQuery(
                         implied_feature_name: name @tag
                                                    @filter(op: "not_regex", value: ["$unstable_feature_pattern"])
                                                    @filter(op: "not_has_prefix", value: ["$underscore"])
-                                                   @filter(op: "!=", value: ["$default_feature_name"])
                                                    @output
 
                         # An explicit ordering key is needed since we don't have span information,
@@ -46,12 +46,13 @@ SemverQuery(
                     }
                 }
             }
-            baseline {
-                # Ensure the feature existed in the baseline and did not already imply
-                # this feature transitively.
+            current {
+                # Ensure the feature still exists. If it's missing entirely, we want to report
+                # it in the `feature_missing` lint, not here.
                 feature {
                     name @filter(op: "=", value: ["%feature_name"])
 
+                    # Follow the full transitive feature graph in case the implication was rerouted.
                     transitively_enables @fold
                                          @transform(op: "count")
                                          @filter(op: "=", value: ["$zero"]) {
@@ -59,8 +60,8 @@ SemverQuery(
                     }
                 }
 
-                # Ensure the implied feature existed in the baseline. If it is new,
-                # don't report it as a newly-added implication.
+                # Ensure the implied feature still exists. If it's missing entirely, we want
+                # to report it in the `feature_missing` lint, not here.
                 feature @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                     name @filter(op: "=", value: ["%implied_feature_name"])
                 }
@@ -73,8 +74,8 @@ SemverQuery(
         "underscore": "_",
         "default_feature_name": "default",
     },
-    error_message: "A feature now directly enables another feature in this package's Cargo.toml. This can enable additional functionality or dependencies for downstream crates that enable the feature.",
-    per_result_error_template: Some(r#"feature {{feature_name}} now enables {{implied_feature_name}}"#),
+    error_message: "A feature no longer enables another feature in this package's Cargo.toml. This will break downstream crates which rely on the implied feature being enabled.",
+    per_result_error_template: Some("feature {{feature_name}} no longer enables {{implied_feature_name}}"),
     // TODO: It's currently not possible to write witnesses for manifest lints,
     //       since we'd need to generate a *Cargo.toml* witness instead of a Rust code witness.
     //       Issue: https://github.com/obi1kenobi/cargo-semver-checks/issues/1008
