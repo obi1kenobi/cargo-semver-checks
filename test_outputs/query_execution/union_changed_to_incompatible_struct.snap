@@ -1,0 +1,84 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/union_changed_to_incompatible_struct/": [
+    {
+      "field_name": String("value"),
+      "name": String("UnionToStructSingleFieldMismatch"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToStructSingleFieldMismatch"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("value"),
+      "name": String("UnionToStructPrivateField"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToStructPrivateField"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("value"),
+      "name": String("UnionToStructNoFields"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToStructNoFields"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("value"),
+      "name": String("UnionToStructMultipleFields"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToStructMultipleFields"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("value"),
+      "name": String("UnionToStructDocHiddenField"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToStructDocHiddenField"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(25),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("value"),
+      "name": String("UnionToStructPrivateExtraField"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToStructPrivateExtraField"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "field_name": String("value"),
+      "name": String("UnionToNonExhaustiveStruct"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToNonExhaustiveStruct"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(35),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

@@ -1,0 +1,57 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/inherent_method_must_use_added/": [
+    {
+      "name": String("UnionToEnumWithMustUseMethods"),
+      "new_kind": String("Enum"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("UnionToEnumWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(130),
+      "span_end_line": Uint64(132),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+    },
+  ],
+  "./test_crates/inherent_method_must_use_removed/": [
+    {
+      "name": String("UnionToEnumWithMustUseMethods"),
+      "new_kind": String("Enum"),
+      "path": List([
+        String("inherent_method_must_use_removed"),
+        String("item_type_changed_inherent_method_must_use_removed"),
+        String("UnionToEnumWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(130),
+      "span_end_line": Uint64(132),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
+    },
+  ],
+  "./test_crates/union_changed_kind/": [
+    {
+      "name": String("UnionToEnum"),
+      "new_kind": String("Enum"),
+      "path": List([
+        String("union_changed_kind"),
+        String("UnionToEnum"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("UnionToTrait"),
+      "new_kind": String("Trait"),
+      "path": List([
+        String("union_changed_kind"),
+        String("UnionToTrait"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

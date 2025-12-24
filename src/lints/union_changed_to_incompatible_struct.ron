@@ -1,0 +1,100 @@
+SemverQuery(
+    id: "union_changed_to_incompatible_struct",
+    human_readable_name: "pub union with single public API field changed to struct missing field",
+    description: "A public union with a single public API field was replaced by a struct that cannot be constructed via only that field.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: None,
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # This lint only applies when the union exposes exactly one public API field.
+                        # Unions with multiple public API fields are handled by
+                        # union_with_multiple_pub_fields_changed_to_struct.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                        }
+
+                        # TODO: We only check field names/visibility here. Once field types are
+                        # exposed in the schema, add a lint for unions whose single field kept
+                        # its name but changed type when converting to a struct.
+                        field {
+                            field_name: name @output @tag
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # Field compatibility is handled by the separate "compatible case" fold
+                        # below; we avoid narrowing here so incompatible structs still match.
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    # The only compatible case is an exhaustive struct with exactly one field total,
+                    # where that field is public API with the same name as the union's single
+                    # public API field. Otherwise, the union could be constructed with a literal
+                    # from that single field, but the struct cannot be constructed that way.
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$one"])
+
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
+                            name @filter(op: "=", value: ["%field_name"])
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "non_exhaustive": "#[non_exhaustive]",
+        "one": 1,
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A public union with a single public API field was replaced by a struct that cannot be constructed using only that field. Downstream code that constructed the union using a literal will break.",
+    per_result_error_template: Some("{{join \"::\" path}} cannot be constructed from {{field_name}} in {{span_filename}}:{{span_begin_line}}"),
+    // Constructing the union with a literal uses only that one field.
+    // The same is not possible unless the replacement struct is exhaustive and
+    // also only has that one field. The witness is the struct literal construction.
+    witness: None,
+)

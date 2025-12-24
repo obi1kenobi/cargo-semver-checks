@@ -1,0 +1,29 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/union_changed_to_incompatible_struct/": [
+    {
+      "name": String("UnionWithMultiplePubFields"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionWithMultiplePubFields"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(39),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/union_with_multiple_pub_fields_changed_to_struct/": [
+    {
+      "name": String("UnionWithMultiplePubFields"),
+      "path": List([
+        String("union_with_multiple_pub_fields_changed_to_struct"),
+        String("UnionWithMultiplePubFields"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
