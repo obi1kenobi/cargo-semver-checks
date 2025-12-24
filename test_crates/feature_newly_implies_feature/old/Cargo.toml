@@ -1,0 +1,37 @@
+[package]
+publish = false
+name = "feature_newly_implies_feature"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[features]
+default = []
+
+# Direct implication added in the new version.
+direct_add_root = []
+direct_add_leaf = []
+
+# Transitive implication added via an intermediate feature.
+transitive_root = []
+transitive_mid = ["transitive_leaf"]
+transitive_leaf = []
+
+# A direct implication is added, but the feature was already transitively enabled.
+already_transitive_root = ["already_transitive_mid"]
+already_transitive_mid = ["already_transitive_leaf"]
+already_transitive_leaf = []
+
+# A transitive implication is added without a new direct edge from the root feature.
+transitive_only_root = ["transitive_only_mid"]
+transitive_only_mid = []
+transitive_only_leaf = []
+
+# Unstable-looking features should be ignored by the lint.
+unstable_enabler = []
+stable_from_unstable_enabler = []
+stable_enables_unstable = []
+unstable_target = []
+stable_enables_private = []
+_private_target = []
