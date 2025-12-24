@@ -30,6 +30,10 @@ SemverQuery(
                                        @filter(op: "!=", value: ["$default_feature_name"])
                                        @output
 
+                    # An explicit ordering key is needed since we don't have span information,
+                    # which what we usually use to order results in tests.
+                    name @output(name: "ordering_key")
+
                     directly_enables {
                         implied_feature_name: name @tag
                                                    @filter(op: "not_regex", value: ["$unstable_feature_pattern"])
@@ -38,7 +42,7 @@ SemverQuery(
 
                         # An explicit ordering key is needed since we don't have span information,
                         # which what we usually use to order results in tests.
-                        name @output(name: "ordering_key")
+                        name @output(name: "ordering_key1")
                     }
                 }
             }
