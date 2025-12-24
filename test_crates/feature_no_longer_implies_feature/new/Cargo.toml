@@ -1,0 +1,22 @@
+[package]
+publish = false
+name = "feature_no_longer_implies_feature"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[features]
+default = ["std"]
+std = []
+extras = ["serde"]
+alloc = []
+serde = []
+
+# `rerouted` now enables `leaf` only transitively.
+rerouted = ["bridge"]
+bridge = ["leaf"]
+leaf = []
+internal = []
+_private = []
+unstable-extras = ["serde"]
