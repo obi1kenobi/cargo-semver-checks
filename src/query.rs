@@ -1556,6 +1556,7 @@ add_lints!(
     constructible_struct_adds_field,
     constructible_struct_adds_private_field,
     constructible_struct_changed_type,
+    copy_impl_added,
     declarative_macro_missing,
     derive_helper_attr_removed,
     derive_proc_macro_missing,
