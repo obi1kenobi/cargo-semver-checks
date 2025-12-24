@@ -365,4 +365,16 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/union_changed_kind/": [
+    {
+      "name": String("UnionToEnum"),
+      "path": List([
+        String("union_changed_kind"),
+        String("UnionToEnum"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
