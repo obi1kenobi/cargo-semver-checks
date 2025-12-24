@@ -1,0 +1,21 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/feature_newly_implies_feature/": [
+    {
+      "direct_implied_feature_name": String("direct_add_leaf"),
+      "feature_name": String("direct_add_root"),
+      "implied_feature_name": String("direct_add_leaf"),
+      "ordering_key": String("direct_add_root"),
+      "ordering_key1": String("direct_add_leaf"),
+    },
+    {
+      "direct_implied_feature_name": String("transitive_mid"),
+      "feature_name": String("transitive_root"),
+      "implied_feature_name": String("transitive_mid"),
+      "ordering_key": String("transitive_root"),
+      "ordering_key1": String("transitive_mid"),
+    },
+  ],
+}
