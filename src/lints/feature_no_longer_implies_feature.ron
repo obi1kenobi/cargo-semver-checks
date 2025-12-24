@@ -48,7 +48,10 @@ SemverQuery(
                 feature {
                     name @filter(op: "=", value: ["%feature_name"])
 
-                    directly_enables @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    # Follow the full transitive feature graph in case the implication was rerouted.
+                    transitively_enables @fold
+                                         @transform(op: "count")
+                                         @filter(op: "=", value: ["$zero"]) {
                         name @filter(op: "=", value: ["%implied_feature_name"])
                     }
                 }

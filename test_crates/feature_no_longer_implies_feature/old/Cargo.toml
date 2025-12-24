@@ -12,6 +12,11 @@ std = []
 extras = ["alloc", "serde"]
 alloc = []
 serde = []
+
+# `rerouted` used to enable `leaf` directly, but will do so transitively in the new version.
+rerouted = ["leaf"]
+bridge = []
+leaf = []
 internal = ["_private"]
 _private = []
 unstable-extras = ["alloc", "serde"]

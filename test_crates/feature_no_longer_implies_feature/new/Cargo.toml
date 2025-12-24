@@ -12,6 +12,11 @@ std = []
 extras = ["serde"]
 alloc = []
 serde = []
+
+# `rerouted` now enables `leaf` only transitively.
+rerouted = ["bridge"]
+bridge = ["leaf"]
+leaf = []
 internal = []
 _private = []
 unstable-extras = ["serde"]
