@@ -1,0 +1,57 @@
+SemverQuery(
+    id: "union_changed_kind",
+    human_readable_name: "pub union changed kind",
+    description: "A public union was replaced by an enum or trait at the same import path.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: None,
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Union {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on Importable {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+                        new_kind: __typename @filter(op: "one_of", value: ["$replacement_kinds"]) @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "replacement_kinds": ["Enum", "Trait"],
+        "true": true,
+    },
+    error_message: "A public union was replaced by a different kind of item at the same path, which breaks field access and layout assumptions.",
+    per_result_error_template: Some("union {{join \"::\" path}} became {{lowercase new_kind}} in {{span_filename}}:{{span_begin_line}}"),
+    // Witness ideas:
+    // - traits are not a concrete type, so functions with a parameter of the union type would break
+    // - enums have very sophisticated representation rules, so it'd be very difficult bordering on
+    //   impossible to convert a union to an enum without breaking something
+    witness: None,
+)
