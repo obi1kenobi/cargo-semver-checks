@@ -1604,6 +1604,7 @@ add_lints!(
     exported_function_return_value_added,
     exported_function_target_feature_added,
     feature_missing,
+    feature_no_longer_implies_feature,
     feature_not_enabled_by_default,
     function_abi_no_longer_unwind,
     function_abi_now_unwind,

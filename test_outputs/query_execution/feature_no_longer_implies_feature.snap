@@ -1,0 +1,24 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/feature_no_longer_implies_feature/": [
+    {
+      "feature_name": String("extras"),
+      "implied_feature_name": String("alloc"),
+      "ordering_key": String("alloc"),
+    },
+  ],
+  "./test_crates/feature_not_enabled_by_default/": [
+    {
+      "feature_name": String("transitive"),
+      "implied_feature_name": String("indirect_feature"),
+      "ordering_key": String("indirect_feature"),
+    },
+    {
+      "feature_name": String("path_b"),
+      "implied_feature_name": String("root"),
+      "ordering_key": String("root"),
+    },
+  ],
+}
