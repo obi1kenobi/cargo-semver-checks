@@ -1620,6 +1620,7 @@ add_lints!(
     enum_variant_missing,
     enum_variant_no_longer_non_exhaustive,
     exhaustive_enum_added,
+    exhaustive_struct_added,
     exported_function_changed_abi,
     exported_function_parameter_count_changed,
     exported_function_now_returns_unit,
