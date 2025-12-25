@@ -16,6 +16,12 @@ SemverQuery(
 
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
+                        # Ensure the struct can be constructed outside of its crate
+                        # using a struct literal: it does not have any private fields.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            visibility_limit @filter(op: "!=", value: ["$public"])
+                        }
+
                         importable_path {
                             path @output @tag
                             public_api @filter(op: "=", value: ["$true"])
@@ -45,6 +51,6 @@ SemverQuery(
         "true": true,
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A new exhaustive pub struct was added. Future fields added to this struct may cause a breaking change. Consider adding #[non_exhaustive] to the struct if you plan to add new fields in the future.",
+    error_message: "A new exhaustive pub struct was added. Future fields added to this struct will cause a breaking change. Consider adding #[non_exhaustive] to the struct if you plan to add new fields in the future.",
     per_result_error_template: Some("struct {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )

@@ -2,5 +2,5 @@
 
 // Existing struct shouldn't trigger the lint
 pub struct ExistingStruct {
-    bar: u64,
+    pub bar: u64,
 }
