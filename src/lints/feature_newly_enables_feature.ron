@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "feature_newly_implies_feature",
+    id: "feature_newly_enables_feature",
     human_readable_name: "package feature now enables another feature",
     description: "A feature now enables another feature in this package's Cargo.toml.",
     required_update: Minor,

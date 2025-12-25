@@ -2,7 +2,7 @@
 source: src/query.rs
 ---
 {
-  "./test_crates/feature_newly_implies_feature/": [
+  "./test_crates/feature_newly_enables_feature/": [
     {
       "feature_name": String("direct_add_root"),
       "implied_feature_name": String("direct_add_leaf"),
@@ -22,7 +22,7 @@ source: src/query.rs
       "ordering_key1": String("transitive_mid"),
     },
   ],
-  "./test_crates/feature_no_longer_implies_feature/": [
+  "./test_crates/feature_no_longer_enables_feature/": [
     {
       "feature_name": String("bridge"),
       "implied_feature_name": String("leaf"),
