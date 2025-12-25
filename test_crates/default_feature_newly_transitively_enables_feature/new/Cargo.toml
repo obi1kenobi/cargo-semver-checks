@@ -1,0 +1,13 @@
+[package]
+publish = false
+name = "default_feature_newly_transitively_enables_feature"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = ["root"]
+root = ["_mid"]
+_mid = ["leaf"]
+leaf = []
+
+[dependencies]

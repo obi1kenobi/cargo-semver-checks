@@ -1,0 +1,13 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/feature_newly_enables_default_feature/": [
+    {
+      "feature_name": String("opt_in"),
+      "implied_feature_name": String("default"),
+      "ordering_key": String("opt_in"),
+      "ordering_key1": String("default"),
+    },
+  ],
+}

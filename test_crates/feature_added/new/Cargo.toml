@@ -1,0 +1,11 @@
+[package]
+publish = false
+name = "feature_added"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+existing_leaf = []
+new_feature = ["existing_leaf"]
+
+[dependencies]

@@ -2,6 +2,14 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/default_feature_newly_transitively_enables_feature/": [
+    {
+      "feature_name": String("root"),
+      "implied_feature_name": String("leaf"),
+      "ordering_key": String("root"),
+      "ordering_key1": String("leaf"),
+    },
+  ],
   "./test_crates/feature_newly_enables_feature/": [
     {
       "feature_name": String("direct_add_root"),

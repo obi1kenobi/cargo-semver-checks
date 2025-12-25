@@ -1,0 +1,45 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/feature_added/": [
+    {
+      "enabled_by_default": Uint64(0),
+      "feature_name": String("new_feature"),
+      "ordering_key": String("new_feature"),
+      "transitively_enabled_features": List([
+        String("existing_leaf"),
+      ]),
+    },
+  ],
+  "./test_crates/feature_flags_validation/": [
+    {
+      "enabled_by_default": Uint64(0),
+      "feature_name": String("bar"),
+      "ordering_key": String("bar"),
+      "transitively_enabled_features": List([]),
+    },
+    {
+      "enabled_by_default": Uint64(0),
+      "feature_name": String("foo"),
+      "ordering_key": String("foo"),
+      "transitively_enabled_features": List([]),
+    },
+  ],
+  "./test_crates/feature_missing/": [
+    {
+      "enabled_by_default": Uint64(0),
+      "feature_name": String("pcg"),
+      "ordering_key": String("pcg"),
+      "transitively_enabled_features": List([]),
+    },
+  ],
+  "./test_crates/function_feature_changed/": [
+    {
+      "enabled_by_default": Uint64(0),
+      "feature_name": String("new_feature"),
+      "ordering_key": String("new_feature"),
+      "transitively_enabled_features": List([]),
+    },
+  ],
+}

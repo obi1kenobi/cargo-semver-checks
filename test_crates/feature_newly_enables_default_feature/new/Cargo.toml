@@ -1,0 +1,11 @@
+[package]
+publish = false
+name = "feature_newly_enables_default_feature"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+opt_in = ["default"]
+
+[dependencies]

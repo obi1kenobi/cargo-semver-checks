@@ -1,0 +1,67 @@
+SemverQuery(
+    id: "default_feature_newly_transitively_enables_feature",
+    human_readable_name: "default feature now transitively enables another feature",
+    description: "The default feature now transitively enables another feature in this package's Cargo.toml.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#cargo-feature-add"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                default_feature {
+                    # Until cargo ships with support for private and/or unstable feature names,
+                    # we'll rely on feature names to detect whether to flag feature changes.
+                    #
+                    # This lint will ignore features that match any of the following:
+                    # - start with an underscore (`_`) character
+                    # - are named `unstable`, `nightly`, or `bench`
+                    # - have a prefix of `unstable`, `nightly`, or `bench` followed by
+                    #   a dash (`-`) or underscore (`_`) character.
+                    #
+                    # Cargo tracking issues:
+                    # - unstable/nightly features: https://github.com/rust-lang/cargo/issues/10881
+                    # - private/hidden features: https://github.com/rust-lang/cargo/issues/10882
+                    # Exclude the `default` feature since it is not an explicit opt-in feature.
+                    implied_feature_name: name @tag
+                                               @filter(op: "not_regex", value: ["$unstable_feature_pattern"])
+                                               @filter(op: "not_has_prefix", value: ["$underscore"])
+                                               @filter(op: "!=", value: ["$default_feature_name"])
+                                               @output
+
+                    # An explicit ordering key is needed since we don't have span information,
+                    # which what we usually use to order results in tests.
+                    name @output(name: "ordering_key")
+                }
+            }
+            baseline {
+                # Ensure the feature was not enabled by default in the baseline.
+                default_feature @fold
+                                @transform(op: "count")
+                                @filter(op: "=", value: ["$zero"]) {
+                    name @filter(op: "=", value: ["%implied_feature_name"])
+                }
+
+                # Ensure the implied feature existed in the baseline. If it is new,
+                # don't report it as a newly-added default implication.
+                feature @fold
+                        @transform(op: "count")
+                        @filter(op: ">", value: ["$zero"]) {
+                    name @filter(op: "=", value: ["%implied_feature_name"])
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "zero": 0,
+        "unstable_feature_pattern": "^(?:unstable|nightly|bench)(?:[-_].*)?$",
+        "underscore": "_",
+        "default_feature_name": "default",
+    },
+    error_message: "The default feature now transitively enables another feature in this package's Cargo.toml. This can enable additional functionality for downstream crates that rely on default features.",
+    per_result_error_template: Some("default feature now transitively enables {{implied_feature_name}}"),
+    // TODO: It's currently not possible to write witnesses for manifest lints,
+    //       since we'd need to generate a *Cargo.toml* witness instead of a Rust code witness.
+    //       Issue: https://github.com/obi1kenobi/cargo-semver-checks/issues/1008
+    witness: None,
+)
