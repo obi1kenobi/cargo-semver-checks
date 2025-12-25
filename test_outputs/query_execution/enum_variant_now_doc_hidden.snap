@@ -1,0 +1,129 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/enum_no_repr_variant_discriminant_changed/": [
+    {
+      "enum_name": String("DiscriminantBecomesDocHiddenAndExplicit"),
+      "path": List([
+        String("enum_no_repr_variant_discriminant_changed"),
+        String("DiscriminantBecomesDocHiddenAndExplicit"),
+        String("Second"),
+      ]),
+      "span_begin_line": Uint64(44),
+      "span_end_line": Uint64(44),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Second"),
+    },
+  ],
+  "./test_crates/enum_non_exhaustive_tuple_variant_changed_kind/": [
+    {
+      "enum_name": String("TestBecomeDocHidden"),
+      "path": List([
+        String("enum_non_exhaustive_tuple_variant_changed_kind"),
+        String("TestBecomeDocHidden"),
+        String("WillBecomeStructLike"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+    },
+  ],
+  "./test_crates/enum_now_doc_hidden/": [
+    {
+      "enum_name": String("PublicEnumHiddenVariant"),
+      "path": List([
+        String("enum_now_doc_hidden"),
+        String("PublicEnumHiddenVariant"),
+        String("A"),
+      ]),
+      "span_begin_line": Uint64(70),
+      "span_end_line": Uint64(70),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("A"),
+    },
+  ],
+  "./test_crates/enum_struct_variant_changed_kind/": [
+    {
+      "enum_name": String("TestBecomeDocHidden"),
+      "path": List([
+        String("enum_struct_variant_changed_kind"),
+        String("TestBecomeDocHidden"),
+        String("WillBecomeTupleLike"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeTupleLike"),
+    },
+    {
+      "enum_name": String("TestBecomeDocHidden"),
+      "path": List([
+        String("enum_struct_variant_changed_kind"),
+        String("TestBecomeDocHidden"),
+        String("WillBecomeTupleLikeNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(27),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeTupleLikeNonExhaustive"),
+    },
+  ],
+  "./test_crates/enum_tuple_variant_changed_kind/": [
+    {
+      "enum_name": String("TestBecomeDocHidden"),
+      "path": List([
+        String("enum_tuple_variant_changed_kind"),
+        String("TestBecomeDocHidden"),
+        String("WillBecomeStructLike"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+    },
+  ],
+  "./test_crates/enum_unit_variant_changed_kind/": [
+    {
+      "enum_name": String("TestBecomeDocHidden"),
+      "path": List([
+        String("enum_unit_variant_changed_kind"),
+        String("TestBecomeDocHidden"),
+        String("WillBecomeStructLike"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBecomeStructLike"),
+    },
+  ],
+  "./test_crates/enum_variant_hidden_from_public_api/": [
+    {
+      "enum_name": String("HiddenVariant"),
+      "path": List([
+        String("enum_variant_hidden_from_public_api"),
+        String("HiddenVariant"),
+        String("ToBeHidden"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("ToBeHidden"),
+    },
+  ],
+  "./test_crates/enum_variant_now_doc_hidden/": [
+    {
+      "enum_name": String("VariantNowDocHidden"),
+      "path": List([
+        String("enum_variant_now_doc_hidden"),
+        String("VariantNowDocHidden"),
+        String("WillBeHidden"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("WillBeHidden"),
+    },
+  ],
+}

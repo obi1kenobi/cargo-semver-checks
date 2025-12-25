@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "enum_variant_now_doc_hidden"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

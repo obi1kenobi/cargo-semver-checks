@@ -1619,6 +1619,7 @@ add_lints!(
     enum_variant_marked_non_exhaustive,
     enum_variant_missing,
     enum_variant_no_longer_non_exhaustive,
+    enum_variant_now_doc_hidden,
     exhaustive_enum_added,
     exhaustive_struct_added,
     exported_function_changed_abi,
