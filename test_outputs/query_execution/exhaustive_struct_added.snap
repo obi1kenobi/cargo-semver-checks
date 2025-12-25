@@ -210,16 +210,6 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
     {
-      "name": String("UnionToStructDocHiddenField"),
-      "path": List([
-        String("union_changed_to_incompatible_struct"),
-        String("UnionToStructDocHiddenField"),
-      ]),
-      "span_begin_line": Uint64(22),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
       "name": String("UnionWithMultiplePubFields"),
       "path": List([
         String("union_changed_to_incompatible_struct"),
