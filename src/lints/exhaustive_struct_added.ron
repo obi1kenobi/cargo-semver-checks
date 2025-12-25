@@ -21,6 +21,12 @@ SemverQuery(
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             visibility_limit @filter(op: "!=", value: ["$public"])
                         }
+                        
+                        # Ensure that all fields are public API.
+                        # Otherwise constructing the struct with a literal is not public API either.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            public_api_eligible @filter(op: "!=", value: ["$true"])
+                        }
 
                         importable_path {
                             path @output @tag
