@@ -2,7 +2,7 @@
 source: src/query.rs
 ---
 {
-  "./test_crates/feature_no_longer_implies_feature/": [
+  "./test_crates/feature_no_longer_enables_feature/": [
     {
       "feature_name": String("extras"),
       "implied_feature_name": String("alloc"),

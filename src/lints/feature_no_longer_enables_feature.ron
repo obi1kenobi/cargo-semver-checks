@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "feature_no_longer_implies_feature",
+    id: "feature_no_longer_enables_feature",
     human_readable_name: "package feature no longer enables another feature",
     description: "A feature no longer enables another feature in this package's Cargo.toml.",
     required_update: Major,

@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "feature_no_longer_implies_feature"
+name = "feature_no_longer_enables_feature"
 version = "0.1.0"
 edition = "2024"
 
