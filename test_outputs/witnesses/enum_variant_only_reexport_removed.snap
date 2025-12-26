@@ -1,0 +1,8 @@
+---
+source: src/query.rs
+description: "Lint `enum_variant_only_reexport_removed` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+---
+[["./test_crates/enum_variant_only_reexport_removed/"]]
+filename = "src/lib.rs"
+begin_line = 6
+hint = "let witness = enum_variant_only_reexport_removed::MissingReexport;"

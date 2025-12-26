@@ -1,0 +1,61 @@
+SemverQuery(
+    id: "enum_variant_only_reexport_removed",
+    human_readable_name: "pub enum variant can no longer be imported by its prior path from a non-importable enum",
+    description: "A pub enum variant can no longer be imported by its prior path when its enum was not importable.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-remove"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Enum {
+                        # The enum itself is not importable; the variant's importable path is the public API surface.
+                        enum_name: name @output
+
+                        importable_path @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            kind: __typename @output
+
+                            variant_name: name @output
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            importable_path {
+                                path @output @tag
+                                public_api @filter(op: "=", value: ["$true"])
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    ... on Variant {
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A publicly-visible enum variant that was only available via a re-export can no longer be imported by its prior path.",
+    per_result_error_template: Some("variant {{enum_name}}::{{variant_name}} ({{join \"::\" path}}), previously in file {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"let witness = {{join "::" path}}{{#if (eq kind "StructVariant")}} {..}{{/if}}{{#if (eq kind "TupleVariant")}}(..){{/if}};"#,
+    ),
+)

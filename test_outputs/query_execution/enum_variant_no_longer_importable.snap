@@ -1,0 +1,19 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/enum_variant_no_longer_importable/": [
+    {
+      "enum_name": String("ReexportedVariant"),
+      "kind": String("PlainVariant"),
+      "path": List([
+        String("enum_variant_no_longer_importable"),
+        String("RemovedVariant"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("RemovedVariant"),
+    },
+  ],
+}
