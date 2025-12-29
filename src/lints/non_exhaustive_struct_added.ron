@@ -1,7 +1,7 @@
 SemverQuery(
     id: "non_exhaustive_struct_added",
-    human_readable_name: "#[non_exhaustive] pub struct added",
-    description: "A new #[non_exhaustive] pub struct was added. It cannot be constructed using a struct literal outside of its defining crate, and pattern matching will require a wildcard.",
+    human_readable_name: "non-exhaustive pub struct added",
+    description: "A new non-exhaustive pub struct was added. It cannot be constructed using a struct literal outside of its defining crate, and pattern matching will require a wildcard.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
@@ -42,7 +42,7 @@ SemverQuery(
             }
             baseline @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                 item {
-                    ... on Struct {
+                    ... on ImplOwner {
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
                         }
