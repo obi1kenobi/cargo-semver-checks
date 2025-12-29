@@ -9,7 +9,7 @@ source: src/query.rs
         String("non_exhaustive_struct_added"),
         String("NewNonExhaustiveStruct"),
       ]),
-      "span_begin_line": Uint64(10),
+      "span_begin_line": Uint64(14),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
