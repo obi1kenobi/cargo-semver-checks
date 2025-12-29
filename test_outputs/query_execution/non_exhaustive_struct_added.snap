@@ -1,0 +1,17 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/non_exhaustive_struct_added/": [
+    {
+      "name": String("NewNonExhaustiveStruct"),
+      "path": List([
+        String("non_exhaustive_struct_added"),
+        String("NewNonExhaustiveStruct"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
