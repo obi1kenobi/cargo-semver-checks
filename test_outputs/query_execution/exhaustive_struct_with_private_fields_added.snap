@@ -1,0 +1,86 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/exhaustive_struct_added/": [
+    {
+      "name": String("StructWithPrivateField"),
+      "path": List([
+        String("exhaustive_struct_added"),
+        String("StructWithPrivateField"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("StructWithHiddenField"),
+      "path": List([
+        String("exhaustive_struct_added"),
+        String("StructWithHiddenField"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/exhaustive_struct_with_private_fields_added/": [
+    {
+      "name": String("NewStructWithPrivateField"),
+      "path": List([
+        String("exhaustive_struct_with_private_fields_added"),
+        String("NewStructWithPrivateField"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("StructWithHiddenField"),
+      "path": List([
+        String("exhaustive_struct_with_private_fields_added"),
+        String("StructWithHiddenField"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/non_exhaustive_struct_added/": [
+    {
+      "name": String("NonExhaustiveStruct"),
+      "path": List([
+        String("non_exhaustive_struct_added"),
+        String("NonExhaustiveStruct"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/struct_must_use_added/": [
+    {
+      "name": String("MustUseNewStruct"),
+      "path": List([
+        String("struct_must_use_added"),
+        String("MustUseNewStruct"),
+      ]),
+      "span_begin_line": Uint64(62),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/type_marked_deprecated/": [
+    {
+      "name": String("DeprecatedNewStruct"),
+      "path": List([
+        String("type_marked_deprecated"),
+        String("structs"),
+        String("DeprecatedNewStruct"),
+      ]),
+      "span_begin_line": Uint64(57),
+      "span_filename": String("src/structs.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
