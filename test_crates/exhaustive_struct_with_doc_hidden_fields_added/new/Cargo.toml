@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "exhaustive_struct_with_doc_hidden_fields_added"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

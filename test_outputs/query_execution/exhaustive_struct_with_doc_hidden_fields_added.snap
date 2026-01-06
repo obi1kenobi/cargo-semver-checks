@@ -1,0 +1,41 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/exhaustive_struct_added/": [
+    {
+      "name": String("StructWithHiddenField"),
+      "path": List([
+        String("exhaustive_struct_added"),
+        String("StructWithHiddenField"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/exhaustive_struct_with_doc_hidden_fields_added/": [
+    {
+      "name": String("StructWithHiddenField"),
+      "path": List([
+        String("exhaustive_struct_with_doc_hidden_fields_added"),
+        String("StructWithHiddenField"),
+      ]),
+      "span_begin_line": Uint64(35),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/exhaustive_struct_with_private_fields_added/": [
+    {
+      "name": String("StructWithHiddenField"),
+      "path": List([
+        String("exhaustive_struct_with_private_fields_added"),
+        String("StructWithHiddenField"),
+      ]),
+      "span_begin_line": Uint64(34),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
