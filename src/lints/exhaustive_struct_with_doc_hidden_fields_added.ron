@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "exhaustive_struct_with_doc_hidden_added",
+    id: "exhaustive_struct_with_doc_hidden_fields_added",
     human_readable_name: "exhaustive pub struct with doc hidden fields added",
     description: "A new pub struct with #[doc(hidden)] fields was added.",
     required_update: Minor,
@@ -28,7 +28,7 @@ SemverQuery(
                         }
 
                         # Ensure the struct has at least one #[doc(hidden)] field.
-                        
+
                         field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             public_api_eligible @filter(op: "!=", value: ["$true"])
                         }
