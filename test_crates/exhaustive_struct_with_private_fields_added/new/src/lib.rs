@@ -30,7 +30,8 @@ pub struct StructWithPublicField {
     pub bar: i64,
 }
 
-pub struct StructWithHiddenField{
+// This struct should not trigget this lint as it has no private fields 
+pub struct StructWithHiddenField {
     pub a: i64,
 
     #[doc(hidden)]

@@ -13,16 +13,6 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
-    {
-      "name": String("StructWithHiddenField"),
-      "path": List([
-        String("exhaustive_struct_added"),
-        String("StructWithHiddenField"),
-      ]),
-      "span_begin_line": Uint64(31),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
   ],
   "./test_crates/exhaustive_struct_with_private_fields_added/": [
     {
@@ -32,16 +22,6 @@ source: src/query.rs
         String("NewStructWithPrivateField"),
       ]),
       "span_begin_line": Uint64(10),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-    {
-      "name": String("StructWithHiddenField"),
-      "path": List([
-        String("exhaustive_struct_with_private_fields_added"),
-        String("StructWithHiddenField"),
-      ]),
-      "span_begin_line": Uint64(33),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

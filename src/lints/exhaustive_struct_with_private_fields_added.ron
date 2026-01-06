@@ -1,7 +1,7 @@
 SemverQuery(
     id: "exhaustive_struct_with_private_fields_added",
     human_readable_name: "exhaustive pub struct with private fields added",
-    description: "A new pub struct with private fields was added. Adding fields to this struct in the future will break pattern matching.",
+    description: "A new pub struct with private fields was added.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
@@ -16,11 +16,11 @@ SemverQuery(
 
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
-                        # Ensure the struct has at least one non-public field,
+                        # Ensure the struct has at least one private field,
                         # making it non-constructible via struct literal outside the crate.
 
                         field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
-                            public_api_eligible @filter(op: "!=", value: ["$true"])
+                            visibility_limit @filter(op: "!=", value: ["$public"])
                         }
 
                         importable_path {
