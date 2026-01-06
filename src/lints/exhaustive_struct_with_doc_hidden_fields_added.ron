@@ -1,7 +1,7 @@
 SemverQuery(
-    id: "exhaustive_struct_with_private_fields_added",
-    human_readable_name: "exhaustive pub struct with private fields added",
-    description: "A new pub struct with private fields was added.",
+    id: "exhaustive_struct_with_doc_hidden_added",
+    human_readable_name: "exhaustive pub struct with doc hidden fields added",
+    description: "A new pub struct with #[doc(hidden)] fields was added.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
@@ -18,14 +18,19 @@ SemverQuery(
                             path @output @tag
                             public_api @filter(op: "=", value: ["$true"])
                         }
-                            
+
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
-                        # Ensure the struct has at least one private field,
-                        # making it non-constructible via struct literal outside the crate.
+                        # Ensure there is no private fields.
 
-                        field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             visibility_limit @filter(op: "!=", value: ["$public"])
+                        }
+
+                        # Ensure the struct has at least one #[doc(hidden)] field.
+                        
+                        field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            public_api_eligible @filter(op: "!=", value: ["$true"])
                         }
 
                         span_: span @optional {
@@ -52,6 +57,6 @@ SemverQuery(
         "true": true,
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A new exhaustive pub struct with non-public fields was added.",
+    error_message: "A new pub struct with a #[doc(hidden)] field was added. Downstream crates can use non-public-API to exhaustively pattern-match the struct or construct it with a literal. If this isn't desirable, consider marking the struct #[non_exhaustive].",
     per_result_error_template: Some("struct {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )
