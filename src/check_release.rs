@@ -137,44 +137,77 @@ fn print_triggered_lint(
     witness_generation: &WitnessGeneration,
 ) -> anyhow::Result<()> {
     let semver_query = &lint_result.semver_query;
-    if let Some(ref_link) = semver_query.reference_link.as_deref() {
-        config.log_info(|config| {
-            writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
-                Style::new().bold(), Reset,
-                &semver_query.error_message,
-                "ref:",
-                ref_link,
-                "impl:",
-                crate_version!(),
-                semver_query.id,
-            )?;
-            Ok(())
-        })?;
-    } else {
-        config.log_info(|config| {
-            writeln!(
-                config.stdout(),
-                "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
-                Style::new().bold(),
-                Reset,
-                &semver_query.error_message,
-                "impl:",
-                crate_version!(),
-                semver_query.id,
-            )?;
-            Ok(())
-        })?;
-    }
 
-    config.log_info(|config| {
-        writeln!(
-            config.stdout(),
-            "{}Failed in:{}",
-            Style::new().bold(),
-            Reset
-        )?;
-        Ok(())
-    })?;
+    // Use appropriate log level based on lint severity
+    match lint_result.effective_lint_level {
+        LintLevel::Deny => {
+            config.log_error(|config| {
+                if let Some(ref_link) = semver_query.reference_link.as_deref() {
+                    writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
+                        Style::new().bold(), Reset,
+                        &semver_query.error_message,
+                        "ref:",
+                        ref_link,
+                        "impl:",
+                        crate_version!(),
+                        semver_query.id,
+                    )?;
+                } else {
+                    writeln!(
+                        config.stdout(),
+                        "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
+                        Style::new().bold(),
+                        Reset,
+                        &semver_query.error_message,
+                        "impl:",
+                        crate_version!(),
+                        semver_query.id,
+                    )?;
+                }
+                writeln!(
+                    config.stdout(),
+                    "{}Failed in:{}",
+                    Style::new().bold(),
+                    Reset
+                )?;
+                Ok(())
+            })?;
+        }
+        LintLevel::Warn => {
+            config.log_warn(|config| {
+                if let Some(ref_link) = semver_query.reference_link.as_deref() {
+                    writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
+                        Style::new().bold(), Reset,
+                        &semver_query.error_message,
+                        "ref:",
+                        ref_link,
+                        "impl:",
+                        crate_version!(),
+                        semver_query.id,
+                    )?;
+                } else {
+                    writeln!(
+                        config.stdout(),
+                        "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
+                        Style::new().bold(),
+                        Reset,
+                        &semver_query.error_message,
+                        "impl:",
+                        crate_version!(),
+                        semver_query.id,
+                    )?;
+                }
+                writeln!(
+                    config.stdout(),
+                    "{}Failed in:{}",
+                    Style::new().bold(),
+                    Reset
+                )?;
+                Ok(())
+            })?;
+        }
+        LintLevel::Allow => return Ok(()), // Don't print allowed lints
+    }
 
     for semver_violation_result in &lint_result.query_results {
         let pretty_result: BTreeMap<&str, TransparentValue> = semver_violation_result
@@ -182,40 +215,60 @@ fn print_triggered_lint(
             .map(|(k, v)| (&**k, v.clone().into()))
             .collect();
 
-        if let Some(template) = semver_query.per_result_error_template.as_deref() {
-            let message = config
-                .handlebars()
-                .render_template(template, &pretty_result)
-                .context("Error instantiating semver query template.")
-                .expect("could not materialize template");
-            config.log_info(|config| {
-                writeln!(config.stdout(), "  {message}")?;
-                Ok(())
-            })?;
-
-            config.log_extra_verbose(|config| {
-                let serde_pretty =
-                    serde_json::to_string_pretty(&pretty_result).expect("serde failed");
-                let indented_serde = serde_pretty
-                    .split('\n')
-                    .map(|line| format!("    {line}"))
-                    .join("\n");
-                writeln!(
-                    config.stdout(),
-                    "\tlint rule output values:\n{indented_serde}"
-                )?;
-                Ok(())
-            })?;
-        } else {
-            config.log_info(|config| {
-                writeln!(
-                    config.stdout(),
-                    "{}\n",
-                    serde_json::to_string_pretty(&pretty_result)?
-                )?;
-                Ok(())
-            })?;
+        match lint_result.effective_lint_level {
+            LintLevel::Deny => {
+                config.log_error(|config| {
+                    if let Some(template) = semver_query.per_result_error_template.as_deref() {
+                        let message = config
+                            .handlebars()
+                            .render_template(template, &pretty_result)
+                            .context("Error instantiating semver query template.")
+                            .expect("could not materialize template");
+                        writeln!(config.stdout(), "  {message}")?;
+                    } else {
+                        writeln!(
+                            config.stdout(),
+                            "{}\n",
+                            serde_json::to_string_pretty(&pretty_result)?
+                        )?;
+                    }
+                    Ok(())
+                })?;
+            }
+            LintLevel::Warn => {
+                config.log_warn(|config| {
+                    if let Some(template) = semver_query.per_result_error_template.as_deref() {
+                        let message = config
+                            .handlebars()
+                            .render_template(template, &pretty_result)
+                            .context("Error instantiating semver query template.")
+                            .expect("could not materialize template");
+                        writeln!(config.stdout(), "  {message}")?;
+                    } else {
+                        writeln!(
+                            config.stdout(),
+                            "{}\n",
+                            serde_json::to_string_pretty(&pretty_result)?
+                        )?;
+                    }
+                    Ok(())
+                })?;
+            }
+            LintLevel::Allow => {}
         }
+
+        config.log_extra_verbose(|config| {
+            let serde_pretty = serde_json::to_string_pretty(&pretty_result).expect("serde failed");
+            let indented_serde = serde_pretty
+                .split('\n')
+                .map(|line| format!("    {line}"))
+                .join("\n");
+            writeln!(
+                config.stdout(),
+                "\tlint rule output values:\n{indented_serde}"
+            )?;
+            Ok(())
+        })?;
 
         if let Some(witness) = &semver_query.witness
             && witness_generation.show_hints
@@ -482,7 +535,7 @@ fn print_report(
             .expect("print failed");
 
         for lint_result in results_with_errors {
-            config.log_info(|config| {
+            config.log_error(|config| {
                 writeln!(
                     config.stdout(),
                     "\n--- failure {}: {} ---\n",
@@ -496,7 +549,7 @@ fn print_report(
         }
 
         for lint_result in results_with_warnings {
-            config.log_info(|config| {
+            config.log_warn(|config| {
                 writeln!(
                     config.stdout(),
                     "\n--- warning {}: {} ---\n",
