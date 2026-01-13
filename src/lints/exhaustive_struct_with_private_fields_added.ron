@@ -52,6 +52,6 @@ SemverQuery(
         "true": true,
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A new exhaustive pub struct with non-public fields was added.",
+    error_message: "A new pub struct with non-public fields was added.",
     per_result_error_template: Some("struct {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
 )
