@@ -1,0 +1,39 @@
+#![no_std]
+
+// Existing struct shouldn't trigger this lint
+pub struct ExistingStructWithPrivateField {
+    pub bar: u64,
+    foo: u64,
+}
+
+// New struct with private fields should trigger this lint
+pub struct NewStructWithPrivateField {
+    pub bar: u64,
+    foo: u64,
+}
+
+// This struct is not public, so it should not trigger the lint.
+struct PrivateStruct {
+    foo: u64,
+}
+
+// This struct is #[non_exhaustive], so it should not trigger this lint
+#[non_exhaustive]
+pub struct NonExhaustiveStructWithPrivateField {
+    pub bar: u64,
+    foo: u64,
+}
+
+// This struct shouldn't trigger the lint because it has public fields only
+pub struct StructWithPublicField {
+    pub foo: i64,
+    pub bar: i64,
+}
+
+// This struct should not trigget this lint as it has no private fields 
+pub struct StructWithHiddenField {
+    pub a: i64,
+
+    #[doc(hidden)]
+    pub b: i64,
+}
