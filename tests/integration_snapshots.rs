@@ -74,7 +74,7 @@ fn bugreport() {
         settings.add_filter(r"Architecture: \w+", "Architecture: [ARCH]");
         settings.add_filter(r"Pointer width: \d+", "Pointer width: [WIDTH]");
         settings.add_filter(r"Endian: \w+", "Endian: [ENDIAN]");
-        settings.add_filter(r"CPU features: [\w,-]+", "CPU features: [FEATURES]");
+        settings.add_filter(r"CPU features: [\w\.,-]+", "CPU features: [FEATURES]");
         settings.add_filter(r"Host: [\w-]+", "Host: [HOST_TRIPLE]");
 
         // this should be serialized TOML
