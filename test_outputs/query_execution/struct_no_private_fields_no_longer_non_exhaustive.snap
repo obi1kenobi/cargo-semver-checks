@@ -1,0 +1,67 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/struct_no_private_fields_no_longer_non_exhaustive/": [
+    {
+      "name": String("NoFields"),
+      "path": List([
+        String("struct_no_private_fields_no_longer_non_exhaustive"),
+        String("NoFields"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("unit"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NoFieldsTuple"),
+      "path": List([
+        String("struct_no_private_fields_no_longer_non_exhaustive"),
+        String("NoFieldsTuple"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("tuple"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NoFieldsStruct"),
+      "path": List([
+        String("struct_no_private_fields_no_longer_non_exhaustive"),
+        String("NoFieldsStruct"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("Tuple"),
+      "path": List([
+        String("struct_no_private_fields_no_longer_non_exhaustive"),
+        String("Tuple"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("tuple"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("Struct"),
+      "path": List([
+        String("struct_no_private_fields_no_longer_non_exhaustive"),
+        String("Struct"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

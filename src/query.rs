@@ -1725,6 +1725,7 @@ add_lints!(
     struct_missing,
     struct_must_use_added,
     struct_must_use_removed,
+    struct_no_private_fields_no_longer_non_exhaustive,
     struct_now_doc_hidden,
     struct_pub_field_missing,
     struct_pub_field_now_doc_hidden,
