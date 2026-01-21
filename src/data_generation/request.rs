@@ -331,9 +331,14 @@ impl<'a> CrateDataRequest<'a> {
 
         // Generate the data we need.
         let build_dir = target_root.join(self.build_path_slug().into_terminal_result()?);
+        // To reduce redundant dependency rebuilds, share the same target between builds
+        // of crates from the same workspace
+        let target_dir = target_root.join("target");
+
         let (data_path, metadata) = super::generate::generate_rustdoc(
             self,
             &build_dir,
+            &target_dir,
             generation_settings,
             &mut callbacks,
         )?;
