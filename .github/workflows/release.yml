@@ -9,6 +9,12 @@ on:
     secrets:
       TAGGER_GITHUB_TOKEN:
         required: true
+  workflow_dispatch:
+    inputs:
+      publish-tag:
+        description: git tag to apply to the release commit
+        required: true
+        type: string
 
 concurrency:
   group: release
