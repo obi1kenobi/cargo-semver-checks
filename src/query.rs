@@ -1657,6 +1657,7 @@ add_lints!(
     function_unsafe_added,
     global_value_marked_deprecated,
     inherent_associated_const_now_doc_hidden,
+    inherent_associated_pub_const_added,
     inherent_associated_pub_const_missing,
     inherent_method_const_generic_reordered,
     inherent_method_const_removed,
