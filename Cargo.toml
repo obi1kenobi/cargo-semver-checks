@@ -36,8 +36,8 @@ log = "0.4.25"
 fs-err = "3.0.0"
 # Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
 # minor version. Otherwise, one will compile `gix` two times in different minor versions.
-gix = { version = "0.75", default-features = false, features = ["max-performance-safe", "revision"] }
-tame-index = { version = "0.25", features = ["sparse"] }
+gix = { version = "0.78", default-features = false, features = ["max-performance-safe", "revision"] }
+tame-index = { version = "0.26", features = ["sparse"] }
 
 human-panic = "2.0.2"
 bugreport = "0.5.1"
@@ -86,11 +86,4 @@ lto = true
 codegen-units = 1
 
 [features]
-default = ["gix-reqwest"]
-
-# Gix has mutually exclusive features that are exposed through tame-index. Hard-coding either of
-# these features can lead to compile errors when another crate enables the other feature through
-# workspace feature unification. We therefore allow downstream users to choose which feature to
-# enable:
-gix-reqwest = ["tame-index/gix-reqwest"]
-gix-curl = ["tame-index/gix-curl"]
+default = []
