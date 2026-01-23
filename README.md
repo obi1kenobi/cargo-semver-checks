@@ -49,6 +49,7 @@ to the implementation of that query in the current version of the tool.
   - [Use with jujutsu](#use-with-jujutsu)
 - [What features does `cargo-semver-checks` enable in the tested crates?](#what-features-does-cargo-semver-checks-enable-in-the-tested-crates)
 - [My crate uses `--cfg` conditional compilation. Can `cargo-semver-checks` scan it?](#my-crate-uses---cfg-conditional-compilation-can-cargo-semver-checks-scan-it)
+- [Should I run `cargo-semver-checks` for multiple target triples?](#should-i-run-cargo-semver-checks-for-multiple-target-triples)
 - [Does `cargo-semver-checks` have false positives?](#does-cargo-semver-checks-have-false-positives)
 - [Will `cargo-semver-checks` catch every semver violation?](#will-cargo-semver-checks-catch-every-semver-violation)
 - [Can I configure individual lints?](#can-i-configure-individual-lints)
@@ -201,6 +202,21 @@ by invoking it as:
 ```
 RUSTDOCFLAGS="--cfg some-option" cargo semver-checks
 ```
+
+### Should I run `cargo-semver-checks` for multiple target triples?
+
+If your crate has target-specific code (e.g. `cfg(target_os)`, `cfg(target_arch)`, or platform-specific dependencies),
+your public API may differ between targets. In that case, it's a good idea to run `cargo-semver-checks` once per
+relevant target triple using the `--target` flag.
+
+For example, to check both an Apple Silicon Mac and a typical x86_64 Linux server:
+
+```
+cargo semver-checks --target aarch64-apple-darwin
+cargo semver-checks --target x86_64-unknown-linux-gnu
+```
+
+You can also do this in CI by running `cargo semver-checks` in a matrix of targets.
 
 ### Does `cargo-semver-checks` have false positives?
 

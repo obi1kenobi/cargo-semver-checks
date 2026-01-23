@@ -264,7 +264,7 @@ jobs:
         #
         #            Also make sure to update the MSRV in the cargo-semver-checks-action CI:
         #            https://github.com/obi1kenobi/cargo-semver-checks-action/blob/main/.github/workflows/test-action.yml#L18
-        toolchain: ["1.90", "1.91", "stable", "beta"]
+        toolchain: ["1.90", "1.91", "1.92", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -2332,7 +2332,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toolchain: ["1.88", "1.89", "1.90", "1.91", "stable"]
+        toolchain: ["1.88", "1.89", "1.90", "1.91", "1.92", "stable"]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
