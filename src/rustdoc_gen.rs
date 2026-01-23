@@ -792,6 +792,11 @@ impl RustdocFromRegistry {
             );
         }
 
+        // reqwest uses rustls-no-provider; install a ring provider once if needed.
+        if rustls::crypto::CryptoProvider::get_default().is_none() {
+            let _ = rustls::crypto::ring::default_provider().install_default();
+        }
+
         let sparse = tame_index::index::SparseIndex::new(tame_index::IndexLocation::new(index_url))
             .context("failed to open crates.io sparse index")?;
         let client = tame_index::external::reqwest::blocking::Client::builder()

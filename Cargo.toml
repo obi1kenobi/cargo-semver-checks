@@ -34,10 +34,10 @@ ignore = "0.4.23"
 clap-verbosity-flag = "3.0.2"
 log = "0.4.25"
 fs-err = "3.0.0"
-# Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
-# minor version. Otherwise, one will compile `gix` two times in different minor versions.
 gix = { version = "0.78", default-features = false, features = ["max-performance-safe", "revision"] }
 tame-index = { version = "0.26", features = ["sparse"] }
+reqwest = { version = "0.13.1", default-features = false, features = ["rustls-no-provider", "http2", "system-proxy"] }
+rustls = { version = "0.23.36", default-features = false, features = ["ring", "std", "tls12", "logging"] }
 
 human-panic = "2.0.2"
 bugreport = "0.5.1"
