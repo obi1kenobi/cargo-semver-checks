@@ -94,3 +94,6 @@ pkg-fmt = "tgz"
 
 [package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
 pkg-fmt = "zip"
+
+[patch.crates-io]
+trustfall_rustdoc = { git = "https://github.com/obi1kenobi/trustfall-rustdoc", rev = "d85138c1c35e865be8c1f58ef97fe1f9503b2679" }

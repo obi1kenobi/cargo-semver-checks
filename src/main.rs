@@ -22,6 +22,13 @@ fn main() {
     let feature_flags = HashSet::from_iter(args.unstable_features.clone());
 
     configure_color(args.color_choice);
+
+    // --version: print version information
+    if args.version {
+        print_version(&args.format);
+        std::process::exit(0);
+    }
+
     let mut config = GlobalConfig::new();
     config.set_log_level(args.verbosity.log_level());
     config.set_feature_flags(feature_flags);
@@ -272,6 +279,36 @@ fn print_issue_url(config: &mut GlobalConfig) {
     .expect("Failed to print bug report generated github issue link");
 }
 
+#[derive(Debug, Clone, Copy, Default, clap::ValueEnum)]
+enum OutputFormat {
+    #[default]
+    Text,
+    Json,
+}
+
+fn print_version(format: &OutputFormat) {
+    let version = env!("CARGO_PKG_VERSION");
+    let formats = cargo_semver_checks::supported_rustdoc_formats();
+
+    match format {
+        OutputFormat::Text => {
+            let formats_str = formats
+                .iter()
+                .map(|v| format!("v{v}"))
+                .collect::<Vec<_>>()
+                .join(", ");
+            println!("cargo-semver-checks {version} (supported rustdoc formats: {formats_str})");
+        }
+        OutputFormat::Json => {
+            let output = serde_json::json!({
+                "version": version,
+                "supported_rustdoc_formats": formats,
+            });
+            println!("{}", serde_json::to_string(&output).unwrap());
+        }
+    }
+}
+
 #[derive(Debug, Parser)]
 #[command(name = "cargo")]
 #[command(bin_name = "cargo")]
@@ -281,8 +318,16 @@ enum Cargo {
 }
 
 #[derive(Debug, Args)]
-#[command(args_conflicts_with_subcommands = true)]
+#[command(args_conflicts_with_subcommands = true, disable_version_flag = true)]
 struct SemverChecks {
+    /// Print version information
+    #[arg(long, short = 'V', global = true)]
+    version: bool,
+
+    /// Output format for --version (only valid with --version)
+    #[arg(long, global = true, value_enum, default_value_t, requires = "version")]
+    format: OutputFormat,
+
     #[arg(long, global = true, exclusive = true)]
     bugreport: bool,
 
@@ -851,4 +896,20 @@ fn current_rustdoc_conflict_errors() {
             ])
             .is_err()
     );
+}
+
+#[test]
+fn verify_version_flag() {
+    use clap::CommandFactory;
+    Cargo::command()
+        .try_get_matches_from(["cargo", "semver-checks", "--version"])
+        .expect("--version should be valid");
+}
+
+#[test]
+fn verify_format_requires_version() {
+    use clap::CommandFactory;
+    assert!(Cargo::command()
+        .try_get_matches_from(["cargo", "semver-checks", "--format", "json"])
+        .is_err());
 }
