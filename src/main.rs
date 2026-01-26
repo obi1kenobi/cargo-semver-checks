@@ -280,18 +280,18 @@ fn print_issue_url(config: &mut GlobalConfig) {
 }
 
 #[derive(Debug, Clone, Copy, Default, clap::ValueEnum)]
-enum OutputFormat {
+enum VersionFormat {
     #[default]
     Text,
     Json,
 }
 
-fn print_version(format: &OutputFormat) {
+fn print_version(format: &VersionFormat) {
     let version = env!("CARGO_PKG_VERSION");
     let formats = cargo_semver_checks::supported_rustdoc_formats();
 
     match format {
-        OutputFormat::Text => {
+        VersionFormat::Text => {
             let formats_str = formats
                 .iter()
                 .map(|v| format!("v{v}"))
@@ -299,7 +299,7 @@ fn print_version(format: &OutputFormat) {
                 .join(", ");
             println!("cargo-semver-checks {version} (supported rustdoc formats: {formats_str})");
         }
-        OutputFormat::Json => {
+        VersionFormat::Json => {
             let output = serde_json::json!({
                 "version": version,
                 "supported_rustdoc_formats": formats,
@@ -326,7 +326,7 @@ struct SemverChecks {
 
     /// Output format for --version (only valid with --version)
     #[arg(long, global = true, value_enum, default_value_t, requires = "version")]
-    format: OutputFormat,
+    format: VersionFormat,
 
     #[arg(long, global = true, exclusive = true)]
     bugreport: bool,
