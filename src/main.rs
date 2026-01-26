@@ -904,12 +904,28 @@ fn verify_version_flag() {
     Cargo::command()
         .try_get_matches_from(["cargo", "semver-checks", "--version"])
         .expect("--version should be valid");
+    Cargo::command()
+        .try_get_matches_from(["cargo", "semver-checks", "--version", "--format", "text"])
+        .expect("--version --format text should be valid");
+    Cargo::command()
+        .try_get_matches_from(["cargo", "semver-checks", "--version", "--format", "json"])
+        .expect("--version --format json should be valid");
 }
 
 #[test]
 fn verify_format_requires_version() {
     use clap::CommandFactory;
-    assert!(Cargo::command()
+    let err = Cargo::command()
         .try_get_matches_from(["cargo", "semver-checks", "--format", "json"])
-        .is_err());
+        .unwrap_err();
+    assert_eq!(err.kind(), clap::error::ErrorKind::MissingRequiredArgument);
+    let err_str = err.to_string();
+    assert!(
+        err_str.contains("--version"),
+        "error should mention --version: {err_str}"
+    );
+    assert!(
+        err_str.contains("--format"),
+        "error should mention --format: {err_str}"
+    );
 }
