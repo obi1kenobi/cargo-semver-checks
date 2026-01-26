@@ -1,0 +1,19 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/struct_no_longer_non_exhaustive/": [
+    {
+      "name": String("MyStruct"),
+      "path": List([
+        String("struct_no_longer_non_exhaustive"),
+        String("MyStruct"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
