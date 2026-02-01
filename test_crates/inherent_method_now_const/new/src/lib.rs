@@ -74,8 +74,8 @@ impl AlreadyConst {
 
 // This struct and its const method were added in the new version.
 // It should NOT be reported by this lint to avoid duplicate lints.
-#[non_exhaustive]
-pub struct NewStruct;
+// Made pub(crate) to avoid interfering with other lint tests.
+pub(crate) struct NewStruct;
 
 impl NewStruct {
     pub const fn new_const_method() -> i32 {
