@@ -74,6 +74,7 @@ impl AlreadyConst {
 
 // This struct and its const method were added in the new version.
 // It should NOT be reported by this lint to avoid duplicate lints.
+#[non_exhaustive]
 pub struct NewStruct;
 
 impl NewStruct {

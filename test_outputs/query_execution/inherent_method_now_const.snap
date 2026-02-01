@@ -14,7 +14,7 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(7),
       "span_end_line": Uint64(9),
-      "span_filename": String("src\\lib.rs"),
+      "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
     {
@@ -28,7 +28,7 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(11),
       "span_end_line": Uint64(13),
-      "span_filename": String("src\\lib.rs"),
+      "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
     {
@@ -42,7 +42,7 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(22),
       "span_end_line": Uint64(24),
-      "span_filename": String("src\\lib.rs"),
+      "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
     {
@@ -56,7 +56,7 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(33),
       "span_end_line": Uint64(35),
-      "span_filename": String("src\\lib.rs"),
+      "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
   ],
