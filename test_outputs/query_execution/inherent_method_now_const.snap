@@ -1,0 +1,63 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/inherent_method_now_const/": [
+    {
+      "method_name": String("becomes_const"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("inherent_method_now_const"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src\\lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("associated_fn_becomes_const"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("inherent_method_now_const"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src\\lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("enum_method_becomes_const"),
+      "method_visibility": String("public"),
+      "name": String("Bar"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("inherent_method_now_const"),
+        String("Bar"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src\\lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("union_method_becomes_const"),
+      "method_visibility": String("public"),
+      "name": String("Baz"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("inherent_method_now_const"),
+        String("Baz"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(35),
+      "span_filename": String("src\\lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
