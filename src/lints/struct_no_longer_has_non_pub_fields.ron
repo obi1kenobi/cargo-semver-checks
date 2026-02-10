@@ -1,0 +1,68 @@
+SemverQuery(
+    id: "struct_no_longer_has_non_pub_fields",
+    human_readable_name: "struct no longer has non-pub fields",
+    description: "A (exhaustive) pub struct has lost all its non-pub fields and can now be constructed using a struct literal",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-add"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # must ignore non_exhaustive structs
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        # Current has no non-pub fields (all fields are public)
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            visibility_limit @filter(op: "!=", value: ["$public"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # must ignore non_exhaustive structs
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        # Baseline had at least one non-pub field
+                        field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            visibility_limit @filter(op: "!=", value: ["$public"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "non_exhaustive": "#[non_exhaustive]",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A pub struct has lost all its non-pub fields and can now be constructed using a struct literal.",
+    per_result_error_template: Some("struct {{name}} in {{span_filename}}:{{span_begin_line}}"),
+)
