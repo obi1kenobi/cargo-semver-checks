@@ -33,6 +33,11 @@ pub use query::{
     SemverQuery, Witness,
 };
 
+/// Returns the rustdoc JSON format versions supported by this build of cargo-semver-checks.
+pub fn supported_rustdoc_formats() -> &'static [u32] {
+    trustfall_rustdoc::supported_versions()
+}
+
 /// Test a release for semver violations.
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Eq, Serialize)]
