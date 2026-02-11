@@ -49,6 +49,7 @@ jobs:
       - run-on-tokio-implicit
       - run-on-perf-event-open-sys2
       - fails-on-too-old-rustc
+      - broken-lint-reference-links
     if: ${{ success() || failure() }}  # Run this job even if a dependency has failed.
     steps:
       - name: Job outcomes
@@ -75,6 +76,7 @@ jobs:
           echo "run-on-tokio-implicit: ${{ needs.run-on-tokio-implicit.result }}"
           echo "run-on-perf-event-open-sys2: ${{ needs.run-on-perf-event-open-sys2.result }}"
           echo "fails-on-too-old-rustc: ${{ needs.fails-on-too-old-rustc.result }}"
+          echo "broken-lint-reference-links: ${{ needs.broken-lint-reference-links.result }}"
 
       # Fail this required job if any of its dependent jobs have failed.
       #
@@ -124,6 +126,8 @@ jobs:
       - if: ${{ needs.run-on-perf-event-open-sys2.result != 'success' }}
         run: exit 1
       - if: ${{ needs.fails-on-too-old-rustc.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.broken-lint-reference-links.result != 'success' }}
         run: exit 1
 
   lint:
@@ -2249,6 +2253,29 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
+
+  broken-lint-reference-links:
+    name: 'Ensure lint reference links are valid'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          path: 'semver'
+
+      - name: Check new links in PRs
+        if: github.event_name == 'pull_request'
+        run: |
+          cd semver
+          git fetch --no-tags --depth=1 origin main
+          ./scripts/check_reference_links.sh --compare-to-ref origin/main
+
+      - name: Check all links on push/schedule trigger
+        if: github.event_name != 'pull_request'
+        run: |
+          cd semver
+          ./scripts/check_reference_links.sh
 
   init-release:
     name: Run the release workflow

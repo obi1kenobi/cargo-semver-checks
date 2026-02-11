@@ -4,7 +4,7 @@ SemverQuery(
     description: "A public type gained a new public inherent method.",
     required_update: Minor,
     lint_level: Allow,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-add"),
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#impl-item-new"),
     query: r#"
     {
         CrateDiff {
