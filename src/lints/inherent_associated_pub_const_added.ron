@@ -1,10 +1,10 @@
 SemverQuery(
     id: "inherent_associated_pub_const_added",
     human_readable_name: "inherent impl's associated pub const added",
-    description: "A public type's added a new public associated const item",
+    description: "A public type added a new public associated const item",
     required_update: Minor,
     lint_level: Allow,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-add"),
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#impl-item-new"),
     query: r#"
     {
         CrateDiff {

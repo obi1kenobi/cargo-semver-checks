@@ -4,7 +4,7 @@ SemverQuery(
     description: "A pub function has newly become `const`, allowing it to be used in a `const` context. Removing `const` later is a breaking change as it would prevent such usage.",
     required_update: Minor,
     lint_level: Allow,
-    reference_link: Some("https://doc.rust-lang.org/reference/const_eval.html#r-const-eval.const-fn.usage"),
+    reference_link: Some("https://doc.rust-lang.org/reference/const_eval.html#const-functions"),
     query: r#"
     {
         CrateDiff {

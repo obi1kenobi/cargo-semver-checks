@@ -4,7 +4,7 @@ SemverQuery(
     description: "A (exhaustive) pub struct has lost all its non-pub fields and can now be constructed using a struct literal",
     required_update: Minor,
     lint_level: Allow,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-add"),
+    reference_link: None,
     query: r#"
     {
         CrateDiff {
