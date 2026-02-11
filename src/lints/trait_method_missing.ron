@@ -4,7 +4,7 @@ SemverQuery(
     description: "A trait method can no longer be called by its prior path.",
     required_update: Major,
     lint_level: Deny,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#major-any-change-to-trait-item-signatures"),
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#trait-item-signature"),
     query: r#"
     {
         CrateDiff {

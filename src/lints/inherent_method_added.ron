@@ -1,7 +1,7 @@
 SemverQuery(
-    id: "inherent_associated_pub_const_added",
-    human_readable_name: "inherent impl's associated pub const added",
-    description: "A public type added a new public associated const item",
+    id: "inherent_method_added",
+    human_readable_name: "pub inherent method added",
+    description: "A public type gained a new public inherent method.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#impl-item-new"),
@@ -21,8 +21,8 @@ SemverQuery(
                         inherent_impl {
                             public_api_eligible @filter(op: "=", value: ["$true"])
 
-                            associated_constant {
-                                associated_constant: name @output @tag
+                            method {
+                                method_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 span_: span @optional {
@@ -47,8 +47,8 @@ SemverQuery(
                         }
 
                         inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            associated_constant {
-                                name @filter(op: "=", value: ["%associated_constant"])
+                            method {
+                                name @filter(op: "=", value: ["%method_name"])
                             }
                         }
                     }
@@ -61,6 +61,6 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "A new public associated const item was added to an existing type.",
-    per_result_error_template: Some("{{name}}::{{associated_constant}} in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A new inherent public method was added to an existing public type.",
+    per_result_error_template: Some("{{name}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
 )

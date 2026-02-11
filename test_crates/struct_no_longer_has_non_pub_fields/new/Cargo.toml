@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "struct_no_longer_has_non_pub_fields"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
