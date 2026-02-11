@@ -1533,22 +1533,48 @@ mod tests {
     }
 }
 
+#[cfg(test)]
+macro_rules! lint_test {
+    // instantiates a lint test without the optional configuration predicate
+    ($name:ident) => {
+        #[test]
+        fn $name() {
+            super::tests::check_query_execution(stringify!($name))
+        }
+    };
+    // instantiates a lint test, ignoring the test if the given configuration predicate (the second
+    // argument) is _not_ met
+    (($name:ident, $conf_pred:meta)) => {
+        #[test]
+        #[cfg_attr(not($conf_pred), ignore)]
+        fn $name() {
+            super::tests::check_query_execution(stringify!($name))
+        }
+    };
+}
+
+macro_rules! lint_name {
+    ($name:ident) => {
+        stringify!($name)
+    };
+    (($name:ident, $conf_pred:meta)) => {
+        stringify!($name)
+    };
+}
+
 macro_rules! add_lints {
-    ($($name:ident,)+) => {
+    ($($args:tt,)+) => {
         #[cfg(test)]
         mod tests_lints {
             $(
-                #[test]
-                fn $name() {
-                    super::tests::check_query_execution(stringify!($name))
-                }
+                lint_test!($args);
             )*
 
             #[test]
             fn all_lint_files_are_used_in_add_lints() {
                 let added_lints = [
                     $(
-                        stringify!($name),
+                        lint_name!($args),
                     )*
                 ];
 
@@ -1560,21 +1586,35 @@ macro_rules! add_lints {
             vec![
                 $(
                     (
-                        stringify!($name),
-                        include_str!(concat!("lints/", stringify!($name), ".ron")),
+                        lint_name!($args),
+                        include_str!(concat!("lints/", lint_name!($args), ".ron")),
                     ),
                 )*
             ]
         }
     };
-    ($($name:ident),*) => {
+    ($($args:tt),*) => {
         compile_error!("Please add a trailing comma after each lint identifier. This ensures our scripts like 'make_new_lint.sh' can safely edit invocations of this macro as needed.");
     }
 }
 
 // The following add_lints! invocation is programmatically edited by scripts/make_new_lint.sh
 // If you must manually edit it, be sure to read the "Requirements" comments in that script first
+#[rustfmt::skip] // to keep lints with config predicates on a single line
 add_lints!(
+    (exported_function_requires_more_target_features, any(target_arch = "x86", target_arch = "x86_64")),
+    (exported_function_target_feature_added, any(target_arch = "x86", target_arch = "x86_64")),
+    (safe_function_requires_more_target_features, any(target_arch = "x86", target_arch = "x86_64")),
+    (safe_function_target_feature_added, any(target_arch = "x86", target_arch = "x86_64")),
+    (safe_inherent_method_requires_more_target_features, any(target_arch = "x86", target_arch = "x86_64")),
+    (safe_inherent_method_target_feature_added, any(target_arch = "x86", target_arch = "x86_64")),
+    (trait_method_target_feature_removed, any(target_arch = "x86", target_arch = "x86_64")),
+    (unsafe_function_requires_more_target_features, any(target_arch = "x86", target_arch = "x86_64")),
+    (unsafe_function_target_feature_added, any(target_arch = "x86", target_arch = "x86_64")),
+    (unsafe_inherent_method_requires_more_target_features, any(target_arch = "x86", target_arch = "x86_64")),
+    (unsafe_inherent_method_target_feature_added, any(target_arch = "x86", target_arch = "x86_64")),
+    (unsafe_trait_method_requires_more_target_features, any(target_arch = "x86", target_arch = "x86_64")),
+    (unsafe_trait_method_target_feature_added, any(target_arch = "x86", target_arch = "x86_64")),
     attribute_proc_macro_missing,
     auto_trait_impl_removed,
     constructible_struct_adds_field,
@@ -1623,17 +1663,15 @@ add_lints!(
     exhaustive_struct_added,
     exhaustive_struct_with_doc_hidden_fields_added,
     exhaustive_struct_with_private_fields_added,
-    exported_function_changed_abi,
-    exported_function_parameter_count_changed,
-    exported_function_now_returns_unit,
-    exported_function_abi_now_unwind,
     exported_function_abi_no_longer_unwind,
-    exported_function_requires_more_target_features,
+    exported_function_abi_now_unwind,
+    exported_function_changed_abi,
+    exported_function_now_returns_unit,
+    exported_function_parameter_count_changed,
     exported_function_return_value_added,
-    exported_function_target_feature_added,
     feature_missing,
-    feature_no_longer_enables_feature,
     feature_newly_enables_feature,
+    feature_no_longer_enables_feature,
     feature_not_enabled_by_default,
     function_abi_no_longer_unwind,
     function_abi_now_unwind,
@@ -1660,23 +1698,23 @@ add_lints!(
     inherent_associated_pub_const_added,
     inherent_associated_pub_const_missing,
     inherent_method_added,
+    inherent_method_changed_abi,
     inherent_method_const_generic_reordered,
     inherent_method_const_removed,
-    inherent_method_changed_abi,
     inherent_method_generic_type_reordered,
     inherent_method_missing,
     inherent_method_must_use_added,
     inherent_method_must_use_removed,
+    inherent_method_no_longer_unwind,
     inherent_method_now_doc_hidden,
     inherent_method_now_returns_unit,
-    inherent_method_no_longer_unwind,
     inherent_method_now_unwind,
     inherent_method_unsafe_added,
     macro_marked_deprecated,
     macro_no_longer_exported,
     macro_now_doc_hidden,
-    method_no_longer_has_receiver,
     method_export_name_changed,
+    method_no_longer_has_receiver,
     method_parameter_count_changed,
     method_receiver_mut_ref_became_owned,
     method_receiver_ref_became_mut,
@@ -1716,10 +1754,6 @@ add_lints!(
     repr_packed_added,
     repr_packed_changed,
     repr_packed_removed,
-    safe_function_requires_more_target_features,
-    safe_function_target_feature_added,
-    safe_inherent_method_requires_more_target_features,
-    safe_inherent_method_target_feature_added,
     sized_impl_removed,
     static_became_unsafe,
     struct_field_marked_deprecated,
@@ -1751,30 +1785,29 @@ add_lints!(
     trait_generic_type_reordered,
     trait_marked_deprecated,
     trait_method_added,
-    trait_method_const_generic_reordered,
     trait_method_changed_abi,
+    trait_method_const_generic_reordered,
     trait_method_default_impl_removed,
     trait_method_generic_type_reordered,
     trait_method_marked_deprecated,
     trait_method_missing,
+    trait_method_no_longer_has_receiver,
+    trait_method_no_longer_unwind,
     trait_method_now_doc_hidden,
     trait_method_now_returns_unit,
-    trait_method_no_longer_unwind,
     trait_method_now_unwind,
-    trait_method_receiver_added,
-    trait_method_no_longer_has_receiver,
     trait_method_parameter_count_changed,
+    trait_method_receiver_added,
     trait_method_receiver_mut_ref_became_owned,
     trait_method_receiver_mut_ref_became_ref,
-    trait_method_receiver_ref_became_mut,
-    trait_method_receiver_ref_became_owned,
     trait_method_receiver_owned_became_mut_ref,
     trait_method_receiver_owned_became_ref,
+    trait_method_receiver_ref_became_mut,
+    trait_method_receiver_ref_became_owned,
     trait_method_receiver_type_changed,
     trait_method_requires_different_const_generic_params,
     trait_method_requires_different_generic_type_params,
     trait_method_return_value_added,
-    trait_method_target_feature_removed,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
     trait_mismatched_generic_lifetimes,
@@ -1807,7 +1840,6 @@ add_lints!(
     union_added,
     union_changed_kind,
     union_changed_to_incompatible_struct,
-    union_with_multiple_pub_fields_changed_to_struct,
     union_field_added_with_all_pub_fields,
     union_field_added_with_non_pub_fields,
     union_field_missing,
@@ -1816,11 +1848,6 @@ add_lints!(
     union_must_use_removed,
     union_now_doc_hidden,
     union_pub_field_now_doc_hidden,
+    union_with_multiple_pub_fields_changed_to_struct,
     unit_struct_changed_kind,
-    unsafe_function_requires_more_target_features,
-    unsafe_function_target_feature_added,
-    unsafe_inherent_method_requires_more_target_features,
-    unsafe_inherent_method_target_feature_added,
-    unsafe_trait_method_requires_more_target_features,
-    unsafe_trait_method_target_feature_added,
 );
