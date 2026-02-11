@@ -163,6 +163,10 @@ jobs:
       - name: cargo fmt
         run: cargo fmt --manifest-path semver/Cargo.toml -- --check
 
+      - name: Check add_lints ordering
+        working-directory: semver
+        run: ./scripts/sort_add_lints.sh --check
+
       # Ensure we include all new non-default features here explicitly, except for
       # pass-through mutually-exclusive features from our dependencies such as:
       # https://github.com/obi1kenobi/cargo-semver-checks/pull/824
