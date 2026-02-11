@@ -1659,6 +1659,7 @@ add_lints!(
     inherent_associated_const_now_doc_hidden,
     inherent_associated_pub_const_added,
     inherent_associated_pub_const_missing,
+    inherent_method_added,
     inherent_method_const_generic_reordered,
     inherent_method_const_removed,
     inherent_method_changed_abi,
