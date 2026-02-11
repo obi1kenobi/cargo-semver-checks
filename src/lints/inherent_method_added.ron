@@ -61,6 +61,6 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "A new public method was added to an existing public type's inherent impl.",
+    error_message: "A new inherent public method was added to an existing public type.",
     per_result_error_template: Some("{{name}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
