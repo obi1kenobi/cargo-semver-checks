@@ -88,7 +88,8 @@ fi
 echo -n "Registering lint in src/query.rs ..."
 # Requirements on $SRC_QUERY_FILE:
 # - one lint per line, with leading indent (a nonzero amount of whitespace)
-# - lint lines must be sorted
+# - lint lines are either `lint_name,` or `(lint_name, <cfg predicate>),`
+# - tuple lint lines sort above non-tuple lint lines, and each group is also sorted within
 # - lints begin with a line that begins with add_lints!(
 # - lints end with a line that begins with )
 if updated_text=$(awk -v lint="$NEW_LINT_NAME" '
@@ -97,10 +98,25 @@ if updated_text=$(awk -v lint="$NEW_LINT_NAME" '
     }
 
     searching {
-        current_lint = "" $2
+        current_line = "" $0
+        current_is_tuple = 0
+
+        if (current_line ~ /^[[:space:]]+\(/) {
+            current_is_tuple = 1
+            sub(/^[[:space:]]+\(/, "", current_line)
+        } else {
+            sub(/^[[:space:]]+/, "", current_line)
+        }
+
+        sub(/,.*/, "", current_line)
+        current_lint = current_line
+        if (current_lint !~ /^[[:alnum:]_]+$/) {
+            current_lint = ""
+        }
+
         if (lint == current_lint) {
             searching = 0
-        } else if ($0 ~ /^\)/ || lint < current_lint) {
+        } else if ($0 ~ /^\)/ || (current_lint != "" && !current_is_tuple && lint < current_lint)) {
             printf("    %s,\n", lint)
             inserted = 1
             searching = 0
@@ -111,7 +127,6 @@ if updated_text=$(awk -v lint="$NEW_LINT_NAME" '
 
     /^add_lints!\(/ {
         searching = 1
-        FS = "[,[:space:]]+"
     }
 
     END {
