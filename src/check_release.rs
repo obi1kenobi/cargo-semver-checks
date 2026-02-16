@@ -137,8 +137,10 @@ fn print_triggered_lint(
     witness_generation: &WitnessGeneration,
 ) -> anyhow::Result<()> {
     let semver_query = &lint_result.semver_query;
+    let lint_level = lint_result.effective_lint_level;
+
     if let Some(ref_link) = semver_query.reference_link.as_deref() {
-        config.log_info(|config| {
+        config.log_at_lint_level(lint_level, |config| {
             writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
                 Style::new().bold(), Reset,
                 &semver_query.error_message,
@@ -151,7 +153,7 @@ fn print_triggered_lint(
             Ok(())
         })?;
     } else {
-        config.log_info(|config| {
+        config.log_at_lint_level(lint_level, |config| {
             writeln!(
                 config.stdout(),
                 "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
@@ -166,7 +168,7 @@ fn print_triggered_lint(
         })?;
     }
 
-    config.log_info(|config| {
+    config.log_at_lint_level(lint_level, |config| {
         writeln!(
             config.stdout(),
             "{}Failed in:{}",
@@ -188,7 +190,7 @@ fn print_triggered_lint(
                 .render_template(template, &pretty_result)
                 .context("Error instantiating semver query template.")
                 .expect("could not materialize template");
-            config.log_info(|config| {
+            config.log_at_lint_level(lint_level, |config| {
                 writeln!(config.stdout(), "  {message}")?;
                 Ok(())
             })?;
@@ -207,7 +209,7 @@ fn print_triggered_lint(
                 Ok(())
             })?;
         } else {
-            config.log_info(|config| {
+            config.log_at_lint_level(lint_level, |config| {
                 writeln!(
                     config.stdout(),
                     "{}\n",
@@ -225,7 +227,7 @@ fn print_triggered_lint(
                 .render_template(&witness.hint_template, &pretty_result)
                 .context("Error instantiating witness hint template.")?;
 
-            config.log_info(|config| {
+            config.log_at_lint_level(lint_level, |config| {
                 let note = Style::new()
                     .fg_color(Some(Color::Ansi(AnsiColor::Cyan)))
                     .bold();
@@ -482,7 +484,7 @@ fn print_report(
             .expect("print failed");
 
         for lint_result in results_with_errors {
-            config.log_info(|config| {
+            config.log_error(|config| {
                 writeln!(
                     config.stdout(),
                     "\n--- failure {}: {} ---\n",
@@ -496,7 +498,7 @@ fn print_report(
         }
 
         for lint_result in results_with_warnings {
-            config.log_info(|config| {
+            config.log_warn(|config| {
                 writeln!(
                     config.stdout(),
                     "\n--- warning {}: {} ---\n",
