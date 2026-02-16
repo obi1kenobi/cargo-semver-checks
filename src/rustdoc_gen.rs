@@ -745,7 +745,7 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
 pub(crate) struct RustdocFromRegistry {
     target_root: PathBuf,
     version: Option<semver::Version>,
-    index: tame_index::index::ComboIndex,
+    index: tame_index::index::RemoteSparseIndex,
 }
 
 impl core::fmt::Debug for RustdocFromRegistry {
@@ -759,7 +759,7 @@ impl core::fmt::Debug for RustdocFromRegistry {
 }
 
 impl RustdocFromRegistry {
-    pub fn new(target_root: &std::path::Path, config: &mut GlobalConfig) -> anyhow::Result<Self> {
+    pub fn new(target_root: &std::path::Path, _config: &mut GlobalConfig) -> anyhow::Result<Self> {
         let index_url = tame_index::IndexUrl::crates_io(
             // This is the config root, where .cargo/config.toml configuration files
             // are crawled to determine if crates.io has been source replaced
@@ -784,35 +784,25 @@ impl RustdocFromRegistry {
         )
         .context("failed to obtain crates.io url")?;
 
-        use tame_index::index::{self, ComboIndexCache};
+        if !index_url.is_sparse() {
+            bail!(
+                "registry index `{}` is not sparse; only sparse HTTP indexes are supported: \
+                set CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse or update cargo config",
+                index_url.as_str()
+            );
+        }
 
-        let index_cache = ComboIndexCache::new(tame_index::IndexLocation::new(index_url))
-            .context("failed to open crates.io index cache")?;
+        // reqwest uses rustls-no-provider; install a ring provider once if needed.
+        if rustls::crypto::CryptoProvider::get_default().is_none() {
+            let _ = rustls::crypto::ring::default_provider().install_default();
+        }
 
-        let index: index::ComboIndex = match index_cache {
-            ComboIndexCache::Git(git) => {
-                let lock = acquire_cargo_global_package_lock(config)?;
-                let mut rgi = index::RemoteGitIndex::new(git, &lock)
-                    .context("failed to open crates.io git index")?;
-
-                config.shell_status("Updating", "index")?;
-                while need_retry(rgi.fetch(&lock))? {
-                    config.shell_status("Blocking", "waiting for lock on registry index")?;
-                    std::thread::sleep(REGISTRY_BACKOFF);
-                }
-                drop(lock);
-
-                rgi.into()
-            }
-            ComboIndexCache::Sparse(sparse) => {
-                let client = tame_index::external::reqwest::blocking::Client::builder()
-                    .http2_prior_knowledge()
-                    .build()
-                    .context("failed to build HTTP client")?;
-                index::RemoteSparseIndex::new(sparse, client).into()
-            }
-            _ => bail!("encountered unknown cache type"),
-        };
+        let sparse = tame_index::index::SparseIndex::new(tame_index::IndexLocation::new(index_url))
+            .context("failed to open crates.io sparse index")?;
+        let client = tame_index::external::reqwest::blocking::Client::builder()
+            .build()
+            .context("failed to build HTTP client")?;
+        let index = tame_index::index::RemoteSparseIndex::new(sparse, client);
 
         Ok(Self {
             target_root: target_root.to_owned(),
@@ -937,23 +927,6 @@ fn choose_baseline_version(
                 .as_str(),
         )?;
         Ok(instance)
-    }
-}
-
-const REGISTRY_BACKOFF: std::time::Duration = std::time::Duration::from_secs(1);
-
-/// Check if we need to retry retrieving the Index.
-fn need_retry(res: Result<(), tame_index::Error>) -> anyhow::Result<bool> {
-    match res {
-        Ok(()) => Ok(false),
-        Err(tame_index::Error::Git(err)) => {
-            if err.is_spurious() || err.is_locked() {
-                Ok(true)
-            } else {
-                Err(tame_index::Error::Git(err).into())
-            }
-        }
-        Err(err) => Err(err.into()),
     }
 }
 

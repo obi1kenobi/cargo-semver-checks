@@ -1,0 +1,28 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/exported_function_return_value_added/": [
+    {
+      "export_name": String("return_value_added"),
+      "name": String("return_value_added"),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("export_name_return_value_added"),
+      "name": String("export_name_return_value_added"),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("method_return_value_added"),
+      "name": String("method_return_value_added"),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

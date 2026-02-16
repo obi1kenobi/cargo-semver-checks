@@ -1,0 +1,269 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/enum_changed_kind/": [
+    {
+      "name": String("EnumToStruct"),
+      "path": List([
+        String("enum_changed_kind"),
+        String("EnumToStruct"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EnumEmpty"),
+      "path": List([
+        String("enum_changed_kind"),
+        String("EnumEmpty"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EnumEmptyNonExhaustive"),
+      "path": List([
+        String("enum_changed_kind"),
+        String("EnumEmptyNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/exhaustive_struct_added/": [
+    {
+      "name": String("NewStruct"),
+      "path": List([
+        String("exhaustive_struct_added"),
+        String("NewStruct"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/exhaustive_struct_with_doc_hidden_fields_added/": [
+    {
+      "name": String("StructWithPublicField"),
+      "path": List([
+        String("exhaustive_struct_with_doc_hidden_fields_added"),
+        String("StructWithPublicField"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/exhaustive_struct_with_private_fields_added/": [
+    {
+      "name": String("StructWithPublicField"),
+      "path": List([
+        String("exhaustive_struct_with_private_fields_added"),
+        String("StructWithPublicField"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/inherent_method_must_use_added/": [
+    {
+      "name": String("EnumToStructWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("EnumToStructWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToStructWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("item_type_changed_inherent_method_must_use_added"),
+        String("UnionToStructWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(161),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NewStructWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_added"),
+        String("struct_inherent_method_must_use_added"),
+        String("NewStructWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(65),
+      "span_filename": String("src/struct_inherent_method_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/inherent_method_must_use_removed/": [
+    {
+      "name": String("EnumToStructWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_removed"),
+        String("item_type_changed_inherent_method_must_use_removed"),
+        String("EnumToStructWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToStructWithMustUseMethods"),
+      "path": List([
+        String("inherent_method_must_use_removed"),
+        String("item_type_changed_inherent_method_must_use_removed"),
+        String("UnionToStructWithMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(161),
+      "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_moved_to_trait_must_use_added/": [
+    {
+      "name": String("NewStructWithTraitMustUseMethods"),
+      "path": List([
+        String("method_moved_to_trait_must_use_added"),
+        String("struct_method_moved_to_trait_must_use_added"),
+        String("NewStructWithTraitMustUseMethods"),
+      ]),
+      "span_begin_line": Uint64(147),
+      "span_filename": String("src/struct_method_moved_to_trait_must_use_added.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/nonbreaking_item_rename/": [
+    {
+      "name": String("NewName"),
+      "path": List([
+        String("nonbreaking_item_rename"),
+        String("NewName"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/switch_away_from_reexport_as_underscore/": [
+    {
+      "name": String("Struct"),
+      "path": List([
+        String("switch_away_from_reexport_as_underscore"),
+        String("Struct"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_changed_kind/": [
+    {
+      "name": String("TraitToStruct"),
+      "path": List([
+        String("trait_changed_kind"),
+        String("TraitToStruct"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/unconditionally_sealed_trait_became_unsealed/": [
+    {
+      "name": String("Token"),
+      "path": List([
+        String("unconditionally_sealed_trait_became_unsealed"),
+        String("unconditionally_sealed_to_unsealed"),
+        String("hidden"),
+        String("Token"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/union_changed_to_incompatible_struct/": [
+    {
+      "name": String("UnionToStructSingleFieldMismatch"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToStructSingleFieldMismatch"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToStructSingleFieldCompatible"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToStructSingleFieldCompatible"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToStructNoFields"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToStructNoFields"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionToStructMultipleFields"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionToStructMultipleFields"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionWithMultiplePubFields"),
+      "path": List([
+        String("union_changed_to_incompatible_struct"),
+        String("UnionWithMultiplePubFields"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/union_with_multiple_pub_fields_changed_to_struct/": [
+    {
+      "name": String("UnionWithMultiplePubFields"),
+      "path": List([
+        String("union_with_multiple_pub_fields_changed_to_struct"),
+        String("UnionWithMultiplePubFields"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnionWithOnePubField"),
+      "path": List([
+        String("union_with_multiple_pub_fields_changed_to_struct"),
+        String("UnionWithOnePubField"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

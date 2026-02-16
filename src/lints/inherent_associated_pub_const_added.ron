@@ -1,0 +1,66 @@
+SemverQuery(
+    id: "inherent_associated_pub_const_added",
+    human_readable_name: "inherent impl's associated pub const added",
+    description: "A public type added a new public associated const item",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#impl-item-new"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            associated_constant {
+                                associated_constant: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            associated_constant {
+                                name @filter(op: "=", value: ["%associated_constant"])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A new public associated const item was added to an existing type.",
+    per_result_error_template: Some("{{name}}::{{associated_constant}} in {{span_filename}}:{{span_begin_line}}"),
+)

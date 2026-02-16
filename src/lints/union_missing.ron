@@ -27,16 +27,39 @@ SemverQuery(
                     }
                 }
             }
-            current @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                item {
-                    # We coerce to `ImplOwner` here, not `Union`, because it's sometimes possible
-                    # to change a union into an enum or struct without causing a breaking change.
-                    # More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
-                    ... on ImplOwner {
+            current {
+                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    # If the union still exists but is no longer public API, union_now_doc_hidden
+                    # will report it. Don't report it as missing in that case.
+                    ... on Union {
                         visibility_limit @filter(op: "=", value: ["$public"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
+                        }
+                    }
+                }
+                # If the union's path is now a struct/enum/trait, that's covered by
+                # union_changed_kind, union_with_multiple_pub_fields_changed_to_struct, or
+                # union_changed_to_incompatible_struct instead of reporting it as missing.
+                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    ... on ImplOwner {
+                        __typename @filter(op: "!=", value: ["$union"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+                item @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
                     }
                 }
@@ -47,6 +70,7 @@ SemverQuery(
         "public": "public",
         "zero": 0,
         "true": true,
+        "union": "Union",
     },
     error_message: "A publicly-visible union cannot be imported by its prior path. A `pub use` may have been removed, or the union itself may have been renamed or removed entirely.",
     per_result_error_template: Some("union {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),

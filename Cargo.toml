@@ -1,6 +1,6 @@
 [package]
 name = "cargo-semver-checks"
-version = "0.45.0"
+version = "0.46.0"
 edition = "2024"
 authors = ["Predrag Gruevski <obi1kenobi82@gmail.com>"]
 license = "Apache-2.0 OR MIT"
@@ -9,7 +9,7 @@ repository = "https://github.com/obi1kenobi/cargo-semver-checks"
 readme = "./README.md"
 keywords = ["semver", "linter", "check", "crate", "cargo"]
 categories = ["command-line-utilities", "development-tools::cargo-plugins"]
-rust-version = "1.90"
+rust-version = "1.91"
 exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "tests/"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -18,7 +18,7 @@ exclude = [".github/", "brand/", "scripts/", "test_crates/", "test_outputs/", "t
 trustfall = "0.8.1"  # Ensure this matches the `trustfall_core` dev-dependency version below.
 # `cargo_metadata` is used at the API boundary of `trustfall_rustdoc`,
 # so ensure the version we use for `cargo_metadata` here matches what `trustfall_rustdoc` uses too.
-trustfall_rustdoc = { version = "0.37.0", default-features = false, features = ["v55", "v56", "v57", "rayon", "rustc-hash"] }
+trustfall_rustdoc = { version = "0.38.0", default-features = false, features = ["v56", "v57", "rayon", "rustc-hash"] }
 cargo_metadata = "0.23.0"
 # End of dependency block
 
@@ -34,10 +34,10 @@ ignore = "0.4.23"
 clap-verbosity-flag = "3.0.2"
 log = "0.4.25"
 fs-err = "3.0.0"
-# Note that `tame-index` and `gix` must be upgraded in lock-step to retain the same `gix`
-# minor version. Otherwise, one will compile `gix` two times in different minor versions.
-gix = { version = "0.74", default-features = false, features = ["max-performance-safe", "revision"] }
-tame-index = { version = "0.24", features = ["sparse"] }
+gix = { version = "0.78", default-features = false, features = ["max-performance-safe", "revision"] }
+tame-index = { version = "0.26", features = ["sparse"] }
+reqwest = { version = "0.13.1", default-features = false, features = ["rustls-no-provider", "http2", "system-proxy"] }
+rustls = { version = "0.23.36", default-features = false, features = ["ring", "std", "tls12", "logging"] }
 
 human-panic = "2.0.2"
 bugreport = "0.5.1"
@@ -86,11 +86,11 @@ lto = true
 codegen-units = 1
 
 [features]
-default = ["gix-reqwest"]
+default = []
 
-# Gix has mutually exclusive features that are exposed through tame-index. Hard-coding either of
-# these features can lead to compile errors when another crate enables the other feature through
-# workspace feature unification. We therefore allow downstream users to choose which feature to
-# enable:
-gix-reqwest = ["tame-index/gix-reqwest"]
-gix-curl = ["tame-index/gix-curl"]
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }.{ archive-format }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"

@@ -1,0 +1,83 @@
+SemverQuery(
+    id: "feature_no_longer_enables_feature",
+    human_readable_name: "package feature no longer enables another feature",
+    description: "A feature no longer enables another feature in this package's Cargo.toml.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#cargo-feature-remove-another"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                feature {
+                    # Until cargo ships with support for private and/or unstable feature names,
+                    # we'll rely on feature names to detect whether to flag feature changes.
+                    #
+                    # This lint will ignore features that match any of the following:
+                    # - start with an underscore (`_`) character
+                    # - are named `unstable`, `nightly`, or `bench`
+                    # - have a prefix of `unstable`, `nightly`, or `bench` followed by
+                    #   a dash (`-`) or underscore (`_`) character.
+                    #
+                    # Cargo tracking issues:
+                    # - unstable/nightly features: https://github.com/rust-lang/cargo/issues/10881
+                    # - private/hidden features: https://github.com/rust-lang/cargo/issues/10882
+                    # Exclude the `default` feature so default-feature changes are handled by
+                    # the `feature_not_enabled_by_default` lint.
+                    feature_name: name @tag
+                                       @filter(op: "not_regex", value: ["$unstable_feature_pattern"])
+                                       @filter(op: "not_has_prefix", value: ["$underscore"])
+                                       @filter(op: "!=", value: ["$default_feature_name"])
+                                       @output
+
+                    # An explicit ordering key is needed since we don't have span information,
+                    # which what we usually use to order results in tests.
+                    name @output(name: "ordering_key")
+
+                    directly_enables {
+                        implied_feature_name: name @tag
+                                                   @filter(op: "not_regex", value: ["$unstable_feature_pattern"])
+                                                   @filter(op: "not_has_prefix", value: ["$underscore"])
+                                                   @output
+
+                        # An explicit ordering key is needed since we don't have span information,
+                        # which what we usually use to order results in tests.
+                        name @output(name: "ordering_key1")
+                    }
+                }
+            }
+            current {
+                # Ensure the feature still exists. If it's missing entirely, we want to report
+                # it in the `feature_missing` lint, not here.
+                feature {
+                    name @filter(op: "=", value: ["%feature_name"])
+
+                    # Follow the full transitive feature graph in case the implication was rerouted.
+                    transitively_enables @fold
+                                         @transform(op: "count")
+                                         @filter(op: "=", value: ["$zero"]) {
+                        name @filter(op: "=", value: ["%implied_feature_name"])
+                    }
+                }
+
+                # Ensure the implied feature still exists. If it's missing entirely, we want
+                # to report it in the `feature_missing` lint, not here.
+                feature @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                    name @filter(op: "=", value: ["%implied_feature_name"])
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "zero": 0,
+        "unstable_feature_pattern": "^(?:unstable|nightly|bench)(?:[-_].*)?$",
+        "underscore": "_",
+        "default_feature_name": "default",
+    },
+    error_message: "A feature no longer enables another feature in this package's Cargo.toml. This will break downstream crates which rely on the implied feature being enabled.",
+    per_result_error_template: Some("feature {{feature_name}} no longer enables {{implied_feature_name}}"),
+    // TODO: It's currently not possible to write witnesses for manifest lints,
+    //       since we'd need to generate a *Cargo.toml* witness instead of a Rust code witness.
+    //       Issue: https://github.com/obi1kenobi/cargo-semver-checks/issues/1008
+    witness: None,
+)

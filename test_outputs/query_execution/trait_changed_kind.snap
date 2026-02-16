@@ -1,0 +1,40 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/trait_changed_kind/": [
+    {
+      "name": String("TraitToStruct"),
+      "new_kind": String("Struct"),
+      "path": List([
+        String("trait_changed_kind"),
+        String("TraitToStruct"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("TraitToEnum"),
+      "new_kind": String("Enum"),
+      "path": List([
+        String("trait_changed_kind"),
+        String("TraitToEnum"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("TraitToUnion"),
+      "new_kind": String("Union"),
+      "path": List([
+        String("trait_changed_kind"),
+        String("TraitToUnion"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

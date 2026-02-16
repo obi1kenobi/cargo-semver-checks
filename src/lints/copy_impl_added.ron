@@ -1,0 +1,76 @@
+SemverQuery(
+    id: "copy_impl_added",
+    human_readable_name: "type now implements Copy",
+    description: "A public type now implements Copy, causing breakage via closure move semantics.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://github.com/rust-lang/rust/issues/100905"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            negative @filter(op: "!=", value: ["$true"])
+
+                            implemented_trait {
+                                trait {
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["$copy_path"])
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        impl {
+                            negative @filter(op: "!=", value: ["$true"])
+
+                            implemented_trait {
+                                trait {
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["$copy_path"])
+                                    }
+                                }
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "copy_path": ["core", "marker", "Copy"],
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A public type now implements Copy, causing non-move closures to capture it by reference instead of moving it.",
+    per_result_error_template: Some("{{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

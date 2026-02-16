@@ -52,6 +52,7 @@ Follow these rules when drafting queries:
 - Lints looking for item removals find the item in `baseline` then assert its non-existence in `current`. Lints for additions do the inverse. Lints where something merely changed could be written in either order: always prefer to check the less likely scenario first, to make queries more efficient.
 - Use `@tag` to capture data in the query and `%tag` inside `@filter` to reuse it anywhere after the `@tag`.
 - Use `@fold @transform(op: "count")` to assert presence/absence (`= $zero`, `> $zero`, etc.) and to deduplicate results as needed.
+- Multiple inline fragments (`... on X`) cannot be stacked at the same level in a single scope. Either split the logic into separate scopes/folds, or use `__typename` plus a `@filter` for the expected type combination.
 - If a line with multiple directives gets longer than about 100 characters, put each directive on its own line, indented one 4-space step with all directives vertically aligned with each other.
 - Gate results to the public API before following edges: combine `visibility_limit = $public` with `public_api` or `public_api_eligible` as appropriate. Only omit a gate when an inline `#` comment explains why.
 - Alias reusable edges with a trailing underscore (`span_`, `abi_`, …) so templates can rely on fields like `span_filename`. An alias applied to an edge acts as a prefix for all output names inside that's edge subtree.
@@ -72,6 +73,8 @@ Follow these rules when drafting queries:
 ## Duplicate suppression & scope hygiene
 - Filter out items that other lints already cover (for example, doc-hidden or `#[non_exhaustive]` changes) so diagnostics do not overlap. Document unusual exclusions inline.
 - Ensure queries only surface public, importable items to avoid false positives from private or unreachable APIs.
+- Items can be importable (and have data for the `importable_path` edge) even if they aren't public API because of `#[doc(hidden)]`. If a lint should target only public API items, a `public_api` filter for `true` should be used inside `importable_path`. Make sure to test such lints with `#[doc(hidden)]` items.
+- Avoid negative test cases where the old/new code is identical; those are redundant since we already test old-old and new-new comparisons to ensure zero lint results.
 
 ## Meta comments
 
