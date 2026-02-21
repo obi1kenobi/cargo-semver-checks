@@ -146,6 +146,8 @@ fn assert_integration_test(test_name: &str, invocation: &[&str]) {
         // remove the cargo verbosity variable, which gets passed to `cargo doc`
         // and may create a nonreproducible environment.
         std::env::remove_var("CARGO_TERM_VERBOSE");
+        // force ASCII diagnostics for reproducible snapshots across cargo/rust versions.
+        std::env::set_var("CARGO_TERM_UNICODE", "false");
     }
 
     let stdout = StaticWriter::new();

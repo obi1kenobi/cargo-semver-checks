@@ -31,6 +31,8 @@ fn assert_integration_test(
 
     // never use color for more readable snapshots
     cmd.env("CARGO_TERM_COLOR", "never");
+    // use ASCII-only diagnostics for reproducible snapshots across cargo/rust versions
+    cmd.env("CARGO_TERM_UNICODE", "false");
     // disable backtrace printing for reproducibility
     cmd.env("RUST_BACKTRACE", "0");
 
