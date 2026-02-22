@@ -249,14 +249,17 @@ impl<'a> CrateDataRequest<'a> {
 
     /// Load data for the requested crate, using the specified directories.
     ///
-    /// `target_root` is the directory where we'll perform any necessary code generation
-    /// to load the data. The specific operations performed there are not public API.
+    /// `internal_work_dir` is the directory where we'll perform any necessary code generation
+    /// and store cargo-semver-checks internal files while loading data.
+    ///
+    /// `cargo_target_dir` is cargo's target directory where cargo-generated artifacts are written.
     ///
     /// `cache` specifies how we may use a cache to speed up our data requests:
     /// read-write, read-only, or not at all.
     pub(crate) fn resolve<'slf>(
         &'slf self,
-        target_root: &Path,
+        internal_work_dir: &Path,
+        cargo_target_dir: &Path,
         cache_settings: CacheSettings<&'a Path>,
         generation_settings: GenerationSettings,
         callbacks: &'slf mut dyn ProgressCallbacks<'slf>,
@@ -330,10 +333,11 @@ impl<'a> CrateDataRequest<'a> {
         }
 
         // Generate the data we need.
-        let build_dir = target_root.join(self.build_path_slug().into_terminal_result()?);
+        let build_dir = internal_work_dir.join(self.build_path_slug().into_terminal_result()?);
         let (data_path, metadata) = super::generate::generate_rustdoc(
             self,
             &build_dir,
+            cargo_target_dir,
             generation_settings,
             &mut callbacks,
         )?;

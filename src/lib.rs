@@ -44,6 +44,10 @@ pub struct Check {
     release_type: Option<ReleaseType>,
     current_feature_config: rustdoc_gen::FeatureConfig,
     baseline_feature_config: rustdoc_gen::FeatureConfig,
+    /// Which `--target-dir` to use for cargo-generated artifacts.
+    /// If unset, cargo's default behavior is used.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    target_dir: Option<PathBuf>,
     /// Which `--target` to use, if unset pass no flag
     build_target: Option<String>,
     /// Options for generating [witnesses](Witness).
@@ -275,6 +279,7 @@ impl Check {
             release_type: None,
             current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
+            target_dir: None,
             build_target: None,
             witness_generation: WitnessGeneration::default(),
         }
@@ -334,6 +339,12 @@ impl Check {
         self
     }
 
+    /// Set what `--target-dir` cargo should use for generated artifacts.
+    pub fn set_target_dir(&mut self, target_dir: PathBuf) -> &mut Self {
+        self.target_dir = Some(target_dir);
+        self
+    }
+
     /// Set what `--target` to build the documentation with, by default will not pass any flag
     /// relying on the users cargo configuration.
     pub fn set_build_target(&mut self, build_target: String) -> &mut Self {
@@ -348,19 +359,49 @@ impl Check {
     }
 
     /// Some `RustdocSource`s don't contain a path to the project root,
-    /// so they don't have a target directory. We try to deduce the target directory
-    /// on a "best effort" basis -- when the source contains a target dir,
-    /// we use it, otherwise when the other source contains one, we use it,
+    /// so they don't have a target directory. We try to deduce the cargo target dir
+    /// on a "best effort" basis -- when the source contains one, we use it,
+    /// otherwise when the other source contains one, we use it,
     /// otherwise we just use a standard cache folder as specified by XDG.
     /// We cannot use a temporary directory, because the rustdocs from registry
     /// are being cached in the target directory.
-    fn get_target_dir(&self, source: &RustdocSource) -> anyhow::Result<PathBuf> {
+    fn get_cargo_target_dir(&self, source: &RustdocSource) -> anyhow::Result<PathBuf> {
+        if let Some(target_dir) = &self.target_dir {
+            return Ok(target_dir.clone());
+        }
+
         Ok(
-            if let Some(path) = get_target_dir_from_project_root(source)? {
+            if let Some(path) = get_cargo_target_dir_from_project_root(source)? {
                 path
-            } else if let Some(path) = get_target_dir_from_project_root(&self.current.source)? {
+            } else if let Some(path) = get_cargo_target_dir_from_project_root(&self.current.source)?
+            {
                 path
-            } else if let Some(path) = get_target_dir_from_project_root(&self.baseline.source)? {
+            } else if let Some(path) =
+                get_cargo_target_dir_from_project_root(&self.baseline.source)?
+            {
+                path
+            } else {
+                get_cache_dir()?
+            },
+        )
+    }
+
+    /// Get the internal work directory used by cargo-semver-checks.
+    fn get_internal_work_dir(&self, source: &RustdocSource) -> anyhow::Result<PathBuf> {
+        if let Some(target_dir) = &self.target_dir {
+            return Ok(get_internal_work_dir_from_target_dir(target_dir, source));
+        }
+
+        Ok(
+            if let Some(path) = get_internal_work_dir_from_project_root(source)? {
+                path
+            } else if let Some(path) =
+                get_internal_work_dir_from_project_root(&self.current.source)?
+            {
+                path
+            } else if let Some(path) =
+                get_internal_work_dir_from_project_root(&self.baseline.source)?
+            {
                 path
             } else {
                 get_cache_dir()?
@@ -373,22 +414,36 @@ impl Check {
         config: &mut GlobalConfig,
         source: &RustdocSource,
     ) -> anyhow::Result<rustdoc_gen::RustdocGenerator> {
-        let target_dir = self.get_target_dir(source)?;
+        let internal_work_dir = self.get_internal_work_dir(source)?;
+        let cargo_target_dir = self.get_cargo_target_dir(source)?;
         Ok(match source {
             RustdocSource::Rustdoc(path) => {
                 rustdoc_gen::RustdocFromFile::new(path.to_owned()).into()
             }
-            RustdocSource::Root(root) => {
-                rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?.into()
-            }
+            RustdocSource::Root(root) => rustdoc_gen::RustdocFromProjectRoot::new(
+                root,
+                &internal_work_dir,
+                &cargo_target_dir,
+            )?
+            .into(),
             RustdocSource::Revision(root, rev) => {
                 let metadata = manifest_metadata_no_deps(root)?;
                 let source = metadata.workspace_root.as_std_path();
-                rustdoc_gen::RustdocFromGitRevision::with_rev(source, &target_dir, rev, config)?
-                    .into()
+                rustdoc_gen::RustdocFromGitRevision::with_rev(
+                    source,
+                    &internal_work_dir,
+                    &cargo_target_dir,
+                    rev,
+                    config,
+                )?
+                .into()
             }
             RustdocSource::VersionFromRegistry(version) => {
-                let mut registry = rustdoc_gen::RustdocFromRegistry::new(&target_dir, config)?;
+                let mut registry = rustdoc_gen::RustdocFromRegistry::new(
+                    &internal_work_dir,
+                    &cargo_target_dir,
+                    config,
+                )?;
                 if let Some(ver) = version {
                     let semver = semver::Version::parse(ver)?;
                     registry.set_version(semver);
@@ -582,7 +637,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                 let witness_data = witness_gen::WitnessGenerationData::new(
                     baseline_loader.get_data_request(),
                     current_loader.get_data_request(),
-                    current_loader.get_target_root(),
+                    current_loader.get_internal_work_dir(),
                 );
 
                 let data_storage = generate_crate_data(
@@ -915,20 +970,42 @@ fn get_cache_dir() -> anyhow::Result<PathBuf> {
     Ok(cache_dir.to_path_buf())
 }
 
-fn get_target_dir_from_project_root(source: &RustdocSource) -> anyhow::Result<Option<PathBuf>> {
+fn get_cargo_target_dir_from_project_root(
+    source: &RustdocSource,
+) -> anyhow::Result<Option<PathBuf>> {
     Ok(match source {
         RustdocSource::Root(root) => {
             let metadata = manifest_metadata_no_deps(root)?;
-            let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-            Some(target)
+            Some(metadata.target_directory.as_std_path().to_path_buf())
         }
-        RustdocSource::Revision(root, rev) => {
+        RustdocSource::Revision(root, _rev) => {
             let metadata = manifest_metadata_no_deps(root)?;
-            let target = metadata.target_directory.as_std_path().join(util::SCOPE);
-            let target = target.join(format!("git-{}", util::slugify(rev)));
-            Some(target)
+            Some(metadata.target_directory.as_std_path().to_path_buf())
         }
         RustdocSource::Rustdoc(_path) => None,
         RustdocSource::VersionFromRegistry(_version) => None,
     })
+}
+
+fn get_internal_work_dir_from_project_root(
+    source: &RustdocSource,
+) -> anyhow::Result<Option<PathBuf>> {
+    let Some(cargo_target_dir) = get_cargo_target_dir_from_project_root(source)? else {
+        return Ok(None);
+    };
+
+    Ok(Some(get_internal_work_dir_from_target_dir(
+        cargo_target_dir.as_path(),
+        source,
+    )))
+}
+
+fn get_internal_work_dir_from_target_dir(target_dir: &Path, source: &RustdocSource) -> PathBuf {
+    let internal_work_dir = target_dir.join(util::SCOPE);
+    match source {
+        RustdocSource::Revision(_, rev) => {
+            internal_work_dir.join(format!("git-{}", util::slugify(rev)))
+        }
+        _ => internal_work_dir,
+    }
 }

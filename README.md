@@ -50,6 +50,7 @@ to the implementation of that query in the current version of the tool.
 - [What features does `cargo-semver-checks` enable in the tested crates?](#what-features-does-cargo-semver-checks-enable-in-the-tested-crates)
 - [My crate uses `--cfg` conditional compilation. Can `cargo-semver-checks` scan it?](#my-crate-uses---cfg-conditional-compilation-can-cargo-semver-checks-scan-it)
 - [Should I run `cargo-semver-checks` for multiple target triples?](#should-i-run-cargo-semver-checks-for-multiple-target-triples)
+- [How does `--target-dir` behave in `cargo-semver-checks`?](#how-does---target-dir-behave-in-cargo-semver-checks)
 - [Does `cargo-semver-checks` have false positives?](#does-cargo-semver-checks-have-false-positives)
 - [Will `cargo-semver-checks` catch every semver violation?](#will-cargo-semver-checks-catch-every-semver-violation)
 - [Can I configure individual lints?](#can-i-configure-individual-lints)
@@ -217,6 +218,33 @@ cargo semver-checks --target x86_64-unknown-linux-gnu
 ```
 
 You can also do this in CI by running `cargo semver-checks` in a matrix of targets.
+
+### How does `--target-dir` behave in `cargo-semver-checks`?
+
+`cargo-semver-checks` accepts Cargo's `--target-dir <DIRECTORY>` option and mirrors Cargo's semantics.
+
+- If `--target-dir` is set, Cargo-generated artifacts used during semver-checking are written there.
+- If it is not set, Cargo chooses the target dir as usual (equivalent to running Cargo without this flag).
+- `cargo-semver-checks` stores its own internal files under a scoped subdirectory:
+  `<target-dir>/semver-checks/...`
+
+Thinking in terms of an "as if" example:
+
+- When semver-checking a crate rooted at `<crate-root>`, the default behavior is as if Cargo had resolved
+  some `<foo>` target dir for that crate, and then `cargo-semver-checks` used:
+  - Cargo outputs in `<foo>/...`
+  - internal state in `<foo>/semver-checks/...`
+- If you pass `--target-dir /tmp/shared-target`, this becomes:
+  - Cargo outputs in `/tmp/shared-target/...`
+  - internal state in `/tmp/shared-target/semver-checks/...`
+
+This can improve reuse with regular `cargo check` / `cargo build` runs that use the same `--target-dir`.
+However, reuse is not guaranteed:
+
+- `cargo-semver-checks` still invokes `cargo doc` to produce rustdoc JSON.
+- rustdoc JSON itself is not produced by `cargo check` or `cargo build`.
+- fingerprint mismatches (for example target triple, enabled features, profile, toolchain, or flags like
+  `--cap-lints=allow`) can reduce shared cache hits.
 
 ### Does `cargo-semver-checks` have false positives?
 

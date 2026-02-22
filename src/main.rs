@@ -544,6 +544,10 @@ struct CheckRelease {
     #[arg(long = "target")]
     build_target: Option<String>,
 
+    /// Directory for all generated artifacts and intermediate files.
+    #[arg(long = "target-dir", value_name = "DIRECTORY")]
+    target_dir: Option<PathBuf>,
+
     #[clap(flatten)]
     unstable_options: UnstableOptions,
 }
@@ -649,6 +653,10 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
 
         if let Some(build_target) = value.build_target {
             check.set_build_target(build_target);
+        }
+
+        if let Some(target_dir) = value.target_dir {
+            check.set_target_dir(target_dir);
         }
 
         let mut witness_generation = WitnessGeneration::new();
@@ -757,6 +765,26 @@ fn features_empty_string_is_no_op() {
     };
 
     assert_eq!(Check::from(no_features), Check::from(empty_features));
+}
+
+#[test]
+fn target_dir_is_mapped_to_check() {
+    use cargo_semver_checks::Check;
+
+    let Cargo::SemverChecks(SemverChecks {
+        check_release: no_target_dir,
+        ..
+    }) = Cargo::parse_from(["cargo", "semver-checks"]);
+
+    let with_target_dir = CheckRelease {
+        target_dir: Some(PathBuf::from("custom-target")),
+        ..no_target_dir.clone()
+    };
+
+    let mut expected = Check::from(no_target_dir);
+    expected.set_target_dir(PathBuf::from("custom-target"));
+
+    assert_eq!(expected, Check::from(with_target_dir));
 }
 
 /// Test to assert that all flags added to the [`UnstableOptions`] are

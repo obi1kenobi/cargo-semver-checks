@@ -313,15 +313,17 @@ pub(crate) fn generate_rustdoc(
     config: &mut GlobalConfig,
     generation_settings: super::data_generation::GenerationSettings,
     cache_settings: super::data_generation::CacheSettings<()>,
-    target_root: PathBuf,
+    internal_work_dir: PathBuf,
+    cargo_target_dir: PathBuf,
     data_request: &CrateDataRequest<'_>,
 ) -> Result<VersionedStorage, TerminalError> {
-    let cache_dir = target_root.join("cache");
+    let cache_dir = internal_work_dir.join("cache");
     let cache_settings = cache_settings.with_path(cache_dir.as_path());
 
     let mut callbacks = crate::callbacks::Callbacks::new(config);
     data_request.resolve(
-        &target_root,
+        &internal_work_dir,
+        &cargo_target_dir,
         cache_settings,
         generation_settings,
         &mut callbacks,
@@ -393,7 +395,8 @@ pub(crate) enum ReadyState<'a> {
     // generator specific, meaning fallible operations will not gain additional context from the
     // additional source context of multiple variants
     Generator {
-        target_root: &'a PathBuf,
+        internal_work_dir: &'a PathBuf,
+        cargo_target_dir: &'a PathBuf,
         data_request: CrateDataRequest<'a>,
     },
 }
@@ -444,7 +447,7 @@ impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
     ) -> Result<StatefulRustdocGenerator<'_, ReadyState<'_>>, TerminalError> {
         let crate_data = self.crate_data;
 
-        let (crate_source, target_root) = match &self.coupled_state {
+        let (crate_source, internal_work_dir, cargo_target_dir) = match &self.coupled_state {
             CoupledState::File { generator } => {
                 return Ok(StatefulRustdocGenerator {
                     coupled_state: ReadyState::File { generator },
@@ -455,13 +458,21 @@ impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
                 let source = generator
                     .get_crate_source(crate_data)
                     .map_err(|err| terminal_context(err, "failed to retrieve local crate data"))?;
-                (source, &generator.target_root)
+                (
+                    source,
+                    &generator.internal_work_dir,
+                    &generator.cargo_target_dir,
+                )
             }
             CoupledState::GitRevision { generator } => {
                 let source = generator.get_crate_source(crate_data).map_err(|err| {
                     terminal_context(err, "failed to retrieve local crate data from git revision")
                 })?;
-                (source, &generator.path.target_root)
+                (
+                    source,
+                    &generator.path.internal_work_dir,
+                    &generator.path.cargo_target_dir,
+                )
             }
             CoupledState::Registry { generator, krate } => {
                 let source = generator
@@ -469,7 +480,11 @@ impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
                     .map_err(|err| {
                         terminal_context(err, "failed to retrieve crate data from registry")
                     })?;
-                (source, &generator.target_root)
+                (
+                    source,
+                    &generator.internal_work_dir,
+                    &generator.cargo_target_dir,
+                )
             }
         };
 
@@ -477,7 +492,8 @@ impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
 
         Ok(StatefulRustdocGenerator {
             coupled_state: ReadyState::Generator {
-                target_root,
+                internal_work_dir,
+                cargo_target_dir,
                 data_request,
             },
             crate_data,
@@ -494,10 +510,12 @@ impl<'a> StatefulRustdocGenerator<'a, ReadyState<'a>> {
         }
     }
 
-    pub(crate) fn get_target_root(&self) -> Option<&Path> {
+    pub(crate) fn get_internal_work_dir(&self) -> Option<&Path> {
         match &self.coupled_state {
             ReadyState::File { .. } => None,
-            ReadyState::Generator { target_root, .. } => Some(target_root),
+            ReadyState::Generator {
+                internal_work_dir, ..
+            } => Some(internal_work_dir),
         }
     }
 
@@ -512,13 +530,15 @@ impl<'a> StatefulRustdocGenerator<'a, ReadyState<'a>> {
             ReadyState::File { generator } => generator.load_rustdoc(),
 
             ReadyState::Generator {
-                target_root,
+                internal_work_dir,
+                cargo_target_dir,
                 data_request,
             } => generate_rustdoc(
                 config,
                 generation_settings,
                 cache_settings,
-                target_root.to_path_buf(),
+                internal_work_dir.to_path_buf(),
+                cargo_target_dir.to_path_buf(),
                 data_request,
             ),
         }
@@ -548,16 +568,19 @@ pub(crate) struct RustdocFromProjectRoot {
     manifests: HashMap<String, Manifest>,
     manifest_errors: HashMap<PathBuf, anyhow::Error>,
     duplicate_packages: HashMap<String, Vec<PathBuf>>,
-    target_root: PathBuf,
+    internal_work_dir: PathBuf,
+    cargo_target_dir: PathBuf,
 }
 
 impl RustdocFromProjectRoot {
     /// # Arguments
     /// * `project_root` - Path to a directory with the manifest or with subdirectories with the manifests.
-    /// * `target_root` - Path to a directory where the placeholder manifest / rustdoc can be created.
+    /// * `internal_work_dir` - Path to a directory where cargo-semver-checks can keep internal files.
+    /// * `cargo_target_dir` - Path to cargo's target directory, where cargo-generated artifacts are written.
     pub(crate) fn new(
         project_root: &std::path::Path,
-        target_root: &std::path::Path,
+        internal_work_dir: &std::path::Path,
+        cargo_target_dir: &std::path::Path,
     ) -> anyhow::Result<Self> {
         let mut manifests_by_path: HashMap<PathBuf, Manifest> = HashMap::new();
         let mut manifest_errors = HashMap::new();
@@ -622,7 +645,8 @@ impl RustdocFromProjectRoot {
             manifests,
             manifest_errors,
             duplicate_packages,
-            target_root: target_root.to_owned(),
+            internal_work_dir: internal_work_dir.to_owned(),
+            cargo_target_dir: cargo_target_dir.to_owned(),
         })
     }
 
@@ -671,7 +695,8 @@ pub(crate) struct RustdocFromGitRevision {
 impl RustdocFromGitRevision {
     pub fn with_rev(
         source: &std::path::Path,
-        target: &std::path::Path,
+        internal_work_dir: &std::path::Path,
+        cargo_target_dir: &std::path::Path,
         rev: &str,
         config: &mut GlobalConfig,
     ) -> anyhow::Result<Self> {
@@ -680,12 +705,12 @@ impl RustdocFromGitRevision {
             .map(gix::Repository::from)?;
 
         let tree_id = repo.rev_parse_single(&*format!("{rev}^{{tree}}"))?;
-        let tree_dir = target.join(tree_id.to_string());
+        let tree_dir = internal_work_dir.join(tree_id.to_string());
 
         std::fs::create_dir_all(&tree_dir)?;
         extract_tree(tree_id, &tree_dir)?;
 
-        let path = RustdocFromProjectRoot::new(&tree_dir, target)?;
+        let path = RustdocFromProjectRoot::new(&tree_dir, internal_work_dir, cargo_target_dir)?;
         Ok(Self { path })
     }
 
@@ -743,7 +768,8 @@ fn bytes2str(b: &[u8]) -> &std::ffi::OsStr {
 }
 
 pub(crate) struct RustdocFromRegistry {
-    target_root: PathBuf,
+    internal_work_dir: PathBuf,
+    cargo_target_dir: PathBuf,
     version: Option<semver::Version>,
     index: tame_index::index::RemoteSparseIndex,
 }
@@ -751,7 +777,8 @@ pub(crate) struct RustdocFromRegistry {
 impl core::fmt::Debug for RustdocFromRegistry {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("RustdocFromRegistry")
-            .field("target_root", &self.target_root)
+            .field("internal_work_dir", &self.internal_work_dir)
+            .field("cargo_target_dir", &self.cargo_target_dir)
             .field("version", &self.version)
             .field("index", &"<elided>")
             .finish()
@@ -759,7 +786,11 @@ impl core::fmt::Debug for RustdocFromRegistry {
 }
 
 impl RustdocFromRegistry {
-    pub fn new(target_root: &std::path::Path, _config: &mut GlobalConfig) -> anyhow::Result<Self> {
+    pub fn new(
+        internal_work_dir: &std::path::Path,
+        cargo_target_dir: &std::path::Path,
+        _config: &mut GlobalConfig,
+    ) -> anyhow::Result<Self> {
         let index_url = tame_index::IndexUrl::crates_io(
             // This is the config root, where .cargo/config.toml configuration files
             // are crawled to determine if crates.io has been source replaced
@@ -805,7 +836,8 @@ impl RustdocFromRegistry {
         let index = tame_index::index::RemoteSparseIndex::new(sparse, client);
 
         Ok(Self {
-            target_root: target_root.to_owned(),
+            internal_work_dir: internal_work_dir.to_owned(),
+            cargo_target_dir: cargo_target_dir.to_owned(),
             version: None,
             index,
         })
