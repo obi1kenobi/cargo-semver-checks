@@ -1,0 +1,105 @@
+SemverQuery(
+    id: "inherent_method_no_longer_unsafe",
+    human_readable_name: "pub method is no longer unsafe",
+    description: "A method or associated fn is no longer unsafe to call. Callers that use an `unsafe` block may get `unused_unsafe` warnings.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#calling-an-unsafe-function-or-method"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl {
+                            method {
+                                method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
+                                method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                unsafe @filter(op: "=", value: ["$true"])
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # We use "impl" instead of "inherent_impl" here because moving
+                        # an inherently-implemented method to a trait is not necessarily
+                        # a breaking change, so we don't want to report it.
+                        #
+                        # We look for "zero matching unsafe methods" rather than
+                        # "methods that are not unsafe" (incorrect!) since multiple methods with
+                        # the same name are allowed to exist on the same type (e.g. via traits).
+                        #
+                        # The above by itself is still not enough: say if the method was removed,
+                        # that still makes the "there is no method ..." statement true.
+                        # So we add an additional clause demanding that a method by that name
+                        # with appropriate visibility actually exists.
+                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                            }
+                        }
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                unsafe @filter(op: "=", value: ["$true"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                            }
+                        }
+
+                        # Get the non-matching methods by that name so we can report them
+                        # in the lint error message.
+                        impl @fold {
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                unsafe @filter(op: "!=", value: ["$true"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                non_matching_span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "public_or_default": ["public", "default"],
+        "zero": 0,
+        "true": true,
+    },
+    error_message: "A publicly-visible method or associated fn is no longer `unsafe`. Callers that use an `unsafe` block may encounter `unused_unsafe` lint warnings. Reverting this change would also be a major breaking change.",
+    per_result_error_template: Some("{{name}}::{{method_name}} in {{multiple_spans non_matching_span_filename non_matching_span_begin_line}}"),
+)

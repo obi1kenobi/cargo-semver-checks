@@ -1,0 +1,138 @@
+---
+source: src/query.rs
+assertion_line: 1073
+---
+{
+  "./test_crates/inherent_method_no_longer_unsafe/": [
+    {
+      "method_name": String("associated_fn"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "non_matching_span_begin_line": List([
+        Uint64(7),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(9),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("inherent_method_no_longer_unsafe"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("method"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "non_matching_span_begin_line": List([
+        Uint64(12),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(14),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("inherent_method_no_longer_unsafe"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("unsafe_enum_associated_fn"),
+      "method_visibility": String("public"),
+      "name": String("Bar"),
+      "non_matching_span_begin_line": List([
+        Uint64(32),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(32),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("inherent_method_no_longer_unsafe"),
+        String("Bar"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/unsafe_inherent_method_requires_more_target_features/": [
+    {
+      "method_name": String("globally_enabled_method"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "non_matching_span_begin_line": List([
+        Uint64(29),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(29),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("unsafe_inherent_method_requires_more_target_features"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("becomes_safe"),
+      "method_visibility": String("public"),
+      "name": String("Foo"),
+      "non_matching_span_begin_line": List([
+        Uint64(34),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(34),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("unsafe_inherent_method_requires_more_target_features"),
+        String("Foo"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/unsafe_inherent_method_target_feature_added/": [
+    {
+      "method_name": String("becomes_safe"),
+      "method_visibility": String("public"),
+      "name": String("A"),
+      "non_matching_span_begin_line": List([
+        Uint64(16),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(16),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("unsafe_inherent_method_target_feature_added"),
+        String("A"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
