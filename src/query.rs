@@ -1748,6 +1748,7 @@ add_lints!(
     repr_align_added,
     repr_align_changed,
     repr_align_removed,
+    repr_c_added,
     repr_c_enum_struct_variant_fields_reordered,
     repr_c_plain_struct_fields_reordered,
     repr_c_removed,

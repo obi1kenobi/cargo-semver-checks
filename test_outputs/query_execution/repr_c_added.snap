@@ -1,0 +1,58 @@
+---
+source: src/query.rs
+assertion_line: 1073
+---
+{
+  "./test_crates/repr_c_added/": [
+    {
+      "name": String("Example"),
+      "path": List([
+        String("repr_c_added"),
+        String("Example"),
+      ]),
+      "repr_C": String("#[repr(C)]"),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Struct"),
+    },
+    {
+      "name": String("Bar"),
+      "path": List([
+        String("repr_c_added"),
+        String("Bar"),
+      ]),
+      "repr_C": String("#[repr(C)]"),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Enum"),
+    },
+    {
+      "name": String("Baz"),
+      "path": List([
+        String("repr_c_added"),
+        String("Baz"),
+      ]),
+      "repr_C": String("#[repr(C)]"),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Union"),
+    },
+  ],
+  "./test_crates/union_field_added/": [
+    {
+      "name": String("BecameReprC"),
+      "path": List([
+        String("union_field_added"),
+        String("BecameReprC"),
+      ]),
+      "repr_C": String("#[repr(C)]"),
+      "span_begin_line": Uint64(49),
+      "span_end_line": Uint64(53),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Union"),
+    },
+  ],
+}
