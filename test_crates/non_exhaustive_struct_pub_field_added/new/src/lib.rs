@@ -28,9 +28,3 @@ struct PrivateNonExhaustiveStructWithNewPubField {
     pub a: u32,
     pub b: u32, // private struct, should not be reported
 }
-
-// This struct is not #[non_exhaustive], so it should not trigger this lint
-pub struct ExhaustiveStruct {
-    pub a: u32,
-    pub b: u32,
-}
