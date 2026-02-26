@@ -1,0 +1,64 @@
+SemverQuery(
+    id: "non_exhaustive_struct_pub_field_added",
+    human_readable_name: "public field added to #[non_exhaustive] struct",
+    description: "A new public field was added to a #[non_exhaustive] public struct.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # Count public fields in baseline
+                        field @fold @transform(op: "count") @tag(name: "baseline_fields") {
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # Count public fields in current
+                        field @fold @transform(op: "count") @filter(op: ">", value: ["%baseline_fields"]) {
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "non_exhaustive": "#[non_exhaustive]",
+    },
+    error_message: "A public field was added to a #[non_exhaustive] struct. This is a public API addition and may require a minor version bump.",
+    per_result_error_template: Some("struct {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+)

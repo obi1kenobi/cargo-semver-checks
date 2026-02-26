@@ -1,0 +1,33 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/constructible_struct_adds_field/": [
+    {
+      "path": List([
+        String("constructible_struct_adds_field"),
+        String("NonexhaustivePlainStruct"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "path": List([
+        String("constructible_struct_adds_field"),
+        String("NonexhaustiveTupleStruct"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/non_exhaustive_struct_pub_field_added/": [
+    {
+      "path": List([
+        String("non_exhaustive_struct_pub_field_added"),
+        String("NonExhaustiveStructWithNewPubField"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
