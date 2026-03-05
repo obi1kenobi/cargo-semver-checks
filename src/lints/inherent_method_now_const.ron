@@ -1,0 +1,73 @@
+SemverQuery(
+    id: "inherent_method_now_const",
+    human_readable_name: "pub method in inherent impl has newly become const",
+    description: "A public method in a public type's inherent impl has newly become `const`, allowing it to be used in a `const` context. Removing `const` later would be a breaking change.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/const_eval.html#const-functions"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline{
+                item{
+                    ...on ImplOwner{
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        owner_type: __typename @tag @output
+
+                        importable_path{
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        inherent_impl{
+                            method{
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                method_name: name @output @tag
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                # The method was NOT const in the baseline version.
+                                const @filter(op: "!=", value: ["$true"])
+                            }
+                        }
+                    }
+                }
+            }
+            current{
+                item{
+                    ...on ImplOwner{
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        __typename @filter(op: "=", value: ["%owner_type"])
+                        name @output
+
+                        importable_path{
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                        inherent_impl{
+                            method{
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                
+                                const @filter(op: "=", value: ["$true"])
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: "A public method in a public type's inherent impl has newly become `const`, allowing it to be used in a `const` context. Removing `const` later would be a breaking change.",
+    per_result_error_template: Some("method {{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

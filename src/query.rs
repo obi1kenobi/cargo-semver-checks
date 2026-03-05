@@ -1706,6 +1706,7 @@ add_lints!(
     inherent_method_must_use_added,
     inherent_method_must_use_removed,
     inherent_method_no_longer_unwind,
+    inherent_method_now_const,
     inherent_method_now_doc_hidden,
     inherent_method_now_returns_unit,
     inherent_method_now_unwind,
