@@ -2,6 +2,19 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/trait_associated_const_added_to_sealed_trait/": [
+    {
+      "name": String("SealedWillLoseSealAndGainConst"),
+      "path": List([
+        String("trait_associated_const_added_to_sealed_trait"),
+        String("SealedWillLoseSealAndGainConst"),
+      ]),
+      "span_begin_line": Uint64(63),
+      "span_end_line": Uint64(67),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_method_added/": [
     {
       "name": String("WillGainMethodWithoutDefaultAndLoseSeal"),

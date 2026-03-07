@@ -1,0 +1,61 @@
+SemverQuery(
+    id: "trait_associated_const_added_to_sealed_trait",
+    human_readable_name: "pub sealed trait added associated constant",
+    description: "A sealed public trait added a new associated constant. This is not a breaking change since downstream crates cannot implement the trait.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#trait-new-item-no-default"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        public_api_sealed @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_constant {
+                            associated_constant: name @output @tag
+                            default @output
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        public_api_sealed @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_constant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%associated_constant"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A sealed public trait added a new associated constant. Since the trait is sealed, downstream crates cannot implement it, so this is not a breaking change.",
+    per_result_error_template: Some("trait constant {{join \"::\" path}}::{{associated_constant}} in file {{span_filename}}:{{span_begin_line}}"),
+)
