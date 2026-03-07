@@ -1776,6 +1776,7 @@ add_lints!(
     trait_associated_const_default_removed,
     trait_associated_const_marked_deprecated,
     trait_associated_const_now_doc_hidden,
+    trait_associated_const_with_default_added,
     trait_associated_type_added,
     trait_associated_type_default_removed,
     trait_associated_type_marked_deprecated,
