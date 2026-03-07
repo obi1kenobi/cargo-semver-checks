@@ -145,3 +145,25 @@ pub enum HandImplToDerived {
     C,
     A,
 }
+
+// Test case: #[non_exhaustive] enum with variants reordered - should NOT trigger this lint
+// (covered by the non_exhaustive-specific companion lint instead)
+#[derive(PartialOrd, PartialEq)]
+#[non_exhaustive]
+pub enum NonExhaustiveReordered {
+    C,
+    A,
+    B,
+}
+
+// Test case: #[non_exhaustive] enum with new variants inserted but no reordering -
+// should NOT trigger this lint
+#[derive(PartialOrd, PartialEq)]
+#[non_exhaustive]
+pub enum NonExhaustiveInsertedOnly {
+    A,
+    New1,
+    B,
+    New2,
+    C,
+}

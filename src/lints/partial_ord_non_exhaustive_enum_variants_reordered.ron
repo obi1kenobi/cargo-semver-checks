@@ -1,7 +1,7 @@
 SemverQuery(
-    id: "partial_ord_enum_variants_reordered",
-    human_readable_name: "enum variants reordered in #[derive(PartialOrd)] enum",
-    description: "An exhaustive public enum that derives PartialOrd had its variants reordered, which changes its ordering behavior.",
+    id: "partial_ord_non_exhaustive_enum_variants_reordered",
+    human_readable_name: "variants reordered in #[derive(PartialOrd)] #[non_exhaustive] enum",
+    description: "A public #[non_exhaustive] enum that derives PartialOrd had its variants reordered relative to each other, which changes its ordering behavior. Merely inserting new variants between existing ones without changing their relative order does not trigger this lint.",
     required_update: Major,
     lint_level: Warn,
     reference_link: Some("https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html#derivable"),
@@ -12,7 +12,6 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         impl {
                             negative @filter(op: "=", value: ["$false"])
@@ -32,10 +31,19 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # Variant A: the one whose reordering we report.
                         variant {
                             variant_name: name @output @tag
                             public_api_eligible @filter(op: "=", value: ["$true"])
                             position @output @tag
+                        }
+
+                        # Variant B: a witness that was AFTER variant A in baseline.
+                        variant {
+                            witness_name: name @tag
+                                @filter(op: "!=", value: ["%variant_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            position @filter(op: ">", value: ["%position"])
                         }
                     }
                 }
@@ -44,7 +52,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
                         name @output
 
                         impl {
@@ -65,16 +73,24 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # Variant A in current: get its new position.
                         variant {
                             name @filter(op: "=", value: ["%variant_name"])
                             public_api_eligible @filter(op: "=", value: ["$true"])
-                            position @filter(op: "!=", value: ["%position"]) @output(name: "new_position")
+                            new_position: position @tag @output
 
                             span_: span @optional {
                                 filename @output
                                 begin_line @output
                                 end_line @output
                             }
+                        }
+
+                        # Variant B is now BEFORE variant A: an inversion.
+                        variant {
+                            name @filter(op: "=", value: ["%witness_name"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            position @filter(op: "<", value: ["%new_position"])
                         }
                     }
                 }
@@ -89,6 +105,6 @@ SemverQuery(
         "non_exhaustive": "#[non_exhaustive]",
         "partial_ord": ["core", "cmp", "PartialOrd"],
     },
-    error_message: "A public enum that derives PartialOrd had its variants reordered. #[derive(PartialOrd)] uses the enum variant order to set the enum's ordering behavior, so this change may break downstream code that relies on the previous order.",
+    error_message: "A public #[non_exhaustive] enum that derives PartialOrd had its variants reordered relative to each other. #[derive(PartialOrd)] uses the enum variant order to set the enum's ordering behavior, so this change may break downstream code that relies on the previous order.",
     per_result_error_template: Some("{{name}}::{{variant_name}} moved from position {{position}} to {{new_position}}, in {{span_filename}}:{{span_begin_line}}"),
 )
