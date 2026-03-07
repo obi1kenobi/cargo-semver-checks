@@ -1832,6 +1832,7 @@ add_lints!(
     type_generic_type_reordered,
     type_marked_deprecated,
     type_method_marked_deprecated,
+    type_method_receiver_ref_now_mutable,
     type_mismatched_generic_lifetimes,
     type_requires_more_const_generic_params,
     type_requires_more_generic_type_params,
