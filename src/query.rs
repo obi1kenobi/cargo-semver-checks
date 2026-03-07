@@ -1727,6 +1727,7 @@ add_lints!(
     non_exhaustive_enum_added,
     non_exhaustive_struct_added,
     non_exhaustive_struct_changed_type,
+    non_exhaustive_struct_pub_field_added,
     partial_ord_enum_struct_variant_fields_reordered,
     partial_ord_enum_variants_reordered,
     partial_ord_struct_fields_reordered,
