@@ -4,7 +4,7 @@ SemverQuery(
     description: "A pub function is no longer unsafe to call.",
     required_update: Minor,
     lint_level: Allow,
-    reference_link: Some("https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#calling-an-unsafe-function-or-method"),
+    reference_link: Some("https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#calling-an-unsafe-function-or-method"),
     query: r#"
     {
         CrateDiff {
