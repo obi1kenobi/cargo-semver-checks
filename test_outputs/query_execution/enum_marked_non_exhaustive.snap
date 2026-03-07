@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1073
 ---
 {
   "./test_crates/non_exhaustive/": [
@@ -11,6 +12,19 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(50),
       "span_end_line": Uint64(53),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/partial_ord_non_exhaustive_enum_variants_reordered/": [
+    {
+      "name": String("BecomesNonExhaustive"),
+      "path": List([
+        String("partial_ord_non_exhaustive_enum_variants_reordered"),
+        String("BecomesNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(109),
+      "span_end_line": Uint64(113),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1073
 ---
 {
   "./test_crates/partial_ord_enum_variants_reordered/": [
@@ -236,6 +237,47 @@ source: src/query.rs
       "span_end_line": Uint64(108),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("A"),
+    },
+  ],
+  "./test_crates/partial_ord_non_exhaustive_enum_variants_reordered/": [
+    {
+      "name": String("ExhaustiveReordered"),
+      "new_position": Int64(1),
+      "path": List([
+        String("partial_ord_non_exhaustive_enum_variants_reordered"),
+        String("ExhaustiveReordered"),
+      ]),
+      "position": Int64(3),
+      "span_begin_line": Uint64(36),
+      "span_end_line": Uint64(36),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("C"),
+    },
+    {
+      "name": String("ExhaustiveReordered"),
+      "new_position": Int64(2),
+      "path": List([
+        String("partial_ord_non_exhaustive_enum_variants_reordered"),
+        String("ExhaustiveReordered"),
+      ]),
+      "position": Int64(1),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("A"),
+    },
+    {
+      "name": String("ExhaustiveReordered"),
+      "new_position": Int64(3),
+      "path": List([
+        String("partial_ord_non_exhaustive_enum_variants_reordered"),
+        String("ExhaustiveReordered"),
+      ]),
+      "position": Int64(2),
+      "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(38),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("B"),
     },
   ],
 }
