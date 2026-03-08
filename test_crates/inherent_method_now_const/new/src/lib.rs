@@ -1,6 +1,6 @@
 #![no_std]
 
-//TRUE POSITIVES: these methods are now const, but were not const in the old version, so should be reported.
+// TRUE POSITIVES: these methods are now const, but were not const in the old version, so should be reported.
 
 pub struct PubStruct;
 
@@ -43,7 +43,7 @@ impl PubUnion {
     }
 }
 
-//FALSE POSITIVES: these methods are const in both versions, so should NOT be reported.
+// FALSE POSITIVES: these methods are const in both versions, so should NOT be reported.
 
 pub struct AlreadyConst;
 

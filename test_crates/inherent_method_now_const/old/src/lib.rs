@@ -1,6 +1,6 @@
 #![no_std]
 
-//TRUE POSITIVES: these methods become const in the new version
+// TRUE POSITIVES: these methods become const in the new version
 
 pub struct PubStruct;
 
