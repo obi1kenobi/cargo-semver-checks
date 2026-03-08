@@ -1,0 +1,119 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/sealed_trait_associated_type_added/": [
+    {
+      "associated_type": String("Bar"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("SealedWillGainTypeWithoutDefault"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Bar"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("SealedWillGainTypeWithDefault"),
+      ]),
+      "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(21),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Two"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("SealedWillGainAnotherType"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Bar"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("PublicAPISealedWillGainType"),
+      ]),
+      "span_begin_line": Uint64(39),
+      "span_end_line": Uint64(39),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Bar"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("SealedWillGainTwoTypes"),
+      ]),
+      "span_begin_line": Uint64(46),
+      "span_end_line": Uint64(46),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Baz"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("SealedWillGainTwoTypes"),
+      ]),
+      "span_begin_line": Uint64(47),
+      "span_end_line": Uint64(47),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_associated_type_added/": [
+    {
+      "associated_type": String("Bar"),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainTypeWithoutDefaultSealed"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Bar"),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainTypeWithDefaultSealed"),
+      ]),
+      "span_begin_line": Uint64(34),
+      "span_end_line": Uint64(34),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Two"),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainAnotherTypeWithoutDefaultSealed"),
+      ]),
+      "span_begin_line": Uint64(48),
+      "span_end_line": Uint64(48),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Bar"),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("PublicAPISealed"),
+      ]),
+      "span_begin_line": Uint64(77),
+      "span_end_line": Uint64(77),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

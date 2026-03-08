@@ -2,6 +2,32 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/sealed_trait_associated_type_added/": [
+    {
+      "associated_type": String("Bar"),
+      "has_default": Boolean(false),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("NonSealedWillGainTypeWithoutDefault"),
+      ]),
+      "span_begin_line": Uint64(57),
+      "span_end_line": Uint64(57),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Bar"),
+      "has_default": Boolean(false),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("NonSealedWillGainSealAndType"),
+      ]),
+      "span_begin_line": Uint64(81),
+      "span_end_line": Uint64(81),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_associated_type_added/": [
     {
       "associated_type": String("Bar"),

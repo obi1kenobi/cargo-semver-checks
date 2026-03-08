@@ -1754,6 +1754,7 @@ add_lints!(
     repr_packed_added,
     repr_packed_changed,
     repr_packed_removed,
+    sealed_trait_associated_type_added,
     sized_impl_removed,
     static_became_unsafe,
     struct_field_marked_deprecated,

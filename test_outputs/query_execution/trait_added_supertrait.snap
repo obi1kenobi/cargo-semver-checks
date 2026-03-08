@@ -2,6 +2,19 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/sealed_trait_associated_type_added/": [
+    {
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("NonSealedWillGainSealAndType"),
+      ]),
+      "span_begin_line": Uint64(80),
+      "span_end_line": Uint64(84),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("Sealed"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_added_supertrait/": [
     {
       "path": List([
