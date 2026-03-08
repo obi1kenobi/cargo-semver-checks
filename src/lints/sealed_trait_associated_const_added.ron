@@ -1,7 +1,7 @@
 SemverQuery(
     id: "sealed_trait_associated_const_added",
     human_readable_name: "pub sealed trait added associated constant",
-    description: "A sealed public trait added a new associated constant. This is not a breaking change since downstream crates cannot implement the trait.",
+    description: "A sealed public trait added a new associated constant. This is not a breaking change since downstream crates couldn't have implemented the sealed trait.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#trait-new-item-no-default"),
