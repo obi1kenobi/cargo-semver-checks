@@ -1,21 +1,24 @@
 use std::borrow::Cow;
 use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 
-use anyhow::{Context as _, bail};
+use anyhow::{bail, Context as _};
 use itertools::Itertools;
 use serde::Serialize;
+use tame_index::external::reqwest::header;
 use tame_index::IndexKrate;
 use trustfall_rustdoc::VersionedStorage;
 
-use crate::GlobalConfig;
 use crate::data_generation::{CrateDataRequest, IntoTerminalResult as _, TerminalError};
 use crate::manifest::Manifest;
+use crate::GlobalConfig;
 
 #[derive(Debug, Clone)]
 pub(crate) enum CrateSource<'a> {
     Registry {
         versioned_krate: &'a tame_index::IndexVersion,
+        registry_name: Option<&'a str>,
     },
     ManifestPath {
         manifest: &'a Manifest,
@@ -252,6 +255,8 @@ impl FeatureConfig {
 pub(crate) struct CrateDataForRustdoc<'a> {
     pub(crate) crate_type: CrateType,
     pub(crate) name: String,
+    /// `None` means crates.io, otherwise a name from `package.publish`
+    pub(crate) registry_name: Option<String>,
     pub(crate) feature_config: &'a FeatureConfig,
     pub(crate) build_target: Option<&'a str>,
 }
@@ -273,9 +278,11 @@ pub(crate) fn generate_data_request<'a>(
 
     match crate_source {
         CrateSource::Registry {
-            versioned_krate, ..
+            versioned_krate,
+            registry_name,
         } => CrateDataRequest::from_index(
             versioned_krate,
+            registry_name,
             default_features,
             extra_features,
             crate_data.build_target,
@@ -335,27 +342,27 @@ pub(crate) enum RustdocGenerator {
     Registry(RustdocFromRegistry),
 }
 
-impl From<RustdocFromFile> for RustdocGenerator {
+impl From<RustdocFromFile> for Rc<RustdocGenerator> {
     fn from(value: RustdocFromFile) -> Self {
-        Self::File(value)
+        Rc::new(RustdocGenerator::File(value))
     }
 }
 
-impl From<RustdocFromProjectRoot> for RustdocGenerator {
+impl From<RustdocFromProjectRoot> for Rc<RustdocGenerator> {
     fn from(value: RustdocFromProjectRoot) -> Self {
-        Self::ProjectRoot(value)
+        Rc::new(RustdocGenerator::ProjectRoot(value))
     }
 }
 
-impl From<RustdocFromGitRevision> for RustdocGenerator {
+impl From<RustdocFromGitRevision> for Rc<RustdocGenerator> {
     fn from(value: RustdocFromGitRevision) -> Self {
-        Self::GitRevision(value)
+        Rc::new(RustdocGenerator::GitRevision(value))
     }
 }
 
-impl From<RustdocFromRegistry> for RustdocGenerator {
+impl From<RustdocFromRegistry> for Rc<RustdocGenerator> {
     fn from(value: RustdocFromRegistry) -> Self {
-        Self::Registry(value)
+        Rc::new(RustdocGenerator::Registry(value))
     }
 }
 
@@ -411,6 +418,7 @@ impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
         generator: &'a RustdocGenerator,
         config: &mut GlobalConfig,
         crate_data: &'a CrateDataForRustdoc<'a>,
+        generation_settings: super::data_generation::GenerationSettings,
     ) -> Result<Self, TerminalError> {
         let coupled_data = match generator {
             RustdocGenerator::File(generator) => CoupledState::File { generator },
@@ -420,12 +428,14 @@ impl<'a> StatefulRustdocGenerator<'a, CoupledState<'a>> {
             RustdocGenerator::GitRevision(generator) => CoupledState::GitRevision { generator },
 
             RustdocGenerator::Registry(generator) => {
-                let krate = generator.get_krate(config, crate_data).map_err(|err| {
-                    terminal_context(
-                        err,
-                        "failed to retrieve index of crate versions from registry",
-                    )
-                })?;
+                let krate = generator
+                    .get_krate(config, crate_data, generation_settings)
+                    .map_err(|err| {
+                        terminal_context(
+                            err,
+                            "failed to retrieve index of crate versions from registry",
+                        )
+                    })?;
                 CoupledState::Registry { generator, krate }
             }
         };
@@ -746,6 +756,8 @@ pub(crate) struct RustdocFromRegistry {
     target_root: PathBuf,
     version: Option<semver::Version>,
     index: tame_index::index::RemoteSparseIndex,
+    // Local-config-dependent name of a custom registry. `None` for crates.io.
+    registry_name: Option<String>,
 }
 
 impl core::fmt::Debug for RustdocFromRegistry {
@@ -759,30 +771,38 @@ impl core::fmt::Debug for RustdocFromRegistry {
 }
 
 impl RustdocFromRegistry {
-    pub fn new(target_root: &std::path::Path, _config: &mut GlobalConfig) -> anyhow::Result<Self> {
-        let index_url = tame_index::IndexUrl::crates_io(
-            // This is the config root, where .cargo/config.toml configuration files
-            // are crawled to determine if crates.io has been source replaced
-            // <https://doc.rust-lang.org/cargo/reference/source-replacement.html>
-            // if not specified it defaults to the current working directory,
-            // which is the same default that cargo uses, though note this can be
-            // extremely confusing if one can specify the manifest path of the
-            // crate from a different current working directory, though AFAICT
-            // this is not how this binary works
-            None,
-            // If set this overrides the CARGO_HOME that is used for both finding
-            // the "global" default config if not overriden during directory
-            // traversal to the root, as well as where the various registry
-            // indices/git sources are rooted. This is generally only useful
-            // for testing
-            None,
-            // If set, overrides the version of the cargo binary used, this is used
-            // as a fallback to determine if the version is 1.70.0+, which means
-            // the default crates.io registry to use is the sparse registry, else
-            // it is the old git registry
-            None,
-        )
-        .context("failed to obtain crates.io url")?;
+    pub fn new(
+        target_root: &std::path::Path,
+        custom_registry_name: Option<&str>,
+        config: &mut GlobalConfig,
+    ) -> anyhow::Result<Self> {
+        // This is the config root, where .cargo/config.toml configuration files
+        // are crawled to determine if crates.io has been source replaced
+        // <https://doc.rust-lang.org/cargo/reference/source-replacement.html>
+        // if not specified it defaults to the current working directory,
+        // which is the same default that cargo uses, though note this can be
+        // extremely confusing if one can specify the manifest path of the
+        // crate from a different current working directory, though AFAICT
+        // this is not how this binary works
+        let config_root = None;
+        // If set this overrides the CARGO_HOME that is used for both finding
+        // the "global" default config if not overriden during directory
+        // traversal to the root, as well as where the various registry
+        // indices/git sources are rooted. This is generally only useful
+        // for testing
+        let cargo_home = None;
+        // If set, overrides the version of the cargo binary used, this is used
+        // as a fallback to determine if the version is 1.70.0+, which means
+        // the default crates.io registry to use is the sparse registry, else
+        // it is the old git registry
+        let cargo_version = None;
+
+        let index_url = match custom_registry_name {
+            Some(name) => tame_index::IndexUrl::for_registry_name(config_root, cargo_home, name)
+                .with_context(|| format!("failed to obtain url for a custom registry '{name}'"))?,
+            None => tame_index::IndexUrl::crates_io(config_root, cargo_home, cargo_version)
+                .context("failed to obtain crates.io url")?,
+        };
 
         if !index_url.is_sparse() {
             bail!(
@@ -798,8 +818,14 @@ impl RustdocFromRegistry {
         }
 
         let sparse = tame_index::index::SparseIndex::new(tame_index::IndexLocation::new(index_url))
-            .context("failed to open crates.io sparse index")?;
-        let client = tame_index::external::reqwest::blocking::Client::builder()
+            .context("failed to open sparse index")?;
+        let mut builder = tame_index::external::reqwest::blocking::Client::builder();
+        if let Some(registry_name) = custom_registry_name {
+            if let Some(headers) = auth_headers_for_registry(registry_name, config)? {
+                builder = builder.default_headers(headers);
+            }
+        }
+        let client = builder
             .build()
             .context("failed to build HTTP client")?;
         let index = tame_index::index::RemoteSparseIndex::new(sparse, client);
@@ -808,6 +834,7 @@ impl RustdocFromRegistry {
             target_root: target_root.to_owned(),
             version: None,
             index,
+            registry_name: custom_registry_name.map(From::from),
         })
     }
 
@@ -815,11 +842,74 @@ impl RustdocFromRegistry {
         self.version = Some(version);
     }
 
+    /// Downloading from the registry with correct authentication requires real Cargo,
+    /// so this uses `cargo info` to make Cargo fetch and cache the crate,
+    /// and then tries to get it from the cache.
+    ///
+    /// The global package lock must be unlocked before calling this.
+    fn custom_registry_download_fallback(
+        &self,
+        config: &mut GlobalConfig,
+        generation_settings: super::data_generation::GenerationSettings,
+        crate_name: &str,
+        validated_name: tame_index::KrateName<'_>,
+    ) -> Option<IndexKrate> {
+        let Some(registry_name) = &self.registry_name else {
+            return None;
+        };
+        config
+            .shell_status(
+                "Fallback",
+                format_args!(
+                    "Using `cargo` to fetch '{crate_name}' from the '{registry_name}' registry"
+                ),
+            )
+            .ok()?;
+        let fetched_ok = std::process::Command::new("cargo")
+            .args([
+                "info",
+                generation_settings.color_flag(),
+                "--registry",
+                registry_name,
+                crate_name,
+            ])
+            .stdin(std::process::Stdio::null())
+            .stderr(if generation_settings.pass_through_stderr {
+                std::process::Stdio::inherit()
+            } else {
+                std::process::Stdio::null()
+            })
+            .stdout(if config.is_verbose() {
+                std::process::Stdio::inherit()
+            } else {
+                std::process::Stdio::null()
+            })
+            .status()
+            .ok()?
+            .success();
+        if !fetched_ok {
+            return None;
+        }
+        let lock = acquire_cargo_global_package_lock(config).ok()?;
+        self.index.cached_krate(validated_name, &lock).ok()?
+    }
+
     pub(crate) fn get_krate(
         &self,
         config: &mut GlobalConfig,
         crate_data: &CrateDataForRustdoc<'_>,
+        generation_settings: super::data_generation::GenerationSettings,
     ) -> Result<IndexKrate, TerminalError> {
+        let crate_name = &crate_data.name;
+        let current_registry_name = self.registry_name.as_deref().unwrap_or("crates.io");
+        if crate_data.registry_name != self.registry_name {
+            let crates_registry = crate_data.registry_name.as_deref().unwrap_or("crates.io");
+            return Err(anyhow::format_err!(
+                "Can't check crate '{crate_name}', because it's from '{crates_registry}' \
+                 registry, but the check is using '{current_registry_name}'"
+            ))
+            .into_terminal_result();
+        }
         let lock = acquire_cargo_global_package_lock(config).into_terminal_result()?;
         let validated_name = crate_data
             .name
@@ -827,24 +917,32 @@ impl RustdocFromRegistry {
             .try_into()
             .expect("this should be impossible");
         let krate = self.index.krate(validated_name, false, &lock)
+            .inspect(|_| drop(lock))
+            .or_else(|err| {
+                match &err {
+                    // Use the fallback method in case of authentication errors
+                    tame_index::Error::Http(tame_index::HttpError::StatusCode { code, .. }) if code.as_u16() == 401 => {
+                        self.custom_registry_download_fallback(config, generation_settings, crate_name, validated_name)
+                    },
+                    _ => None,
+                }.ok_or(err).map(Some)
+            })
             .with_context(|| {
-                format!("failed to read index metadata for crate '{}'", crate_data.name)
+                format!("failed to read {current_registry_name} index metadata for crate '{crate_name}'")
             }).into_terminal_result()?
             .with_context(|| {
             anyhow::format_err!(
-                "{} not found in registry (crates.io). \
+                "'{crate_name}' not found in registry ({current_registry_name}). \
         For workarounds check \
         https://github.com/obi1kenobi/cargo-semver-checks#does-the-crate-im-checking-have-to-be-published-on-cratesio",
-                crate_data.name
             )
         }).into_terminal_result()?;
-        drop(lock);
 
         Ok(krate)
     }
 
     fn get_crate_source<'a>(
-        &self,
+        &'a self,
         crate_data: &CrateDataForRustdoc<'_>,
         krate: &'a IndexKrate,
     ) -> Result<CrateSource<'a>, TerminalError> {
@@ -871,15 +969,52 @@ impl RustdocFromRegistry {
             })
             .with_context(|| {
                 anyhow::format_err!(
-                    "crate {} version {} not found in registry",
+                    "crate {} version {} not found in \
+                     {} registry",
                     crate_data.name,
-                    base_version
+                    base_version,
+                    self.registry_name.as_deref().unwrap_or("crates.io")
                 )
             })
             .into_terminal_result()?;
 
-        Ok(CrateSource::Registry { versioned_krate })
+        Ok(CrateSource::Registry {
+            versioned_krate,
+            registry_name: self.registry_name.as_deref(),
+        })
     }
+}
+
+/// This is a basic fallback due to lack of auth handling in tame-index:
+/// <https://github.com/EmbarkStudios/tame-index/issues/50#issuecomment-1982613779>
+fn auth_headers_for_registry(
+    registry_name: &str,
+    config: &mut GlobalConfig,
+) -> Result<Option<header::HeaderMap>, anyhow::Error> {
+    let var_name = format!(
+        "CARGO_REGISTRIES_{}_TOKEN",
+        registry_name.to_uppercase().replace('-', "_")
+    );
+    Ok(match std::env::var(&var_name) {
+        Ok(token) if !token.trim_ascii_start().is_empty() => {
+            config.log_verbose(|config| {
+                config.shell_note(format_args!(
+                    "Using {var_name} to authenticate with the '{registry_name}' registry"
+                ))
+            })?;
+            let auth_header = header::HeaderValue::from_str(&token)
+                .with_context(|| format!("invalid auth token in {var_name}"))?;
+            let mut headers = header::HeaderMap::with_capacity(1);
+            headers.append(header::AUTHORIZATION, auth_header);
+            Some(headers)
+        }
+        _ => {
+            config.shell_note(format_args!(
+                "Set {var_name} env var to authenticate with the '{registry_name}' registry directly"
+            ))?;
+            None
+        }
+    })
 }
 
 fn choose_baseline_version(
