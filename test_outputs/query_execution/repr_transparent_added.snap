@@ -1,0 +1,30 @@
+---
+source: src/query.rs
+assertion_line: 1073
+---
+{
+  "./test_crates/repr_transparent_added/": [
+    {
+      "name": String("StructGainsTransparent"),
+      "path": List([
+        String("repr_transparent_added"),
+        String("StructGainsTransparent"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Struct"),
+    },
+    {
+      "name": String("EnumGainsTransparent"),
+      "path": List([
+        String("repr_transparent_added"),
+        String("EnumGainsTransparent"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "type": String("Enum"),
+    },
+  ],
+}
