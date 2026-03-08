@@ -1,0 +1,77 @@
+SemverQuery(
+    id: "repr_c_added",
+    human_readable_name: "repr(C) added",
+    description: "A struct, enum, or union gained a #[repr(C)] attribute.",
+    reference: Some("Adding repr(C) to a default-repr type is a non-breaking change, but can be tracked as a minor-level API addition."),
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#repr-c-add"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on ImplOwner {
+                        type: __typename @filter(op: "one_of", value: ["$types"]) @output @tag
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        attribute {
+                            repr_C: raw_attribute @output
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$c"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        __typename @filter(op: "=", value: ["%type"])
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            content {
+                                base @filter(op: "=", value: ["$repr"])
+                                argument {
+                                    base @filter(op: "=", value: ["$c"])
+                                }
+                            }
+                        }
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "c": "C",
+        "public": "public",
+        "repr": "repr",
+        "true": true,
+        "types": ["Struct", "Enum", "Union"],
+        "zero": 0,
+    },
+    error_message: "repr(C) was added to a public type. This guarantees a C-compatible memory layout.",
+    per_result_error_template: Some("{{lowercase type}} {{name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
