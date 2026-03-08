@@ -1,0 +1,55 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/inherent_method_now_const/": [
+    {
+      "method_name": String("becomes_const"),
+      "name": String("PubStruct"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("inherent_method_now_const"),
+        String("PubStruct"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("assoc_fn_becomes_const"),
+      "name": String("PubStruct"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("inherent_method_now_const"),
+        String("PubStruct"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("becomes_const"),
+      "name": String("PubEnum"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("inherent_method_now_const"),
+        String("PubEnum"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("new"),
+      "name": String("PubUnion"),
+      "owner_type": String("Union"),
+      "path": List([
+        String("inherent_method_now_const"),
+        String("PubUnion"),
+      ]),
+      "span_begin_line": Uint64(41),
+      "span_end_line": Uint64(43),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

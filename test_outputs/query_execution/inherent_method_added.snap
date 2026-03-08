@@ -382,6 +382,20 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/inherent_method_now_const/": [
+    {
+      "method_name": String("brand_new_const_method"),
+      "name": String("NewConstMethod"),
+      "path": List([
+        String("inherent_method_now_const"),
+        String("NewConstMethod"),
+      ]),
+      "span_begin_line": Uint64(112),
+      "span_end_line": Uint64(114),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/inherent_method_unsafe_added/": [
     {
       "method_name": String("new_unsafe_associated_fn"),
