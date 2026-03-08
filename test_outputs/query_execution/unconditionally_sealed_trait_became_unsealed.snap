@@ -2,11 +2,11 @@
 source: src/query.rs
 ---
 {
-  "./test_crates/trait_associated_const_added_to_sealed_trait/": [
+  "./test_crates/sealed_trait_associated_const_added/": [
     {
       "name": String("SealedWillLoseSealAndGainConst"),
       "path": List([
-        String("trait_associated_const_added_to_sealed_trait"),
+        String("sealed_trait_associated_const_added"),
         String("SealedWillLoseSealAndGainConst"),
       ]),
       "span_begin_line": Uint64(63),

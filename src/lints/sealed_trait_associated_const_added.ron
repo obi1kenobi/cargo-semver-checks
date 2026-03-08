@@ -1,5 +1,5 @@
 SemverQuery(
-    id: "trait_associated_const_added_to_sealed_trait",
+    id: "sealed_trait_associated_const_added",
     human_readable_name: "pub sealed trait added associated constant",
     description: "A sealed public trait added a new associated constant. This is not a breaking change since downstream crates cannot implement the trait.",
     required_update: Minor,

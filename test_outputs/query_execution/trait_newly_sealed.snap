@@ -2,6 +2,19 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/sealed_trait_associated_const_added/": [
+    {
+      "name": String("NonSealedWillGainSealAndConst"),
+      "path": List([
+        String("sealed_trait_associated_const_added"),
+        String("NonSealedWillGainSealAndConst"),
+      ]),
+      "span_begin_line": Uint64(72),
+      "span_end_line": Uint64(76),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_associated_const_added/": [
     {
       "name": String("WillGainConstWithoutDefaultAndSeal"),
@@ -22,19 +35,6 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(48),
       "span_end_line": Uint64(53),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-  ],
-  "./test_crates/trait_associated_const_added_to_sealed_trait/": [
-    {
-      "name": String("NonSealedWillGainSealAndConst"),
-      "path": List([
-        String("trait_associated_const_added_to_sealed_trait"),
-        String("NonSealedWillGainSealAndConst"),
-      ]),
-      "span_begin_line": Uint64(72),
-      "span_end_line": Uint64(76),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
