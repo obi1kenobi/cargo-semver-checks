@@ -1,0 +1,95 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/inherent_associated_pub_const_missing/": [
+    {
+      "associated_constant": String("N_A"),
+      "default": String("0"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("TraitA"),
+      ]),
+      "span_begin_line": Uint64(62),
+      "span_end_line": Uint64(62),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_associated_const_added/": [
+    {
+      "associated_constant": String("BAR"),
+      "default": String("true"),
+      "path": List([
+        String("trait_associated_const_added"),
+        String("WillGainConstWithDefault"),
+      ]),
+      "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(25),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_associated_const_with_default_added/": [
+    {
+      "associated_constant": String("BAR"),
+      "default": String("true"),
+      "path": List([
+        String("trait_associated_const_with_default_added"),
+        String("WillGainConstWithDefault"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("TWO"),
+      "default": String("false"),
+      "path": List([
+        String("trait_associated_const_with_default_added"),
+        String("WillGainAnotherConstWithDefault"),
+      ]),
+      "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(21),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("FOO"),
+      "default": String("true"),
+      "path": List([
+        String("trait_associated_const_with_default_added"),
+        String("WillGainTwoConstsWithDefault"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("BAR"),
+      "default": String("false"),
+      "path": List([
+        String("trait_associated_const_with_default_added"),
+        String("WillGainTwoConstsWithDefault"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("BAR"),
+      "default": String("true"),
+      "path": List([
+        String("trait_associated_const_with_default_added"),
+        String("WillGainDocHiddenConstWithDefault"),
+      ]),
+      "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(38),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

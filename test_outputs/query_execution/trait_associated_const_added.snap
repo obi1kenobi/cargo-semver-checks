@@ -66,4 +66,18 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/trait_associated_const_with_default_added/": [
+    {
+      "associated_constant": String("BAR"),
+      "default": Null,
+      "path": List([
+        String("trait_associated_const_with_default_added"),
+        String("WillGainConstWithoutDefault"),
+      ]),
+      "span_begin_line": Uint64(48),
+      "span_end_line": Uint64(48),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
