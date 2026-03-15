@@ -2,6 +2,7 @@
 
 use std::{collections::HashSet, env, ffi::OsStr, io::Write as _, path::PathBuf};
 
+use anstream::ColorChoice as AnstreamChoice;
 use anstyle::{AnsiColor, Color, Reset, Style};
 use cargo_config2::Config;
 use cargo_semver_checks::{
@@ -17,11 +18,36 @@ mod snapshot_tests;
 fn main() {
     human_panic::setup_panic!();
 
+    // Configure colorful output based on the environmental variable. We match the behavior of
+    // Cargo in <https://doc.rust-lang.org/cargo/reference/config.html#termcolor>. This is
+    // specifically done before `Cargo::parse()` so that users can configure whether
+    // `cargo semver-checks --help` has colorful output.
+    match env::var("CARGO_TERM_COLOR").as_deref() {
+        Ok("always") => AnstreamChoice::Always,
+        Ok("never") => AnstreamChoice::Never,
+        // If `auto` is set or the env var is invalid, we set the choice to auto.
+        _ => AnstreamChoice::Auto,
+    }
+    .write_global();
+
     let Cargo::SemverChecks(args) = Cargo::parse();
 
     let feature_flags = HashSet::from_iter(args.unstable_features.clone());
 
-    configure_color(args.color_choice);
+    // If `--color` is passed to the CLI, override any existing color choice (including that set
+    // by the environmental variable.)
+    if let Some(cli_choice) = args.color_choice {
+        use clap::ColorChoice as ClapChoice;
+
+        let choice = match cli_choice {
+            ClapChoice::Always => AnstreamChoice::Always,
+            ClapChoice::Auto => AnstreamChoice::Auto,
+            ClapChoice::Never => AnstreamChoice::Never,
+        };
+
+        choice.write_global();
+    }
+
     let mut config = GlobalConfig::new();
     config.set_log_level(args.verbosity.log_level());
     config.set_feature_flags(feature_flags);
@@ -176,33 +202,6 @@ fn exit_on_error<T>(log_errors: bool, mut inner: impl FnMut() -> anyhow::Result<
             std::process::exit(1)
         }
     }
-}
-
-/// helper function to determine whether to use colors based on the (passed) `--color` flag
-/// and the value of the `CARGO_TERM_COLOR` variable.
-///
-/// If the `--color` flag is set to something valid, it overrides anything in
-/// the `CARGO_TERM_COLOR` environment variable
-fn configure_color(cli_choice: Option<clap::ColorChoice>) {
-    use anstream::ColorChoice as AnstreamChoice;
-    use clap::ColorChoice as ClapChoice;
-    let choice = match cli_choice {
-        Some(ClapChoice::Always) => AnstreamChoice::Always,
-        Some(ClapChoice::Auto) => AnstreamChoice::Auto,
-        Some(ClapChoice::Never) => AnstreamChoice::Never,
-        // we match the behavior of cargo in
-        // https://doc.rust-lang.org/cargo/reference/config.html#termcolor
-        // note that [`ColorChoice::AlwaysAnsi`] is not supported by cargo.
-        None => match env::var("CARGO_TERM_COLOR").as_deref() {
-            Ok("always") => AnstreamChoice::Always,
-            Ok("never") => AnstreamChoice::Never,
-            // if `auto` is set, or the env var is invalid
-            // or both the env var and flag are not set, we set the choice to auto
-            _ => AnstreamChoice::Auto,
-        },
-    };
-
-    choice.write_global();
 }
 
 fn print_issue_url(config: &mut GlobalConfig) {
