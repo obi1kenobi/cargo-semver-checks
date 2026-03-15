@@ -276,6 +276,7 @@ fn print_issue_url(config: &mut GlobalConfig) {
 #[command(name = "cargo")]
 #[command(bin_name = "cargo")]
 #[command(version, propagate_version = true)]
+#[command(styles = clap_cargo::style::CLAP_STYLING)]
 enum Cargo {
     SemverChecks(SemverChecks),
 }
