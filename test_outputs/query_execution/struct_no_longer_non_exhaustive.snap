@@ -2,6 +2,20 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/non_exhaustive_struct_pub_field_added/": [
+    {
+      "name": String("LosesNonExhaustiveAndGainsField"),
+      "path": List([
+        String("non_exhaustive_struct_pub_field_added"),
+        String("LosesNonExhaustiveAndGainsField"),
+      ]),
+      "span_begin_line": Uint64(70),
+      "span_end_line": Uint64(73),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/struct_no_longer_non_exhaustive/": [
     {
       "name": String("MyStruct"),

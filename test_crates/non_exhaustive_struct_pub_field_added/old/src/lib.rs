@@ -51,7 +51,22 @@ pub struct UnchangedStruct {
     pub y: i64,
 }
 
-// Not #[non_exhaustive] and stays that way, therefore this lint wont fire here.
+// This struct has never been #[non_exhaustive] and should not be reported.
 pub struct WasNeverNonExhaustive {
     pub x: i64,
+}
+
+// Was #[non_exhaustive] in the baseline; the new pub field should be reported.
+// struct_no_longer_non_exhaustive fires separately for losing the attribute.
+#[non_exhaustive]
+pub struct LosesNonExhaustiveAndGainsField {
+    pub x: i64,
+}
+
+// The field y is private here and becomes public in the new version.
+// That's a separate change and should not be reported by this lint.
+#[non_exhaustive]
+pub struct PrivateFieldBecomesPublic {
+    pub x: i64,
+    y: i64,
 }

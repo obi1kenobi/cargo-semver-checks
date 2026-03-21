@@ -83,6 +83,17 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
       "struct_name": String("StructGainsTwoFields"),
     },
+    {
+      "field_name": String("y"),
+      "path": List([
+        String("non_exhaustive_struct_pub_field_added"),
+        String("LosesNonExhaustiveAndGainsField"),
+      ]),
+      "span_begin_line": Uint64(72),
+      "span_end_line": Uint64(72),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("LosesNonExhaustiveAndGainsField"),
+    },
   ],
   "./test_crates/tuple_struct_to_plain_struct/": [
     {

@@ -27,8 +27,7 @@ pub struct StructGainsTwoFields {
     pub z: i64,
 }
 
-// Not #[non_exhaustive], so constructible_struct_adds_field covers this instead.
-// Kept unchanged to avoid triggering that lint.
+// Not #[non_exhaustive], so constructible_struct_adds_field covers field additions here.
 pub struct ExhaustiveStruct {
     pub x: i64,
 }
@@ -61,7 +60,22 @@ pub struct UnchangedStruct {
     pub y: i64,
 }
 
-// Was not #[non_exhaustive] in baseline, kept unchanged.
+// Not #[non_exhaustive] and unchanged from baseline, so not reported.
 pub struct WasNeverNonExhaustive {
     pub x: i64,
+}
+
+// Was #[non_exhaustive] in the baseline; the new pub field should be reported.
+// struct_no_longer_non_exhaustive fires separately for losing the attribute.
+pub struct LosesNonExhaustiveAndGainsField {
+    pub x: i64,
+    pub y: i64,
+}
+
+// The field y was private in the baseline and is now public.
+// That's a separate change and should not be reported by this lint.
+#[non_exhaustive]
+pub struct PrivateFieldBecomesPublic {
+    pub x: i64,
+    pub y: i64,
 }

@@ -12,7 +12,6 @@ SemverQuery(
                 item {
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
                         struct_name: name @output
 
                         importable_path {
@@ -48,10 +47,9 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The new field did not previously exist as a pub field.
+                        # No field with this name existed in the baseline, not even as private.
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             name @filter(op: "=", value: ["%field_name"])
-                            visibility_limit @filter(op: "=", value: ["$public"])
                         }
                     }
                 }
@@ -64,7 +62,7 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "A #[non_exhaustive] pub struct gained a new pub field. Since it's #[non_exhaustive], downstream patterns already require a `..` wildcard and continue to compile.",
+    error_message: "A #[non_exhaustive] pub struct gained a new pub field. This is not a major breaking change since downstream uses already could not construct or exhaustively match the struct.",
     per_result_error_template: Some("field {{struct_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )
