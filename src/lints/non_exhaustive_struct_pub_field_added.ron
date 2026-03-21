@@ -1,0 +1,70 @@
+SemverQuery(
+    id: "non_exhaustive_struct_pub_field_added",
+    human_readable_name: "#[non_exhaustive] pub struct gains pub field",
+    description: "A #[non_exhaustive] pub struct has a new pub field.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
+                        struct_name: name @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        field {
+                            field_name: name @output @tag
+                            visibility_limit @filter(op: "=", value: ["$public"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        # The struct must already have been #[non_exhaustive] in the baseline.
+                        # If it wasn't, other lints (e.g. constructible_struct_adds_field) handle
+                        # the field addition as a major breaking change instead.
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # The new field did not previously exist as a pub field.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%field_name"])
+                            visibility_limit @filter(op: "=", value: ["$public"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "non_exhaustive": "#[non_exhaustive]",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A #[non_exhaustive] pub struct gained a new pub field. Since it's #[non_exhaustive], downstream patterns already require a `..` wildcard and continue to compile.",
+    per_result_error_template: Some("field {{struct_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

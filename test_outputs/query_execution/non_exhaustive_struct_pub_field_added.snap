@@ -1,0 +1,122 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/constructible_struct_adds_field/": [
+    {
+      "field_name": String("new_field"),
+      "path": List([
+        String("constructible_struct_adds_field"),
+        String("NonexhaustivePlainStruct"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("NonexhaustivePlainStruct"),
+    },
+    {
+      "field_name": String("2"),
+      "path": List([
+        String("constructible_struct_adds_field"),
+        String("NonexhaustiveTupleStruct"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(27),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("NonexhaustiveTupleStruct"),
+    },
+  ],
+  "./test_crates/non_exhaustive_struct_pub_field_added/": [
+    {
+      "field_name": String("y"),
+      "path": List([
+        String("non_exhaustive_struct_pub_field_added"),
+        String("PlainStruct"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("PlainStruct"),
+    },
+    {
+      "field_name": String("x"),
+      "path": List([
+        String("non_exhaustive_struct_pub_field_added"),
+        String("EmptyStruct"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("EmptyStruct"),
+    },
+    {
+      "field_name": String("y"),
+      "path": List([
+        String("non_exhaustive_struct_pub_field_added"),
+        String("my_module"),
+        String("NestedStruct"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("NestedStruct"),
+    },
+    {
+      "field_name": String("y"),
+      "path": List([
+        String("non_exhaustive_struct_pub_field_added"),
+        String("StructGainsTwoFields"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("StructGainsTwoFields"),
+    },
+    {
+      "field_name": String("z"),
+      "path": List([
+        String("non_exhaustive_struct_pub_field_added"),
+        String("StructGainsTwoFields"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(27),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("StructGainsTwoFields"),
+    },
+  ],
+  "./test_crates/tuple_struct_to_plain_struct/": [
+    {
+      "field_name": String("a"),
+      "path": List([
+        String("tuple_struct_to_plain_struct"),
+        String("TupleToPlainStructNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("TupleToPlainStructNonExhaustive"),
+    },
+    {
+      "field_name": String("b"),
+      "path": List([
+        String("tuple_struct_to_plain_struct"),
+        String("TupleToPlainStructNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(21),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("TupleToPlainStructNonExhaustive"),
+    },
+    {
+      "field_name": String("c"),
+      "path": List([
+        String("tuple_struct_to_plain_struct"),
+        String("TupleToPlainStructNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("TupleToPlainStructNonExhaustive"),
+    },
+  ],
+}
