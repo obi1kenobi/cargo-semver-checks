@@ -2,7 +2,7 @@
 
 pub enum EnumWithNewVariant {
     OldVariant,
-    
+
     OldStructVariant {
         x: i64,
     },

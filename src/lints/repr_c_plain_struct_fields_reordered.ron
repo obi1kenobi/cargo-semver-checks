@@ -27,7 +27,7 @@ SemverQuery(
                             path @tag @output
                             public_api @filter(op: "=", value: ["$true"])
                         }
-                        
+
                         field {
                             field_name: name @output @tag
                             public_api_eligible @filter(op: "=", value: ["$true"])

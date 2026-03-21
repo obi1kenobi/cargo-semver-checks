@@ -38,7 +38,7 @@ pub fn private_export_name_changed() {}
 pub mod export_name_moved {
     #[export_name = "export_name_moved"]
     pub fn export_name_moved_1() {}
-    
+
     pub fn export_name_moved_2() {}
 }
 

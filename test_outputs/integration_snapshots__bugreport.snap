@@ -26,13 +26,13 @@ cargo-semver-checks [VERSION] ([HASH])
 #### Command-line
 
 ```bash
-[EXECUTABLE_PATH] semver-checks --bugreport 
+[EXECUTABLE_PATH] semver-checks --bugreport
 ```
 
 #### cargo version
 
 ```
-> cargo -V 
+> cargo -V
 cargo [CARGO_VERSION] ([CARGO_VERSION_DETAILS])
 ```
 

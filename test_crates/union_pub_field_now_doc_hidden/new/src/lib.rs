@@ -9,7 +9,7 @@ pub union MyUnion {
 }
 
 pub union PublicUnionDocHiddenField {
-    
+
     #[doc(hidden)]
     pub my_field: i8,
 }

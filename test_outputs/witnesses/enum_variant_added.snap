@@ -6,7 +6,7 @@ description: "Lint `enum_variant_added` did not have the expected witness output
 filename = "src/lib.rs"
 begin_line = 69
 hint = """
-match value { 
+match value {
     enum_discriminant_no_longer_defined::GainsStructVariant::None => (),
 }"""
 
@@ -14,7 +14,7 @@ match value {
 filename = "src/lib.rs"
 begin_line = 12
 hint = """
-match value { 
+match value {
     enum_variant_added::EnumWithNewVariant::OldVariant => (),
     enum_variant_added::EnumWithNewVariant::OldStructVariant { .. } => (),
     enum_variant_added::EnumWithNewVariant::OldTupleVariant(..) => (),
@@ -24,7 +24,7 @@ match value {
 filename = "src/lib.rs"
 begin_line = 18
 hint = """
-match value { 
+match value {
     enum_variant_hidden_from_public_api::AddedVariant::First => (),
     enum_variant_hidden_from_public_api::AddedVariant::Second => (),
 }"""
