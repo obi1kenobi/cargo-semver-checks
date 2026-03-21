@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1151
 description: "Lint `enum_variant_added` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 ---
 [["./test_crates/enum_discriminant_no_longer_defined/"]]
@@ -27,4 +28,14 @@ hint = """
 match value { 
     enum_variant_hidden_from_public_api::AddedVariant::First => (),
     enum_variant_hidden_from_public_api::AddedVariant::Second => (),
+}"""
+
+[["./test_crates/partial_ord_enum_variants_reordered_non_exhaustive/"]]
+filename = "src/lib.rs"
+begin_line = 48
+hint = """
+match value { 
+    partial_ord_enum_variants_reordered_non_exhaustive::ExhaustiveWithNew::A => (),
+    partial_ord_enum_variants_reordered_non_exhaustive::ExhaustiveWithNew::B => (),
+    partial_ord_enum_variants_reordered_non_exhaustive::ExhaustiveWithNew::C => (),
 }"""
