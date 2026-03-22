@@ -85,6 +85,7 @@ SemverQuery(
         hint_template: r#"match value {
     {{ join "::" path }}::{{ variant_name }} ({{#repeat field_count }}{{#if (eq (to_string @index) ../field_name)}}witness{{else}}_{{/if}}{{#unless @last }}, {{/unless}}{{/repeat}}) => (),
     _ => (),
-}"#,
+}
+"#,
     ),
 )

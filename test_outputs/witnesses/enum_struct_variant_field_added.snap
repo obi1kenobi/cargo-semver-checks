@@ -9,7 +9,8 @@ hint = """
 match value {
     enum_no_repr_variant_discriminant_changed::UnitOnlyBecomesUndefined::Struct {  } => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_struct_field_hidden_from_public_api/"]]
 filename = "src/lib.rs"
@@ -18,7 +19,8 @@ hint = """
 match value {
     enum_struct_field_hidden_from_public_api::AddedVariantField::StructVariant { x } => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_struct_variant_field_added/"]]
 filename = "src/lib.rs"
@@ -27,7 +29,8 @@ hint = """
 match value {
     enum_struct_variant_field_added::PubEnum::Foo { x } => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/repr_c_enum_struct_variant_fields_reordered/"]]
 filename = "src/lib.rs"
@@ -36,4 +39,5 @@ hint = """
 match value {
     repr_c_enum_struct_variant_fields_reordered::EnumWithAddition::StructVariant { a, b } => (),
     _ => (),
-}"""
+}
+"""

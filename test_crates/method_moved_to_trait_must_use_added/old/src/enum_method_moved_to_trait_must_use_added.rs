@@ -87,7 +87,7 @@ enum PrivateEnumWithMovedMustUseMethods {
 }
 
 impl PrivateEnumWithMovedMustUseMethods {
-    
+
     pub fn PrivateEnumMethodToMovedPrivateDeclaredMustUseMethod(&self) {}
 
     pub fn PrivateEnumMethodToMovedPrivateProvidedMustUseMethod(&self) {}
