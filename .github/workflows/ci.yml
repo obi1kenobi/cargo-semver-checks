@@ -2346,8 +2346,28 @@ jobs:
 
           # Only check lines introduced by this PR for whitespace issues that
           # `git diff --check` reports, so unrelated pre-existing whitespace in
-          # touched files does not fail CI.
-          sed -n 's/^\(.*\):\([0-9][0-9]*\): \(.*\)$/\1:\2: \3/p' \
+          # touched files does not fail CI. Lines that consist only of spaces
+          # are allowed, so suppress the matching trailing-whitespace finding.
+          awk '
+            function flush_pending() {
+              if (pending != "") {
+                print pending
+                pending = ""
+              }
+            }
+
+            /^[^:]+:[0-9][0-9]*: / {
+              flush_pending()
+              pending = $0
+              next
+            }
+
+            pending ~ /: trailing whitespace\.$/ && /^\+[ ]+$/ {
+              pending = ""
+            }
+
+            END { flush_pending() }
+          ' \
             "$diff_check_output" >"$diff_check_report"
 
           if [ -s "$diff_check_report" ]; then

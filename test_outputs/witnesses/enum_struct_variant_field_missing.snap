@@ -9,7 +9,8 @@ hint = """
 match value {
     enum_struct_variant_field_missing::Enum::FieldWillBeMissing { bar, .. } => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/repr_c_enum_struct_variant_fields_reordered/"]]
 filename = "src/lib.rs"
@@ -18,4 +19,5 @@ hint = """
 match value {
     repr_c_enum_struct_variant_fields_reordered::EnumWithRemoval::StructVariant { a, .. } => (),
     _ => (),
-}"""
+}
+"""

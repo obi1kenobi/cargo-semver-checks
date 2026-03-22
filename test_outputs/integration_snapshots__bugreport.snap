@@ -7,6 +7,7 @@ info:
     - "--bugreport"
   env:
     CARGO_TERM_COLOR: never
+    CARGO_TERM_UNICODE: "false"
     RUST_BACKTRACE: "0"
 ---
 success: true

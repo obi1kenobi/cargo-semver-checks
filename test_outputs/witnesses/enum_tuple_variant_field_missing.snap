@@ -9,7 +9,8 @@ hint = """
 match value {
     enum_struct_field_hidden_from_public_api::RemovedHiddenFieldFromVariant::VisibleTupleVariantBreaking(_, _, _, witness) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_tuple_variant_field_missing/"]]
 filename = "src/lib.rs"
@@ -18,4 +19,5 @@ hint = """
 match value {
     enum_tuple_variant_field_missing::PublicEnum::TupleVariantWithMissingField(_, _, witness) => (),
     _ => (),
-}"""
+}
+"""
