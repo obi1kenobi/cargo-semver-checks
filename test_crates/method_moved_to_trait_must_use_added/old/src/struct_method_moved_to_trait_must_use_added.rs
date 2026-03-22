@@ -81,7 +81,7 @@ pub trait TraitWithMovedDeclaredMustUseMethods {}
 struct PrivateStructWithMovedMustUseMethods {}
 
 impl PrivateStructWithMovedMustUseMethods {
-    
+
     pub fn PrivateStructMethodToMovedPrivateDeclaredMustUseMethod(&self) {}
 
     pub fn PrivateStructMethodToMovedPrivateProvidedMustUseMethod(&self) {}

@@ -91,6 +91,7 @@ SemverQuery(
         hint_template: r#"match value {
     {{ join "::" path }}::{{ variant_name }} { {{ join ", " baseline_field_names }} } => (),
     _ => (),
-}"#,
+}
+"#,
     )
 )

@@ -13,7 +13,7 @@ SemverQuery(
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         name @output
-                        
+
                         attrs @filter(op: "contains", value: ["$non_exhaustive"])
 
                         importable_path {

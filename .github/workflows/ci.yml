@@ -50,7 +50,8 @@ jobs:
       - run-on-perf-event-open-sys2
       - fails-on-too-old-rustc
       - broken-lint-reference-links
-    if: ${{ success() || failure() }}  # Run this job even if a dependency has failed.
+      - whitespace-hygiene
+    if: ${{ always() && !cancelled() }}  # Also run when PR-only jobs are skipped on other triggers.
     steps:
       - name: Job outcomes
         run: |
@@ -77,6 +78,7 @@ jobs:
           echo "run-on-perf-event-open-sys2: ${{ needs.run-on-perf-event-open-sys2.result }}"
           echo "fails-on-too-old-rustc: ${{ needs.fails-on-too-old-rustc.result }}"
           echo "broken-lint-reference-links: ${{ needs.broken-lint-reference-links.result }}"
+          echo "whitespace-hygiene: ${{ needs.whitespace-hygiene.result }}"
 
       # Fail this required job if any of its dependent jobs have failed.
       #
@@ -128,6 +130,8 @@ jobs:
       - if: ${{ needs.fails-on-too-old-rustc.result != 'success' }}
         run: exit 1
       - if: ${{ needs.broken-lint-reference-links.result != 'success' }}
+        run: exit 1
+      - if: ${{ github.event_name == 'pull_request' && needs.whitespace-hygiene.result != 'success' }}
         run: exit 1
 
   lint:
@@ -272,7 +276,7 @@ jobs:
         #
         #            Also make sure to update the MSRV in the cargo-semver-checks-action CI:
         #            https://github.com/obi1kenobi/cargo-semver-checks-action/blob/main/.github/workflows/test-action.yml#L18
-        toolchain: ["1.91", "1.92", "stable", "beta"]
+        toolchain: ["1.91", "1.92", "1.93", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -364,7 +368,7 @@ jobs:
           mv target/debug/cargo-semver-checks ../bins/cargo-semver-checks
 
       - name: upload binary
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -416,7 +420,7 @@ jobs:
           mv target\debug\cargo-semver-checks.exe ..\bins\cargo-semver-checks.exe
 
       - name: upload binary
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: cargo-semver-checks-windows
           path: bins\
@@ -458,7 +462,7 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -574,7 +578,7 @@ jobs:
           path: 'subject'
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -717,7 +721,7 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -796,7 +800,7 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -870,7 +874,7 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -942,7 +946,7 @@ jobs:
         run: sudo apt install protobuf-compiler
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1064,7 +1068,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1127,7 +1131,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1189,7 +1193,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1447,7 +1451,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1570,7 +1574,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1641,7 +1645,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1872,7 +1876,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1972,7 +1976,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-windows
           path: bins\
@@ -2073,7 +2077,7 @@ jobs:
           rustflags: "-Dwarnings"  # set explicitly, to ensure we trigger the bug described above
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -2137,7 +2141,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -2203,7 +2207,7 @@ jobs:
           cache: false
 
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -2280,6 +2284,126 @@ jobs:
         run: |
           cd semver
           ./scripts/check_reference_links.sh
+
+  whitespace-hygiene:
+    name: Check trailing whitespace and final newlines
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cargo-semver-checks
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          path: 'semver'
+
+      - name: Check changed files
+        working-directory: semver
+        run: |
+          export LC_ALL=C
+
+          had_error=0
+          header_printed=0
+          diff_check_output="$(mktemp)"
+          changed_files_list="$(mktemp)"
+          diff_check_report="$(mktemp)"
+          trap 'rm -f "$diff_check_output" "$changed_files_list" "$diff_check_report"' EXIT
+
+          if ! base_ref="$(git rev-parse --verify HEAD^1)"; then
+            printf '%s\n' \
+              'Sorry, the whitespace check could not determine the base commit for this PR.' \
+              'Please try rerunning CI. If it keeps failing, ask a maintainer to take a look.'
+            exit 1
+          fi
+
+          diff_check_status=0
+
+          git diff --check --no-color "$base_ref"..HEAD -- >"$diff_check_output" 2>&1 || diff_check_status=$?
+          if [ "$diff_check_status" -ne 0 ] && [ "$diff_check_status" -ne 2 ]; then
+            printf '%s\n' \
+              'Sorry, the whitespace check could not compare this PR against its base commit.' \
+              'Please try rerunning CI. If it keeps failing, ask a maintainer to take a look.'
+            cat "$diff_check_output"
+            exit "$diff_check_status"
+          fi
+
+          if ! git diff --name-only -z --diff-filter=ACMR "$base_ref"..HEAD -- >"$changed_files_list"; then
+            printf '%s\n' \
+              'Sorry, the whitespace check could not list the files changed in this PR.' \
+              'Please try rerunning CI. If it keeps failing, ask a maintainer to take a look.'
+            exit 1
+          fi
+
+          print_header() {
+            if [ "$header_printed" -eq 0 ]; then
+              printf '%s\n' \
+                'We found a few whitespace issues in this PR.' \
+                'Please fix the reported whitespace issues and make sure each affected text file ends with a single newline.' \
+                ''
+              header_printed=1
+            fi
+          }
+
+          # Only check lines introduced by this PR for whitespace issues that
+          # `git diff --check` reports, so unrelated pre-existing whitespace in
+          # touched files does not fail CI. Lines that consist only of spaces
+          # are allowed, so suppress the matching trailing-whitespace finding.
+          awk '
+            function flush_pending() {
+              if (pending != "") {
+                print pending
+                pending = ""
+              }
+            }
+
+            /^[^:]+:[0-9][0-9]*: / {
+              flush_pending()
+              pending = $0
+              next
+            }
+
+            pending ~ /: trailing whitespace\.$/ && /^\+[ ]+$/ {
+              pending = ""
+            }
+
+            END { flush_pending() }
+          ' \
+            "$diff_check_output" >"$diff_check_report"
+
+          if [ -s "$diff_check_report" ]; then
+            had_error=1
+            print_header
+            cat "$diff_check_report"
+          fi
+
+          # Missing final newlines are an end-of-file property, so check changed text files.
+          while IFS= read -r -d '' file; do
+            [ -f "$file" ] || continue
+            grep -Iq . "$file" || continue
+
+            if [ -s "$file" ]; then
+              last_byte="$(tail -c 1 -- "$file" | od -An -t x1 | tr -d '[:space:]')"
+              if [ "$last_byte" != '0a' ]; then
+                had_error=1
+                print_header
+                line_number="$(awk 'END { print NR }' "$file")"
+                printf '%s:%s: file does not end with a trailing newline\n' "$file" "$line_number"
+              fi
+            fi
+          done <"$changed_files_list"
+
+          if [ "$had_error" -ne 0 ]; then
+            printf '%s\n' \
+              '' \
+              'Most editors can fix this automatically.' \
+              'In VSCode-based editors, add these settings:' \
+              '    "files.trimFinalNewlines": true,' \
+              '    "files.trimTrailingWhitespace": true,' \
+              '    "files.insertFinalNewline": true,'
+            exit 1
+          fi
+
+          echo 'No whitespace hygiene issues were found in changed text files.'
 
   init-release:
     name: Run the release workflow
@@ -2362,7 +2486,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toolchain: ["1.91", "1.92", "stable"]
+        toolchain: ["1.91", "1.92", "1.93", "stable"]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -2400,7 +2524,7 @@ jobs:
           echo "name=test-rustdocs-$HASH-$TRIPLE-$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifact.outputs.name }}
           path: localdata/test_data

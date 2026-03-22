@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1151
 description: "Lint `enum_variant_missing` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 ---
 [["./test_crates/enum_struct_variant_field_missing/"]]
@@ -21,3 +22,18 @@ hint = "let witness = enum_variant_missing::TupleVariantWillBeRemoved::Bar(...);
 filename = "src/lib.rs"
 begin_line = 20
 hint = "let witness = enum_variant_missing::StructVariantWillBeRemoved::Bar {...};"
+
+[["./test_crates/partial_ord_enum_variants_reordered_non_exhaustive/"]]
+filename = "src/lib.rs"
+begin_line = 35
+hint = "let witness = partial_ord_enum_variants_reordered_non_exhaustive::RemovedMiddle::B;"
+
+[["./test_crates/partial_ord_enum_variants_reordered_non_exhaustive/"]]
+filename = "src/lib.rs"
+begin_line = 53
+hint = "let witness = partial_ord_enum_variants_reordered_non_exhaustive::AddAndRemove::B;"
+
+[["./test_crates/partial_ord_enum_variants_reordered_non_exhaustive/"]]
+filename = "src/lib.rs"
+begin_line = 81
+hint = "let witness = partial_ord_enum_variants_reordered_non_exhaustive::ReorderAfterRemoval::B;"

@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "repr_transparent_added"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

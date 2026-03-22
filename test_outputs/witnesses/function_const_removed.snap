@@ -8,4 +8,5 @@ begin_line = 3
 hint = """
 const fn witness() {
     function_const_removed::add(...);
-}"""
+}
+"""
