@@ -69,7 +69,7 @@ SemverQuery(
                                 field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                                     name @filter(op: "=", value: ["%field_name"])
                                 }
-                                
+
                                 field @fold @transform(op: "count") @output(name: "field_count")
                             }
                         }
@@ -90,6 +90,7 @@ SemverQuery(
         hint_template: r#"match value {
     {{ join "::" path }}::{{ variant_name }} ({{#repeat field_count }}_{{#unless @last}}, {{/unless}}{{/repeat}}) => (),
     _ => (),
-}"#, 
+}
+"#,
     ),
 )

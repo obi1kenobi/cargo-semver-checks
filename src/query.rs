@@ -1441,6 +1441,43 @@ mod tests {
     }
 
     #[test]
+    fn witness_hint_templates_have_whitespace_hygiene() {
+        let mut issues = Vec::new();
+
+        for (query_name, semver_query) in SemverQuery::all_queries() {
+            let Some(witness) = semver_query.witness else {
+                continue;
+            };
+
+            for (line_index, line) in witness.hint_template.lines().enumerate() {
+                if line.ends_with([' ', '\t']) {
+                    issues.push(format!(
+                        "witness hint template for {query_name} has trailing whitespace on line {}: {:?}",
+                        line_index + 1,
+                        line
+                    ));
+                }
+            }
+
+            if witness.hint_template.contains('\n') || witness.hint_template.contains('\r') {
+                let trimmed = witness.hint_template.trim_end_matches(['\r', '\n']);
+                let newline_suffix = &witness.hint_template[trimmed.len()..];
+                if newline_suffix != "\n" && newline_suffix != "\r\n" {
+                    issues.push(format!(
+                        "witness hint template for {query_name} must end with exactly one trailing newline"
+                    ));
+                }
+            }
+        }
+
+        assert!(
+            issues.is_empty(),
+            "witness hint templates have whitespace hygiene issues:\n{}",
+            issues.join("\n")
+        );
+    }
+
+    #[test]
     fn test_data_is_fresh() -> anyhow::Result<()> {
         // Adds the modification time of all files in `{dir}/**/*.{rs,toml,json}` to `set`, excluding
         // the `target` directory.

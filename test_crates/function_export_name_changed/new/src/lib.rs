@@ -35,7 +35,7 @@ pub fn private_export_name_changed() {}
 /// is no longer equivalent to a call to `export_name_moved` in the ABI
 pub mod export_name_moved {
     pub fn export_name_moved_1() {}
-    
+
     #[export_name = "export_name_moved"]
     pub fn export_name_moved_2() {}
 }

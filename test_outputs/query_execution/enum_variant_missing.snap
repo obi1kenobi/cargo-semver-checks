@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1073
 ---
 {
   "./test_crates/enum_struct_variant_field_missing/": [
@@ -55,6 +56,47 @@ source: src/query.rs
       "span_end_line": Uint64(22),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Bar"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/partial_ord_enum_variants_reordered_non_exhaustive/": [
+    {
+      "enum_name": String("RemovedMiddle"),
+      "kind": String("PlainVariant"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("RemovedMiddle"),
+      ]),
+      "span_begin_line": Uint64(35),
+      "span_end_line": Uint64(35),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("B"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("AddAndRemove"),
+      "kind": String("PlainVariant"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("AddAndRemove"),
+      ]),
+      "span_begin_line": Uint64(53),
+      "span_end_line": Uint64(53),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("B"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("ReorderAfterRemoval"),
+      "kind": String("PlainVariant"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("ReorderAfterRemoval"),
+      ]),
+      "span_begin_line": Uint64(81),
+      "span_end_line": Uint64(81),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("B"),
       "visibility_limit": String("public"),
     },
   ],

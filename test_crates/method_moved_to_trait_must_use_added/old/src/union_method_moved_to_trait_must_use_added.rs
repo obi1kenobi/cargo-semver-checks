@@ -87,7 +87,7 @@ union PrivateUnionWithMovedMustUseMethods {
 }
 
 impl PrivateUnionWithMovedMustUseMethods {
-    
+
     pub fn PrivateUnionMethodToMovedPrivateDeclaredMustUseMethod(&self) {}
 
     pub fn PrivateUnionMethodToMovedPrivateProvidedMustUseMethod(&self) {}
