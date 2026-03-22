@@ -9,7 +9,8 @@ hint = """
 match value {
     enum_non_exhaustive_tuple_variant_changed_kind::TestStructExhaustive::WillBecomeStructLike(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_non_exhaustive_tuple_variant_changed_kind/"]]
 filename = "src/lib.rs"
@@ -18,7 +19,8 @@ hint = """
 match value {
     enum_non_exhaustive_tuple_variant_changed_kind::TestUnitExhaustive::WillBecomeUnitLike(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_non_exhaustive_tuple_variant_changed_kind/"]]
 filename = "src/lib.rs"
@@ -27,7 +29,8 @@ hint = """
 match value {
     enum_non_exhaustive_tuple_variant_changed_kind::MultipleTestExhaustive::WillBecomeStructLike(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_non_exhaustive_tuple_variant_changed_kind/"]]
 filename = "src/lib.rs"
@@ -36,7 +39,8 @@ hint = """
 match value {
     enum_non_exhaustive_tuple_variant_changed_kind::MultipleTestExhaustive::WillBecomeUnitLike(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_tuple_variant_changed_kind/"]]
 filename = "src/lib.rs"
@@ -45,7 +49,8 @@ hint = """
 match value {
     enum_tuple_variant_changed_kind::TestStruct::WillBecomeStructLike(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_tuple_variant_changed_kind/"]]
 filename = "src/lib.rs"
@@ -54,7 +59,8 @@ hint = """
 match value {
     enum_tuple_variant_changed_kind::TestUnit::WillBecomeUnitLike(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_tuple_variant_changed_kind/"]]
 filename = "src/lib.rs"
@@ -63,7 +69,8 @@ hint = """
 match value {
     enum_tuple_variant_changed_kind::MultipleTest::WillBecomeStructLike(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_tuple_variant_changed_kind/"]]
 filename = "src/lib.rs"
@@ -72,7 +79,8 @@ hint = """
 match value {
     enum_tuple_variant_changed_kind::MultipleTest::WillBecomeUnitLike(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_tuple_variant_changed_kind/"]]
 filename = "src/lib.rs"
@@ -81,7 +89,8 @@ hint = """
 match value {
     enum_tuple_variant_changed_kind::TestBecomeDocHidden::WillBecomeStructLike(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_tuple_variant_changed_kind/"]]
 filename = "src/lib.rs"
@@ -90,7 +99,8 @@ hint = """
 match value {
     enum_tuple_variant_changed_kind::TestBecomeNonExhaustive::WillBecomeStructLike(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_tuple_variant_field_missing/"]]
 filename = "src/lib.rs"
@@ -99,7 +109,8 @@ hint = """
 match value {
     enum_tuple_variant_field_missing::PublicEnum::TupleVariantBecomesPlain(..) => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_tuple_variant_field_missing/"]]
 filename = "src/lib.rs"
@@ -108,4 +119,5 @@ hint = """
 match value {
     enum_tuple_variant_field_missing::PublicEnum::TupleVariantBecomesStruct(..) => (),
     _ => (),
-}"""
+}
+"""

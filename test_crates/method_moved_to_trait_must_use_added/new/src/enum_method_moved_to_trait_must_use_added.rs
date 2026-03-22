@@ -66,7 +66,7 @@ pub trait TraitWithMovedDeclaredMustUseMethods {
 }
 
 impl TraitWithMovedDeclaredMustUseMethods for EnumWithMovedDeclaredMustUseMethods {
-    
+
     // These methods did not have the #[must_use] attribute in the old version.
     // Addition of the attribute should be reported.
 
@@ -138,7 +138,7 @@ pub trait TraitWithMovedImplMustUseMethods {
 }
 
 impl TraitWithMovedImplMustUseMethods for EnumWithMovedImplMustUseMethods {
-    
+
     #[must_use]
     fn MethodToMovedImplDeclaredMustUseMethod(&self) {}
 

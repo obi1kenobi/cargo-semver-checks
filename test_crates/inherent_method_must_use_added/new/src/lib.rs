@@ -1,7 +1,7 @@
 #![no_std]
 
 // This crate's test cases were separated into smaller files for easier
-// management and debugging. 
+// management and debugging.
 
 pub mod enum_inherent_method_must_use_added;
 

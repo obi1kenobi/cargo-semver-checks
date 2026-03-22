@@ -9,7 +9,8 @@ hint = """
 match value {
     enum_struct_variant_field_marked_deprecated::NormalEnum::StructVariant { field_to_be_deprecated, .. } => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_struct_variant_field_marked_deprecated/"]]
 filename = "src/lib.rs"
@@ -18,7 +19,8 @@ hint = """
 match value {
     enum_struct_variant_field_marked_deprecated::NormalEnum::StructVariant { field_to_be_deprecated_with_message, .. } => (),
     _ => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_struct_variant_field_marked_deprecated/"]]
 filename = "src/lib.rs"
@@ -27,4 +29,5 @@ hint = """
 match value {
     enum_struct_variant_field_marked_deprecated::EnumWithAlreadyDeprecatedField::StructVariant { field_to_be_deprecated, .. } => (),
     _ => (),
-}"""
+}
+"""

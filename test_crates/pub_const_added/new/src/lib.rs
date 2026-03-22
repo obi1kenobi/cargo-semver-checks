@@ -16,5 +16,5 @@ pub const NEW_PUB_CONST_IN_GLOBAL: i32 = 0;
 
 pub mod my_module {
     pub const EXISTING_CONST_IN_MODULE: i32 = 0;
-    pub const NEW_PUB_CONST_IN_MODULE: i32 = 0; 
+    pub const NEW_PUB_CONST_IN_MODULE: i32 = 0;
 }

@@ -66,8 +66,11 @@ SemverQuery(
     error_message: "A publicly-visible enum without #[non_exhaustive] has a new variant.",
     per_result_error_template: Some("variant {{enum_name}}:{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: (
-        hint_template: r#"match value { {{#each baseline_variant_kinds }}
-    {{ join "::" ../path }}::{{lookup ../baseline_variant_names @index}}{{#if (eq this "StructVariant")}} { .. }{{/if}}{{#if (eq this "TupleVariant")}}(..){{/if}} => (),{{/each}}
-}"#,
+        hint_template: r#"match value {
+{{#each baseline_variant_kinds }}
+    {{ join "::" ../path }}::{{lookup ../baseline_variant_names @index}}{{#if (eq this "StructVariant")}} { .. }{{/if}}{{#if (eq this "TupleVariant")}}(..){{/if}} => (),
+{{/each}}
+}
+"#,
     ),
 )

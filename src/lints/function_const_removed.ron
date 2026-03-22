@@ -52,6 +52,7 @@ SemverQuery(
     witness: (
         hint_template: r#"const fn witness() {
     {{join "::" path}}(...);
-}"#,
+}
+"#,
     ),
 )
