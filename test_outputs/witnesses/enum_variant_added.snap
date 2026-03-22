@@ -7,35 +7,39 @@ description: "Lint `enum_variant_added` did not have the expected witness output
 filename = "src/lib.rs"
 begin_line = 69
 hint = """
-match value { 
+match value {
     enum_discriminant_no_longer_defined::GainsStructVariant::None => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_variant_added/"]]
 filename = "src/lib.rs"
 begin_line = 12
 hint = """
-match value { 
+match value {
     enum_variant_added::EnumWithNewVariant::OldVariant => (),
     enum_variant_added::EnumWithNewVariant::OldStructVariant { .. } => (),
     enum_variant_added::EnumWithNewVariant::OldTupleVariant(..) => (),
-}"""
+}
+"""
 
 [["./test_crates/enum_variant_hidden_from_public_api/"]]
 filename = "src/lib.rs"
 begin_line = 18
 hint = """
-match value { 
+match value {
     enum_variant_hidden_from_public_api::AddedVariant::First => (),
     enum_variant_hidden_from_public_api::AddedVariant::Second => (),
-}"""
+}
+"""
 
 [["./test_crates/partial_ord_enum_variants_reordered_non_exhaustive/"]]
 filename = "src/lib.rs"
 begin_line = 48
 hint = """
-match value { 
+match value {
     partial_ord_enum_variants_reordered_non_exhaustive::ExhaustiveWithNew::A => (),
     partial_ord_enum_variants_reordered_non_exhaustive::ExhaustiveWithNew::B => (),
     partial_ord_enum_variants_reordered_non_exhaustive::ExhaustiveWithNew::C => (),
-}"""
+}
+"""
