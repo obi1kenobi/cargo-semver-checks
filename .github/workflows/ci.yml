@@ -2294,14 +2294,13 @@ jobs:
         uses: actions/checkout@v6
         with:
           persist-credentials: false
+          fetch-depth: 2
           path: 'semver'
 
       - name: Check changed files
         working-directory: semver
         run: |
           export LC_ALL=C
-
-          git fetch --no-tags --depth=1 origin main
 
           had_error=0
           header_printed=0
@@ -2310,18 +2309,25 @@ jobs:
           diff_check_report="$(mktemp)"
           trap 'rm -f "$diff_check_output" "$changed_files_list" "$diff_check_report"' EXIT
 
+          if ! base_ref="$(git rev-parse --verify HEAD^1)"; then
+            printf '%s\n' \
+              'Sorry, the whitespace check could not determine the base commit for this PR.' \
+              'Please try rerunning CI. If it keeps failing, ask a maintainer to take a look.'
+            exit 1
+          fi
+
           diff_check_status=0
 
-          git diff --check --no-color origin/main...HEAD -- >"$diff_check_output" 2>&1 || diff_check_status=$?
+          git diff --check --no-color "$base_ref"..HEAD -- >"$diff_check_output" 2>&1 || diff_check_status=$?
           if [ "$diff_check_status" -ne 0 ] && [ "$diff_check_status" -ne 2 ]; then
             printf '%s\n' \
-              'Sorry, the whitespace check could not compare this PR against origin/main.' \
+              'Sorry, the whitespace check could not compare this PR against its base commit.' \
               'Please try rerunning CI. If it keeps failing, ask a maintainer to take a look.'
             cat "$diff_check_output"
             exit "$diff_check_status"
           fi
 
-          if ! git diff --name-only -z --diff-filter=ACMR origin/main...HEAD -- >"$changed_files_list"; then
+          if ! git diff --name-only -z --diff-filter=ACMR "$base_ref"..HEAD -- >"$changed_files_list"; then
             printf '%s\n' \
               'Sorry, the whitespace check could not list the files changed in this PR.' \
               'Please try rerunning CI. If it keeps failing, ask a maintainer to take a look.'
