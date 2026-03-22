@@ -73,6 +73,7 @@ SemverQuery(
         hint_template: r#"match value {
     {{ join "::" path }}::{{ variant_name }}(..) => (),
     _ => (),
-}"#,
+}
+"#,
     )
 )
