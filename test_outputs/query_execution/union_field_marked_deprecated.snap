@@ -11,7 +11,7 @@ assertion_line: 1073
         String("FieldBecomesDeprecated"),
       ]),
       "span_begin_line": Uint64(6),
-      "span_filename": String("src\\lib.rs"),
+      "span_filename": String("src/lib.rs"),
       "union_name": String("FieldBecomesDeprecated"),
     },
   ],
