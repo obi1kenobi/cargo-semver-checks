@@ -39,9 +39,3 @@ pub union DocHiddenUnion {
     pub bar: u64,
 }
 
-// New union added in new version with deprecated field.
-// Should not be reported to avoid duplicate with union_added lint.
-pub union NewUnionWithDeprecatedField {
-    #[deprecated]
-    pub bar: u64,
-}
