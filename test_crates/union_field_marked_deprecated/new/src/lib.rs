@@ -38,4 +38,3 @@ pub union DocHiddenUnion {
     #[deprecated]
     pub bar: u64,
 }
-
