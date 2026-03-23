@@ -1884,6 +1884,7 @@ add_lints!(
     union_field_added_with_all_pub_fields,
     union_field_added_with_non_pub_fields,
     union_field_missing,
+    union_marked_deprecated,
     union_missing,
     union_must_use_added,
     union_must_use_removed,
