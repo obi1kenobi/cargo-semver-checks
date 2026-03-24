@@ -4,6 +4,7 @@ use clap::ValueEnum;
 use rand::Rng;
 use std::{collections::HashSet, io::Write, sync::LazyLock};
 
+use crate::query::LintLevel;
 use crate::templating::make_handlebars_registry;
 
 #[allow(dead_code)]
@@ -87,6 +88,10 @@ impl GlobalConfig {
         self.level.is_some() && self.level.unwrap() >= log::Level::Info
     }
 
+    pub fn is_warn(&self) -> bool {
+        self.level.is_some() && self.level.unwrap() >= log::Level::Warn
+    }
+
     pub fn is_error(&self) -> bool {
         self.level.is_some() && self.level.unwrap() >= log::Level::Error
     }
@@ -127,6 +132,37 @@ impl GlobalConfig {
             callback(self)?;
         }
         Ok(())
+    }
+
+    pub fn log_warn(
+        &mut self,
+        callback: impl FnOnce(&mut Self) -> anyhow::Result<()>,
+    ) -> anyhow::Result<()> {
+        if self.is_warn() {
+            callback(self)?;
+        }
+        Ok(())
+    }
+
+    /// Logs at the level appropriate for the given [`LintLevel`]: `log_error` for
+    /// [`LintLevel::Deny`] and `log_warn` for [`LintLevel::Warn`].
+    ///
+    /// # Panics
+    ///
+    /// Panics if `lint_level` is [`LintLevel::Allow`], since allowed lints should
+    /// never be printed.
+    pub fn log_at_lint_level(
+        &mut self,
+        lint_level: LintLevel,
+        callback: impl FnOnce(&mut Self) -> anyhow::Result<()>,
+    ) -> anyhow::Result<()> {
+        match lint_level {
+            LintLevel::Deny => self.log_error(callback),
+            LintLevel::Warn => self.log_warn(callback),
+            LintLevel::Allow => {
+                unreachable!("attempted to log a lint whose level is `Allow`");
+            }
+        }
     }
 
     pub fn log_error(

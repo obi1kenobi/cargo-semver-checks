@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1073
 ---
 {
   "./test_crates/enum_discriminant_no_longer_defined/": [
@@ -65,6 +66,30 @@ source: src/query.rs
       "span_end_line": Uint64(18),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Added"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/partial_ord_enum_variants_reordered_non_exhaustive/": [
+    {
+      "baseline_variant_kinds": List([
+        String("PlainVariant"),
+        String("PlainVariant"),
+        String("PlainVariant"),
+      ]),
+      "baseline_variant_names": List([
+        String("A"),
+        String("B"),
+        String("C"),
+      ]),
+      "enum_name": String("ExhaustiveWithNew"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("ExhaustiveWithNew"),
+      ]),
+      "span_begin_line": Uint64(48),
+      "span_end_line": Uint64(48),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("New"),
       "visibility_limit": String("public"),
     },
   ],
