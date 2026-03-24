@@ -1772,6 +1772,7 @@ add_lints!(
     struct_pub_field_now_doc_hidden,
     struct_repr_transparent_removed,
     struct_with_no_pub_fields_changed_type,
+    struct_with_private_field_pub_field_added,
     struct_with_pub_fields_changed_type,
     trait_added_supertrait,
     trait_allows_fewer_const_generic_params,

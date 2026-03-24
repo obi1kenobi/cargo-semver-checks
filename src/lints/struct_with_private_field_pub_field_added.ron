@@ -1,0 +1,79 @@
+SemverQuery(
+    id: "struct_with_private_field_pub_field_added",
+    human_readable_name: "pub struct with private field gains new pub field",
+    description: "A pub struct that has at least one private field gained a new pub field.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/expressions/struct-expr.html"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        struct_name: name @output
+                        struct_type @output @tag
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        field {
+                            field_name: name @output @tag
+                            visibility_limit @filter(op: "=", value: ["$public"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Struct {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        # The struct must not have been #[non_exhaustive] in the baseline.
+                        # If it was, non_exhaustive_struct_pub_field_added handles this instead.
+                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+
+                        struct_type @filter(op: "=", value: ["%struct_type"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # The struct must have had at least one non-public field in the baseline.
+                        # If it had none, adding a pub field breaks struct literal construction
+                        # and constructible_struct_adds_field covers that as a major change instead.
+                        field @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                            visibility_limit @filter(op: "!=", value: ["$public"])
+                        }
+
+                        # The field did not exist in the baseline at all, not even as a private
+                        # field. A private field becoming public is a different kind of change
+                        # and is handled by a separate lint.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%field_name"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "non_exhaustive": "#[non_exhaustive]",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A pub struct with a private field gained a new pub field. Since downstream code cannot construct the struct with a literal, this is not a breaking change.",
+    per_result_error_template: Some("field {{struct_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)

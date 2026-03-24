@@ -15,4 +15,28 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/struct_with_private_field_pub_field_added/": [
+    {
+      "name": String("PrivateBecomesPubGainsField"),
+      "path": List([
+        String("struct_with_private_field_pub_field_added"),
+        String("PrivateBecomesPubGainsField"),
+      ]),
+      "span_begin_line": Uint64(84),
+      "span_end_line": Uint64(88),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("PrivateRemovedGainsField"),
+      "path": List([
+        String("struct_with_private_field_pub_field_added"),
+        String("PrivateRemovedGainsField"),
+      ]),
+      "span_begin_line": Uint64(91),
+      "span_end_line": Uint64(94),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }

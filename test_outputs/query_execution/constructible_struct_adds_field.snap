@@ -92,4 +92,18 @@ source: src/query.rs
       "struct_type": String("plain"),
     },
   ],
+  "./test_crates/struct_with_private_field_pub_field_added/": [
+    {
+      "field_name": String("z"),
+      "path": List([
+        String("struct_with_private_field_pub_field_added"),
+        String("ExhaustiveAllPublicStruct"),
+      ]),
+      "span_begin_line": Uint64(36),
+      "span_end_line": Uint64(36),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("ExhaustiveAllPublicStruct"),
+      "struct_type": String("plain"),
+    },
+  ],
 }

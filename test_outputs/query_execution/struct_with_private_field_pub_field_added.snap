@@ -1,0 +1,118 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/constructible_struct_adds_field/": [
+    {
+      "field_name": String("new_field"),
+      "path": List([
+        String("constructible_struct_adds_field"),
+        String("PlainStructWithPrivateField"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(33),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("PlainStructWithPrivateField"),
+      "struct_type": String("plain"),
+    },
+    {
+      "field_name": String("2"),
+      "path": List([
+        String("constructible_struct_adds_field"),
+        String("TupleStructWithPrivateField"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("TupleStructWithPrivateField"),
+      "struct_type": String("tuple"),
+    },
+  ],
+  "./test_crates/struct_with_private_field_pub_field_added/": [
+    {
+      "field_name": String("z"),
+      "path": List([
+        String("struct_with_private_field_pub_field_added"),
+        String("PlainStruct"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("PlainStruct"),
+      "struct_type": String("plain"),
+    },
+    {
+      "field_name": String("z"),
+      "path": List([
+        String("struct_with_private_field_pub_field_added"),
+        String("my_module"),
+        String("NestedStruct"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("NestedStruct"),
+      "struct_type": String("plain"),
+    },
+    {
+      "field_name": String("y2"),
+      "path": List([
+        String("struct_with_private_field_pub_field_added"),
+        String("StructGainsTwoFields"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("StructGainsTwoFields"),
+      "struct_type": String("plain"),
+    },
+    {
+      "field_name": String("z"),
+      "path": List([
+        String("struct_with_private_field_pub_field_added"),
+        String("StructGainsTwoFields"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("StructGainsTwoFields"),
+      "struct_type": String("plain"),
+    },
+    {
+      "field_name": String("y"),
+      "path": List([
+        String("struct_with_private_field_pub_field_added"),
+        String("AllPrivateFields"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("AllPrivateFields"),
+      "struct_type": String("plain"),
+    },
+    {
+      "field_name": String("z"),
+      "path": List([
+        String("struct_with_private_field_pub_field_added"),
+        String("PrivateBecomesPubGainsField"),
+      ]),
+      "span_begin_line": Uint64(87),
+      "span_end_line": Uint64(87),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("PrivateBecomesPubGainsField"),
+      "struct_type": String("plain"),
+    },
+    {
+      "field_name": String("z"),
+      "path": List([
+        String("struct_with_private_field_pub_field_added"),
+        String("PrivateRemovedGainsField"),
+      ]),
+      "span_begin_line": Uint64(93),
+      "span_end_line": Uint64(93),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("PrivateRemovedGainsField"),
+      "struct_type": String("plain"),
+    },
+  ],
+}
