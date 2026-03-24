@@ -22,7 +22,7 @@ SemverQuery(
 
                         inherent_impl {
                             public_api_eligible @filter(op: "=", value: ["$true"])
-                            
+
                             method {
                                 method_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])

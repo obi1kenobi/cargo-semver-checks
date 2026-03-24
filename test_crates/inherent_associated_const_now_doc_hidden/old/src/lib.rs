@@ -4,7 +4,7 @@ pub struct StructA {}
 
 impl StructA {
     pub const PublicConstantA: i32 = 0;
-   
+
     // #[doc(hidden)]
     pub const DocHiddenConstantA: i32 = 0;
 }
@@ -13,7 +13,7 @@ struct StructB {}
 
 impl StructB {
     pub const PublicConstantA: i32 = 0;
-   
+
     // #[doc(hidden)]
     pub const DocHiddenConstantA: i32 = 0;
 }
@@ -24,7 +24,7 @@ pub enum EnumA {
 
 impl EnumA {
     pub const PublicConstantA: u32 = 0;
-   
+
     // #[doc(hidden)]
     pub const DocHiddenConstantA: u32 = 0;
 }
@@ -36,7 +36,7 @@ pub union UnionA {
 
 impl UnionA {
     pub const PublicConstantA: u32 = 0;
-   
+
     // #[doc(hidden)]
     pub const DocHiddenConstantA: u32 = 0;
 }

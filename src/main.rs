@@ -204,6 +204,20 @@ fn exit_on_error<T>(log_errors: bool, mut inner: impl FnMut() -> anyhow::Result<
     }
 }
 
+fn sanitize_bugreport_output(output: &str) -> String {
+    output
+        .split_inclusive('\n')
+        .map(|line| {
+            // Work around trailing spaces emitted by `bugreport`:
+            // https://github.com/sharkdp/bugreport/issues/19
+            let Some(content) = line.strip_suffix('\n') else {
+                return line.trim_end_matches([' ', '\t', '\r']).to_owned();
+            };
+            format!("{}\n", content.trim_end_matches([' ', '\t', '\r']))
+        })
+        .collect()
+}
+
 fn print_issue_url(config: &mut GlobalConfig) {
     use bugreport::{bugreport, collector::*, format::Markdown};
     let other_bug_url: &str = "https://github.com/obi1kenobi/cargo-semver-checks/issues/new?labels=C-bug&template=3-bug-report.yml";
@@ -226,10 +240,11 @@ fn print_issue_url(config: &mut GlobalConfig) {
         -------------------"
     )
     .expect("Failed to print bug report system information to stdout");
-    bug_report.print::<Markdown>();
+    let bug_report = sanitize_bugreport_output(&bug_report.format::<Markdown>());
+    write!(config.stdout(), "{bug_report}").expect("Failed to print bug report to stdout");
+    writeln!(config.stdout()).expect("Failed to print bug report separator");
 
-    let bug_report = bug_report.format::<Markdown>();
-    let bug_report_url = urlencoding::encode(&bug_report);
+    let bug_report_url = urlencoding::encode(bug_report.trim_end_matches('\n'));
 
     let cargo_config = match Config::load() {
         Ok(c) => toml::to_string(&c).unwrap_or_else(|s| {
