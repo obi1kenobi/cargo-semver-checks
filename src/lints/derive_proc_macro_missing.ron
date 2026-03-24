@@ -47,5 +47,9 @@ SemverQuery(
     },
     error_message: "A derive macro has been removed. Type definitions using #[derive(...)] with this macro will fail to compile.",
     per_result_error_template: Some("macro {{macro_name}} in {{span_filename}}:{{span_begin_line}}"),
-    witness: None,
+    witness: (
+        hint_template: r#"#[derive({{macro_name}})]
+struct Witness;
+"#,
+    ),
 )
