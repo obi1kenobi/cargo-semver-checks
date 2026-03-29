@@ -87,6 +87,24 @@ impl From<ReleaseType> for ActualSemverUpdate {
     }
 }
 
+/// How the witness is expected to be used in running the lint.
+#[non_exhaustive]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub enum WitnessPurpose {
+    /// The query is expected to only flag true-positive cases,
+    /// so the witness is used to double-check its outputs for false-positives.
+    /// If the witness fails to validate an output,
+    /// then either the query or the witness generator has a bug.
+    #[default]
+    ConsistencyCheck,
+
+    /// The query is necessary but not sufficient to correctly identify true-positives.
+    /// A witness must be generated for each query output, and its outcome determines
+    /// whether the output is a true positive. The query is *not* considered buggy
+    /// even if the witness fails to validate the query's output.
+    RequiredForCorrectness,
+}
+
 /// A query that can be executed on a pair of rustdoc output files,
 /// returning instances of a particular kind of semver violation.
 #[non_exhaustive]
@@ -247,6 +265,10 @@ impl OverrideStack {
 /// for a given `SemverQuery`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Witness {
+    /// The purpose this witness serves in the surrounding query.
+    #[serde(default)]
+    pub purpose: WitnessPurpose,
+
     /// A [`handlebars`] template that renders a user-facing hint to give a quick
     /// explanation of breakage.  This may not be a buildable example, but it should
     /// show the idea of why downstream code could break.  It will be provided all
