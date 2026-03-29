@@ -1,0 +1,18 @@
+---
+source: src/query.rs
+assertion_line: 1073
+---
+{
+  "./test_crates/union_field_marked_deprecated/": [
+    {
+      "field_name": String("bar"),
+      "path": List([
+        String("union_field_marked_deprecated"),
+        String("FieldBecomesDeprecated"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "union_name": String("FieldBecomesDeprecated"),
+    },
+  ],
+}

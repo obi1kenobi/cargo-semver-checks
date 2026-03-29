@@ -1883,6 +1883,7 @@ add_lints!(
     union_changed_to_incompatible_struct,
     union_field_added_with_all_pub_fields,
     union_field_added_with_non_pub_fields,
+    union_field_marked_deprecated,
     union_field_missing,
     union_missing,
     union_must_use_added,
