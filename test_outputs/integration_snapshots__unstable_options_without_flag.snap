@@ -4,9 +4,10 @@ info:
   program: cargo-semver-checks
   args:
     - semver-checks
-    - "--witness-hints"
+    - "--consistency-check"
   env:
     CARGO_TERM_COLOR: never
+    CARGO_TERM_UNICODE: "false"
     RUST_BACKTRACE: "0"
 ---
 success: false
@@ -15,4 +16,4 @@ exit_code: 1
 
 ----- stderr -----
 error: the following options are not supported without `-Z unstable-options`:
- - `--witness-hints`
+ - `--consistency-check`

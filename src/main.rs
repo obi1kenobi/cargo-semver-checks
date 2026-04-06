@@ -353,9 +353,9 @@ struct UnstableOptions {
     #[arg(long, hide = true)]
     witness_hints: bool,
 
-    /// Enable generating and testing witness programs, full examples of potentially-broken downstream code.
+    /// Enable running witness-based consistency checks for lints whose witness purpose is `ConsistencyCheck`.
     #[arg(long, hide = true)]
-    witnesses: bool,
+    consistency_check: bool,
 }
 
 impl UnstableOptions {
@@ -379,15 +379,15 @@ impl UnstableOptions {
         // docstring for how to fix this function's implementation.
         let Self {
             witness_hints,
-            witnesses,
+            consistency_check,
         } = self;
 
         if *witness_hints {
             list.push("--witness-hints".into());
         }
 
-        if *witnesses {
-            list.push("--witnesses".into())
+        if *consistency_check {
+            list.push("--consistency-check".into())
         }
 
         list
@@ -668,7 +668,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
 
         let mut witness_generation = WitnessGeneration::new();
         witness_generation.show_hints = value.unstable_options.witness_hints;
-        witness_generation.generate_witnesses = value.unstable_options.witnesses;
+        witness_generation.run_consistency_checks = value.unstable_options.consistency_check;
         check.set_witness_generation(witness_generation);
 
         check

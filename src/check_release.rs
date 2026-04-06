@@ -362,7 +362,7 @@ pub(super) fn run_check_release(
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
 
-    if witness_generation.generate_witnesses {
+    if witness_generation.run_consistency_checks {
         witness_gen::run_witness_checks(config, witness_data, crate_name, &adapter, &lint_results);
     }
 

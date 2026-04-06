@@ -8,6 +8,7 @@ info:
     - help
   env:
     CARGO_TERM_COLOR: never
+    CARGO_TERM_UNICODE: "false"
     RUST_BACKTRACE: "0"
 ---
 success: true
@@ -22,7 +23,7 @@ Unstable options:
       --witness-hints
           Enable printing witness hints, examples of potentially-broken downstream code
 
-      --witnesses
-          Enable generating and testing witness programs, full examples of potentially-broken downstream code
+      --consistency-check
+          Enable running witness-based consistency checks for lints whose witness purpose is `ConsistencyCheck`
 
 ----- stderr -----

@@ -29,6 +29,6 @@ Check(
   build_target: None,
   witness_generation: WitnessGeneration(
     show_hints: false,
-    generate_witnesses: false,
+    run_consistency_checks: false,
   ),
 )

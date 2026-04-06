@@ -30,7 +30,7 @@ use rustdoc_gen::CrateDataForRustdoc;
 pub use config::{FeatureFlag, GlobalConfig};
 pub use query::{
     ActualSemverUpdate, LintLevel, OverrideMap, OverrideStack, QueryOverride, RequiredSemverUpdate,
-    SemverQuery, Witness,
+    SemverQuery, Witness, WitnessPurpose,
 };
 
 /// Test a release for semver violations.
@@ -791,19 +791,19 @@ pub struct WitnessGeneration {
     /// Whether to print witness hints, short examples that show why a change is breaking,
     /// while not necessarily buildable standalone programs.  See [`Witness::hint_template`].
     pub show_hints: bool,
-    /// Whether to generate witness programs: longer, fully valid and compilable examples
-    /// of a breaking change. See [`Witness::witness_template`] and [`Witness::witness_query`].
-    pub generate_witnesses: bool,
+    /// Whether to run witness-based consistency checks for lints whose witness purpose is
+    /// [`WitnessPurpose::ConsistencyCheck`].
+    pub run_consistency_checks: bool,
 }
 
 impl WitnessGeneration {
-    /// Creates a new [`WitnessGeneration`] instance indicating to not generate any witnesses.
+    /// Creates a new [`WitnessGeneration`] instance with optional witness output disabled.
     #[inline]
     #[must_use]
     pub const fn new() -> Self {
         Self {
             show_hints: false,
-            generate_witnesses: false,
+            run_consistency_checks: false,
         }
     }
 }

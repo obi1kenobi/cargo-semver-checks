@@ -14,7 +14,7 @@ use trustfall_rustdoc::VersionedRustdocAdapter;
 
 use crate::check_release::LintResult;
 use crate::data_generation::CrateDataRequest;
-use crate::query::{Witness, WitnessQuery};
+use crate::query::{Witness, WitnessPurpose, WitnessQuery};
 use crate::{GlobalConfig, SemverQuery};
 
 /// Higher level data used specifically in the generation of a witness program. Values of [`None`] will
@@ -120,6 +120,7 @@ fn map_to_witness_text<'query>(
     match semver_query.witness {
         // Don't bother running the witness query unless both a witness query and template exist
         Some(Witness {
+            purpose: WitnessPurpose::ConsistencyCheck,
             witness_template: Some(ref witness_template),
             witness_query: Some(ref witness_query),
             ..
@@ -146,6 +147,7 @@ fn map_to_witness_text<'query>(
 
         // If no witness query exists, we still want to forward the existing output
         Some(Witness {
+            purpose: WitnessPurpose::ConsistencyCheck,
             witness_template: Some(ref witness_template),
             witness_query: None,
             ..
