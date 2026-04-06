@@ -89,7 +89,7 @@ impl From<ReleaseType> for ActualSemverUpdate {
 
 /// How the witness is expected to be used in running the lint.
 #[non_exhaustive]
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum WitnessPurpose {
     /// The query is expected to only flag true-positive cases,
     /// so the witness is used to double-check its outputs for false-positives.

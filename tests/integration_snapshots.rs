@@ -98,14 +98,14 @@ fn bugreport() {
     });
 }
 
-// TODO: this test will break when the `--witness-hints` is stabilized.  It will need to
+// TODO: this test will break when the `--consistency-check` option is stabilized.  It will need to
 // be replaced with a different unstable option.  See the module-level doc comment for
 // how to update this test.
 /// Tests the behavior of unstable options being passed without `-Z unstable-options`.
 #[test]
 fn unstable_options_without_flag() {
     assert_integration_test("unstable_options_without_flag", |cmd, _| {
-        cmd.arg("--witness-hints");
+        cmd.arg("--consistency-check");
     });
 }
 
