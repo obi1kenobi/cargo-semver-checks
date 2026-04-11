@@ -307,15 +307,77 @@ impl Flags {
             .unwrap_or_default())
     }
 
-    fn from_env_and_config() -> anyhow::Result<Self> {
+    fn from_env_and_config_for_target(build_target: Option<&str>) -> anyhow::Result<Self> {
         let config = cargo_config2::Config::load().context("failed to inspect cargo config")?;
-        let triple = get_default_build_target_triple(&config)?;
+        let triple = match build_target {
+            Some(build_target) => build_target.to_owned(),
+            None => get_default_build_target_triple(&config)?,
+        };
 
         Ok(Self {
             rustflags: Self::determine_rustflags(&config, &triple)?,
             rustdocflags: Self::determine_rustdocflags(&config, &triple)?,
         })
     }
+}
+
+fn extract_cfg_related_flags(flags: &str) -> Vec<String> {
+    // TODO: This parser currently splits a flattened flags string on
+    // whitespace, which loses original argument boundaries for quoted or
+    // value-bearing cfg flags like `--cfg 'api="v 2"'` or
+    // `--check-cfg 'cfg(api, values("v 2"))'`. When we revisit witness flag
+    // fidelity, preserve rustflags/rustdocflags as token vectors instead of
+    // flattening and reparsing them here.
+    let tokens = flags.split_whitespace().collect::<Vec<_>>();
+    let mut extracted = Vec::new();
+    let mut index = 0usize;
+    while index < tokens.len() {
+        let token = tokens[index];
+        if matches!(token, "--cfg" | "--check-cfg") {
+            if let Some(value) = tokens.get(index + 1) {
+                extracted.push(token.to_owned());
+                extracted.push((*value).to_owned());
+                index += 2;
+                continue;
+            }
+        } else if token.starts_with("--cfg=") || token.starts_with("--check-cfg=") {
+            extracted.push(token.to_owned());
+        }
+        index += 1;
+    }
+    extracted
+}
+
+fn combine_witness_rustflags(mut rustflags: String, rustdocflags: &str) -> Option<String> {
+    let cfg_related = extract_cfg_related_flags(rustdocflags);
+    if cfg_related.is_empty() {
+        return (!rustflags.is_empty()).then_some(rustflags);
+    }
+
+    if !rustflags.is_empty() {
+        rustflags.push(' ');
+    }
+    rustflags.push_str(&cfg_related.join(" "));
+    Some(rustflags)
+}
+
+/// Returns the effective `RUSTFLAGS` to use when compiling witness scripts for
+/// the given request.
+///
+/// Witnesses are checked with `cargo check`, not `cargo doc`, so cfg-sensitive
+/// behavior that originally came from rustdoc flags has to be replayed here as
+/// rustc flags. Callers should use this helper when they want witness
+/// compilation to preserve the same conditional API surface as the rustdoc
+/// generation step by carrying over ordinary `RUSTFLAGS` plus any cfg-related
+/// settings from the effective `RUSTDOCFLAGS`.
+pub(crate) fn effective_witness_rustflags(
+    request: &CrateDataRequest<'_>,
+) -> anyhow::Result<Option<String>> {
+    let flags = Flags::from_env_and_config_for_target(request.build_target())?;
+    Ok(combine_witness_rustflags(
+        flags.rustflags,
+        &flags.rustdocflags,
+    ))
 }
 
 /// Run `cargo update` inside a placeholder workspace.
@@ -397,15 +459,16 @@ fn run_cargo_doc(
     // Load the current rustflags and rustdocflags settings.
     // We'll want to modify them.
     let Flags {
-        rustflags: mut prior_rustflags,
+        rustflags: prior_rustflags,
         rustdocflags: mut prior_rustdocflags,
-    } = Flags::from_env_and_config().into_terminal_result()?;
+    } = Flags::from_env_and_config_for_target(request.build_target()).into_terminal_result()?;
 
     // Generating rustdoc JSON for a crate also involves checking that crate's dependencies.
     // The check is done by rustc, not rustdoc, so it's subject to `RUSTFLAGS` not `RUSTDOCFLAGS`.
     // We don't want rustc to fail that check if the user has set `RUSTFLAGS="-Dwarnings"` here.
     // This fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/589
     let rustflags = if !prior_rustflags.is_empty() {
+        let mut prior_rustflags = prior_rustflags;
         prior_rustflags.push_str(" --cap-lints=allow");
         std::borrow::Cow::Owned(prior_rustflags)
     } else {
@@ -791,4 +854,33 @@ fn save_placeholder_rustdoc_manifest(
     std::fs::write(placeholder_build_dir.join("lib.rs"), "")
         .context("failed to create empty lib.rs")?;
     Ok(placeholder_manifest_path)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::combine_witness_rustflags;
+
+    #[test]
+    fn combine_witness_rustflags_preserves_existing_rustflags() {
+        assert_eq!(
+            combine_witness_rustflags("--cfg existing".to_owned(), ""),
+            Some("--cfg existing".to_owned())
+        );
+    }
+
+    #[test]
+    fn combine_witness_rustflags_appends_cfg_related_rustdocflags() {
+        assert_eq!(
+            combine_witness_rustflags(
+                "--cfg existing".to_owned(),
+                "--cfg extra --check-cfg=cfg(extra) --document-private-items"
+            ),
+            Some("--cfg existing --cfg extra --check-cfg=cfg(extra)".to_owned())
+        );
+    }
+
+    #[test]
+    fn combine_witness_rustflags_returns_none_when_no_flags_apply() {
+        assert_eq!(combine_witness_rustflags(String::new(), ""), None);
+    }
 }

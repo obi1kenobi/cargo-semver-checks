@@ -247,6 +247,48 @@ impl<'a> CrateDataRequest<'a> {
         }
     }
 
+    pub(crate) fn package_name(&self) -> anyhow::Result<&str> {
+        self.kind.name()
+    }
+
+    pub(crate) fn exact_version(&self) -> anyhow::Result<String> {
+        Ok(format!("={}", self.kind.version()?))
+    }
+
+    pub(crate) fn local_project_dir(&self) -> anyhow::Result<Option<PathBuf>> {
+        match &self.kind {
+            RequestKind::Registry(..) => Ok(None),
+            RequestKind::LocalProject(ProjectRequest { manifest }) => Ok(Some(
+                crate::manifest::get_project_dir_from_manifest_path(&manifest.path)?,
+            )),
+        }
+    }
+
+    pub(crate) fn default_features_enabled(&self) -> bool {
+        self.default_features
+    }
+
+    pub(crate) fn extra_features(&self) -> impl Iterator<Item = &str> + '_ {
+        self.extra_features.iter().map(Cow::as_ref)
+    }
+
+    pub(crate) fn build_target(&self) -> Option<&str> {
+        self.build_target
+    }
+
+    /// Best-effort Rust import name for this crate as it would appear in
+    /// downstream code. This is intentionally not always the same as the Cargo
+    /// package name: local projects may customize their library target name,
+    /// while registry packages with dashes are imported with underscores.
+    pub(crate) fn fallback_import_name(&self) -> anyhow::Result<String> {
+        match &self.kind {
+            RequestKind::Registry(..) => Ok(self.package_name()?.replace('-', "_")),
+            RequestKind::LocalProject(ProjectRequest { manifest }) => {
+                crate::manifest::get_library_target_name(manifest)
+            }
+        }
+    }
+
     /// Load data for the requested crate, using the specified directories.
     ///
     /// `target_root` is the directory where we'll perform any necessary code generation
