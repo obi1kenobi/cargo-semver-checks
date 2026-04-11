@@ -328,7 +328,7 @@ struct SemverChecks {
         short = 'Z',
         value_name = "FLAG",
         global = true,
-        hide_possible_values = true // show explictly with -Z help
+        hide_possible_values = true // show explicitly with -Z help
     )]
     unstable_features: Vec<FeatureFlag>,
 }

@@ -51,6 +51,7 @@ to the implementation of that query in the current version of the tool.
 - [My crate uses `--cfg` conditional compilation. Can `cargo-semver-checks` scan it?](#my-crate-uses---cfg-conditional-compilation-can-cargo-semver-checks-scan-it)
 - [Should I run `cargo-semver-checks` for multiple target triples?](#should-i-run-cargo-semver-checks-for-multiple-target-triples)
 - [Does `cargo-semver-checks` have false positives?](#does-cargo-semver-checks-have-false-positives)
+- [What are witness checks, and when are they useful?](#what-are-witness-checks-and-when-are-they-useful)
 - [Will `cargo-semver-checks` catch every semver violation?](#will-cargo-semver-checks-catch-every-semver-violation)
 - [Can I configure individual lints?](#can-i-configure-individual-lints)
 - [If I really want a new feature to be implemented, can I sponsor its development?](#if-i-really-want-a-new-feature-to-be-implemented-can-i-sponsor-its-development)
@@ -168,7 +169,7 @@ GIT_DIR="$(jj root)/.jj/repo/store/git" cargo semver-checks --package "foo" --ba
 
 By default, checking is done on all features except features named `unstable`, `nightly`, `bench`, `no_std`, or ones with prefix `_`, `unstable-`, or `unstable_`, as such names are commonly used for private or unstable features.
 
-This behaviour can be overriden. Checked feature set can be changed to:
+This behavior can be overridden. Checked feature set can be changed to:
 
 - _all_ the features, selected with `--all-features`,
 - only the crate's default features, selected with `--default-features`,
@@ -233,6 +234,23 @@ If you think `cargo-semver-checks` might have a false-positive but you aren't su
 Semver in Rust has [many non-obvious and tricky edge cases](https://predr.ag/blog/toward-fearless-cargo-update/),
 especially [in the presence of macros](https://github.com/obi1kenobi/cargo-semver-checks/issues/167).
 We'd be happy to look into it together with you to determine if it's a false positive or not.
+
+### What are witness checks, and when are they useful?
+
+Some lints include a "witness": a minimal downstream code example that should compile against
+the baseline crate and fail against the current crate if the reported breaking change is real.
+
+Witnesses are useful in two circumstances:
+- For some lints, our usual query process alone is not precise enough. In such cases,
+  `cargo-semver-checks` creates and checks witnesses automatically, discarding any lint results
+  where the witness did not confirm the breakage.
+- For other lints, witnesses act merely an optional self-consistency check, and can be enabled
+  to get additional certainty in the lint results.
+
+If a witness check fails unexpectedly for reasons unrelated to SemVer, `cargo-semver-checks`
+may exit with a non-zero code and may retain the generated witness code for inspection.
+Please consider reporting such cases by submitting the generated witness artifacts to
+our GitHub issue tracker — they are invaluable for helping us figure out all the edge cases.
 
 ### Will `cargo-semver-checks` catch every semver violation?
 
@@ -305,7 +323,7 @@ Also, generally speaking, inspecting JSON data is likely going to be faster than
 
 [`cargo-public-api`](https://crates.io/crates/cargo-public-api) uses rustdoc,
 like `cargo-semver-checks`, but focuses more on API diffing (showing which
-items has changed) and not API linting (explaining why they have changed and
+items have changed) and not API linting (explaining why they have changed and
 providing control over what counts).
 
 ### Why is it sometimes `cargo-semver-check` and `cargo-semver-checks`?
