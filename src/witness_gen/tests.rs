@@ -489,6 +489,7 @@ fn consistency_check_mismatch_retains_artifacts_without_suppressing_lint() {
     let manifest = fs::read_to_string(finalized[0].join("manifest.toml"))
         .expect("failed to read retained artifact manifest");
     assert!(manifest.contains("status = \"consistency_check_mismatch\""));
+    assert!(manifest.contains("not_confirmed_by_witness = 0"));
     assert!(manifest.contains("consistency_check_mismatches = 1"));
     assert!(
         finalized[0]

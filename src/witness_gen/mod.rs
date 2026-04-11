@@ -347,9 +347,9 @@ pub(crate) fn run_witness_checks(
                     authoritative_results.push(query_result);
                 }
                 SingleWitnessOutcome::NotConfirmedByWitness { retained_artifact } => {
-                    report.manifest_summary.not_confirmed_by_witness += 1;
                     match witness.purpose {
                         WitnessPurpose::RequiredForCorrectness => {
+                            report.manifest_summary.not_confirmed_by_witness += 1;
                             not_confirmed_by_witness += 1;
                             config
                                 .log_extra_verbose(|config| {
