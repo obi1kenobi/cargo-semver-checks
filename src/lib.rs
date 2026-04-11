@@ -24,7 +24,7 @@ use std::io::Write as _;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use check_release::{LintResult, run_check_release};
+use check_release::{LintResult, PendingCrateReport, run_check_release};
 use rustdoc_gen::CrateDataForRustdoc;
 
 pub use config::{FeatureFlag, GlobalConfig};
@@ -550,10 +550,11 @@ note: skipped the following crates since they have no library target: {skipped}"
 
         let current_loader = self.get_rustdoc_generator(config, &self.current.source)?;
         let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
+        let witness_target_dir = self.get_target_dir(&self.current.source)?;
 
         // Create a report for each crate.
         // We want to run all the checks, even if one returns `Err`.
-        let all_outcomes: Vec<anyhow::Result<(String, CrateReport)>> = crates_to_check
+        let all_outcomes: Vec<anyhow::Result<(String, PendingCrateReport)>> = crates_to_check
             .into_iter()
             .map(|selected| {
                 let start = std::time::Instant::now();
@@ -582,7 +583,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                 let witness_data = witness_gen::WitnessGenerationData::new(
                     baseline_loader.get_data_request(),
                     current_loader.get_data_request(),
-                    current_loader.get_target_root(),
+                    witness_target_dir.clone(),
                 );
 
                 let data_storage = generate_crate_data(
@@ -611,9 +612,34 @@ note: skipped the following crates since they have no library target: {skipped}"
             .collect();
         let crate_reports: BTreeMap<String, CrateReport> = {
             let mut reports = BTreeMap::new();
+            let mut witness_run_reports = Vec::new();
             for outcome in all_outcomes {
                 let (name, outcome) = outcome?;
-                reports.insert(name, outcome);
+                witness_run_reports.push(outcome.witness_run_report);
+                reports.insert(name, outcome.report);
+            }
+
+            match witness_gen::finalize_retained_artifacts(config.run_id(), &witness_run_reports) {
+                Ok(retained_artifact_dirs) => {
+                    if !retained_artifact_dirs.is_empty() {
+                        if retained_artifact_dirs.len() == 1 {
+                            config.shell_note(format_args!(
+                                "retained witness artifacts in {}",
+                                retained_artifact_dirs[0].display()
+                            ))?;
+                        } else {
+                            config.shell_note("retained witness artifacts in:")?;
+                            for dir in retained_artifact_dirs {
+                                writeln!(config.stderr(), "{:12}{}", "", dir.display())?;
+                            }
+                        }
+                    }
+                }
+                Err(error) => {
+                    config.shell_warn(format_args!(
+                        "failed to retain witness artifacts: {error:#}"
+                    ))?;
+                }
             }
             reports
         };
@@ -714,11 +740,17 @@ pub struct CrateReport {
     selected_checks: usize,
     /// Number of ignored queries
     skipped_checks: usize,
+    /// Witness statistics produced while evaluating this crate, if any.
+    witness_statistics: Option<WitnessStatistics>,
 }
 
 impl CrateReport {
-    /// Check if the semver check was successful.
-    /// `true` if required bump <= detected bump.
+    /// Check whether this crate passed the semver check itself.
+    ///
+    /// This only reports whether the crate's authoritative lint results require
+    /// a larger semver bump than was detected. It does not include witness
+    /// execution failures; inspect [`Self::has_required_witness_errors`] or
+    /// [`Self::witness_statistics`] separately when those matter.
     pub fn success(&self) -> bool {
         match self.required_bumps.update_type().map(ReleaseType::from) {
             // If `None`, no additional bump is required.
@@ -748,6 +780,13 @@ impl CrateReport {
         }
     }
 
+    /// Whether required witness validation encountered an execution error.
+    pub fn has_required_witness_errors(&self) -> bool {
+        self.witness_statistics
+            .as_ref()
+            .is_some_and(|statistics| statistics.required_witness_errors() > 0)
+    }
+
     /// Minimum bump required to respect semver.
     /// It's [`Option::None`] if no bump is required beyond the already-detected bump.
     pub fn required_bump(&self) -> Option<ReleaseType> {
@@ -757,6 +796,11 @@ impl CrateReport {
     /// Bump between the current version and the baseline one.
     pub fn detected_bump(&self) -> ActualSemverUpdate {
         self.detected_bump
+    }
+
+    /// Additional witness-related statistics for this crate, if any were produced.
+    pub fn witness_statistics(&self) -> Option<&WitnessStatistics> {
+        self.witness_statistics.as_ref()
     }
 }
 
@@ -770,9 +814,29 @@ pub struct Report {
 }
 
 impl Report {
-    /// `true` if none of the crates violate semver.
+    /// `true` if none of the crates violate SemVer according to authoritative
+    /// lint results.
+    ///
+    /// This is SemVer-lint-only and does not include required witness
+    /// execution failures. Use [`Self::is_cli_success`] for the same success
+    /// semantics as the `cargo-semver-checks` CLI.
     pub fn success(&self) -> bool {
         self.crate_reports.values().all(|report| report.success())
+    }
+
+    /// `true` if the check should be considered successful by the CLI.
+    ///
+    /// This includes both authoritative SemVer lint results and required
+    /// witness execution failures.
+    pub fn is_cli_success(&self) -> bool {
+        self.success() && !self.has_required_witness_errors()
+    }
+
+    /// Whether any crate encountered a required witness execution error.
+    pub fn has_required_witness_errors(&self) -> bool {
+        self.crate_reports
+            .values()
+            .any(|report| report.has_required_witness_errors())
     }
 
     /// Reports of each crate checked, sorted by crate name.
@@ -792,12 +856,13 @@ pub struct WitnessGeneration {
     /// while not necessarily buildable standalone programs.  See [`Witness::hint_template`].
     pub show_hints: bool,
     /// Whether to run witness-based consistency checks for lints whose witness purpose is
-    /// [`WitnessPurpose::ConsistencyCheck`].
+    /// [`WitnessPurpose::ConsistencyCheck`]. Witnesses whose purpose is
+    /// [`WitnessPurpose::RequiredForCorrectness`] always run.
     pub run_consistency_checks: bool,
 }
 
 impl WitnessGeneration {
-    /// Creates a new [`WitnessGeneration`] instance with optional witness output disabled.
+    /// Creates a new [`WitnessGeneration`] instance with all optional witness output disabled.
     #[inline]
     #[must_use]
     pub const fn new() -> Self {
@@ -805,6 +870,64 @@ impl WitnessGeneration {
             show_hints: false,
             run_consistency_checks: false,
         }
+    }
+}
+
+/// Witness-related statistics produced while checking one crate.
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WitnessStatistics {
+    not_confirmed_by_witness: usize,
+    consistency_check_mismatches: usize,
+    consistency_check_errors: usize,
+    required_witness_errors: usize,
+}
+
+impl WitnessStatistics {
+    pub(crate) const fn new(
+        not_confirmed_by_witness: usize,
+        consistency_check_mismatches: usize,
+        consistency_check_errors: usize,
+        required_witness_errors: usize,
+    ) -> Self {
+        Self {
+            not_confirmed_by_witness,
+            consistency_check_mismatches,
+            consistency_check_errors,
+            required_witness_errors,
+        }
+    }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        self.not_confirmed_by_witness == 0
+            && self.consistency_check_mismatches == 0
+            && self.consistency_check_errors == 0
+            && self.required_witness_errors == 0
+    }
+
+    /// Number of `RequiredForCorrectness` candidate query results that were
+    /// suppressed because the witness also compiled on the current crate,
+    /// disproving the breakage.
+    pub fn not_confirmed_by_witness(&self) -> usize {
+        self.not_confirmed_by_witness
+    }
+
+    /// Number of `ConsistencyCheck` query results whose witness still compiled
+    /// on the current crate. This is unexpected and indicates likely false-positives.
+    pub fn consistency_check_mismatches(&self) -> usize {
+        self.consistency_check_mismatches
+    }
+
+    /// Number of witness execution failures encountered while running
+    /// `ConsistencyCheck` witnesses.
+    pub fn consistency_check_errors(&self) -> usize {
+        self.consistency_check_errors
+    }
+
+    /// Number of witness execution failures encountered while running
+    /// `RequiredForCorrectness` witnesses.
+    pub fn required_witness_errors(&self) -> usize {
+        self.required_witness_errors
     }
 }
 

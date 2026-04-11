@@ -105,6 +105,15 @@ pub enum WitnessPurpose {
     RequiredForCorrectness,
 }
 
+impl WitnessPurpose {
+    pub(crate) const fn as_str(self) -> &'static str {
+        match self {
+            Self::ConsistencyCheck => "consistency_check",
+            Self::RequiredForCorrectness => "required_for_correctness",
+        }
+    }
+}
+
 /// A query that can be executed on a pair of rustdoc output files,
 /// returning instances of a particular kind of semver violation.
 #[non_exhaustive]

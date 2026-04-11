@@ -98,9 +98,9 @@ fn bugreport() {
     });
 }
 
-// TODO: this test will break when the `--consistency-check` option is stabilized.  It will need to
-// be replaced with a different unstable option.  See the module-level doc comment for
-// how to update this test.
+// TODO: this test will break when `--consistency-check` is stabilized. It will need to
+// be replaced with a different unstable option. See the module-level doc comment for how
+// to update this test.
 /// Tests the behavior of unstable options being passed without `-Z unstable-options`.
 #[test]
 fn unstable_options_without_flag() {

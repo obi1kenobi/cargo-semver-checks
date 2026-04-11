@@ -66,6 +66,24 @@ pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<&str> {
     Ok(version)
 }
 
+/// Returns the Rust library target name that downstream code imports.
+///
+/// This may differ from the Cargo package name when `[lib].name` is set. When
+/// no explicit library name is present, Cargo's usual dash-to-underscore
+/// normalization of the package name is applied.
+pub(crate) fn get_library_target_name(manifest: &Manifest) -> anyhow::Result<String> {
+    if let Some(name) = manifest
+        .parsed
+        .lib
+        .as_ref()
+        .and_then(|lib| lib.name.as_ref())
+    {
+        return Ok(name.clone());
+    }
+
+    Ok(get_package_name(manifest)?.replace('-', "_"))
+}
+
 pub(crate) fn get_project_dir_from_manifest_path(
     manifest_path: &std::path::Path,
 ) -> anyhow::Result<std::path::PathBuf> {

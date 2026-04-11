@@ -185,7 +185,7 @@ fn main() {
     let check: cargo_semver_checks::Check = check_release.into();
 
     let report = exit_on_error(config.is_error(), || check.check_release(&mut config));
-    if report.success() {
+    if report.is_cli_success() {
         std::process::exit(0);
     } else {
         std::process::exit(1);

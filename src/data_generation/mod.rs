@@ -7,6 +7,7 @@ use trustfall_rustdoc::{VersionedIndex, VersionedRustdocAdapter, VersionedStorag
 
 pub(crate) use error::{IntoTerminalResult, TerminalError};
 pub(crate) use generate::GenerationSettings;
+pub(crate) use generate::effective_witness_rustflags;
 pub(crate) use progress::ProgressCallbacks;
 pub(crate) use request::{CacheSettings, CrateDataRequest};
 
