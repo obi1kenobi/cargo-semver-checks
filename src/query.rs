@@ -1122,10 +1122,7 @@ mod tests {
         if let Some(template) = semver_query.per_result_error_template {
             assert!(!transparent_results.is_empty());
 
-            let flattened_actual_results: Vec<_> = transparent_results
-                .iter()
-                .flat_map(|(_key, value)| value)
-                .collect();
+            let flattened_actual_results: Vec<_> = transparent_results.values().flatten().collect();
             for semver_violation_result in flattened_actual_results {
                 registry
                     .render_template(&template, semver_violation_result)
