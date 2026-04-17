@@ -473,7 +473,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v5
         with:
-          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-version-caching-adler2-2_0_1-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -493,7 +493,7 @@ jobs:
         uses: actions/cache/save@v5
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: cross-version-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-version-caching-adler2-2_0_1-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Install newer rust
