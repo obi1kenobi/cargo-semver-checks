@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "reexported_generic_defaults"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
