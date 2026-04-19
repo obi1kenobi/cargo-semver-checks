@@ -65,5 +65,49 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "name": String("WillGainAssociatedConstWithDefault"),
+      "path": List([
+        String("trait_no_longer_dyn_compatible"),
+        String("WillGainAssociatedConstWithDefault"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("WillGainAssociatedConstWithoutDefault"),
+      "path": List([
+        String("trait_no_longer_dyn_compatible"),
+        String("WillGainAssociatedConstWithoutDefault"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("SealedWillGainAssociatedConstWithDefault"),
+      "path": List([
+        String("trait_no_longer_dyn_compatible"),
+        String("SealedWillGainAssociatedConstWithDefault"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("SealedWillGainAssociatedConstWithoutDefault"),
+      "path": List([
+        String("trait_no_longer_dyn_compatible"),
+        String("SealedWillGainAssociatedConstWithoutDefault"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
 }
