@@ -42,13 +42,16 @@ jobs:
           VERSION: "v4.43.1"
         run: |
           set -euxo pipefail
-          wget "https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_linux_amd64" -O yq &&\
-            chmod +x ./yq
+          YQ="$RUNNER_TEMP/yq"
+          wget "https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_linux_amd64" -O "$YQ"
+          chmod +x "$YQ"
 
       - name: check if the new Rust release is out
+        id: rust-version
         run: |
           set -euxo pipefail
-          UPCOMING="$(yq '.jobs.rust-tests.strategy.matrix.toolchain as $versions |
+          YQ="$RUNNER_TEMP/yq"
+          UPCOMING="$("$YQ" '.jobs.rust-tests.strategy.matrix.toolchain as $versions |
               [$versions[] | select(. != "beta" and . != "stable")] as $numerical_versions |
               [$versions[] | select(. == "beta" or . == "stable")] as $non_numerical_versions |
               (
@@ -61,18 +64,49 @@ jobs:
 
           # This line will fail if that release isn't out yet.
           wget "https://github.com/rust-lang/rust/releases/tag/${UPCOMING}" --server-response -O /dev/null
+          echo "upcoming=${UPCOMING}" >> "$GITHUB_OUTPUT"
+
+      - name: install new Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ steps.rust-version.outputs.upcoming }}
+          components: rustfmt, clippy
+          cache: false
+          rustflags: ""
+
+      - name: apply automatic clippy and rustfmt fixes
+        run: |
+          set -euxo pipefail
+          cargo clippy --workspace --all-targets --no-deps --fix
+          cargo fmt
+
+      - name: show source changes from clippy and rustfmt
+        run: |
+          set -euxo pipefail
+          git diff --stat
+          git diff
+          git diff > source-changes.patch
+
+      - name: upload source changes artifact for use in PR
+        uses: actions/upload-artifact@v7
+        with:
+          name: source-changes.patch
+          path: source-changes.patch
+          retention-days: 1
+          if-no-files-found: error
 
       - name: add next minor to test matrix
         run: |
           set -euxo pipefail
+          YQ="$RUNNER_TEMP/yq"
 
           # Update the rust-tests matrix
-          yq '.jobs.rust-tests.strategy.matrix.toolchain' .github/workflows/ci.yml -o json | \
+          "$YQ" '.jobs.rust-tests.strategy.matrix.toolchain' .github/workflows/ci.yml -o json | \
             python -m json.tool --compact | \
             sed 's/,/, /g' \
             >.current_versions
 
-          yq '.jobs.rust-tests.strategy.matrix.toolchain as $versions |
+          "$YQ" '.jobs.rust-tests.strategy.matrix.toolchain as $versions |
               [$versions[] | select(. != "beta" and . != "stable")] as $numerical_versions |
               [$versions[] | select(. == "beta" or . == "stable")] as $non_numerical_versions |
               (
@@ -92,12 +126,12 @@ jobs:
           sed -i "s/$CURRENT/$NEXT/g" .github/workflows/ci.yml
 
           # Update the upload-prebuilt-test-rustdocs matrix using the same next version
-          yq '.jobs.upload-prebuilt-test-rustdocs.strategy.matrix.toolchain' .github/workflows/ci.yml -o json | \
+          "$YQ" '.jobs.upload-prebuilt-test-rustdocs.strategy.matrix.toolchain' .github/workflows/ci.yml -o json | \
             python -m json.tool --compact | \
             sed 's/,/, /g' \
             >.current_upload_versions
 
-          yq '.jobs.upload-prebuilt-test-rustdocs.strategy.matrix.toolchain as $versions |
+          "$YQ" '.jobs.upload-prebuilt-test-rustdocs.strategy.matrix.toolchain as $versions |
               [$versions[] | select(. != "beta" and . != "stable")] as $numerical_versions |
               [$versions[] | select(. == "beta" or . == "stable")] as $non_numerical_versions |
               (
@@ -150,6 +184,25 @@ jobs:
           name: ci.yml
           path: .github/workflows/
 
+      - name: download source changes from update job
+        uses: actions/download-artifact@v8
+        with:
+          name: source-changes.patch
+          path: source-changes/
+
+      - name: apply source changes from clippy and rustfmt
+        id: source-changes
+        run: |
+          set -euo pipefail
+
+          PATCH="source-changes/source-changes.patch"
+          if [[ -s "$PATCH" ]]; then
+            git apply "$PATCH"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: craft PR body and commit message
         run: |
           set -euo pipefail
@@ -158,6 +211,11 @@ jobs:
 
           {
             echo "${PR_MESSAGE}"
+            if [[ "${{ steps.source-changes.outputs.changed }}" == "true" ]]; then
+              echo
+              echo 'Any changes to source code are made by `cargo clippy --fix && cargo fmt` with the newly released Rust toolchain.'
+              echo
+            fi
             echo '```diff'
             echo "$DIFF"
             echo '```'
@@ -170,10 +228,10 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git switch --force-create "$BRANCH_NAME"
-          git add ./.github/workflows/ci.yml
+          git add --update
           DIFF="$(git diff --staged)"
           if [[ "$DIFF" == "" ]]; then
-            echo >&2 "./.github/workflows/ci.yml was not changed, bailing out and not making a PR"
+            echo >&2 "No files were changed, bailing out and not making a PR"
             exit 1
           fi
           git commit --no-verify --file=body.md
