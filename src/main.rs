@@ -182,10 +182,12 @@ fn main() {
         None => args.check_release,
     };
 
+    let has_report_output = check_release.unstable_options.report_output.is_some();
+
     let check: cargo_semver_checks::Check = check_release.into();
 
     let report = exit_on_error(config.is_error(), || check.check_release(&mut config));
-    if report.is_cli_success() {
+    if report.is_cli_success() || (!report.has_required_witness_errors() && has_report_output) {
         std::process::exit(0);
     } else {
         std::process::exit(1);
@@ -356,6 +358,16 @@ struct UnstableOptions {
     /// Enable running witness-based consistency checks for lints whose witness purpose is `ConsistencyCheck`.
     #[arg(long, hide = true)]
     consistency_check: bool,
+
+    /// File where to save the report. Note: this is primarily intended to be paired with
+    /// a later invocation that passes `--baseline-report`. The file format is unstable.
+    #[arg(long, hide = true, conflicts_with = "baseline_report")]
+    report_output: Option<PathBuf>,
+
+    /// File containing a report to use as baseline. A result is only included in the
+    /// report being generated if not already present in the baseline report
+    #[arg(long, hide = true, conflicts_with = "report_output")]
+    baseline_report: Option<PathBuf>,
 }
 
 impl UnstableOptions {
@@ -380,6 +392,8 @@ impl UnstableOptions {
         let Self {
             witness_hints,
             consistency_check,
+            report_output,
+            baseline_report,
         } = self;
 
         if *witness_hints {
@@ -388,6 +402,14 @@ impl UnstableOptions {
 
         if *consistency_check {
             list.push("--consistency-check".into())
+        }
+
+        if report_output.is_some() {
+            list.push("--report-output".into())
+        }
+
+        if baseline_report.is_some() {
+            list.push("--baseline-report".into())
         }
 
         list
@@ -670,6 +692,14 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         witness_generation.show_hints = value.unstable_options.witness_hints;
         witness_generation.run_consistency_checks = value.unstable_options.consistency_check;
         check.set_witness_generation(witness_generation);
+
+        if let Some(baseline_report) = value.unstable_options.baseline_report {
+            check.set_baseline_report(baseline_report);
+        }
+
+        if let Some(report_output) = value.unstable_options.report_output {
+            check.set_report_output(report_output);
+        }
 
         check
     }

@@ -26,4 +26,10 @@ Unstable options:
       --consistency-check
           Enable running witness-based consistency checks for lints whose witness purpose is `ConsistencyCheck`
 
+      --report-output <REPORT_OUTPUT>
+          File where to save the report. Note: this is primarily intended to be paired with a later invocation that passes `--baseline-report`. The file format is unstable
+
+      --baseline-report <BASELINE_REPORT>
+          File containing a report to use as baseline. A result is only included in the report being generated if not already present in the baseline report
+
 ----- stderr -----

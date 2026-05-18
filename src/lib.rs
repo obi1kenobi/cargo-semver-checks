@@ -17,7 +17,7 @@ use clap::ValueEnum;
 use data_generation::{DataStorage, IntoTerminalResult as _, TerminalError};
 use directories::ProjectDirs;
 use itertools::Itertools;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use std::collections::{BTreeMap, HashSet};
 use std::io::Write as _;
@@ -48,6 +48,8 @@ pub struct Check {
     build_target: Option<String>,
     /// Options for generating [witnesses](Witness).
     witness_generation: WitnessGeneration,
+    report_output: Option<PathBuf>,
+    baseline_report: Option<PathBuf>,
 }
 
 /// The kind of release we're making.
@@ -277,6 +279,8 @@ impl Check {
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
             build_target: None,
             witness_generation: WitnessGeneration::default(),
+            report_output: None,
+            baseline_report: None,
         }
     }
 
@@ -338,6 +342,20 @@ impl Check {
     /// relying on the users cargo configuration.
     pub fn set_build_target(&mut self, build_target: String) -> &mut Self {
         self.build_target = Some(build_target);
+        self
+    }
+
+    /// File containing a report to use as baseline. A result is only included in the
+    /// report being generated if it's not already present in the baseline report
+    pub fn set_baseline_report(&mut self, baseline_report: PathBuf) -> &mut Self {
+        self.baseline_report = Some(baseline_report);
+        self
+    }
+
+    /// File where to save the report. Note: this is primarily intended to be paired with
+    /// a later invocation that passes `--baseline-report`. The file format is unstable.
+    pub fn set_report_output(&mut self, report_output: PathBuf) -> &mut Self {
+        self.report_output = Some(report_output);
         self
     }
 
@@ -552,6 +570,21 @@ note: skipped the following crates since they have no library target: {skipped}"
         let baseline_loader = self.get_rustdoc_generator(config, &self.baseline.source)?;
         let witness_target_dir = self.get_target_dir(&self.current.source)?;
 
+        let mut crate_reports = BaselineReport::default();
+
+        let version = env!("CARGO_PKG_VERSION").to_owned();
+
+        if let Some(baseline_report) = &self.baseline_report {
+            crate_reports = serde_json::from_reader(std::fs::File::open(baseline_report)?)?;
+
+            if crate_reports.version != version {
+                anyhow::bail!(
+                    "baseline report was generated with a different version: {} != {version} ",
+                    crate_reports.version
+                )
+            }
+        }
+
         // Create a report for each crate.
         // We want to run all the checks, even if one returns `Err`.
         let all_outcomes: Vec<anyhow::Result<(String, PendingCrateReport)>> = crates_to_check
@@ -602,6 +635,7 @@ note: skipped the following crates since they have no library target: {skipped}"
                     &selected.overrides,
                     &self.witness_generation,
                     witness_data,
+                    crate_reports.crate_reports.get(&name),
                 )?;
                 config.shell_status(
                     "Finished",
@@ -641,11 +675,33 @@ note: skipped the following crates since they have no library target: {skipped}"
                     ))?;
                 }
             }
+
+            if let Some(report_output) = &self.report_output {
+                let baseline_report = BaselineReport {
+                    version,
+                    crate_reports: reports,
+                };
+
+                std::fs::write(
+                    report_output,
+                    serde_json::to_string_pretty(&baseline_report)?,
+                )?;
+
+                reports = baseline_report.crate_reports;
+            }
+
             reports
         };
 
         Ok(Report { crate_reports })
     }
+}
+
+#[derive(Default, Serialize, Deserialize)]
+struct BaselineReport {
+    /// Version of cargo-semver-checks which generated the reports
+    version: String,
+    crate_reports: BTreeMap<String, CrateReport>,
 }
 
 fn overrides_for_workspace_package(
@@ -701,7 +757,7 @@ fn log_terminal_error(config: &mut GlobalConfig, err: TerminalError) -> anyhow::
 }
 
 /// Summary of version bumps from queries
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Bumps {
     major: u32,
     minor: u32,
@@ -724,7 +780,7 @@ impl Bumps {
 
 /// Report of semver check of one crate.
 #[non_exhaustive]
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CrateReport {
     /// Bump between the current version and the baseline one.
     detected_bump: ActualSemverUpdate,
@@ -875,7 +931,7 @@ impl WitnessGeneration {
 
 /// Witness-related statistics produced while checking one crate.
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct WitnessStatistics {
     not_confirmed_by_witness: usize,
     consistency_check_mismatches: usize,
