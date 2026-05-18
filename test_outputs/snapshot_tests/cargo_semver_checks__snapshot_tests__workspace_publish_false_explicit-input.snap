@@ -30,4 +30,6 @@ Check(
     show_hints: false,
     run_consistency_checks: false,
   ),
+  report_output: None,
+  baseline_report: None,
 )
