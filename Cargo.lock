@@ -3440,9 +3440,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "56.2.5"
+version = "56.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0118a6c11eb379080bbeddff175e636240658543cfe3ab00e49a1734af55e919"
+checksum = "3a2564090bb8246b7f921e2fca35154dc8a67fcc3b8c77b5fc5ae7c1efa3d93c"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3455,9 +3455,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "57.0.6"
+version = "57.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f71ffbf1f3cf9d0992e13ec29529fa7ccb06a6b5001a90c5ab1b1a7b1973044"
+checksum = "3c96b0167112d34e8d3eb5f226c4206daeb5a8bdbc0877799cd76c4ccbe25d20"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3508,8 +3508,8 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.18",
  "trustfall",
- "trustfall-rustdoc-adapter 56.2.5",
- "trustfall-rustdoc-adapter 57.0.6",
+ "trustfall-rustdoc-adapter 56.2.6",
+ "trustfall-rustdoc-adapter 57.0.7",
  "trustfall_core",
 ]
 
