@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
@@ -9,6 +10,73 @@ use crate::data_generation::request::RequestKind;
 use super::error::{IntoTerminalResult as _, TerminalError};
 use super::progress::CallbackHandler;
 use super::request::CrateDataRequest;
+
+const EXTRA_RUSTDOCFLAGS: &str = "-Z unstable-options --document-private-items --document-hidden-items --output-format=json --cap-lints=allow";
+
+#[derive(Debug, Clone)]
+pub(crate) struct RustdocBuildEnvironment {
+    pub(crate) target_triple: String,
+    pub(crate) cargo_rustflags: Cow<'static, str>,
+    pub(crate) cargo_rustdocflags: Cow<'static, str>,
+    pub(crate) toolchain_version: String,
+}
+
+impl RustdocBuildEnvironment {
+    pub(crate) fn from_env_and_config_for_target(
+        build_target: Option<&str>,
+    ) -> anyhow::Result<Self> {
+        let flags = Flags::from_env_and_config_for_target(build_target)?;
+
+        // Generating rustdoc JSON for a crate also involves checking that crate's dependencies.
+        // The check is done by rustc, not rustdoc, so it's subject to `RUSTFLAGS` not
+        // `RUSTDOCFLAGS`. We don't want rustc to fail that check if the user has set
+        // `RUSTFLAGS="-Dwarnings"` here.
+        // This fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/589
+        let cargo_rustflags = if flags.rustflags.is_empty() {
+            Cow::Borrowed("--cap-lints=allow")
+        } else {
+            Cow::Owned(format!("{} --cap-lints=allow", flags.rustflags))
+        };
+
+        // Preserve user rustdoc flags, including `--cfg <custom-value>` settings that toggle
+        // what functionality is compiled into the scanned crate.
+        // Suggested in: https://github.com/obi1kenobi/cargo-semver-checks/discussions/1012
+        let cargo_rustdocflags = if flags.rustdocflags.is_empty() {
+            Cow::Borrowed(EXTRA_RUSTDOCFLAGS)
+        } else {
+            Cow::Owned(format!("{} {}", flags.rustdocflags, EXTRA_RUSTDOCFLAGS))
+        };
+
+        // Include the rustdoc toolchain version in artifact identity, since rustdoc JSON may
+        // change across toolchains.
+        let cmd_output = std::process::Command::new("rustdoc")
+            .arg("--version")
+            .output()
+            .context("'rustdoc --version' failed, is Rust installed correctly?")?;
+        if !cmd_output.status.success() {
+            anyhow::bail!(
+                "'rustdoc --version' exited with status {}",
+                cmd_output.status
+            );
+        }
+        let mut toolchain_version = String::from_utf8(cmd_output.stdout)
+            .context("'rustdoc --version' output is not legal UTF-8")?;
+        toolchain_version.truncate(toolchain_version.trim_end().len());
+        let prefix = "rustdoc ";
+        anyhow::ensure!(
+            toolchain_version.starts_with(prefix),
+            "'rustdoc --version' output did not start with 'rustdoc '",
+        );
+        toolchain_version.drain(..prefix.len());
+
+        Ok(Self {
+            target_triple: flags.target_triple,
+            cargo_rustflags,
+            cargo_rustdocflags,
+            toolchain_version,
+        })
+    }
+}
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct GenerationSettings {
@@ -46,6 +114,7 @@ pub(super) fn generate_rustdoc(
     request: &CrateDataRequest<'_>,
     build_dir: &Path,
     settings: GenerationSettings,
+    build_environment: &RustdocBuildEnvironment,
     callbacks: &mut CallbackHandler<'_>,
 ) -> Result<(PathBuf, cargo_metadata::Metadata), TerminalError> {
     let crate_name = request.kind.name().into_terminal_result()?;
@@ -116,6 +185,7 @@ pub(super) fn generate_rustdoc(
         crate_name,
         version,
         &settings,
+        build_environment,
         callbacks,
     )?;
 
@@ -209,6 +279,7 @@ fn get_default_build_target_triple(config: &cargo_config2::Config) -> anyhow::Re
 }
 
 struct Flags {
+    target_triple: String,
     rustflags: String,
     rustdocflags: String,
 }
@@ -317,6 +388,7 @@ impl Flags {
         Ok(Self {
             rustflags: Self::determine_rustflags(&config, &triple)?,
             rustdocflags: Self::determine_rustdocflags(&config, &triple)?,
+            target_triple: triple,
         })
     }
 }
@@ -452,41 +524,10 @@ fn run_cargo_doc(
     crate_name: &str,
     version: &str,
     settings: &GenerationSettings,
+    build_environment: &RustdocBuildEnvironment,
     callbacks: &mut CallbackHandler<'_>,
 ) -> Result<PathBuf, TerminalError> {
     let pkg_spec = format!("{crate_name}@{version}");
-
-    // Load the current rustflags and rustdocflags settings.
-    // We'll want to modify them.
-    let Flags {
-        rustflags: prior_rustflags,
-        rustdocflags: mut prior_rustdocflags,
-    } = Flags::from_env_and_config_for_target(request.build_target()).into_terminal_result()?;
-
-    // Generating rustdoc JSON for a crate also involves checking that crate's dependencies.
-    // The check is done by rustc, not rustdoc, so it's subject to `RUSTFLAGS` not `RUSTDOCFLAGS`.
-    // We don't want rustc to fail that check if the user has set `RUSTFLAGS="-Dwarnings"` here.
-    // This fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/589
-    let rustflags = if !prior_rustflags.is_empty() {
-        let mut prior_rustflags = prior_rustflags;
-        prior_rustflags.push_str(" --cap-lints=allow");
-        std::borrow::Cow::Owned(prior_rustflags)
-    } else {
-        std::borrow::Cow::Borrowed("--cap-lints=allow")
-    };
-
-    // Ensure we preserve `RUSTDOCFLAGS` if they are set.
-    // This allows users to supply `--cfg <custom-value>` settings in `RUSTDOCFLAGS`
-    // in order to toggle what functionality is compiled into the scanned crate.
-    // Suggested in: https://github.com/obi1kenobi/cargo-semver-checks/discussions/1012
-    let extra_rustdocflags = "-Z unstable-options --document-private-items --document-hidden-items --output-format=json --cap-lints=allow";
-    let rustdocflags = if !prior_rustdocflags.is_empty() {
-        prior_rustdocflags.push(' ');
-        prior_rustdocflags.push_str(extra_rustdocflags);
-        std::borrow::Cow::Owned(prior_rustdocflags)
-    } else {
-        std::borrow::Cow::Borrowed(extra_rustdocflags)
-    };
 
     // Run the rustdoc generation command on the placeholder crate,
     // specifically requesting the rustdoc of *only* the crate specified in `pkg_spec`.
@@ -499,8 +540,11 @@ fn run_cargo_doc(
     callbacks.generate_rustdoc_start();
     let mut cmd = std::process::Command::new("cargo");
     cmd.env("RUSTC_BOOTSTRAP", "1")
-        .env("RUSTDOCFLAGS", rustdocflags.as_ref())
-        .env("RUSTFLAGS", rustflags.as_ref())
+        .env(
+            "RUSTDOCFLAGS",
+            build_environment.cargo_rustdocflags.as_ref(),
+        )
+        .env("RUSTFLAGS", build_environment.cargo_rustflags.as_ref())
         .stdout(std::process::Stdio::null()) // Don't pollute output
         .stderr(settings.stderr())
         .arg("doc")
@@ -557,7 +601,7 @@ fn run_cargo_doc(
         )
         .expect("formatting failed");
 
-        if rustflags.contains("--cfg") {
+        if build_environment.cargo_rustflags.contains("--cfg") {
             writeln!(
                 message,
                 "note: RUSTFLAGS appears to contain '--cfg' arguments."
