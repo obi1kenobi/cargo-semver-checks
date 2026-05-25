@@ -401,7 +401,6 @@ impl Check {
     pub fn check_release(&self, config: &mut GlobalConfig) -> anyhow::Result<Report> {
         let generation_settings = data_generation::GenerationSettings {
             use_color: config.err_color_choice(),
-            deps: false,
             pass_through_stderr: config.is_verbose(),
         };
 
