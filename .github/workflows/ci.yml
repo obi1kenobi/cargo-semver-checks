@@ -422,8 +422,8 @@ jobs:
           path: bins\
 
   cross-version-caching:
-    # Ensure that cached rustdoc JSON files from an mismatched rustdoc version
-    # are transparently cleared and overwritten with the rustdoc version from the current toolchain.
+    # Ensure that cached rustdoc JSON files from a mismatched rustdoc version
+    # are not reused when running with the current toolchain.
     # Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/415
     name: 'Caching across rustdoc versions'
     runs-on: ubuntu-latest
@@ -473,7 +473,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v5
         with:
-          key: cross-version-caching-adler2-2_0_1-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-version-caching-adler2-2_0_1-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -493,7 +493,7 @@ jobs:
         uses: actions/cache/save@v5
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: cross-version-caching-adler2-2_0_1-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-version-caching-adler2-2_0_1-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}
           path: subject/target/semver-checks/cache
 
       - name: Install newer rust
@@ -513,22 +513,31 @@ jobs:
 
           # Show what's in the cache.
           ls subject-new/target/semver-checks/cache/
-          EXPECTED_PREFIX='subject-new/target/semver-checks/cache/adler2-2_0_1-default-01666ec060466c14'
-          EXPECTED_CACHED_METADATA="${EXPECTED_PREFIX}.metadata.json"
-          EXPECTED_CACHED_RUSTDOC="${EXPECTED_PREFIX}.json"
+          mapfile -t OLD_CACHED_RUSTDOCS < <(find subject-new/target/semver-checks/cache \
+            -maxdepth 1 \
+            -name 'adler2-2_0_1-*.json' \
+            ! -name '*.metadata.json' \
+            | sort)
+
+          [ "${#OLD_CACHED_RUSTDOCS[@]}" -eq 1 ] || { \
+            echo "expected exactly one cached adler2 rustdoc file, found ${#OLD_CACHED_RUSTDOCS[@]}"; \
+            exit 1;
+          }
+          OLD_CACHED_RUSTDOC="${OLD_CACHED_RUSTDOCS[0]}"
+          OLD_CACHED_METADATA="${OLD_CACHED_RUSTDOC%.json}.metadata.json"
 
           # Ensure the previous cached rustdoc and metadata files still exist.
-          [ -f "$EXPECTED_CACHED_METADATA" ] || { \
+          [ -f "$OLD_CACHED_METADATA" ] || { \
             echo "could not find adler2 metadata cache file"; \
             exit 1;
           }
-          [ -f "$EXPECTED_CACHED_RUSTDOC" ] || { \
+          [ -f "$OLD_CACHED_RUSTDOC" ] || { \
             echo "could not find adler2 rustdoc cache file"; \
             exit 1;
           }
 
           OLD_RUSTDOC_VERSION=
-          OLD_RUSTDOC_VERSION=$(jq .format_version "$EXPECTED_CACHED_RUSTDOC")
+          OLD_RUSTDOC_VERSION=$(jq .format_version "$OLD_CACHED_RUSTDOC")
           export OLD_RUSTDOC_VERSION
 
           # Run cargo-semver-checks with the older cached file.
@@ -539,12 +548,38 @@ jobs:
 
           # Show what's in the cache now.
           ls subject-new/target/semver-checks/cache/
+          mapfile -t CACHED_RUSTDOCS < <(find subject-new/target/semver-checks/cache \
+            -maxdepth 1 \
+            -name 'adler2-2_0_1-*.json' \
+            ! -name '*.metadata.json' \
+            | sort)
+
+          [ "${#CACHED_RUSTDOCS[@]}" -eq 2 ] || { \
+            echo "expected two cached adler2 rustdoc files, found ${#CACHED_RUSTDOCS[@]}"; \
+            exit 1;
+          }
+          NEW_CACHED_RUSTDOC=
+          for cached_rustdoc in "${CACHED_RUSTDOCS[@]}"; do
+            if [ "$cached_rustdoc" != "$OLD_CACHED_RUSTDOC" ]; then
+              NEW_CACHED_RUSTDOC="$cached_rustdoc"
+              break
+            fi
+          done
+          [ -n "$NEW_CACHED_RUSTDOC" ] || { \
+            echo "could not find new adler2 rustdoc cache file"; \
+            exit 1;
+          }
+          NEW_CACHED_METADATA="${NEW_CACHED_RUSTDOC%.json}.metadata.json"
+          [ -f "$NEW_CACHED_METADATA" ] || { \
+            echo "could not find new adler2 metadata cache file"; \
+            exit 1;
+          }
 
           NEW_RUSTDOC_VERSION=
-          NEW_RUSTDOC_VERSION=$(jq .format_version "$EXPECTED_CACHED_RUSTDOC")
+          NEW_RUSTDOC_VERSION=$(jq .format_version "$NEW_CACHED_RUSTDOC")
           export NEW_RUSTDOC_VERSION
 
-          # Ensure the cached rustdoc versions were indeed different before and after.
+          # Ensure the cached rustdoc versions differ across the separate cache entries.
           [ "$OLD_RUSTDOC_VERSION" != "$NEW_RUSTDOC_VERSION" ] || exit 1
 
   cross-feature-caching:
@@ -588,7 +623,7 @@ jobs:
         id: cache
         uses: actions/cache/restore@v5
         with:
-          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
@@ -611,7 +646,7 @@ jobs:
         uses: actions/cache/save@v5
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
+          key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}
           path: subject/target/semver-checks/cache
 
       # Run cargo-semver-checks, enabling feature `unstable` this time.
@@ -643,31 +678,24 @@ jobs:
           # Show what's in the cache.
           ls subject/target/semver-checks/cache/
 
-          # The previous cached rustdoc should continue to exist.
-          PREVIOUS_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-default-5900ebf8bb9b9f8b'
-          PREVIOUS_RUSTDOC="${PREVIOUS_PREFIX}.json"
-          PREVIOUS_METADATA="${PREVIOUS_PREFIX}.metadata.json"
-          if [ ! -f "$PREVIOUS_RUSTDOC" ]; then
-            echo "Older rustdoc JSON not found in cache!"
-            exit 1
-          fi
-          if [ ! -f "$PREVIOUS_METADATA" ]; then
-            echo "Older metadata file not found in cache!"
-            exit 1
-          fi
+          # The previous cached rustdoc and the new feature-specific rustdoc should both exist.
+          mapfile -t CACHED_RUSTDOCS < <(find subject/target/semver-checks/cache \
+            -maxdepth 1 \
+            -name 'serde-1_0_162-*.json' \
+            ! -name '*.metadata.json' \
+            | sort)
 
-          # There should also be a new cached rustdoc file for the new feature settings.
-          NEW_PREFIX='subject/target/semver-checks/cache/serde-1_0_162-default-6999ae87ca463ab3'
-          NEW_RUSTDOC="${NEW_PREFIX}.json"
-          NEW_METADATA="${NEW_PREFIX}.metadata.json"
-          if [ ! -f "$NEW_RUSTDOC" ]; then
-            echo "New rustdoc JSON for new feature combo not found in cache!"
+          if [ "${#CACHED_RUSTDOCS[@]}" -ne 2 ]; then
+            echo "Expected exactly two serde rustdoc JSON cache files, found ${#CACHED_RUSTDOCS[@]}."
             exit 1
           fi
-          if [ ! -f "$NEW_METADATA" ]; then
-            echo "New metadata file for new feature combo not found in cache!"
-            exit 1
-          fi
+          for cached_rustdoc in "${CACHED_RUSTDOCS[@]}"; do
+            metadata="${cached_rustdoc%.json}.metadata.json"
+            if [ ! -f "$metadata" ]; then
+              echo "Metadata file not found in cache for $cached_rustdoc!"
+              exit 1
+            fi
+          done
 
       - name: Cleanup
         run: |
