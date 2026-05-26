@@ -6,6 +6,7 @@ use anyhow::Context as _;
 use itertools::Itertools;
 
 use crate::data_generation::request::RequestKind;
+use crate::util::atomic_write;
 
 use super::error::{IntoTerminalResult as _, TerminalError};
 use super::progress::CallbackHandler;
@@ -884,18 +885,19 @@ fn save_placeholder_rustdoc_manifest(
     placeholder_build_dir: &Path,
     placeholder_manifest: cargo_toml::Manifest<()>,
 ) -> anyhow::Result<PathBuf> {
-    std::fs::create_dir_all(placeholder_build_dir).context("failed to create build dir")?;
+    fs_err::create_dir_all(placeholder_build_dir).context("failed to create build dir")?;
     let placeholder_manifest_path = placeholder_build_dir.join("Cargo.toml");
 
     // Possibly fixes https://github.com/libp2p/rust-libp2p/pull/2647#issuecomment-1280221217
-    let _: std::io::Result<()> = std::fs::remove_file(placeholder_build_dir.join("Cargo.lock"));
+    let _: std::io::Result<()> = fs_err::remove_file(placeholder_build_dir.join("Cargo.lock"));
 
-    std::fs::write(
-        &placeholder_manifest_path,
-        toml::to_string(&placeholder_manifest)?,
-    )
+    let placeholder_manifest = toml::to_string(&placeholder_manifest)?;
+    atomic_write(&placeholder_manifest_path, |writer| {
+        writer.write_all(placeholder_manifest.as_bytes())?;
+        Ok(())
+    })
     .context("failed to write placeholder manifest")?;
-    std::fs::write(placeholder_build_dir.join("lib.rs"), "")
+    atomic_write(placeholder_build_dir.join("lib.rs"), |_writer| Ok(()))
         .context("failed to create empty lib.rs")?;
     Ok(placeholder_manifest_path)
 }

@@ -11,6 +11,7 @@ use trustfall_rustdoc::VersionedStorage;
 use crate::GlobalConfig;
 use crate::data_generation::{CrateDataRequest, IntoTerminalResult as _, TerminalError};
 use crate::manifest::Manifest;
+use crate::util::atomic_write;
 
 #[derive(Debug, Clone)]
 pub(crate) enum CrateSource<'a> {
@@ -675,7 +676,7 @@ impl RustdocFromGitRevision {
         let tree_id = repo.rev_parse_single(&*format!("{rev}^{{tree}}"))?;
         let tree_dir = target.join(tree_id.to_string());
 
-        std::fs::create_dir_all(&tree_dir)?;
+        fs_err::create_dir_all(&tree_dir)?;
         extract_tree(tree_id, &tree_dir)?;
 
         let path = RustdocFromProjectRoot::new(&tree_dir, target)?;
@@ -702,7 +703,7 @@ fn extract_tree(tree: gix::Id<'_>, target: &std::path::Path) -> anyhow::Result<(
         let mode = entry.mode();
         if mode.is_tree() {
             let path = target.join(bytes2str(entry.filename()));
-            std::fs::create_dir_all(&path)?;
+            fs_err::create_dir_all(&path)?;
             extract_tree(entry.id(), &path)?;
         } else if mode.is_blob() {
             let blob = entry.object()?;
@@ -711,9 +712,12 @@ fn extract_tree(tree: gix::Id<'_>, target: &std::path::Path) -> anyhow::Result<(
                 "we are not working on a corrupted repository"
             );
             let path = target.join(bytes2str(entry.filename()));
-            let existing = std::fs::read(&path).ok();
+            let existing = fs_err::read(&path).ok();
             if existing.as_deref() != Some(&blob.data) {
-                std::fs::write(&path, &blob.data)?;
+                atomic_write(&path, |writer| {
+                    writer.write_all(&blob.data)?;
+                    Ok(())
+                })?;
             }
         }
     }

@@ -6,7 +6,7 @@ use sha2::Digest as _;
 use trustfall_rustdoc::{LoadingError, VersionedStorage};
 
 use crate::manifest::Manifest;
-use crate::util::slugify;
+use crate::util::{atomic_write, slugify};
 
 use super::error::{IntoTerminalResult, TerminalError};
 use super::generate::{GenerationSettings, RustdocBuildEnvironment};
@@ -178,8 +178,26 @@ impl<'a> CacheUse<'a> {
                     .expect("invariant violation: no metadata path for readable cache");
 
                 fs_err::create_dir_all(path)?;
-                fs_err::copy(rustdoc_json, json_path)?;
-                fs_err::write(metadata_path, serde_json::to_string(metadata)?)?;
+                // Do not use `fs_err::copy` or `std::fs::copy` here. Those APIs open the
+                // destination path themselves and stream bytes into it directly, so another process
+                // can observe a partially copied cache file if it reads while the copy is in
+                // progress or if the copy fails partway through. Routing the copy through
+                // `atomic_write` publishes only a completed temp-file copy.
+                atomic_write(json_path, |writer| {
+                    let mut rustdoc_json_file = fs_err::File::open(rustdoc_json)?;
+                    std::io::copy(&mut rustdoc_json_file, writer).with_context(|| {
+                        format!(
+                            "failed to copy rustdoc JSON cache file from {} to {}",
+                            rustdoc_json.display(),
+                            json_path.display()
+                        )
+                    })?;
+                    Ok(())
+                })?;
+                atomic_write(metadata_path, |writer| {
+                    serde_json::to_writer(writer, metadata)?;
+                    Ok(())
+                })?;
                 Ok(true)
             }
             CacheSettings::None | CacheSettings::ReadOnly(..) => Ok(false),
