@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "trait_supertrait_where_self_equivalence"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
