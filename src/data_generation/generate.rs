@@ -87,9 +87,6 @@ pub(crate) struct GenerationSettings {
 
     /// On `true`, pass `--color=always` to `cargo` invocations. On `false`, pass `--color=never`.
     pub(crate) use_color: bool,
-
-    /// On `false`, pass `--no-deps` to `cargo`.
-    pub(crate) deps: bool,
 }
 
 impl GenerationSettings {
@@ -559,9 +556,7 @@ fn run_cargo_doc(
     if let Some(build_target) = request.build_target {
         cmd.arg("--target").arg(build_target);
     }
-    if !settings.deps {
-        cmd.arg("--no-deps");
-    }
+    cmd.arg("--no-deps");
 
     // Respect our configured color choice
     cmd.arg(settings.color_flag());

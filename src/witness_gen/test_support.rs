@@ -233,7 +233,6 @@ pub(super) fn make_test_data_storage(
     let generation_settings = GenerationSettings {
         pass_through_stderr: false,
         use_color: false,
-        deps: false,
     };
     let mut callbacks = NoopProgressCallbacks;
     let baseline_storage = baseline_request
