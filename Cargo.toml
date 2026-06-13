@@ -34,7 +34,7 @@ ignore = "0.4.23"
 clap-verbosity-flag = "3.0.2"
 log = "0.4.25"
 fs-err = "3.0.0"
-gix = { version = "0.78", default-features = false, features = ["max-performance-safe", "revision"] }
+gix = { version = "0.84", default-features = false, features = ["max-performance-safe", "revision", "sha1", "sha256"] }
 tame-index = { version = "0.26", features = ["sparse"] }
 reqwest = { version = "0.13.1", default-features = false, features = ["rustls-no-provider", "http2", "system-proxy"] }
 rustls = { version = "0.23.36", default-features = false, features = ["ring", "std", "tls12", "logging"] }
