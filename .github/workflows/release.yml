@@ -33,7 +33,7 @@ jobs:
       id-token: write     # Required for OIDC token exchange (Trusted Publishing)
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -60,7 +60,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: true
           token: ${{ secrets.TAGGER_GITHUB_TOKEN }}
