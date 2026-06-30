@@ -30,7 +30,18 @@ fn main() {
     }
     .write_global();
 
-    let Cargo::SemverChecks(args) = Cargo::parse();
+    // Catch possible invocations from development tooling that use `cargo run` or with the full
+    // binary name `cargo-semver-checks`, and normalize the expected subcommand so that it works the
+    // same way as the cargo wrapper `cargo semver-checks` style invocation.
+    let mut raw_args: Vec<_> = env::args().collect();
+    if raw_args.first().is_some_and(|bin_name| {
+        (bin_name.ends_with("cargo-semver-checks") || bin_name.ends_with("cargo-semver-checks.exe"))
+            && (raw_args.len() == 1 || raw_args.get(1).is_some_and(|cmd| cmd != "semver-checks"))
+    }) {
+        raw_args.insert(1, "semver-checks".into());
+    }
+
+    let Cargo::SemverChecks(args) = Cargo::parse_from(raw_args);
 
     let feature_flags = HashSet::from_iter(args.unstable_features.clone());
 
