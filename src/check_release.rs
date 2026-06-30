@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::io::Write as _;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -119,7 +119,7 @@ fn get_minimum_version_change(version: &semver::Version) -> VersionChange {
 }
 
 /// Intermediate state in [`run_check_release`]
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub(crate) struct LintResult {
     pub semver_query: SemverQuery,
     pub query_results: Vec<BTreeMap<Arc<str>, FieldValue>>,
@@ -260,6 +260,7 @@ fn print_triggered_lint(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(super) fn run_check_release(
     config: &mut GlobalConfig,
     data_storage: &DataStorage,
@@ -268,6 +269,7 @@ pub(super) fn run_check_release(
     overrides: &OverrideStack,
     witness_generation: &WitnessGeneration,
     witness_data: witness_gen::WitnessGenerationData,
+    baseline_report: Option<&CrateReport>,
 ) -> anyhow::Result<PendingCrateReport> {
     let current_version = data_storage.current_crate().crate_version();
     let baseline_version = data_storage.baseline_crate().crate_version();
@@ -387,6 +389,26 @@ pub(super) fn run_check_release(
         &mut lint_results,
     );
 
+    if let Some(baseline_report) = baseline_report {
+        let mut lint_map = lint_results
+            .iter_mut()
+            .map(|lint| (lint.semver_query.id.clone(), lint))
+            .collect::<HashMap<_, _>>();
+
+        for old_lint in &baseline_report.lint_results {
+            let Some(new_lint) = lint_map.get_mut(&old_lint.semver_query.id) else {
+                continue;
+            };
+
+            // note building a query results set requires adding Hash to FieldValue in trustfall
+            for old_result in &old_lint.query_results {
+                new_lint
+                    .query_results
+                    .retain(|new_result| !btreemap_eq_ignoring_span_keys(new_result, old_result));
+            }
+        }
+    }
+
     let checks_duration = checks_start_instant.elapsed();
 
     let mut required_bumps = Bumps { major: 0, minor: 0 };
@@ -424,6 +446,15 @@ pub(super) fn run_check_release(
         report,
         witness_run_report,
     })
+}
+
+type QueryResults = BTreeMap<Arc<str>, FieldValue>;
+
+fn btreemap_eq_ignoring_span_keys(a: &QueryResults, b: &QueryResults) -> bool {
+    let not_span = |(k, _): &(&Arc<str>, _)| {
+        !["span_filename", "span_begin_line", "span_end_line"].contains(&k.as_ref())
+    };
+    a.iter().filter(not_span).eq(b.iter().filter(not_span))
 }
 
 fn print_report(
