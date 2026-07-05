@@ -1,5 +1,9 @@
-use std::path::PathBuf;
-use std::{borrow::Cow, collections::BTreeSet, path::Path};
+use std::{
+    borrow::Cow,
+    collections::BTreeSet,
+    fmt::Write as _,
+    path::{Path, PathBuf},
+};
 
 use anyhow::Context;
 use sha2::Digest as _;
@@ -511,13 +515,14 @@ impl<'a> CrateDataRequest<'a> {
             &build_environment.toolchain_version,
         );
 
-        // Store the hash as string with hex number (leading zeros added).
-        let mut hash = format!("{:0>64x}", hasher.finalize());
-
         // First 16 hex characters are good enough for our use case.
         // For birthday paradox to occur, a single crate version must be run
         // with approximately 2**32 artifact configurations.
-        hash.truncate(16);
+        let digest = hasher.finalize();
+        let mut hash = String::with_capacity(16);
+        for byte in digest.as_slice().iter().take(8) {
+            write!(&mut hash, "{byte:02x}").expect("writing to a String should not fail");
+        }
         Ok(hash)
     }
 }
