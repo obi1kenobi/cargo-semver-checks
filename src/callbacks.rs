@@ -6,8 +6,8 @@ pub(crate) struct Callbacks<'a> {
     config: &'a mut GlobalConfig,
 
     // (crate_name, version, is_baseline) keys
-    generate_starts: BTreeMap<(&'a str, &'a str, bool), std::time::Instant>,
-    parse_starts: BTreeMap<(&'a str, &'a str, bool), std::time::Instant>,
+    generate_starts: BTreeMap<(String, String, bool), std::time::Instant>,
+    parse_starts: BTreeMap<(String, String, bool), std::time::Instant>,
 }
 
 impl<'a> Callbacks<'a> {
@@ -21,7 +21,7 @@ impl<'a> Callbacks<'a> {
 }
 
 impl<'a> crate::data_generation::ProgressCallbacks<'a> for Callbacks<'a> {
-    fn generate_rustdoc_start(&mut self, crate_name: &'a str, version: &'a str, is_baseline: bool) {
+    fn generate_rustdoc_start(&mut self, crate_name: &str, version: &str, is_baseline: bool) {
         let kind = if is_baseline { "baseline" } else { "current" };
 
         // Ignore terminal printing failures.
@@ -31,21 +31,16 @@ impl<'a> crate::data_generation::ProgressCallbacks<'a> for Callbacks<'a> {
         );
 
         self.generate_starts.insert(
-            (crate_name, version, is_baseline),
+            (crate_name.to_owned(), version.to_owned(), is_baseline),
             std::time::Instant::now(),
         );
     }
 
-    fn generate_rustdoc_success(
-        &mut self,
-        crate_name: &'a str,
-        version: &'a str,
-        is_baseline: bool,
-    ) {
+    fn generate_rustdoc_success(&mut self, crate_name: &str, version: &str, is_baseline: bool) {
         let kind = if is_baseline { "baseline" } else { "current" };
         let start = self
             .generate_starts
-            .remove(&(crate_name, version, is_baseline))
+            .remove(&(crate_name.to_owned(), version.to_owned(), is_baseline))
             .expect("success on generation task that never started");
 
         // Ignore terminal printing failures.
@@ -58,8 +53,8 @@ impl<'a> crate::data_generation::ProgressCallbacks<'a> for Callbacks<'a> {
     fn parse_rustdoc_start(
         &mut self,
         cached: bool,
-        crate_name: &'a str,
-        version: &'a str,
+        crate_name: &str,
+        version: &str,
         is_baseline: bool,
     ) {
         let kind = if is_baseline { "baseline" } else { "current" };
@@ -72,7 +67,7 @@ impl<'a> crate::data_generation::ProgressCallbacks<'a> for Callbacks<'a> {
         );
 
         self.parse_starts.insert(
-            (crate_name, version, is_baseline),
+            (crate_name.to_owned(), version.to_owned(), is_baseline),
             std::time::Instant::now(),
         );
     }
@@ -80,14 +75,14 @@ impl<'a> crate::data_generation::ProgressCallbacks<'a> for Callbacks<'a> {
     fn parse_rustdoc_success(
         &mut self,
         _cached: bool,
-        crate_name: &'a str,
-        version: &'a str,
+        crate_name: &str,
+        version: &str,
         is_baseline: bool,
     ) {
         let kind = if is_baseline { "baseline" } else { "current" };
         let start = self
             .parse_starts
-            .remove(&(crate_name, version, is_baseline))
+            .remove(&(crate_name.to_owned(), version.to_owned(), is_baseline))
             .expect("success on parse task that never started");
 
         // Ignore terminal printing failures.
@@ -99,8 +94,8 @@ impl<'a> crate::data_generation::ProgressCallbacks<'a> for Callbacks<'a> {
 
     fn non_fatal_error(
         &mut self,
-        crate_name: &'a str,
-        version: &'a str,
+        crate_name: &str,
+        version: &str,
         is_baseline: bool,
         error: anyhow::Error,
     ) {
