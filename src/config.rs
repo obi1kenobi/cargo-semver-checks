@@ -1,7 +1,7 @@
 use anstream::{AutoStream, ColorChoice};
 use anstyle::{AnsiColor, Color, Reset, Style};
 use clap::ValueEnum;
-use rand::Rng;
+use rand::RngExt;
 use std::{collections::HashSet, io::Write, sync::LazyLock};
 
 use crate::query::LintLevel;
