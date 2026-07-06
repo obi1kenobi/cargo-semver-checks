@@ -41,3 +41,23 @@ hint = "function_missing::pub_use_removed_fn(...);"
 filename = "src/lib.rs"
 begin_line = 46
 hint = "function_must_use_removed::MustUseRemovedFunction(...);"
+
+[["./test_crates/hidden_reexports/"]]
+filename = "src/lib.rs"
+begin_line = 32
+hint = "hidden_reexports::deprecated_hidden_glob_removed(...);"
+
+[["./test_crates/hidden_reexports/"]]
+filename = "src/lib.rs"
+begin_line = 41
+hint = "hidden_reexports::deprecated_hidden_per_item_removed(...);"
+
+[["./test_crates/hidden_reexports/"]]
+filename = "src/lib.rs"
+begin_line = 79
+hint = "hidden_reexports::hidden_per_item_then_public_per_item_removed(...);"
+
+[["./test_crates/hidden_reexports/"]]
+filename = "src/lib.rs"
+begin_line = 101
+hint = "hidden_reexports::hidden_glob_then_public_per_item_removed(...);"

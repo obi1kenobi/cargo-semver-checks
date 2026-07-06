@@ -102,4 +102,50 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/hidden_reexports/": [
+    {
+      "name": String("deprecated_hidden_glob_removed"),
+      "path": List([
+        String("hidden_reexports"),
+        String("deprecated_hidden_glob_removed"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_end_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("deprecated_hidden_per_item_removed"),
+      "path": List([
+        String("hidden_reexports"),
+        String("deprecated_hidden_per_item_removed"),
+      ]),
+      "span_begin_line": Uint64(41),
+      "span_end_line": Uint64(41),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("hidden_per_item_then_public_per_item_removed"),
+      "path": List([
+        String("hidden_reexports"),
+        String("hidden_per_item_then_public_per_item_removed"),
+      ]),
+      "span_begin_line": Uint64(79),
+      "span_end_line": Uint64(79),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("hidden_glob_then_public_per_item_removed"),
+      "path": List([
+        String("hidden_reexports"),
+        String("hidden_glob_then_public_per_item_removed"),
+      ]),
+      "span_begin_line": Uint64(101),
+      "span_end_line": Uint64(101),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
