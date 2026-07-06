@@ -149,7 +149,7 @@ pub(super) fn generate_rustdoc(
         // That issue is tracked here: https://github.com/obi1kenobi/cargo-semver-checks/issues/902
         match run_cargo_update(
             crate_name,
-            version,
+            version.as_ref(),
             request,
             placeholder_manifest_path.as_path(),
             &settings,
@@ -181,7 +181,7 @@ pub(super) fn generate_rustdoc(
         &placeholder_manifest_path,
         target_dir,
         crate_name,
-        version,
+        version.as_ref(),
         &settings,
         build_environment,
         callbacks,
@@ -195,7 +195,11 @@ fn produce_repro_workspace_shell_commands(request: &CrateDataRequest<'_>) -> Str
         RequestKind::Registry { .. } => format!(
             "{}@={}",
             request.kind.name().expect("failed to get crate name"),
-            request.kind.version().expect("failed to get crate version")
+            request
+                .kind
+                .version()
+                .expect("failed to get crate version")
+                .as_ref()
         ),
         RequestKind::LocalProject(project) => format!(
             "--path {}",
@@ -812,7 +816,12 @@ fn create_placeholder_rustdoc_manifest(
 
     Ok(Manifest::<()> {
         package: {
-            let mut package = Package::new("placeholder", "0.0.0");
+            let mut package = Package::new(
+                "placeholder",
+                "0.0.0"
+                    .parse()
+                    .expect("hardcoded semver version should parse"),
+            );
             package.publish = Inheritable::Set(Publish::Flag(false));
             Some(package)
         },
@@ -830,7 +839,11 @@ fn create_placeholder_rustdoc_manifest(
                     // We need the *exact* version as a dependency, or else cargo will
                     // give us the latest semver-compatible version which is not we want.
                     // Fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/261
-                    version: Some(format!("={}", request.kind.version()?)),
+                    version: Some(
+                        format!("={}", request.kind.version()?.as_ref())
+                            .parse()
+                            .context("failed to parse exact dependency version requirement")?,
+                    ),
                     default_features: request.default_features,
                     features: request
                         .extra_features

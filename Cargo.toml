@@ -42,7 +42,7 @@ rustls = { version = "0.23.36", default-features = false, features = ["ring", "s
 human-panic = "2.0.2"
 bugreport = "0.6.0"
 itertools = "0.15.0"
-cargo_toml = "0.22.1"
+cargo_toml = "1.0.0"
 toml = "1.1.2"
 directories = "6.0.0"
 sha2 = "0.10.8"
