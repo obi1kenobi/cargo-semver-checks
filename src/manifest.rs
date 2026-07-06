@@ -50,7 +50,7 @@ pub(crate) fn get_package_name(manifest: &Manifest) -> anyhow::Result<&str> {
     Ok(&package.name)
 }
 
-pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<&str> {
+pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<String> {
     let package = manifest.parsed.package.as_ref().with_context(|| {
         format!(
             "failed to parse {}: no `package` table",
@@ -63,7 +63,7 @@ pub(crate) fn get_package_version(manifest: &Manifest) -> anyhow::Result<&str> {
             manifest.path.display()
         )
     })?;
-    Ok(version)
+    Ok(version.to_string())
 }
 
 /// Returns the Rust library target name that downstream code imports.
