@@ -154,6 +154,7 @@ impl Default for ScopeMode {
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct PackageSelection {
     selection: ScopeSelection,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     included_packages: Vec<String>,
     excluded_packages: Vec<String>,
 }
