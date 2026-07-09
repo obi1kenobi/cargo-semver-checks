@@ -602,7 +602,7 @@ impl RustdocFromProjectRoot {
                 duplicate_packages.insert(name, vec![prev_path, path]);
             }
         }
-        for (_package, paths) in duplicate_packages.iter_mut() {
+        for paths in duplicate_packages.values_mut() {
             paths.sort_unstable();
         }
 
