@@ -1,5 +1,9 @@
-use std::path::PathBuf;
-use std::{borrow::Cow, collections::BTreeSet, path::Path};
+use std::{
+    borrow::Cow,
+    collections::BTreeSet,
+    fmt::Write as _,
+    path::{Path, PathBuf},
+};
 
 use anyhow::Context;
 use sha2::Digest as _;
@@ -38,11 +42,13 @@ impl RequestKind<'_> {
         })
     }
 
-    pub(super) fn version(&self) -> anyhow::Result<&str> {
+    pub(super) fn version(&self) -> anyhow::Result<Cow<'_, str>> {
         Ok(match self {
-            Self::Registry(RegistryRequest { index_entry }) => index_entry.version.as_str(),
+            Self::Registry(RegistryRequest { index_entry }) => {
+                Cow::Borrowed(index_entry.version.as_str())
+            }
             Self::LocalProject(ProjectRequest { manifest }) => {
-                crate::manifest::get_package_version(manifest)?
+                Cow::Owned(crate::manifest::get_package_version(manifest)?)
             }
         })
     }
@@ -258,7 +264,7 @@ impl<'a> CrateDataRequest<'a> {
     }
 
     pub(crate) fn exact_version(&self) -> anyhow::Result<String> {
-        Ok(format!("={}", self.kind.version()?))
+        Ok(format!("={}", self.kind.version()?.as_ref()))
     }
 
     pub(crate) fn local_project_dir(&self) -> anyhow::Result<Option<PathBuf>> {
@@ -309,15 +315,17 @@ impl<'a> CrateDataRequest<'a> {
         generation_settings: GenerationSettings,
         callbacks: &'slf mut dyn ProgressCallbacks<'slf>,
     ) -> Result<VersionedStorage, TerminalError> {
+        let version = self
+            .kind
+            .version()
+            .context("failed to get crate version")
+            .into_terminal_result()?;
         let mut callbacks = CallbackHandler::new(
             self.kind
                 .name()
                 .context("failed to get crate name")
                 .into_terminal_result()?,
-            self.kind
-                .version()
-                .context("failed to get crate version")
-                .into_terminal_result()?,
+            version,
             self.is_baseline,
             callbacks,
         );
@@ -455,7 +463,7 @@ impl<'a> CrateDataRequest<'a> {
         Ok(format!(
             "{}-{}-{}-{}",
             slugify(self.kind.name()?),
-            slugify(self.kind.version()?),
+            slugify(self.kind.version()?.as_ref()),
             slugify(&build_environment.target_triple),
             self.artifact_fingerprint(build_environment)?,
         ))
@@ -481,7 +489,7 @@ impl<'a> CrateDataRequest<'a> {
             },
         );
         update_artifact_hash(&mut hasher, "name", self.kind.name()?);
-        update_artifact_hash(&mut hasher, "version", self.kind.version()?);
+        update_artifact_hash(&mut hasher, "version", self.kind.version()?.as_ref());
         update_artifact_hash(
             &mut hasher,
             "default_features",
@@ -511,13 +519,14 @@ impl<'a> CrateDataRequest<'a> {
             &build_environment.toolchain_version,
         );
 
-        // Store the hash as string with hex number (leading zeros added).
-        let mut hash = format!("{:0>64x}", hasher.finalize());
-
         // First 16 hex characters are good enough for our use case.
         // For birthday paradox to occur, a single crate version must be run
         // with approximately 2**32 artifact configurations.
-        hash.truncate(16);
+        let digest = hasher.finalize();
+        let mut hash = String::with_capacity(16);
+        for byte in digest.as_slice().iter().take(8) {
+            write!(&mut hash, "{byte:02x}").expect("writing to a String should not fail");
+        }
         Ok(hash)
     }
 }
