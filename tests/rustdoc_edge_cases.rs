@@ -120,6 +120,19 @@ fn renamed_lib_target() {
         .success();
 }
 
+/// Ensure dependency warnings do not fail rustdoc generation when the user has
+/// `RUSTFLAGS=-Dwarnings` set.
+/// https://github.com/obi1kenobi/cargo-semver-checks/issues/589
+#[test]
+fn dependency_warnings_do_not_fail_rustdoc_generation() {
+    let mut cmd = cargo_semver_checks();
+    cmd.current_dir("test_crates/dependency_warnings_with_deny/new")
+        .args(["semver-checks", "check-release", "--baseline-root=../old"])
+        .env("RUSTFLAGS", "-Dwarnings")
+        .assert()
+        .success();
+}
+
 /// Ensure that semver-checking a crate that uses workspace-provided values works fine.
 #[test]
 fn crate_in_workspace() {
