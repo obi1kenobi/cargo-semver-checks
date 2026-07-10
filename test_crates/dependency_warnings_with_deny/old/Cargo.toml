@@ -1,0 +1,8 @@
+[package]
+publish = false
+name = "dependency_warnings_with_deny"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+warning_dependency = { path = "../warning_dependency" }
