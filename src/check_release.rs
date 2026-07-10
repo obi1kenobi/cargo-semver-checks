@@ -159,7 +159,7 @@ fn print_triggered_lint(
         config.log_at_lint_level(lint_level, |config| {
             writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
                 Style::new().bold(), Reset,
-                &semver_query.error_message,
+                semver_query.error_message,
                 "ref:",
                 ref_link,
                 "impl:",
@@ -175,7 +175,7 @@ fn print_triggered_lint(
                 "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
                 Style::new().bold(),
                 Reset,
-                &semver_query.error_message,
+                semver_query.error_message,
                 "impl:",
                 crate_version!(),
                 semver_query.id,
