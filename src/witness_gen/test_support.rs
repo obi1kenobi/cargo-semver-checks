@@ -6,7 +6,7 @@ use std::{
 use rand::RngExt as _;
 
 use crate::{
-    LintLevel, RequiredSemverUpdate,
+    LintLevel, RequiredSemverUpdate, RustdocIndexingMode,
     data_generation::{
         CacheSettings, CrateDataRequest, DataStorage, GenerationSettings, ProgressCallbacks,
     },
@@ -177,6 +177,7 @@ pub(super) fn run_smoke_witness(
         &baseline_request,
         &current_request,
         temp_dir.path().join("target"),
+        RustdocIndexingMode::Ordinary,
     );
 
     (report, lint_results, temp_dir, config)
@@ -189,6 +190,7 @@ pub(super) fn run_witness_with_requests(
     baseline_request: &CrateDataRequest<'_>,
     current_request: &CrateDataRequest<'_>,
     target_dir: PathBuf,
+    rustdoc_indexing_mode: RustdocIndexingMode,
 ) -> (WitnessRunReport, Vec<LintResult>, GlobalConfig) {
     let witness_data =
         WitnessGenerationData::new(Some(baseline_request), Some(current_request), target_dir);
@@ -206,7 +208,7 @@ pub(super) fn run_witness_with_requests(
         current_request,
         witness_data.target_dir.as_path(),
     );
-    let index_storage = data_storage.create_indexes();
+    let index_storage = data_storage.create_indexes(rustdoc_indexing_mode);
     let adapter = index_storage.create_adapter();
 
     let report = run_witness_checks(

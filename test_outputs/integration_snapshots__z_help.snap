@@ -26,4 +26,7 @@ Unstable options:
       --consistency-check
           Enable running witness-based consistency checks for lints whose witness purpose is `ConsistencyCheck`
 
+      --stability-aware
+          Interpret structured rustdoc stability metadata while deciding public API
+
 ----- stderr -----

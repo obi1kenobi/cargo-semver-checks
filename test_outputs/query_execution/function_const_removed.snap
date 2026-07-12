@@ -15,4 +15,28 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/stability_aware_mode/": [
+    {
+      "name": String("const_stable_to_non_const"),
+      "path": List([
+        String("stability_aware_mode"),
+        String("const_stable_to_non_const"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("const_unstable_to_non_const"),
+      "path": List([
+        String("stability_aware_mode"),
+        String("const_unstable_to_non_const"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_end_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }

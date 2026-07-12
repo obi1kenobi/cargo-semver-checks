@@ -24,7 +24,7 @@ use std::io::Write as _;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use check_release::{LintResult, PendingCrateReport, run_check_release};
+use check_release::{CheckReleaseSettings, LintResult, PendingCrateReport, run_check_release};
 use rustdoc_gen::CrateDataForRustdoc;
 
 pub use config::{FeatureFlag, GlobalConfig};
@@ -41,6 +41,13 @@ pub struct Check {
     scope: Scope,
     current: Rustdoc,
     baseline: Rustdoc,
+
+    /// Whether we should consider stability attributes when determining public API status.
+    /// Stability attributes are not currently stable, and are only used internally
+    /// in the Rust standard library crates themselves.
+    #[serde(skip_serializing_if = "RustdocIndexingMode::is_ordinary")]
+    rustdoc_indexing_mode: RustdocIndexingMode,
+
     release_type: Option<ReleaseType>,
     current_feature_config: rustdoc_gen::FeatureConfig,
     baseline_feature_config: rustdoc_gen::FeatureConfig,
@@ -66,6 +73,24 @@ pub enum ReleaseType {
 #[derive(Debug, PartialEq, Eq, Serialize)]
 pub struct Rustdoc {
     source: RustdocSource,
+}
+
+/// How rustdoc JSON should be indexed for semver checking.
+#[doc(hidden)]
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize)]
+pub enum RustdocIndexingMode {
+    /// Index rustdoc JSON using ordinary crate public API rules.
+    #[default]
+    Ordinary,
+    /// Index rustdoc JSON while honoring structured stability metadata.
+    StabilityAware,
+}
+
+impl RustdocIndexingMode {
+    fn is_ordinary(&self) -> bool {
+        matches!(self, Self::Ordinary)
+    }
 }
 
 impl Rustdoc {
@@ -272,6 +297,7 @@ impl Check {
             scope: Scope::default(),
             current,
             baseline: Rustdoc::from_registry_latest_crate_version(),
+            rustdoc_indexing_mode: RustdocIndexingMode::default(),
             release_type: None,
             current_feature_config: rustdoc_gen::FeatureConfig::default_for_current(),
             baseline_feature_config: rustdoc_gen::FeatureConfig::default_for_baseline(),
@@ -297,6 +323,12 @@ impl Check {
 
     pub fn set_release_type(&mut self, release_type: ReleaseType) -> &mut Self {
         self.release_type = Some(release_type);
+        self
+    }
+
+    #[doc(hidden)]
+    pub fn set_rustdoc_indexing_mode(&mut self, mode: RustdocIndexingMode) -> &mut Self {
+        self.rustdoc_indexing_mode = mode;
         self
     }
 
@@ -597,7 +629,10 @@ note: skipped the following crates since they have no library target: {skipped}"
                     config,
                     &data_storage,
                     &name,
-                    self.release_type,
+                    CheckReleaseSettings {
+                        release_type: self.release_type,
+                        rustdoc_indexing_mode: self.rustdoc_indexing_mode,
+                    },
                     &selected.overrides,
                     &self.witness_generation,
                     witness_data,

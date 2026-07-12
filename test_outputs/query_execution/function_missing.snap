@@ -148,4 +148,28 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/stability_aware_mode/": [
+    {
+      "name": String("stable_removed"),
+      "path": List([
+        String("stability_aware_mode"),
+        String("stable_removed"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("unstable_removed"),
+      "path": List([
+        String("stability_aware_mode"),
+        String("unstable_removed"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
