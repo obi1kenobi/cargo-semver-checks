@@ -9,6 +9,7 @@ Lint your crate API changes for semver violations.
 - [Quick Start](#quick-start)
 - [FAQ](#faq)
 - [Configuration](#configuration)
+- [Exit status](#exit-status)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md)
 
@@ -527,6 +528,18 @@ Configuration set in the _baseline version_ of the package (the version being co
 When the `--manifest-path` option is used to specify the subject package's `Cargo.toml` file, that's also the file from which configuration is loaded. If that CLI flag is not specified, `cargo-semver-checks` will by default attempt to find and use a `Cargo.toml` file that belongs to the current directory.
 
 If `cargo-semver-checks` is executed in a way that skips reading the current manifest (such as with the `--current-rustdoc` flag), it is currently not possible to configure lints. Interest in, and progress toward resolving this limitation is tracked in [this issue](https://github.com/obi1kenobi/cargo-semver-checks/issues/827).
+
+## Exit status
+
+`cargo-semver-checks` uses its exit status to distinguish deny-level SemVer violations from
+errors that prevent the check from completing:
+
+- `0`: the check completed without deny-level SemVer violations.
+- `100`: the check completed and found one or more deny-level SemVer violations.
+- `101`: the check could not complete, for example because of a rustdoc or build failure, or a
+  connectivity problem.
+
+Command-line parsing errors may use a different non-zero exit status.
 
 ## Troubleshooting
 

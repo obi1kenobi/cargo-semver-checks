@@ -850,20 +850,8 @@ pub struct Report {
 impl Report {
     /// `true` if none of the crates violate SemVer according to authoritative
     /// lint results.
-    ///
-    /// This is SemVer-lint-only and does not include required witness
-    /// execution failures. Use [`Self::is_cli_success`] for the same success
-    /// semantics as the `cargo-semver-checks` CLI.
     pub fn success(&self) -> bool {
         self.crate_reports.values().all(|report| report.success())
-    }
-
-    /// `true` if the check should be considered successful by the CLI.
-    ///
-    /// This includes both authoritative SemVer lint results and required
-    /// witness execution failures.
-    pub fn is_cli_success(&self) -> bool {
-        self.success() && !self.has_required_witness_errors()
     }
 
     /// Whether any crate encountered a required witness execution error.

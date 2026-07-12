@@ -15,6 +15,12 @@ use clap::{Args, CommandFactory, Parser, Subcommand};
 #[allow(unsafe_code)]
 mod snapshot_tests;
 
+/// Exit code used when a completed check finds deny-level lint violations.
+const LINT_FAILURE_EXIT_CODE: i32 = 100;
+
+/// Cargo's conventional exit code when a command fails to complete.
+const ERROR_EXIT_CODE: i32 = 101;
+
 fn main() {
     human_panic::setup_panic!();
 
@@ -185,10 +191,16 @@ fn main() {
     let check: cargo_semver_checks::Check = check_release.into();
 
     let report = exit_on_error(config.is_error(), || check.check_release(&mut config));
-    if report.is_cli_success() {
-        std::process::exit(0);
+    std::process::exit(check_exit_code(&report));
+}
+
+fn check_exit_code(report: &cargo_semver_checks::Report) -> i32 {
+    if report.has_required_witness_errors() {
+        ERROR_EXIT_CODE
+    } else if report.success() {
+        0
     } else {
-        std::process::exit(1);
+        LINT_FAILURE_EXIT_CODE
     }
 }
 
@@ -199,7 +211,7 @@ fn exit_on_error<T>(log_errors: bool, mut inner: impl FnMut() -> anyhow::Result<
             if log_errors {
                 eprintln!("error: {err:?}");
             }
-            std::process::exit(1)
+            std::process::exit(ERROR_EXIT_CODE)
         }
     }
 }
