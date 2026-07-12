@@ -43,7 +43,7 @@ error: no crates with library targets selected, nothing to semver-check
 note: only library targets contain an API surface that can be checked for semver
 note: skipped the following crates since they have no library target: proc_macro_crate\n",
         )
-        .failure();
+        .code(101);
 }
 
 /// Ensure that crates with only a bin target (so, no lib target) produce the correct error message

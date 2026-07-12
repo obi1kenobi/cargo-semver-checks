@@ -939,23 +939,34 @@ mod test {
     }
 
     #[test]
-    fn report_cli_success_includes_required_witness_errors() {
-        let crate_report = CrateReport {
-            detected_bump: ActualSemverUpdate::NotChanged,
-            required_bumps: Bumps { major: 0, minor: 0 },
-            suggested_bumps: Bumps { major: 0, minor: 0 },
-            lint_results: Vec::new(),
-            checks_duration: Duration::ZERO,
-            selected_checks: 1,
-            skipped_checks: 0,
-            witness_statistics: Some(crate::WitnessStatistics::new(0, 0, 0, 1)),
-        };
+    fn report_tracks_required_witness_errors_separately_from_semver_success() {
+        fn create_crate_report(required_witness_errors: usize) -> CrateReport {
+            CrateReport {
+                detected_bump: ActualSemverUpdate::NotChanged,
+                required_bumps: Bumps { major: 0, minor: 0 },
+                suggested_bumps: Bumps { major: 0, minor: 0 },
+                lint_results: Vec::new(),
+                checks_duration: Duration::ZERO,
+                selected_checks: 1,
+                skipped_checks: 0,
+                witness_statistics: Some(crate::WitnessStatistics::new(
+                    0,
+                    0,
+                    0,
+                    required_witness_errors,
+                )),
+            }
+        }
+
         let report = crate::Report {
-            crate_reports: BTreeMap::from([("demo".to_owned(), crate_report)]),
+            crate_reports: BTreeMap::from([
+                ("clean".to_owned(), create_crate_report(0)),
+                ("error".to_owned(), create_crate_report(1)),
+            ]),
         };
 
         assert!(report.success());
-        assert!(!report.is_cli_success());
+        assert!(report.has_required_witness_errors());
     }
 
     #[test]

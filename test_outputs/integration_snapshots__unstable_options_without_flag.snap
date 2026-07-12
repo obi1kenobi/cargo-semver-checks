@@ -11,7 +11,7 @@ info:
     RUST_BACKTRACE: "0"
 ---
 success: false
-exit_code: 1
+exit_code: 101
 ----- stdout -----
 
 ----- stderr -----
