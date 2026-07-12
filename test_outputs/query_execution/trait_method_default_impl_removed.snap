@@ -2,6 +2,32 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/stability_aware_mode/": [
+    {
+      "method_name": String("stable_default_body_removed"),
+      "name": String("DefaultStability"),
+      "path": List([
+        String("stability_aware_mode"),
+        String("DefaultStability"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("unstable_default_body_removed"),
+      "name": String("DefaultStability"),
+      "path": List([
+        String("stability_aware_mode"),
+        String("DefaultStability"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_method_default_impl_removed/": [
     {
       "method_name": String("method_default_impl_removed"),

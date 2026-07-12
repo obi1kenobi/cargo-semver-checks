@@ -6,8 +6,8 @@ use anstream::ColorChoice as AnstreamChoice;
 use anstyle::{AnsiColor, Color, Reset, Style};
 use cargo_config2::Config;
 use cargo_semver_checks::{
-    FeatureFlag, GlobalConfig, PackageSelection, ReleaseType, Rustdoc, ScopeSelection, SemverQuery,
-    WitnessGeneration,
+    FeatureFlag, GlobalConfig, PackageSelection, ReleaseType, Rustdoc, RustdocIndexingMode,
+    ScopeSelection, SemverQuery, WitnessGeneration,
 };
 use clap::{Args, CommandFactory, Parser, Subcommand};
 
@@ -356,6 +356,10 @@ struct UnstableOptions {
     /// Enable running witness-based consistency checks for lints whose witness purpose is `ConsistencyCheck`.
     #[arg(long, hide = true)]
     consistency_check: bool,
+
+    /// Interpret structured rustdoc stability metadata while deciding public API.
+    #[arg(long = "stability-aware", hide = true)]
+    stability_aware: bool,
 }
 
 impl UnstableOptions {
@@ -380,6 +384,7 @@ impl UnstableOptions {
         let Self {
             witness_hints,
             consistency_check,
+            stability_aware,
         } = self;
 
         if *witness_hints {
@@ -388,6 +393,10 @@ impl UnstableOptions {
 
         if *consistency_check {
             list.push("--consistency-check".into())
+        }
+
+        if *stability_aware {
+            list.push("--stability-aware".into());
         }
 
         list
@@ -666,6 +675,10 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
             check.set_build_target(build_target);
         }
 
+        if value.unstable_options.stability_aware {
+            check.set_rustdoc_indexing_mode(RustdocIndexingMode::StabilityAware);
+        }
+
         let mut witness_generation = WitnessGeneration::new();
         witness_generation.show_hints = value.unstable_options.witness_hints;
         witness_generation.run_consistency_checks = value.unstable_options.consistency_check;
@@ -865,5 +878,50 @@ fn current_rustdoc_conflict_errors() {
                 "main",
             ])
             .is_err()
+    );
+}
+
+#[test]
+fn stability_aware_is_unstable_option() {
+    let Cargo::SemverChecks(args) = Cargo::try_parse_from([
+        "cargo",
+        "semver-checks",
+        "check-release",
+        "--stability-aware",
+        "--current-rustdoc",
+        "current.json",
+        "--baseline-rustdoc",
+        "baseline.json",
+    ])
+    .expect("args should parse before unstable option validation");
+
+    let mut config = GlobalConfig::new();
+    let err = validate_feature_flags(&mut config, &args)
+        .expect_err("--stability-aware should require -Z unstable-options");
+
+    assert!(
+        err.to_string().contains("--stability-aware"),
+        "unexpected error: {err:#}"
+    );
+}
+
+#[test]
+fn stability_aware_adds_no_extra_validation_requirements() {
+    // This implies "check the current project vs the default baseline, with stability-aware rules."
+    let Cargo::SemverChecks(args) = Cargo::try_parse_from([
+        "cargo",
+        "semver-checks",
+        "check-release",
+        "-Z",
+        "unstable-options",
+        "--stability-aware",
+    ])
+    .expect("args should parse");
+
+    let mut config = GlobalConfig::new();
+    config.set_feature_flags(HashSet::from_iter(args.unstable_features.clone()));
+
+    validate_feature_flags(&mut config, &args).expect(
+        "--stability-aware should not add validation requirements beyond -Z unstable-options",
     );
 }

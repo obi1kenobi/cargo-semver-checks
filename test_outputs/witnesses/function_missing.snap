@@ -61,3 +61,13 @@ hint = "hidden_reexports::hidden_per_item_then_public_per_item_removed(...);"
 filename = "src/lib.rs"
 begin_line = 101
 hint = "hidden_reexports::hidden_glob_then_public_per_item_removed(...);"
+
+[["./test_crates/stability_aware_mode/"]]
+filename = "src/lib.rs"
+begin_line = 12
+hint = "stability_aware_mode::stable_removed(...);"
+
+[["./test_crates/stability_aware_mode/"]]
+filename = "src/lib.rs"
+begin_line = 15
+hint = "stability_aware_mode::unstable_removed(...);"

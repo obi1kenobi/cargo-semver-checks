@@ -17,7 +17,9 @@ use crate::query::{
     ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery,
 };
 use crate::witness_gen;
-use crate::{Bumps, CrateReport, GlobalConfig, ReleaseType, WitnessGeneration};
+use crate::{
+    Bumps, CrateReport, GlobalConfig, ReleaseType, RustdocIndexingMode, WitnessGeneration,
+};
 
 /// Represents a change between two semantic versions
 #[derive(Debug, PartialEq, Eq)]
@@ -260,15 +262,25 @@ fn print_triggered_lint(
     Ok(())
 }
 
+pub(super) struct CheckReleaseSettings {
+    pub(super) release_type: Option<ReleaseType>,
+    pub(super) rustdoc_indexing_mode: RustdocIndexingMode,
+}
+
 pub(super) fn run_check_release(
     config: &mut GlobalConfig,
     data_storage: &DataStorage,
     crate_name: &str,
-    release_type: Option<ReleaseType>,
+    settings: CheckReleaseSettings,
     overrides: &OverrideStack,
     witness_generation: &WitnessGeneration,
     witness_data: witness_gen::WitnessGenerationData,
 ) -> anyhow::Result<PendingCrateReport> {
+    let CheckReleaseSettings {
+        release_type,
+        rustdoc_indexing_mode,
+    } = settings;
+
     let current_version = data_storage.current_crate().crate_version();
     let baseline_version = data_storage.baseline_crate().crate_version();
 
@@ -314,7 +326,7 @@ pub(super) fn run_check_release(
         VersionChangeKind::Minimum => format!("no change; {assume}{change}"),
     };
 
-    let index_storage = data_storage.create_indexes();
+    let index_storage = data_storage.create_indexes(rustdoc_indexing_mode);
     let adapter = index_storage.create_adapter();
 
     let mut queries_to_run = SemverQuery::all_queries();

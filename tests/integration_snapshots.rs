@@ -119,6 +119,37 @@ fn z_help() {
     })
 }
 
+#[test]
+fn stability_aware_mode() {
+    let baseline_rustdoc = "localdata/test_data/stability_aware_mode/old/rustdoc.json";
+    let current_rustdoc = "localdata/test_data/stability_aware_mode/new/rustdoc.json";
+
+    // TODO: Remove this block when the oldest rustdoc JSON version we support is v60+.
+    if rustdoc_format_version(baseline_rustdoc) < 60 || rustdoc_format_version(current_rustdoc) < 60
+    {
+        eprintln!(
+            "stability_aware_mode fixture needs rustdoc JSON v60+ for structured stability data"
+        );
+        return;
+    }
+
+    assert_integration_test("stability_aware_mode", |cmd, settings| {
+        cmd.args([
+            "-Z",
+            "unstable-options",
+            "--stability-aware",
+            "--release-type",
+            "minor",
+            "--baseline-rustdoc",
+            baseline_rustdoc,
+            "--current-rustdoc",
+            current_rustdoc,
+        ]);
+
+        set_snapshot_filters(settings);
+    });
+}
+
 /// Pin down the behavior when running `cargo-semver-checks` on a package that
 /// relies on `--cfg` based conditional compilation to enable or disable functionality.
 ///
@@ -206,4 +237,12 @@ fn executable_path() -> PathBuf {
     assert_cmd::cargo::cargo_bin!("cargo-semver-checks")
         .canonicalize()
         .expect("error canonicalizing")
+}
+
+fn rustdoc_format_version(path: &str) -> u64 {
+    let rustdoc = fs_err::read_to_string(path).expect("failed to read rustdoc JSON");
+    let json: serde_json::Value = serde_json::from_str(&rustdoc).expect("failed to parse JSON");
+    json["format_version"]
+        .as_u64()
+        .expect("rustdoc JSON missing numeric format_version")
 }
