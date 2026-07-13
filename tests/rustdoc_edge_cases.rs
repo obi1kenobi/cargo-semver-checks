@@ -43,7 +43,7 @@ error: no crates with library targets selected, nothing to semver-check
 note: only library targets contain an API surface that can be checked for semver
 note: skipped the following crates since they have no library target: proc_macro_crate\n",
         )
-        .failure();
+        .code(101);
 }
 
 /// Ensure that crates with only a bin target (so, no lib target) produce the correct error message
@@ -116,6 +116,19 @@ fn renamed_lib_target() {
     let mut cmd = cargo_semver_checks();
     cmd.current_dir("test_crates/renamed_lib_target")
         .args(["semver-checks", "check-release", "--baseline-root=."])
+        .assert()
+        .success();
+}
+
+/// Ensure dependency warnings do not fail rustdoc generation when the user has
+/// `RUSTFLAGS=-Dwarnings` set.
+/// https://github.com/obi1kenobi/cargo-semver-checks/issues/589
+#[test]
+fn dependency_warnings_do_not_fail_rustdoc_generation() {
+    let mut cmd = cargo_semver_checks();
+    cmd.current_dir("test_crates/dependency_warnings_with_deny/new")
+        .args(["semver-checks", "check-release", "--baseline-root=../old"])
+        .env("RUSTFLAGS", "-Dwarnings")
         .assert()
         .success();
 }

@@ -1,5 +1,6 @@
 use std::{borrow::Cow, collections::BTreeMap, path::Path};
 
+use crate::RustdocIndexingMode;
 use tame_index::IndexVersion;
 
 use super::{
@@ -143,6 +144,7 @@ fn feature_gated_witness_preserves_selected_features() {
         &baseline_request,
         &current_request,
         temp_dir.path().join("target"),
+        RustdocIndexingMode::Ordinary,
     );
 
     assert!(report.statistics.is_none());

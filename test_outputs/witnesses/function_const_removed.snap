@@ -10,3 +10,21 @@ const fn witness() {
     function_const_removed::add(...);
 }
 """
+
+[["./test_crates/stability_aware_mode/"]]
+filename = "src/lib.rs"
+begin_line = 12
+hint = """
+const fn witness() {
+    stability_aware_mode::const_stable_to_non_const(...);
+}
+"""
+
+[["./test_crates/stability_aware_mode/"]]
+filename = "src/lib.rs"
+begin_line = 17
+hint = """
+const fn witness() {
+    stability_aware_mode::const_unstable_to_non_const(...);
+}
+"""

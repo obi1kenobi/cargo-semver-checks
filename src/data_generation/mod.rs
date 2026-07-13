@@ -5,6 +5,8 @@ mod request;
 
 use trustfall_rustdoc::{VersionedIndex, VersionedRustdocAdapter, VersionedStorage};
 
+use crate::RustdocIndexingMode;
+
 pub(crate) use error::{IntoTerminalResult, TerminalError};
 pub(crate) use generate::GenerationSettings;
 pub(crate) use generate::effective_witness_rustflags;
@@ -32,10 +34,21 @@ impl DataStorage {
 }
 
 impl DataStorage {
-    pub(crate) fn create_indexes(&self) -> IndexStorage<'_> {
+    pub(crate) fn create_indexes(&self, mode: RustdocIndexingMode) -> IndexStorage<'_> {
+        let (current_crate, baseline_crate) = match mode {
+            RustdocIndexingMode::Ordinary => (
+                VersionedIndex::from_storage(&self.current),
+                VersionedIndex::from_storage(&self.baseline),
+            ),
+            RustdocIndexingMode::StabilityAware => (
+                VersionedIndex::from_rust_std_component_storage(&self.current),
+                VersionedIndex::from_rust_std_component_storage(&self.baseline),
+            ),
+        };
+
         IndexStorage {
-            current_crate: VersionedIndex::from_storage(&self.current),
-            baseline_crate: VersionedIndex::from_storage(&self.baseline),
+            current_crate,
+            baseline_crate,
         }
     }
 }

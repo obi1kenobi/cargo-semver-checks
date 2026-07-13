@@ -14,7 +14,7 @@ fn verify_binary_contains_lints() {
     assert_on_crate_pair("template").success();
 
     // Those test crate pairs should trigger an error (because of a lint with the same name),
-    // so they should return a non-zero exit code.
+    // so they should return the exit code for deny-level lint findings.
     // Only a few (arbitrarily) lints are being checked to speed up the testing process (the full
     // list of lints is tested in `src/query.rs`).
     for crate_pair in [
@@ -22,6 +22,6 @@ fn verify_binary_contains_lints() {
         "function_const_removed",
         "function_unsafe_added",
     ] {
-        assert_on_crate_pair(crate_pair).failure();
+        assert_on_crate_pair(crate_pair).code(100);
     }
 }

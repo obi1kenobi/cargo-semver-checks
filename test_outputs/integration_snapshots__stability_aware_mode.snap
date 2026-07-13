@@ -1,0 +1,93 @@
+---
+source: tests/integration_snapshots.rs
+info:
+  program: cargo-semver-checks
+  args:
+    - semver-checks
+    - "-Z"
+    - unstable-options
+    - "--stability-aware"
+    - "--release-type"
+    - minor
+    - "--baseline-rustdoc"
+    - localdata/test_data/stability_aware_mode/old/rustdoc.json
+    - "--current-rustdoc"
+    - localdata/test_data/stability_aware_mode/new/rustdoc.json
+  env:
+    CARGO_TERM_COLOR: never
+    CARGO_TERM_UNICODE: "false"
+    RUST_BACKTRACE: "0"
+---
+success: false
+exit_code: 100
+----- stdout -----
+
+--- failure function_const_removed: pub fn is no longer const ---
+
+Description:
+A publicly-visible function is no longer `const` and can no longer be used in a `const` context.
+        ref: https://doc.rust-lang.org/reference/const_eval.html
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/function_const_removed.ron
+
+Failed in:
+  function stability_aware_mode::const_stable_to_non_const in file src/lib.rs:12
+  function stability_aware_mode::const_stable_to_unstable in file src/lib.rs:70
+
+--- failure function_missing: pub fn removed or renamed ---
+
+Description:
+A publicly-visible function cannot be imported by its prior path. A `pub use` may have been removed, or the function itself may have been renamed or removed entirely.
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#item-remove
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/function_missing.ron
+
+Failed in:
+  function stability_aware_mode::stable_removed, previously in file src/lib.rs:12
+
+--- failure function_now_doc_hidden: pub function is now #[doc(hidden)] ---
+
+Description:
+A pub function is now #[doc(hidden)], removing it from the crate's public API.
+        ref: https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html#hidden
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/function_now_doc_hidden.ron
+
+Failed in:
+  function stable_item_to_unstable in file src/lib.rs:60
+  function stable_now_doc_hidden in file src/lib.rs:23
+
+--- failure trait_associated_const_default_removed: non-sealed trait removed the default value for an associated constant ---
+
+Description:
+A non-sealed trait associated constant lost its default value, which breaks downstream implementations of the trait
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#trait-item-signature
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/trait_associated_const_default_removed.ron
+
+Failed in:
+  trait constant stability_aware_mode::DefaultStability::STABLE_DEFAULT_CONST_REMOVED in file src/lib.rs:34
+
+--- failure trait_associated_type_default_removed: non-sealed trait removed the default value for an associated type ---
+
+Description:
+A non-sealed trait associated type lost its default value, which breaks downstream implementations of the trait
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#trait-item-signature
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/trait_associated_type_default_removed.ron
+
+Failed in:
+  trait type stability_aware_mode::DefaultStability::StableDefaultTypeRemoved in file src/lib.rs:40
+
+--- failure trait_method_default_impl_removed: pub trait default method impl removed ---
+
+Description:
+A method's default impl in an unsealed trait has been removed, breaking trait implementations that relied on that default
+        ref: https://doc.rust-lang.org/book/ch10-02-traits.html#default-implementations
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/trait_method_default_impl_removed.ron
+
+Failed in:
+  trait method stability_aware_mode::DefaultStability::stable_default_body_removed in file src/lib.rs:28
+  trait method stability_aware_mode::DefaultStability::stable_default_body_to_unstable in file src/lib.rs:53
+
+----- stderr -----
+    Checking <unknown> v0.1.0 -> v0.1.0 (assume minor change)
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 6 fail, 0 warn, [SKIP] skip
+
+     Summary semver requires new major version: 6 major and 0 minor checks failed
+    Finished [TIME] <unknown>

@@ -17,7 +17,9 @@ use crate::query::{
     ActualSemverUpdate, LintLevel, OverrideStack, RequiredSemverUpdate, SemverQuery,
 };
 use crate::witness_gen;
-use crate::{Bumps, CrateReport, GlobalConfig, ReleaseType, WitnessGeneration};
+use crate::{
+    Bumps, CrateReport, GlobalConfig, ReleaseType, RustdocIndexingMode, WitnessGeneration,
+};
 
 /// Represents a change between two semantic versions
 #[derive(Debug, PartialEq, Eq)]
@@ -159,7 +161,7 @@ fn print_triggered_lint(
         config.log_at_lint_level(lint_level, |config| {
             writeln!(config.stdout(), "{}Description:{}\n{}\n{:>12} {}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron\n",
                 Style::new().bold(), Reset,
-                &semver_query.error_message,
+                semver_query.error_message,
                 "ref:",
                 ref_link,
                 "impl:",
@@ -175,7 +177,7 @@ fn print_triggered_lint(
                 "{}Description:{}\n{}\n{:>12} https://github.com/obi1kenobi/cargo-semver-checks/tree/v{}/src/lints/{}.ron",
                 Style::new().bold(),
                 Reset,
-                &semver_query.error_message,
+                semver_query.error_message,
                 "impl:",
                 crate_version!(),
                 semver_query.id,
@@ -260,15 +262,25 @@ fn print_triggered_lint(
     Ok(())
 }
 
+pub(super) struct CheckReleaseSettings {
+    pub(super) release_type: Option<ReleaseType>,
+    pub(super) rustdoc_indexing_mode: RustdocIndexingMode,
+}
+
 pub(super) fn run_check_release(
     config: &mut GlobalConfig,
     data_storage: &DataStorage,
     crate_name: &str,
-    release_type: Option<ReleaseType>,
+    settings: CheckReleaseSettings,
     overrides: &OverrideStack,
     witness_generation: &WitnessGeneration,
     witness_data: witness_gen::WitnessGenerationData,
 ) -> anyhow::Result<PendingCrateReport> {
+    let CheckReleaseSettings {
+        release_type,
+        rustdoc_indexing_mode,
+    } = settings;
+
     let current_version = data_storage.current_crate().crate_version();
     let baseline_version = data_storage.baseline_crate().crate_version();
 
@@ -314,7 +326,7 @@ pub(super) fn run_check_release(
         VersionChangeKind::Minimum => format!("no change; {assume}{change}"),
     };
 
-    let index_storage = data_storage.create_indexes();
+    let index_storage = data_storage.create_indexes(rustdoc_indexing_mode);
     let adapter = index_storage.create_adapter();
 
     let mut queries_to_run = SemverQuery::all_queries();
@@ -927,23 +939,34 @@ mod test {
     }
 
     #[test]
-    fn report_cli_success_includes_required_witness_errors() {
-        let crate_report = CrateReport {
-            detected_bump: ActualSemverUpdate::NotChanged,
-            required_bumps: Bumps { major: 0, minor: 0 },
-            suggested_bumps: Bumps { major: 0, minor: 0 },
-            lint_results: Vec::new(),
-            checks_duration: Duration::ZERO,
-            selected_checks: 1,
-            skipped_checks: 0,
-            witness_statistics: Some(crate::WitnessStatistics::new(0, 0, 0, 1)),
-        };
+    fn report_tracks_required_witness_errors_separately_from_semver_success() {
+        fn create_crate_report(required_witness_errors: usize) -> CrateReport {
+            CrateReport {
+                detected_bump: ActualSemverUpdate::NotChanged,
+                required_bumps: Bumps { major: 0, minor: 0 },
+                suggested_bumps: Bumps { major: 0, minor: 0 },
+                lint_results: Vec::new(),
+                checks_duration: Duration::ZERO,
+                selected_checks: 1,
+                skipped_checks: 0,
+                witness_statistics: Some(crate::WitnessStatistics::new(
+                    0,
+                    0,
+                    0,
+                    required_witness_errors,
+                )),
+            }
+        }
+
         let report = crate::Report {
-            crate_reports: BTreeMap::from([("demo".to_owned(), crate_report)]),
+            crate_reports: BTreeMap::from([
+                ("clean".to_owned(), create_crate_report(0)),
+                ("error".to_owned(), create_crate_report(1)),
+            ]),
         };
 
         assert!(report.success());
-        assert!(!report.is_cli_success());
+        assert!(report.has_required_witness_errors());
     }
 
     #[test]

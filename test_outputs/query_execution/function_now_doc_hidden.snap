@@ -47,4 +47,16 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/stability_aware_mode/": [
+    {
+      "function_name": String("stable_now_doc_hidden"),
+      "path": List([
+        String("stability_aware_mode"),
+        String("stable_now_doc_hidden"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }
