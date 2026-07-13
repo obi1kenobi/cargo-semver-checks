@@ -6,6 +6,7 @@ Check(
   scope: Scope(
     mode: DenyList(PackageSelection(
       selection: DefaultMembers,
+      explicitly_included_packages: [],
       excluded_packages: [],
     )),
   ),

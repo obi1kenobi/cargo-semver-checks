@@ -154,8 +154,7 @@ impl Default for ScopeMode {
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct PackageSelection {
     selection: ScopeSelection,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    included_packages: Vec<String>,
+    explicitly_included_packages: Vec<String>,
     excluded_packages: Vec<String>,
 }
 
@@ -163,13 +162,13 @@ impl PackageSelection {
     pub fn new(selection: ScopeSelection) -> Self {
         Self {
             selection,
-            included_packages: vec![],
+            explicitly_included_packages: vec![],
             excluded_packages: vec![],
         }
     }
 
-    pub fn set_included_packages(&mut self, packages: Vec<String>) -> &mut Self {
-        self.included_packages = packages;
+    pub fn set_explicitly_included_packages(&mut self, packages: Vec<String>) -> &mut Self {
+        self.explicitly_included_packages = packages;
         self
     }
 
@@ -202,7 +201,7 @@ impl Scope {
         let base_ids: HashSet<&PackageId> = match &self.mode {
             ScopeMode::DenyList(PackageSelection {
                 selection,
-                included_packages: _,
+                explicitly_included_packages: _,
                 excluded_packages,
             }) => {
                 let packages = match selection {
@@ -518,8 +517,9 @@ note: skipped the following crates since they have no library target: {skipped}"
                         let is_explicitly_included = match &self.scope.mode {
                             ScopeMode::AllowList(packages) => packages.contains(&selected.name),
                             ScopeMode::DenyList(PackageSelection {
-                                included_packages, ..
-                            }) => included_packages.contains(&selected.name),
+                                explicitly_included_packages,
+                                ..
+                            }) => explicitly_included_packages.contains(&selected.name),
                         };
                         let is_implied = !is_explicitly_included
                             && metadata.workspace_members.len() > 1

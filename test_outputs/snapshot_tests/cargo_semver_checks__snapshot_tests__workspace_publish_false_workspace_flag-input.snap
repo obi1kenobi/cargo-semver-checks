@@ -6,7 +6,7 @@ Check(
   scope: Scope(
     mode: DenyList(PackageSelection(
       selection: Workspace,
-      included_packages: [
+      explicitly_included_packages: [
         "a",
       ],
       excluded_packages: [],
