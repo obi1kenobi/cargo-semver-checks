@@ -294,12 +294,12 @@ fn workspace_publish_false_explicit() {
     )
 }
 
-/// Running `cargo semver-checks` on a workspace with a `package = false` member,
-/// explicitly including that member with `--package` and also specifying `--workspace`.
-/// Currently, `--workspace` overrides `--package` and the `publish = false` member is not
-/// semver-checked, and `cargo-semver-checks` silently exits 0.
+/// Running `cargo semver-checks` on a workspace with `publish = false` members,
+/// explicitly including one such member with `--package` and also specifying `--workspace`.
+/// The explicitly included package and the publishable workspace member should be
+/// semver-checked, while the implicitly selected `publish = false` package should be skipped.
 ///
-/// Changing this behavior to make it more consistent is tracked in:
+/// Regression test for:
 /// https://github.com/obi1kenobi/cargo-semver-checks/issues/868
 #[test]
 fn workspace_publish_false_workspace_flag() {
@@ -309,14 +309,12 @@ fn workspace_publish_false_workspace_flag() {
             "cargo",
             "semver-checks",
             "--manifest-path",
-            "test_crates/manifest_tests/workspace_all_publish_false/new",
+            "test_crates/manifest_tests/workspace_publish_false_mixed/new",
             "--baseline-root",
-            "test_crates/manifest_tests/workspace_all_publish_false/old",
+            "test_crates/manifest_tests/workspace_publish_false_mixed/old",
             "--workspace",
             "--package",
             "a",
-            // use verbose mode to show what is being skipped
-            "--verbose",
         ],
     )
 }

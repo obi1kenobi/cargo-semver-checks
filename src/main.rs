@@ -615,6 +615,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
         if value.workspace.all || value.workspace.workspace {
             // Specified explicit `--workspace` or `--all`.
             let mut selection = PackageSelection::new(ScopeSelection::Workspace);
+            selection.set_explicitly_included_packages(value.workspace.package);
             selection.set_excluded_packages(value.workspace.exclude);
             check.set_package_selection(selection);
         } else if !value.workspace.package.is_empty() {

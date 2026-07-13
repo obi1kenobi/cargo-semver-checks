@@ -6,14 +6,17 @@ Check(
   scope: Scope(
     mode: DenyList(PackageSelection(
       selection: Workspace,
+      explicitly_included_packages: [
+        "a",
+      ],
       excluded_packages: [],
     )),
   ),
   current: Rustdoc(
-    source: Root("test_crates/manifest_tests/workspace_all_publish_false/new"),
+    source: Root("test_crates/manifest_tests/workspace_publish_false_mixed/new"),
   ),
   baseline: Rustdoc(
-    source: Root("test_crates/manifest_tests/workspace_all_publish_false/old"),
+    source: Root("test_crates/manifest_tests/workspace_publish_false_mixed/old"),
   ),
   release_type: None,
   current_feature_config: FeatureConfig(
