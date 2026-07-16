@@ -1902,6 +1902,7 @@ add_lints!(
     type_marked_deprecated,
     type_method_marked_deprecated,
     type_mismatched_generic_lifetimes,
+    type_removed_trait,
     type_requires_more_const_generic_params,
     type_requires_more_generic_type_params,
     unconditionally_sealed_trait_became_pub_api_sealed,

@@ -1,0 +1,90 @@
+SemverQuery(
+    id: "type_removed_trait",
+    human_readable_name: "type no longer implements pub trait",
+    description: "A public type no longer implements a public trait defined in the same crate.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/implementations.html#r-items.impl.trait"),
+    query: r#"
+    {
+        CrateDiff {
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        importable_path {
+                            type_path: path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                        public_api_eligible @filter(op: "=", value: ["$true"])
+                        type_name: name @output @tag
+                        impl {
+                            # the trait is not synthetic,
+                            # derived (checked by `derive_trait_impl_removed`)
+                            # or negaive (e.g. !Sized)
+                            synthetic @filter(op: "=", value: ["$false"])
+                            trait_attrs: attrs @filter(op: "not_contains", value: ["$derived"])
+                            implemented_trait {
+                                trait_name: bare_name @tag @filter(op: "!=", value: ["$sized_type_properties"])
+                                trait_name_full: instantiated_name @output
+                                trait @optional {
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+                                    importable_path {
+                                        trait_path: path @output @tag
+                                        public_api @filter(op: "=", value: ["$true"])
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            current {
+                item {
+                    ... on ImplOwner {
+                        type_: importable_path {
+                            path @filter(op: "=", value: ["%type_path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+                        public_api_eligible @filter(op: "=", value: ["$true"])
+                        name @filter(op: "=", value: ["%type_name"])
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            synthetic @filter(op: "=", value: ["$false"])
+                            attrs @filter(op: "not_contains", value: ["$derived"])
+                            implemented_trait {
+                                # check the corresponding trait no longer exists
+                                bare_name @filter(op: "=", value: ["%trait_name"]) @filter(op: "!=", value: ["$sized_type_properties"])
+                                trait_: trait @optional {
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+                                    importable_path {
+                                        path @filter(op: "=", value: ["%trait_path"])
+                                        public_api @filter(op: "=", value: ["$true"])
+                                    }
+                                }
+                            }
+                        }
+
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "false": false,
+        "zero": 0,
+        "derived": "#[automatically_derived]",
+        "sized_type_properties": "SizedTypeProperties"
+    },
+
+    error_message: "A public type no longer implements a public trait defined in the same crate. This is a breaking change as external crates may rely on the trait implementation for the type.",
+    per_result_error_template: Some("{{type_path}}::{{type_name}} no longer implements trait {{trait_path}}::{{trait_name_full}} in {{span_filename}}:{{span_begin_line}}"),
+    // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
+    // for information about this field.
+    witness: None,
+)

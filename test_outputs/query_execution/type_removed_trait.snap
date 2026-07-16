@@ -1,0 +1,237 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/sized_impl_removed/": [
+    {
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("Into<U>"),
+      "trait_path": Null,
+      "type_name": String("SizedStruct"),
+      "type_path": List([
+        String("sized_impl_removed"),
+        String("SizedStruct"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("From<T>"),
+      "trait_path": Null,
+      "type_name": String("SizedStruct"),
+      "type_path": List([
+        String("sized_impl_removed"),
+        String("SizedStruct"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("TryInto<U>"),
+      "trait_path": Null,
+      "type_name": String("SizedStruct"),
+      "type_path": List([
+        String("sized_impl_removed"),
+        String("SizedStruct"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("TryFrom<U>"),
+      "trait_path": Null,
+      "type_name": String("SizedStruct"),
+      "type_path": List([
+        String("sized_impl_removed"),
+        String("SizedStruct"),
+      ]),
+    },
+  ],
+  "./test_crates/type_removed_trait/": [
+    {
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubTrait"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubTrait"),
+      ]),
+      "type_name": String("PubStruct"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubStruct"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(6),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubTrait"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubTrait"),
+      ]),
+      "type_name": String("PubEnum"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubEnum"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubTrait"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubTrait"),
+      ]),
+      "type_name": String("PubUnion"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubUnion"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubGenericTrait<usize>"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubGenericTrait"),
+      ]),
+      "type_name": String("PubGenericStruct"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubGenericStruct"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubGenericTrait<usize>"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubGenericTrait"),
+      ]),
+      "type_name": String("PubGenericEnum"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubGenericEnum"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubGenericTrait<usize>"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubGenericTrait"),
+      ]),
+      "type_name": String("PubGenericUnion"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubGenericUnion"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(17),
+      "span_end_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubGenericTrait<T>"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubGenericTrait"),
+      ]),
+      "type_name": String("PubGenericBoundStruct"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubGenericBoundStruct"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubGenericTrait<T>"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubGenericTrait"),
+      ]),
+      "type_name": String("PubGenericBoundEnum"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubGenericBoundEnum"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(19),
+      "span_end_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubGenericTrait<T>"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubGenericTrait"),
+      ]),
+      "type_name": String("PubGenericBoundUnion"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubGenericBoundUnion"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubGenericTrait<T>"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubGenericTrait"),
+      ]),
+      "type_name": String("PubLifetimeBoundStruct"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubLifetimeBoundStruct"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubGenericTrait<T>"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubGenericTrait"),
+      ]),
+      "type_name": String("PubLifetimeBoundEnum"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubLifetimeBoundEnum"),
+      ]),
+    },
+    {
+      "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+      "trait_name_full": String("PubGenericTrait<T>"),
+      "trait_path": List([
+        String("type_removed_trait"),
+        String("PubGenericTrait"),
+      ]),
+      "type_name": String("PubLifetimeBoundUnion"),
+      "type_path": List([
+        String("type_removed_trait"),
+        String("PubLifetimeBoundUnion"),
+      ]),
+    },
+  ],
+}
