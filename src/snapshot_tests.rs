@@ -50,7 +50,6 @@ use std::{
 
 use cargo_semver_checks::{Check, GlobalConfig};
 use clap::Parser as _;
-use semver::Version;
 
 use crate::Cargo;
 
@@ -327,16 +326,6 @@ fn workspace_publish_false_workspace_flag() {
 /// an error at the end.
 #[test]
 fn workspace_baseline_compile_error() {
-    // HACK: the `cargo doc` error output changed from cargo 1.77 to 1.78, and the snapshot
-    // does not work for older versions
-    if rustc_version::version().map_or(true, |version| version < Version::new(1, 78, 0)) {
-        eprintln!(
-            "Skipping this test as `cargo doc` output is different in earlier versions.
-            Consider rerunning with cargo >= 1.78"
-        );
-        return;
-    }
-
     assert_integration_test(
         "workspace_baseline_compile_error",
         &[
@@ -359,16 +348,6 @@ fn workspace_baseline_compile_error() {
 /// an error at the end.
 #[test]
 fn workspace_baseline_conditional_compile_error() {
-    // HACK: the `cargo doc` error output changed from cargo 1.77 to 1.78, and the snapshot
-    // does not work for older versions
-    if rustc_version::version().map_or(true, |version| version < Version::new(1, 78, 0)) {
-        eprintln!(
-            "Skipping this test as `cargo doc` output is different in earlier versions.
-            Consider rerunning with cargo >= 1.78"
-        );
-        return;
-    }
-
     assert_integration_test(
         "workspace_baseline_conditional_compile_error",
         &[
