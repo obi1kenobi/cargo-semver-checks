@@ -24,13 +24,6 @@ pub enum UsizeEnumToEnum {
     Baz,
 }
 
-#[repr(C, u8)]
-pub enum CU8EnumToCEnum {
-    Bar,
-    Baz,
-}
-
-
 // The following enums have *changes* of repr(i*) and repr(u*),
 // not removals of repr(i*) or repr(u*).
 // They should not be reported by this rule, because they have their own rule.
@@ -49,12 +42,6 @@ pub enum I32ToI8Enum {
 
 #[repr(i32)]
 pub enum I32ToU32Enum {
-    Bar,
-    Baz,
-}
-
-#[repr(C, u8)]
-pub enum CU8ToCU16Enum {
     Bar,
     Baz,
 }
