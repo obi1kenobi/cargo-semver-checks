@@ -130,7 +130,7 @@ source: src/query.rs
     },
     {
       "span_begin_line": Uint64(15),
-      "span_end_line": Uint64(15),
+      "span_end_line": Uint64(17),
       "span_filename": String("src/lib.rs"),
       "trait_name_full": String("PubGenericTrait<usize>"),
       "trait_path": List([
@@ -144,8 +144,8 @@ source: src/query.rs
       ]),
     },
     {
-      "span_begin_line": Uint64(17),
-      "span_end_line": Uint64(17),
+      "span_begin_line": Uint64(19),
+      "span_end_line": Uint64(19),
       "span_filename": String("src/lib.rs"),
       "trait_name_full": String("PubGenericTrait<T>"),
       "trait_path": List([
@@ -159,8 +159,8 @@ source: src/query.rs
       ]),
     },
     {
-      "span_begin_line": Uint64(18),
-      "span_end_line": Uint64(18),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(20),
       "span_filename": String("src/lib.rs"),
       "trait_name_full": String("PubGenericTrait<T>"),
       "trait_path": List([
@@ -174,8 +174,8 @@ source: src/query.rs
       ]),
     },
     {
-      "span_begin_line": Uint64(19),
-      "span_end_line": Uint64(19),
+      "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(23),
       "span_filename": String("src/lib.rs"),
       "trait_name_full": String("PubGenericTrait<T>"),
       "trait_path": List([
@@ -189,8 +189,8 @@ source: src/query.rs
       ]),
     },
     {
-      "span_begin_line": Uint64(21),
-      "span_end_line": Uint64(23),
+      "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(27),
       "span_filename": String("src/lib.rs"),
       "trait_name_full": String("PubGenericTrait<T>"),
       "trait_path": List([
@@ -204,8 +204,8 @@ source: src/query.rs
       ]),
     },
     {
-      "span_begin_line": Uint64(24),
-      "span_end_line": Uint64(26),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(30),
       "span_filename": String("src/lib.rs"),
       "trait_name_full": String("PubGenericTrait<T>"),
       "trait_path": List([
@@ -219,8 +219,8 @@ source: src/query.rs
       ]),
     },
     {
-      "span_begin_line": Uint64(27),
-      "span_end_line": Uint64(29),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(33),
       "span_filename": String("src/lib.rs"),
       "trait_name_full": String("PubGenericTrait<T>"),
       "trait_path": List([

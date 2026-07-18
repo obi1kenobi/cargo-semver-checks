@@ -15,16 +15,20 @@ impl PubTrait for PubUnion {}
 pub trait PubGenericTrait<T> {}
 
 pub struct PubGenericStruct {}
-pub struct PubGenericEnum {}
-pub struct PubGenericUnion {}
+pub enum PubGenericEnum {}
+pub union PubGenericUnion {
+    f1: usize,
+}
 
 impl PubGenericTrait<usize> for PubGenericStruct {}
 impl PubGenericTrait<usize> for PubGenericEnum {}
 impl PubGenericTrait<usize> for PubGenericUnion {}
 
 pub struct PubGenericBoundStruct {}
-pub struct PubGenericBoundEnum {}
-pub struct PubGenericBoundUnion {}
+pub enum PubGenericBoundEnum {}
+pub union PubGenericBoundUnion {
+    f1: usize,
+}
 
 impl<T> PubGenericTrait<T> for PubGenericBoundStruct where T: TryInto<usize> {}
 impl<T> PubGenericTrait<T> for PubGenericBoundEnum where T: TryInto<usize> {}
@@ -33,10 +37,10 @@ impl<T> PubGenericTrait<T> for PubGenericBoundUnion where T: TryInto<usize> {}
 pub struct PubLifetimeBoundStruct<'a> {
     p: &'a usize,
 }
-pub struct PubLifetimeBoundEnum<'a> {
-    p: &'a usize,
+pub enum PubLifetimeBoundEnum<'a> {
+    Data(&'a usize),
 }
-pub struct PubLifetimeBoundUnion<'a> {
+pub union PubLifetimeBoundUnion<'a> {
     p: &'a usize,
 }
 
@@ -50,10 +54,10 @@ impl<'a, T> PubGenericTrait<T> for PubLifetimeBoundUnion<'a> where T: TryInto<us
 pub struct LifetimeToStaticStruct<'a> {
     p: &'a usize,
 }
-pub struct LifetimeToStaticEnum<'a> {
-    p: &'a usize,
+pub enum LifetimeToStaticEnum<'a> {
+    Data(&'a usize),
 }
-pub struct LifetimeToStaticUnion<'a> {
+pub union LifetimeToStaticUnion<'a> {
     p: &'a usize,
 }
 
@@ -64,10 +68,10 @@ impl<'a> PubGenericTrait<usize> for LifetimeToStaticUnion<'a> {}
 pub struct LifetimeToNonStaticStruct {
     p: &'static usize,
 }
-pub struct LifetimeToNonStaticEnum {
-    p: &'static usize,
+pub enum LifetimeToNonStaticEnum {
+    Data(&'static usize),
 }
-pub struct LifetimeToNonStaticUnion {
+pub union LifetimeToNonStaticUnion {
     p: &'static usize,
 }
 
@@ -97,20 +101,15 @@ impl<'a, T> LifetimeGenericTrait<'a, T> for LifetimeGenericUnion<'a, T> {}
 #[derive(PartialEq)]
 pub struct ManualToDeriveStruct {}
 #[derive(PartialEq)]
-pub struct ManualToDeriveEnum {}
-#[derive(PartialEq)]
-pub struct ManualToDeriveUnion {}
+pub enum ManualToDeriveEnum {}
 
 impl Eq for ManualToDeriveStruct {}
 impl Eq for ManualToDeriveEnum {}
-impl Eq for ManualToDeriveUnion {}
 
 #[derive(Eq, PartialEq)]
 pub struct DeriveToManualStruct {}
 #[derive(Eq, PartialEq)]
-pub struct DeriveToManualEnum {}
-#[derive(Eq, PartialEq)]
-pub struct DeriveToManualUnion {}
+pub enum DeriveToManualEnum {}
 
 // these should not be flagged as the trait is not public
 

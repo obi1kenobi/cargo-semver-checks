@@ -11,20 +11,24 @@ pub union PubUnion {
 pub trait PubGenericTrait<T> {}
 
 pub struct PubGenericStruct {}
-pub struct PubGenericEnum {}
-pub struct PubGenericUnion {}
+pub enum PubGenericEnum {}
+pub union PubGenericUnion {
+    f1: usize,
+}
 
 pub struct PubGenericBoundStruct {}
-pub struct PubGenericBoundEnum {}
-pub struct PubGenericBoundUnion {}
+pub enum PubGenericBoundEnum {}
+pub union PubGenericBoundUnion {
+    f1: usize,
+}
 
 pub struct PubLifetimeBoundStruct<'a> {
     p: &'a usize,
 }
-pub struct PubLifetimeBoundEnum<'a> {
-    p: &'a usize,
+pub enum PubLifetimeBoundEnum<'a> {
+    Data(&'a usize),
 }
-pub struct PubLifetimeBoundUnion<'a> {
+pub union PubLifetimeBoundUnion<'a> {
     p: &'a usize,
 }
 
@@ -34,10 +38,10 @@ pub struct PubLifetimeBoundUnion<'a> {
 pub struct LifetimeToStaticStruct {
     p: &'static usize,
 }
-pub struct LifetimeToStaticEnum {
-    p: &'static usize,
+pub enum LifetimeToStaticEnum {
+    Data(&'static usize),
 }
-pub struct LifetimeToStaticUnion {
+pub union LifetimeToStaticUnion {
     p: &'static usize,
 }
 
@@ -48,10 +52,10 @@ impl<'a> PubGenericTrait<usize> for LifetimeToStaticUnion {}
 pub struct LifetimeToNonStaticStruct<'a> {
     p: &'a usize,
 }
-pub struct LifetimeToNonStaticEnum<'a> {
-    p: &'a usize,
+pub enum LifetimeToNonStaticEnum<'a> {
+    Data(&'a usize),
 }
-pub struct LifetimeToNonStaticUnion<'a> {
+pub union LifetimeToNonStaticUnion<'a> {
     p: &'a usize,
 }
 
@@ -81,20 +85,15 @@ impl<'a, T> LifetimeGenericTrait<'a, T> for LifetimeGenericUnion<'static, T> {}
 #[derive(Eq, PartialEq)]
 pub struct ManualToDeriveStruct {}
 #[derive(Eq, PartialEq)]
-pub struct ManualToDeriveEnum {}
-#[derive(Eq, PartialEq)]
-pub struct ManualToDeriveUnion {}
+pub enum ManualToDeriveEnum {}
 
 #[derive(PartialEq)]
 pub struct DeriveToManualStruct {}
 #[derive(PartialEq)]
-pub struct DeriveToManualEnum {}
-#[derive(PartialEq)]
-pub struct DeriveToManualUnion {}
+pub enum DeriveToManualEnum {}
 
 impl Eq for DeriveToManualStruct {}
 impl Eq for DeriveToManualEnum {}
-impl Eq for DeriveToManualUnion {}
 
 // these should not be flagged as the trait is not public
 
