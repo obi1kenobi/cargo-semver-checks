@@ -44,6 +44,74 @@ impl<'a, T> PubGenericTrait<T> for PubLifetimeBoundStruct<'a> where T: TryInto<u
 impl<'a, T> PubGenericTrait<T> for PubLifetimeBoundEnum<'a> where T: TryInto<usize> {}
 impl<'a, T> PubGenericTrait<T> for PubLifetimeBoundUnion<'a> where T: TryInto<usize> {}
 
+// these should not be flagged because the impl for T
+// has not changed even though the lifetime has
+
+pub struct LifetimeToStaticStruct<'a> {
+    p: &'a usize,
+}
+pub struct LifetimeToStaticEnum<'a> {
+    p: &'a usize,
+}
+pub struct LifetimeToStaticUnion<'a> {
+    p: &'a usize,
+}
+
+impl<'a> PubGenericTrait<usize> for LifetimeToStaticStruct<'a> {}
+impl<'a> PubGenericTrait<usize> for LifetimeToStaticEnum<'a> {}
+impl<'a> PubGenericTrait<usize> for LifetimeToStaticUnion<'a> {}
+
+pub struct LifetimeToNonStaticStruct {
+    p: &'static usize,
+}
+pub struct LifetimeToNonStaticEnum {
+    p: &'static usize,
+}
+pub struct LifetimeToNonStaticUnion {
+    p: &'static usize,
+}
+
+impl PubGenericTrait<usize> for LifetimeToNonStaticStruct {}
+impl PubGenericTrait<usize> for LifetimeToNonStaticEnum {}
+impl PubGenericTrait<usize> for LifetimeToNonStaticUnion {}
+
+// only a lifetime change; don't flag
+pub trait LifetimeGenericTrait<'a, T> {}
+
+pub struct LifetimeGenericStruct<'a, T> {
+    p: &'a T,
+}
+pub enum LifetimeGenericEnum<'a, T> {
+    Data(&'a T),
+}
+pub union LifetimeGenericUnion<'a, T> {
+    p: &'a T,
+}
+
+impl<'a, T> LifetimeGenericTrait<'a, T> for LifetimeGenericStruct<'a, T> {}
+impl<'a, T> LifetimeGenericTrait<'a, T> for LifetimeGenericEnum<'a, T> {}
+impl<'a, T> LifetimeGenericTrait<'a, T> for LifetimeGenericUnion<'a, T> {}
+
+// going from manual to automatic should not get flagged
+
+#[derive(PartialEq)]
+pub struct ManualToDeriveStruct {}
+#[derive(PartialEq)]
+pub struct ManualToDeriveEnum {}
+#[derive(PartialEq)]
+pub struct ManualToDeriveUnion {}
+
+impl Eq for ManualToDeriveStruct {}
+impl Eq for ManualToDeriveEnum {}
+impl Eq for ManualToDeriveUnion {}
+
+#[derive(Eq, PartialEq)]
+pub struct DeriveToManualStruct {}
+#[derive(Eq, PartialEq)]
+pub struct DeriveToManualEnum {}
+#[derive(Eq, PartialEq)]
+pub struct DeriveToManualUnion {}
+
 // these should not be flagged as the trait is not public
 
 trait PrivateTrait {}

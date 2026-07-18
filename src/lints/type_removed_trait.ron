@@ -18,9 +18,8 @@ SemverQuery(
                         public_api_eligible @filter(op: "=", value: ["$true"])
                         type_name: name @output @tag
                         impl {
-                            # the trait is not synthetic,
+                            # the trait is not synthetic or
                             # derived (checked by `derive_trait_impl_removed`)
-                            # or negaive (e.g. !Sized)
                             synthetic @filter(op: "=", value: ["$false"])
                             trait_attrs: attrs @filter(op: "not_contains", value: ["$derived"])
                             implemented_trait {
