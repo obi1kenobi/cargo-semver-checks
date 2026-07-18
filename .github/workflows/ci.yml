@@ -22,6 +22,10 @@ env:
   CARGO_PROFILE_TEST_DEBUG: 0
 
 jobs:
+  # Every job listed in `needs` must run on every workflow event. GitHub propagates
+  # a skipped dependency through the entire dependency chain even when this job uses
+  # `always()`, so making a dependency pull-request-only would also skip publishing
+  # and other downstream jobs.
   ci-everything:
     name: All CI stages
     runs-on: ubuntu-latest
@@ -49,7 +53,7 @@ jobs:
       - fails-on-too-old-rustc
       - broken-lint-reference-links
       - whitespace-hygiene
-    if: ${{ always() && !cancelled() }}  # Also run when PR-only jobs are skipped on other triggers.
+    if: ${{ always() && !cancelled() }}  # Run even if a dependency fails, unless the workflow is cancelled.
     steps:
       - name: Job outcomes
         run: |
@@ -123,7 +127,7 @@ jobs:
         run: exit 1
       - if: ${{ needs.broken-lint-reference-links.result != 'success' }}
         run: exit 1
-      - if: ${{ github.event_name == 'pull_request' && needs.whitespace-hygiene.result != 'success' }}
+      - if: ${{ needs.whitespace-hygiene.result != 'success' }}
         run: exit 1
 
   lint:
@@ -2091,12 +2095,20 @@ jobs:
           cd semver
           ./scripts/check_reference_links.sh
 
+  # This job must succeed as a no-op outside pull requests. `ci-everything` depends
+  # on it. GitHub propagates a skipped job through the entire `needs` chain,
+  # even when an intermediate job uses `always()`. Keep the PR-only conditions
+  # on the individual steps instead of on the job.
   whitespace-hygiene:
     name: Check trailing whitespace and final newlines
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
+      - name: No-op outside pull requests
+        if: github.event_name != 'pull_request'
+        run: echo 'Whitespace hygiene is only checked on pull requests.'
+
       - name: Checkout cargo-semver-checks
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@v7
         with:
           persist-credentials: false
@@ -2104,6 +2116,7 @@ jobs:
           path: 'semver'
 
       - name: Check changed files
+        if: github.event_name == 'pull_request'
         working-directory: semver
         run: |
           export LC_ALL=C
