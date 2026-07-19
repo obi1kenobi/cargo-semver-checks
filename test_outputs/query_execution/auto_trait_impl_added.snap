@@ -1,0 +1,42 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/auto_trait_impl_added/": [
+    {
+      "auto_trait": String("Sync"),
+      "auto_trait_path": List([
+        String("core"),
+        String("marker"),
+        String("Sync"),
+      ]),
+      "name": String("PubStruct"),
+      "path": List([
+        String("auto_trait_impl_added"),
+        String("PubStruct"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "auto_trait": String("RefUnwindSafe"),
+      "auto_trait_path": List([
+        String("core"),
+        String("panic"),
+        String("unwind_safe"),
+        String("RefUnwindSafe"),
+      ]),
+      "name": String("PubStruct"),
+      "path": List([
+        String("auto_trait_impl_added"),
+        String("PubStruct"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

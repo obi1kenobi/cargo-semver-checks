@@ -1,0 +1,90 @@
+SemverQuery(
+    id: "auto_trait_impl_added",
+    human_readable_name: "public type gained auto trait",
+    description: "A public type has gained an auto trait's implementation.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#item-new"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        impl {
+                            negative @filter(op: "=", value: ["$false"])
+
+                            implemented_trait {
+                                trait {
+                                    auto_trait: name @output
+
+                                    canonical_path {
+                                        auto_trait_path: path
+                                            @filter(op: "one_of", value: ["$auto_traits"])
+                                            @output
+                                            @tag
+                                    }
+                                }
+                            }
+                        }
+                        span_: span @optional {
+                            filename @output
+                            begin_line @output
+                            end_line @output
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on ImplOwner {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        name @output
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            negative @filter(op: "=", value: ["$false"])
+
+                            implemented_trait {
+                                trait {
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["%auto_trait_path"])
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "zero": 0,
+        "false": false,
+        "true": true,
+        "auto_traits": [
+            ["core", "marker", "Send"],
+            ["core", "marker", "Sync"],
+            ["core", "marker", "Unpin"],
+            ["core", "panic", "unwind_safe", "RefUnwindSafe"],
+            ["core", "panic", "unwind_safe", "UnwindSafe"],
+        ],
+    },
+    error_message: "A public type has gained an auto trait's implementation. Removing this auto trait in future would be a breaking change.",
+    per_result_error_template: Some("type {{name}} has gained trait {{auto_trait}}, in {{span_filename}}:{{span_begin_line}}"),
+    // TODO: see https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#adding-a-witness
+    // for information about this field.
+    witness: None,
+)
