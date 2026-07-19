@@ -1681,6 +1681,7 @@ add_lints!(
     (unsafe_trait_method_requires_more_target_features, any(target_arch = "x86", target_arch = "x86_64")),
     (unsafe_trait_method_target_feature_added, any(target_arch = "x86", target_arch = "x86_64")),
     attribute_proc_macro_missing,
+    auto_trait_impl_added,
     auto_trait_impl_removed,
     constructible_struct_adds_field,
     constructible_struct_adds_private_field,
