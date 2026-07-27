@@ -63,3 +63,21 @@ pub struct TupleToPlainStruct {
     pub bar: i64,
     new_field: bool
 }
+
+// Even though naming every field requires using non-public API, downstream
+// code can construct this struct with functional-update syntax.
+// Adding a private field breaks that expression, so this should be reported.
+pub struct StructWithDocHiddenFieldGainsPrivateField {
+    pub foo: usize,
+    #[doc(hidden)]
+    pub hidden: i64,
+    new_private_field: bool,
+}
+
+pub fn make_struct_with_doc_hidden_field() -> StructWithDocHiddenFieldGainsPrivateField {
+    StructWithDocHiddenFieldGainsPrivateField {
+        foo: 0,
+        hidden: 0,
+        new_private_field: false,
+    }
+}

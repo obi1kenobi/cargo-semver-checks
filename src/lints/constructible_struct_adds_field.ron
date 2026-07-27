@@ -1,7 +1,7 @@
 SemverQuery(
     id: "constructible_struct_adds_field",
-    human_readable_name: "externally-constructible struct adds field",
-    description: "A struct constructible with a struct literal added a new pub field.",
+    human_readable_name: "struct exhaustively constructible through public API adds field",
+    description: "A struct exhaustively constructible with a literal using only public API added a new pub field.",
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/expressions/struct-expr.html"),
@@ -42,10 +42,12 @@ SemverQuery(
             }
             baseline {
                 item {
-                    # The struct needs to previously have been constructible with a struct literal.
-                    # Both of the following need to be true for that to have been the case:
+                    # The struct needs to previously have been exhaustively constructible
+                    # with a struct literal using only public API.
+                    # All of the following need to be true for that to have been the case:
                     # 1. It needs to not have been marked `#[non_exhaustive]`.
                     # 2. It needs to not have had any non-public fields.
+                    # 3. All of its fields need to have been part of public API.
                     ... on Struct {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         struct_type @filter(op: "=", value: ["%struct_type"])
@@ -63,7 +65,16 @@ SemverQuery(
                             visibility_limit @filter(op: "!=", value: ["$public"])
                         }
 
+                        # 3. All of its fields need to have been part of public API.
+                        field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            public_api_eligible @filter(op: "!=", value: ["$true"])
+                        }
+
                         # The new field did not previously exist.
+                        #
+                        # Do not require the new field to be part of public API.
+                        # Adding a pub field makes existing exhaustive literals not work
+                        # even if the field is `#[doc(hidden)]` or unstable.
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             name @filter(op: "=", value: ["%field_name"])
                             visibility_limit @filter(op: "=", value: ["$public"])
@@ -79,6 +90,6 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "A pub struct constructible with a struct literal has a new pub field. Existing struct literals must be updated to include the new field.",
+    error_message: "A pub struct that could be exhaustively constructed with a literal using only public API has a new pub field, breaking existing exhaustive literals.",
     per_result_error_template: Some("field {{struct_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
 )

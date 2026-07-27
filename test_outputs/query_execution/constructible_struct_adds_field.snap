@@ -51,6 +51,18 @@ source: src/query.rs
       "struct_name": String("ExhaustiveTupleStruct"),
       "struct_type": String("tuple"),
     },
+    {
+      "field_name": String("new_field"),
+      "path": List([
+        String("constructible_struct_adds_field"),
+        String("PlainStructGainsDocHiddenField"),
+      ]),
+      "span_begin_line": Uint64(81),
+      "span_end_line": Uint64(81),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("PlainStructGainsDocHiddenField"),
+      "struct_type": String("plain"),
+    },
   ],
   "./test_crates/constructible_struct_adds_private_field/": [
     {
@@ -89,6 +101,32 @@ source: src/query.rs
       "span_end_line": Uint64(82),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("StructWithAddition"),
+      "struct_type": String("plain"),
+    },
+  ],
+  "./test_crates/stability_aware_mode/": [
+    {
+      "field_name": String("added"),
+      "path": List([
+        String("stability_aware_mode"),
+        String("PublicFieldAddedToStructWithUnstableField"),
+      ]),
+      "span_begin_line": Uint64(81),
+      "span_end_line": Uint64(81),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("PublicFieldAddedToStructWithUnstableField"),
+      "struct_type": String("plain"),
+    },
+    {
+      "field_name": String("unstable"),
+      "path": List([
+        String("stability_aware_mode"),
+        String("UnstableFieldAddedToConstructibleStruct"),
+      ]),
+      "span_begin_line": Uint64(89),
+      "span_end_line": Uint64(89),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("UnstableFieldAddedToConstructibleStruct"),
       "struct_type": String("plain"),
     },
   ],

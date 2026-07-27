@@ -22,6 +22,26 @@ success: false
 exit_code: 100
 ----- stdout -----
 
+--- failure constructible_struct_adds_field: struct exhaustively constructible through public API adds field ---
+
+Description:
+A pub struct that could be exhaustively constructed with a literal using only public API has a new pub field, breaking existing exhaustive literals.
+        ref: https://doc.rust-lang.org/reference/expressions/struct-expr.html
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/constructible_struct_adds_field.ron
+
+Failed in:
+  field UnstableFieldAddedToConstructibleStruct.unstable in src/lib.rs:89
+
+--- failure constructible_struct_adds_private_field: struct no longer constructible due to new private field ---
+
+Description:
+A struct has a new non-public field that causes downstream code to be unable to construct it with a struct expression, including functional-update syntax.
+        ref: https://doc.rust-lang.org/reference/expressions/struct-expr.html
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/constructible_struct_adds_private_field.ron
+
+Failed in:
+  field PrivateFieldAddedToStructWithUnstableField.new_private_field in src/lib.rs:98
+
 --- failure function_const_removed: pub fn is no longer const ---
 
 Description:
@@ -51,8 +71,8 @@ A pub function is now #[doc(hidden)], removing it from the crate's public API.
        impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/[VERSION]/src/lints/function_now_doc_hidden.ron
 
 Failed in:
-  function stable_item_to_unstable in file src/lib.rs:60
   function stable_now_doc_hidden in file src/lib.rs:23
+  function stable_item_to_unstable in file src/lib.rs:60
 
 --- failure trait_associated_const_default_removed: non-sealed trait removed the default value for an associated constant ---
 
@@ -87,7 +107,7 @@ Failed in:
 
 ----- stderr -----
     Checking <unknown> v0.1.0 -> v0.1.0 (assume minor change)
-     Checked [TIME] [TOTAL] checks: [PASS] pass, 6 fail, 0 warn, [SKIP] skip
+     Checked [TIME] [TOTAL] checks: [PASS] pass, 8 fail, 0 warn, [SKIP] skip
 
-     Summary semver requires new major version: 6 major and 0 minor checks failed
+     Summary semver requires new major version: 8 major and 0 minor checks failed
     Finished [TIME] <unknown>
