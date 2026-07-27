@@ -63,3 +63,28 @@ pub struct TupleToPlainStruct {
     pub bar: i64,
     pub new_field: bool,
 }
+
+// Exhaustively constructing this struct requires using non-public API,
+// so adding another field should not be reported.
+pub struct PlainStructWithDocHiddenField {
+    pub foo: usize,
+    #[doc(hidden)]
+    pub hidden: i64,
+    pub new_field: bool,
+}
+
+// This struct can be constructed using only public API. Adding a pub field
+// should be reported even if the new field is not itself part of public API.
+pub struct PlainStructGainsDocHiddenField {
+    pub foo: usize,
+    #[doc(hidden)]
+    pub new_field: bool,
+}
+
+pub fn make_plain_struct_with_doc_hidden_field() -> PlainStructWithDocHiddenField {
+    PlainStructWithDocHiddenField {
+        foo: 0,
+        hidden: 0,
+        new_field: false,
+    }
+}

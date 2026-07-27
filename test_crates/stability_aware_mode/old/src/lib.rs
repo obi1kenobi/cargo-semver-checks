@@ -85,3 +85,41 @@ pub fn stable_item_to_unstable() {}
 pub const fn const_stable_to_unstable() -> usize {
     1
 }
+
+#[stable(feature = "stability_aware_mode_fixture", since = "1.0.0")]
+pub struct PublicFieldAddedToStructWithUnstableField {
+    #[stable(feature = "stability_aware_mode_fixture", since = "1.0.0")]
+    pub stable: usize,
+    #[unstable(feature = "stability_aware_mode_unstable_fields", issue = "none")]
+    pub unstable: i64,
+}
+
+#[stable(feature = "stability_aware_mode_fixture", since = "1.0.0")]
+pub struct UnstableFieldAddedToConstructibleStruct {
+    #[stable(feature = "stability_aware_mode_fixture", since = "1.0.0")]
+    pub stable: usize,
+}
+
+#[stable(feature = "stability_aware_mode_fixture", since = "1.0.0")]
+pub struct PrivateFieldAddedToStructWithUnstableField {
+    #[stable(feature = "stability_aware_mode_fixture", since = "1.0.0")]
+    pub stable: usize,
+    #[unstable(feature = "stability_aware_mode_unstable_fields", issue = "none")]
+    pub unstable: i64,
+}
+
+#[stable(feature = "stability_aware_mode_fixture", since = "1.0.0")]
+pub fn make_public_field_struct() -> PublicFieldAddedToStructWithUnstableField {
+    PublicFieldAddedToStructWithUnstableField {
+        stable: 0,
+        unstable: 0,
+    }
+}
+
+#[stable(feature = "stability_aware_mode_fixture", since = "1.0.0")]
+pub fn make_private_field_struct() -> PrivateFieldAddedToStructWithUnstableField {
+    PrivateFieldAddedToStructWithUnstableField {
+        stable: 0,
+        unstable: 0,
+    }
+}

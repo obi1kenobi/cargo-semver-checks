@@ -1,7 +1,7 @@
 SemverQuery(
     id: "constructible_struct_adds_private_field",
     human_readable_name: "struct no longer constructible due to new private field",
-    description: "A struct is no longer constructible with a struct literal due to a new private field.",
+    description: "A struct is no longer constructible with a struct expression due to a new private field.",
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/expressions/struct-expr.html"),
@@ -42,8 +42,9 @@ SemverQuery(
             }
             baseline {
                 item {
-                    # The struct needs to previously have been constructible with a struct literal.
-                    # Both of the following need to be true for that to have been the case:
+                    # The struct needs to previously have supported downstream construction with a
+                    # struct expression, including functional-update syntax when a base value is
+                    # available. Both of the following need to be true for that to have been the case:
                     # 1. It needs to not have been marked `#[non_exhaustive]`.
                     # 2. It needs to not have had any non-public fields.
                     ... on Struct {
@@ -59,6 +60,10 @@ SemverQuery(
                         }
 
                         # 2. It needs to not have had any non-public fields.
+                        #
+                        # Do not require the fields to be part of public API. Unstable and
+                        # `#[doc(hidden)]` pub fields still permit downstream functional-update
+                        # expressions, and adding a private field breaks those expressions.
                         field @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             visibility_limit @filter(op: "!=", value: ["$public"])
                         }
@@ -79,6 +84,6 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "A struct constructible with a struct literal has a new non-public field. It can no longer be constructed using a struct literal outside of its crate.",
+    error_message: "A struct has a new non-public field that causes downstream code to be unable to construct it with a struct expression, including functional-update syntax.",
     per_result_error_template: Some("field {{struct_name}}.{{field_name}} in {{span_filename}}:{{span_begin_line}}"),
 )

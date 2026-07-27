@@ -56,3 +56,21 @@ pub struct PlainToTupleStruct {
 // The tuple -> plain change takes priority as a separate breaking change,
 // so this should not be reported by this lint.
 pub struct TupleToPlainStruct(pub usize, pub i64);
+
+// Exhaustively constructing this struct requires using non-public API,
+// so adding another field should not be reported.
+pub struct PlainStructWithDocHiddenField {
+    pub foo: usize,
+    #[doc(hidden)]
+    pub hidden: i64,
+}
+
+// This struct can be constructed using only public API. Adding a pub field
+// should be reported even if the new field is not itself part of public API.
+pub struct PlainStructGainsDocHiddenField {
+    pub foo: usize,
+}
+
+pub fn make_plain_struct_with_doc_hidden_field() -> PlainStructWithDocHiddenField {
+    PlainStructWithDocHiddenField { foo: 0, hidden: 0 }
+}
