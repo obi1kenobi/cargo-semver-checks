@@ -4,12 +4,6 @@ pub enum CEnumToEnum {
     Bar,
 }
 
-#[repr(u8)]
-pub enum CU8EnumToU8Enum {
-    Bar,
-    Baz,
-}
-
 pub struct CStructToStruct {
     pub bar: usize,
 }

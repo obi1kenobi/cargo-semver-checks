@@ -77,5 +77,31 @@ source: src/query.rs
       "struct_name": String("ExhaustiveTupleStruct"),
       "struct_type": String("tuple"),
     },
+    {
+      "field_name": String("new_private_field"),
+      "path": List([
+        String("constructible_struct_adds_private_field"),
+        String("StructWithDocHiddenFieldGainsPrivateField"),
+      ]),
+      "span_begin_line": Uint64(74),
+      "span_end_line": Uint64(74),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("StructWithDocHiddenFieldGainsPrivateField"),
+      "struct_type": String("plain"),
+    },
+  ],
+  "./test_crates/stability_aware_mode/": [
+    {
+      "field_name": String("new_private_field"),
+      "path": List([
+        String("stability_aware_mode"),
+        String("PrivateFieldAddedToStructWithUnstableField"),
+      ]),
+      "span_begin_line": Uint64(98),
+      "span_end_line": Uint64(98),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("PrivateFieldAddedToStructWithUnstableField"),
+      "struct_type": String("plain"),
+    },
   ],
 }

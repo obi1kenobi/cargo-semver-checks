@@ -22,6 +22,10 @@ env:
   CARGO_PROFILE_TEST_DEBUG: 0
 
 jobs:
+  # Every job listed in `needs` must run on every workflow event. GitHub propagates
+  # a skipped dependency through the entire dependency chain even when this job uses
+  # `always()`, so making a dependency pull-request-only would also skip publishing
+  # and other downstream jobs.
   ci-everything:
     name: All CI stages
     runs-on: ubuntu-latest
@@ -49,7 +53,7 @@ jobs:
       - fails-on-too-old-rustc
       - broken-lint-reference-links
       - whitespace-hygiene
-    if: ${{ always() && !cancelled() }}  # Also run when PR-only jobs are skipped on other triggers.
+    if: ${{ always() && !cancelled() }}  # Run even if a dependency fails, unless the workflow is cancelled.
     steps:
       - name: Job outcomes
         run: |
@@ -123,7 +127,7 @@ jobs:
         run: exit 1
       - if: ${{ needs.broken-lint-reference-links.result != 'success' }}
         run: exit 1
-      - if: ${{ github.event_name == 'pull_request' && needs.whitespace-hygiene.result != 'success' }}
+      - if: ${{ needs.whitespace-hygiene.result != 'success' }}
         run: exit 1
 
   lint:
@@ -202,19 +206,12 @@ jobs:
           #
           # Also don't complain about test crates that rely on:
           # - non-pub trait bounds (`private_bounds`)
-          # - `repr(C, i16)` and similar code (`conflicting_repr_hints`)
           #
           # TODO: Clean up warnings around `non_snake_case` and `non_upper_case_globals`.
           #       In the meantime, we suppress them as well since they clog the logs.
-          RUSTFLAGS: -A dead_code -A deprecated -A unused -A private_bounds -A conflicting_repr_hints -A non_snake_case -A non_upper_case_globals
+          RUSTFLAGS: -A dead_code -A deprecated -A unused -A private_bounds -A non_snake_case -A non_upper_case_globals
         # Exclude test crates that intentionally do not pass `cargo check`
         # in order to serve their test purpose.
-        #
-        # Also exclude test crates `enum_repr_int_added`, `enum_repr_int_changed`,
-        # `enum_repr_int_removed`, and `repr_c_removed` since the "conflicting representation hints"
-        # warning seems to have become a hard error on 1.90 stable.
-        # When 1.90 is the oldest Rust we support, remove the problematic code and
-        # remove the exclusion of those crates from this list.
         #
         # `xargs` stops immediately on exit 255, to make the problematic crate easier to spot.
         # We `cd` into the directory before running `cargo`, because crates like
@@ -225,10 +222,6 @@ jobs:
             -path 'test_crates/manifest_tests/workspace_baseline_compile_error/*' -prune -o \
             -path 'test_crates/manifest_tests/workspace_baseline_conditional_compile_error/*' -prune -o \
             -path 'test_crates/feature_flags_validation/*' -prune -o \
-            -path 'test_crates/enum_repr_int_added/*' -prune -o \
-            -path 'test_crates/enum_repr_int_changed/*' -prune -o \
-            -path 'test_crates/enum_repr_int_removed/*' -prune -o \
-            -path 'test_crates/repr_c_removed/*' -prune -o \
             -path 'test_crates/broken_rustdoc/*' -prune -o \
             -type f -name 'Cargo.toml' \
             -print0 | \
@@ -265,10 +258,7 @@ jobs:
         # IMPORTANT: When updating the versions here, make sure you also update
         #            the `fails-on-too-old-rustc` job and its error message to
         #            to account for the raised minimum required version.
-        #
-        #            Also make sure to update the MSRV in the cargo-semver-checks-action CI:
-        #            https://github.com/obi1kenobi/cargo-semver-checks-action/blob/main/.github/workflows/test-action.yml#L18
-        toolchain: ["1.91", "1.92", "1.93", "1.94", "1.95", "1.96", "stable", "beta"]
+        toolchain: ["1.93", "1.94", "1.95", "1.96", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -426,8 +416,8 @@ jobs:
     needs:
       - build-binary
     env:
-      OLDER_RUST: "1.92"  # Rust 1.92 uses rustdoc v56
-      NEWER_RUST: "1.93"  # Rust 1.93 uses rustdoc v57
+      OLDER_RUST: "1.93"  # Rust 1.93 uses rustdoc v57
+      NEWER_RUST: "beta"  # Rust beta (currently 1.98) uses rustdoc v60
     steps:
       - name: Put env vars in outputs
         id: vars
@@ -2008,7 +1998,7 @@ jobs:
         id: toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: "1.90"
+          toolchain: "1.92"
           rustflags: ""
           cache: false
 
@@ -2051,7 +2041,7 @@ jobs:
       - name: Check output
         run: |
           cd semver
-          EXPECTED="$(echo -e "error: rustc version is not high enough: >=1.91.0 needed, got 1.90.0")"
+          EXPECTED="$(echo -e "error: rustc version is not high enough: >=1.93.0 needed, got 1.92.0")"
           RESULT="$(grep 'error: rustc version' output)"
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
@@ -2091,12 +2081,20 @@ jobs:
           cd semver
           ./scripts/check_reference_links.sh
 
+  # This job must succeed as a no-op outside pull requests. `ci-everything` depends
+  # on it. GitHub propagates a skipped job through the entire `needs` chain,
+  # even when an intermediate job uses `always()`. Keep the PR-only conditions
+  # on the individual steps instead of on the job.
   whitespace-hygiene:
     name: Check trailing whitespace and final newlines
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
+      - name: No-op outside pull requests
+        if: github.event_name != 'pull_request'
+        run: echo 'Whitespace hygiene is only checked on pull requests.'
+
       - name: Checkout cargo-semver-checks
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@v7
         with:
           persist-credentials: false
@@ -2104,6 +2102,7 @@ jobs:
           path: 'semver'
 
       - name: Check changed files
+        if: github.event_name == 'pull_request'
         working-directory: semver
         run: |
           export LC_ALL=C
@@ -2292,7 +2291,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toolchain: ["1.91", "1.92", "1.93", "1.94", "1.95", "1.96", "stable"]
+        toolchain: ["1.93", "1.94", "1.95", "1.96", "stable"]
     steps:
       - name: Checkout
         uses: actions/checkout@v7

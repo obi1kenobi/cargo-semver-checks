@@ -18,12 +18,6 @@ pub enum I32ToU32Enum {
     Baz,
 }
 
-#[repr(C, u8)]
-pub enum CU8ToCU16Enum {
-    Bar,
-    Baz,
-}
-
 // The following enums have changes that can be breaking on some systems.
 // Since there are no guarantees on what particular system a given crate
 // might run on, this is a breaking change.
@@ -89,12 +83,6 @@ pub enum IsizeEnumToEnum {
 
 #[repr(usize)]
 pub enum UsizeEnumToEnum {
-    Bar,
-    Baz,
-}
-
-#[repr(C, u8)]
-pub enum CU8EnumToCEnum {
     Bar,
     Baz,
 }

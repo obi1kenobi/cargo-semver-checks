@@ -56,3 +56,15 @@ pub struct PlainToTupleStruct {
 // The tuple -> plain change takes priority as a separate breaking change,
 // so this should not be reported by this lint.
 pub struct TupleToPlainStruct(pub usize, pub i64);
+
+// Even though naming every field requires using non-public API, downstream
+// code can construct this struct with functional-update syntax.
+pub struct StructWithDocHiddenFieldGainsPrivateField {
+    pub foo: usize,
+    #[doc(hidden)]
+    pub hidden: i64,
+}
+
+pub fn make_struct_with_doc_hidden_field() -> StructWithDocHiddenFieldGainsPrivateField {
+    StructWithDocHiddenFieldGainsPrivateField { foo: 0, hidden: 0 }
+}
