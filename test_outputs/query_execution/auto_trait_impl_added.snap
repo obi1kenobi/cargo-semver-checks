@@ -1,0 +1,94 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/auto_trait_impl_added/": [
+    {
+      "auto_trait": String("Sync"),
+      "auto_trait_path": List([
+        String("core"),
+        String("marker"),
+        String("Sync"),
+      ]),
+      "name": String("SyncStruct"),
+      "path": List([
+        String("auto_trait_impl_added"),
+        String("SyncStruct"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "auto_trait": String("Send"),
+      "auto_trait_path": List([
+        String("core"),
+        String("marker"),
+        String("Send"),
+      ]),
+      "name": String("SendStruct"),
+      "path": List([
+        String("auto_trait_impl_added"),
+        String("SendStruct"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "auto_trait": String("UnwindSafe"),
+      "auto_trait_path": List([
+        String("core"),
+        String("panic"),
+        String("unwind_safe"),
+        String("UnwindSafe"),
+      ]),
+      "name": String("UnwindSafeStruct"),
+      "path": List([
+        String("auto_trait_impl_added"),
+        String("UnwindSafeStruct"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "auto_trait": String("RefUnwindSafe"),
+      "auto_trait_path": List([
+        String("core"),
+        String("panic"),
+        String("unwind_safe"),
+        String("RefUnwindSafe"),
+      ]),
+      "name": String("RefUnwindSafeStruct"),
+      "path": List([
+        String("auto_trait_impl_added"),
+        String("RefUnwindSafeStruct"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "auto_trait": String("Unpin"),
+      "auto_trait_path": List([
+        String("core"),
+        String("marker"),
+        String("Unpin"),
+      ]),
+      "name": String("UnpinStruct"),
+      "path": List([
+        String("auto_trait_impl_added"),
+        String("UnpinStruct"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
