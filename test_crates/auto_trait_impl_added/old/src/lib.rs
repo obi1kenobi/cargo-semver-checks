@@ -29,12 +29,12 @@ pub struct RefUnwindSafeStruct {
     bar: Rc<RefCell<i64>>,
 }
 
-// The RefUnwindSafeStruct struct checks for RefUnwindSafe being removed.
-// However, the way it's constructed above means that it loses both
+// The RefUnwindSafeStruct struct checks for RefUnwindSafe being added.
+// However, the way it's constructed above means that it gains both
 // the UnwindSafe and the RefUnwindSafe traits.
 //
 // Manually put the UnwindSafe trait back in, so that our test case tests
-// only for RefUnwindSafe being removed. UnwindSafe was tested earlier
+// only for RefUnwindSafe being added. UnwindSafe was tested earlier
 // in this file.
 impl UnwindSafe for RefUnwindSafeStruct {}
 
