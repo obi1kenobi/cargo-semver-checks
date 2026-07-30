@@ -51,7 +51,7 @@ rayon = "1.10.0"
 anstyle = "1.0.10"
 anstream = "1.0.0"
 urlencoding = "2.1.3"
-cargo-config2 = "0.1.32"
+cargo-config2 = "0.1.45"
 rand = "0.10.2"
 
 [dev-dependencies]
