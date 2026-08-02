@@ -21,7 +21,7 @@ SemverQuery(
                         }
 
                         impl {
-                            negative @filter(op: "=", value: ["$false"])
+                            negative @filter(op: "!=", value: ["$true"])
 
                             # This is how we know the trait is built-in and used to be derived.
                             # https://doc.rust-lang.org/reference/attributes/derive.html#the-automatically_derived-attribute
@@ -61,7 +61,7 @@ SemverQuery(
                             # We don't check for `#[automatically_derived]` here because
                             # it's not breaking to replace a derived impl with a hand-impl.
 
-                            negative @filter(op: "=", value: ["$false"])
+                            negative @filter(op: "!=", value: ["$true"])
 
                             # TODO: check for matching generics as well
 
@@ -90,7 +90,6 @@ SemverQuery(
         "derived": "#[automatically_derived]",
         "public": "public",
         "zero": 0,
-        "false": false,
         "true": true,
         "structural_eq": ["core", "marker", "StructuralEq"],
     },

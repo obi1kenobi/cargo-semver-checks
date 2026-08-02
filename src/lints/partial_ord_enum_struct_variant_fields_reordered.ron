@@ -14,7 +14,7 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"])
 
                         impl {
-                            negative @filter(op: "=", value: ["$false"])
+                            negative @filter(op: "!=", value: ["$true"])
                             attrs @filter(op: "contains", value: ["$derived"])
 
                             implemented_trait {
@@ -53,7 +53,7 @@ SemverQuery(
                         name @output
 
                         impl {
-                            negative @filter(op: "=", value: ["$false"])
+                            negative @filter(op: "!=", value: ["$true"])
                             attrs @filter(op: "contains", value: ["$derived"])
 
                             implemented_trait {
@@ -95,7 +95,6 @@ SemverQuery(
     arguments: {
         "public": "public",
         "derived": "#[automatically_derived]",
-        "false": false,
         "true": true,
         "partial_ord": ["core", "cmp", "PartialOrd"],
     },
