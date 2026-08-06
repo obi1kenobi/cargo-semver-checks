@@ -19,9 +19,9 @@ checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
 name = "aho-corasick"
-version = "1.1.4"
+version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddd31a130427c27518df266943a5308ed92d4b226cc639f5a8f1002816174301"
+checksum = "c982642fa9e8606056828ee9a8505737230110bb1099153c79efe865c59d12ba"
 dependencies = [
  "memchr",
 ]
@@ -1114,9 +1114,9 @@ dependencies = [
 
 [[package]]
 name = "gix-command"
-version = "0.9.1"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00706d4fef135ef4b01680d5218c6ee40cda8baf697b864296cbc887d19118f6"
+checksum = "cf4363accdf6ef7ba861871d2d521ab7418a04aaaed919fadb022af71d379b12"
 dependencies = [
  "bstr",
  "gix-path",
@@ -1423,9 +1423,9 @@ dependencies = [
 
 [[package]]
 name = "gix-path"
-version = "0.12.3"
+version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ed3e8d7a82e886e17a72e03d4ba0c13db6f2219b6cd4e2900b4cae426ec20c9"
+checksum = "751d6bd162106f8c1e7e9aaccb5bbdd605267e91a930a17a4560c46e33a9100c"
 dependencies = [
  "bstr",
  "gix-trace",
@@ -1662,9 +1662,9 @@ dependencies = [
 
 [[package]]
 name = "globset"
-version = "0.4.19"
+version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e47d37d2ae4464254884b60ab7071be2b876a9c35b696bd018ddcc76847309cd"
+checksum = "07c34a9410465b45bd9787443bc7370f37735bad04b0f0cd57ff1a3186c98988"
 dependencies = [
  "aho-corasick",
  "bstr",
@@ -1991,9 +1991,9 @@ dependencies = [
 
 [[package]]
 name = "ignore"
-version = "0.4.31"
+version = "0.4.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f8a7b8211e695a1d0cd91cace480d4d0bd57667ab10277cc412c5f7f4884f83"
+checksum = "00b69833ed729dc5aa7d19541d96d6cf8e9137194207a04916d658e43168402f"
 dependencies = [
  "crossbeam-deque",
  "globset",
@@ -2631,9 +2631,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.16"
+version = "0.4.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fcfdb36bda0c880c5931cdc7a2bcdc8ba4556847b9d912bca70bc94708711ad"
+checksum = "ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -3054,9 +3054,9 @@ checksum = "bbbb5d9659141646ae647b42fe094daf6c6192d1620870b449d9557f748b2daa"
 
 [[package]]
 name = "similar"
-version = "3.1.1"
+version = "3.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6505efef05804732ed8a3f2d4f279429eb485bd69d5b0cc6b19cc02005cda16"
+checksum = "85ee016af5d736b69fc89e19254540fa4b5f5492853fb5503920f084011c78b6"
 dependencies = [
  "bstr",
  "unicode-segmentation",
@@ -3070,7 +3070,7 @@ checksum = "997e6ca38e97437973fc9f7f50a50d1274cacd874341a4960fea90067291038c"
 dependencies = [
  "console",
  "serde",
- "similar 3.1.1",
+ "similar 3.1.2",
 ]
 
 [[package]]
@@ -3523,9 +3523,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "57.1.0"
+version = "57.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61a48f46a8ee5b56fe9edf4f539d6eaa4fbbb0aa13da78e80366b5fac7a16009"
+checksum = "ebaa8fc9dff917f185cd870866b38b72fdf7b6866a44904c264583af713bff4c"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3538,9 +3538,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "60.0.0"
+version = "60.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "557031fcc0a5f7ac758f3d728a8f475460bc62c660f369b2f3d4cf3ab8f47b7f"
+checksum = "95c2038acee2156dce83ba7302e6dc92110d0d58c7a0a20626ffe5225e7e16e3"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3553,9 +3553,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "61.0.0"
+version = "61.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86afe17a5b529c16786ded209fc3e348d515e3677c4924722880d5bdef5ad69e"
+checksum = "446e9010bb47e6a961b2b108de0b1ba94809637e9d718c5597b050a9d1afa9fb"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3606,9 +3606,9 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.19",
  "trustfall",
- "trustfall-rustdoc-adapter 57.1.0",
- "trustfall-rustdoc-adapter 60.0.0",
- "trustfall-rustdoc-adapter 61.0.0",
+ "trustfall-rustdoc-adapter 57.1.1",
+ "trustfall-rustdoc-adapter 60.0.1",
+ "trustfall-rustdoc-adapter 61.0.1",
  "trustfall_core",
 ]
 
@@ -4233,9 +4233,9 @@ dependencies = [
 
 [[package]]
 name = "zlib-rs"
-version = "0.6.6"
+version = "0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b142a20ec14a91d5bc708c1dc21b080c550113d8aa77afa29635673a65dd02c5"
+checksum = "34b31d188d9d685a4f9c7b46d6e36631b07058d2cfe190267adce54dc230bf12"
 
 [[package]]
 name = "zmij"
