@@ -856,6 +856,77 @@ mod tests {
         .join("\n\n")
     }
 
+    fn sort_by_key_evaluating_each<T, K: Ord>(
+        values: &mut Vec<T>,
+        mut key_func: impl FnMut(&T) -> K,
+    ) {
+        let mut keyed_values: Vec<_> = values
+            .drain(..)
+            .map(|value| (key_func(&value), value))
+            .collect();
+        keyed_values.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
+        values.extend(keyed_values.into_iter().map(|(_, value)| value));
+    }
+
+    #[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
+    enum SortKey {
+        Span(Arc<str>, usize),
+        Explicit(Vec<Arc<str>>),
+    }
+
+    fn query_result_sort_key(elem: &BTreeMap<String, FieldValue>) -> SortKey {
+        // Queries should either:
+        // - define `span_filename` and `span_begin_line` values where the lint is being raised,
+        //   which will then define a total order of results for that query on that crate.
+        // - define explicit ordering keys, canonically named `ordering_key`,
+        //   `ordering_key1`, `ordering_key2`, etc., even though any output name
+        //   with the `ordering_key` prefix works in practice. Those keys form a
+        //   composite ordering key by being sorted lexicographically by name,
+        //   then compared lexicographically by their string values, or
+        if elem.contains_key("ordering_key") {
+            let mut ordering_key_names: Vec<_> = elem
+                .keys()
+                .filter(|key| key.starts_with("ordering_key"))
+                .collect();
+            ordering_key_names.sort_unstable();
+            let ordering_keys = ordering_key_names
+                .into_iter()
+                .map(|key| {
+                    let value = elem
+                        .get(key)
+                        .unwrap_or_else(|| panic!("{key} output missing from result"));
+                    Arc::clone(
+                        value
+                            .as_arc_str()
+                            .expect("ordering_key output was not a string"),
+                    )
+                })
+                .collect();
+            SortKey::Explicit(ordering_keys)
+        } else {
+            let filename = elem.get("span_filename").map(|value| {
+                value
+                    .as_arc_str()
+                    .expect("`span_filename` was not a string")
+            });
+            let line = elem
+                .get("span_begin_line")
+                .map(|value: &FieldValue| value.as_usize().expect("begin line was not an int"));
+            match (filename, line) {
+                (Some(filename), Some(line)) => SortKey::Span(Arc::clone(filename), line),
+                (Some(_filename), None) => panic!(
+                    "No `span_begin_line` was returned by the query, even though `span_filename` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                ),
+                (None, Some(_line)) => panic!(
+                    "No `span_filename` was returned by the query, even though `span_begin_line` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                ),
+                (None, None) => panic!(
+                    "A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                ),
+            }
+        }
+    }
+
     fn run_query_on_crate_pair(
         semver_query: &SemverQuery,
         parsed_query: Arc<IndexedQuery>, // The parsed version of semver_query.
@@ -1032,66 +1103,8 @@ mod tests {
 
         // Reorder vector of results into a deterministic order that will compensate for
         // nondeterminism in how the results are ordered.
-        #[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
-        enum SortKey {
-            Span(Arc<str>, usize),
-            Explicit(Vec<Arc<str>>),
-        }
-
-        let key_func = |elem: &BTreeMap<String, FieldValue>| {
-            // Queries should either:
-            // - define `span_filename` and `span_begin_line` values where the lint is being raised,
-            //   which will then define a total order of results for that query on that crate.
-            // - define explicit ordering keys, canonically named `ordering_key`,
-            //   `ordering_key1`, `ordering_key2`, etc., even though any output name
-            //   with the `ordering_key` prefix works in practice. Those keys form a
-            //   composite ordering key by being sorted lexicographically by name,
-            //   then compared lexicographically by their string values, or
-            if elem.contains_key("ordering_key") {
-                let mut ordering_key_names: Vec<_> = elem
-                    .keys()
-                    .filter(|key| key.starts_with("ordering_key"))
-                    .collect();
-                ordering_key_names.sort_unstable();
-                let ordering_keys = ordering_key_names
-                    .into_iter()
-                    .map(|key| {
-                        let value = elem
-                            .get(key)
-                            .unwrap_or_else(|| panic!("{key} output missing from result"));
-                        Arc::clone(
-                            value
-                                .as_arc_str()
-                                .expect("ordering_key output was not a string"),
-                        )
-                    })
-                    .collect();
-                SortKey::Explicit(ordering_keys)
-            } else {
-                let filename = elem.get("span_filename").map(|value| {
-                    value
-                        .as_arc_str()
-                        .expect("`span_filename` was not a string")
-                });
-                let line = elem
-                    .get("span_begin_line")
-                    .map(|value: &FieldValue| value.as_usize().expect("begin line was not an int"));
-                match (filename, line) {
-                    (Some(filename), Some(line)) => SortKey::Span(Arc::clone(filename), line),
-                    (Some(_filename), None) => panic!(
-                        "No `span_begin_line` was returned by the query, even though `span_filename` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
-                    ),
-                    (None, Some(_line)) => panic!(
-                        "No `span_filename` was returned by the query, even though `span_begin_line` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
-                    ),
-                    (None, None) => panic!(
-                        "A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
-                    ),
-                }
-            }
-        };
         for value in query_execution_results.values_mut() {
-            value.sort_unstable_by_key(key_func);
+            sort_by_key_evaluating_each(value, query_result_sort_key);
         }
 
         insta::with_settings!(
@@ -1204,6 +1217,13 @@ mod tests {
             per_result_error_template: None,
             witness: None,
         }
+    }
+
+    #[test]
+    #[should_panic(expected = "A valid query must either output an explicit `ordering_key`")]
+    fn singleton_query_result_without_ordering_data_is_rejected() {
+        let mut values = vec![BTreeMap::new()];
+        sort_by_key_evaluating_each(&mut values, query_result_sort_key);
     }
 
     #[test]
