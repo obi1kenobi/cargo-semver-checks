@@ -979,6 +979,10 @@ mod tests {
         }
     }
 
+    const ORDERING_KEY_COLUMN: &str = "ordering_key";
+    const SPAN_FILENAME_COLUMN: &str = "span_filename";
+    const SPAN_BEGIN_LINE_COLUMN: &str = "span_begin_line";
+
     pub(in crate::query) fn check_query_execution(query_name: &str) {
         let query_text = std::fs::read_to_string(format!("./src/lints/{query_name}.ron")).unwrap();
         let semver_query = SemverQuery::from_ron_str(&query_text).unwrap();
@@ -1001,6 +1005,8 @@ mod tests {
                             trustfall_core::frontend::parse(adapter.schema(), &semver_query.query)
                                 .expect("Query failed to parse.")
                         });
+
+                assert_query_outputs_sort_columns(&semver_query.id, indexed_query.as_ref());
 
                 assert_no_false_positives_in_nonchanged_crate(
                     query_name,
@@ -1068,24 +1074,24 @@ mod tests {
                     .collect();
                 SortKey::Explicit(ordering_keys)
             } else {
-                let filename = elem.get("span_filename").map(|value| {
+                let filename = elem.get(SPAN_FILENAME_COLUMN).map(|value| {
                     value
                         .as_arc_str()
-                        .expect("`span_filename` was not a string")
+                        .unwrap_or_else(|| panic!("`{SPAN_FILENAME_COLUMN}` was not a string"))
                 });
                 let line = elem
-                    .get("span_begin_line")
+                    .get(SPAN_BEGIN_LINE_COLUMN)
                     .map(|value: &FieldValue| value.as_usize().expect("begin line was not an int"));
                 match (filename, line) {
                     (Some(filename), Some(line)) => SortKey::Span(Arc::clone(filename), line),
                     (Some(_filename), None) => panic!(
-                        "No `span_begin_line` was returned by the query, even though `span_filename` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                        "No `{SPAN_BEGIN_LINE_COLUMN}` was returned by the query, even though `span_filename` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `{SPAN_BEGIN_LINE_COLUMN}`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
                     ),
                     (None, Some(_line)) => panic!(
-                        "No `span_filename` was returned by the query, even though `span_begin_line` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                        "No `span_filename` was returned by the query, even though `{SPAN_BEGIN_LINE_COLUMN}` was present. A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `{SPAN_BEGIN_LINE_COLUMN}`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
                     ),
                     (None, None) => panic!(
-                        "A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `span_begin_line`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
+                        "A valid query must either output an explicit `ordering_key`, or output both `span_filename` and `{SPAN_BEGIN_LINE_COLUMN}`. See https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md for details."
                     ),
                 }
             }
@@ -1139,13 +1145,13 @@ mod tests {
                         Cow::Borrowed(k.as_str()),
                         v.iter()
                             .map(|values| {
-                                let Some(TransparentValue::String(filename)) = values.get("span_filename") else {
-                                    unreachable!("Missing span_filename String, this should be validated above")
+                                let Some(TransparentValue::String(filename)) = values.get(SPAN_FILENAME_COLUMN) else {
+                                    unreachable!("Missing `{SPAN_FILENAME_COLUMN}` String, this should be validated above")
                                 };
-                                let begin_line = match values.get("span_begin_line") {
+                                let begin_line = match values.get(SPAN_BEGIN_LINE_COLUMN) {
                                     Some(TransparentValue::Int64(i)) => *i as usize,
                                     Some(TransparentValue::Uint64(n)) => *n as usize,
-                                    _ => unreachable!("Missing span_begin_line Int, this should be validated above"),
+                                    _ => unreachable!("Missing `{SPAN_BEGIN_LINE_COLUMN}` Int, this should be validated above"),
                                 };
 
                                 // TODO: Run witness queries and generate full witness here.
@@ -1179,6 +1185,37 @@ mod tests {
                     insta::assert_snapshot!(query_name, formatted_witnesses);
                 }
             );
+        }
+    }
+
+    fn assert_query_outputs_sort_columns(query_name: &str, query_metadata: &IndexedQuery) {
+        // Either the outputs include at least one explicit ordering key column,
+        // or they include both a span filename and a span begin line column.
+        if !query_metadata.outputs.contains_key(ORDERING_KEY_COLUMN) {
+            match (
+                query_metadata.outputs.contains_key(SPAN_FILENAME_COLUMN),
+                query_metadata.outputs.contains_key(SPAN_BEGIN_LINE_COLUMN),
+            ) {
+                (true, true) => {}
+                (true, false) => {
+                    panic!(
+                        "lint query {query_name} contains `{SPAN_FILENAME_COLUMN}` output \
+                        but no `{SPAN_BEGIN_LINE_COLUMN}` output"
+                    );
+                }
+                (false, true) => {
+                    panic!(
+                        "lint query {query_name} contains `{SPAN_BEGIN_LINE_COLUMN}` output \
+                        but no `{SPAN_FILENAME_COLUMN}` output"
+                    );
+                }
+                (false, false) => {
+                    panic!(
+                        "lint query {query_name} has neither an explicit ordering key column, \
+                        nor `{SPAN_FILENAME_COLUMN}` and `{SPAN_BEGIN_LINE_COLUMN}` outputs"
+                    );
+                }
+            }
         }
     }
 
