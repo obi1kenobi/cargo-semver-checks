@@ -258,7 +258,7 @@ jobs:
         # IMPORTANT: When updating the versions here, make sure you also update
         #            the `fails-on-too-old-rustc` job and its error message to
         #            to account for the raised minimum required version.
-        toolchain: ["1.93", "1.94", "1.95", "1.96", "stable", "beta"]
+        toolchain: ["1.93", "1.94", "1.95", "1.96", "1.97", "stable", "beta"]
         experimental: [false]
         include:
           - toolchain: "nightly"
@@ -2291,7 +2291,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toolchain: ["1.93", "1.94", "1.95", "1.96", "stable"]
+        toolchain: ["1.93", "1.94", "1.95", "1.96", "1.97", "stable"]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
