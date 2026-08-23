@@ -20,3 +20,8 @@ test_crates/**/Cargo.lock
 
 # Ignore macOS metadata files
 **/.DS_Store
+
+# Python bytecode and cache files
+**/__pycache__/
+**/*.pyc
+**/*.pyo
