@@ -16,6 +16,8 @@ on:
         required: true
         type: string
 
+permissions: {}
+
 concurrency:
   group: release
 
@@ -30,6 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     permissions:
+      contents: read
       id-token: write     # Required for OIDC token exchange (Trusted Publishing)
     steps:
       - name: Checkout
@@ -61,6 +64,8 @@ jobs:
     needs:
       - publish
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -88,6 +93,8 @@ jobs:
     needs:
       - publish
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     uses: ./.github/workflows/build-binaries.yml
     with:
       publish-tag: ${{ inputs.publish-tag }}

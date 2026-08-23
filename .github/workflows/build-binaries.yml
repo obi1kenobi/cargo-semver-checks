@@ -12,6 +12,8 @@ on:
         required: true
         type: string
 
+permissions: {}
+
 concurrency:
   group: build-binaries
 
@@ -42,6 +44,8 @@ jobs:
     name: Build ${{ matrix.target }}
     needs:
       - build-script-policy
+    permissions:
+      contents: write
     strategy:
       matrix:
         include:

@@ -8,6 +8,9 @@ on:
   schedule:
     - cron: '17 7 * * 1-5'  # run once per day Monday-Friday at 7:17am
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -45,6 +48,7 @@ jobs:
   ci-everything:
     name: All CI stages
     runs-on: ubuntu-latest
+    permissions: {}
     needs:
       - build-script-policy
       - lint
@@ -1136,6 +1140,9 @@ jobs:
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/380
     name: 'Semver: tokio ~v1.25.0 (explicit)'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
     needs:
       - build-binary
     steps:
@@ -1232,6 +1239,9 @@ jobs:
     # https://github.com/obi1kenobi/cargo-semver-checks/issues/380
     name: 'Semver: tokio ~v1.25.0 (implicit)'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
     needs:
       - build-binary
     steps:
@@ -2252,6 +2262,9 @@ jobs:
       - ci-everything
       - pre-publish-checks
     if: needs.should-publish.outputs.is_new_version == 'yes' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      id-token: write
     uses: ./.github/workflows/release.yml
     with:
       publish-tag: ${{ needs.should-publish.outputs.publish-tag }}
