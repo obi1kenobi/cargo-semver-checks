@@ -45,13 +45,16 @@ jobs:
       - name: Enforce the build-script policy
         run: python3 .github/scripts/check_build_scripts.py
 
-      - name: download yq
+      - name: download and verify yq
         env:
           VERSION: "v4.43.1"
+          # Update this digest together with VERSION, using the release's checksums asset.
+          YQ_SHA256: "cfbbb9ba72c9402ef4ab9d8f843439693dfb380927921740e51706d90869c7e1"
         run: |
           set -euxo pipefail
           YQ="$RUNNER_TEMP/yq"
           wget "https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_linux_amd64" -O "$YQ"
+          printf '%s  %s\n' "$YQ_SHA256" "$YQ" | sha256sum --check --strict -
           chmod +x "$YQ"
 
       - name: check if the new Rust release is out
