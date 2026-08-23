@@ -7,3 +7,7 @@ updates:
       day: "saturday"
       time: "00:42"
       timezone: "America/New_York"
+    # Delay version updates to reduce exposure to newly published releases.
+    # Security updates are not subject to this cooldown.
+    cooldown:
+      default-days: 7
