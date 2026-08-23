@@ -4,29 +4,53 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: Branch to update snapshots on
+        description: Branch to apply lint fixes on
         required: true
         type: string
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
+
+concurrency:
+  group: lint-fix-${{ inputs.branch }}
+  cancel-in-progress: false
 
 jobs:
-  apply-lint-fixes:
-    if: github.repository_owner == 'obi1kenobi'
+  # This job executes code from the selected branch. Keep it read-only and secret-free.
+  generate-lint-fixes:
+    # github.ref_name is which branch's workflow is running, not the branch input.
+    # Require the trusted default-branch workflow; inputs.branch still selects the target.
+    if: >-
+      github.repository_owner == 'obi1kenobi' &&
+      github.ref_type == 'branch' &&
+      github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.patch.outputs.changed }}
+      source_sha: ${{ steps.source.outputs.sha }}
     env:
-      OLD_BRANCH: "${{ github.event.inputs.branch }}"
-      NEW_BRANCH: "${{ github.event.inputs.branch }}-lint-fix"
-      PR_TITLE: "chore: apply lint fixes for ${{ github.event.inputs.branch }}"
+      TARGET_BRANCH: ${{ inputs.branch }}
     steps:
-      - name: Checkout the source code
+      - name: Validate target branch
+        run: |
+          set -euo pipefail
+          if [[ "$TARGET_BRANCH" == -* || "$TARGET_BRANCH" == refs/* ]]; then
+            echo "Expected a branch name, not a ref: $TARGET_BRANCH" >&2
+            exit 1
+          fi
+          git check-ref-format "refs/heads/$TARGET_BRANCH"
+          git check-ref-format "refs/heads/$TARGET_BRANCH-lint-fix"
+
+      - name: Checkout the source code without credentials
         uses: actions/checkout@v7
         with:
-          token: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
-          ref: ${{ env.OLD_BRANCH }}
-          persist-credentials: true
+          ref: refs/heads/${{ inputs.branch }}
+          persist-credentials: false
+
+      - name: Record source commit
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Install rust
         id: toolchain
@@ -37,6 +61,10 @@ jobs:
           cache: false
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          # The selected branch is untrusted input, while this workflow runs in the
+          # default branch's cache scope. Do not save this action's cache from here.
+          save-if: false
 
       - name: Run cargo clippy fix
         run: |
@@ -48,78 +76,208 @@ jobs:
           set -euxo pipefail
           cargo fmt
 
-      - name: Check for changes
-        id: changes
+      - name: Create validated lint-fix patch
+        id: patch
+        env:
+          PATCH: ${{ runner.temp }}/lint-fixes.patch
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
         run: |
           set -euo pipefail
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "dirty=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "dirty=false" >> "$GITHUB_OUTPUT"
+
+          if [[ "$(git rev-parse HEAD)" != "$SOURCE_SHA" ]]; then
+            echo "The lint commands changed the checked-out commit" >&2
+            exit 1
           fi
 
-      - name: Prepare commit
-        if: steps.changes.outputs.dirty == 'true'
+          git add -A
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No lint fixes were necessary."
+            exit 0
+          fi
+
+          saw_change=false
+          while IFS= read -r -d '' status && IFS= read -r -d '' path; do
+            saw_change=true
+            if [[ "$status" != "M" || "$path" != *.rs ]]; then
+              printf 'Refusing unexpected lint-fix change: %q %q\n' "$status" "$path" >&2
+              exit 1
+            fi
+
+            mode="$(git ls-files --stage -- "$path" | awk 'NR == 1 { print $1 }')"
+            if [[ "$mode" != "100644" ]]; then
+              printf 'Refusing non-regular Rust source: %q has mode %q\n' "$path" "$mode" >&2
+              exit 1
+            fi
+          done < <(git diff --cached --name-status -z)
+
+          if [[ "$saw_change" != "true" ]]; then
+            echo "Expected at least one staged lint fix" >&2
+            exit 1
+          fi
+
+          git diff --cached --binary --full-index > "$PATCH"
+          test -s "$PATCH"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload lint-fix patch
+        if: steps.patch.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: lint-fixes
+          path: ${{ runner.temp }}/lint-fixes.patch
+          retention-days: 1
+          if-no-files-found: error
+
+  # This job may validate Git data, but must never execute code from the selected branch.
+  # This also means it must not run any Rust commands such as `cargo check`,
+  # because such commands can run build scripts.
+  #
+  # To be extra safe, keep the PAT confined to the final publication steps.
+  publish-lint-fixes:
+    needs: generate-lint-fixes
+    # github.ref_name is which branch's workflow is running, not the branch input.
+    # Require the trusted default-branch workflow; inputs.branch still selects the target.
+    if: >-
+      needs.generate-lint-fixes.outputs.changed == 'true' &&
+      github.repository_owner == 'obi1kenobi' &&
+      github.ref_type == 'branch' &&
+      github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TARGET_BRANCH: ${{ inputs.branch }}
+      NEW_BRANCH: ${{ inputs.branch }}-lint-fix
+      PR_TITLE: "chore: apply lint fixes for ${{ inputs.branch }}"
+      SOURCE_SHA: ${{ needs.generate-lint-fixes.outputs.source_sha }}
+    steps:
+      - name: Validate publication metadata
+        run: |
+          set -euo pipefail
+          if [[ "$TARGET_BRANCH" == -* || "$TARGET_BRANCH" == refs/* ]]; then
+            echo "Expected a branch name, not a ref: $TARGET_BRANCH" >&2
+            exit 1
+          fi
+          git check-ref-format "refs/heads/$TARGET_BRANCH"
+          git check-ref-format "refs/heads/$NEW_BRANCH"
+          if [[ ! "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Invalid source commit: $SOURCE_SHA" >&2
+            exit 1
+          fi
+
+      - name: Checkout the exact source commit without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.generate-lint-fixes.outputs.source_sha }}
+          persist-credentials: false
+
+      - name: Verify source branch and prepare publication branch
+        run: |
+          set -euo pipefail
+          read -r remote_sha remote_ref < <(
+            git ls-remote --exit-code origin "refs/heads/$TARGET_BRANCH"
+          )
+          if [[ "$remote_ref" != "refs/heads/$TARGET_BRANCH" || "$remote_sha" != "$SOURCE_SHA" ]]; then
+            echo "The target branch changed while lint fixes were generated; rerun the workflow" >&2
+            exit 1
+          fi
+          git switch --force-create "$NEW_BRANCH"
+          git config --local core.hooksPath /dev/null
+
+      - name: Download lint-fix patch
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: lint-fixes
+          path: ${{ runner.temp }}/generated
+
+      - name: Validate and apply lint fixes
+        env:
+          PATCH: ${{ runner.temp }}/generated/lint-fixes.patch
+        run: |
+          set -euo pipefail
+          test -s "$PATCH"
+          git apply --check --index "$PATCH"
+          git apply --index "$PATCH"
+
+          saw_change=false
+          while IFS= read -r -d '' status && IFS= read -r -d '' path; do
+            saw_change=true
+            if [[ "$status" != "M" || "$path" != *.rs ]]; then
+              printf 'Refusing unexpected lint-fix change: %q %q\n' "$status" "$path" >&2
+              exit 1
+            fi
+
+            mode="$(git ls-files --stage -- "$path" | awk 'NR == 1 { print $1 }')"
+            if [[ "$mode" != "100644" ]]; then
+              printf 'Refusing non-regular Rust source: %q has mode %q\n' "$path" "$mode" >&2
+              exit 1
+            fi
+          done < <(git diff --cached --name-status -z)
+
+          if [[ "$saw_change" != "true" || -n "$(git diff --name-only)" ]]; then
+            echo "The lint-fix patch did not produce a clean, staged change" >&2
+            exit 1
+          fi
+
+      - name: Prepare commit and pull request body
+        env:
+          PR_BODY: ${{ runner.temp }}/pr-body.md
         run: |
           set -euo pipefail
           git config user.name github-actions
           git config user.email github-actions@github.com
-          CHANGES="$(git status --short)"
-          git switch --force-create "$NEW_BRANCH"
-          git add -A
-          git commit --no-verify -m "chore: apply lint fixes"
           {
-            echo "$PR_TITLE"
-            echo
-            echo "The workflow applied lint fixes on branch $OLD_BRANCH."
-            if [[ -n "$CHANGES" ]]; then
-              echo
-              echo "Changes:"
-              echo '```'
-              echo "$CHANGES"
-              echo '```'
-            fi
-          } > body.md
+            printf '%s\n\n' "$PR_TITLE"
+            printf 'The workflow applied lint fixes on branch `%s`.\n\n' "$TARGET_BRANCH"
+            echo "Changes:"
+            echo '```'
+            git diff --cached --name-status
+            echo '```'
+          } > "$PR_BODY"
+          git commit --no-verify -m "chore: apply clippy lint fixes"
 
-      - name: Push branch
-        if: steps.changes.outputs.dirty == 'true'
-        run: |
-          set -euo pipefail
-          git push --force --set-upstream origin "$NEW_BRANCH"
-
-      - name: Edit existing open pull request
-        if: steps.changes.outputs.dirty == 'true'
-        id: edit
-        continue-on-error: true
+      - name: Push publication branch
         env:
-          GITHUB_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
+          # We have to use a Personal Access Token (PAT) here.
+          # Pushes authenticated using the standard `GITHUB_TOKEN` in GitHub Actions
+          # do not automatically trigger more workflows:
+          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+          GH_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          if STATE="$(gh pr view "$NEW_BRANCH" --repo "$GITHUB_REPOSITORY" --json state --jq '.state')"; then
-            if [[ "$STATE" != "OPEN" ]]; then
-              exit 1
-            fi
-            gh pr edit "$NEW_BRANCH" \
-              --title "$PR_TITLE" \
-              --body-file body.md \
-              --repo "$GITHUB_REPOSITORY" \
-              --base "$OLD_BRANCH"
-          else
+          gh auth setup-git
+          git push --force --set-upstream origin "HEAD:refs/heads/$NEW_BRANCH"
+
+      - name: Open or update pull request
+        env:
+          # We have to use a Personal Access Token (PAT) here.
+          # PRs opened from a workflow using the standard `GITHUB_TOKEN` in GitHub Actions
+          # do not automatically trigger more workflows:
+          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+          GH_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
+          PR_BODY: ${{ runner.temp }}/pr-body.md
+        run: |
+          set -euo pipefail
+          pr_urls="$(
+            gh api --method GET \
+              "repos/$GITHUB_REPOSITORY/pulls" \
+              -f state=open \
+              -f head="$GITHUB_REPOSITORY_OWNER:$NEW_BRANCH" \
+              -f base="$TARGET_BRANCH" \
+              --jq '.[].html_url'
+          )"
+          if [[ "$pr_urls" == *$'\n'* ]]; then
+            echo "Found multiple open pull requests for $NEW_BRANCH" >&2
             exit 1
           fi
-
-      - name: Open new pull request
-        if: steps.changes.outputs.dirty == 'true' && steps.edit.outcome != 'success'
-        env:
-          GITHUB_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          gh pr create \
-            --title "$PR_TITLE" \
-            --body-file body.md \
-            --repo "$GITHUB_REPOSITORY" \
-            --base "$OLD_BRANCH"
-
-      - name: No lint fixes needed
-        if: steps.changes.outputs.dirty != 'true'
-        run: echo "No lint fixes were necessary."
+          if [[ -n "$pr_urls" ]]; then
+            gh pr edit "$pr_urls" --title "$PR_TITLE" --body-file "$PR_BODY"
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --head "$GITHUB_REPOSITORY_OWNER:$NEW_BRANCH" \
+              --base "$TARGET_BRANCH" \
+              --title "$PR_TITLE" \
+              --body-file "$PR_BODY"
+          fi
