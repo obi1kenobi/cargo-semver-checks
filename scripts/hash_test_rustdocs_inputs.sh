@@ -12,12 +12,14 @@ set -euo pipefail
 TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null || { cd -- "$(dirname -- "${BASH_SOURCE[0]}")"/.. && pwd; })"
 cd "$TOPLEVEL"
 
-find test_crates \
-    -type f \( -name 'Cargo.toml' -o -name '*.rs' \) \
-    -not -path '*/target/*' \
-    -not -name 'Cargo.lock' \
-    -print0 | sort -z | while IFS= read -r -d '' file; do
-    printf '%s\n' "${file#./}"
-    cat "$file"
+{
+    printf '%s\0' scripts/regenerate_test_rustdocs.sh
+    find test_crates \
+        -type f \( -name 'Cargo.toml' -o -name '*.rs' \) \
+        -not -path '*/target/*' \
+        -not -name 'Cargo.lock' \
+        -print0
+} | LC_ALL=C sort -z | while IFS= read -r -d '' file; do
+    file_hash="$(sha256sum < "$file" | cut -d' ' -f1)"
+    printf '%s\0%s\0' "${file#./}" "$file_hash"
 done | sha256sum | cut -d' ' -f1
-

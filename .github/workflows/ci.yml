@@ -271,7 +271,17 @@ jobs:
         uses: actions/checkout@v7
         with:
           persist-credentials: false
-          path: 'semver'
+
+      - name: Compute test rustdocs input hash
+        id: rustdoc-inputs
+        run: |
+          set -euo pipefail
+          hash="$(./scripts/hash_test_rustdocs_inputs.sh)"
+          if [[ ! "$hash" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "Invalid test rustdocs input hash" >&2
+            exit 1
+          fi
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
 
       - name: Install rust
         id: toolchain
@@ -285,34 +295,24 @@ jobs:
         id: cache-test-rustdocs
         uses: actions/cache@v6
         with:
-          path: semver/localdata/test_data/
-          key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/test_crates/**/*.rs') }}
+          path: localdata/test_data/
+          key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ steps.rustdoc-inputs.outputs.hash }}
 
       - name: Regenerate test data
         if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
-        run: |
-          cd semver
-          ./scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
+        run: ./scripts/regenerate_test_rustdocs.sh +${{ matrix.toolchain }}
 
       - name: Fake rustdoc mtime on cache hit
         if: steps.cache-test-rustdocs.outputs.cache-hit == 'true'
-        run: |
-          cd semver
-          find localdata/test_data -exec touch {} \;
+        run: find localdata/test_data -exec touch {} \;
 
       - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: 'semver'
 
       - name: compile
-        run: |
-          cd semver
-          cargo test --no-run
+        run: cargo test --no-run
 
       - name: test
-        run: |
-          cd semver
-          cargo test
+        run: cargo test
 
   build-binary:
     name: Build binary
@@ -2301,11 +2301,23 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Compute test rustdocs input hash
+        id: rustdoc-inputs
+        run: |
+          set -euo pipefail
+          hash="$(./scripts/hash_test_rustdocs_inputs.sh)"
+          if [[ ! "$hash" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "Invalid test rustdocs input hash" >&2
+            exit 1
+          fi
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+
       - name: Install rust
         id: toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
+          rustflags: ""
           cache: false
 
       - name: Restore test rustdocs
@@ -2313,11 +2325,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: localdata/test_data/
-          key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('test_crates/**/*.rs') }}
-
-      - name: Compute hash
-        id: hash
-        run: echo "hash=$(./scripts/hash_test_rustdocs_inputs.sh)" >> "$GITHUB_OUTPUT"
+          key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ steps.rustdoc-inputs.outputs.hash }}
 
       - name: Regenerate test rustdocs
         if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
@@ -2326,7 +2334,7 @@ jobs:
       - name: Compute artifact name
         id: artifact
         run: |
-          HASH="${{ steps.hash.outputs.hash }}"
+          HASH="${{ steps.rustdoc-inputs.outputs.hash }}"
           TRIPLE="$(rustc -vV | grep '^host:' | awk '{print $2}')"
           VERSION="$(rustc --version | awk '{print $2}')"
           echo "name=test-rustdocs-$HASH-$TRIPLE-$VERSION" >> "$GITHUB_OUTPUT"
