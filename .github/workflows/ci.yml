@@ -1444,7 +1444,7 @@ jobs:
       - name: Checkout cargo-semver-checks
         uses: actions/checkout@v7
         with:
-          persist-credentials: true
+          persist-credentials: false
           path: "semver"
 
       - name: Checkout ref-slice fork major change
@@ -1455,8 +1455,8 @@ jobs:
           # and clone the local checkout into a bare repository.
           fetch-depth: 0
           persist-credentials: false
-          repository: "mgr0dzicki/cargo-semver-action-ref-slice"
-          ref: "major_change"
+          repository: "obi1kenobi/cargo-semver-action-ref-slice"
+          ref: "4d64380252c8fbda023cca58406fa40a27ad1177"  # branch major_change
           path: "subject-checkout"
 
       - name: Setup bare repository worktree
@@ -1464,7 +1464,8 @@ jobs:
           set -euo pipefail
           git clone --bare subject-checkout subject-bare
           mkdir subject
-          git --git-dir subject-bare --work-tree subject checkout major_change .
+          revision="$(git -C subject-checkout rev-parse --verify 'HEAD^{commit}')"
+          git --git-dir subject-bare --work-tree subject checkout "$revision" .
           test ! -e subject/.git
 
       - name: Install rust
@@ -1756,14 +1757,14 @@ jobs:
       - name: Checkout cargo-semver-checks
         uses: actions/checkout@v7
         with:
-          persist-credentials: true
+          persist-credentials: false
           path: 'semver'
 
       - name: Checkout ref-slice fork semver break
         uses: actions/checkout@v7
         with:
           persist-credentials: false
-          repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
+          repository: 'obi1kenobi/cargo-semver-action-ref-slice'
           ref: '4d64380252c8fbda023cca58406fa40a27ad1177'  # branch major_change
           path: 'subject'
 
@@ -1858,14 +1859,14 @@ jobs:
       - name: Checkout cargo-semver-checks
         uses: actions/checkout@v7
         with:
-          persist-credentials: true
+          persist-credentials: false
           path: semver
 
       - name: Checkout ref-slice fork semver break
         uses: actions/checkout@v7
         with:
           persist-credentials: false
-          repository: 'mgr0dzicki/cargo-semver-action-ref-slice'
+          repository: 'obi1kenobi/cargo-semver-action-ref-slice'
           ref: '4d64380252c8fbda023cca58406fa40a27ad1177'  # branch major_change
           path: 'subject'
 
