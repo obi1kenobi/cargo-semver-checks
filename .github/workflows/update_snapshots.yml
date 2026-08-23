@@ -8,29 +8,49 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
+
+concurrency:
+  group: snapshot-update-${{ inputs.branch }}
+  cancel-in-progress: false
 
 jobs:
-  update-snapshots:
-    if: github.repository_owner == 'obi1kenobi'
+  # This job executes code from the selected branch. Keep it read-only and secret-free.
+  generate-snapshots:
+    # github.ref_name is which branch's workflow is running, not the branch input.
+    # Require the trusted default-branch workflow; inputs.branch still selects the target.
+    if: >-
+      github.repository_owner == 'obi1kenobi' &&
+      github.ref_type == 'branch' &&
+      github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      source_sha: ${{ steps.source.outputs.sha }}
     env:
-      TARGET_BRANCH: "${{ github.event.inputs.branch }}"
-      BRANCH_NAME: "auto/update_snapshots_${{ github.event.inputs.branch }}"
-      PR_TITLE: "chore: updating snapshots for branch ${{ github.event.inputs.branch }}"
+      TARGET_BRANCH: ${{ inputs.branch }}
+      BRANCH_NAME: auto/update_snapshots_${{ inputs.branch }}
     steps:
-      - name: Checkout the source code
+      - name: Validate target branch
+        run: |
+          set -euo pipefail
+          if [[ "$TARGET_BRANCH" == -* || "$TARGET_BRANCH" == refs/* ]]; then
+            echo "Expected a branch name, not a ref: $TARGET_BRANCH" >&2
+            exit 1
+          fi
+          git check-ref-format "refs/heads/$TARGET_BRANCH"
+          git check-ref-format "refs/heads/$BRANCH_NAME"
+
+      - name: Checkout the source code without credentials
         uses: actions/checkout@v7
         with:
-          # We have to use a Personal Access Token (PAT) here.
-          # PRs opened from a workflow using the standard `GITHUB_TOKEN` in GitHub Actions
-          # do not automatically trigger more workflows:
-          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
-          token: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
-          ref: ${{ env.TARGET_BRANCH }}
-          persist-credentials: true
+          ref: refs/heads/${{ inputs.branch }}
+          persist-credentials: false
+
+      - name: Record source commit
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Install rust
         id: toolchain
@@ -41,10 +61,14 @@ jobs:
           cache: false
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          # The selected branch is untrusted input, while this workflow runs in the
+          # default branch's cache scope. Do not save this action's cache from here.
+          save-if: false
 
-      - name: restore test rustdocs
+      - name: Restore test rustdocs
         id: cache-test-rustdocs
-        uses: actions/cache@v6
+        uses: actions/cache/restore@v6
         with:
           path: localdata/test_data/
           key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('test_crates/**/*.rs') }}
@@ -62,56 +86,297 @@ jobs:
           set -euxo pipefail
           INSTA_UPDATE=always cargo test -- --quiet
 
-      - name: Prepare commit
+      - name: Save test rustdocs from the default branch
+        # workflow_dispatch cache writes use the workflow ref's cache scope, which is
+        # the default branch here. Only let a default-branch checkout populate it.
+        if: >-
+          steps.cache-test-rustdocs.outputs.cache-hit != 'true' &&
+          inputs.branch == github.event.repository.default_branch
+        uses: actions/cache/save@v6
+        with:
+          path: localdata/test_data/
+          key: ${{ steps.cache-test-rustdocs.outputs.cache-primary-key }}
+
+      - name: Create validated snapshot patch
+        env:
+          PATCH: ${{ runner.temp }}/snapshot-updates.patch
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$(git rev-parse HEAD)" != "$SOURCE_SHA" ]]; then
+            echo "Snapshot generation changed the checked-out commit" >&2
+            exit 1
+          fi
+
+          git add -- ':(glob)test_outputs/**/*.snap'
+          if git diff --cached --quiet; then
+            echo "No snapshot updates" >&2
+            exit 1
+          fi
+
+          if ! git diff --quiet || [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
+            echo "Snapshot generation changed files outside test_outputs/**/*.snap" >&2
+            git status --short >&2
+            exit 1
+          fi
+
+          saw_change=false
+          while IFS= read -r -d '' status && IFS= read -r -d '' path; do
+            saw_change=true
+            if [[ "$status" != "A" && "$status" != "M" && "$status" != "D" ]]; then
+              printf 'Refusing unexpected snapshot operation: %q %q\n' "$status" "$path" >&2
+              exit 1
+            fi
+            if [[ "$path" != test_outputs/*.snap ]]; then
+              printf 'Refusing snapshot outside test_outputs: %q\n' "$path" >&2
+              exit 1
+            fi
+
+            if [[ "$status" != "D" ]]; then
+              mode="$(git ls-files --stage -- "$path" | awk 'NR == 1 { print $1 }')"
+              if [[ "$mode" != "100644" ]]; then
+                printf 'Refusing non-regular snapshot: %q has mode %q\n' "$path" "$mode" >&2
+                exit 1
+              fi
+            fi
+          done < <(git diff --cached --name-status -z)
+
+          if [[ "$saw_change" != "true" ]]; then
+            echo "Expected at least one staged snapshot update" >&2
+            exit 1
+          fi
+
+          git diff --cached --binary --full-index > "$PATCH"
+          test -s "$PATCH"
+
+      - name: Upload snapshot patch
+        uses: actions/upload-artifact@v7
+        with:
+          name: snapshot-updates
+          path: ${{ runner.temp }}/snapshot-updates.patch
+          retention-days: 1
+          if-no-files-found: error
+
+  # This job may validate Git data, but must never execute code from the selected branch.
+  # This also means it must not run any Rust commands such as `cargo check`,
+  # because such commands can run build scripts.
+  #
+  # To be extra safe, keep the PAT confined to the final publication steps.
+  publish-snapshots:
+    needs: generate-snapshots
+    # github.ref_name is which branch's workflow is running, not the branch input.
+    # Require the trusted default-branch workflow; inputs.branch still selects the target.
+    if: >-
+      github.repository_owner == 'obi1kenobi' &&
+      github.ref_type == 'branch' &&
+      github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      pr_url: ${{ steps.pull-request.outputs.url }}
+      head_sha: ${{ steps.commit.outputs.sha }}
+    env:
+      TARGET_BRANCH: ${{ inputs.branch }}
+      BRANCH_NAME: auto/update_snapshots_${{ inputs.branch }}
+      PR_TITLE: "chore: updating snapshots for branch ${{ inputs.branch }}"
+      SOURCE_SHA: ${{ needs.generate-snapshots.outputs.source_sha }}
+    steps:
+      - name: Validate publication metadata
+        run: |
+          set -euo pipefail
+          if [[ "$TARGET_BRANCH" == -* || "$TARGET_BRANCH" == refs/* ]]; then
+            echo "Expected a branch name, not a ref: $TARGET_BRANCH" >&2
+            exit 1
+          fi
+          git check-ref-format "refs/heads/$TARGET_BRANCH"
+          git check-ref-format "refs/heads/$BRANCH_NAME"
+          if [[ ! "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Invalid source commit: $SOURCE_SHA" >&2
+            exit 1
+          fi
+
+      - name: Checkout the exact source commit without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.generate-snapshots.outputs.source_sha }}
+          persist-credentials: false
+
+      - name: Verify source branch and prepare publication branch
+        run: |
+          set -euo pipefail
+          read -r remote_sha remote_ref < <(
+            git ls-remote --exit-code origin "refs/heads/$TARGET_BRANCH"
+          )
+          if [[ "$remote_ref" != "refs/heads/$TARGET_BRANCH" || "$remote_sha" != "$SOURCE_SHA" ]]; then
+            echo "The target branch changed while snapshots were generated; rerun the workflow" >&2
+            exit 1
+          fi
+          git switch --force-create "$BRANCH_NAME"
+          git config --local core.hooksPath /dev/null
+
+      - name: Download snapshot patch
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: snapshot-updates
+          path: ${{ runner.temp }}/generated
+
+      - name: Validate and apply snapshot updates
+        env:
+          PATCH: ${{ runner.temp }}/generated/snapshot-updates.patch
+        run: |
+          set -euo pipefail
+          test -s "$PATCH"
+          git apply --check --index "$PATCH"
+          git apply --index "$PATCH"
+
+          saw_change=false
+          while IFS= read -r -d '' status && IFS= read -r -d '' path; do
+            saw_change=true
+            if [[ "$status" != "A" && "$status" != "M" && "$status" != "D" ]]; then
+              printf 'Refusing unexpected snapshot operation: %q %q\n' "$status" "$path" >&2
+              exit 1
+            fi
+            if [[ "$path" != test_outputs/*.snap ]]; then
+              printf 'Refusing snapshot outside test_outputs: %q\n' "$path" >&2
+              exit 1
+            fi
+
+            if [[ "$status" != "D" ]]; then
+              mode="$(git ls-files --stage -- "$path" | awk 'NR == 1 { print $1 }')"
+              if [[ "$mode" != "100644" ]]; then
+                printf 'Refusing non-regular snapshot: %q has mode %q\n' "$path" "$mode" >&2
+                exit 1
+              fi
+            fi
+          done < <(git diff --cached --name-status -z)
+
+          if [[ "$saw_change" != "true" || -n "$(git diff --name-only)" ]]; then
+            echo "The snapshot patch did not produce a clean, staged change" >&2
+            exit 1
+          fi
+
+      - name: Prepare commit and pull request body
+        id: commit
+        env:
+          PR_BODY: ${{ runner.temp }}/pr-body.md
         run: |
           set -euo pipefail
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git switch --force-create "$BRANCH_NAME"
-          git add test_outputs/**/*.snap
-          CHANGED="$(git diff --staged --name-only)"
-          if [ -z "$CHANGED" ]; then
-            echo "No snapshot updates" >&2
-            exit 1
-          fi
-          { echo "$PR_TITLE"; echo; echo "$CHANGED"; } > body.md
-          git commit --no-verify -F body.md
+          {
+            printf '%s\n\n' "$PR_TITLE"
+            git diff --cached --name-status
+          } > "$PR_BODY"
+          git commit --no-verify --file="$PR_BODY"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Push branch
+      - name: Push publication branch
+        env:
+          # We have to use a Personal Access Token (PAT) here.
+          # Pushes authenticated using the standard `GITHUB_TOKEN` in GitHub Actions
+          # do not automatically trigger more workflows:
+          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+          GH_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          git push --no-verify --force --set-upstream origin "$BRANCH_NAME"
+          gh auth setup-git
+          git push --no-verify --force --set-upstream origin "HEAD:refs/heads/$BRANCH_NAME"
 
-      - name: Edit existing open pull request
-        id: edit
-        continue-on-error: true
+      - name: Open or update pull request
+        id: pull-request
         env:
           # We have to use a Personal Access Token (PAT) here.
           # PRs opened from a workflow using the standard `GITHUB_TOKEN` in GitHub Actions
           # do not automatically trigger more workflows:
           # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
-          GITHUB_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
+          PR_BODY: ${{ runner.temp }}/pr-body.md
         run: |
           set -euo pipefail
-          STATE="$(gh pr view "$BRANCH_NAME" --repo "$GITHUB_REPOSITORY" --json state --jq '.state')"
-          if [[ "$STATE" != "OPEN" ]]; then
+          pr_urls="$(
+            gh api --method GET \
+              "repos/$GITHUB_REPOSITORY/pulls" \
+              -f state=open \
+              -f head="$GITHUB_REPOSITORY_OWNER:$BRANCH_NAME" \
+              -f base="$TARGET_BRANCH" \
+              --jq '.[].html_url'
+          )"
+          if [[ "$pr_urls" == *$'\n'* ]]; then
+            echo "Found multiple open pull requests for $BRANCH_NAME" >&2
             exit 1
           fi
-          gh pr edit "$BRANCH_NAME" --title "$PR_TITLE" --body-file body.md --repo "$GITHUB_REPOSITORY" --base "$TARGET_BRANCH"
+          if [[ -n "$pr_urls" ]]; then
+            pr_url="$pr_urls"
+            gh pr edit "$pr_url" --title "$PR_TITLE" --body-file "$PR_BODY"
+          else
+            pr_url="$(
+              gh pr create \
+                --repo "$GITHUB_REPOSITORY" \
+                --head "$GITHUB_REPOSITORY_OWNER:$BRANCH_NAME" \
+                --base "$TARGET_BRANCH" \
+                --title "$PR_TITLE" \
+                --body-file "$PR_BODY"
+            )"
+          fi
+          if [[ "$pr_url" != "https://github.com/$GITHUB_REPOSITORY/pull/"* || "$pr_url" == *$'\n'* ]]; then
+            echo "Refusing unexpected pull request URL: $pr_url" >&2
+            exit 1
+          fi
+          echo "url=$pr_url" >> "$GITHUB_OUTPUT"
 
-      - name: Open new pull request
-        if: steps.edit.outcome != 'success'
+  # GITHUB_TOKEN permissions are job-scoped, so keep auto-merge in a separate job.
+  # This confines contents and pull-request write access to the auto-merge step.
+  enable-auto-merge:
+    needs: publish-snapshots
+    # github.ref_name is which branch's workflow is running, not the branch input.
+    # Require the trusted default-branch workflow; inputs.branch still selects the target.
+    if: >-
+      needs.publish-snapshots.outputs.pr_url != '' &&
+      github.repository_owner == 'obi1kenobi' &&
+      github.ref_type == 'branch' &&
+      github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Set pull request to auto-merge
         env:
-          # We have to use a Personal Access Token (PAT) here.
-          # PRs opened from a workflow using the standard `GITHUB_TOKEN` in GitHub Actions
-          # do not automatically trigger more workflows:
-          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
-          GITHUB_TOKEN: ${{ secrets.RUST_UPDATER_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ needs.publish-snapshots.outputs.pr_url }}
+          EXPECTED_HEAD_SHA: ${{ needs.publish-snapshots.outputs.head_sha }}
+          TARGET_BRANCH: ${{ inputs.branch }}
+          BRANCH_NAME: auto/update_snapshots_${{ inputs.branch }}
         run: |
           set -euo pipefail
-          gh pr create --title "$PR_TITLE" --body-file body.md --repo "$GITHUB_REPOSITORY" --base "$TARGET_BRANCH"
+          pr_number="${PR_URL##*/}"
+          if [[ ! "$pr_number" =~ ^[0-9]+$ ||
+                "$PR_URL" != "https://github.com/$GITHUB_REPOSITORY/pull/$pr_number" ||
+                ! "$EXPECTED_HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Refusing unexpected pull request URL: $PR_URL" >&2
+            exit 1
+          fi
 
-      - name: Set PR to auto-merge
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr merge --squash --auto --delete-branch
+          read -r state cross_repository head_branch head_sha base_branch head_repository url < <(
+            gh pr view "$PR_URL" \
+              --repo "$GITHUB_REPOSITORY" \
+              --json state,isCrossRepository,headRefName,headRefOid,baseRefName,headRepository,url \
+              --jq '[.state, .isCrossRepository, .headRefName, .headRefOid, .baseRefName, .headRepository.nameWithOwner, .url] | @tsv'
+          )
+          if [[ "$state" != "OPEN" ||
+                "$cross_repository" != "false" ||
+                "$head_branch" != "$BRANCH_NAME" ||
+                "$head_sha" != "$EXPECTED_HEAD_SHA" ||
+                "$base_branch" != "$TARGET_BRANCH" ||
+                "$head_repository" != "$GITHUB_REPOSITORY" ||
+                "$url" != "$PR_URL" ]]; then
+            echo "Refusing to auto-merge a pull request that does not match the publication branch" >&2
+            exit 1
+          fi
+          gh pr merge "$PR_URL" \
+            --squash \
+            --auto \
+            --delete-branch \
+            --match-head-commit "$EXPECTED_HEAD_SHA"
