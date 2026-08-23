@@ -8,9 +8,13 @@ on:
     paths:
       - ".github/workflows/*.ya?ml"
 
+permissions: {}
+
 jobs:
   actionlint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
       - name: Download actionlint
