@@ -42,6 +42,22 @@ jobs:
           git check-ref-format "refs/heads/$TARGET_BRANCH"
           git check-ref-format "refs/heads/$TARGET_BRANCH-lint-fix"
 
+      # Preserve the policy from the trusted workflow ref before the selected
+      # branch replaces the worktree. The selected branch must not define its own policy.
+      - name: Checkout the trusted build-script policy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+
+      - name: Preserve the trusted build-script policy outside the worktree
+        run: |
+          set -euo pipefail
+          policy_dir="$RUNNER_TEMP/trusted-build-script-policy"
+          mkdir "$policy_dir"
+          cp -- .github/build-script-exceptions.txt "$policy_dir/"
+          cp -- .github/scripts/check_build_scripts.py "$policy_dir/"
+
       - name: Checkout the source code without credentials
         uses: actions/checkout@v7
         with:
@@ -51,6 +67,17 @@ jobs:
       - name: Record source commit
         id: source
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Enforce the trusted build-script policy
+        run: |
+          set -euo pipefail
+          policy_dir="$RUNNER_TEMP/trusted-build-script-policy"
+          # The selected branch may omit scripts approved by the default-branch policy.
+          # Allow absence only; present scripts still require an exact path and digest.
+          python3 "$policy_dir/check_build_scripts.py" \
+            --repository "$GITHUB_WORKSPACE" \
+            --exceptions "$policy_dir/build-script-exceptions.txt" \
+            --allow-missing-approved-build-scripts
 
       - name: Install rust
         id: toolchain
