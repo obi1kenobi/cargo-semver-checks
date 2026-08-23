@@ -59,6 +59,7 @@ jobs:
         run: |
           echo "lint: ${{ needs.lint.result }}"
           echo "rust-tests: ${{ needs.rust-tests.result }}"
+          echo "cargo-check-test-crates: ${{ needs.cargo-check-test-crates.result }}"
           echo "check-test-crate-lockfiles: ${{ needs.check-test-crate-lockfiles.result }}"
           echo "cross-version-caching: ${{ needs.cross-version-caching.result }}"
           echo "cross-feature-caching: ${{ needs.cross-feature-caching.result }}"
@@ -88,6 +89,8 @@ jobs:
       - if: ${{ needs.lint.result != 'success' }}
         run: exit 1
       - if: ${{ needs.rust-tests.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.cargo-check-test-crates.result != 'success' }}
         run: exit 1
       - if: ${{ needs.check-test-crate-lockfiles.result != 'success' }}
         run: exit 1
