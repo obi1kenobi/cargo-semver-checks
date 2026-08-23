@@ -14,6 +14,13 @@ on:
     - cron: "37 03 * * MON"
   workflow_dispatch:
     # Needed so we can run it manually
+
+# Scheduled and manually dispatched runs can both force-push the same publication
+# branch. Serialize the full workflow so they cannot overwrite each other's work.
+concurrency:
+  group: cargo-dependency-update
+  cancel-in-progress: false
+
 permissions:
   contents: read
 defaults:

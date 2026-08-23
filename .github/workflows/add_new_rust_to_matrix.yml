@@ -14,6 +14,13 @@ on:
     - cron: '37 18 * * THU'
   workflow_dispatch:
     # Needed so we can run it manually
+
+# Scheduled and manually dispatched runs can both force-push the same publication
+# branch. Serialize the full workflow so they cannot overwrite each other's work.
+concurrency:
+  group: add-new-rust-to-matrix
+  cancel-in-progress: false
+
 permissions:
   contents: read
 defaults:
