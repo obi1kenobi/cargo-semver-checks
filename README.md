@@ -178,6 +178,10 @@ This behavior can be overridden. Checked feature set can be changed to:
 
 Additionally, features can be enabled one-by-one, using flags `--features`, `--baseline-features` and `--current-features`.
 
+The feature named `default` can be selected explicitly just like any other feature. For example, `--only-explicit-features --features default` disables implicit default-feature selection and then explicitly enables the feature named `default` in both versions. Use `--baseline-features default` or `--current-features default` to select it for only one version.
+
+This is different from `--default-features`: if a package does not define a `default` feature, `--default-features` selects no features. Explicitly adding `default` treats it like any other requested feature name; it is not another spelling of `--default-features`.
+
 For example, consider crate [serde](https://github.com/serde-rs/serde), with the following features (per v1.0.163):
 
 - `std` - the crate's only default feature,
@@ -192,6 +196,7 @@ For example, consider crate [serde](https://github.com/serde-rs/serde), with the
 | `--default-features`                           | `std`                                      | The crate has only one default feature.                            |
 | `--default-features --features derive`         | `std`, `derive`                            | Feature `derive` is used along with crate's default features.      |
 | `--only-explicit-features`                     | none                                       | No explicit features are passed.                                   |
+| `--only-explicit-features --features default`  | `std`                                      | The feature named `default` is selected explicitly.                |
 | `--only-explicit-features --features unstable` | `unstable`                                 | All features can be added explicitly, regardless of their name.    |
 
 ### My crate uses `--cfg` conditional compilation. Can `cargo-semver-checks` scan it?

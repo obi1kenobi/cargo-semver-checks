@@ -118,6 +118,59 @@ fn simple_validation_feature_flags() {
 }
 
 #[test]
+fn default_feature_name_can_be_selected_explicitly() {
+    // This fixture fails to compile unless both `std` and `alloc` are enabled.
+    // Its `default` feature enables both, making every case sensitive to whether
+    // the explicitly named feature was actually selected.
+    CargoSemverChecks::new(
+        "test_crates/feature_flags_validation/old/",
+        "test_crates/feature_flags_validation/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .add_arg("--features")
+    .add_arg("default")
+    .run_all()
+    .into_iter()
+    .for_each(|a| {
+        a.success();
+    });
+
+    // Select `default` for only the baseline, while spelling out the equivalent
+    // features for the current crate.
+    CargoSemverChecks::new(
+        "test_crates/feature_flags_validation/old/",
+        "test_crates/feature_flags_validation/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .add_arg("--baseline-features")
+    .add_arg("default")
+    .add_arg("--current-features")
+    .add_arg("std,alloc")
+    .run_all()
+    .into_iter()
+    .for_each(|a| {
+        a.success();
+    });
+
+    // Select `default` for only the current crate, while spelling out the
+    // equivalent features for the baseline.
+    CargoSemverChecks::new(
+        "test_crates/feature_flags_validation/old/",
+        "test_crates/feature_flags_validation/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .add_arg("--baseline-features")
+    .add_arg("std,alloc")
+    .add_arg("--current-features")
+    .add_arg("default")
+    .run_all()
+    .into_iter()
+    .for_each(|a| {
+        a.success();
+    });
+}
+
+#[test]
 fn simple_heuristic_features() {
     CargoSemverChecks::new(
         "test_crates/features_simple/new/",
@@ -360,6 +413,22 @@ fn default_features_when_default_undefined() {
     .add_arg("--default-features")
     .add_arg("--features")
     .add_arg("B")
+    .run_all()
+    .into_iter()
+    .for_each(|a| {
+        a.failure();
+    });
+}
+
+#[test]
+fn explicitly_named_default_must_exist() {
+    CargoSemverChecks::new(
+        "test_crates/features_no_default/new/",
+        "test_crates/features_no_default/old/Cargo.toml",
+    )
+    .add_arg("--only-explicit-features")
+    .add_arg("--features")
+    .add_arg("default")
     .run_all()
     .into_iter()
     .for_each(|a| {
