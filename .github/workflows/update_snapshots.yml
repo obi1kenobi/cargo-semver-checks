@@ -52,6 +52,17 @@ jobs:
         id: source
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
+      - name: Compute test rustdocs input hash
+        id: rustdoc-inputs
+        run: |
+          set -euo pipefail
+          hash="$(./scripts/hash_test_rustdocs_inputs.sh)"
+          if [[ ! "$hash" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "Invalid test rustdocs input hash" >&2
+            exit 1
+          fi
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+
       - name: Install rust
         id: toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -71,7 +82,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: localdata/test_data/
-          key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('test_crates/**/*.rs') }}
+          key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ steps.rustdoc-inputs.outputs.hash }}
 
       - name: Regenerate test data
         if: steps.cache-test-rustdocs.outputs.cache-hit != 'true'
