@@ -31,14 +31,41 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      source_sha: ${{ steps.source.outputs.sha }}
     steps:
-      - name: Checkout
+      - name: Checkout the trusted build-script policy
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.workflow_sha }}
           persist-credentials: false
 
-      - name: Enforce the build-script policy
-        run: python3 .github/scripts/check_build_scripts.py
+      - name: Preserve the trusted build-script policy outside the worktree
+        run: |
+          set -euo pipefail
+          policy_dir="$RUNNER_TEMP/trusted-build-script-policy"
+          mkdir "$policy_dir"
+          cp -- .github/build-script-exceptions.txt "$policy_dir/"
+          cp -- .github/scripts/check_build_scripts.py "$policy_dir/"
+
+      - name: Checkout the release tag without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.publish-tag }}
+          persist-credentials: false
+
+      - name: Record and validate the release source
+        id: source
+        run: |
+          set -euo pipefail
+          policy_dir="$RUNNER_TEMP/trusted-build-script-policy"
+          # The release tag may omit scripts approved by the current policy.
+          # Allow absence only; present scripts still require an exact path and digest.
+          python3 "$policy_dir/check_build_scripts.py" \
+            --repository "$GITHUB_WORKSPACE" \
+            --exceptions "$policy_dir/build-script-exceptions.txt" \
+            --allow-missing-approved-build-scripts
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   build-and-upload-binary:
     name: Build ${{ matrix.target }}
@@ -64,6 +91,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: ${{ needs.build-script-policy.outputs.source_sha }}
           persist-credentials: false
 
       - name: Install rust
