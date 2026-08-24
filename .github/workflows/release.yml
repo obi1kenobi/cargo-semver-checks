@@ -27,13 +27,12 @@ env:
   CARGO_INCREMENTAL: 0
 
 jobs:
-  publish:
-    name: Publish to crates.io
+  verify-package:
+    name: Verify package
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
-      id-token: write     # Required for OIDC token exchange (Trusted Publishing)
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -62,13 +61,42 @@ jobs:
           fi
           git check-ref-format "refs/tags/$PUBLISH_TAG"
 
+      - name: Verify package
+        run: cargo publish --manifest-path "$GITHUB_WORKSPACE/Cargo.toml" --dry-run --locked
+
+  # Package verification compiles the crate, so keep it outside this credentialed job.
+  publish:
+    name: Publish to crates.io
+    needs:
+      - verify-package
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write     # Required for OIDC token exchange (Trusted Publishing)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # master
+        with:
+          toolchain: stable
+
       # For Trusted Publishing:
       # https://crates.io/docs/trusted-publishing
       - uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
         id: auth
 
       - name: Publish
-        run: cargo publish
+        # Cargo discovers configuration from its working directory, not from
+        # --manifest-path. Run outside the checkout so repository-controlled
+        # configuration cannot change the registry or credential provider while
+        # the publishing token is available.
+        working-directory: ${{ runner.temp }}
+        run: cargo publish --manifest-path "$GITHUB_WORKSPACE/Cargo.toml" --no-verify --locked
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
 

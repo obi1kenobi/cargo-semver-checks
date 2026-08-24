@@ -67,12 +67,12 @@ jobs:
             --allow-missing-approved-build-scripts
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-  build-and-upload-binary:
+  build-binary:
     name: Build ${{ matrix.target }}
     needs:
       - build-script-policy
     permissions:
-      contents: write
+      contents: read
     strategy:
       matrix:
         include:
@@ -99,7 +99,7 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Upload binary
+      - name: Build and package binary
         uses: taiki-e/upload-rust-binary-action@f0d45ae91ee7b8ee928de7a9d04d893a08bcbec6 # v1.30.2
         with:
           bin: cargo-semver-checks
@@ -107,7 +107,61 @@ jobs:
           ref: refs/tags/${{ inputs.publish-tag }}
           tar: all
           zip: windows
+          dry-run: true
+          dry-run-intended: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 1
           CARGO_PROFILE_RELEASE_LTO: true
+
+      - name: Upload packaged binary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: binary-${{ matrix.target }}
+          path: |
+            cargo-semver-checks-${{ matrix.target }}.tar.gz
+            cargo-semver-checks-${{ matrix.target }}.zip
+          retention-days: 1
+          if-no-files-found: error
+
+  # This job handles release credentials but never checks out or executes repository code.
+  upload-binaries:
+    name: Upload binaries
+    needs:
+      - build-binary
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download packaged binaries
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: binary-*
+          path: ${{ runner.temp }}/release-assets
+          merge-multiple: true
+
+      - name: Upload binaries to the GitHub release
+        env:
+          ASSET_DIR: ${{ runner.temp }}/release-assets
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH_TAG: ${{ inputs.publish-tag }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          assets=(
+            "$ASSET_DIR"/cargo-semver-checks-*.tar.gz
+            "$ASSET_DIR"/cargo-semver-checks-*.zip
+          )
+          if [[ "${#assets[@]}" -lt 8 ]]; then
+            echo "Expected at least 8 release assets, found ${#assets[@]}" >&2
+            exit 1
+          fi
+
+          for delay in {1..10}; do
+            if gh release upload "$PUBLISH_TAG" "${assets[@]}" \
+                --clobber --repo "$GITHUB_REPOSITORY"; then
+              exit 0
+            fi
+            sleep "$delay"
+          done
+          gh release upload "$PUBLISH_TAG" "${assets[@]}" \
+            --clobber --repo "$GITHUB_REPOSITORY"
