@@ -48,6 +48,18 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
+      - name: Validate release tag
+        env:
+          PUBLISH_TAG: ${{ inputs.publish-tag }}
+        run: |
+          set -euo pipefail
+          expected_tag="v$(./scripts/get_current_version.sh cargo-semver-checks)"
+          if [[ "$PUBLISH_TAG" != "$expected_tag" ]]; then
+            echo "Expected release tag $expected_tag, got $PUBLISH_TAG" >&2
+            exit 1
+          fi
+          git check-ref-format "refs/tags/$PUBLISH_TAG"
+
       # For Trusted Publishing:
       # https://crates.io/docs/trusted-publishing
       - uses: rust-lang/crates-io-auth-action@v1
@@ -76,9 +88,11 @@ jobs:
       - name: Tag the version
         env:
           GITHUB_TOKEN: ${{ secrets.TAGGER_GITHUB_TOKEN }}
+          PUBLISH_TAG: ${{ inputs.publish-tag }}
         run: |
-          git tag "${{ inputs.publish-tag }}"
-          git push origin "${{ inputs.publish-tag }}"
+          set -euo pipefail
+          git tag -- "$PUBLISH_TAG"
+          git push origin "refs/tags/$PUBLISH_TAG:refs/tags/$PUBLISH_TAG"
 
       - uses: taiki-e/create-gh-release-action@v1
         name: Create github release
@@ -91,7 +105,7 @@ jobs:
   upload-binary:
     name: Run the build-binaries workflow
     needs:
-      - publish
+      - tag-and-make-release
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
