@@ -168,19 +168,19 @@ jobs:
       - build-script-policy
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           components: rustfmt, clippy
           cache: false
           rustflags: ""
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: 'semver'
 
@@ -218,19 +218,19 @@ jobs:
       - build-script-policy
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           toolchain: nightly  # Because we sometimes test unstable features.
           rustflags: ""
           cache: false
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: 'semver'
 
@@ -267,7 +267,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
@@ -302,7 +302,7 @@ jobs:
             experimental: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -319,7 +319,7 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           toolchain: ${{ matrix.toolchain }}
           rustflags: ""
@@ -327,7 +327,7 @@ jobs:
 
       - name: restore test rustdocs
         id: cache-test-rustdocs
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: localdata/test_data/
           key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ steps.rustdoc-inputs.outputs.hash }}
@@ -340,7 +340,7 @@ jobs:
         if: steps.cache-test-rustdocs.outputs.cache-hit == 'true'
         run: find localdata/test_data -exec touch {} \;
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 
       - name: compile
         run: cargo test --no-run
@@ -359,23 +359,23 @@ jobs:
       RUSTC_WRAPPER: "sccache"
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           rustflags: ""
           cache: false
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: 'semver'
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.11
+        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
 
       - name: build
         run: |
@@ -389,7 +389,7 @@ jobs:
           mv target/debug/cargo-semver-checks ../bins/cargo-semver-checks
 
       - name: upload binary
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -413,23 +413,23 @@ jobs:
       RUSTC_WRAPPER: "sccache"
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           rustflags: ""
           cache: false
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: 'semver'
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.11
+        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
 
       - name: build
         run: |
@@ -443,7 +443,7 @@ jobs:
           mv target\debug\cargo-semver-checks.exe ..\bins\cargo-semver-checks.exe
 
       - name: upload binary
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cargo-semver-checks-windows
           path: bins\
@@ -467,7 +467,7 @@ jobs:
           echo "newer-rust=$NEWER_RUST" >> "$GITHUB_OUTPUT"
 
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
@@ -481,7 +481,7 @@ jobs:
           tar -xzf adler2-2.0.1.crate --strip-components=1 -C subject
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -490,7 +490,7 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           toolchain: ${{ steps.vars.outputs.older-rust }}
           rustflags: ""
@@ -498,13 +498,13 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: cross-version-caching-adler2-2_0_1-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject/target/semver-checks/local-adler2-2_0_1
@@ -517,14 +517,14 @@ jobs:
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --baseline-version 2.0.1 --default-features --verbose
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: cross-version-caching-adler2-2_0_1-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}
           path: subject/target/semver-checks/cache
 
       - name: Install newer rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           toolchain: ${{ steps.vars.outputs.newer-rust }}
           rustflags: ""
@@ -617,14 +617,14 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       # This is a fork of serde, modified to make feature `unstable` break semver.
       - name: Checkout fork of serde
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'staniewzki/serde'
@@ -632,7 +632,7 @@ jobs:
           path: 'subject'
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -641,20 +641,20 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject/target/semver-checks/local-serde-1_0_162
@@ -670,7 +670,7 @@ jobs:
       # Save the older rustdoc on cache miss. This must run *before* the cross-feature check,
       # since we don't want to save that rustdoc -- we're making sure it gets generated and used!
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: cross-feature-caching-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}
@@ -744,7 +744,7 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
@@ -759,13 +759,13 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -774,13 +774,13 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject/target/semver-checks/local-pest_meta-2_8_6
@@ -799,7 +799,7 @@ jobs:
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/Cargo.toml" --package="pest_meta" --baseline-version 2.8.6 --only-explicit-features --features grammar-extras --verbose
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -820,19 +820,19 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -858,19 +858,19 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Install rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -898,13 +898,13 @@ jobs:
       - build-script-policy
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout rust-libp2p
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'servo/core-foundation-rs'
@@ -913,14 +913,14 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       # This job runs on macOS, not Linux like the rest.
       # It should save its cache, because no other job will save it in its place.
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           shared-key: 'semver'
           workspaces: |
@@ -929,7 +929,7 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
@@ -940,7 +940,7 @@ jobs:
           cargo run semver-checks check-release --manifest-path="../subject/core-graphics/Cargo.toml" --verbose
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -956,13 +956,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout bevy
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
@@ -971,13 +971,13 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -986,13 +986,13 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject/target/semver-checks/local-bevy_core-0_9_0
@@ -1003,7 +1003,7 @@ jobs:
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/crates/bevy_core/Cargo.toml" --verbose
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -1019,13 +1019,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout bevy
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
@@ -1034,13 +1034,13 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1049,13 +1049,13 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject/target/semver-checks/local-bevy_gltf-0_9_1
@@ -1066,7 +1066,7 @@ jobs:
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/crates/bevy_gltf/Cargo.toml" --baseline-version 0.9.0 --verbose
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -1081,13 +1081,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout sqllogictest
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'risinglightdb/sqllogictest-rs'
@@ -1096,13 +1096,13 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1111,13 +1111,13 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject/target/semver-checks/local-sqllogictest-0_13_0
@@ -1133,7 +1133,7 @@ jobs:
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path ../subject/sqllogictest/Cargo.toml --verbose
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -1151,7 +1151,7 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
@@ -1250,7 +1250,7 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
@@ -1337,13 +1337,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout clap v3.2.0
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'clap-rs/clap'
@@ -1351,7 +1351,7 @@ jobs:
           path: 'subject-current'
 
       - name: Checkout clap v3.1.18
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'clap-rs/clap'
@@ -1360,13 +1360,13 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1375,13 +1375,13 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject-current/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject-current/target/semver-checks/local-clap-3_2_0/
@@ -1441,7 +1441,7 @@ jobs:
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -1456,13 +1456,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: "semver"
 
       - name: Checkout ref-slice fork major change
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # NOTE: We cannot checkout a bare repository with the actions/checkout action
           # (https://github.com/actions/checkout/issues/603), so we checkout a "normal" version
@@ -1484,13 +1484,13 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1499,13 +1499,13 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject/target/semver-checks/git-v1_2_1/
@@ -1532,7 +1532,7 @@ jobs:
           diff <(echo "$RESULT") <(echo "$EXPECTED")
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -1547,7 +1547,7 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-config testcases
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'obi1kenobi/c-s-c-testcase-cargo-config-toml'
@@ -1555,13 +1555,13 @@ jobs:
           path: 'semver'
 
       - name: Install rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1769,13 +1769,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout ref-slice fork semver break
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'obi1kenobi/cargo-semver-action-ref-slice'
@@ -1784,7 +1784,7 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         env:
           CARGO_REGISTRIES_CRATES_IO_PROTOCOL: ${{ matrix.protocol }}
         with:
@@ -1792,7 +1792,7 @@ jobs:
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1801,13 +1801,13 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject/target/semver-checks/local-ref_slice-1_2_1/
@@ -1851,7 +1851,7 @@ jobs:
           rm -f unexpectedly_did_not_fail
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -1871,13 +1871,13 @@ jobs:
       - build-binary-windows
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: semver
 
       - name: Checkout ref-slice fork semver break
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'obi1kenobi/cargo-semver-action-ref-slice'
@@ -1886,26 +1886,26 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-windows
           path: bins\
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject\target\semver-checks\cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject\target\semver-checks\local-ref_slice-1_2_1\
@@ -1950,7 +1950,7 @@ jobs:
           rm output
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver\**\Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -1966,13 +1966,13 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       - name: Checkout phantomical/perf-event
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: 'phantomical/perf-event'
@@ -1981,13 +1981,13 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
           rustflags: ""
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -1996,13 +1996,13 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject/target/semver-checks/local-perf-event-open-sys2-5_0_0
@@ -2013,7 +2013,7 @@ jobs:
           ../bins/cargo-semver-checks semver-checks check-release --manifest-path="../subject/perf-event-open-sys/Cargo.toml" --baseline-version 5.0.0 --verbose
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -2030,14 +2030,14 @@ jobs:
       - build-binary
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
 
       # rust-fnv is very lightweight and quite stable.
       - name: Checkout rust-fnv
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           repository: "servo/rust-fnv"
@@ -2046,14 +2046,14 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           toolchain: "1.92"
           rustflags: ""
           cache: false
 
       - name: Download binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -2062,13 +2062,13 @@ jobs:
 
       - name: Restore rustdoc
         id: cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             subject/target/semver-checks/local-fnv-1_0_7/
@@ -2102,7 +2102,7 @@ jobs:
           rm -f unexpectedly_did_not_fail
 
       - name: Save rustdoc
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           key: ${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ hashFiles('semver/**/Cargo.lock') }}-${{ github.job }}-rustdoc
@@ -2113,7 +2113,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout cargo-semver-checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           path: 'semver'
@@ -2145,7 +2145,7 @@ jobs:
 
       - name: Checkout cargo-semver-checks
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 2
@@ -2286,17 +2286,17 @@ jobs:
       publish-tag: ${{ steps.tag.outputs.tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           cache: false
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 
       - id: check
         run: |
@@ -2328,12 +2328,12 @@ jobs:
     if: needs.should-publish.outputs.is_new_version == 'yes'
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Check semver
-        uses: obi1kenobi/cargo-semver-checks-action@v2
+        uses: obi1kenobi/cargo-semver-checks-action@6b69fcf40e9b5fb17adeb57e4b6ecd020649a239 # v2.9
         with:
           # Ensure we include all new non-default features here explicitly, except for
           # pass-through mutually-exclusive features from our dependencies such as:
@@ -2349,7 +2349,7 @@ jobs:
         toolchain: ["1.93", "1.94", "1.95", "1.96", "1.97", "stable"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -2366,7 +2366,7 @@ jobs:
 
       - name: Install rust
         id: toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           toolchain: ${{ matrix.toolchain }}
           rustflags: ""
@@ -2374,7 +2374,7 @@ jobs:
 
       - name: Restore test rustdocs
         id: cache-test-rustdocs
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: localdata/test_data/
           key: test-rustdocs-and-meta-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ steps.rustdoc-inputs.outputs.hash }}
@@ -2392,7 +2392,7 @@ jobs:
           echo "name=test-rustdocs-$HASH-$TRIPLE-$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.artifact.outputs.name }}
           path: localdata/test_data
