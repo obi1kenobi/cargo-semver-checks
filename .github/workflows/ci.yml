@@ -68,6 +68,7 @@ jobs:
       - run-on-cargo-config-linux
       - run-on-ref-slice-fork
       - run-on-ref-slice-fork-windows
+      - run-on-bare-repository
       - run-on-tokio-explicit
       - run-on-tokio-implicit
       - run-on-perf-event-open-sys2
@@ -96,6 +97,7 @@ jobs:
           echo "run-on-cargo-config-linux: ${{ needs.run-on-cargo-config-linux.result }}"
           echo "run-on-ref-slice-fork: ${{ needs.run-on-ref-slice-fork.result }}"
           echo "run-on-ref-slice-fork-windows: ${{ needs.run-on-ref-slice-fork-windows.result }}"
+          echo "run-on-bare-repository: ${{ needs.run-on-bare-repository.result }}"
           echo "run-on-tokio-explicit: ${{ needs.run-on-tokio-explicit.result }}"
           echo "run-on-tokio-implicit: ${{ needs.run-on-tokio-implicit.result }}"
           echo "run-on-perf-event-open-sys2: ${{ needs.run-on-perf-event-open-sys2.result }}"
@@ -143,6 +145,8 @@ jobs:
       - if: ${{ needs.run-on-ref-slice-fork.result != 'success' }}
         run: exit 1
       - if: ${{ needs.run-on-ref-slice-fork-windows.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.run-on-bare-repository.result != 'success' }}
         run: exit 1
       - if: ${{ needs.run-on-tokio-explicit.result != 'success' }}
         run: exit 1
