@@ -112,15 +112,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: true
-          token: ${{ secrets.TAGGER_GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Tag the version
         env:
-          GITHUB_TOKEN: ${{ secrets.TAGGER_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TAGGER_GITHUB_TOKEN }}
           PUBLISH_TAG: ${{ inputs.publish-tag }}
         run: |
           set -euo pipefail
+          gh auth setup-git
           git tag -- "$PUBLISH_TAG"
           git push origin "refs/tags/$PUBLISH_TAG:refs/tags/$PUBLISH_TAG"
 
