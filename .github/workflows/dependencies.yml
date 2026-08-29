@@ -94,7 +94,7 @@ jobs:
       - name: checkout the source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: true
+          persist-credentials: false
 
       - name: download Cargo.lock from update job
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -137,8 +137,11 @@ jobs:
           git commit --no-verify --file=commit.txt
 
       - name: push
+        env:
+          GH_TOKEN: ${{ secrets.DEPS_UPDATER_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          gh auth setup-git
           git push --no-verify --force --set-upstream origin "$BRANCH_NAME"
 
       - name: edit existing open pull request
