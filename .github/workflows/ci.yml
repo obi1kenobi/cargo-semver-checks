@@ -42,6 +42,27 @@ jobs:
       - name: Enforce the build-script policy
         run: python3 .github/scripts/check_build_scripts.py
 
+  zizmor:
+    name: Run zizmor
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+        with:
+          persona: regular
+          online-audits: true
+          min-severity: medium
+          min-confidence: medium
+          advanced-security: false
+          annotations: true
+
   # Every job listed in `needs` must run on every workflow event. GitHub propagates
   # a skipped dependency through the entire dependency chain even when this job uses
   # `always()`, so making a dependency pull-request-only would also skip publishing
@@ -52,6 +73,7 @@ jobs:
     permissions: {}
     needs:
       - build-script-policy
+      - zizmor
       - lint
       - rust-tests
       - cargo-check-test-crates
@@ -81,6 +103,7 @@ jobs:
       - name: Job outcomes
         run: |
           echo "build-script-policy: ${{ needs.build-script-policy.result }}"
+          echo "zizmor: ${{ needs.zizmor.result }}"
           echo "lint: ${{ needs.lint.result }}"
           echo "rust-tests: ${{ needs.rust-tests.result }}"
           echo "cargo-check-test-crates: ${{ needs.cargo-check-test-crates.result }}"
@@ -112,6 +135,8 @@ jobs:
       # Multi-line `if` clauses are not evaluated properly: see the intermediate commits in
       # https://github.com/obi1kenobi/cargo-semver-checks/pull/405
       - if: ${{ needs.build-script-policy.result != 'success' }}
+        run: exit 1
+      - if: ${{ needs.zizmor.result != 'success' }}
         run: exit 1
       - if: ${{ needs.lint.result != 'success' }}
         run: exit 1
