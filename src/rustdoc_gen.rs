@@ -698,30 +698,127 @@ impl RustdocFromGitRevision {
 }
 
 fn extract_tree(tree: gix::Id<'_>, target: &std::path::Path) -> anyhow::Result<()> {
+    let mut symlinks = Vec::new();
+    extract_tree_entries(tree, target, target, &mut symlinks)?;
+    expand_symlinks(symlinks)
+}
+
+fn extract_tree_entries(
+    tree: gix::Id<'_>,
+    root: &std::path::Path,
+    target: &std::path::Path,
+    symlinks: &mut Vec<(PathBuf, PathBuf)>,
+) -> anyhow::Result<()> {
     for entry in tree.object()?.try_into_tree()?.iter() {
         let entry = entry?;
         let mode = entry.mode();
+        let path = target.join(bytes2str(entry.filename()));
         if mode.is_tree() {
-            let path = target.join(bytes2str(entry.filename()));
             fs_err::create_dir_all(&path)?;
-            extract_tree(entry.id(), &path)?;
-        } else if mode.is_blob() {
+            extract_tree_entries(entry.id(), root, &path, symlinks)?;
+        } else if mode.is_blob() || mode.is_link() {
             let blob = entry.object()?;
             assert!(
                 blob.kind.is_blob(),
                 "we are not working on a corrupted repository"
             );
-            let path = target.join(bytes2str(entry.filename()));
-            let existing = fs_err::read(&path).ok();
-            if existing.as_deref() != Some(&blob.data) {
-                atomic_write(&path, |writer| {
-                    writer.write_all(&blob.data)?;
-                    Ok(())
-                })?;
+            if mode.is_link() {
+                symlinks.push((
+                    path.clone(),
+                    resolve_symlink_target(root, &path, &blob.data)?,
+                ));
+            } else {
+                write_file_if_changed(&path, &blob.data)?;
             }
         }
     }
 
+    Ok(())
+}
+
+fn resolve_symlink_target(
+    root: &std::path::Path,
+    symlink: &std::path::Path,
+    target: &[u8],
+) -> anyhow::Result<PathBuf> {
+    let target = std::path::Path::new(bytes2str(target));
+    if target.is_absolute() {
+        bail!("cannot expand absolute symlink target {}", target.display());
+    }
+
+    let relative_parent = symlink
+        .parent()
+        .and_then(|parent| parent.strip_prefix(root).ok())
+        .with_context(|| {
+            format!(
+                "symlink path is outside the extracted tree: {}",
+                symlink.display()
+            )
+        })?;
+    let mut relative_target = PathBuf::new();
+    for component in relative_parent.join(target).components() {
+        match component {
+            std::path::Component::Normal(component) => relative_target.push(component),
+            std::path::Component::CurDir => {}
+            std::path::Component::ParentDir => {
+                if !relative_target.pop() {
+                    bail!(
+                        "symlink target points outside the extracted tree: {}",
+                        target.display()
+                    );
+                }
+            }
+            std::path::Component::Prefix(_) | std::path::Component::RootDir => {
+                bail!("cannot expand absolute symlink target {}", target.display());
+            }
+        }
+    }
+
+    Ok(root.join(relative_target))
+}
+
+fn expand_symlinks(mut symlinks: Vec<(PathBuf, PathBuf)>) -> anyhow::Result<()> {
+    while !symlinks.is_empty() {
+        let symlink_paths: BTreeSet<_> = symlinks.iter().map(|(path, _)| path.clone()).collect();
+        let mut deferred = Vec::new();
+        let mut expanded_any = false;
+
+        for (path, target) in symlinks {
+            if symlink_paths.contains(&target) {
+                deferred.push((path, target));
+                continue;
+            }
+
+            let contents = fs_err::read(&target).with_context(|| {
+                format!(
+                    "failed to expand symlink {} pointing to {}",
+                    path.display(),
+                    target.display()
+                )
+            })?;
+            write_file_if_changed(&path, &contents)?;
+            expanded_any = true;
+        }
+
+        if !expanded_any {
+            let paths = deferred.iter().map(|(path, _)| path.display()).join(", ");
+            bail!("cannot expand cyclic symlinks: {paths}");
+        }
+        symlinks = deferred;
+    }
+
+    Ok(())
+}
+
+#[inline(always)]
+fn write_file_if_changed(path: &std::path::Path, contents: &[u8]) -> anyhow::Result<()> {
+    let existing = fs_err::read(path).ok();
+    if existing.as_deref() != Some(contents) {
+        atomic_write(path, |writer| {
+            writer.write_all(contents)?;
+            Ok(())
+        })?;
+    }
     Ok(())
 }
 
@@ -943,9 +1040,88 @@ fn acquire_cargo_global_package_lock(
 
 #[cfg(test)]
 mod tests {
+    use std::path::{Path, PathBuf};
     use tame_index::{IndexKrate, IndexVersion};
 
-    use super::choose_baseline_version;
+    use super::{choose_baseline_version, expand_symlinks, resolve_symlink_target};
+
+    struct TestDir {
+        path: PathBuf,
+    }
+
+    impl TestDir {
+        fn new(name: &str) -> Self {
+            let path = std::env::temp_dir().join(format!(
+                "cargo-semver-checks-{name}-{}-{:032x}",
+                std::process::id(),
+                rand::random::<u128>(),
+            ));
+            fs_err::create_dir(&path).expect("failed to create test temp dir");
+            Self { path }
+        }
+
+        fn path(&self) -> &Path {
+            &self.path
+        }
+    }
+
+    impl Drop for TestDir {
+        fn drop(&mut self) {
+            let _ = fs_err::remove_dir_all(&self.path);
+        }
+    }
+
+    #[test]
+    fn symlinks_are_expanded_as_regular_files() -> anyhow::Result<()> {
+        let temp_dir = TestDir::new("expand-symlinks");
+        let foo = temp_dir.path().join("foo.rs");
+        let bar = temp_dir.path().join("bar.rs");
+        fs_err::write(&foo, "pub struct Foo;\n")?;
+
+        let target = resolve_symlink_target(temp_dir.path(), &bar, b"foo.rs")?;
+        expand_symlinks(vec![(bar.clone(), target)])?;
+
+        assert_eq!(fs_err::read(&bar)?, fs_err::read(&foo)?);
+        assert!(fs_err::metadata(&bar)?.is_file());
+        assert!(!fs_err::symlink_metadata(&bar)?.file_type().is_symlink());
+        Ok(())
+    }
+
+    // Guard against materializing files from paths outside the extracted tree.
+    #[test]
+    fn absolute_symlink_targets_are_rejected() {
+        let temp_dir = TestDir::new("reject-absolute-symlink-target");
+        let bar = temp_dir.path().join("bar.rs");
+        let absolute_target = temp_dir
+            .path()
+            .join("outside.rs")
+            .to_string_lossy()
+            .into_owned();
+
+        let error = resolve_symlink_target(temp_dir.path(), &bar, absolute_target.as_bytes())
+            .expect_err("absolute symlink targets should be rejected");
+
+        assert!(
+            error
+                .to_string()
+                .contains("cannot expand absolute symlink target")
+        );
+    }
+
+    #[test]
+    fn symlink_targets_outside_the_extracted_tree_are_rejected() {
+        let temp_dir = TestDir::new("reject-parent-symlink-target");
+        let bar = temp_dir.path().join("nested").join("bar.rs");
+
+        let error = resolve_symlink_target(temp_dir.path(), &bar, b"../../outside.rs")
+            .expect_err("symlink targets outside the extracted tree should be rejected");
+
+        assert!(
+            error
+                .to_string()
+                .contains("symlink target points outside the extracted tree")
+        );
+    }
 
     fn new_mock_version(version: semver::Version, yanked: bool) -> IndexVersion {
         let mut iv = IndexVersion::fake("test-crate", version.to_string());
