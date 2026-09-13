@@ -2338,8 +2338,6 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       publish-tag: ${{ needs.should-publish.outputs.publish-tag }}
-    secrets:
-      TAGGER_GITHUB_TOKEN: ${{ secrets.TAGGER_GITHUB_TOKEN }}
 
   should-publish:
     name: Check if version changed
