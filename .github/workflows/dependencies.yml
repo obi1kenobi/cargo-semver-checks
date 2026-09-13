@@ -54,9 +54,11 @@ jobs:
         run: python3 .github/scripts/check_build_scripts.py
 
       - name: Install rust
-        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # master
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
           toolchain: stable
+          rustflags: ""
+          cache: false
 
       - name: cargo update
         # Remove first line that always just says "Updating crates.io index"
