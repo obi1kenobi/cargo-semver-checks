@@ -640,11 +640,27 @@ mod tests {
 
     #[test]
     fn test_set_global_color_choice() {
+        struct RestoreGlobalColorChoice(ColorChoice);
+
+        impl Drop for RestoreGlobalColorChoice {
+            fn drop(&mut self) {
+                self.0.write_global();
+            }
+        }
+
+        let _restore_color_choice = RestoreGlobalColorChoice(ColorChoice::global());
+
+        // Keep all global color writes in one test to avoid races between writers.
         ColorChoice::Always.write_global();
         assert_color_choice(|_| (), Some(true), Some(true));
 
         ColorChoice::AlwaysAnsi.write_global();
         assert_color_choice(|_| (), Some(true), Some(true));
+
+        // A new GlobalConfig inherits the global color choice.
+        let config = GlobalConfig::new();
+        assert!(config.err_color_choice());
+        assert!(config.out_color_choice());
 
         ColorChoice::Never.write_global();
         assert_color_choice(|_| (), Some(false), Some(false));
@@ -666,13 +682,6 @@ mod tests {
         config.set_color_choice(false);
         config.set_err_color_choice(true);
         assert!(config.err_color_choice());
-
-        ColorChoice::AlwaysAnsi.write_global();
-        // we have to instantiate a new GlobalConfig here for it to read
-        // the color choice
-        config = GlobalConfig::new();
-        assert!(config.err_color_choice());
-        assert!(config.out_color_choice());
     }
 
     #[test]
