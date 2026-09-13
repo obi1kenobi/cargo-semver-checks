@@ -1031,7 +1031,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
-          ref: 'v0.9.0'
+          ref: '920543c824735dc1df6f4a59e7036e653dd5a553' # v0.9.0
           path: 'subject'
 
       - name: Install rust
@@ -1094,7 +1094,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'bevyengine/bevy'
-          ref: 'v0.9.1'
+          ref: '5718a7e74cc9b93d1d0bed9123548222123151b3' # v0.9.1
           path: 'subject'
 
       - name: Install rust
@@ -1156,7 +1156,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'risinglightdb/sqllogictest-rs'
-          ref: 'v0.13.0'
+          ref: 'ad46a4f7145b4cc7b94f8c48591527f5defeb01e' # v0.13.0
           path: 'subject'
 
       - name: Install rust
@@ -1412,7 +1412,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'clap-rs/clap'
-          ref: 'v3.2.0'
+          ref: '4e56acffcebd6f9b37f0714f3d3b69beacb564b6' # v3.2.0
           path: 'subject-current'
 
       - name: Checkout clap v3.1.18
@@ -1420,7 +1420,7 @@ jobs:
         with:
           persist-credentials: false
           repository: 'clap-rs/clap'
-          ref: 'v3.1.18'
+          ref: '524e36cf1a67ee6a447d3615a70b065d2b4f5e60' # v3.1.18
           path: 'subject-baseline'
 
       - name: Install rust
