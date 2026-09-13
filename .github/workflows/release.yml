@@ -6,9 +6,6 @@ on:
       publish-tag:
         required: true
         type: string
-    secrets:
-      TAGGER_GITHUB_TOKEN:
-        required: true
   workflow_dispatch:
     inputs:
       publish-tag:
@@ -120,7 +117,9 @@ jobs:
 
       - name: Tag the version
         env:
-          GH_TOKEN: ${{ secrets.TAGGER_GITHUB_TOKEN }}
+          # A GITHUB_TOKEN-authenticated tag push does not trigger other workflows.
+          # No repository workflow currently relies on that tag-push event.
+          GH_TOKEN: ${{ github.token }}
           PUBLISH_TAG: ${{ inputs.publish-tag }}
         run: |
           set -euo pipefail
