@@ -1,0 +1,116 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/trait_method_no_longer_variadic/": [
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("required_associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("trait_method_no_longer_variadic"),
+        String("RequiredAndProvided"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("provided_associated"),
+      "parameter_names": List([
+        String("_value"),
+      ]),
+      "path": List([
+        String("trait_method_no_longer_variadic"),
+        String("RequiredAndProvided"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("required_method"),
+      "parameter_names": List([
+        String("self"),
+      ]),
+      "path": List([
+        String("trait_method_no_longer_variadic"),
+        String("RequiredAndProvided"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("provided_method"),
+      "parameter_names": List([
+        String("self"),
+        String("_value"),
+      ]),
+      "path": List([
+        String("trait_method_no_longer_variadic"),
+        String("RequiredAndProvided"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C-unwind"),
+      "method_name": String("c_unwind"),
+      "parameter_names": List([
+        String("_value"),
+      ]),
+      "path": List([
+        String("trait_method_no_longer_variadic"),
+        String("RequiredAndProvided"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("required_associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("trait_method_no_longer_variadic"),
+        String("Sealed"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("provided_method"),
+      "parameter_names": List([
+        String("self"),
+      ]),
+      "path": List([
+        String("trait_method_no_longer_variadic"),
+        String("Sealed"),
+      ]),
+      "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(25),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("method"),
+      "parameter_names": List([
+        String("self"),
+      ]),
+      "path": List([
+        String("trait_method_no_longer_variadic"),
+        String("PublicReexport"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(33),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

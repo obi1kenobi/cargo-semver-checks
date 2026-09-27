@@ -2,6 +2,21 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/inherent_method_no_longer_variadic/": [
+    {
+      "method_name": String("newly_hidden"),
+      "method_visibility": String("public"),
+      "name": String("Methods"),
+      "path": List([
+        String("inherent_method_no_longer_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/inherent_method_now_doc_hidden/": [
     {
       "method_name": String("associated_fn"),
@@ -85,6 +100,21 @@ source: src/query.rs
       "span_begin_line": Uint64(11),
       "span_end_line": Uint64(13),
       "span_filename": String("src/union_inherent_method_now_doc_hidden.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/inherent_method_now_variadic/": [
+    {
+      "method_name": String("newly_hidden"),
+      "method_visibility": String("public"),
+      "name": String("Methods"),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
   ],

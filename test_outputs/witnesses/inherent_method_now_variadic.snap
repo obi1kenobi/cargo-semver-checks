@@ -1,0 +1,96 @@
+---
+source: src/query.rs
+description: "Lint `inherent_method_now_variadic` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+---
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 15
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::Methods::associated;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 16
+hint = """
+let _: unsafe extern "C" fn(
+    _
+) -> _ = inherent_method_now_variadic::Methods::with_fixed_argument;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 17
+hint = """
+let _: unsafe extern "C" fn(
+    _
+) -> _ = inherent_method_now_variadic::Methods::shared_receiver;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 18
+hint = """
+let _: unsafe extern "C" fn(
+    _
+) -> _ = inherent_method_now_variadic::Methods::mutable_receiver;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 19
+hint = """
+let _: unsafe extern "C-unwind" fn(
+) -> _ = inherent_method_now_variadic::Methods::unwind;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 41
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::Enum::associated;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 42
+hint = """
+let _: unsafe extern "C" fn(
+    _
+) -> _ = inherent_method_now_variadic::Enum::method;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 51
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::Union::associated;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 52
+hint = """
+let _: unsafe extern "C" fn(
+    _
+) -> _ = inherent_method_now_variadic::Union::method;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 62
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::Reexported::associated;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 105
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::Generic::associated;
+"""

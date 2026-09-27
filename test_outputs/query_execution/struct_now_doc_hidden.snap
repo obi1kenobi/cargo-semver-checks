@@ -14,6 +14,18 @@ source: src/query.rs
       "struct_name": String("StructF"),
     },
   ],
+  "./test_crates/inherent_method_no_longer_variadic/": [
+    {
+      "path": List([
+        String("inherent_method_no_longer_variadic"),
+        String("NewlyHidden"),
+      ]),
+      "span_begin_line": Uint64(95),
+      "span_end_line": Uint64(95),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("NewlyHidden"),
+    },
+  ],
   "./test_crates/inherent_method_now_doc_hidden/": [
     {
       "path": List([
@@ -25,6 +37,18 @@ source: src/query.rs
       "span_end_line": Uint64(5),
       "span_filename": String("src/struct_and_inherent_method_now_doc_hidden.rs"),
       "struct_name": String("Foo"),
+    },
+  ],
+  "./test_crates/inherent_method_now_variadic/": [
+    {
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("NewlyHidden"),
+      ]),
+      "span_begin_line": Uint64(95),
+      "span_end_line": Uint64(95),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("NewlyHidden"),
     },
   ],
   "./test_crates/struct_now_doc_hidden/": [

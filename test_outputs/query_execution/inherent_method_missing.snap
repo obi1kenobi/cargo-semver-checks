@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-assertion_line: 1073
 ---
 {
   "./test_crates/inherent_method_const_removed/": [
@@ -83,6 +82,36 @@ assertion_line: 1073
       ]),
       "span_begin_line": Uint64(22),
       "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/inherent_method_no_longer_variadic/": [
+    {
+      "method_name": String("newly_private"),
+      "method_visibility": String("public"),
+      "name": String("Methods"),
+      "path": List([
+        String("inherent_method_no_longer_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/inherent_method_now_variadic/": [
+    {
+      "method_name": String("newly_private"),
+      "method_visibility": String("public"),
+      "name": String("Methods"),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
