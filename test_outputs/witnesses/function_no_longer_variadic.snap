@@ -33,7 +33,28 @@ let _: unsafe extern "C-unwind" fn(
 
 [["./test_crates/function_no_longer_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 29
+begin_line = 15
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    ...
+) -> _ = function_no_longer_variadic::added_fixed_parameter;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 16
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    _,
+    ...
+) -> _ = function_no_longer_variadic::removed_fixed_parameter;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 34
 hint = """
 let _: unsafe extern "C" fn(
     _,
@@ -43,7 +64,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/function_no_longer_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 30
+begin_line = 35
 hint = """
 let _: unsafe extern "C" fn(
     _,
@@ -53,7 +74,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/function_no_longer_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 31
+begin_line = 36
 hint = """
 let _: unsafe extern "C" fn(
     _,
@@ -63,7 +84,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/function_no_longer_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 32
+begin_line = 37
 hint = """
 let _: unsafe extern "C" fn(
     ...
@@ -72,7 +93,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/function_no_longer_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 36
+begin_line = 41
 hint = """
 let _: unsafe extern "C-unwind" fn(
     _,
@@ -82,7 +103,7 @@ let _: unsafe extern "C-unwind" fn(
 
 [["./test_crates/function_no_longer_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 40
+begin_line = 45
 hint = """
 let _: unsafe extern "system" fn(
     _,
@@ -92,7 +113,7 @@ let _: unsafe extern "system" fn(
 
 [["./test_crates/function_no_longer_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 44
+begin_line = 49
 hint = """
 let _: unsafe extern "C" fn(
     _,
@@ -102,7 +123,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/function_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 82
+begin_line = 89
 hint = """
 let _: unsafe extern "C" fn(
     _,

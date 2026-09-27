@@ -66,13 +66,37 @@ source: src/query.rs
     },
     {
       "abi_raw_name": String("C"),
+      "method_name": String("fixed_parameter_added"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("fixed_parameter_removed"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
       "method_name": String("associated"),
       "parameter_names": List([]),
       "path": List([
         String("inherent_method_now_variadic"),
         String("Enum"),
       ]),
-      "span_begin_line": Uint64(41),
+      "span_begin_line": Uint64(45),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -85,7 +109,7 @@ source: src/query.rs
         String("inherent_method_now_variadic"),
         String("Enum"),
       ]),
-      "span_begin_line": Uint64(42),
+      "span_begin_line": Uint64(46),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -96,7 +120,7 @@ source: src/query.rs
         String("inherent_method_now_variadic"),
         String("Union"),
       ]),
-      "span_begin_line": Uint64(51),
+      "span_begin_line": Uint64(55),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -109,7 +133,7 @@ source: src/query.rs
         String("inherent_method_now_variadic"),
         String("Union"),
       ]),
-      "span_begin_line": Uint64(52),
+      "span_begin_line": Uint64(56),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -120,7 +144,7 @@ source: src/query.rs
         String("inherent_method_now_variadic"),
         String("Reexported"),
       ]),
-      "span_begin_line": Uint64(62),
+      "span_begin_line": Uint64(66),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -131,7 +155,62 @@ source: src/query.rs
         String("inherent_method_now_variadic"),
         String("Generic"),
       ]),
-      "span_begin_line": Uint64(105),
+      "span_begin_line": Uint64(109),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("MovedToDefaultTrait"),
+      ]),
+      "span_begin_line": Uint64(125),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("MovedToOverriddenTrait"),
+      ]),
+      "span_begin_line": Uint64(141),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("ChangedInherentWithMatchingTrait"),
+      ]),
+      "span_begin_line": Uint64(164),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("MovedToHiddenMatchingTrait"),
+      ]),
+      "span_begin_line": Uint64(193),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("ChangedInherentWithHiddenOverload"),
+      ]),
+      "span_begin_line": Uint64(206),
       "span_filename": String("src/lib.rs"),
     },
   ],

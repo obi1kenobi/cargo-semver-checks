@@ -10,6 +10,11 @@ pub unsafe extern "C" fn no_fixed_definition() {}
 pub unsafe extern "C" fn fixed_definition(_: u32) {}
 pub unsafe extern "C-unwind" fn unwind_definition(_: u32) {}
 
+// Fixed parameter counts and variadic status are independent signature changes.
+// Both lints should report these: reverting either change still breaks function pointers.
+pub unsafe extern "C" fn added_fixed_parameter(_first: i32, _second: i32) {}
+pub unsafe extern "C" fn removed_fixed_parameter(_first: i32) {}
+
 // Extern declarations can constrain downstream code even when the downstream crate supplies
 // the symbol. For example, this baseline API and dependent crate compile together:
 //

@@ -4,7 +4,7 @@ description: "Lint `function_now_variadic` did not have the expected witness out
 ---
 [["./test_crates/function_no_longer_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 82
+begin_line = 87
 hint = """
 let _: unsafe extern "C" fn(
     _
@@ -39,7 +39,26 @@ let _: unsafe extern "C-unwind" fn(
 
 [["./test_crates/function_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 29
+begin_line = 15
+hint = """
+let _: unsafe extern "C" fn(
+    _
+) -> _ = function_now_variadic::added_fixed_parameter;
+"""
+
+[["./test_crates/function_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 18
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    _
+) -> _ = function_now_variadic::removed_fixed_parameter;
+"""
+
+[["./test_crates/function_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 36
 hint = """
 let _: unsafe extern "C" fn(
     _
@@ -48,7 +67,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/function_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 30
+begin_line = 37
 hint = """
 let _: unsafe extern "C" fn(
     _
@@ -57,7 +76,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/function_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 31
+begin_line = 38
 hint = """
 let _: unsafe extern "C" fn(
     _
@@ -66,7 +85,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/function_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 32
+begin_line = 39
 hint = """
 let _: unsafe extern "C" fn(
 ) -> _ = function_now_variadic::no_fixed_declaration;
@@ -74,7 +93,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/function_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 36
+begin_line = 43
 hint = """
 let _: unsafe extern "C-unwind" fn(
     _
@@ -83,7 +102,7 @@ let _: unsafe extern "C-unwind" fn(
 
 [["./test_crates/function_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 40
+begin_line = 47
 hint = """
 let _: unsafe extern "system" fn(
     _
@@ -92,7 +111,7 @@ let _: unsafe extern "system" fn(
 
 [["./test_crates/function_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 44
+begin_line = 51
 hint = """
 let _: unsafe extern "C" fn(
     _

@@ -52,6 +52,19 @@ SemverQuery(
                                 public_api_eligible @filter(op: "!=", value: ["$true"])
                             }
                         }
+
+                        # Disjoint generic impls can have methods with the same name.
+                        # A hidden method does not establish that the public method was hidden
+                        # if a same-name method is still public API: it might be the original.
+                        inherent_impl @fold
+                                      @transform(op: "count")
+                                      @filter(op: "=", value: ["$zero"]) {
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                            }
+                        }
                     }
                 }
             }
@@ -59,7 +72,8 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
-        "true": true
+        "true": true,
+        "zero": 0,
     },
     error_message: "A method or associated fn is now #[doc(hidden)], removing it from the crate's public API.",
     per_result_error_template: Some("{{name}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),

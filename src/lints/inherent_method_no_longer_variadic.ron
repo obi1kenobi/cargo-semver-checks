@@ -51,9 +51,18 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        inherent_impl {
+                        # A method moved to a trait can still be called through its owner.
+                        impl {
+                            # An inherent impl implements zero traits; a trait impl implements one.
+                            # Record the candidate's kind so the suppression check below can
+                            # respect inherent methods taking precedence over trait methods.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @tag(name: "candidate_trait_count")
+
                             method {
-                                visibility_limit @filter(op: "=", value: ["$public"])
+                                visibility_limit
+                                    @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
                                 c_variadic @filter(op: "!=", value: ["$true"])
@@ -65,16 +74,45 @@ SemverQuery(
                             }
                         }
 
-                        # Disjoint generic impls can have methods with the same name.
+                        # Disjoint generic impls and traits can have methods with the same name.
                         # Do not report a change if a method with the baseline
                         # variadicness still exists: it might be the original method.
+                        impl @fold
+                             @transform(op: "count")
+                             @filter(op: "=", value: ["$zero"]) {
+                            # For an inherent candidate (0), only inherent methods can suppress
+                            # the report: a trait method cannot preserve an inherent call that
+                            # now resolves to a changed signature. For a trait candidate (1),
+                            # either kind of method may preserve the baseline API.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "<=", value: ["%candidate_trait_count"])
+
+                            method {
+                                visibility_limit
+                                    @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                c_variadic @filter(op: "=", value: ["$true"])
+                            }
+                        }
+
+                        # If an inherent method merely becomes doc-hidden, it still shadows
+                        # trait methods. Report that API loss via inherent_method_now_doc_hidden,
+                        # without attributing a variadic change to an unrelated trait method.
                         inherent_impl @fold
                                       @transform(op: "count")
                                       @filter(op: "=", value: ["$zero"]) {
+                            # An inherent impl's trait count is zero, so this exclusion applies
+                            # only to trait candidates (1), never to inherent candidates (0).
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "<", value: ["%candidate_trait_count"])
+
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
-                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                public_api_eligible @filter(op: "!=", value: ["$true"])
                                 c_variadic @filter(op: "=", value: ["$true"])
                             }
                         }
@@ -85,6 +123,7 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
+        "public_or_default": ["public", "default"],
         "true": true,
         "zero": 0,
     },

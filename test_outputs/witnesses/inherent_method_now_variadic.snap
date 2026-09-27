@@ -47,7 +47,24 @@ let _: unsafe extern "C-unwind" fn(
 
 [["./test_crates/inherent_method_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 41
+begin_line = 22
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::Methods::fixed_parameter_added;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 23
+hint = """
+let _: unsafe extern "C" fn(
+    _
+) -> _ = inherent_method_now_variadic::Methods::fixed_parameter_removed;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 45
 hint = """
 let _: unsafe extern "C" fn(
 ) -> _ = inherent_method_now_variadic::Enum::associated;
@@ -55,7 +72,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/inherent_method_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 42
+begin_line = 46
 hint = """
 let _: unsafe extern "C" fn(
     _
@@ -64,7 +81,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/inherent_method_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 51
+begin_line = 55
 hint = """
 let _: unsafe extern "C" fn(
 ) -> _ = inherent_method_now_variadic::Union::associated;
@@ -72,7 +89,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/inherent_method_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 52
+begin_line = 56
 hint = """
 let _: unsafe extern "C" fn(
     _
@@ -81,7 +98,7 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/inherent_method_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 62
+begin_line = 66
 hint = """
 let _: unsafe extern "C" fn(
 ) -> _ = inherent_method_now_variadic::Reexported::associated;
@@ -89,8 +106,48 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/inherent_method_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 105
+begin_line = 109
 hint = """
 let _: unsafe extern "C" fn(
 ) -> _ = inherent_method_now_variadic::Generic::associated;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 125
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::MovedToDefaultTrait::associated;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 141
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::MovedToOverriddenTrait::associated;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 164
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::ChangedInherentWithMatchingTrait::associated;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 193
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::MovedToHiddenMatchingTrait::associated;
+"""
+
+[["./test_crates/inherent_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 206
+hint = """
+let _: unsafe extern "C" fn(
+) -> _ = inherent_method_now_variadic::ChangedInherentWithHiddenOverload::associated;
 """
