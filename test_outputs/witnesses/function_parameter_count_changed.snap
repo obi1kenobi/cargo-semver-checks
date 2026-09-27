@@ -2,6 +2,26 @@
 source: src/query.rs
 description: "Lint `function_parameter_count_changed` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 ---
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 15
+hint = "let witness = |_first| function_no_longer_variadic::added_fixed_parameter(_first);"
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 16
+hint = "let witness = |_first, _second| function_no_longer_variadic::removed_fixed_parameter(_first, _second);"
+
+[["./test_crates/function_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 15
+hint = "let witness = |_first| function_now_variadic::added_fixed_parameter(_first);"
+
+[["./test_crates/function_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 18
+hint = "let witness = |_first, _second| function_now_variadic::removed_fixed_parameter(_first, _second);"
+
 [["./test_crates/parameter_count_changed/"]]
 filename = "src/lib.rs"
 begin_line = 3

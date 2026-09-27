@@ -18,6 +18,10 @@ impl Methods {
     pub unsafe extern "C" fn mutable_receiver(&mut self) {}
     pub unsafe extern "C-unwind" fn unwind() {}
 
+    // Both variadicness and fixed arity changes should be reported.
+    pub unsafe extern "C" fn fixed_parameter_added(_: i32) {}
+    pub unsafe extern "C" fn fixed_parameter_removed() {}
+
     // Private and doc-hidden methods should not be reported.
     unsafe extern "C" fn private() {}
     #[doc(hidden)]
@@ -114,4 +118,95 @@ impl Disjoint<u8> {
 
 impl Disjoint<u16> {
     pub unsafe extern "C" fn associated() {}
+}
+
+// Trait methods can replace inherent methods without changing their call syntax.
+pub trait VariadicTrait {
+    unsafe extern "C" fn associated(_: ...) {}
+}
+
+pub trait NonVariadicTrait {
+    unsafe extern "C" fn associated() {}
+}
+
+// Moving to a trait while changing variadicness should be reported,
+// whether the method uses the trait default or overrides it.
+pub struct MovedToDefaultTrait;
+
+impl NonVariadicTrait for MovedToDefaultTrait {}
+
+pub struct MovedToOverriddenTrait;
+
+impl NonVariadicTrait for MovedToOverriddenTrait {
+    unsafe extern "C" fn associated() {}
+}
+
+// Adding a trait method must not flag an unchanged inherent method of the same name.
+pub struct PreservedInherentMethod;
+
+impl PreservedInherentMethod {
+    pub unsafe extern "C" fn associated(_: ...) {}
+}
+
+impl NonVariadicTrait for PreservedInherentMethod {}
+
+// A matching trait method must also suppress reports about other same-name methods.
+pub struct MovedToMatchingTrait;
+
+impl VariadicTrait for MovedToMatchingTrait {}
+
+impl NonVariadicTrait for MovedToMatchingTrait {}
+
+// An unchanged trait method does not preserve a changed inherent method that shadows it.
+pub struct ChangedInherentWithMatchingTrait;
+
+impl ChangedInherentWithMatchingTrait {
+    pub unsafe extern "C" fn associated() {}
+}
+
+impl VariadicTrait for ChangedInherentWithMatchingTrait {}
+
+// Making this inherent method doc-hidden removes its public API guarantee and is breaking.
+// The signature itself is unchanged, so inherent_method_now_doc_hidden should report the loss,
+// without a variadicness lint reporting the unrelated trait method that it still shadows.
+pub struct NewlyHiddenInherentWithTrait;
+
+impl NewlyHiddenInherentWithTrait {
+    #[doc(hidden)]
+    pub unsafe extern "C" fn associated(_: ...) {}
+}
+
+impl NonVariadicTrait for NewlyHiddenInherentWithTrait {}
+
+// A doc-hidden trait method cannot preserve the removed inherent method's public API.
+// Even if downstream code could keep compiling by using that method, it would lose its
+// SemVer guarantee: the hidden method could change without a future major version bump.
+// The variadicness change must therefore be reported despite the hidden matching signature.
+pub trait HiddenMatchingTrait {
+    #[doc(hidden)]
+    unsafe extern "C" fn associated(_: ...) {}
+}
+
+// Use a separate default method so this case and MovedToDefaultTrait have distinct
+// source spans, keeping snapshot ordering deterministic.
+pub trait NonVariadicTraitForHiddenMatch {
+    unsafe extern "C" fn associated() {}
+}
+
+pub struct MovedToHiddenMatchingTrait;
+
+impl HiddenMatchingTrait for MovedToHiddenMatchingTrait {}
+
+impl NonVariadicTraitForHiddenMatch for MovedToHiddenMatchingTrait {}
+
+// A hidden overload in a disjoint impl cannot preserve the changed public method.
+pub struct ChangedInherentWithHiddenOverload<T>(core::marker::PhantomData<T>);
+
+impl ChangedInherentWithHiddenOverload<u8> {
+    pub unsafe extern "C" fn associated() {}
+}
+
+impl ChangedInherentWithHiddenOverload<u16> {
+    #[doc(hidden)]
+    pub unsafe extern "C" fn associated(_: ...) {}
 }

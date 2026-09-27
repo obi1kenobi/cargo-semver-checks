@@ -61,6 +61,30 @@ fn witness<T: trait_method_now_variadic::RequiredAndProvided>() {
 filename = "src/lib.rs"
 begin_line = 24
 hint = """
+fn witness<T: trait_method_now_variadic::FixedParameterCountChanged>() {
+    let _: unsafe extern "C" fn(
+        _
+    ) -> _ = T::added_fixed_parameter;
+}
+"""
+
+[["./test_crates/trait_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 28
+hint = """
+fn witness<T: trait_method_now_variadic::FixedParameterCountChanged>() {
+    let _: unsafe extern "C" fn(
+        _,
+        _,
+        _
+    ) -> _ = T::removed_fixed_parameter;
+}
+"""
+
+[["./test_crates/trait_method_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 34
+hint = """
 fn witness<T: trait_method_now_variadic::Sealed>() {
     let _: unsafe extern "C" fn(
     ) -> _ = T::required_associated;
@@ -69,7 +93,7 @@ fn witness<T: trait_method_now_variadic::Sealed>() {
 
 [["./test_crates/trait_method_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 25
+begin_line = 35
 hint = """
 fn witness<T: trait_method_now_variadic::Sealed>() {
     let _: unsafe extern "C" fn(
@@ -80,7 +104,7 @@ fn witness<T: trait_method_now_variadic::Sealed>() {
 
 [["./test_crates/trait_method_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 33
+begin_line = 43
 hint = """
 fn witness<T: trait_method_now_variadic::PublicReexport>() {
     let _: unsafe extern "C" fn(

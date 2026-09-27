@@ -2,6 +2,76 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/function_no_longer_variadic/": [
+    {
+      "current_parameter_count": Uint64(2),
+      "name": String("added_fixed_parameter"),
+      "old_parameter_count": Uint64(1),
+      "old_parameter_names": List([
+        String("_first"),
+      ]),
+      "path": List([
+        String("function_no_longer_variadic"),
+        String("added_fixed_parameter"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_parameter_count": Uint64(1),
+      "name": String("removed_fixed_parameter"),
+      "old_parameter_count": Uint64(2),
+      "old_parameter_names": List([
+        String("_first"),
+        String("_second"),
+      ]),
+      "path": List([
+        String("function_no_longer_variadic"),
+        String("removed_fixed_parameter"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_now_variadic/": [
+    {
+      "current_parameter_count": Uint64(2),
+      "name": String("added_fixed_parameter"),
+      "old_parameter_count": Uint64(1),
+      "old_parameter_names": List([
+        String("_first"),
+      ]),
+      "path": List([
+        String("function_now_variadic"),
+        String("added_fixed_parameter"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_parameter_count": Uint64(1),
+      "name": String("removed_fixed_parameter"),
+      "old_parameter_count": Uint64(2),
+      "old_parameter_names": List([
+        String("_first"),
+        String("_second"),
+      ]),
+      "path": List([
+        String("function_now_variadic"),
+        String("removed_fixed_parameter"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/parameter_count_changed/": [
     {
       "current_parameter_count": Uint64(2),

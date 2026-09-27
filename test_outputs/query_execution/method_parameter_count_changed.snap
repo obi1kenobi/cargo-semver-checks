@@ -2,6 +2,130 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/inherent_method_no_longer_variadic/": [
+    {
+      "current_parameter_count": List([
+        Uint64(1),
+      ]),
+      "found_receiver": List([
+        Uint64(0),
+      ]),
+      "has_receiver": Uint64(0),
+      "method_name": String("fixed_parameter_added"),
+      "method_visibility": String("public"),
+      "name": String("Methods"),
+      "non_matching_span_begin_line": List([
+        Uint64(22),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(22),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_parameter_count": Uint64(0),
+      "path": List([
+        String("inherent_method_no_longer_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_parameter_count": List([
+        Uint64(0),
+      ]),
+      "found_receiver": List([
+        Uint64(0),
+      ]),
+      "has_receiver": Uint64(0),
+      "method_name": String("fixed_parameter_removed"),
+      "method_visibility": String("public"),
+      "name": String("Methods"),
+      "non_matching_span_begin_line": List([
+        Uint64(23),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(23),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_parameter_count": Uint64(1),
+      "path": List([
+        String("inherent_method_no_longer_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/inherent_method_now_variadic/": [
+    {
+      "current_parameter_count": List([
+        Uint64(1),
+      ]),
+      "found_receiver": List([
+        Uint64(0),
+      ]),
+      "has_receiver": Uint64(0),
+      "method_name": String("fixed_parameter_added"),
+      "method_visibility": String("public"),
+      "name": String("Methods"),
+      "non_matching_span_begin_line": List([
+        Uint64(22),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(22),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_parameter_count": Uint64(0),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_parameter_count": List([
+        Uint64(0),
+      ]),
+      "found_receiver": List([
+        Uint64(0),
+      ]),
+      "has_receiver": Uint64(0),
+      "method_name": String("fixed_parameter_removed"),
+      "method_visibility": String("public"),
+      "name": String("Methods"),
+      "non_matching_span_begin_line": List([
+        Uint64(23),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(23),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_parameter_count": Uint64(1),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/parameter_count_changed/": [
     {
       "current_parameter_count": List([

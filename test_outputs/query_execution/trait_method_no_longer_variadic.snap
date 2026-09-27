@@ -74,14 +74,44 @@ source: src/query.rs
     },
     {
       "abi_raw_name": String("C"),
+      "method_name": String("added_fixed_parameter"),
+      "parameter_names": List([
+        String("_first"),
+      ]),
+      "path": List([
+        String("trait_method_no_longer_variadic"),
+        String("FixedParameterCountChanged"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("removed_fixed_parameter"),
+      "parameter_names": List([
+        String("self"),
+        String("_first"),
+        String("_second"),
+      ]),
+      "path": List([
+        String("trait_method_no_longer_variadic"),
+        String("FixedParameterCountChanged"),
+      ]),
+      "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(25),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
       "method_name": String("required_associated"),
       "parameter_names": List([]),
       "path": List([
         String("trait_method_no_longer_variadic"),
         String("Sealed"),
       ]),
-      "span_begin_line": Uint64(24),
-      "span_end_line": Uint64(24),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(31),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -94,8 +124,8 @@ source: src/query.rs
         String("trait_method_no_longer_variadic"),
         String("Sealed"),
       ]),
-      "span_begin_line": Uint64(25),
-      "span_end_line": Uint64(25),
+      "span_begin_line": Uint64(32),
+      "span_end_line": Uint64(32),
       "span_filename": String("src/lib.rs"),
     },
     {
@@ -108,8 +138,8 @@ source: src/query.rs
         String("trait_method_no_longer_variadic"),
         String("PublicReexport"),
       ]),
-      "span_begin_line": Uint64(33),
-      "span_end_line": Uint64(33),
+      "span_begin_line": Uint64(40),
+      "span_end_line": Uint64(40),
       "span_filename": String("src/lib.rs"),
     },
   ],

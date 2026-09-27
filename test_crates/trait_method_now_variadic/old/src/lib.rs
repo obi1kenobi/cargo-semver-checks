@@ -15,6 +15,16 @@ pub trait RequiredAndProvided: Sized {
     unsafe extern "C-unwind" fn c_unwind(_value: i32);
 }
 
+// Fixed parameter counts and variadic status are independent signature changes.
+// Both lints should report these: reverting either change still breaks function pointers.
+pub trait FixedParameterCountChanged: Sized {
+    unsafe extern "C" fn added_fixed_parameter(_first: i32);
+
+    // Removing a fixed parameter while adding `...` preserves existing two-argument calls,
+    // but assignments to the previous function pointer type still break.
+    unsafe extern "C" fn removed_fixed_parameter(&self, _first: i32, _second: i32) {}
+}
+
 // Sealing does not prevent downstream function-pointer coercions.
 // Both methods should be reported.
 pub trait Sealed: private::Sealed + Sized {
