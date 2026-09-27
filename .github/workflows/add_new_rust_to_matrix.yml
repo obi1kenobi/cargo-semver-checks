@@ -91,6 +91,7 @@ jobs:
           components: rustfmt, clippy
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: apply automatic clippy and rustfmt fixes
         run: |

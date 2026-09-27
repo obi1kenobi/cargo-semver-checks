@@ -58,6 +58,7 @@ jobs:
         with:
           toolchain: stable
           rustflags: ""
+          build-warnings: ""
           cache: false
 
       - name: cargo update

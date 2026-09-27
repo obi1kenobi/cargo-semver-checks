@@ -99,6 +99,7 @@ jobs:
         with:
           toolchain: stable
           rustflags: ""
+          build-warnings: ""
           cache: false
 
       - name: Build and package binary

@@ -244,6 +244,7 @@ jobs:
           components: rustfmt, clippy
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
@@ -256,6 +257,8 @@ jobs:
       # Ideally, one day we'd be able to do something like "`--all-features` except feature X":
       # https://github.com/rust-lang/cargo/issues/3126
       - name: cargo clippy
+        # TODO: Once MSRV is 1.97, use the setup action's build-warnings: deny
+        # instead of -D warnings in this job.
         run: cargo clippy --manifest-path semver/Cargo.toml --workspace --all-targets --no-deps -- -D warnings --allow deprecated
 
       - name: cargo fmt
@@ -273,6 +276,8 @@ jobs:
       # https://github.com/rust-lang/cargo/issues/3126
       - name: cargo doc
         env:
+          # TODO: Once MSRV is 1.97, use the setup action's build-warnings: deny
+          # instead of -D warnings in this job.
           RUSTDOCFLAGS: -D warnings
         run: cargo doc --manifest-path semver/Cargo.toml --workspace --no-deps --document-private-items
 
@@ -293,6 +298,7 @@ jobs:
         with:
           toolchain: nightly  # Because we sometimes test unstable features.
           rustflags: ""
+          build-warnings: ""
           cache: false
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
@@ -388,6 +394,7 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           rustflags: ""
+          build-warnings: ""
           cache: false
 
       - name: restore test rustdocs
@@ -433,6 +440,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
         with:
           rustflags: ""
+          build-warnings: ""
           cache: false
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
@@ -487,6 +495,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
         with:
           rustflags: ""
+          build-warnings: ""
           cache: false
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
@@ -559,6 +568,7 @@ jobs:
         with:
           toolchain: ${{ steps.vars.outputs.older-rust }}
           rustflags: ""
+          build-warnings: ""
           cache: false
 
       - name: Restore rustdoc
@@ -593,6 +603,7 @@ jobs:
         with:
           toolchain: ${{ steps.vars.outputs.newer-rust }}
           rustflags: ""
+          build-warnings: ""
           cache: false
 
       - name: Check with older rustdoc version cached
@@ -710,6 +721,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Restore rustdoc
         id: cache
@@ -828,6 +840,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -895,6 +908,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -933,6 +947,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -982,6 +997,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       # This job runs on macOS, not Linux like the rest.
       # It should save its cache, because no other job will save it in its place.
@@ -1040,6 +1056,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -1103,6 +1120,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -1165,6 +1183,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -1429,6 +1448,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -1553,6 +1573,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -1624,6 +1645,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -1855,6 +1877,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -1955,6 +1978,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -2050,6 +2074,7 @@ jobs:
         with:
           cache: false
           rustflags: ""
+          build-warnings: ""
 
       - name: Download binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -2115,6 +2140,7 @@ jobs:
         with:
           toolchain: "1.92"
           rustflags: ""
+          build-warnings: ""
           cache: false
 
       - name: Download binary
@@ -2358,6 +2384,9 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
         with:
           cache: false
+          # TODO: Once MSRV is 1.97, use build-warnings: deny instead of -D warnings.
+          rustflags: "-D warnings"
+          build-warnings: ""
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 
@@ -2433,6 +2462,7 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           rustflags: ""
+          build-warnings: ""
           cache: false
 
       - name: Restore test rustdocs
