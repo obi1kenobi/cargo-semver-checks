@@ -1,0 +1,98 @@
+---
+source: src/query.rs
+description: "Lint `trait_method_no_longer_variadic` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+---
+[["./test_crates/trait_method_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 11
+hint = """
+fn witness<T: trait_method_no_longer_variadic::RequiredAndProvided>() {
+    let _: unsafe extern "C" fn(
+        ...
+    ) -> _ = T::required_associated;
+}
+"""
+
+[["./test_crates/trait_method_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 12
+hint = """
+fn witness<T: trait_method_no_longer_variadic::RequiredAndProvided>() {
+    let _: unsafe extern "C" fn(
+        _,
+        ...
+    ) -> _ = T::provided_associated;
+}
+"""
+
+[["./test_crates/trait_method_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 13
+hint = """
+fn witness<T: trait_method_no_longer_variadic::RequiredAndProvided>() {
+    let _: unsafe extern "C" fn(
+        _,
+        ...
+    ) -> _ = T::required_method;
+}
+"""
+
+[["./test_crates/trait_method_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 14
+hint = """
+fn witness<T: trait_method_no_longer_variadic::RequiredAndProvided>() {
+    let _: unsafe extern "C" fn(
+        _,
+        _,
+        ...
+    ) -> _ = T::provided_method;
+}
+"""
+
+[["./test_crates/trait_method_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 15
+hint = """
+fn witness<T: trait_method_no_longer_variadic::RequiredAndProvided>() {
+    let _: unsafe extern "C-unwind" fn(
+        _,
+        ...
+    ) -> _ = T::c_unwind;
+}
+"""
+
+[["./test_crates/trait_method_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 24
+hint = """
+fn witness<T: trait_method_no_longer_variadic::Sealed>() {
+    let _: unsafe extern "C" fn(
+        ...
+    ) -> _ = T::required_associated;
+}
+"""
+
+[["./test_crates/trait_method_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 25
+hint = """
+fn witness<T: trait_method_no_longer_variadic::Sealed>() {
+    let _: unsafe extern "C" fn(
+        _,
+        ...
+    ) -> _ = T::provided_method;
+}
+"""
+
+[["./test_crates/trait_method_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 33
+hint = """
+fn witness<T: trait_method_no_longer_variadic::PublicReexport>() {
+    let _: unsafe extern "C" fn(
+        _,
+        ...
+    ) -> _ = T::method;
+}
+"""

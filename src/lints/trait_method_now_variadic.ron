@@ -1,0 +1,82 @@
+SemverQuery(
+    id: "trait_method_now_variadic",
+    human_readable_name: "trait method became variadic",
+    description: "A public trait method is now variadic.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some(
+        "https://doc.rust-lang.org/reference/items/functions.html#c-variadic-functions",
+    ),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @tag @output
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            c_variadic @filter(op: "=", value: ["$true"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            method_name: name @tag @output
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            c_variadic @filter(op: "!=", value: ["$true"])
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+                            name @filter(op: "=", value: ["%method_name"])
+
+                            abi_: abi {
+                                raw_name @output
+                            }
+
+                            parameter @fold {
+                                name @output(name: "parameter_names")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+    },
+    error_message: r#"A public trait method is now variadic.
+Downstream code relying on its previous signature may no longer compile."#,
+    per_result_error_template: Some(
+        r#"{{join "::" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"#,
+    ),
+    witness: (
+        hint_template: r#"fn witness<T: {{join "::" path}}>() {
+    let _: unsafe extern "{{abi_raw_name}}" fn(
+{{#each parameter_names}}        _{{#unless @last}},{{/unless}}
+{{/each}}    ) -> _ = T::{{method_name}};
+}
+"#,
+    ),
+)

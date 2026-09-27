@@ -1,0 +1,111 @@
+---
+source: src/query.rs
+description: "Lint `function_no_longer_variadic` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+---
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 9
+hint = """
+let _: unsafe extern "C" fn(
+    ...
+) -> _ = function_no_longer_variadic::no_fixed_definition;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 10
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    ...
+) -> _ = function_no_longer_variadic::fixed_definition;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 11
+hint = """
+let _: unsafe extern "C-unwind" fn(
+    _,
+    ...
+) -> _ = function_no_longer_variadic::unwind_definition;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 29
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    ...
+) -> _ = function_no_longer_variadic::provided_by_downstream;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 30
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    ...
+) -> _ = function_no_longer_variadic::explicit_unsafe_declaration;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 31
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    ...
+) -> _ = function_no_longer_variadic::safe_declaration;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 32
+hint = """
+let _: unsafe extern "C" fn(
+    ...
+) -> _ = function_no_longer_variadic::no_fixed_declaration;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 36
+hint = """
+let _: unsafe extern "C-unwind" fn(
+    _,
+    ...
+) -> _ = function_no_longer_variadic::unwind_declaration;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 40
+hint = """
+let _: unsafe extern "system" fn(
+    _,
+    ...
+) -> _ = function_no_longer_variadic::system_declaration;
+"""
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 44
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    ...
+) -> _ = function_no_longer_variadic::reexported;
+"""
+
+[["./test_crates/function_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 82
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    ...
+) -> _ = function_now_variadic::opposite_direction;
+"""

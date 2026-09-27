@@ -2,6 +2,18 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/function_no_longer_variadic/": [
+    {
+      "function_name": String("becomes_doc_hidden"),
+      "path": List([
+        String("function_no_longer_variadic"),
+        String("becomes_doc_hidden"),
+      ]),
+      "span_begin_line": Uint64(76),
+      "span_end_line": Uint64(76),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
   "./test_crates/function_now_doc_hidden/": [
     {
       "function_name": String("my_function"),
@@ -44,6 +56,18 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(52),
       "span_end_line": Uint64(54),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/function_now_variadic/": [
+    {
+      "function_name": String("becomes_doc_hidden"),
+      "path": List([
+        String("function_now_variadic"),
+        String("becomes_doc_hidden"),
+      ]),
+      "span_begin_line": Uint64(76),
+      "span_end_line": Uint64(76),
       "span_filename": String("src/lib.rs"),
     },
   ],

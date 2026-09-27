@@ -1,0 +1,138 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/inherent_method_now_variadic/": [
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("with_fixed_argument"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("shared_receiver"),
+      "parameter_names": List([
+        String("self"),
+      ]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("mutable_receiver"),
+      "parameter_names": List([
+        String("self"),
+      ]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C-unwind"),
+      "method_name": String("unwind"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Methods"),
+      ]),
+      "span_begin_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Enum"),
+      ]),
+      "span_begin_line": Uint64(41),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("method"),
+      "parameter_names": List([
+        String("self"),
+      ]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Enum"),
+      ]),
+      "span_begin_line": Uint64(42),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Union"),
+      ]),
+      "span_begin_line": Uint64(51),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("method"),
+      "parameter_names": List([
+        String("self"),
+      ]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Union"),
+      ]),
+      "span_begin_line": Uint64(52),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Reexported"),
+      ]),
+      "span_begin_line": Uint64(62),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("associated"),
+      "parameter_names": List([]),
+      "path": List([
+        String("inherent_method_now_variadic"),
+        String("Generic"),
+      ]),
+      "span_begin_line": Uint64(105),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

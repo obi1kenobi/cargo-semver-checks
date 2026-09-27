@@ -1,0 +1,148 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/function_no_longer_variadic/": [
+    {
+      "abi_raw_name": String("C"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("function_no_longer_variadic"),
+        String("opposite_direction"),
+      ]),
+      "span_begin_line": Uint64(82),
+      "span_end_line": Uint64(82),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/function_now_variadic/": [
+    {
+      "abi_raw_name": String("C"),
+      "parameter_names": List([]),
+      "path": List([
+        String("function_now_variadic"),
+        String("no_fixed_definition"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("function_now_variadic"),
+        String("fixed_definition"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C-unwind"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("function_now_variadic"),
+        String("unwind_definition"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "parameter_names": List([
+        String("value"),
+      ]),
+      "path": List([
+        String("function_now_variadic"),
+        String("provided_by_downstream"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "parameter_names": List([
+        String("value"),
+      ]),
+      "path": List([
+        String("function_now_variadic"),
+        String("explicit_unsafe_declaration"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_end_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "parameter_names": List([
+        String("value"),
+      ]),
+      "path": List([
+        String("function_now_variadic"),
+        String("safe_declaration"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "parameter_names": List([]),
+      "path": List([
+        String("function_now_variadic"),
+        String("no_fixed_declaration"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_end_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C-unwind"),
+      "parameter_names": List([
+        String("value"),
+      ]),
+      "path": List([
+        String("function_now_variadic"),
+        String("unwind_declaration"),
+      ]),
+      "span_begin_line": Uint64(36),
+      "span_end_line": Uint64(36),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("system"),
+      "parameter_names": List([
+        String("value"),
+      ]),
+      "path": List([
+        String("function_now_variadic"),
+        String("system_declaration"),
+      ]),
+      "span_begin_line": Uint64(40),
+      "span_end_line": Uint64(40),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("function_now_variadic"),
+        String("reexported"),
+      ]),
+      "span_begin_line": Uint64(44),
+      "span_end_line": Uint64(44),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

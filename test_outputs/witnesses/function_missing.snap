@@ -42,6 +42,26 @@ filename = "src/lib.rs"
 begin_line = 46
 hint = "function_must_use_removed::MustUseRemovedFunction(...);"
 
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 72
+hint = "function_no_longer_variadic::becomes_private(...);"
+
+[["./test_crates/function_no_longer_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 76
+hint = "function_no_longer_variadic::removed_function(...);"
+
+[["./test_crates/function_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 72
+hint = "function_now_variadic::becomes_private(...);"
+
+[["./test_crates/function_now_variadic/"]]
+filename = "src/lib.rs"
+begin_line = 76
+hint = "function_now_variadic::removed_function(...);"
+
 [["./test_crates/hidden_reexports/"]]
 filename = "src/lib.rs"
 begin_line = 32
