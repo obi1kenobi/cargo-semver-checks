@@ -134,6 +134,7 @@ for crate_pair in "${crate_pairs[@]}"; do
     fi
 done
 
+worker_pids=()
 for i in $(seq 0 $((NUM_JOBS - 1))); do
     (
         export CARGO_TARGET_DIR="${CARGO_TARGET_DIR_BASE}/worker${i}"
@@ -141,8 +142,19 @@ for i in $(seq 0 $((NUM_JOBS - 1))); do
             generate_rustdocs "${crate_jobs[j]}"
         done
     ) &
+    worker_pids+=("$!")
 done
-wait
+
+# Bare wait discards worker failures, so collect each exit status explicitly.
+worker_status=0
+for worker_pid in "${worker_pids[@]}"; do
+    wait "$worker_pid" || worker_status=$?
+done
+if [[ $worker_status -ne 0 ]]; then
+    exit "$worker_status"
+fi
+
+worker_pids=()
 for i in $(seq 0 $((NUM_JOBS - 1))); do
     (
         export PLACEHOLDER_DIR="${PLACEHOLDER_DIR_BASE}${i}"
@@ -150,7 +162,15 @@ for i in $(seq 0 $((NUM_JOBS - 1))); do
             generate_metadata "${crate_jobs[j]}"
         done
     ) &
+    worker_pids+=("$!")
 done
-wait
+
+worker_status=0
+for worker_pid in "${worker_pids[@]}"; do
+    wait "$worker_pid" || worker_status=$?
+done
+if [[ $worker_status -ne 0 ]]; then
+    exit "$worker_status"
+fi
 
 unset CARGO_TARGET_DIR PLACEHOLDER_DIR
