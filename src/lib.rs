@@ -419,7 +419,8 @@ impl Check {
                 rustdoc_gen::RustdocFromFile::new(path.to_owned()).into()
             }
             RustdocSource::Root(root) => {
-                rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir)?.into()
+                rustdoc_gen::RustdocFromProjectRoot::new(root, &target_dir, Default::default())?
+                    .into()
             }
             RustdocSource::Revision(root, rev) => {
                 let metadata = manifest_metadata_no_deps(root)?;

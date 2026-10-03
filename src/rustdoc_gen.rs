@@ -549,16 +549,23 @@ impl RustdocFromProjectRoot {
     /// # Arguments
     /// * `project_root` - Path to a directory with the manifest or with subdirectories with the manifests.
     /// * `target_root` - Path to a directory where the placeholder manifest / rustdoc can be created.
+    /// * `directory_symlinks` - Materialized directory aliases to exclude from manifest discovery.
     pub(crate) fn new(
         project_root: &std::path::Path,
         target_root: &std::path::Path,
+        directory_symlinks: BTreeSet<PathBuf>,
     ) -> anyhow::Result<Self> {
         let mut manifests_by_path: HashMap<PathBuf, Manifest> = HashMap::new();
         let mut manifest_errors = HashMap::new();
 
         // First, scan the contents of the root directory for `Cargo.toml` files.
         // Parse such files' contents into `Manifest` values.
-        for result in ignore::Walk::new(project_root) {
+        // Directory aliases must remain available to Cargo without discovering their manifests
+        // again as separate definitions of the same packages.
+        let walker = ignore::WalkBuilder::new(project_root)
+            .filter_entry(move |entry| !directory_symlinks.contains(entry.path()))
+            .build();
+        for result in walker {
             let entry = result?;
             if entry.file_name() == "Cargo.toml" {
                 let path = entry.into_path();
@@ -677,9 +684,9 @@ impl RustdocFromGitRevision {
         let tree_dir = target.join(tree_id.to_string());
 
         fs_err::create_dir_all(&tree_dir)?;
-        extract_tree(tree_id, &tree_dir)?;
+        let directory_symlinks = extract_tree(tree_id, &tree_dir, config)?;
 
-        let path = RustdocFromProjectRoot::new(&tree_dir, target)?;
+        let path = RustdocFromProjectRoot::new(&tree_dir, target, directory_symlinks)?;
         Ok(Self { path })
     }
 
@@ -697,10 +704,14 @@ impl RustdocFromGitRevision {
     }
 }
 
-fn extract_tree(tree: gix::Id<'_>, target: &std::path::Path) -> anyhow::Result<()> {
+fn extract_tree(
+    tree: gix::Id<'_>,
+    target: &std::path::Path,
+    config: &mut GlobalConfig,
+) -> anyhow::Result<BTreeSet<PathBuf>> {
     let mut symlinks = Vec::new();
     extract_tree_entries(tree, target, target, &mut symlinks)?;
-    expand_symlinks(symlinks)
+    expand_symlinks(symlinks, config)
 }
 
 fn extract_tree_entries(
@@ -777,40 +788,85 @@ fn resolve_symlink_target(
     Ok(root.join(relative_target))
 }
 
-fn expand_symlinks(mut symlinks: Vec<(PathBuf, PathBuf)>) -> anyhow::Result<()> {
+fn expand_symlinks(
+    mut symlinks: Vec<(PathBuf, PathBuf)>,
+    config: &mut GlobalConfig,
+) -> anyhow::Result<BTreeSet<PathBuf>> {
+    let mut directory_symlinks = BTreeSet::new();
     while !symlinks.is_empty() {
         let symlink_paths: BTreeSet<_> = symlinks.iter().map(|(path, _)| path.clone()).collect();
         let mut deferred = Vec::new();
-        let mut expanded_any = false;
+        let mut processed_any = false;
 
         for (path, target) in symlinks {
-            if symlink_paths.contains(&target) {
+            // Wait for links along the target path and inside directories being copied.
+            // Ancestor lookups and one range lookup take O(depth * log N) path comparisons
+            // per target, though a chain of links can still require one pass per link.
+            // Paths sort by component, so if any pending descendants exist, the first path
+            // at or after the target must be one of them.
+            if target
+                .ancestors()
+                .any(|ancestor| symlink_paths.contains(ancestor))
+                || symlink_paths
+                    .range::<PathBuf, _>(&target..)
+                    .next()
+                    .is_some_and(|pending| pending.starts_with(&target))
+            {
                 deferred.push((path, target));
                 continue;
             }
 
-            let contents = fs_err::read(&target).with_context(|| {
+            processed_any = true;
+            let metadata = match fs_err::metadata(&target) {
+                Ok(metadata) => metadata,
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                    config.shell_warn(format_args!(
+                        "skipping dangling symlink {} pointing to {}",
+                        path.display(),
+                        target.display(),
+                    ))?;
+                    continue;
+                }
+                Err(error) => return Err(error.into()),
+            };
+            copy_symlink_target(&target, &path).with_context(|| {
                 format!(
                     "failed to expand symlink {} pointing to {}",
                     path.display(),
                     target.display()
                 )
             })?;
-            write_file_if_changed(&path, &contents)?;
-            expanded_any = true;
+            if metadata.is_dir() {
+                directory_symlinks.insert(path);
+            }
         }
 
-        if !expanded_any {
+        if !processed_any {
             let paths = deferred.iter().map(|(path, _)| path.display()).join(", ");
             bail!("cannot expand cyclic symlinks: {paths}");
         }
         symlinks = deferred;
     }
 
-    Ok(())
+    Ok(directory_symlinks)
 }
 
-#[inline(always)]
+fn copy_symlink_target(
+    source: &std::path::Path,
+    destination: &std::path::Path,
+) -> anyhow::Result<()> {
+    if fs_err::metadata(source)?.is_dir() {
+        fs_err::create_dir_all(destination)?;
+        for entry in fs_err::read_dir(source)? {
+            let entry = entry?;
+            copy_symlink_target(&entry.path(), &destination.join(entry.file_name()))?;
+        }
+        Ok(())
+    } else {
+        write_file_if_changed(destination, &fs_err::read(source)?)
+    }
+}
+
 fn write_file_if_changed(path: &std::path::Path, contents: &[u8]) -> anyhow::Result<()> {
     let existing = fs_err::read(path).ok();
     if existing.as_deref() != Some(contents) {
@@ -1043,7 +1099,8 @@ mod tests {
     use std::path::{Path, PathBuf};
     use tame_index::{IndexKrate, IndexVersion};
 
-    use super::{choose_baseline_version, expand_symlinks, resolve_symlink_target};
+    use super::{choose_baseline_version, expand_symlinks, extract_tree, resolve_symlink_target};
+    use crate::GlobalConfig;
 
     struct TestDir {
         path: PathBuf,
@@ -1072,19 +1129,269 @@ mod tests {
     }
 
     #[test]
+    fn extract_tree_materializes_directory_symlinks() -> anyhow::Result<()> {
+        use gix::objs::{
+            Tree,
+            tree::{Entry, EntryKind},
+        };
+
+        let temp_dir = TestDir::new("extract-unrelated-directory-symlink");
+        let repo = gix::init_bare(temp_dir.path().join("repo"))?;
+        let manifest = r#"[package]
+name = "unrelated-symlink"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+path = "lib.rs"
+"#;
+        let link_name = "docs";
+        let source = format!(
+            r#"pub const ARTIFACT: &[u8] = include_bytes!("{link_name}/data/artifact.bin");"#
+        );
+        let directory_name = "documentation";
+        let contents = b"\x00\x80\xffartifact\n";
+        let data = repo.write_object(&Tree {
+            entries: vec![Entry {
+                mode: EntryKind::Blob.into(),
+                filename: "artifact.bin".into(),
+                oid: repo.write_blob(contents)?.detach(),
+            }],
+        })?;
+
+        let documentation = repo.write_object(&Tree {
+            entries: [
+                ("data", EntryKind::Tree, data),
+                (
+                    "linked.bin",
+                    EntryKind::Link,
+                    repo.write_blob("data/artifact.bin")?,
+                ),
+            ]
+            .into_iter()
+            .map(|(filename, kind, id)| Entry {
+                mode: kind.into(),
+                filename: filename.into(),
+                oid: id.detach(),
+            })
+            .collect(),
+        })?;
+
+        // Store the link directly in Git so this also works without OS symlink privileges.
+        let tree = repo.write_object(&Tree {
+            entries: [
+                ("Cargo.toml", EntryKind::Blob, repo.write_blob(manifest)?),
+                (
+                    "artifact",
+                    EntryKind::Link,
+                    repo.write_blob(format!("{link_name}/data/artifact.bin"))?,
+                ),
+                (link_name, EntryKind::Link, repo.write_blob(directory_name)?),
+                (directory_name, EntryKind::Tree, documentation),
+                ("lib.rs", EntryKind::Blob, repo.write_blob(&source)?),
+            ]
+            .into_iter()
+            .map(|(filename, kind, id)| Entry {
+                mode: kind.into(),
+                filename: filename.into(),
+                oid: id.detach(),
+            })
+            .collect(),
+        })?;
+        let extracted = temp_dir.path().join("extracted");
+        fs_err::create_dir(&extracted)?;
+
+        extract_tree(tree, &extracted, &mut GlobalConfig::new())?;
+
+        assert_eq!(
+            fs_err::read_to_string(extracted.join("Cargo.toml"))?,
+            manifest
+        );
+        assert_eq!(fs_err::read_to_string(extracted.join("lib.rs"))?, source);
+        assert_eq!(
+            fs_err::read(extracted.join(link_name).join("data/artifact.bin"))?,
+            contents
+        );
+        assert_eq!(
+            fs_err::read(extracted.join(link_name).join("linked.bin"))?,
+            contents
+        );
+        assert_eq!(fs_err::read(extracted.join("artifact"))?, contents);
+        assert!(fs_err::symlink_metadata(extracted.join(link_name))?.is_dir());
+        Ok(())
+    }
+
+    #[test]
+    fn extract_tree_allows_unrelated_dangling_symlink() -> anyhow::Result<()> {
+        use gix::objs::{
+            Tree,
+            tree::{Entry, EntryKind},
+        };
+
+        let temp_dir = TestDir::new("extract-unrelated-dangling-symlink");
+        let repo = gix::init_bare(temp_dir.path().join("repo"))?;
+        let manifest = r#"[package]
+name = "unrelated-symlink"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+path = "lib.rs"
+"#;
+        let source = "pub struct Example;\n";
+        let dangling_link = "docs";
+
+        // Store the link directly in Git so this also works without OS symlink privileges.
+        let tree = repo.write_object(&Tree {
+            entries: [
+                ("Cargo.toml", EntryKind::Blob, repo.write_blob(manifest)?),
+                (
+                    dangling_link,
+                    EntryKind::Link,
+                    repo.write_blob("missing-documentation")?,
+                ),
+                (
+                    "docs-alias",
+                    EntryKind::Link,
+                    repo.write_blob(dangling_link)?,
+                ),
+                ("lib.rs", EntryKind::Blob, repo.write_blob(source)?),
+            ]
+            .into_iter()
+            .map(|(filename, kind, id)| Entry {
+                mode: kind.into(),
+                filename: filename.into(),
+                oid: id.detach(),
+            })
+            .collect(),
+        })?;
+        let extracted = temp_dir.path().join("extracted");
+        fs_err::create_dir(&extracted)?;
+
+        let warning_path = temp_dir.path().join("warnings.txt");
+        let mut config = GlobalConfig::new();
+        config.set_log_level(Some(log::Level::Info));
+        config.set_stderr(Box::new(fs_err::File::create(&warning_path)?));
+        config.set_err_color_choice(false);
+        extract_tree(tree, &extracted, &mut config)?;
+        drop(config);
+
+        let warnings = fs_err::read_to_string(warning_path)?;
+        assert!(warnings.contains("skipping dangling symlink"));
+        assert!(warnings.contains("missing-documentation"));
+        assert!(warnings.contains("docs-alias"));
+
+        assert_eq!(
+            fs_err::read_to_string(extracted.join("Cargo.toml"))?,
+            manifest
+        );
+        assert_eq!(fs_err::read_to_string(extracted.join("lib.rs"))?, source);
+        Ok(())
+    }
+
+    #[test]
+    fn directory_symlinks_do_not_duplicate_package_manifests() -> anyhow::Result<()> {
+        use gix::objs::{
+            Tree,
+            tree::{Entry, EntryKind},
+        };
+
+        let temp_dir = TestDir::new("directory-symlink-manifests");
+        let repo = gix::init_bare(temp_dir.path().join("repo"))?;
+        let manifest = r#"[package]
+name = "directory-alias"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+path = "lib.rs"
+"#;
+        let original_name = "original";
+        let alias_name = "alias";
+        let original = repo.write_object(&Tree {
+            entries: [("Cargo.toml", manifest), ("lib.rs", "pub struct Example;")]
+                .into_iter()
+                .map(|(filename, contents)| {
+                    Ok(Entry {
+                        mode: EntryKind::Blob.into(),
+                        filename: filename.into(),
+                        oid: repo.write_blob(contents)?.detach(),
+                    })
+                })
+                .collect::<anyhow::Result<_>>()?,
+        })?;
+        let tree = repo.write_object(&Tree {
+            entries: [
+                (alias_name, EntryKind::Link, repo.write_blob(original_name)?),
+                (original_name, EntryKind::Tree, original),
+            ]
+            .into_iter()
+            .map(|(filename, kind, id)| Entry {
+                mode: kind.into(),
+                filename: filename.into(),
+                oid: id.detach(),
+            })
+            .collect(),
+        })?;
+        let extracted = temp_dir.path().join("extracted");
+        fs_err::create_dir(&extracted)?;
+        let aliases = extract_tree(tree, &extracted, &mut GlobalConfig::new())?;
+
+        assert_eq!(
+            fs_err::read_to_string(extracted.join(alias_name).join("Cargo.toml"))?,
+            manifest
+        );
+        let project = super::RustdocFromProjectRoot::new(&extracted, temp_dir.path(), aliases)?;
+        assert!(project.manifests.contains_key("directory-alias"));
+        assert!(project.duplicate_packages.is_empty());
+        Ok(())
+    }
+
+    #[test]
     fn symlinks_are_expanded_as_regular_files() -> anyhow::Result<()> {
         let temp_dir = TestDir::new("expand-symlinks");
         let foo = temp_dir.path().join("foo.rs");
         let bar = temp_dir.path().join("bar.rs");
+        let baz = temp_dir.path().join("baz.rs");
         fs_err::write(&foo, "pub struct Foo;\n")?;
 
         let target = resolve_symlink_target(temp_dir.path(), &bar, b"foo.rs")?;
-        expand_symlinks(vec![(bar.clone(), target)])?;
+        expand_symlinks(
+            vec![(baz.clone(), bar.clone()), (bar.clone(), target)],
+            &mut GlobalConfig::new(),
+        )?;
 
-        assert_eq!(fs_err::read(&bar)?, fs_err::read(&foo)?);
-        assert!(fs_err::metadata(&bar)?.is_file());
-        assert!(!fs_err::symlink_metadata(&bar)?.file_type().is_symlink());
+        for path in [&bar, &baz] {
+            assert_eq!(fs_err::read(path)?, fs_err::read(&foo)?);
+            assert!(fs_err::symlink_metadata(path)?.is_file());
+        }
         Ok(())
+    }
+
+    #[test]
+    fn cyclic_symlinks_are_rejected() {
+        let temp_dir = TestDir::new("reject-cyclic-symlinks");
+        let first = temp_dir.path().join("first");
+        let second = temp_dir.path().join("second");
+
+        let error = expand_symlinks(
+            vec![(first.clone(), second.clone()), (second, first)],
+            &mut GlobalConfig::new(),
+        )
+        .expect_err("cyclic symlinks should be rejected");
+        assert!(error.to_string().contains("cannot expand cyclic symlinks"));
+    }
+
+    #[test]
+    fn recursive_directory_symlinks_are_rejected() {
+        let temp_dir = TestDir::new("reject-recursive-directory-symlink");
+        let root = temp_dir.path().to_owned();
+        let error = expand_symlinks(
+            vec![(root.join("recursive"), root)],
+            &mut GlobalConfig::new(),
+        )
+        .expect_err("recursive directory symlinks should be rejected");
+        assert!(error.to_string().contains("cannot expand cyclic symlinks"));
     }
 
     // Guard against materializing files from paths outside the extracted tree.
