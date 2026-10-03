@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::path::PathBuf;
 
 use anyhow::{Context as _, bail};
@@ -710,13 +710,12 @@ fn extract_tree(
     config: &mut GlobalConfig,
 ) -> anyhow::Result<BTreeSet<PathBuf>> {
     let mut symlinks = Vec::new();
-    extract_tree_entries(tree, target, target, &mut symlinks)?;
-    expand_symlinks(symlinks, config)
+    extract_tree_entries(tree, target, &mut symlinks)?;
+    expand_symlinks(target, symlinks, config)
 }
 
 fn extract_tree_entries(
     tree: gix::Id<'_>,
-    root: &std::path::Path,
     target: &std::path::Path,
     symlinks: &mut Vec<(PathBuf, PathBuf)>,
 ) -> anyhow::Result<()> {
@@ -726,7 +725,7 @@ fn extract_tree_entries(
         let path = target.join(bytes2str(entry.filename()));
         if mode.is_tree() {
             fs_err::create_dir_all(&path)?;
-            extract_tree_entries(entry.id(), root, &path, symlinks)?;
+            extract_tree_entries(entry.id(), &path, symlinks)?;
         } else if mode.is_blob() || mode.is_link() {
             let blob = entry.object()?;
             assert!(
@@ -734,10 +733,7 @@ fn extract_tree_entries(
                 "we are not working on a corrupted repository"
             );
             if mode.is_link() {
-                symlinks.push((
-                    path.clone(),
-                    resolve_symlink_target(root, &path, &blob.data)?,
-                ));
+                symlinks.push((path, PathBuf::from(bytes2str(&blob.data))));
             } else {
                 write_file_if_changed(&path, &blob.data)?;
             }
@@ -747,12 +743,14 @@ fn extract_tree_entries(
     Ok(())
 }
 
+/// Returns `Ok(None)` when resolution must wait for a pending symlink to be materialized.
 fn resolve_symlink_target(
     root: &std::path::Path,
     symlink: &std::path::Path,
-    target: &[u8],
-) -> anyhow::Result<PathBuf> {
-    let target = std::path::Path::new(bytes2str(target));
+    target: &std::path::Path,
+    pending_symlinks: &BTreeSet<PathBuf>,
+    directory_symlinks: &BTreeMap<PathBuf, PathBuf>,
+) -> anyhow::Result<Option<PathBuf>> {
     if target.is_absolute() {
         bail!("cannot expand absolute symlink target {}", target.display());
     }
@@ -766,18 +764,29 @@ fn resolve_symlink_target(
                 symlink.display()
             )
         })?;
-    let mut relative_target = PathBuf::new();
+    let mut resolved_target = root.to_path_buf();
     for component in relative_parent.join(target).components() {
         match component {
-            std::path::Component::Normal(component) => relative_target.push(component),
+            std::path::Component::Normal(component) => {
+                resolved_target.push(component);
+                if pending_symlinks.contains(&resolved_target) {
+                    return Ok(None);
+                }
+                // Materialized aliases are ordinary directories on disk. Follow their original
+                // targets here so a subsequent `..` uses the target's parent, not the alias's.
+                if let Some(source) = directory_symlinks.get(&resolved_target) {
+                    resolved_target.clone_from(source);
+                }
+            }
             std::path::Component::CurDir => {}
             std::path::Component::ParentDir => {
-                if !relative_target.pop() {
+                if resolved_target == root {
                     bail!(
                         "symlink target points outside the extracted tree: {}",
                         target.display()
                     );
                 }
+                resolved_target.pop();
             }
             std::path::Component::Prefix(_) | std::path::Component::RootDir => {
                 bail!("cannot expand absolute symlink target {}", target.display());
@@ -785,34 +794,44 @@ fn resolve_symlink_target(
         }
     }
 
-    Ok(root.join(relative_target))
+    Ok(Some(resolved_target))
 }
 
 fn expand_symlinks(
+    root: &std::path::Path,
     mut symlinks: Vec<(PathBuf, PathBuf)>,
     config: &mut GlobalConfig,
 ) -> anyhow::Result<BTreeSet<PathBuf>> {
-    let mut directory_symlinks = BTreeSet::new();
+    let mut directory_symlinks = BTreeMap::new();
     while !symlinks.is_empty() {
         let symlink_paths: BTreeSet<_> = symlinks.iter().map(|(path, _)| path.clone()).collect();
         let mut deferred = Vec::new();
         let mut processed_any = false;
 
-        for (path, target) in symlinks {
+        for (path, unresolved_target) in symlinks {
             // Wait for links along the target path and inside directories being copied.
-            // Ancestor lookups and one range lookup take O(depth * log N) path comparisons
+            // Component lookups and one range lookup take O(depth * log N) path comparisons
             // per target, though a chain of links can still require one pass per link.
+            let Some(target) = resolve_symlink_target(
+                root,
+                &path,
+                &unresolved_target,
+                &symlink_paths,
+                &directory_symlinks,
+            )?
+            else {
+                deferred.push((path, unresolved_target));
+                continue;
+            };
+
             // Paths sort by component, so if any pending descendants exist, the first path
             // at or after the target must be one of them.
-            if target
-                .ancestors()
-                .any(|ancestor| symlink_paths.contains(ancestor))
-                || symlink_paths
-                    .range::<PathBuf, _>(&target..)
-                    .next()
-                    .is_some_and(|pending| pending.starts_with(&target))
+            if symlink_paths
+                .range::<PathBuf, _>(&target..)
+                .next()
+                .is_some_and(|pending| pending.starts_with(&target))
             {
-                deferred.push((path, target));
+                deferred.push((path, unresolved_target));
                 continue;
             }
 
@@ -837,7 +856,7 @@ fn expand_symlinks(
                 )
             })?;
             if metadata.is_dir() {
-                directory_symlinks.insert(path);
+                directory_symlinks.insert(path, target);
             }
         }
 
@@ -848,7 +867,7 @@ fn expand_symlinks(
         symlinks = deferred;
     }
 
-    Ok(directory_symlinks)
+    Ok(directory_symlinks.into_keys().collect())
 }
 
 fn copy_symlink_target(
@@ -1222,6 +1241,76 @@ path = "lib.rs"
     }
 
     #[test]
+    fn extract_tree_resolves_directory_symlinks_before_parent_components() -> anyhow::Result<()> {
+        use gix::objs::{
+            Tree,
+            tree::{Entry, EntryKind},
+        };
+
+        let temp_dir = TestDir::new("symlink-parent-components");
+        let repo = gix::init_bare(temp_dir.path().join("repo"))?;
+        let root_source = "pub struct WrongRoot;\n";
+        let nested_source = "pub struct CorrectNested;\n";
+        let subdir = repo.write_object(&Tree {
+            entries: vec![Entry {
+                mode: EntryKind::Blob.into(),
+                filename: "keep".into(),
+                oid: repo.write_blob("keep this directory in Git\n")?.detach(),
+            }],
+        })?;
+        let nested = repo.write_object(&Tree {
+            entries: [
+                ("api.rs", EntryKind::Blob, repo.write_blob(nested_source)?),
+                ("subdir", EntryKind::Tree, subdir),
+            ]
+            .into_iter()
+            .map(|(filename, kind, id)| Entry {
+                mode: kind.into(),
+                filename: filename.into(),
+                oid: id.detach(),
+            })
+            .collect(),
+        })?;
+        let tree = repo.write_object(&Tree {
+            entries: [
+                ("api.rs", EntryKind::Blob, repo.write_blob(root_source)?),
+                ("nested", EntryKind::Tree, nested),
+                (
+                    "picked.rs",
+                    EntryKind::Link,
+                    repo.write_blob("unrelated_alias/../api.rs")?,
+                ),
+                (
+                    "unrelated_alias",
+                    EntryKind::Link,
+                    repo.write_blob("nested/subdir")?,
+                ),
+            ]
+            .into_iter()
+            .map(|(filename, kind, id)| Entry {
+                mode: kind.into(),
+                filename: filename.into(),
+                oid: id.detach(),
+            })
+            .collect(),
+        })?;
+        let extracted = temp_dir.path().join("extracted");
+        fs_err::create_dir(&extracted)?;
+
+        extract_tree(tree, &extracted, &mut GlobalConfig::new())?;
+
+        assert_eq!(
+            fs_err::read_to_string(extracted.join("picked.rs"))?,
+            nested_source
+        );
+        assert_eq!(
+            fs_err::read_to_string(extracted.join("api.rs"))?,
+            root_source
+        );
+        Ok(())
+    }
+
+    #[test]
     fn extract_tree_allows_unrelated_dangling_symlink() -> anyhow::Result<()> {
         use gix::objs::{
             Tree,
@@ -1355,9 +1444,12 @@ path = "lib.rs"
         let baz = temp_dir.path().join("baz.rs");
         fs_err::write(&foo, "pub struct Foo;\n")?;
 
-        let target = resolve_symlink_target(temp_dir.path(), &bar, b"foo.rs")?;
         expand_symlinks(
-            vec![(baz.clone(), bar.clone()), (bar.clone(), target)],
+            temp_dir.path(),
+            vec![
+                (baz.clone(), PathBuf::from("bar.rs")),
+                (bar.clone(), PathBuf::from("foo.rs")),
+            ],
             &mut GlobalConfig::new(),
         )?;
 
@@ -1375,7 +1467,11 @@ path = "lib.rs"
         let second = temp_dir.path().join("second");
 
         let error = expand_symlinks(
-            vec![(first.clone(), second.clone()), (second, first)],
+            temp_dir.path(),
+            vec![
+                (first, PathBuf::from("second")),
+                (second, PathBuf::from("first")),
+            ],
             &mut GlobalConfig::new(),
         )
         .expect_err("cyclic symlinks should be rejected");
@@ -1387,7 +1483,8 @@ path = "lib.rs"
         let temp_dir = TestDir::new("reject-recursive-directory-symlink");
         let root = temp_dir.path().to_owned();
         let error = expand_symlinks(
-            vec![(root.join("recursive"), root)],
+            &root,
+            vec![(root.join("recursive"), PathBuf::from("."))],
             &mut GlobalConfig::new(),
         )
         .expect_err("recursive directory symlinks should be rejected");
@@ -1405,8 +1502,14 @@ path = "lib.rs"
             .to_string_lossy()
             .into_owned();
 
-        let error = resolve_symlink_target(temp_dir.path(), &bar, absolute_target.as_bytes())
-            .expect_err("absolute symlink targets should be rejected");
+        let error = resolve_symlink_target(
+            temp_dir.path(),
+            &bar,
+            Path::new(&absolute_target),
+            &Default::default(),
+            &Default::default(),
+        )
+        .expect_err("absolute symlink targets should be rejected");
 
         assert!(
             error
@@ -1420,14 +1523,54 @@ path = "lib.rs"
         let temp_dir = TestDir::new("reject-parent-symlink-target");
         let bar = temp_dir.path().join("nested").join("bar.rs");
 
-        let error = resolve_symlink_target(temp_dir.path(), &bar, b"../../outside.rs")
-            .expect_err("symlink targets outside the extracted tree should be rejected");
+        let error = resolve_symlink_target(
+            temp_dir.path(),
+            &bar,
+            Path::new("../../outside.rs"),
+            &Default::default(),
+            &Default::default(),
+        )
+        .expect_err("symlink targets outside the extracted tree should be rejected");
 
         assert!(
             error
                 .to_string()
                 .contains("symlink target points outside the extracted tree")
         );
+    }
+
+    #[test]
+    fn directory_symlink_parent_components_cannot_escape_the_tree() -> anyhow::Result<()> {
+        let temp_dir = TestDir::new("reject-escape-through-directory-symlink");
+        let root = temp_dir.path().join("extracted");
+        fs_err::create_dir_all(root.join("nested"))?;
+        fs_err::create_dir(root.join("target"))?;
+        fs_err::write(temp_dir.path().join("outside.rs"), "pub struct Outside;\n")?;
+        fs_err::write(root.join("outside.rs"), "pub struct Inside;\n")?;
+        let alias = root.join("nested/alias");
+
+        // Following the alias shortens the path: two `..` components escape the tree,
+        // although collapsing them lexically would select the file inside the tree.
+        let error = expand_symlinks(
+            &root,
+            vec![
+                (
+                    root.join("picked.rs"),
+                    PathBuf::from("nested/alias/../../outside.rs"),
+                ),
+                (alias.clone(), PathBuf::from("../target")),
+            ],
+            &mut GlobalConfig::new(),
+        )
+        .expect_err("parent components after a directory alias must not escape the tree");
+
+        assert!(fs_err::symlink_metadata(alias)?.is_dir());
+        assert!(
+            error
+                .to_string()
+                .contains("symlink target points outside the extracted tree")
+        );
+        Ok(())
     }
 
     fn new_mock_version(version: semver::Version, yanked: bool) -> IndexVersion {
