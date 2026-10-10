@@ -281,7 +281,7 @@ struct CrateToCheck<'a> {
 /// Is the specified target able to be semver-checked as a library, of any sort.
 ///
 /// This is a broader definition than cargo's own "lib" definition, since we can also
-/// semver-check rlib, dylib, and staticlib targets as well.
+/// semver-check rlib, dylib, cdylib, staticlib, and proc-macro targets as well.
 #[expect(
     clippy::unneeded_struct_pattern,
     reason = "we don't want a breaking change if the target variants change from unit variants to a different kind"
@@ -295,6 +295,7 @@ fn is_lib_like_checkable_target(target: &cargo_metadata::Target) -> bool {
                     | cargo_metadata::TargetKind::DyLib { .. }
                     | cargo_metadata::TargetKind::CDyLib { .. }
                     | cargo_metadata::TargetKind::StaticLib { .. }
+                    | cargo_metadata::TargetKind::ProcMacro { .. }
             )
         })
 }
