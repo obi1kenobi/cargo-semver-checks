@@ -1782,6 +1782,7 @@ add_lints!(
     feature_not_enabled_by_default,
     function_abi_no_longer_unwind,
     function_abi_now_unwind,
+    function_added,
     function_changed_abi,
     function_const_generic_reordered,
     function_const_removed,

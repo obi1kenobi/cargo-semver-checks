@@ -1,0 +1,227 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/enum_changed_kind/": [
+    {
+      "name": String("EnumToFunction"),
+      "path": List([
+        String("enum_changed_kind"),
+        String("EnumToFunction"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/features_no_default/": [
+    {
+      "name": String("function_previously_depending_on_A"),
+      "path": List([
+        String("features_no_default"),
+        String("function_previously_depending_on_A"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_added/": [
+    {
+      "name": String("existing_function"),
+      "path": List([
+        String("function_added"),
+        String("reexports"),
+        String("existing_function"),
+      ]),
+      "span_begin_line": Uint64(3),
+      "span_end_line": Uint64(3),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("new_function_in_module"),
+      "path": List([
+        String("function_added"),
+        String("my_module"),
+        String("new_function_in_module"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("new_function"),
+      "path": List([
+        String("function_added"),
+        String("new_function"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("new_reexported_function"),
+      "path": List([
+        String("function_added"),
+        String("new_reexported_function"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_end_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_const_removed/": [
+    {
+      "name": String("new_const_fn"),
+      "path": List([
+        String("function_const_removed"),
+        String("new_const_fn"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_must_use_added/": [
+    {
+      "name": String("MustUseNewFunction"),
+      "path": List([
+        String("function_must_use_added"),
+        String("MustUseNewFunction"),
+      ]),
+      "span_begin_line": Uint64(46),
+      "span_end_line": Uint64(46),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_no_longer_variadic/": [
+    {
+      "name": String("newly_reexported"),
+      "path": List([
+        String("function_no_longer_variadic"),
+        String("newly_reexported"),
+      ]),
+      "span_begin_line": Uint64(56),
+      "span_end_line": Uint64(56),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("newly_public"),
+      "path": List([
+        String("function_no_longer_variadic"),
+        String("newly_public"),
+      ]),
+      "span_begin_line": Uint64(75),
+      "span_end_line": Uint64(75),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("added_function"),
+      "path": List([
+        String("function_no_longer_variadic"),
+        String("added_function"),
+      ]),
+      "span_begin_line": Uint64(84),
+      "span_end_line": Uint64(84),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_now_const/": [
+    {
+      "name": String("new_const_fn"),
+      "path": List([
+        String("function_now_const"),
+        String("new_const_fn"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/function_now_variadic/": [
+    {
+      "name": String("newly_reexported"),
+      "path": List([
+        String("function_now_variadic"),
+        String("newly_reexported"),
+      ]),
+      "span_begin_line": Uint64(58),
+      "span_end_line": Uint64(58),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("newly_public"),
+      "path": List([
+        String("function_now_variadic"),
+        String("newly_public"),
+      ]),
+      "span_begin_line": Uint64(77),
+      "span_end_line": Uint64(77),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("added_function"),
+      "path": List([
+        String("function_now_variadic"),
+        String("added_function"),
+      ]),
+      "span_begin_line": Uint64(86),
+      "span_end_line": Uint64(86),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/nonbreaking_item_rename/": [
+    {
+      "name": String("new_fn"),
+      "path": List([
+        String("nonbreaking_item_rename"),
+        String("new_fn"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_changed_kind/": [
+    {
+      "name": String("TraitToFunction"),
+      "path": List([
+        String("trait_changed_kind"),
+        String("TraitToFunction"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/union_changed_kind/": [
+    {
+      "name": String("UnionToFunction"),
+      "path": List([
+        String("union_changed_kind"),
+        String("UnionToFunction"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
