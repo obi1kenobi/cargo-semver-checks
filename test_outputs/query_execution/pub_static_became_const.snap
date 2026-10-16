@@ -1,0 +1,130 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/global_value_marked_deprecated/": [
+    {
+      "name": String("STATIC_BECOMING_CONST"),
+      "path": List([
+        String("global_value_marked_deprecated"),
+        String("STATIC_BECOMING_CONST"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/pub_const_added/": [
+    {
+      "name": String("PUB_STATIC_IN_GLOBAL_WILL_BE_CONST"),
+      "path": List([
+        String("pub_const_added"),
+        String("PUB_STATIC_IN_GLOBAL_WILL_BE_CONST"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/pub_static_became_const/": [
+    {
+      "name": String("STATIC_BECOMES_CONST"),
+      "path": List([
+        String("pub_static_became_const"),
+        String("STATIC_BECOMES_CONST"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(4),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("MUT_STATIC_BECOMES_CONST"),
+      "path": List([
+        String("pub_static_became_const"),
+        String("MUT_STATIC_BECOMES_CONST"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("STATIC_IN_MODULE_BECOMES_CONST"),
+      "path": List([
+        String("pub_static_became_const"),
+        String("my_module"),
+        String("STATIC_IN_MODULE_BECOMES_CONST"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("REEXPORTED_STATIC_BECOMES_CONST"),
+      "path": List([
+        String("pub_static_became_const"),
+        String("REEXPORTED_STATIC_BECOMES_CONST"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/pub_static_missing/": [
+    {
+      "name": String("PUB_STATIC_IN_GLOBAL_WILL_BE_CONST"),
+      "path": List([
+        String("pub_static_missing"),
+        String("PUB_STATIC_IN_GLOBAL_WILL_BE_CONST"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("SPECIAL_CONST"),
+      "path": List([
+        String("pub_static_missing"),
+        String("my_module"),
+        String("my_module_nested"),
+        String("PUB_STATIC_IN_NESTED_MODULE_WILL_RE_EXPORT_CONST"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("SPECIAL_CONST"),
+      "path": List([
+        String("pub_static_missing"),
+        String("my_module"),
+        String("PUB_STATIC_IN_MODULE_WILL_RE_EXPORT_CONST"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("PUB_STATIC_IN_MODULE_WILL_BE_CONST"),
+      "path": List([
+        String("pub_static_missing"),
+        String("my_module"),
+        String("PUB_STATIC_IN_MODULE_WILL_BE_CONST"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_end_line": Uint64(17),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("PUB_STATIC_IN_NESTED_MODULE_WILL_BE_CONST"),
+      "path": List([
+        String("pub_static_missing"),
+        String("my_module"),
+        String("my_module_nested"),
+        String("PUB_STATIC_IN_NESTED_MODULE_WILL_BE_CONST"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

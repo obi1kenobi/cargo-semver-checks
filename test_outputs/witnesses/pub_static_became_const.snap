@@ -1,0 +1,58 @@
+---
+source: src/query.rs
+description: "Lint `pub_static_became_const` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+---
+[["./test_crates/global_value_marked_deprecated/"]]
+filename = "src/lib.rs"
+begin_line = 16
+hint = "let _ = &raw const global_value_marked_deprecated::STATIC_BECOMING_CONST;"
+
+[["./test_crates/pub_const_added/"]]
+filename = "src/lib.rs"
+begin_line = 7
+hint = "let _ = &raw const pub_const_added::PUB_STATIC_IN_GLOBAL_WILL_BE_CONST;"
+
+[["./test_crates/pub_static_became_const/"]]
+filename = "src/lib.rs"
+begin_line = 4
+hint = "let _ = &raw const pub_static_became_const::STATIC_BECOMES_CONST;"
+
+[["./test_crates/pub_static_became_const/"]]
+filename = "src/lib.rs"
+begin_line = 5
+hint = "let _ = &raw const pub_static_became_const::MUT_STATIC_BECOMES_CONST;"
+
+[["./test_crates/pub_static_became_const/"]]
+filename = "src/lib.rs"
+begin_line = 9
+hint = "let _ = &raw const pub_static_became_const::my_module::STATIC_IN_MODULE_BECOMES_CONST;"
+
+[["./test_crates/pub_static_became_const/"]]
+filename = "src/lib.rs"
+begin_line = 14
+hint = "let _ = &raw const pub_static_became_const::REEXPORTED_STATIC_BECOMES_CONST;"
+
+[["./test_crates/pub_static_missing/"]]
+filename = "src/lib.rs"
+begin_line = 5
+hint = "let _ = &raw const pub_static_missing::PUB_STATIC_IN_GLOBAL_WILL_BE_CONST;"
+
+[["./test_crates/pub_static_missing/"]]
+filename = "src/lib.rs"
+begin_line = 10
+hint = "let _ = &raw const pub_static_missing::my_module::my_module_nested::PUB_STATIC_IN_NESTED_MODULE_WILL_RE_EXPORT_CONST;"
+
+[["./test_crates/pub_static_missing/"]]
+filename = "src/lib.rs"
+begin_line = 10
+hint = "let _ = &raw const pub_static_missing::my_module::PUB_STATIC_IN_MODULE_WILL_RE_EXPORT_CONST;"
+
+[["./test_crates/pub_static_missing/"]]
+filename = "src/lib.rs"
+begin_line = 17
+hint = "let _ = &raw const pub_static_missing::my_module::PUB_STATIC_IN_MODULE_WILL_BE_CONST;"
+
+[["./test_crates/pub_static_missing/"]]
+filename = "src/lib.rs"
+begin_line = 26
+hint = "let _ = &raw const pub_static_missing::my_module::my_module_nested::PUB_STATIC_IN_NESTED_MODULE_WILL_BE_CONST;"
