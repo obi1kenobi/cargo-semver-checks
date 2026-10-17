@@ -1852,6 +1852,7 @@ add_lints!(
     pub_module_level_const_now_doc_hidden,
     pub_static_added,
     pub_static_became_const,
+    pub_static_became_hidden_const,
     pub_static_missing,
     pub_static_mut_now_immutable,
     pub_static_now_doc_hidden,
