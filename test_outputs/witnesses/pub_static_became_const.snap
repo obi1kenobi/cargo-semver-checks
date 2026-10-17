@@ -32,6 +32,11 @@ filename = "src/lib.rs"
 begin_line = 14
 hint = "let _ = &raw const pub_static_became_const::REEXPORTED_STATIC_BECOMES_CONST;"
 
+[["./test_crates/pub_static_became_hidden_const/"]]
+filename = "src/lib.rs"
+begin_line = 21
+hint = "let _ = &raw const pub_static_became_hidden_const::STATIC_BECOMES_CONST;"
+
 [["./test_crates/pub_static_missing/"]]
 filename = "src/lib.rs"
 begin_line = 5

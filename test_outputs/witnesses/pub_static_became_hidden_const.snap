@@ -1,0 +1,23 @@
+---
+source: src/query.rs
+description: "Lint `pub_static_became_hidden_const` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+---
+[["./test_crates/pub_static_became_const/"]]
+filename = "src/lib.rs"
+begin_line = 31
+hint = "let _ = &raw const pub_static_became_const::STATIC_BECOMES_DOC_HIDDEN_CONST;"
+
+[["./test_crates/pub_static_became_hidden_const/"]]
+filename = "src/lib.rs"
+begin_line = 5
+hint = "let _ = &raw const pub_static_became_hidden_const::STATIC_BECOMES_HIDDEN_CONST;"
+
+[["./test_crates/pub_static_became_hidden_const/"]]
+filename = "src/lib.rs"
+begin_line = 7
+hint = "let _ = &raw const pub_static_became_hidden_const::MUT_STATIC_BECOMES_HIDDEN_CONST;"
+
+[["./test_crates/pub_static_became_hidden_const/"]]
+filename = "src/lib.rs"
+begin_line = 12
+hint = "let _ = &raw const pub_static_became_hidden_const::my_module::STATIC_IN_MODULE_BECOMES_HIDDEN_CONST;"

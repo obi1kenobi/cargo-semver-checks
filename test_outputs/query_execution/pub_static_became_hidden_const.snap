@@ -1,0 +1,50 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/pub_static_became_const/": [
+    {
+      "name": String("STATIC_BECOMES_DOC_HIDDEN_CONST"),
+      "path": List([
+        String("pub_static_became_const"),
+        String("STATIC_BECOMES_DOC_HIDDEN_CONST"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/pub_static_became_hidden_const/": [
+    {
+      "name": String("STATIC_BECOMES_HIDDEN_CONST"),
+      "path": List([
+        String("pub_static_became_hidden_const"),
+        String("STATIC_BECOMES_HIDDEN_CONST"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("MUT_STATIC_BECOMES_HIDDEN_CONST"),
+      "path": List([
+        String("pub_static_became_hidden_const"),
+        String("MUT_STATIC_BECOMES_HIDDEN_CONST"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "name": String("STATIC_IN_MODULE_BECOMES_HIDDEN_CONST"),
+      "path": List([
+        String("pub_static_became_hidden_const"),
+        String("my_module"),
+        String("STATIC_IN_MODULE_BECOMES_HIDDEN_CONST"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

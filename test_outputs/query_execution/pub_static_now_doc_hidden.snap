@@ -2,6 +2,18 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/pub_static_became_hidden_const/": [
+    {
+      "path": List([
+        String("pub_static_became_hidden_const"),
+        String("STATIC_BECOMES_HIDDEN_STATIC"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+      "static_name": String("STATIC_BECOMES_HIDDEN_STATIC"),
+    },
+  ],
   "./test_crates/pub_static_mut_now_immutable/": [
     {
       "path": List([

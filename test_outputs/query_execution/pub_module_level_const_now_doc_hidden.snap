@@ -37,4 +37,16 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/pub_static_became_hidden_const/": [
+    {
+      "constant_name": String("CONST_BECOMES_HIDDEN_CONST"),
+      "path": List([
+        String("pub_static_became_hidden_const"),
+        String("CONST_BECOMES_HIDDEN_CONST"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }
