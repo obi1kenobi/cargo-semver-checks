@@ -462,7 +462,7 @@ jobs:
           mv target/debug/cargo-semver-checks ../bins/cargo-semver-checks
 
       - name: upload binary
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: cargo-semver-checks-linux
           path: bins/
@@ -517,7 +517,7 @@ jobs:
           mv target\debug\cargo-semver-checks.exe ..\bins\cargo-semver-checks.exe
 
       - name: upload binary
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: cargo-semver-checks-windows
           path: bins\
@@ -2485,7 +2485,7 @@ jobs:
           echo "name=test-rustdocs-$HASH-$TRIPLE-$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ steps.artifact.outputs.name }}
           path: localdata/test_data
