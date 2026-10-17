@@ -61,6 +61,6 @@ SemverQuery(
         "zero": 0,
         "non_exhaustive": "#[non_exhaustive]",
     },
-    error_message: "A new #[non_exhaustive] variant was added to a #[non_exhaustive] pub enum. Removing it later would be a breaking change.",
+    error_message: "A new #[non_exhaustive] variant was added to a #[non_exhaustive] pub enum.",
     per_result_error_template: Some("variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
 )
