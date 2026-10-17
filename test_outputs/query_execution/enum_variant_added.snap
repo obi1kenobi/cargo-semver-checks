@@ -43,6 +43,26 @@ assertion_line: 1073
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/enum_unit_variant_added/": [
+    {
+      "baseline_variant_kinds": List([
+        String("TupleVariant"),
+      ]),
+      "baseline_variant_names": List([
+        String("Existing"),
+      ]),
+      "enum_name": String("ExhaustiveEnum"),
+      "path": List([
+        String("enum_unit_variant_added"),
+        String("ExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Added"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_variant_added/": [
     {
       "baseline_variant_kinds": List([

@@ -121,3 +121,13 @@ match value {
     _ => (),
 }
 """
+
+[["./test_crates/enum_unit_variant_added/"]]
+filename = "src/lib.rs"
+begin_line = 24
+hint = """
+match value {
+    enum_unit_variant_added::VariantChangesKind::Changing(..) => (),
+    _ => (),
+}
+"""
