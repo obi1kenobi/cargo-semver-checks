@@ -970,6 +970,17 @@ impl WitnessStatistics {
     }
 }
 
+fn ensure_rustdoc_versions_match(
+    current_version: u32,
+    baseline_version: u32,
+) -> anyhow::Result<()> {
+    anyhow::ensure!(
+        current_version == baseline_version,
+        "rustdoc version mismatch after regenerating the baseline JSON file: current version {current_version}, baseline version {baseline_version}"
+    );
+    Ok(())
+}
+
 fn generate_crate_data(
     config: &mut GlobalConfig,
     generation_settings: data_generation::GenerationSettings,
@@ -1014,12 +1025,8 @@ fn generate_crate_data(
                 data_generation::CacheSettings::WriteOnly(()),
             )?;
 
-            assert_eq!(
-                baseline_crate.version(),
-                current_rustdoc_version,
-                "Deleting and regenerating the baseline JSON file did not resolve the rustdoc \
-                 version mismatch."
-            );
+            ensure_rustdoc_versions_match(current_rustdoc_version, baseline_crate.version())
+                .into_terminal_result()?;
         }
 
         baseline_crate
@@ -1093,4 +1100,24 @@ fn get_target_dir_from_project_root(source: &RustdocSource) -> anyhow::Result<Op
         RustdocSource::Rustdoc(_path) => None,
         RustdocSource::VersionFromRegistry(_version) => None,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ensure_rustdoc_versions_match;
+
+    #[test]
+    fn matching_rustdoc_versions_succeed() {
+        ensure_rustdoc_versions_match(60, 60).unwrap();
+    }
+
+    #[test]
+    fn mismatched_rustdoc_versions_return_an_error() {
+        let error = ensure_rustdoc_versions_match(60, 57).unwrap_err();
+
+        assert_eq!(
+            error.to_string(),
+            "rustdoc version mismatch after regenerating the baseline JSON file: current version 60, baseline version 57"
+        );
+    }
 }
