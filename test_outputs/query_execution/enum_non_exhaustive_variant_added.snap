@@ -1,0 +1,69 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/enum_discriminant_no_longer_defined/": [
+    {
+      "enum_name": String("GainsNonExhaustiveVariant"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsNonExhaustiveVariant"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Third"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("NonUnitVariantButGainsNonExhaustiveVariant"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("NonUnitVariantButGainsNonExhaustiveVariant"),
+      ]),
+      "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(38),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Third"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_non_exhaustive_variant_added/": [
+    {
+      "enum_name": String("NonExhaustiveEnum"),
+      "path": List([
+        String("enum_non_exhaustive_variant_added"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AddedPlain"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("NonExhaustiveEnum"),
+      "path": List([
+        String("enum_non_exhaustive_variant_added"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AddedTuple"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("NonExhaustiveEnum"),
+      "path": List([
+        String("enum_non_exhaustive_variant_added"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AddedStruct"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

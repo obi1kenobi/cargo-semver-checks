@@ -1740,6 +1740,7 @@ add_lints!(
     enum_non_exhaustive_struct_variant_field_added,
     enum_non_exhaustive_tuple_variant_changed_kind,
     enum_non_exhaustive_tuple_variant_field_added,
+    enum_non_exhaustive_variant_added,
     enum_now_doc_hidden,
     enum_repr_int_added,
     enum_repr_int_changed,
