@@ -21,3 +21,13 @@ match value {
     _ => (),
 }
 """
+
+[["./test_crates/enum_tuple_variant_field_added/"]]
+filename = "src/lib.rs"
+begin_line = 13
+hint = """
+match value {
+    enum_tuple_variant_field_added::PublicEnum::TupleVariantWithFieldAddedBecomesNonExhaustive (_, _) => (),
+    _ => (),
+}
+"""

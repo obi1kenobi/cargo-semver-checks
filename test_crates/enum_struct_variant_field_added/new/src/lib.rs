@@ -28,7 +28,7 @@ pub enum EnumWithNonExhaustiveVariant {
 }
 
 // This enum's variant will become non-exhaustive while also gaining a field.
-// That should trigger a separate lint, and not this one.
+// Both the field addition and the new #[non_exhaustive] should be reported.
 pub enum EnumWithExhaustiveVariant {
     #[non_exhaustive]
     ExhaustiveVariant {

@@ -32,6 +32,16 @@ match value {
 }
 """
 
+[["./test_crates/enum_struct_variant_field_added/"]]
+filename = "src/lib.rs"
+begin_line = 36
+hint = """
+match value {
+    enum_struct_variant_field_added::EnumWithExhaustiveVariant::ExhaustiveVariant { x } => (),
+    _ => (),
+}
+"""
+
 [["./test_crates/repr_c_enum_struct_variant_fields_reordered/"]]
 filename = "src/lib.rs"
 begin_line = 65

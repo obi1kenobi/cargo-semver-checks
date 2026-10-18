@@ -50,6 +50,21 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
       "variant_name": String("Foo"),
     },
+    {
+      "baseline_field_names": List([
+        String("x"),
+      ]),
+      "enum_name": String("EnumWithExhaustiveVariant"),
+      "field_name": String("y"),
+      "path": List([
+        String("enum_struct_variant_field_added"),
+        String("EnumWithExhaustiveVariant"),
+      ]),
+      "span_begin_line": Uint64(36),
+      "span_end_line": Uint64(36),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("ExhaustiveVariant"),
+    },
   ],
   "./test_crates/repr_c_enum_struct_variant_fields_reordered/": [
     {
