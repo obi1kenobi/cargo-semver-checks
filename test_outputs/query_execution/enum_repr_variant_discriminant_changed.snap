@@ -86,4 +86,22 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/renamed_enum_with_reexport/": [
+    {
+      "enum_name": String("OldReprDiscriminant"),
+      "new_attr": String("#[repr(u8)]"),
+      "new_value": String("2"),
+      "old_attr": String("#[repr(u8)]"),
+      "old_value": String("1"),
+      "path": List([
+        String("renamed_enum_with_reexport"),
+        String("ReprDiscriminant"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Value"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }

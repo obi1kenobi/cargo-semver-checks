@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-assertion_line: 1073
 ---
 {
   "./test_crates/enum_no_repr_variant_discriminant_changed/": [
@@ -1084,6 +1083,22 @@ assertion_line: 1073
       "span_end_line": Uint64(187),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("B"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/renamed_enum_with_reexport/": [
+    {
+      "enum_name": String("OldDiscriminant"),
+      "new_value": String("2"),
+      "old_value": String("1"),
+      "path": List([
+        String("renamed_enum_with_reexport"),
+        String("Discriminant"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(33),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Value"),
       "visibility_limit": String("public"),
     },
   ],

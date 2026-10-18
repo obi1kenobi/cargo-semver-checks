@@ -36,18 +36,6 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
-  "./test_crates/enum_non_exhaustive_variant_added/": [
-    {
-      "name": String("BecomesExhaustive"),
-      "path": List([
-        String("enum_non_exhaustive_variant_added"),
-        String("BecomesExhaustive"),
-      ]),
-      "span_begin_line": Uint64(21),
-      "span_filename": String("src/lib.rs"),
-      "visibility_limit": String("public"),
-    },
-  ],
   "./test_crates/enum_repr_variant_discriminant_changed/": [
     {
       "name": String("DiscriminantIsChangedButAVariantIsNonExhaustive"),

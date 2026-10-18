@@ -21,3 +21,53 @@ match value {
     _ => (),
 }
 """
+
+[["./test_crates/enum_tuple_variant_field_missing/"]]
+filename = "src/lib.rs"
+begin_line = 31
+hint = """
+match value {
+    enum_tuple_variant_field_missing::NonExhaustiveEnum::TupleVariantWithMissingFields { 1: witness, .. } => (),
+    _ => (),
+}
+"""
+
+[["./test_crates/enum_tuple_variant_field_missing/"]]
+filename = "src/lib.rs"
+begin_line = 31
+hint = """
+match value {
+    enum_tuple_variant_field_missing::NonExhaustiveEnum::TupleVariantWithMissingFields { 2: witness, .. } => (),
+    _ => (),
+}
+"""
+
+[["./test_crates/enum_tuple_variant_field_missing/"]]
+filename = "src/lib.rs"
+begin_line = 33
+hint = """
+match value {
+    enum_tuple_variant_field_missing::NonExhaustiveEnum::TupleVariantLosesLastField { 0: witness, .. } => (),
+    _ => (),
+}
+"""
+
+[["./test_crates/enum_tuple_variant_field_missing/"]]
+filename = "src/lib.rs"
+begin_line = 34
+hint = """
+match value {
+    enum_tuple_variant_field_missing::NonExhaustiveEnum::ExhaustiveTupleVariantWithMissingField(_, witness) => (),
+    _ => (),
+}
+"""
+
+[["./test_crates/renamed_enum_with_reexport/"]]
+filename = "src/lib.rs"
+begin_line = 10
+hint = """
+match value {
+    renamed_enum_with_reexport::Variants::TupleFieldRemoved(_, witness) => (),
+    _ => (),
+}
+"""

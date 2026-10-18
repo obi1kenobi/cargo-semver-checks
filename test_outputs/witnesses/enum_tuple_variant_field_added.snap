@@ -31,3 +31,13 @@ match value {
     _ => (),
 }
 """
+
+[["./test_crates/renamed_enum_with_reexport/"]]
+filename = "src/lib.rs"
+begin_line = 7
+hint = """
+match value {
+    renamed_enum_with_reexport::Variants::TupleFieldAdded (_) => (),
+    _ => (),
+}
+"""

@@ -131,3 +131,13 @@ match value {
     _ => (),
 }
 """
+
+[["./test_crates/renamed_enum_with_reexport/"]]
+filename = "src/lib.rs"
+begin_line = 17
+hint = """
+match value {
+    renamed_enum_with_reexport::Variants::TupleToStruct(..) => (),
+    _ => (),
+}
+"""

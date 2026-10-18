@@ -4,6 +4,7 @@ source: src/query.rs
 {
   "./test_crates/enum_struct_field_hidden_from_public_api/": [
     {
+      "baseline_non_exhaustive": Uint64(0),
       "enum_name": String("RemovedHiddenFieldFromVariant"),
       "field_count": Uint64(4),
       "field_name": String("3"),
@@ -19,6 +20,7 @@ source: src/query.rs
   ],
   "./test_crates/enum_tuple_variant_field_missing/": [
     {
+      "baseline_non_exhaustive": Uint64(0),
       "enum_name": String("PublicEnum"),
       "field_count": Uint64(3),
       "field_name": String("2"),
@@ -30,6 +32,78 @@ source: src/query.rs
       "span_end_line": Uint64(5),
       "span_filename": String("src/lib.rs"),
       "variant_name": String("TupleVariantWithMissingField"),
+    },
+    {
+      "baseline_non_exhaustive": Uint64(1),
+      "enum_name": String("NonExhaustiveEnum"),
+      "field_count": Uint64(3),
+      "field_name": String("1"),
+      "path": List([
+        String("enum_tuple_variant_field_missing"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariantWithMissingFields"),
+    },
+    {
+      "baseline_non_exhaustive": Uint64(1),
+      "enum_name": String("NonExhaustiveEnum"),
+      "field_count": Uint64(3),
+      "field_name": String("2"),
+      "path": List([
+        String("enum_tuple_variant_field_missing"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariantWithMissingFields"),
+    },
+    {
+      "baseline_non_exhaustive": Uint64(1),
+      "enum_name": String("NonExhaustiveEnum"),
+      "field_count": Uint64(1),
+      "field_name": String("0"),
+      "path": List([
+        String("enum_tuple_variant_field_missing"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(33),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleVariantLosesLastField"),
+    },
+    {
+      "baseline_non_exhaustive": Uint64(0),
+      "enum_name": String("NonExhaustiveEnum"),
+      "field_count": Uint64(2),
+      "field_name": String("1"),
+      "path": List([
+        String("enum_tuple_variant_field_missing"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(34),
+      "span_end_line": Uint64(34),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("ExhaustiveTupleVariantWithMissingField"),
+    },
+  ],
+  "./test_crates/renamed_enum_with_reexport/": [
+    {
+      "baseline_non_exhaustive": Uint64(0),
+      "enum_name": String("OldVariants"),
+      "field_count": Uint64(2),
+      "field_name": String("1"),
+      "path": List([
+        String("renamed_enum_with_reexport"),
+        String("Variants"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleFieldRemoved"),
     },
   ],
 }

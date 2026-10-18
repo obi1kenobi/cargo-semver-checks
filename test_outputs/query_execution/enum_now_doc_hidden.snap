@@ -49,6 +49,48 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/enum_variant_field_hidden_with_reexport/": [
+    {
+      "enum_name": String("SolePath"),
+      "path": List([
+        String("enum_variant_field_hidden_with_reexport"),
+        String("SolePath"),
+      ]),
+      "span_begin_line": Uint64(4),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("PreservedPath"),
+      "path": List([
+        String("enum_variant_field_hidden_with_reexport"),
+        String("PreservedPath"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("ReplacedPaths"),
+      "path": List([
+        String("enum_variant_field_hidden_with_reexport"),
+        String("ReplacedPaths"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("ReplacedPaths"),
+      "path": List([
+        String("enum_variant_field_hidden_with_reexport"),
+        String("OldAlias"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
   "./test_crates/type_hidden_from_public_api/": [
     {
       "enum_name": String("ExampleEnum"),

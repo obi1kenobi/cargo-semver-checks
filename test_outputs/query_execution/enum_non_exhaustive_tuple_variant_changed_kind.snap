@@ -123,4 +123,19 @@ source: src/query.rs
       "variant_name": String("WillBecomeUnitLike"),
     },
   ],
+  "./test_crates/renamed_enum_with_reexport/": [
+    {
+      "enum_name": String("OldVariants"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("renamed_enum_with_reexport"),
+        String("Variants"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("NonExhaustiveTupleToStruct"),
+    },
+  ],
 }

@@ -23,3 +23,13 @@ pub enum BecomesPublicEnum {
 enum BecomesPrivateEnum {
     TupleVariantWithMissingField(i32, &'static str),
 }
+
+// Hints must account for variant exhaustiveness independently of the enum's attribute.
+#[non_exhaustive]
+pub enum NonExhaustiveEnum {
+    #[non_exhaustive]
+    TupleVariantWithMissingFields(i32),
+    #[non_exhaustive]
+    TupleVariantLosesLastField(),
+    ExhaustiveTupleVariantWithMissingField(i32),
+}

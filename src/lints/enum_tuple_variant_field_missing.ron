@@ -12,7 +12,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        enum_name: name @output @tag
+                        enum_name: name @output
 
                         importable_path {
                             path @output @tag
@@ -23,6 +23,10 @@ SemverQuery(
                             ... on TupleVariant {
                                 variant_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                attribute @fold @transform(op: "count") @output(name: "baseline_non_exhaustive") {
+                                    raw_attribute @filter(op: "=", value: ["$non_exhaustive"])
+                                }
 
                                 field {
                                     field_name: name @output @tag
@@ -45,7 +49,6 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%enum_name"])
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -71,12 +74,16 @@ SemverQuery(
         "public": "public",
         "true": true,
         "zero": 0,
+        "non_exhaustive": "#[non_exhaustive]",
     },
     error_message: "A field of a tuple variant in a pub enum has been removed.",
     per_result_error_template: Some("field {{field_name}} of variant {{enum_name}}::{{variant_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
     witness: (
+        // #[non_exhaustive] tuple variants have private constructors, so tuple patterns
+        // fail even against the baseline. Struct-style syntax works for tuple variants
+        // regardless of exhaustiveness, but must name the removed field to show breakage.
         hint_template: r#"match value {
-    {{ join "::" path }}::{{ variant_name }}({{#repeat field_count }}{{#if (eq (to_string @index) ../field_name) }}witness{{else}}_{{/if}}{{#unless @last}}, {{/unless}}{{/repeat}}) => (),
+    {{ join "::" path }}::{{ variant_name }}{{#if baseline_non_exhaustive}} { {{field_name}}: witness, .. }{{else}}({{#repeat field_count }}{{#if (eq (to_string @index) ../field_name) }}witness{{else}}_{{/if}}{{#unless @last}}, {{/unless}}{{/repeat}}){{/if}} => (),
     _ => (),
 }
 "#,

@@ -50,6 +50,18 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/enum_variant_field_hidden_with_reexport/": [
+    {
+      "name": String("ReplacedPaths"),
+      "path": List([
+        String("enum_variant_field_hidden_with_reexport"),
+        String("NewAlias"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_variant_marked_deprecated/": [
     {
       "name": String("NewEnumWithDeprecatedVariants"),
