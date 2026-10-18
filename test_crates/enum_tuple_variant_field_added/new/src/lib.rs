@@ -8,7 +8,7 @@ pub enum PublicEnum {
     NonExhaustiveTupleVariantWithFieldAdded(i32, i64, u8),
     // If variant was non exhaustive, adding a field is not a breaking change
     TupleVariantWithFieldAddedBecomesExhaustive(i32, i64, u8),
-    // Variant becoming non exhaustive is a different kind of breaking change
+    // Both the field addition and the new #[non_exhaustive] should be reported.
     #[non_exhaustive]
     TupleVariantWithFieldAddedBecomesNonExhaustive(i32, i64, u8),
     // Variant type change is a different kind of breaking change

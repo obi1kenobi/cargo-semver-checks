@@ -13,6 +13,16 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "name": String("ReexportedEnum"),
+      "path": List([
+        String("enum_no_longer_non_exhaustive"),
+        String("PublicReexport"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
   "./test_crates/enum_non_exhaustive_variant_added/": [
     {
