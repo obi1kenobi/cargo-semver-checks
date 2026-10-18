@@ -20,3 +20,11 @@ pub enum NonExhaustiveEnumWithNewVariant {
 
     NewVariant,
 }
+
+pub enum EnumWithNonExhaustiveTupleVariant {
+    #[non_exhaustive]
+    Existing(i64),
+    #[non_exhaustive]
+    Unit,
+    Added,
+}
