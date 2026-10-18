@@ -179,4 +179,19 @@ source: src/query.rs
       "variant_name": String("Changing"),
     },
   ],
+  "./test_crates/renamed_enum_with_reexport/": [
+    {
+      "enum_name": String("OldVariants"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("renamed_enum_with_reexport"),
+        String("Variants"),
+      ]),
+      "span_begin_line": Uint64(17),
+      "span_end_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleToStruct"),
+    },
+  ],
 }

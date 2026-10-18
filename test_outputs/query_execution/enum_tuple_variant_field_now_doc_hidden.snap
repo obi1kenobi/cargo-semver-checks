@@ -16,4 +16,32 @@ source: src/query.rs
       "variant_name": String("TupleVariantWithPublicField"),
     },
   ],
+  "./test_crates/enum_variant_field_hidden_with_reexport/": [
+    {
+      "enum_name": String("PreservedPath"),
+      "field_name": String("0"),
+      "path": List([
+        String("enum_variant_field_hidden_with_reexport"),
+        String("RetainedAlias"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Tuple"),
+    },
+  ],
+  "./test_crates/renamed_enum_with_reexport/": [
+    {
+      "enum_name": String("OldVariants"),
+      "field_name": String("0"),
+      "path": List([
+        String("renamed_enum_with_reexport"),
+        String("Variants"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("TupleFieldHidden"),
+    },
+  ],
 }

@@ -80,4 +80,18 @@ source: src/query.rs
       "variant_name": String("TupleVariantWithFieldAddedBecomesExhaustive"),
     },
   ],
+  "./test_crates/renamed_enum_with_reexport/": [
+    {
+      "enum_name": String("NewVariants"),
+      "field_name": String("1"),
+      "path": List([
+        String("renamed_enum_with_reexport"),
+        String("Variants"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(9),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("NonExhaustiveTupleFieldAdded"),
+    },
+  ],
 }
