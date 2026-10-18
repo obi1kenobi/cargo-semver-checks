@@ -164,4 +164,19 @@ source: src/query.rs
       "variant_name": String("TupleVariantBecomesStruct"),
     },
   ],
+  "./test_crates/enum_unit_variant_added/": [
+    {
+      "enum_name": String("VariantChangesKind"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("PlainVariant"),
+      "path": List([
+        String("enum_unit_variant_added"),
+        String("VariantChangesKind"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Changing"),
+    },
+  ],
 }

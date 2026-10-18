@@ -1,0 +1,217 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/enum_non_exhaustive_variant_added/": [
+    {
+      "enum_name": String("GainsExhaustiveVariant"),
+      "path": List([
+        String("enum_non_exhaustive_variant_added"),
+        String("GainsExhaustiveVariant"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(31),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Added"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_unit_variant_added/": [
+    {
+      "enum_name": String("NonExhaustiveEnum"),
+      "path": List([
+        String("enum_unit_variant_added"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AddedUnit"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_variant_added/": [
+    {
+      "enum_name": String("NonExhaustiveEnumWithNewVariant"),
+      "path": List([
+        String("enum_variant_added"),
+        String("NonExhaustiveEnumWithNewVariant"),
+      ]),
+      "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(21),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("NewVariant"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/partial_ord_enum_variants_reordered_non_exhaustive/": [
+    {
+      "enum_name": String("NewAtFront"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("NewAtFront"),
+      ]),
+      "span_begin_line": Uint64(7),
+      "span_end_line": Uint64(7),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("New"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("InsertedInMiddle"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("InsertedInMiddle"),
+      ]),
+      "span_begin_line": Uint64(18),
+      "span_end_line": Uint64(18),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("New"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("MultipleInserted"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("MultipleInserted"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(27),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("X"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("MultipleInserted"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("MultipleInserted"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Y"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("AddAndRemove"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("AddAndRemove"),
+      ]),
+      "span_begin_line": Uint64(56),
+      "span_end_line": Uint64(56),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("X"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("ReorderWithNew"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("ReorderWithNew"),
+      ]),
+      "span_begin_line": Uint64(75),
+      "span_end_line": Uint64(75),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("New"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("SingleVariant"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("SingleVariant"),
+      ]),
+      "span_begin_line": Uint64(114),
+      "span_end_line": Uint64(114),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("New"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("FilledWithNew"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("FilledWithNew"),
+      ]),
+      "span_begin_line": Uint64(122),
+      "span_end_line": Uint64(122),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("W"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("FilledWithNew"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("FilledWithNew"),
+      ]),
+      "span_begin_line": Uint64(124),
+      "span_end_line": Uint64(124),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("X"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("FilledWithNew"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("FilledWithNew"),
+      ]),
+      "span_begin_line": Uint64(126),
+      "span_end_line": Uint64(126),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Y"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("FilledWithNew"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("FilledWithNew"),
+      ]),
+      "span_begin_line": Uint64(128),
+      "span_end_line": Uint64(128),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Z"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("MixedShiftAndReorder"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("MixedShiftAndReorder"),
+      ]),
+      "span_begin_line": Uint64(135),
+      "span_end_line": Uint64(135),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("New"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("SwapPlusNew"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("SwapPlusNew"),
+      ]),
+      "span_begin_line": Uint64(157),
+      "span_end_line": Uint64(157),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("New"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("AppendedAtEnd"),
+      "path": List([
+        String("partial_ord_enum_variants_reordered_non_exhaustive"),
+        String("AppendedAtEnd"),
+      ]),
+      "span_begin_line": Uint64(179),
+      "span_end_line": Uint64(179),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("New"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

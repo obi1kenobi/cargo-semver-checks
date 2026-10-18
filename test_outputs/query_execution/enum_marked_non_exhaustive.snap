@@ -15,6 +15,19 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/enum_unit_variant_added/": [
+    {
+      "name": String("BecomesNonExhaustive"),
+      "path": List([
+        String("enum_unit_variant_added"),
+        String("BecomesNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(40),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/non_exhaustive/": [
     {
       "name": String("SimpleEnum"),
