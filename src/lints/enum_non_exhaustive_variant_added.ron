@@ -4,7 +4,7 @@ SemverQuery(
     description: "A #[non_exhaustive] pub enum has a new #[non_exhaustive] variant.",
     required_update: Minor,
     lint_level: Allow,
-    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#enum-variant-new"),
+    reference_link: Some("https://doc.rust-lang.org/reference/items/enumerations.html"),
     query: r#"
     {
         CrateDiff {
@@ -13,7 +13,6 @@ SemverQuery(
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         enum_name: name @output
-                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
 
                         importable_path {
                             path @output @tag
@@ -38,8 +37,8 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        # The enum must already have been #[non_exhaustive]. If it only became
-                        # #[non_exhaustive] in this release, `enum_marked_non_exhaustive` reports it.
+                        # If the baseline enum was exhaustive, `enum_variant_added`
+                        # reports the new variant as a major change instead.
                         attrs @filter(op: "contains", value: ["$non_exhaustive"])
 
                         importable_path {

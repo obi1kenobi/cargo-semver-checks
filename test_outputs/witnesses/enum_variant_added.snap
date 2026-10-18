@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-assertion_line: 1151
 description: "Lint `enum_variant_added` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 ---
 [["./test_crates/enum_discriminant_no_longer_defined/"]]
@@ -14,19 +13,55 @@ match value {
 
 [["./test_crates/enum_non_exhaustive_variant_added/"]]
 filename = "src/lib.rs"
-begin_line = 24
+begin_line = 38
 hint = """
 match value {
     enum_non_exhaustive_variant_added::ExhaustiveEnum::Existing(..) => (),
 }
 """
 
+[["./test_crates/enum_non_exhaustive_variant_added/"]]
+filename = "src/lib.rs"
+begin_line = 63
+hint = """
+match value {
+    enum_non_exhaustive_variant_added::BecomesNonExhaustive::Existing(..) => (),
+}
+"""
+
+[["./test_crates/enum_non_exhaustive_variant_added/"]]
+filename = "src/lib.rs"
+begin_line = 65
+hint = """
+match value {
+    enum_non_exhaustive_variant_added::BecomesNonExhaustive::Existing(..) => (),
+}
+"""
+
+[["./test_crates/enum_non_exhaustive_variant_added/"]]
+filename = "src/lib.rs"
+begin_line = 67
+hint = """
+match value {
+    enum_non_exhaustive_variant_added::BecomesNonExhaustive::Existing(..) => (),
+}
+"""
+
 [["./test_crates/enum_unit_variant_added/"]]
 filename = "src/lib.rs"
-begin_line = 31
+begin_line = 37
 hint = """
 match value {
     enum_unit_variant_added::ExhaustiveEnum::Existing(..) => (),
+}
+"""
+
+[["./test_crates/enum_unit_variant_added/"]]
+filename = "src/lib.rs"
+begin_line = 45
+hint = """
+match value {
+    enum_unit_variant_added::BecomesNonExhaustive::Existing(..) => (),
 }
 """
 
@@ -38,6 +73,16 @@ match value {
     enum_variant_added::EnumWithNewVariant::OldVariant => (),
     enum_variant_added::EnumWithNewVariant::OldStructVariant { .. } => (),
     enum_variant_added::EnumWithNewVariant::OldTupleVariant(..) => (),
+}
+"""
+
+[["./test_crates/enum_variant_added/"]]
+filename = "src/lib.rs"
+begin_line = 29
+hint = """
+match value {
+    enum_variant_added::EnumWithNonExhaustiveTupleVariant::Existing { .. } => (),
+    enum_variant_added::EnumWithNonExhaustiveTupleVariant::Unit { .. } => (),
 }
 """
 

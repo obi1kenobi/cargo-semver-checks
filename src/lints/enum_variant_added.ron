@@ -13,7 +13,6 @@ SemverQuery(
                     ... on Enum {
                         enum_name: name @output
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
-                        attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         importable_path {
                             path @output @tag
@@ -36,6 +35,8 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        # Baseline exhaustiveness makes a new variant a major change,
+                        # even if the enum also becomes #[non_exhaustive].
                         attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
 
                         importable_path {
@@ -51,6 +52,10 @@ SemverQuery(
                             baseline_variant_kinds: __typename @output
 
                             baseline_variant_names: name @output
+
+                            attribute @fold @transform(op: "count") @output(name: "baseline_non_exhaustive") {
+                                raw_attribute @filter(op: "=", value: ["$non_exhaustive"])
+                            }
                         }
                     }
                 }
@@ -66,9 +71,12 @@ SemverQuery(
     error_message: "A publicly-visible enum without #[non_exhaustive] has a new variant.",
     per_result_error_template: Some("variant {{enum_name}}:{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
     witness: (
+        // #[non_exhaustive] unit and tuple variants have private constructors, so their
+        // bare unit and tuple patterns fail even against the baseline.
+        // Struct-style syntax works for tuple variants regardless of exhaustiveness.
         hint_template: r#"match value {
 {{#each baseline_variant_kinds }}
-    {{ join "::" ../path }}::{{lookup ../baseline_variant_names @index}}{{#if (eq this "StructVariant")}} { .. }{{/if}}{{#if (eq this "TupleVariant")}}(..){{/if}} => (),
+    {{ join "::" ../path }}::{{lookup ../baseline_variant_names @index}}{{#if (lookup ../baseline_non_exhaustive @index)}} { .. }{{else}}{{#if (eq this "StructVariant")}} { .. }{{/if}}{{#if (eq this "TupleVariant")}}(..){{/if}}{{/if}} => (),
 {{/each}}
 }
 "#,

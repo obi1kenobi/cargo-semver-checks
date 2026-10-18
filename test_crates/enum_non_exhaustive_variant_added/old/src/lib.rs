@@ -7,6 +7,13 @@ pub enum NonExhaustiveEnum {
     Existing(i64),
 }
 
+// New #[non_exhaustive] variants should be reported even when the enum
+// itself loses #[non_exhaustive].
+#[non_exhaustive]
+pub enum BecomesExhaustive {
+    Existing(i64),
+}
+
 // Exhaustive enum gaining a #[non_exhaustive] variant: that is a major change
 // reported by `enum_variant_added`, so this lint should not report it.
 pub enum ExhaustiveEnum {
@@ -27,8 +34,8 @@ pub enum ExistingVariantMarkedNonExhaustive {
     Marked,
 }
 
-// The enum only becomes #[non_exhaustive] in the new version, which
-// `enum_marked_non_exhaustive` reports, so this lint should not report it.
+// The baseline enum is exhaustive, so `enum_variant_added` reports the new variants.
+// `enum_marked_non_exhaustive` separately reports the added attribute.
 pub enum BecomesNonExhaustive {
     Existing(i64),
 }

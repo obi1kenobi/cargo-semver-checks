@@ -65,6 +65,42 @@ source: src/query.rs
       "variant_name": String("AddedStruct"),
       "visibility_limit": String("public"),
     },
+    {
+      "enum_name": String("BecomesExhaustive"),
+      "path": List([
+        String("enum_non_exhaustive_variant_added"),
+        String("BecomesExhaustive"),
+      ]),
+      "span_begin_line": Uint64(24),
+      "span_end_line": Uint64(24),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AddedPlain"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("BecomesExhaustive"),
+      "path": List([
+        String("enum_non_exhaustive_variant_added"),
+        String("BecomesExhaustive"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(26),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AddedTuple"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("BecomesExhaustive"),
+      "path": List([
+        String("enum_non_exhaustive_variant_added"),
+        String("BecomesExhaustive"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AddedStruct"),
+      "visibility_limit": String("public"),
+    },
   ],
   "./test_crates/enum_unit_variant_added/": [
     {

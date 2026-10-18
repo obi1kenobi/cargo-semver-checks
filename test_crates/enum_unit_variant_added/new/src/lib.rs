@@ -16,6 +16,12 @@ pub enum NonExhaustiveEnum {
     AddedHiddenUnit,
 }
 
+// A new unit variant should be reported even when the enum also loses #[non_exhaustive].
+pub enum BecomesExhaustive {
+    Existing(i64),
+    AddedUnit,
+}
+
 // An existing tuple variant becomes a unit variant. No variant is added,
 // so this lint should not report it.
 #[non_exhaustive]
@@ -31,8 +37,8 @@ pub enum ExhaustiveEnum {
     Added,
 }
 
-// The enum only becomes #[non_exhaustive] in the new version, which
-// `enum_marked_non_exhaustive` reports, so this lint should not report it.
+// The baseline enum is exhaustive, so `enum_variant_added` reports the new variant.
+// `enum_marked_non_exhaustive` separately reports the added attribute.
 #[non_exhaustive]
 pub enum BecomesNonExhaustive {
     Existing(i64),
