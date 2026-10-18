@@ -12,7 +12,7 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        enum_name: name @output @tag
+                        enum_name: name @output
 
                         importable_path {
                             path @output @tag
@@ -37,10 +37,12 @@ SemverQuery(
                 item {
                     ... on Enum {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        name @filter(op: "=", value: ["%enum_name"])
 
                         importable_path {
+                            # The same path must remain public API; a new alias cannot preserve it.
+                            # `enum_now_doc_hidden` reports paths that became hidden.
                             path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
                         }
 
                         variant {

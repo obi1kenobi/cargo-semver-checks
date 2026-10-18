@@ -134,4 +134,19 @@ source: src/query.rs
       "variant_name": String("WillBecomeTupleLike"),
     },
   ],
+  "./test_crates/renamed_enum_with_reexport/": [
+    {
+      "enum_name": String("OldVariants"),
+      "kind": String("StructVariant"),
+      "new_kind": String("TupleVariant"),
+      "path": List([
+        String("renamed_enum_with_reexport"),
+        String("Variants"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("StructToTuple"),
+    },
+  ],
 }
