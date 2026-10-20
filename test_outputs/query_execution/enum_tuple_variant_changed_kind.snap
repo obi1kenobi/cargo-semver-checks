@@ -56,6 +56,21 @@ source: src/query.rs
       "variant_name": String("WillBecomeUnitLike"),
     },
   ],
+  "./test_crates/enum_struct_variant_added/": [
+    {
+      "enum_name": String("VariantChangesKind"),
+      "kind": String("TupleVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("enum_struct_variant_added"),
+        String("VariantChangesKind"),
+      ]),
+      "span_begin_line": Uint64(30),
+      "span_end_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Changing"),
+    },
+  ],
   "./test_crates/enum_tuple_variant_changed_kind/": [
     {
       "enum_name": String("TestStruct"),

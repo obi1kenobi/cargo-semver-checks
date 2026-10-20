@@ -47,6 +47,24 @@ match value {
 }
 """
 
+[["./test_crates/enum_struct_variant_added/"]]
+filename = "src/lib.rs"
+begin_line = 37
+hint = """
+match value {
+    enum_struct_variant_added::ExhaustiveEnum::Existing(..) => (),
+}
+"""
+
+[["./test_crates/enum_struct_variant_added/"]]
+filename = "src/lib.rs"
+begin_line = 45
+hint = """
+match value {
+    enum_struct_variant_added::BecomesNonExhaustive::Existing(..) => (),
+}
+"""
+
 [["./test_crates/enum_tuple_variant_added/"]]
 filename = "src/lib.rs"
 begin_line = 37

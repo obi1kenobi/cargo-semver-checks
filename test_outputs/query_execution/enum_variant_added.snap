@@ -111,6 +111,50 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/enum_struct_variant_added/": [
+    {
+      "baseline_non_exhaustive": List([
+        Uint64(0),
+      ]),
+      "baseline_variant_kinds": List([
+        String("TupleVariant"),
+      ]),
+      "baseline_variant_names": List([
+        String("Existing"),
+      ]),
+      "enum_name": String("ExhaustiveEnum"),
+      "path": List([
+        String("enum_struct_variant_added"),
+        String("ExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(37),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Added"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "baseline_non_exhaustive": List([
+        Uint64(0),
+      ]),
+      "baseline_variant_kinds": List([
+        String("TupleVariant"),
+      ]),
+      "baseline_variant_names": List([
+        String("Existing"),
+      ]),
+      "enum_name": String("BecomesNonExhaustive"),
+      "path": List([
+        String("enum_struct_variant_added"),
+        String("BecomesNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(45),
+      "span_end_line": Uint64(45),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Added"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_tuple_variant_added/": [
     {
       "baseline_non_exhaustive": List([

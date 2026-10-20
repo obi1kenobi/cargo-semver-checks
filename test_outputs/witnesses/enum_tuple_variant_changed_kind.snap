@@ -42,6 +42,16 @@ match value {
 }
 """
 
+[["./test_crates/enum_struct_variant_added/"]]
+filename = "src/lib.rs"
+begin_line = 30
+hint = """
+match value {
+    enum_struct_variant_added::VariantChangesKind::Changing(..) => (),
+    _ => (),
+}
+"""
+
 [["./test_crates/enum_tuple_variant_changed_kind/"]]
 filename = "src/lib.rs"
 begin_line = 5
