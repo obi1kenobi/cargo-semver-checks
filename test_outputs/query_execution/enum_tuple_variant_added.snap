@@ -1,0 +1,87 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/enum_discriminant_no_longer_defined/": [
+    {
+      "enum_name": String("GainsTupleVariant"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsTupleVariant"),
+      ]),
+      "span_begin_line": Uint64(63),
+      "span_end_line": Uint64(63),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Some"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_tuple_variant_added/": [
+    {
+      "enum_name": String("NonExhaustiveEnum"),
+      "path": List([
+        String("enum_tuple_variant_added"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AddedTuple"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("BecomesExhaustive"),
+      "path": List([
+        String("enum_tuple_variant_added"),
+        String("BecomesExhaustive"),
+      ]),
+      "span_begin_line": Uint64(22),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AddedTuple"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_unit_variant_added/": [
+    {
+      "enum_name": String("NonExhaustiveEnum"),
+      "path": List([
+        String("enum_unit_variant_added"),
+        String("NonExhaustiveEnum"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("AddedTuple"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/renamed_enum_with_reexport/": [
+    {
+      "enum_name": String("NewGainsFieldfulVariant"),
+      "path": List([
+        String("renamed_enum_with_reexport"),
+        String("GainsFieldfulVariant"),
+      ]),
+      "span_begin_line": Uint64(39),
+      "span_end_line": Uint64(39),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Added"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/type_mismatched_generic_lifetimes/": [
+    {
+      "enum_name": String("Either"),
+      "path": List([
+        String("type_mismatched_generic_lifetimes"),
+        String("Either"),
+      ]),
+      "span_begin_line": Uint64(10),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Mid"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

@@ -1,0 +1,69 @@
+SemverQuery(
+    id: "enum_tuple_variant_added",
+    human_readable_name: "pub enum tuple variant added",
+    description: "A #[non_exhaustive] pub enum has a new tuple variant that isn't #[non_exhaustive].",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/reference/items/enumerations.html"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        enum_name: name @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        variant {
+                            ... on TupleVariant {
+                                variant_name: name @output @tag
+                                attrs @filter(op: "not_contains", value: ["$non_exhaustive"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        # If the baseline enum was exhaustive, `enum_variant_added`
+                        # reports the new variant as a major change instead.
+                        attrs @filter(op: "contains", value: ["$non_exhaustive"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # Match by name only, so a variant that merely changed kind
+                        # (e.g. from a unit variant to a tuple variant) isn't reported as added.
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%variant_name"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+        "non_exhaustive": "#[non_exhaustive]",
+    },
+    error_message: "A new tuple variant without #[non_exhaustive] was added to a #[non_exhaustive] pub enum.",
+    per_result_error_template: Some("variant {{enum_name}}::{{variant_name}} in {{span_filename}}:{{span_begin_line}}"),
+)

@@ -48,6 +48,18 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/enum_tuple_variant_added/": [
+    {
+      "name": String("BecomesExhaustive"),
+      "path": List([
+        String("enum_tuple_variant_added"),
+        String("BecomesExhaustive"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_unit_variant_added/": [
     {
       "name": String("BecomesExhaustive"),

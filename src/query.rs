@@ -1752,6 +1752,7 @@ add_lints!(
     enum_struct_variant_field_marked_deprecated,
     enum_struct_variant_field_missing,
     enum_struct_variant_field_now_doc_hidden,
+    enum_tuple_variant_added,
     enum_tuple_variant_changed_kind,
     enum_tuple_variant_field_added,
     enum_tuple_variant_field_marked_deprecated,
