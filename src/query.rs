@@ -1747,6 +1747,7 @@ add_lints!(
     enum_repr_int_removed,
     enum_repr_transparent_removed,
     enum_repr_variant_discriminant_changed,
+    enum_struct_variant_added,
     enum_struct_variant_changed_kind,
     enum_struct_variant_field_added,
     enum_struct_variant_field_marked_deprecated,
