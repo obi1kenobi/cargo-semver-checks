@@ -970,6 +970,17 @@ impl WitnessStatistics {
     }
 }
 
+fn ensure_rustdoc_versions_match(
+    current_version: u32,
+    baseline_version: u32,
+) -> anyhow::Result<()> {
+    anyhow::ensure!(
+        current_version == baseline_version,
+        "The baseline and current crates were built with different Rust toolchains (rustdoc JSON format versions: current {current_version}, baseline {baseline_version}). Use the same Rust toolchain for both checkouts, including any rustup overrides or `rust-toolchain.toml`, and rerun `cargo semver-checks`."
+    );
+    Ok(())
+}
+
 fn generate_crate_data(
     config: &mut GlobalConfig,
     generation_settings: data_generation::GenerationSettings,
@@ -1014,12 +1025,8 @@ fn generate_crate_data(
                 data_generation::CacheSettings::WriteOnly(()),
             )?;
 
-            assert_eq!(
-                baseline_crate.version(),
-                current_rustdoc_version,
-                "Deleting and regenerating the baseline JSON file did not resolve the rustdoc \
-                 version mismatch."
-            );
+            ensure_rustdoc_versions_match(current_rustdoc_version, baseline_crate.version())
+                .into_terminal_result()?;
         }
 
         baseline_crate
