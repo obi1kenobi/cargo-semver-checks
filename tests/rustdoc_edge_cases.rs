@@ -59,16 +59,28 @@ fn different_rustdoc_toolchains_report_actionable_error() {
             .expect("failed to write fixture library");
     }
 
-    let baseline_rustdoc = generate_rustdoc(
-        &baseline,
-        "nightly-2025-12-01",
-        &test_dir.path().join("target-baseline"),
-    );
-    let current_rustdoc = generate_rustdoc(
-        &current,
-        "nightly-2026-10-01",
-        &test_dir.path().join("target-current"),
-    );
+    let baseline_rustdoc = generate_rustdoc(&baseline, &test_dir.path().join("target-baseline"));
+    let current_rustdoc = generate_rustdoc(&current, &test_dir.path().join("target-current"));
+
+    // Simulate a baseline from another supported schema without downloading another toolchain.
+    let mut baseline_json: serde_json::Value = serde_json::from_str(
+        &fs_err::read_to_string(&baseline_rustdoc).expect("failed to read baseline rustdoc JSON"),
+    )
+    .expect("baseline rustdoc JSON should be valid");
+    let current_json: serde_json::Value = serde_json::from_str(
+        &fs_err::read_to_string(&current_rustdoc).expect("failed to read current rustdoc JSON"),
+    )
+    .expect("current rustdoc JSON should be valid");
+    let current_format_version = current_json["format_version"]
+        .as_u64()
+        .expect("current rustdoc JSON should have a numeric format_version");
+    let baseline_format_version = if current_format_version == 57 { 60 } else { 57 };
+    baseline_json["format_version"] = baseline_format_version.into();
+    fs_err::write(
+        &baseline_rustdoc,
+        serde_json::to_vec(&baseline_json).expect("baseline rustdoc JSON should serialize"),
+    )
+    .expect("failed to write baseline rustdoc JSON");
 
     let mut cmd = cargo_semver_checks();
     cmd.current_dir(&current)
@@ -88,7 +100,7 @@ fn different_rustdoc_toolchains_report_actionable_error() {
         ));
 }
 
-fn generate_rustdoc(crate_root: &Path, toolchain: &str, target_dir: &Path) -> PathBuf {
+fn generate_rustdoc(crate_root: &Path, target_dir: &Path) -> PathBuf {
     let manifest = crate_root.join("Cargo.toml");
     let output = std::process::Command::new("cargo")
         .current_dir(crate_root)
@@ -104,13 +116,12 @@ fn generate_rustdoc(crate_root: &Path, toolchain: &str, target_dir: &Path) -> Pa
             "--output-format",
             "json",
         ])
-        .env("RUSTUP_TOOLCHAIN", toolchain)
         .env("RUSTC_BOOTSTRAP", "1")
         .output()
         .expect("failed to start cargo doc");
     assert!(
         output.status.success(),
-        "cargo doc with Rust {toolchain} failed:\n{}",
+        "cargo doc failed:\n{}",
         String::from_utf8_lossy(&output.stderr)
     );
 
