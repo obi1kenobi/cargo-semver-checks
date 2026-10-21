@@ -52,3 +52,19 @@ mod private_module {
         }
     }
 }
+
+// Same-named methods in different inherent impls are unchanged between versions,
+// so they must not be paired with each other (rustdoc doesn't expose the impl's self type).
+pub struct Wrapper<T>(T);
+
+impl<T> Wrapper<core::cell::Cell<T>> {
+    pub fn set(self, value: T) {
+        self.0.set(value);
+    }
+}
+
+impl<T> Wrapper<core::cell::OnceCell<T>> {
+    pub fn set(self, value: T) -> Result<(), T> {
+        self.0.set(value)
+    }
+}

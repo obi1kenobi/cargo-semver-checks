@@ -38,6 +38,16 @@ SemverQuery(
                                 }
                             }
                         }
+
+                        # Rustdoc JSON doesn't expose an inherent impl's self type, so methods of
+                        # different impls with the same name (`impl Foo<A> { fn f() }` and
+                        # `impl Foo<B> { fn f() }`) can't be told apart. Only compare a method when
+                        # its name is unique among the inherent impls of the type.
+                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
+                            method {
+                                name @filter(op: "=", value: ["%method_name"])
+                            }
+                        }
                     }
                 }
             }
@@ -69,6 +79,16 @@ SemverQuery(
                                 }
                             }
                         }
+
+                        # Rustdoc JSON doesn't expose an inherent impl's self type, so methods of
+                        # different impls with the same name (`impl Foo<A> { fn f() }` and
+                        # `impl Foo<B> { fn f() }`) can't be told apart. Only compare a method when
+                        # its name is unique among the inherent impls of the type.
+                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
+                            method {
+                                name @filter(op: "=", value: ["%method_name"])
+                            }
+                        }
                     }
                 }
             }
@@ -77,6 +97,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
+        "one": 1,
     },
     error_message: "A publicly-visible method that used to return a value now returns `()`.",
     per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
