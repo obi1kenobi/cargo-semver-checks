@@ -1,7 +1,122 @@
 use assert_cmd::Command;
+use std::{path::Path, path::PathBuf, time::SystemTime, time::UNIX_EPOCH};
+
+struct TestDirectory(PathBuf);
+
+impl TestDirectory {
+    fn new() -> Self {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock should be after Unix epoch")
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "cargo-semver-checks-rustdoc-version-mismatch-{}-{nonce}",
+            std::process::id()
+        ));
+        fs_err::create_dir_all(&path).expect("failed to create test directory");
+        Self(path)
+    }
+
+    fn path(&self) -> &Path {
+        &self.0
+    }
+}
+
+impl Drop for TestDirectory {
+    fn drop(&mut self) {
+        if let Err(error) = fs_err::remove_dir_all(&self.0) {
+            eprintln!(
+                "failed to remove test directory {}: {error}",
+                self.0.display()
+            );
+        }
+    }
+}
 
 fn cargo_semver_checks() -> Command {
     assert_cmd::cargo::cargo_bin_cmd!("cargo-semver-checks")
+}
+
+/// Explain how to resolve incompatible rustdoc output when baseline and current crates select
+/// different toolchains.
+#[test]
+fn different_rustdoc_toolchains_report_actionable_error() {
+    let test_dir = TestDirectory::new();
+    let baseline = test_dir.path().join("old");
+    let current = test_dir.path().join("new");
+
+    for (path, version) in [(&baseline, "0.1.0"), (&current, "0.2.0")] {
+        fs_err::create_dir_all(path.join("src"))
+            .expect("failed to create fixture source directory");
+        fs_err::write(
+            path.join("Cargo.toml"),
+            format!(
+                "[package]\nname = \"rustdoc-version-mismatch-fixture\"\nversion = \"{version}\"\nedition = \"2021\"\n"
+            ),
+        )
+        .expect("failed to write fixture manifest");
+        fs_err::write(path.join("src/lib.rs"), "pub fn api() {}\n")
+            .expect("failed to write fixture library");
+    }
+
+    let baseline_rustdoc = generate_rustdoc(
+        &baseline,
+        "nightly-2025-12-01",
+        &test_dir.path().join("target-baseline"),
+    );
+    let current_rustdoc = generate_rustdoc(
+        &current,
+        "nightly-2026-10-01",
+        &test_dir.path().join("target-current"),
+    );
+
+    let mut cmd = cargo_semver_checks();
+    cmd.current_dir(&current)
+        .args(["semver-checks", "check-release", "--baseline-rustdoc"])
+        .arg(&baseline_rustdoc)
+        .arg("--current-rustdoc")
+        .arg(&current_rustdoc)
+        .env_remove("RUSTUP_TOOLCHAIN")
+        .env("CARGO_TERM_COLOR", "never")
+        .env("CARGO_TERM_UNICODE", "false")
+        .env("RUST_BACKTRACE", "0")
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains("different Rust toolchains"))
+        .stderr(predicates::str::contains(
+            "same Rust toolchain for both checkouts",
+        ));
+}
+
+fn generate_rustdoc(crate_root: &Path, toolchain: &str, target_dir: &Path) -> PathBuf {
+    let manifest = crate_root.join("Cargo.toml");
+    let output = std::process::Command::new("cargo")
+        .current_dir(crate_root)
+        .args(["rustdoc", "--offline", "--manifest-path"])
+        .arg(&manifest)
+        .arg("--target-dir")
+        .arg(target_dir)
+        .args([
+            "--lib",
+            "--",
+            "-Z",
+            "unstable-options",
+            "--output-format",
+            "json",
+        ])
+        .env("RUSTUP_TOOLCHAIN", toolchain)
+        .env("RUSTC_BOOTSTRAP", "1")
+        .output()
+        .expect("failed to start cargo doc");
+    assert!(
+        output.status.success(),
+        "cargo doc with Rust {toolchain} failed:\n{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    target_dir
+        .join("doc")
+        .join("rustdoc_version_mismatch_fixture.json")
 }
 
 /// This test checks whether the tool correctly detects

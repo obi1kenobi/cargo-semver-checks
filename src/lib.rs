@@ -976,7 +976,7 @@ fn ensure_rustdoc_versions_match(
 ) -> anyhow::Result<()> {
     anyhow::ensure!(
         current_version == baseline_version,
-        "rustdoc version mismatch after regenerating the baseline JSON file: current version {current_version}, baseline version {baseline_version}"
+        "The baseline and current crates were built with different Rust toolchains (rustdoc JSON format versions: current {current_version}, baseline {baseline_version}). Use the same Rust toolchain for both checkouts, including any rustup overrides or `rust-toolchain.toml`, and rerun `cargo semver-checks`."
     );
     Ok(())
 }
@@ -1100,24 +1100,4 @@ fn get_target_dir_from_project_root(source: &RustdocSource) -> anyhow::Result<Op
         RustdocSource::Rustdoc(_path) => None,
         RustdocSource::VersionFromRegistry(_version) => None,
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::ensure_rustdoc_versions_match;
-
-    #[test]
-    fn matching_rustdoc_versions_succeed() {
-        ensure_rustdoc_versions_match(60, 60).unwrap();
-    }
-
-    #[test]
-    fn mismatched_rustdoc_versions_return_an_error() {
-        let error = ensure_rustdoc_versions_match(60, 57).unwrap_err();
-
-        assert_eq!(
-            error.to_string(),
-            "rustdoc version mismatch after regenerating the baseline JSON file: current version 60, baseline version 57"
-        );
-    }
 }
