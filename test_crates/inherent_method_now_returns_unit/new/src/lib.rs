@@ -55,8 +55,8 @@ mod private_module {
     }
 }
 
-// Same-named methods in different inherent impls are unchanged between versions,
-// so they must not be paired with each other (rustdoc doesn't expose the impl's self type).
+// Same-named methods in different inherent impls, unchanged between versions:
+// the unit-returning `Cell` method must not be reported as a change of the `OnceCell` method.
 pub struct Wrapper<T>(T);
 
 impl<T> Wrapper<core::cell::Cell<T>> {
@@ -69,4 +69,16 @@ impl<T> Wrapper<core::cell::OnceCell<T>> {
     pub fn set(self, value: T) -> Result<(), T> {
         self.0.set(value)
     }
+}
+
+// Same-named methods in different inherent impls where one of them did change:
+// `Mixed<u8>::get` used to return a value, while `Mixed<u16>::get` always returned `()`.
+pub struct Mixed<T>(T);
+
+impl Mixed<u8> {
+    pub fn get(&self) {}
+}
+
+impl Mixed<u16> {
+    pub fn get(&self) {}
 }

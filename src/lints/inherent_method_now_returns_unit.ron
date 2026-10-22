@@ -38,16 +38,6 @@ SemverQuery(
                                 }
                             }
                         }
-
-                        # Rustdoc JSON doesn't expose an inherent impl's self type, so methods of
-                        # different impls with the same name (`impl Foo<A> { fn f() }` and
-                        # `impl Foo<B> { fn f() }`) can't be told apart. Only compare a method when
-                        # its name is unique among the inherent impls of the type.
-                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
-                            method {
-                                name @filter(op: "=", value: ["%method_name"])
-                            }
-                        }
                     }
                 }
             }
@@ -80,13 +70,26 @@ SemverQuery(
                             }
                         }
 
-                        # Rustdoc JSON doesn't expose an inherent impl's self type, so methods of
-                        # different impls with the same name (`impl Foo<A> { fn f() }` and
-                        # `impl Foo<B> { fn f() }`) can't be told apart. Only compare a method when
-                        # its name is unique among the inherent impls of the type.
-                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$one"]) {
+                        # Disjoint generic impls can have methods with the same name, such as
+                        # `impl Foo<A> { fn f() -> u8 }` and `impl Foo<B> { fn f() }`.
+                        # Rustdoc JSON records each impl's self type (`rustdoc_types::Impl::for_`),
+                        # but the Trustfall schema's `Impl` type has no edge or property for it
+                        # (`trustfall-rustdoc-adapter` v61, `src/rustdoc_schema.graphql`),
+                        # so this query cannot pair a method with the impl it came from.
+                        # Do not report a change if a same-named method that still returns a value
+                        # exists: it might be the original.
+                        inherent_impl @fold
+                                      @transform(op: "count")
+                                      @filter(op: "=", value: ["$zero"]) {
                             method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
+                                async @filter(op: "=", value: ["%is_async"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+
+                                return_value {
+                                    is_unit @filter(op: "!=", value: ["$true"])
+                                }
                             }
                         }
                     }
@@ -97,7 +100,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
-        "one": 1,
+        "zero": 0,
     },
     error_message: "A publicly-visible method that used to return a value now returns `()`.",
     per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
