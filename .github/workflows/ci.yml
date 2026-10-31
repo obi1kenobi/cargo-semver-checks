@@ -246,7 +246,7 @@ jobs:
           rustflags: ""
           build-warnings: ""
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: 'semver'
 
@@ -301,7 +301,7 @@ jobs:
           build-warnings: ""
           cache: false
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: 'semver'
 
@@ -412,7 +412,7 @@ jobs:
         if: steps.cache-test-rustdocs.outputs.cache-hit == 'true'
         run: find localdata/test_data -exec touch {} \;
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
       - name: compile
         run: cargo test --no-run
@@ -443,7 +443,7 @@ jobs:
           build-warnings: ""
           cache: false
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: 'semver'
 
@@ -498,7 +498,7 @@ jobs:
           build-warnings: ""
           cache: false
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: 'semver'
 
@@ -579,7 +579,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject/target/semver-checks/local-adler2-2_0_1
@@ -731,7 +731,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject/target/semver-checks/local-serde-1_0_162
@@ -858,7 +858,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject/target/semver-checks/local-pest_meta-2_8_6
@@ -1001,7 +1001,7 @@ jobs:
 
       # This job runs on macOS, not Linux like the rest.
       # It should save its cache, because no other job will save it in its place.
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: 'semver'
           workspaces: |
@@ -1074,7 +1074,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject/target/semver-checks/local-bevy_core-0_9_0
@@ -1138,7 +1138,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject/target/semver-checks/local-bevy_gltf-0_9_1
@@ -1201,7 +1201,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject/target/semver-checks/local-sqllogictest-0_13_0
@@ -1466,7 +1466,7 @@ jobs:
           path: subject-current/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject-current/target/semver-checks/local-clap-3_2_0/
@@ -1591,7 +1591,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject/target/semver-checks/git-v1_2_1/
@@ -1895,7 +1895,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject/target/semver-checks/local-ref_slice-1_2_1/
@@ -1994,7 +1994,7 @@ jobs:
           path: subject\target\semver-checks\cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject\target\semver-checks\local-ref_slice-1_2_1\
@@ -2092,7 +2092,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject/target/semver-checks/local-perf-event-open-sys2-5_0_0
@@ -2159,7 +2159,7 @@ jobs:
           path: subject/target/semver-checks/cache
 
       - name: Restore cargo index and rustdoc target dir
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             subject/target/semver-checks/local-fnv-1_0_7/
@@ -2388,7 +2388,7 @@ jobs:
           rustflags: "-D warnings"
           build-warnings: ""
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
       - id: check
         run: |
