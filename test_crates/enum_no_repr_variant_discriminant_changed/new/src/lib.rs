@@ -70,8 +70,8 @@ pub enum FieldlessWithDiscrimants {
     Last = 21,
 }
 
-// Implicit discriminant value changed by becoming explicit. Should not be reported as it involves
-// ABI breakage as well, and this is linted at *API* only breakage.
+// Changing `Unit` from 2 to 5 should be reported even though the enum also gains `repr(u8)`.
+// Both versions allow numeric casts: only the unit variant gains an explicit discriminant.
 #[repr(u8)]
 pub enum FieldlessChangesToExplicitDescriminant {
     Tuple(),
