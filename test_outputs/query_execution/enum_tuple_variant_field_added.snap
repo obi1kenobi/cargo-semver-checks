@@ -2,6 +2,60 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/": [
+    {
+      "enum_name": String("TupleGainsOnlyFields"),
+      "field_count": Uint64(0),
+      "field_name": String("0"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("TupleGainsOnlyFields"),
+      ]),
+      "span_begin_line": Uint64(58),
+      "span_end_line": Uint64(58),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Variant"),
+    },
+    {
+      "enum_name": String("TupleGainsOnlyFields"),
+      "field_count": Uint64(0),
+      "field_name": String("1"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("TupleGainsOnlyFields"),
+      ]),
+      "span_begin_line": Uint64(58),
+      "span_end_line": Uint64(58),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Variant"),
+    },
+    {
+      "enum_name": String("BaselineHasExplicitNonUnitDiscriminant"),
+      "field_count": Uint64(0),
+      "field_name": String("0"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("BaselineHasExplicitNonUnitDiscriminant"),
+      ]),
+      "span_begin_line": Uint64(91),
+      "span_end_line": Uint64(91),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("First"),
+    },
+    {
+      "enum_name": String("BaselineHasDrop"),
+      "field_count": Uint64(0),
+      "field_name": String("0"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("BaselineHasDrop"),
+      ]),
+      "span_begin_line": Uint64(100),
+      "span_end_line": Uint64(100),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Variant"),
+    },
+  ],
   "./test_crates/enum_struct_field_hidden_from_public_api/": [
     {
       "enum_name": String("AddedVariantField"),

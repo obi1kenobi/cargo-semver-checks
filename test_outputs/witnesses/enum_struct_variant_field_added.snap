@@ -2,9 +2,19 @@
 source: src/query.rs
 description: "Lint `enum_struct_variant_field_added` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 ---
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 67
+hint = """
+match value {
+    enum_discriminants_undefined_non_unit_explicit_discriminant::StructGainsOnlyFields::Variant {  } => (),
+    _ => (),
+}
+"""
+
 [["./test_crates/enum_no_repr_variant_discriminant_changed/"]]
 filename = "src/lib.rs"
-begin_line = 87
+begin_line = 88
 hint = """
 match value {
     enum_no_repr_variant_discriminant_changed::UnitOnlyBecomesUndefined::Struct {  } => (),

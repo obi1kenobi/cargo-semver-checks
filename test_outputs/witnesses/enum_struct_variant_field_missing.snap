@@ -2,6 +2,16 @@
 source: src/query.rs
 description: "Lint `enum_struct_variant_field_missing` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 ---
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 69
+hint = """
+match value {
+    enum_discriminants_undefined_non_unit_explicit_discriminant::BaselineHasStructFields::Fields { value, .. } => (),
+    _ => (),
+}
+"""
+
 [["./test_crates/enum_struct_variant_field_missing/"]]
 filename = "src/lib.rs"
 begin_line = 8

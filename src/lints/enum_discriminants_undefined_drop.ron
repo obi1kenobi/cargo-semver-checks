@@ -1,0 +1,109 @@
+SemverQuery(
+    id: "enum_discriminants_undefined_drop",
+    human_readable_name: "enum no longer supports numeric casts due to Drop",
+    description: "A public enum gained a Drop implementation, preventing casts to its numeric discriminant.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/reference/expressions/operator-expr.html#r-expr.as.enum"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        enum_name: name @output
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # Report each independent cause of lost casts: removing Drop alone
+                        # does not restore casts if fields or non-exhaustive variants also prevent them.
+                        # As a result, we don't try to rule out other ways to lose discriminant casts.
+                        impl {
+                            negative @filter(op: "!=", value: ["$true"])
+
+                            implemented_trait {
+                                trait {
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["$drop_trait"])
+                                    }
+                                }
+                            }
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Enum {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # Previously, no Drop impl.
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            negative @filter(op: "!=", value: ["$true"])
+
+                            implemented_trait {
+                                trait {
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["$drop_trait"])
+                                    }
+                                }
+                            }
+                        }
+
+                        # Previously, no variant with fields.
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            field {
+                                name
+                            }
+                        }
+
+                        # Previously, no non-unit variant with an explicit discriminant.
+                        # Integer repr exposes discriminants even for non-castable enums.
+                        # Only unit variants may have explicit discriminants in a castable enum.
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            __typename @filter(op: "!=", value: ["$plain_variant"])
+                            discriminant {
+                                explicit @filter(op: "=", value: ["$true"])
+                            }
+                        }
+
+                        # Previously, no variant with `#[non_exhaustive]`.
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            attrs @filter(op: "contains", value: ["$non_exhaustive"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+        "drop_trait": ["core", "ops", "drop", "Drop"],
+        "plain_variant": "PlainVariant",
+        "non_exhaustive": "#[non_exhaustive]",
+    },
+    error_message: "An enum gained a Drop implementation. This breaks downstream code that accesses its discriminants via numeric casts using the `as` operator.",
+    per_result_error_template: Some("enum {{enum_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"let value: {{join "::" path}} = ...;
+let discriminant = value as isize;
+"#,
+    ),
+)

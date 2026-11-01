@@ -1,0 +1,203 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/enum_discriminant_loss_combinations/": [
+    {
+      "enum_name": String("ExplicitOnly"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("ExplicitOnly"),
+      ]),
+      "span_begin_line": Uint64(52),
+      "span_end_line": Uint64(56),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("DropAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("DropAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(86),
+      "span_end_line": Uint64(90),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("FieldsAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("FieldsAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(109),
+      "span_end_line": Uint64(114),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("NonExhaustiveAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("NonExhaustiveAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(120),
+      "span_end_line": Uint64(125),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("DropFieldsAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("DropFieldsAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(147),
+      "span_end_line": Uint64(152),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("DropNonExhaustiveAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("DropNonExhaustiveAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(161),
+      "span_end_line": Uint64(167),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("FieldsNonExhaustiveAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("FieldsNonExhaustiveAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(177),
+      "span_end_line": Uint64(186),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("AllCauses"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("AllCauses"),
+      ]),
+      "span_begin_line": Uint64(192),
+      "span_end_line": Uint64(200),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("FieldsAndExplicitSameTupleVariant"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("FieldsAndExplicitSameTupleVariant"),
+      ]),
+      "span_begin_line": Uint64(210),
+      "span_end_line": Uint64(214),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("AllCausesSameStructVariant"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("AllCausesSameStructVariant"),
+      ]),
+      "span_begin_line": Uint64(220),
+      "span_end_line": Uint64(227),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/enum_discriminant_no_longer_defined/": [
+    {
+      "enum_name": String("GainsExplicitEmptyVariant"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsExplicitEmptyVariant"),
+      ]),
+      "span_begin_line": Uint64(122),
+      "span_end_line": Uint64(126),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("GainsExplicitEmptyStructVariant"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsExplicitEmptyStructVariant"),
+      ]),
+      "span_begin_line": Uint64(130),
+      "span_end_line": Uint64(133),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/": [
+    {
+      "enum_name": String("EmptyTupleGainsExplicitDiscriminant"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("EmptyTupleGainsExplicitDiscriminant"),
+      ]),
+      "span_begin_line": Uint64(8),
+      "span_end_line": Uint64(10),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("HiddenEmptyStructGainsExplicitDiscriminant"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("HiddenEmptyStructGainsExplicitDiscriminant"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("ExplicitUnitBecomesTuple"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("ExplicitUnitBecomesTuple"),
+      ]),
+      "span_begin_line": Uint64(27),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("ExplicitUnitBecomesStruct"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("ExplicitUnitBecomesStruct"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(35),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("MultipleVariantsGainExplicitDiscriminants"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("MultipleVariantsGainExplicitDiscriminants"),
+      ]),
+      "span_begin_line": Uint64(39),
+      "span_end_line": Uint64(42),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "enum_name": String("After"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("ReexportedEnum"),
+      ]),
+      "span_begin_line": Uint64(150),
+      "span_end_line": Uint64(152),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/enum_no_repr_variant_discriminant_changed/": [
+    {
+      "enum_name": String("EmptyVariantBecomesExplicit"),
+      "path": List([
+        String("enum_no_repr_variant_discriminant_changed"),
+        String("EmptyVariantBecomesExplicit"),
+      ]),
+      "span_begin_line": Uint64(94),
+      "span_end_line": Uint64(97),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}

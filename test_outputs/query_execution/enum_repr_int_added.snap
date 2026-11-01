@@ -2,6 +2,140 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/enum_discriminant_loss_combinations/": [
+    {
+      "name": String("ExplicitOnly"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("ExplicitOnly"),
+      ]),
+      "span_begin_line": Uint64(52),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("DropAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("DropAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(86),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("FieldsAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("FieldsAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(109),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("NonExhaustiveAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("NonExhaustiveAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(120),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("DropFieldsAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("DropFieldsAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(147),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("DropNonExhaustiveAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("DropNonExhaustiveAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(161),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("FieldsNonExhaustiveAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("FieldsNonExhaustiveAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(177),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("FieldsAndExplicitSameTupleVariant"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("FieldsAndExplicitSameTupleVariant"),
+      ]),
+      "span_begin_line": Uint64(210),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("AllCausesSameStructVariant"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("AllCausesSameStructVariant"),
+      ]),
+      "span_begin_line": Uint64(220),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_discriminant_no_longer_defined/": [
+    {
+      "name": String("GainsReprAndEmptyVariants"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsReprAndEmptyVariants"),
+      ]),
+      "span_begin_line": Uint64(83),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("GainsExplicitUnitDiscriminantAndEmptyVariants"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsExplicitUnitDiscriminantAndEmptyVariants"),
+      ]),
+      "span_begin_line": Uint64(92),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("GainsExplicitEmptyVariant"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsExplicitEmptyVariant"),
+      ]),
+      "span_begin_line": Uint64(122),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("GainsExplicitEmptyStructVariant"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsExplicitEmptyStructVariant"),
+      ]),
+      "span_begin_line": Uint64(130),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_no_repr_variant_discriminant_changed/": [
     {
       "name": String("GainsRepr"),
@@ -20,6 +154,26 @@ source: src/query.rs
         String("FieldlessChangesToExplicitDescriminant"),
       ]),
       "span_begin_line": Uint64(76),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("UnitOnlyBecomesUndefined"),
+      "path": List([
+        String("enum_no_repr_variant_discriminant_changed"),
+        String("UnitOnlyBecomesUndefined"),
+      ]),
+      "span_begin_line": Uint64(85),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("EmptyVariantBecomesExplicit"),
+      "path": List([
+        String("enum_no_repr_variant_discriminant_changed"),
+        String("EmptyVariantBecomesExplicit"),
+      ]),
+      "span_begin_line": Uint64(94),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

@@ -1,0 +1,155 @@
+---
+source: src/query.rs
+description: "Lint `enum_discriminants_undefined_non_unit_explicit_discriminant` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+---
+[["./test_crates/enum_discriminant_loss_combinations/"]]
+filename = "src/lib.rs"
+begin_line = 52
+hint = """
+let value: enum_discriminant_loss_combinations::ExplicitOnly = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_loss_combinations/"]]
+filename = "src/lib.rs"
+begin_line = 86
+hint = """
+let value: enum_discriminant_loss_combinations::DropAndExplicit = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_loss_combinations/"]]
+filename = "src/lib.rs"
+begin_line = 109
+hint = """
+let value: enum_discriminant_loss_combinations::FieldsAndExplicit = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_loss_combinations/"]]
+filename = "src/lib.rs"
+begin_line = 120
+hint = """
+let value: enum_discriminant_loss_combinations::NonExhaustiveAndExplicit = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_loss_combinations/"]]
+filename = "src/lib.rs"
+begin_line = 147
+hint = """
+let value: enum_discriminant_loss_combinations::DropFieldsAndExplicit = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_loss_combinations/"]]
+filename = "src/lib.rs"
+begin_line = 161
+hint = """
+let value: enum_discriminant_loss_combinations::DropNonExhaustiveAndExplicit = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_loss_combinations/"]]
+filename = "src/lib.rs"
+begin_line = 177
+hint = """
+let value: enum_discriminant_loss_combinations::FieldsNonExhaustiveAndExplicit = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_loss_combinations/"]]
+filename = "src/lib.rs"
+begin_line = 192
+hint = """
+let value: enum_discriminant_loss_combinations::AllCauses = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_loss_combinations/"]]
+filename = "src/lib.rs"
+begin_line = 210
+hint = """
+let value: enum_discriminant_loss_combinations::FieldsAndExplicitSameTupleVariant = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_loss_combinations/"]]
+filename = "src/lib.rs"
+begin_line = 220
+hint = """
+let value: enum_discriminant_loss_combinations::AllCausesSameStructVariant = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_no_longer_defined/"]]
+filename = "src/lib.rs"
+begin_line = 122
+hint = """
+let value: enum_discriminant_no_longer_defined::GainsExplicitEmptyVariant = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminant_no_longer_defined/"]]
+filename = "src/lib.rs"
+begin_line = 130
+hint = """
+let value: enum_discriminant_no_longer_defined::GainsExplicitEmptyStructVariant = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 8
+hint = """
+let value: enum_discriminants_undefined_non_unit_explicit_discriminant::EmptyTupleGainsExplicitDiscriminant = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 20
+hint = """
+let value: enum_discriminants_undefined_non_unit_explicit_discriminant::HiddenEmptyStructGainsExplicitDiscriminant = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 27
+hint = """
+let value: enum_discriminants_undefined_non_unit_explicit_discriminant::ExplicitUnitBecomesTuple = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 33
+hint = """
+let value: enum_discriminants_undefined_non_unit_explicit_discriminant::ExplicitUnitBecomesStruct = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 39
+hint = """
+let value: enum_discriminants_undefined_non_unit_explicit_discriminant::MultipleVariantsGainExplicitDiscriminants = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 150
+hint = """
+let value: enum_discriminants_undefined_non_unit_explicit_discriminant::ReexportedEnum = ...;
+let discriminant = value as isize;
+"""
+
+[["./test_crates/enum_no_repr_variant_discriminant_changed/"]]
+filename = "src/lib.rs"
+begin_line = 94
+hint = """
+let value: enum_no_repr_variant_discriminant_changed::EmptyVariantBecomesExplicit = ...;
+let discriminant = value as isize;
+"""

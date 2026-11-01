@@ -85,6 +85,22 @@ source: src/query.rs
       "variant_name": String("Second"),
       "visibility_limit": String("public"),
     },
+    {
+      "enum_name": String("DiscriminantChangesWithDrop"),
+      "new_attr": String("#[repr(u8)]"),
+      "new_value": String("2"),
+      "old_attr": String("#[repr(u8)]"),
+      "old_value": String("1"),
+      "path": List([
+        String("enum_repr_variant_discriminant_changed"),
+        String("DiscriminantChangesWithDrop"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_end_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Value"),
+      "visibility_limit": String("public"),
+    },
   ],
   "./test_crates/renamed_enum_with_reexport/": [
     {

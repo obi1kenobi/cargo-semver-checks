@@ -2,6 +2,46 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/enum_discriminants_undefined_drop/": [
+    {
+      "name": String("ExplicitTuple"),
+      "path": List([
+        String("enum_discriminants_undefined_drop"),
+        String("ExplicitTuple"),
+      ]),
+      "span_begin_line": Uint64(67),
+      "span_end_line": Uint64(67),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Empty"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/": [
+    {
+      "name": String("BaselineHasFields"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("BaselineHasFields"),
+      ]),
+      "span_begin_line": Uint64(77),
+      "span_end_line": Uint64(77),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Explicit"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "name": String("BaselineHasDrop"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("BaselineHasDrop"),
+      ]),
+      "span_begin_line": Uint64(100),
+      "span_end_line": Uint64(100),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Variant"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_no_repr_variant_discriminant_changed/": [
     {
       "name": String("DiscriminantIsChangedAndMarkedNonExhaustive"),

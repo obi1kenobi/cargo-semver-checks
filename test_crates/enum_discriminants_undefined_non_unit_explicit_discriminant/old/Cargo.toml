@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "enum_discriminants_undefined_non_unit_explicit_discriminant"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

@@ -26,3 +26,13 @@ pub enum DiscriminantIsChangedButAVariantIsNonExhaustive {
     First,
     Second,
 }
+
+// Drop prevents numeric casts but not pointer reads of a primitive-repr discriminant.
+#[repr(u8)]
+pub enum DiscriminantChangesWithDrop {
+    Value = 1,
+}
+
+impl core::ops::Drop for DiscriminantChangesWithDrop {
+    fn drop(&mut self) {}
+}

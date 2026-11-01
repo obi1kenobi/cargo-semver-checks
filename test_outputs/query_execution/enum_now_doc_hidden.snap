@@ -2,6 +2,30 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/enum_discriminants_undefined_drop/": [
+    {
+      "enum_name": String("BecomesHidden"),
+      "path": List([
+        String("enum_discriminants_undefined_drop"),
+        String("BecomesHidden"),
+      ]),
+      "span_begin_line": Uint64(161),
+      "span_end_line": Uint64(163),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/": [
+    {
+      "enum_name": String("BecomesHiddenEnum"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("BecomesHiddenEnum"),
+      ]),
+      "span_begin_line": Uint64(134),
+      "span_end_line": Uint64(137),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
   "./test_crates/enum_no_longer_non_exhaustive/": [
     {
       "enum_name": String("NowHiddenEnum"),
