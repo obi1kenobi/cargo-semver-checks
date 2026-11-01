@@ -2,6 +2,20 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/function_added/": [
+    {
+      "method_name": String("new_method"),
+      "name": String("ExistingStruct"),
+      "path": List([
+        String("function_added"),
+        String("ExistingStruct"),
+      ]),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/inherent_method_added/": [
     {
       "method_name": String("new_method"),
