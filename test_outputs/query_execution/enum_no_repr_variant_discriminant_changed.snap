@@ -87,6 +87,21 @@ source: src/query.rs
       "variant_name": String("Unit"),
       "visibility_limit": String("public"),
     },
+    {
+      "enum_name": String("DiscriminantChanges"),
+      "new_value": String("2"),
+      "old_value": String("1"),
+      "path": List([
+        String("enum_no_repr_variant_discriminant_changed"),
+        String("shadow_drop"),
+        String("DiscriminantChanges"),
+      ]),
+      "span_begin_line": Uint64(161),
+      "span_end_line": Uint64(161),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Value"),
+      "visibility_limit": String("public"),
+    },
   ],
   "./test_crates/partial_ord_enum_variants_reordered/": [
     {

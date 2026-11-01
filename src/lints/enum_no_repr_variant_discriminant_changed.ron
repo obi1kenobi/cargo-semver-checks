@@ -26,6 +26,19 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # A baseline Drop implementation already prevents enum-to-integer casts.
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            negative @filter(op: "!=", value: ["$true"])
+
+                            implemented_trait {
+                                trait {
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["$drop_trait"])
+                                    }
+                                }
+                            }
+                        }
+
                         variant {
                             variant_name: name @output @tag
 
@@ -48,6 +61,36 @@ SemverQuery(
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # Adding Drop removes cast support rather than changing its numeric result.
+                        # We report that in a separate lint.
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            negative @filter(op: "!=", value: ["$true"])
+
+                            implemented_trait {
+                                trait {
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["$drop_trait"])
+                                    }
+                                }
+                            }
+                        }
+
+                        # Integer repr can expose numeric discriminants even after fields or
+                        # explicit tuple/struct discriminants have made casts impossible.
+                        # Those changes belong to the cast-loss lint, not this value-change lint.
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            field {
+                                name
+                            }
+                        }
+
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            __typename @filter(op: "!=", value: ["$plain_variant"])
+                            discriminant {
+                                explicit @filter(op: "=", value: ["$true"])
+                            }
                         }
 
                         variant {
@@ -76,6 +119,8 @@ SemverQuery(
         "public": "public",
         "repr": "repr",
         "non_exhaustive": "#[non_exhaustive]",
+        "drop_trait": ["core", "ops", "drop", "Drop"],
+        "plain_variant": "PlainVariant",
         "zero": 0,
         "true": true,
     },

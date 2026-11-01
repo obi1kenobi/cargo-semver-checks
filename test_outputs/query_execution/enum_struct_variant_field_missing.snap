@@ -2,6 +2,20 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/": [
+    {
+      "enum_name": String("BaselineHasStructFields"),
+      "field_name": String("value"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("BaselineHasStructFields"),
+      ]),
+      "span_begin_line": Uint64(69),
+      "span_end_line": Uint64(69),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Fields"),
+    },
+  ],
   "./test_crates/enum_struct_variant_field_missing/": [
     {
       "enum_name": String("Enum"),

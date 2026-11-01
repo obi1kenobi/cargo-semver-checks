@@ -67,19 +67,26 @@ pub enum FieldlessWithDiscrimants {
     Last = 20,
 }
 
-// Changing `Unit` from 2 to 5 should be reported even though the enum also gains `repr(u8)`.
-// Both versions allow numeric casts: only the unit variant gains an explicit discriminant.
+// The unit variant's numeric discriminant changes from 2 to 5 and should be reported.
+// Adding repr does not change this: the baseline enum made no ABI commitment.
 pub enum FieldlessChangesToExplicitDescriminant {
     Tuple(),
     Struct {},
     Unit,
 }
 
-// Variant `Struct` acquires a field. By doing so, it makes the discriminant not `well-defined`,
-// meaning it is not possible to do a numeric cast anymore on the enum. Should not be reported.
+// Adding a field prevents numeric casts even though the new integer repr exposes
+// the changed discriminants. Report cast loss, not changed numeric cast results.
 pub enum UnitOnlyBecomesUndefined {
     First,
     Second,
+    Struct {},
+}
+
+// An explicit empty-variant discriminant prevents casts despite having a known value.
+// Report cast loss, not changed numeric cast results.
+pub enum EmptyVariantBecomesExplicit {
+    Tuple(),
     Struct {},
 }
 
@@ -99,4 +106,55 @@ pub enum DiscriminantIsChangedAndVariantNoLongerNonExhaustive {
     #[non_exhaustive]
     First,
     Second,
+}
+
+// Drop already prevents numeric casts, so changing the value is not a cast regression.
+pub enum DiscriminantChangesWithDrop {
+    Value = 1,
+}
+
+impl core::ops::Drop for DiscriminantChangesWithDrop {
+    fn drop(&mut self) {}
+}
+
+// Removing Drop makes casts available; their results were not observable in the baseline.
+pub enum DiscriminantChangesAndDropRemoved {
+    Value = 1,
+}
+
+impl core::ops::Drop for DiscriminantChangesAndDropRemoved {
+    fn drop(&mut self) {}
+}
+
+// Removing a hidden Drop impl makes casts available; the changed numeric value
+// was not observable through a cast in the baseline.
+pub enum DiscriminantChangesAndHiddenDropRemoved {
+    Value = 1,
+}
+
+#[doc(hidden)]
+impl core::ops::Drop for DiscriminantChangesAndHiddenDropRemoved {
+    fn drop(&mut self) {}
+}
+
+// Adding Drop removes casts entirely, rather than changing their numeric results.
+pub enum DiscriminantChangesAndDropAdded {
+    Value = 1,
+}
+
+// A hidden Drop impl still prevents casts. Report the new cast restriction
+// instead of the changed numeric value.
+pub enum DiscriminantChangesAndHiddenDropAdded {
+    Value = 1,
+}
+
+// An unrelated trait named Drop does not affect numeric casts.
+pub mod shadow_drop {
+    pub trait Drop {}
+
+    pub enum DiscriminantChanges {
+        Value = 1,
+    }
+
+    impl Drop for DiscriminantChanges {}
 }

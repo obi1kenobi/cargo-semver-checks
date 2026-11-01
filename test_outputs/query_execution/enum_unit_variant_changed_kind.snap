@@ -2,6 +2,34 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/": [
+    {
+      "enum_name": String("ExplicitUnitBecomesTuple"),
+      "kind": String("PlainVariant"),
+      "new_kind": String("TupleVariant"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("ExplicitUnitBecomesTuple"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Variant"),
+    },
+    {
+      "enum_name": String("ExplicitUnitBecomesStruct"),
+      "kind": String("PlainVariant"),
+      "new_kind": String("StructVariant"),
+      "path": List([
+        String("enum_discriminants_undefined_non_unit_explicit_discriminant"),
+        String("ExplicitUnitBecomesStruct"),
+      ]),
+      "span_begin_line": Uint64(34),
+      "span_end_line": Uint64(34),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Variant"),
+    },
+  ],
   "./test_crates/enum_tuple_variant_added/": [
     {
       "enum_name": String("VariantChangesKind"),

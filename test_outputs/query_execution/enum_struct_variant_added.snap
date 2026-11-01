@@ -2,6 +2,178 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/enum_discriminant_loss_combinations/": [
+    {
+      "enum_name": String("DropAndFields"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("DropAndFields"),
+      ]),
+      "span_begin_line": Uint64(63),
+      "span_end_line": Uint64(63),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Fields"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("DropAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("DropAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(89),
+      "span_end_line": Uint64(89),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Explicit"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("FieldsAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("FieldsAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(113),
+      "span_end_line": Uint64(113),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Explicit"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("DropFieldsAndNonExhaustive"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("DropFieldsAndNonExhaustive"),
+      ]),
+      "span_begin_line": Uint64(133),
+      "span_end_line": Uint64(135),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Fields"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("DropNonExhaustiveAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("DropNonExhaustiveAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(166),
+      "span_end_line": Uint64(166),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Explicit"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("FieldsNonExhaustiveAndExplicit"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("FieldsNonExhaustiveAndExplicit"),
+      ]),
+      "span_begin_line": Uint64(180),
+      "span_end_line": Uint64(182),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Fields"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("AllCauses"),
+      "path": List([
+        String("enum_discriminant_loss_combinations"),
+        String("AllCauses"),
+      ]),
+      "span_begin_line": Uint64(198),
+      "span_end_line": Uint64(198),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Explicit"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/enum_discriminant_no_longer_defined/": [
+    {
+      "enum_name": String("GainsEmptyVariants"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsEmptyVariants"),
+      ]),
+      "span_begin_line": Uint64(77),
+      "span_end_line": Uint64(77),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("GainsReprAndEmptyVariants"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsReprAndEmptyVariants"),
+      ]),
+      "span_begin_line": Uint64(86),
+      "span_end_line": Uint64(86),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("GainsExplicitUnitDiscriminantAndEmptyVariants"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsExplicitUnitDiscriminantAndEmptyVariants"),
+      ]),
+      "span_begin_line": Uint64(95),
+      "span_end_line": Uint64(95),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("GainsExplicitEmptyStructVariant"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("GainsExplicitEmptyStructVariant"),
+      ]),
+      "span_begin_line": Uint64(132),
+      "span_end_line": Uint64(132),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("RemovedDropGainsStructVariant"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("RemovedDropGainsStructVariant"),
+      ]),
+      "span_begin_line": Uint64(151),
+      "span_end_line": Uint64(151),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("AddedDropGainsEmptyVariants"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("AddedDropGainsEmptyVariants"),
+      ]),
+      "span_begin_line": Uint64(201),
+      "span_end_line": Uint64(201),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "enum_name": String("EmptyStructGainsFieldfulVariant"),
+      "path": List([
+        String("enum_discriminant_no_longer_defined"),
+        String("EmptyStructGainsFieldfulVariant"),
+      ]),
+      "span_begin_line": Uint64(241),
+      "span_end_line": Uint64(241),
+      "span_filename": String("src/lib.rs"),
+      "variant_name": String("Added"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/enum_struct_variant_added/": [
     {
       "enum_name": String("NonExhaustiveEnum"),

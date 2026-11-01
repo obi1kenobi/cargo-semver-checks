@@ -2,6 +2,36 @@
 source: src/query.rs
 description: "Lint `enum_tuple_variant_field_added` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
 ---
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 58
+hint = """
+match value {
+    enum_discriminants_undefined_non_unit_explicit_discriminant::TupleGainsOnlyFields::Variant () => (),
+    _ => (),
+}
+"""
+
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 91
+hint = """
+match value {
+    enum_discriminants_undefined_non_unit_explicit_discriminant::BaselineHasExplicitNonUnitDiscriminant::First () => (),
+    _ => (),
+}
+"""
+
+[["./test_crates/enum_discriminants_undefined_non_unit_explicit_discriminant/"]]
+filename = "src/lib.rs"
+begin_line = 100
+hint = """
+match value {
+    enum_discriminants_undefined_non_unit_explicit_discriminant::BaselineHasDrop::Variant () => (),
+    _ => (),
+}
+"""
+
 [["./test_crates/enum_struct_field_hidden_from_public_api/"]]
 filename = "src/lib.rs"
 begin_line = 43

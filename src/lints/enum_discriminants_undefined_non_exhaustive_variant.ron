@@ -1,11 +1,11 @@
 SemverQuery(
     id: "enum_discriminants_undefined_non_exhaustive_variant",
-    human_readable_name: "enum's variants no longer have defined discriminants due to a non-exhaustive variant",
-    description: "A public enum's variants no longer have well-defined discriminants value due to a non-exhaustive variant.",
-    reference: Some("A public enum's variants no longer have well-defined discriminants due to a non-exhaustive variant. This breaks downstream code that accessed the discriminant via a numeric cast like `as isize`."),
+    human_readable_name: "enum no longer supports numeric casts due to a non-exhaustive variant",
+    description: "A public enum no longer supports numeric casts due to a non-exhaustive variant.",
+    reference: Some("A public enum now contains a non-exhaustive variant. This breaks downstream code that accesses its discriminants via numeric casts using the `as` operator."),
     required_update: Major,
     lint_level: Deny,
-    reference_link: Some("https://doc.rust-lang.org/reference/items/enumerations.html#assigning-discriminant-values"),
+    reference_link: Some("https://doc.rust-lang.org/reference/expressions/operator-expr.html#r-expr.as.enum"),
     query: r#"
     {
         CrateDiff {
@@ -15,27 +15,42 @@ SemverQuery(
                         visibility_limit @filter(op: "=", value: ["$public"]) @output
                         enum_name: name @output
 
-                        attribute @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            content {
-                                base @filter(op: "=", value: ["$repr"])
-                            }
-                        }
-
                         importable_path {
                             path @output @tag
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        variant @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
-                            discriminant {
-                                value
+                        # Previously, no Drop impl.
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            negative @filter(op: "!=", value: ["$true"])
+
+                            implemented_trait {
+                                trait {
+                                    canonical_path {
+                                        path @filter(op: "=", value: ["$drop_trait"])
+                                    }
+                                }
                             }
                         }
 
+                        # Previously, no variant with fields.
                         variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            __typename @filter(op: "!=", value: ["$plain_variant"])
+                            field {
+                                name
+                            }
                         }
 
+                        # Previously, no non-unit variant with an explicit discriminant.
+                        # Integer repr exposes discriminants even for non-castable enums.
+                        # Only unit variants may have explicit discriminants in a castable enum.
+                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            __typename @filter(op: "!=", value: ["$plain_variant"])
+                            discriminant {
+                                explicit @filter(op: "=", value: ["$true"])
+                            }
+                        }
+
+                        # Previously, no variant with `#[non_exhaustive]`.
                         variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             attrs @filter(op: "contains", value: ["$non_exhaustive"])
                         }
@@ -52,10 +67,9 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        variant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            __typename @filter(op: "!=", value: ["$plain_variant"])
-                        }
-
+                        # Report each independent cause of lost casts: removing this attribute
+                        # does not restore casts if fields or Drop also prevent them.
+                        # As a result, we don't try to rule out other ways to lose discriminant casts.
                         variant @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             attrs @filter(op: "contains", value: ["$non_exhaustive"])
                         }
@@ -72,12 +86,17 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
-        "repr": "repr",
         "non_exhaustive": "#[non_exhaustive]",
+        "drop_trait": ["core", "ops", "drop", "Drop"],
         "plain_variant": "PlainVariant",
         "zero": 0,
         "true": true,
     },
-    error_message: "An enum's variants no longer have well-defined discriminant values due to a non-exhaustive variant in the enum. This breaks downstream code that accesses discriminants via a numeric cast like `as isize`.",
+    error_message: "An enum now contains a non-exhaustive variant. This breaks downstream code that accesses its discriminants via numeric casts using the `as` operator.",
     per_result_error_template: Some("enum {{enum_name}} in {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"let value: {{join "::" path}} = ...;
+let discriminant = value as isize;
+"#,
+    ),
 )
