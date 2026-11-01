@@ -2,6 +2,19 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/sealed_trait_associated_const_added/": [
+    {
+      "name": String("BecomesUnsealed"),
+      "path": List([
+        String("sealed_trait_associated_const_added"),
+        String("BecomesUnsealed"),
+      ]),
+      "span_begin_line": Uint64(31),
+      "span_end_line": Uint64(35),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_method_added/": [
     {
       "name": String("WillGainMethodWithoutDefaultAndLoseSeal"),

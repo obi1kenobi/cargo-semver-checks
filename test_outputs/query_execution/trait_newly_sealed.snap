@@ -2,6 +2,19 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/sealed_trait_associated_const_added/": [
+    {
+      "name": String("BecomesSealed"),
+      "path": List([
+        String("sealed_trait_associated_const_added"),
+        String("BecomesSealed"),
+      ]),
+      "span_begin_line": Uint64(56),
+      "span_end_line": Uint64(60),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_associated_const_added/": [
     {
       "name": String("WillGainConstWithoutDefaultAndSeal"),
