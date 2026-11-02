@@ -1,0 +1,7 @@
+[package]
+publish = false
+name = "trait_associated_const_with_default_added"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

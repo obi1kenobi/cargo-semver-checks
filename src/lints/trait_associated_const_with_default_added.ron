@@ -1,0 +1,67 @@
+SemverQuery(
+    id: "trait_associated_const_with_default_added",
+    human_readable_name: "non-sealed trait added associated constant with default value",
+    description: "A non-sealed public trait added a new associated constant with a default value.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#trait-new-default-item"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_constant {
+                            associated_constant: name @output @tag
+                            # Constants without a default value are reported by `trait_associated_const_added`.
+                            default @filter(op: "is_not_null")
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        # If the baseline trait was sealed, `sealed_trait_associated_const_added`
+                        # reports the new constant instead.
+                        public_api_sealed @filter(op: "!=", value: ["$true"])
+                        # If the baseline trait was dyn-compatible, the new associated constant makes it
+                        # no longer dyn-compatible, which `trait_no_longer_dyn_compatible` reports instead.
+                        dyn_compatible @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_constant @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%associated_constant"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A non-sealed public trait added a new associated constant with a default value.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{associated_constant}} in file {{span_filename}}:{{span_begin_line}}"),
+)
