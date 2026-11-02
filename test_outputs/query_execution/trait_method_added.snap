@@ -316,6 +316,20 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/sealed_trait_method_added/": [
+    {
+      "method_name": String("added_without_default"),
+      "name": String("NotSealed"),
+      "path": List([
+        String("sealed_trait_method_added"),
+        String("NotSealed"),
+      ]),
+      "span_begin_line": Uint64(70),
+      "span_end_line": Uint64(70),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_method_added/": [
     {
       "method_name": String("one_method"),

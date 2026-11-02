@@ -1,0 +1,69 @@
+SemverQuery(
+    id: "sealed_trait_method_added",
+    human_readable_name: "sealed trait added method",
+    description: "A sealed public trait added a new method.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        dyn_compatible @tag(name: "current_dyn_compatible")
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method {
+                            method_name: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        # If the baseline trait wasn't sealed, downstream crates may have implemented it,
+                        # and `trait_method_added` reports methods without a default implementation.
+                        public_api_sealed @filter(op: "=", value: ["$true"])
+                        # If a dyn-compatible trait is no longer dyn-compatible, for example because
+                        # the new method is generic, `trait_no_longer_dyn_compatible` reports it instead.
+                        # Trustfall can't express "unless the trait went from dyn-compatible to not",
+                        # so this lint requires dyn-compatibility to be unchanged. That also skips
+                        # the rare case of a trait becoming dyn-compatible while gaining a method.
+                        dyn_compatible @filter(op: "=", value: ["%current_dyn_compatible"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        method @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%method_name"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A sealed public trait added a new method.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+)
