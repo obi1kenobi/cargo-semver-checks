@@ -1,7 +1,7 @@
 SemverQuery(
     id: "trait_associated_const_with_default_added",
     human_readable_name: "non-sealed trait added associated constant with default value",
-    description: "A non-sealed public trait added a new associated constant with a default value. Existing downstream implementations of the trait keep compiling, since they use the default value.",
+    description: "A non-sealed public trait added a new associated constant with a default value.",
     required_update: Minor,
     lint_level: Allow,
     reference_link: Some("https://doc.rust-lang.org/cargo/reference/semver.html#trait-new-default-item"),
@@ -63,5 +63,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A non-sealed public trait added a new associated constant with a default value.",
-    per_result_error_template: Some("trait constant {{join \"::\" path}}::{{associated_constant}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{join \"::\" path}}::{{associated_constant}} in file {{span_filename}}:{{span_begin_line}}"),
 )
