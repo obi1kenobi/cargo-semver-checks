@@ -12,7 +12,6 @@ SemverQuery(
                 item {
                     ... on Trait {
                         visibility_limit @filter(op: "=", value: ["$public"])
-                        dyn_compatible @tag(name: "current_dyn_compatible")
 
                         importable_path {
                             path @output @tag
@@ -39,12 +38,8 @@ SemverQuery(
                         # If the baseline trait wasn't sealed, downstream crates may have implemented it,
                         # and `trait_method_added` reports methods without a default implementation.
                         public_api_sealed @filter(op: "=", value: ["$true"])
-                        # If a dyn-compatible trait is no longer dyn-compatible, for example because
-                        # the new method is generic, `trait_no_longer_dyn_compatible` reports it instead.
-                        # Trustfall can't express "unless the trait went from dyn-compatible to not",
-                        # so this lint requires dyn-compatibility to be unchanged. That also skips
-                        # the rare case of a trait becoming dyn-compatible while gaining a method.
-                        dyn_compatible @filter(op: "=", value: ["%current_dyn_compatible"])
+                        # This lint doesn't check dyn-compatibility: if the new method makes the trait
+                        # no longer dyn-compatible, `trait_no_longer_dyn_compatible` reports that too.
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])

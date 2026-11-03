@@ -31,16 +31,10 @@ pub trait BecomesUnsealed: sealed::Sealed {
     fn method(&self);
 }
 
-// Sealed and dyn-compatible, but the new generic method makes it no longer dyn-compatible,
-// which `trait_no_longer_dyn_compatible` reports, so this lint should not report it.
+// Sealed and dyn-compatible, but the new generic method makes it no longer dyn-compatible.
+// The new method should be reported, and `trait_no_longer_dyn_compatible` also reports the trait.
 pub trait BecomesNonDynCompatible: sealed::Sealed {
     fn method(&self);
-}
-
-// Sealed and not dyn-compatible, but it becomes dyn-compatible in the new version.
-// This lint requires dyn-compatibility to be unchanged, so it should not report the new method.
-pub trait BecomesDynCompatible: sealed::Sealed {
-    fn make_me_non_dyn_compatible() -> Self;
 }
 
 // Not sealed: `trait_method_added` reports the new method without a default implementation,
