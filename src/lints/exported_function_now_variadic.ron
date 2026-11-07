@@ -1,0 +1,42 @@
+SemverQuery(
+    id: "exported_function_now_variadic",
+    human_readable_name: "exported function is now variadic",
+    description: "An exported function (via #[no_mangle] or #[export_name]) is now C-variadic.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some(
+        "https://doc.rust-lang.org/reference/items/functions.html#c-variadic-functions",
+    ),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                ffi_exported_function {
+                    name @output
+                    export_name @output @tag
+                    c_variadic @filter(op: "=", value: ["$true"])
+
+                    span_: span @optional {
+                        filename @output
+                        begin_line @output
+                        end_line @output
+                    }
+                }
+            }
+            baseline {
+                ffi_exported_function {
+                    export_name @filter(op: "=", value: ["%export_name"])
+                    c_variadic @filter(op: "!=", value: ["$true"])
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "true": true,
+    },
+    error_message: r#"An exported symbol now refers to a C-variadic function definition.
+Foreign code declaring the symbol with its previous non-variadic signature no longer matches its calling convention,
+and calling a function through an incompatible signature is undefined behavior."#,
+    per_result_error_template: Some("{{name}} exported as {{export_name}} is now variadic, in {{span_filename}}:{{span_begin_line}}"),
+    witness: None,
+)
