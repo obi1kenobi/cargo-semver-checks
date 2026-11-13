@@ -1,0 +1,108 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/sealed_trait_method_added/": [
+    {
+      "method_name": String("added_without_default"),
+      "path": List([
+        String("sealed_trait_method_added"),
+        String("SealedDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("added_with_default"),
+      "path": List([
+        String("sealed_trait_method_added"),
+        String("SealedDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(15),
+      "span_end_line": Uint64(15),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("added"),
+      "path": List([
+        String("sealed_trait_method_added"),
+        String("SealedNotDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(25),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("added"),
+      "path": List([
+        String("sealed_trait_method_added"),
+        String("PublicApiSealed"),
+      ]),
+      "span_begin_line": Uint64(36),
+      "span_end_line": Uint64(36),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("added"),
+      "path": List([
+        String("sealed_trait_method_added"),
+        String("BecomesUnsealed"),
+      ]),
+      "span_begin_line": Uint64(44),
+      "span_end_line": Uint64(44),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("added"),
+      "path": List([
+        String("sealed_trait_method_added"),
+        String("BecomesNonDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(52),
+      "span_end_line": Uint64(52),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_method_added/": [
+    {
+      "method_name": String("one_method"),
+      "path": List([
+        String("trait_method_added"),
+        String("WillGainMethodWithoutDefaultSealed"),
+      ]),
+      "span_begin_line": Uint64(42),
+      "span_end_line": Uint64(42),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("one_method"),
+      "path": List([
+        String("trait_method_added"),
+        String("WillGainMethodWithoutDefaultAndLoseSeal"),
+      ]),
+      "span_begin_line": Uint64(46),
+      "span_end_line": Uint64(46),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("one_method"),
+      "path": List([
+        String("trait_method_added"),
+        String("PublicAPISealed"),
+      ]),
+      "span_begin_line": Uint64(57),
+      "span_end_line": Uint64(57),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
