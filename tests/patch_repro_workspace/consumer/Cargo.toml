@@ -1,0 +1,7 @@
+[package]
+name = "consumer"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+app = { path = "../app", features = ["fancy"] }

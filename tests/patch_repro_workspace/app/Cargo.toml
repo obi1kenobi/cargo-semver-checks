@@ -1,0 +1,10 @@
+[package]
+name = "app"
+version.workspace = true
+edition.workspace = true
+
+[features]
+fancy = []
+
+[dependencies]
+either.workspace = true
