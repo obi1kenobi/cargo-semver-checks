@@ -504,6 +504,10 @@ jobs:
 
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
+        with:
+          # Newer releases expand rustc argument files past Windows' command-line limit.
+          # Upgrade once https://github.com/mozilla/sccache/pull/3026 ships a fix.
+          version: v0.16.0
 
       - name: build
         run: |
