@@ -34,8 +34,8 @@ pub trait BecomesUnsealed {
     fn make_me_non_dyn_compatible() -> Self;
 }
 
-// Sealed but dyn-compatible: the new constant makes it no longer dyn-compatible,
-// which `trait_no_longer_dyn_compatible` reports, so this lint should not report it.
+// Sealed and dyn-compatible, but the new constant makes it no longer dyn-compatible.
+// The new constant should be reported, and `trait_no_longer_dyn_compatible` also reports the trait.
 pub trait SealedDynCompatible: sealed::Sealed {
     const ADDED: i64 = 0;
 

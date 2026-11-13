@@ -38,9 +38,8 @@ SemverQuery(
                         # If the baseline trait wasn't sealed, downstream crates may have implemented it,
                         # and `trait_associated_const_added` reports constants without a default value.
                         public_api_sealed @filter(op: "=", value: ["$true"])
-                        # If the baseline trait was dyn-compatible, the new associated constant makes it
-                        # no longer dyn-compatible, which `trait_no_longer_dyn_compatible` reports instead.
-                        dyn_compatible @filter(op: "!=", value: ["$true"])
+                        # This lint doesn't check dyn-compatibility: if the new constant makes the trait
+                        # no longer dyn-compatible, `trait_no_longer_dyn_compatible` reports that too.
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
