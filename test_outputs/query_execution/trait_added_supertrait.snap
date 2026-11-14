@@ -15,6 +15,19 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/sealed_trait_method_added/": [
+    {
+      "path": List([
+        String("sealed_trait_method_added"),
+        String("BecomesSealed"),
+      ]),
+      "span_begin_line": Uint64(67),
+      "span_end_line": Uint64(71),
+      "span_filename": String("src/lib.rs"),
+      "supertrait": String("Sealed"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_added_supertrait/": [
     {
       "path": List([
