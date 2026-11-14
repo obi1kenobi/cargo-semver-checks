@@ -144,4 +144,58 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_receiver_disjoint_impls/": [
+    {
+      "method_name": String("to_mut"),
+      "method_visibility": String("public"),
+      "name": String("HiddenDestination"),
+      "path": List([
+        String("method_receiver_disjoint_impls"),
+        String("HiddenDestination"),
+      ]),
+      "span_begin_line": Uint64(242),
+      "span_end_line": Uint64(242),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("ref_to_owned"),
+      "method_visibility": String("public"),
+      "name": String("HiddenDestination"),
+      "path": List([
+        String("method_receiver_disjoint_impls"),
+        String("HiddenDestination"),
+      ]),
+      "span_begin_line": Uint64(243),
+      "span_end_line": Uint64(243),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("mut_to_owned"),
+      "method_visibility": String("public"),
+      "name": String("HiddenDestination"),
+      "path": List([
+        String("method_receiver_disjoint_impls"),
+        String("HiddenDestination"),
+      ]),
+      "span_begin_line": Uint64(244),
+      "span_end_line": Uint64(244),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("different_kind"),
+      "method_visibility": String("public"),
+      "name": String("HiddenDestination"),
+      "path": List([
+        String("method_receiver_disjoint_impls"),
+        String("HiddenDestination"),
+      ]),
+      "span_begin_line": Uint64(245),
+      "span_end_line": Uint64(245),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }
