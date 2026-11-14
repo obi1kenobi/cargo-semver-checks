@@ -40,7 +40,7 @@ jobs:
         run: python3 .github/scripts/check_build_scripts.py
 
       - name: Install rust
-        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
         with:
           toolchain: stable
           rustflags: ""
@@ -81,7 +81,7 @@ jobs:
           persist-credentials: false
 
       - name: Install rust
-        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
         with:
           toolchain: stable
           rustflags: ""
@@ -129,7 +129,7 @@ jobs:
           git tag -- "$PUBLISH_TAG"
           git push origin "refs/tags/$PUBLISH_TAG:refs/tags/$PUBLISH_TAG"
 
-      - uses: taiki-e/create-gh-release-action@eba8ea96c86cca8a37f1b56e94b4d13301fba651 # v1.11.0
+      - uses: taiki-e/create-gh-release-action@045e5c0ed9c50cc1f96de7e891a09ad3daea245f # v1.12.0
         name: Create github release
         with:
           branch: main
