@@ -27,16 +27,26 @@ impl RustdocBuildEnvironment {
         build_target: Option<&str>,
     ) -> anyhow::Result<Self> {
         let flags = Flags::from_env_and_config_for_target(build_target)?;
+        Self::from_flags(flags)
+    }
 
+    fn from_flags(flags: Flags) -> anyhow::Result<Self> {
         // Generating rustdoc JSON for a crate also involves checking that crate's dependencies.
         // The check is done by rustc, not rustdoc, so it's subject to `RUSTFLAGS` not
         // `RUSTDOCFLAGS`. We don't want rustc to fail that check if the user has set
         // `RUSTFLAGS="-Dwarnings"` here.
         // This fixes: https://github.com/obi1kenobi/cargo-semver-checks/issues/589
+        //
+        // Cargo probes target support by parsing unsupported-crate-type warnings,
+        // appending `-Wwarnings` to enable them. A `warn` cap lets that override work;
+        // an `allow` cap would hide the probe's warnings and break some targets.
+        // `-Awarnings` suppresses warnings during compilation, including when Cargo's
+        // `build.warnings` setting denies them.
+        // https://github.com/obi1kenobi/cargo-semver-checks/issues/1068
         let cargo_rustflags = if flags.rustflags.is_empty() {
-            Cow::Borrowed("--cap-lints=allow")
+            Cow::Borrowed("--cap-lints=warn -Awarnings")
         } else {
-            Cow::Owned(format!("{} --cap-lints=allow", flags.rustflags))
+            Cow::Owned(format!("{} --cap-lints=warn -Awarnings", flags.rustflags))
         };
 
         // Preserve user rustdoc flags, including `--cfg <custom-value>` settings that toggle
@@ -912,7 +922,48 @@ fn save_placeholder_rustdoc_manifest(
 
 #[cfg(test)]
 mod tests {
-    use super::combine_witness_rustflags;
+    use super::{Flags, RustdocBuildEnvironment, combine_witness_rustflags};
+
+    #[test]
+    fn rustflags_allow_cargo_target_probe_and_suppress_lints() {
+        for rustflags in ["", "-Dwarnings"] {
+            let environment = RustdocBuildEnvironment::from_flags(Flags {
+                target_triple: "wasm32-unknown-unknown".to_owned(),
+                rustflags: rustflags.to_owned(),
+                rustdocflags: String::new(),
+            })
+            .expect("failed to construct rustdoc build environment");
+
+            // Cargo needs this warning to match file names to supported crate types.
+            // Printing file names does not require the target's standard library.
+            assert_cmd::Command::new("rustc")
+                .args([
+                    "-",
+                    "--crate-name=probe",
+                    "--print=file-names",
+                    "--crate-type=rlib,dylib",
+                    "--target",
+                    &environment.target_triple,
+                ])
+                .args(environment.cargo_rustflags.split_whitespace())
+                .arg("-Wwarnings")
+                .assert()
+                .success()
+                .stdout(predicates::str::contains("libprobe.rlib"))
+                .stderr(predicates::str::contains(
+                    "dropping unsupported crate type `dylib`",
+                ));
+
+            // Compile for the host so this check needs no additional target libraries.
+            assert_cmd::Command::new("rustc")
+                .args(["-", "--crate-type=lib", "--emit=metadata", "-o", "-"])
+                .args(environment.cargo_rustflags.split_whitespace())
+                .write_stdin("#[forbid(unused_variables)]\npub fn example() { let unused = 0; }\n")
+                .assert()
+                .success()
+                .stderr("");
+        }
+    }
 
     #[test]
     fn combine_witness_rustflags_preserves_existing_rustflags() {

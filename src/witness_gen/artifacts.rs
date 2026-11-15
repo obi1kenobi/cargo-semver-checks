@@ -141,11 +141,9 @@ pub(super) fn execute_script(
     // witness sees the same effective build configuration as the semver query,
     // including cfgs that came from rustdoc settings or user config.
     //
-    // We also always append `--cap-lints=allow` here. Generated witness scripts
-    // already opt into `#![allow(warnings)]`, but user-supplied `-Dwarnings`
-    // from Cargo config or environment still wins over crate attributes.
-    // Without capping lints at the rustc level, unrelated warnings in the
-    // witness can turn into false witness failures.
+    // Unrelated lints in the witness or its dependencies must not affect whether
+    // a breaking change is confirmed. Suppress them through rustflags so that
+    // the policy applies to dependencies as well as the generated script.
     let effective_rustflags =
         effective_witness_execution_rustflags(execution_config.rustflags.as_deref());
     cmd.env("RUSTC_BOOTSTRAP", "1")
@@ -653,17 +651,21 @@ fn render_locked_reproduction_command(
     parts.join(" ")
 }
 
-/// Add `--cap-lints=allow` to the given rustflags, if any.
+/// Suppress compiler lints while allowing Cargo to probe supported crate types.
 fn effective_witness_execution_rustflags(
     rustflags: Option<&str>,
 ) -> std::borrow::Cow<'static, str> {
+    // Cargo's target probe appends `-Wwarnings` and parses unsupported-crate-type
+    // warnings. Capping at `warn` lets that override work, while `-Awarnings`
+    // keeps compilation quiet even when Cargo's `build.warnings` denies warnings.
+    // https://github.com/obi1kenobi/cargo-semver-checks/issues/1068
     match rustflags {
         Some(rustflags) => {
             let mut rustflags = rustflags.to_owned();
-            rustflags.push_str(" --cap-lints=allow");
+            rustflags.push_str(" --cap-lints=warn -Awarnings");
             std::borrow::Cow::Owned(rustflags)
         }
-        None => std::borrow::Cow::Borrowed("--cap-lints=allow"),
+        None => std::borrow::Cow::Borrowed("--cap-lints=warn -Awarnings"),
     }
 }
 
@@ -811,5 +813,36 @@ pub(super) fn classify_execution_outcome(
         (true, false) => WitnessExecutionClassification::ConfirmedBreaking,
         (true, true) => WitnessExecutionClassification::NotConfirmedByWitness,
         _ => WitnessExecutionClassification::WitnessError,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::effective_witness_execution_rustflags;
+
+    #[test]
+    fn rustflags_allow_cargo_target_probe() {
+        for rustflags in [None, Some("-Dwarnings")] {
+            let effective_rustflags = effective_witness_execution_rustflags(rustflags);
+
+            // Cargo needs this warning to match file names to supported crate types.
+            // Printing file names does not require the target's standard library.
+            assert_cmd::Command::new("rustc")
+                .args([
+                    "-",
+                    "--crate-name=probe",
+                    "--print=file-names",
+                    "--crate-type=rlib,dylib",
+                    "--target=wasm32-unknown-unknown",
+                ])
+                .args(effective_rustflags.split_whitespace())
+                .arg("-Wwarnings")
+                .assert()
+                .success()
+                .stdout(predicates::str::contains("libprobe.rlib"))
+                .stderr(predicates::str::contains(
+                    "dropping unsupported crate type `dylib`",
+                ));
+        }
     }
 }
