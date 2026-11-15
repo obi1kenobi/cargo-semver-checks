@@ -1,7 +1,81 @@
 ---
 source: src/query.rs
+assertion_line: 1110
 ---
 {
+  "./test_crates/method_generic_disjoint_impls/": [
+    {
+      "method_name": String("const_count"),
+      "method_visibility": String("public"),
+      "name": String("Converged"),
+      "new_required_const_count": List([
+        Uint64(2),
+        Uint64(2),
+      ]),
+      "new_required_consts": List([
+        List([
+          String("N"),
+          String("M"),
+        ]),
+        List([
+          String("N"),
+          String("M"),
+        ]),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(43),
+        Uint64(48),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+        String("src/lib.rs"),
+      ]),
+      "old_required_const_count": Uint64(1),
+      "old_required_consts": List([
+        String("N"),
+      ]),
+      "path": List([
+        String("method_generic_disjoint_impls"),
+        String("Converged"),
+      ]),
+      "span_begin_line": Uint64(43),
+      "span_end_line": Uint64(43),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("const_count"),
+      "method_visibility": String("public"),
+      "name": String("CountChanged"),
+      "new_required_const_count": List([
+        Uint64(2),
+      ]),
+      "new_required_consts": List([
+        List([
+          String("N"),
+          String("M"),
+        ]),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(94),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_required_const_count": Uint64(1),
+      "old_required_consts": List([
+        String("N"),
+      ]),
+      "path": List([
+        String("method_generic_disjoint_impls"),
+        String("CountChanged"),
+      ]),
+      "span_begin_line": Uint64(89),
+      "span_end_line": Uint64(89),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/method_requires_different_const_generic_params/": [
     {
       "method_name": String("previously_not_generic"),
