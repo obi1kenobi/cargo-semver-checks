@@ -4,8 +4,9 @@ mod sealed {
     pub(crate) trait Sealed {}
 }
 
-// Not sealed and not dyn-compatible. The new method with a default implementation should be
-// reported. The new method without one and the new #[doc(hidden)] method should not.
+// Not sealed and not dyn-compatible. The new methods with a default implementation, with and
+// without a receiver, should be reported. The new method without a default implementation
+// and the new #[doc(hidden)] method should not.
 pub trait NotDynCompatible {
     fn make_me_non_dyn_compatible() -> Self;
 }
