@@ -1,0 +1,65 @@
+SemverQuery(
+    id: "sealed_trait_associated_type_added",
+    human_readable_name: "sealed trait added associated type",
+    description: "A sealed public trait added a new associated type.",
+    required_update: Minor,
+    lint_level: Allow,
+    reference_link: Some("https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_type {
+                            associated_type: name @output @tag
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        # If the baseline trait wasn't sealed, downstream crates may have implemented it,
+                        # and `trait_associated_type_added` reports types without a default value.
+                        public_api_sealed @filter(op: "=", value: ["$true"])
+                        # If the baseline trait was dyn-compatible, downstream code may have used it as
+                        # `dyn Trait`, which stops compiling because it must now specify the new type.
+                        dyn_compatible @filter(op: "!=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%associated_type"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A sealed public trait added a new associated type.",
+    per_result_error_template: Some("trait associated type {{join \"::\" path}}::{{associated_type}} in file {{span_filename}}:{{span_begin_line}}"),
+)
