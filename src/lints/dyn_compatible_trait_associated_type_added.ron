@@ -1,0 +1,72 @@
+SemverQuery(
+    id: "dyn_compatible_trait_associated_type_added",
+    human_readable_name: "dyn-compatible trait added associated type",
+    description: "A dyn-compatible public trait added a new associated type, which breaks `dyn Trait` usage.",
+    required_update: Major,
+    lint_level: Deny,
+    reference_link: Some("https://doc.rust-lang.org/error_codes/E0191.html"),
+    query: r#"
+    {
+        CrateDiff {
+            current {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"])
+                        # If the new type made the trait no longer dyn-compatible (e.g. a generic associated type),
+                        # `trait_no_longer_dyn_compatible` reports that instead.
+                        dyn_compatible @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @output @tag
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        # Trait objects must specify every associated type, so the new type is reported
+                        # even if it has a default value or is #[doc(hidden)].
+                        # TODO: A new type with a `where Self: Sized` bound doesn't need to be specified,
+                        # but the schema doesn't expose associated type where clauses yet,
+                        # so this lint still reports it.
+                        associated_type {
+                            associated_type: name @output @tag
+
+                            span_: span @optional {
+                                filename @output
+                                begin_line @output
+                                end_line @output
+                            }
+                        }
+                    }
+                }
+            }
+            baseline {
+                item {
+                    ... on Trait {
+                        visibility_limit @filter(op: "=", value: ["$public"]) @output
+                        # Downstream code can use the trait as `dyn Trait` whether or not it's sealed,
+                        # so this lint doesn't check sealing.
+                        dyn_compatible @filter(op: "=", value: ["$true"])
+
+                        importable_path {
+                            path @filter(op: "=", value: ["%path"])
+                            public_api @filter(op: "=", value: ["$true"])
+                        }
+
+                        associated_type @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            name @filter(op: "=", value: ["%associated_type"])
+                        }
+                    }
+                }
+            }
+        }
+    }"#,
+    arguments: {
+        "public": "public",
+        "true": true,
+        "zero": 0,
+    },
+    error_message: "A dyn-compatible public trait added a new associated type. Trait objects must specify all associated types, so existing `dyn Trait` usage no longer compiles.",
+    per_result_error_template: Some("trait associated type {{join \"::\" path}}::{{associated_type}} in file {{span_filename}}:{{span_begin_line}}"),
+    witness: (
+        hint_template: r#"fn witness(value: &dyn {{join "::" path}}) {...}"#,
+    ),
+)

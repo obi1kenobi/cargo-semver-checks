@@ -2,6 +2,19 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/dyn_compatible_trait_associated_type_added/": [
+    {
+      "name": String("BecomesNotDynCompatible"),
+      "path": List([
+        String("dyn_compatible_trait_associated_type_added"),
+        String("BecomesNotDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(50),
+      "span_end_line": Uint64(54),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/inherent_associated_pub_const_missing/": [
     {
       "name": String("TraitA"),
