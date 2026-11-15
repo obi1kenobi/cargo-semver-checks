@@ -1,0 +1,33 @@
+---
+source: src/query.rs
+description: "Lint `dyn_compatible_trait_associated_type_added` did not have the expected witness output.\nSee https://github.com/obi1kenobi/cargo-semver-checks/blob/main/CONTRIBUTING.md#testing-witnesses\nfor more information."
+---
+[["./test_crates/dyn_compatible_trait_associated_type_added/"]]
+filename = "src/lib.rs"
+begin_line = 12
+hint = "fn witness(value: &dyn dyn_compatible_trait_associated_type_added::DynCompatible) {...}"
+
+[["./test_crates/dyn_compatible_trait_associated_type_added/"]]
+filename = "src/lib.rs"
+begin_line = 13
+hint = "fn witness(value: &dyn dyn_compatible_trait_associated_type_added::DynCompatible) {...}"
+
+[["./test_crates/dyn_compatible_trait_associated_type_added/"]]
+filename = "src/lib.rs"
+begin_line = 21
+hint = "fn witness(value: &dyn dyn_compatible_trait_associated_type_added::SealedDynCompatible) {...}"
+
+[["./test_crates/dyn_compatible_trait_associated_type_added/"]]
+filename = "src/lib.rs"
+begin_line = 23
+hint = "fn witness(value: &dyn dyn_compatible_trait_associated_type_added::SealedDynCompatible) {...}"
+
+[["./test_crates/dyn_compatible_trait_associated_type_added/"]]
+filename = "src/lib.rs"
+begin_line = 32
+hint = "fn witness(value: &dyn dyn_compatible_trait_associated_type_added::ExistingAssociatedType) {...}"
+
+[["./test_crates/dyn_compatible_trait_associated_type_added/"]]
+filename = "src/lib.rs"
+begin_line = 41
+hint = "fn witness(value: &dyn dyn_compatible_trait_associated_type_added::SelfSizedAssociatedType) {...}"
