@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1110
 ---
 {
   "./test_crates/inherent_method_no_longer_variadic/": [
@@ -140,6 +141,34 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(170),
       "span_end_line": Uint64(170),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_generic_disjoint_impls/": [
+    {
+      "method_name": String("reorder"),
+      "method_visibility": String("public"),
+      "name": String("HiddenShadow"),
+      "path": List([
+        String("method_generic_disjoint_impls"),
+        String("HiddenShadow"),
+      ]),
+      "span_begin_line": Uint64(187),
+      "span_end_line": Uint64(187),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("reorder"),
+      "method_visibility": String("public"),
+      "name": String("HiddenChangedShadow"),
+      "path": List([
+        String("method_generic_disjoint_impls"),
+        String("HiddenChangedShadow"),
+      ]),
+      "span_begin_line": Uint64(339),
+      "span_end_line": Uint64(339),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
