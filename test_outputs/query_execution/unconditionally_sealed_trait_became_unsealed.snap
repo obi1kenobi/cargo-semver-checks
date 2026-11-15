@@ -67,6 +67,19 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/trait_method_with_default_added/": [
+    {
+      "name": String("BecomesUnsealed"),
+      "path": List([
+        String("trait_method_with_default_added"),
+        String("BecomesUnsealed"),
+      ]),
+      "span_begin_line": Uint64(68),
+      "span_end_line": Uint64(72),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/unconditionally_sealed_trait_became_unsealed/": [
     {
       "name": String("ExtendsTraitInHiddenModule"),
