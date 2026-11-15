@@ -127,8 +127,7 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: r#"A public inherent method or associated function is now variadic.
-Downstream code relying on its previous signature may no longer compile."#,
+    error_message: "A public inherent method or associated function is now variadic. Downstream code relying on its previous signature may no longer compile.",
     per_result_error_template: Some(
         r#"{{join "::" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"#,
     ),

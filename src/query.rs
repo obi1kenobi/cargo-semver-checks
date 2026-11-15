@@ -1506,6 +1506,16 @@ mod tests {
     }
 
     #[test]
+    fn lint_error_messages_are_single_line() {
+        for (query_name, semver_query) in SemverQuery::all_queries() {
+            assert!(
+                !semver_query.error_message.contains(['\n', '\r']),
+                "error message for {query_name} must not contain hard line breaks"
+            );
+        }
+    }
+
+    #[test]
     fn witness_hint_templates_have_whitespace_hygiene() {
         let mut issues = Vec::new();
 

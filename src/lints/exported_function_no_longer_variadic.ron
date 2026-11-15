@@ -34,8 +34,6 @@ SemverQuery(
     arguments: {
         "true": true,
     },
-    error_message: r#"An exported symbol no longer refers to a C-variadic function definition.
-Foreign code declaring the symbol with its previous variadic signature no longer matches its calling convention,
     error_message: r#"An exported function is no longer C-variadic. Calls using its previous signature may cause undefined behavior."#,
     per_result_error_template: Some("{{name}} exported as {{export_name}} is no longer variadic, in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
