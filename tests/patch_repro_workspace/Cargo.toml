@@ -1,0 +1,14 @@
+[workspace]
+members = ["app", "consumer"]
+resolver = "2"
+
+[workspace.dependencies]
+either = "1"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+
+# The table the tool's synthetic per-feature manifests drop (issue #1777).
+[patch.crates-io]
+either = { path = "vendor/either" }
