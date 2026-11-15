@@ -1,0 +1,51 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/exported_function_no_longer_variadic/": [
+    {
+      "export_name": String("no_longer_variadic"),
+      "name": String("no_longer_variadic"),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("explicit_export_no_longer_variadic"),
+      "name": String("explicitly_exported"),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("unwind_no_longer_variadic"),
+      "name": String("unwind_no_longer_variadic"),
+      "span_begin_line": Uint64(19),
+      "span_end_line": Uint64(19),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("method_no_longer_variadic"),
+      "name": String("method"),
+      "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(25),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("hook"),
+      "name": String("fixed"),
+      "span_begin_line": Uint64(68),
+      "span_end_line": Uint64(68),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/exported_function_now_variadic/": [
+    {
+      "export_name": String("no_longer_variadic"),
+      "name": String("no_longer_variadic"),
+      "span_begin_line": Uint64(54),
+      "span_end_line": Uint64(54),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+}
