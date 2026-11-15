@@ -145,6 +145,62 @@ assertion_line: 1110
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_abi_disjoint_impls/": [
+    {
+      "method_name": String("changed_abi"),
+      "method_visibility": String("public"),
+      "name": String("MethodHidden"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("MethodHidden"),
+      ]),
+      "span_begin_line": Uint64(385),
+      "span_end_line": Uint64(385),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("now_unwind"),
+      "method_visibility": String("public"),
+      "name": String("MethodHidden"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("MethodHidden"),
+      ]),
+      "span_begin_line": Uint64(386),
+      "span_end_line": Uint64(386),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("no_longer_unwind"),
+      "method_visibility": String("public"),
+      "name": String("MethodHidden"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("MethodHidden"),
+      ]),
+      "span_begin_line": Uint64(387),
+      "span_end_line": Uint64(387),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_export_disjoint_impls/": [
+    {
+      "method_name": String("exported"),
+      "method_visibility": String("public"),
+      "name": String("MethodHidden"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("MethodHidden"),
+      ]),
+      "span_begin_line": Uint64(345),
+      "span_end_line": Uint64(347),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/method_generic_disjoint_impls/": [
     {
       "method_name": String("reorder"),

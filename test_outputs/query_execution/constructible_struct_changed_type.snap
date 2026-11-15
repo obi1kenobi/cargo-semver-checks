@@ -1,7 +1,24 @@
 ---
 source: src/query.rs
+assertion_line: 1110
 ---
 {
+  "./test_crates/method_abi_disjoint_impls/": [
+    {
+      "current_typename": String("Enum"),
+      "name": String("OwnerKindChanged"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("OwnerKindChanged"),
+      ]),
+      "span_begin_line": Uint64(395),
+      "span_end_line": Uint64(395),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("unit"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/struct_becomes_enum/": [
     {
       "current_typename": String("Enum"),

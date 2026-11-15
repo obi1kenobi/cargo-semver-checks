@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1110
 ---
 {
   "./test_crates/function_added/": [
@@ -432,6 +433,58 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(16),
       "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_abi_disjoint_impls/": [
+    {
+      "method_name": String("renamed_changed_abi"),
+      "name": String("RenamedMethod"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("RenamedMethod"),
+      ]),
+      "span_begin_line": Uint64(381),
+      "span_end_line": Uint64(381),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("renamed_now_unwind"),
+      "name": String("RenamedMethod"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("RenamedMethod"),
+      ]),
+      "span_begin_line": Uint64(382),
+      "span_end_line": Uint64(382),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("renamed_no_longer_unwind"),
+      "name": String("RenamedMethod"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("RenamedMethod"),
+      ]),
+      "span_begin_line": Uint64(383),
+      "span_end_line": Uint64(383),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_export_disjoint_impls/": [
+    {
+      "method_name": String("renamed"),
+      "name": String("RenamedMethod"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("RenamedMethod"),
+      ]),
+      "span_begin_line": Uint64(347),
+      "span_end_line": Uint64(349),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
