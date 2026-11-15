@@ -579,7 +579,7 @@ mod tests {
     ) -> RustdocBuildEnvironment {
         RustdocBuildEnvironment {
             target_triple: target_triple.to_owned(),
-            cargo_rustflags: Cow::Borrowed("--cap-lints=allow"),
+            cargo_rustflags: Cow::Borrowed("--cap-lints=warn -Awarnings"),
             cargo_rustdocflags: Cow::Borrowed(rustdocflags),
             toolchain_version: String::from("1.95.0"),
         }

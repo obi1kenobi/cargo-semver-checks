@@ -351,38 +351,42 @@ package.edition = \"2024\"
 ---
 #![allow(warnings)]
 
+#[deny(unused_variables)]
 fn main() {
     let unused = 0;
 }
 ",
     );
 
-    let execution = execute_script(
-        temp_workspace_root,
-        &artifact_dir,
-        &WitnessExecutionConfig {
-            build_target: None,
-            rustflags: Some("-Dwarnings".to_owned()),
-        },
-        "warning-profile",
-        "script.rs",
-    )
-    .expect("failed to execute witness script with deny-warnings rustflags");
+    for rustflags in [None, Some("-Dwarnings".to_owned())] {
+        let execution = execute_script(
+            temp_workspace_root.clone(),
+            &artifact_dir,
+            &WitnessExecutionConfig {
+                build_target: None,
+                rustflags,
+            },
+            "warning-profile",
+            "script.rs",
+        )
+        .expect("failed to execute witness script with denied lints");
 
-    assert!(
-        execution.success,
-        "expected witness execution to cap lints even when rustflags deny \
-         warnings\nstdout:\n{}\nstderr:\n{}",
-        execution.stdout, execution.stderr,
-    );
+        assert!(
+            execution.success,
+            "expected witness execution to cap lints with source-level deny \
+             and optional deny-warnings rustflags\nstdout:\n{}\nstderr:\n{}",
+            execution.stdout, execution.stderr,
+        );
+        assert!(
+            !execution.stderr.contains("warning:"),
+            "expected witness warnings to be suppressed:\n{}",
+            execution.stderr,
+        );
+    }
 }
 
-// `execute_script_caps_warnings_even_when_rustflags_deny_them()` only covers
-// warnings in the generated witness script itself.
-// This one guards against a subtler regression: if witness execution ever moves
-// to a mechanism like `cargo rustc -- --cap-lints=allow`, lint capping would
-// only apply to the top-level script crate and a warning in the baseline/current
-// dependency could still make the witness fail for an unrelated reason.
+// Dependency lints must be suppressed as well as script lints: either can make
+// a witness fail for reasons unrelated to the API change.
 #[test]
 fn execute_script_caps_dependency_warnings_even_when_rustflags_deny_them() {
     let temp_dir = TempDir::new("cargo-semver-checks-cap-lints-dep");
@@ -405,6 +409,7 @@ edition = \"2024\"
     write_file(
         &dependency_dir.join("src/lib.rs"),
         "\
+#[forbid(unused_variables)]
 pub fn dependency_warning() {
     let unused = 0;
 }
@@ -429,24 +434,31 @@ fn main() {
 ",
     );
 
-    let execution = execute_script(
-        temp_workspace_root,
-        &artifact_dir,
-        &WitnessExecutionConfig {
-            build_target: None,
-            rustflags: Some("-Dwarnings".to_owned()),
-        },
-        "warning-dependency-profile",
-        "script.rs",
-    )
-    .expect("failed to execute witness script with warning dependency");
+    for rustflags in [None, Some("-Dwarnings".to_owned())] {
+        let execution = execute_script(
+            temp_workspace_root.clone(),
+            &artifact_dir,
+            &WitnessExecutionConfig {
+                build_target: None,
+                rustflags,
+            },
+            "warning-dependency-profile",
+            "script.rs",
+        )
+        .expect("failed to execute witness script with forbidden dependency lints");
 
-    assert!(
-        execution.success,
-        "expected witness execution to cap dependency warnings even when \
-         rustflags deny warnings\nstdout:\n{}\nstderr:\n{}",
-        execution.stdout, execution.stderr,
-    );
+        assert!(
+            execution.success,
+            "expected witness execution to cap dependency lints with source-level \
+             forbid and optional deny-warnings rustflags\nstdout:\n{}\nstderr:\n{}",
+            execution.stdout, execution.stderr,
+        );
+        assert!(
+            !execution.stderr.contains("warning:"),
+            "expected dependency warnings to be suppressed:\n{}",
+            execution.stderr,
+        );
+    }
 }
 
 #[test]
@@ -673,7 +685,7 @@ version = 4
         artifact
             .get("effective_rustflags")
             .and_then(toml::Value::as_str),
-        Some("--cfg custom --cap-lints=allow")
+        Some("--cfg custom --cap-lints=warn -Awarnings")
     );
     assert_eq!(
         artifact
@@ -726,7 +738,9 @@ version = 4
         .get("baseline_internal_command")
         .and_then(toml::Value::as_str)
         .expect("missing baseline_internal_command");
-    assert!(baseline_internal_command.contains("RUSTFLAGS='--cfg custom --cap-lints=allow'"));
+    assert!(
+        baseline_internal_command.contains("RUSTFLAGS='--cfg custom --cap-lints=warn -Awarnings'")
+    );
     assert!(baseline_internal_command.contains("cargo -Zscript check --manifest-path"));
     assert!(baseline_internal_command.contains("--target 'wasm32-unknown-unknown'"));
 
@@ -734,7 +748,10 @@ version = 4
         .get("baseline_reproduction_command")
         .and_then(toml::Value::as_str)
         .expect("missing baseline_reproduction_command");
-    assert!(baseline_reproduction_command.contains("RUSTFLAGS='--cfg custom --cap-lints=allow'"));
+    assert!(
+        baseline_reproduction_command
+            .contains("RUSTFLAGS='--cfg custom --cap-lints=warn -Awarnings'")
+    );
     assert!(
         baseline_reproduction_command
             .contains("cargo +nightly -Zscript -Zlockfile-path check --manifest-path")

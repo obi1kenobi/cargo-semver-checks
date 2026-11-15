@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use predicates::prelude::PredicateBooleanExt as _;
 
 fn cargo_semver_checks() -> Command {
     assert_cmd::cargo::cargo_bin_cmd!("cargo-semver-checks")
@@ -133,16 +134,27 @@ fn renamed_lib_target() {
 }
 
 /// Ensure dependency warnings do not fail rustdoc generation when the user has
-/// `RUSTFLAGS=-Dwarnings` set.
+/// `RUSTFLAGS=-Dwarnings` or `CARGO_BUILD_WARNINGS=deny` set.
 /// https://github.com/obi1kenobi/cargo-semver-checks/issues/589
 #[test]
 fn dependency_warnings_do_not_fail_rustdoc_generation() {
-    let mut cmd = cargo_semver_checks();
-    cmd.current_dir("test_crates/dependency_warnings_with_deny/new")
-        .args(["semver-checks", "check-release", "--baseline-root=../old"])
-        .env("RUSTFLAGS", "-Dwarnings")
-        .assert()
-        .success();
+    for rustflags in ["", "-Dwarnings"] {
+        let mut cmd = cargo_semver_checks();
+        cmd.current_dir("test_crates/dependency_warnings_with_deny/new")
+            .args([
+                "semver-checks",
+                "check-release",
+                "--baseline-root=../old",
+                "--verbose",
+            ])
+            .env("RUSTFLAGS", rustflags)
+            .env_remove("CARGO_BUILD_RUSTFLAGS")
+            .env_remove("CARGO_ENCODED_RUSTFLAGS")
+            .env("CARGO_BUILD_WARNINGS", "deny")
+            .assert()
+            .success()
+            .stderr(predicates::str::contains("warning:").not());
+    }
 }
 
 /// Ensure that semver-checking a crate that uses workspace-provided values works fine.
