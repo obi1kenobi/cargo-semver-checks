@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1110
 ---
 {
   "./test_crates/inherent_method_const_removed/": [
@@ -140,6 +141,62 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(16),
       "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_abi_disjoint_impls/": [
+    {
+      "method_name": String("changed_abi"),
+      "method_visibility": String("public"),
+      "name": String("RenamedMethod"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("RenamedMethod"),
+      ]),
+      "span_begin_line": Uint64(394),
+      "span_end_line": Uint64(394),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("now_unwind"),
+      "method_visibility": String("public"),
+      "name": String("RenamedMethod"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("RenamedMethod"),
+      ]),
+      "span_begin_line": Uint64(395),
+      "span_end_line": Uint64(395),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("no_longer_unwind"),
+      "method_visibility": String("public"),
+      "name": String("RenamedMethod"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("RenamedMethod"),
+      ]),
+      "span_begin_line": Uint64(396),
+      "span_end_line": Uint64(396),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_export_disjoint_impls/": [
+    {
+      "method_name": String("exported"),
+      "method_visibility": String("public"),
+      "name": String("RenamedMethod"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("RenamedMethod"),
+      ]),
+      "span_begin_line": Uint64(355),
+      "span_end_line": Uint64(357),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

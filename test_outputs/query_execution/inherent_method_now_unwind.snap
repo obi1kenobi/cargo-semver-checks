@@ -1,14 +1,14 @@
 ---
 source: src/query.rs
-assertion_line: 1049
+assertion_line: 1110
 ---
 {
   "./test_crates/function_abi_no_longer_unwind/": [
     {
-      "abi_raw_name": String("C"),
+      "baseline_abi_name": String("C"),
+      "baseline_abi_raw_name": String("C"),
       "method_name": String("inherent_non_unwind_becomes_unwind"),
       "name": String("InherentUnwindToggles"),
-      "new_abi_raw_name": String("C-unwind"),
       "owner_type": String("Struct"),
       "path": List([
         String("function_abi_no_longer_unwind"),
@@ -16,6 +16,120 @@ assertion_line: 1049
       ]),
       "span_begin_line": Uint64(11),
       "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/method_abi_disjoint_impls/": [
+    {
+      "baseline_abi_name": String("C"),
+      "baseline_abi_raw_name": String("C"),
+      "method_name": String("now_unwind"),
+      "name": String("Converged"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("Converged"),
+      ]),
+      "span_begin_line": Uint64(50),
+      "span_end_line": Uint64(50),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_abi_name": String("C"),
+      "baseline_abi_raw_name": String("C"),
+      "method_name": String("now_unwind"),
+      "name": String("BothChanged"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("BothChanged"),
+      ]),
+      "span_begin_line": Uint64(64),
+      "span_end_line": Uint64(64),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_abi_name": String("C"),
+      "baseline_abi_raw_name": String("C"),
+      "method_name": String("now_unwind"),
+      "name": String("BothChanged"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("BothChanged"),
+      ]),
+      "span_begin_line": Uint64(69),
+      "span_end_line": Uint64(69),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_abi_name": String("C"),
+      "baseline_abi_raw_name": String("C"),
+      "method_name": String("now_unwind"),
+      "name": String("ThirdAbi"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("ThirdAbi"),
+      ]),
+      "span_begin_line": Uint64(79),
+      "span_end_line": Uint64(79),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_abi_name": String("C"),
+      "baseline_abi_raw_name": String("C"),
+      "method_name": String("now_unwind"),
+      "name": String("TraitShadowed"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("TraitShadowed"),
+      ]),
+      "span_begin_line": Uint64(225),
+      "span_end_line": Uint64(225),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_abi_name": String("C"),
+      "baseline_abi_raw_name": String("C"),
+      "method_name": String("now_unwind"),
+      "name": String("AsyncAbi"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("AsyncAbi"),
+      ]),
+      "span_begin_line": Uint64(296),
+      "span_end_line": Uint64(296),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_abi_name": String("C"),
+      "baseline_abi_raw_name": String("C"),
+      "method_name": String("now_unwind"),
+      "name": String("RemovedOriginal"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("RemovedOriginal"),
+      ]),
+      "span_begin_line": Uint64(310),
+      "span_end_line": Uint64(310),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_abi_name": String("C"),
+      "baseline_abi_raw_name": String("C"),
+      "method_name": String("now_unwind"),
+      "name": String("TraitChanged"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("TraitChanged"),
+      ]),
+      "span_begin_line": Uint64(327),
+      "span_end_line": Uint64(327),
       "span_filename": String("src/lib.rs"),
     },
   ],

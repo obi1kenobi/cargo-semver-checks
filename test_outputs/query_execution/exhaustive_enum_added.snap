@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1110
 ---
 {
   "./test_crates/enum_must_use_added/": [
@@ -142,6 +143,18 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(130),
       "span_filename": String("src/item_type_changed_inherent_method_must_use_removed.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_abi_disjoint_impls/": [
+    {
+      "name": String("OwnerKindChanged"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("OwnerKindChanged"),
+      ]),
+      "span_begin_line": Uint64(395),
+      "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
   ],

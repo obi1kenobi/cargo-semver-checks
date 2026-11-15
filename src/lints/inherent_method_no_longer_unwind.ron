@@ -1,14 +1,14 @@
 SemverQuery(
     id: "inherent_method_no_longer_unwind",
-    human_readable_name: "inherent method ABI is no longer unwind-capable",
-    description: "A public inherent method changed from an unwind-capable ABI to the same ABI without unwind. Causing unwinding in that method (for example by panicking) is now undefined behavior for downstream callers.",
+    human_readable_name: "inherent method no longer supports its previous unwind-capable ABI",
+    description: "A public inherent method no longer supports its previous unwind-capable ABI.",
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://rust-lang.github.io/rfcs/2945-c-unwind-abi.html"),
     query: r#"
     {
         CrateDiff {
-            current {
+            baseline {
                 item {
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
@@ -16,20 +16,20 @@ SemverQuery(
                         name @output
 
                         importable_path {
-                            path @output @tag
+                            path @tag @output
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
                         inherent_impl {
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
-                                method_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
+                                method_name: name @output @tag
 
-                                new_abi_: abi {
-                                    name @tag(name: "abi_name")
+                                baseline_abi_: abi {
+                                    name @tag(name: "abi_name") @output
                                     raw_name @output
-                                    unwind @filter(op: "!=", value: ["$true"])
+                                    unwind @filter(op: "=", value: ["$true"])
                                 }
 
                                 span_: span @optional {
@@ -42,8 +42,32 @@ SemverQuery(
                     }
                 }
             }
-            baseline {
-                item {
+            current {
+                # The adapter's normalized ABI names omit the "-unwind" suffix.
+                # Require matching normalized names and known, opposite unwind settings
+                # for the baseline method and the current candidate.
+                #
+                # `Reader<bool>::get` and `Reader<u8>::get` need not have the same ABI and unwind setting.
+                # Without knowing which parameterizations each impl applies to,
+                # we cannot identify which current method replaces an old one.
+                # Report the loss of the old unwind-capable ABI only when all three conditions hold:
+                # 1. A public API inherent function has the old method's name and the same ABI name,
+                #    with unwinding disabled.
+                # 2. No same-named inherent function uses the old ABI with unwinding enabled;
+                #    on generic owners, no same-named trait function does either.
+                # 3. On generic owners, every same-named inherent function is public API.
+                #
+                # If a method disables unwinding while a same-named method in another impl
+                # retains the same ABI with unwinding enabled, this lint will not report the change.
+                # The adapter associates each impl with its owning type,
+                # but does not distinguish different parameterizations of that type.
+                # We therefore cannot distinguish this case from adding a method with unwinding disabled
+                # while leaving every existing method unchanged.
+                # TODO: Match impl targets to detect changes to individual impls.
+                #
+                # Fold current candidates to report each baseline method once at its old span,
+                # without assigning the change to an unrelated current declaration.
+                item @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                     ... on ImplOwner {
                         __typename @filter(op: "=", value: ["%owner_type"])
                         visibility_limit @filter(op: "=", value: ["$public"])
@@ -53,17 +77,81 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # Count the owner's parameters: `impl Reader<bool>` has none of its own,
+                        # but methods on generic `Reader<T>` still need the conservative checks below.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @tag(name: "owner_generic_count")
+
+                        # 1. A public API inherent function has the old method's name and the same ABI name,
+                        #    with unwinding disabled.
+                        #
+                        # This candidate may already have had its present ABI and unwind setting.
+                        # The remaining conditions establish the loss of the old method's unwind-capable ABI.
                         inherent_impl {
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
-                                name @filter(op: "=", value: ["%method_name"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
+                                name @filter(op: "=", value: ["%method_name"])
 
-                                abi_: abi {
+                                abi {
                                     name @filter(op: "=", value: ["%abi_name"])
-                                    raw_name @output
+                                    unwind @filter(op: "=", value: ["$false"])
+                                }
+                            }
+                        }
+
+                        # 2. No same-named inherent function uses the old ABI with unwinding enabled;
+                        #    on generic owners, no same-named trait function does either.
+                        #
+                        # A nongeneric owner's inherent function takes precedence over trait functions
+                        # in `Owner::method` calls. On generic owners, `Reader<bool>::get` may move
+                        # to a trait while an unrelated inherent `Reader<u8>::get` remains.
+                        #
+                        # Conservatively include private and doc-hidden alternatives,
+                        # accepting missed changes when they cannot actually preserve calls with the old ABI.
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            # Zero for inherent impls, one for trait impls: include traits only
+                            # when the owner has at least one generic parameter.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "<=", value: ["%owner_generic_count"])
+
+                            method {
+                                name @filter(op: "=", value: ["%method_name"])
+
+                                abi {
+                                    name @filter(op: "=", value: ["%abi_name"])
                                     unwind @filter(op: "=", value: ["$true"])
                                 }
+                            }
+                        }
+
+                        # 3. On generic owners, every same-named inherent function is public API.
+                        #
+                        # A private or doc-hidden method could be the old method leaving public API,
+                        # even if its ABI and unwind setting changed too. Omit the report in that ambiguous case.
+                        inherent_impl @fold
+                                      @transform(op: "count")
+                                      @filter(op: "=", value: ["$zero"]) {
+                            # Inherent impls have count zero, so apply this only to generic owners.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "<", value: ["%owner_generic_count"])
+
+                            # An impl violates the rule only if it contains this name
+                            # but has no such function in the public API.
+                            method @fold
+                                   @transform(op: "count")
+                                   @filter(op: ">", value: ["$zero"]) {
+                                name @filter(op: "=", value: ["%method_name"])
+                            }
+                            method @fold
+                                   @transform(op: "count")
+                                   @filter(op: "=", value: ["$zero"]) {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
+                                name @filter(op: "=", value: ["%method_name"])
                             }
                         }
                     }
@@ -73,8 +161,12 @@ SemverQuery(
     }"#,
     arguments: {
         "public": "public",
+        // `unwind` is nullable: `!= true` also accepts unknown values.
+        // Use both constants to require known unwind settings.
         "true": true,
+        "false": false,
+        "zero": 0,
     },
-    error_message: "A public inherent method lost its unwind-capable ABI. Any unwinding inside that method is now undefined behavior for downstream code.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A public inherent method no longer supports its previous unwind-capable ABI. Uses of its previous function pointer type may no longer compile.",
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} no longer supports ABI {{baseline_abi_raw_name}}; previously in {{span_filename}}:{{span_begin_line}}"),
 )

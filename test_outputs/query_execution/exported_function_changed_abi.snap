@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1110
 ---
 {
   "./test_crates/exported_function_changed_abi/": [
@@ -67,6 +68,30 @@ source: src/query.rs
       "new_abi_raw_name": String("C-unwind"),
       "span_begin_line": Uint64(28),
       "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/method_abi_disjoint_impls/": [
+    {
+      "abi_name": String("C"),
+      "abi_raw_name": String("C"),
+      "export_name": String("disjoint_abi_swapped_u8_changed_abi"),
+      "name": String("changed_abi"),
+      "new_abi_name": String("Rust"),
+      "new_abi_raw_name": String("Rust"),
+      "span_begin_line": Uint64(29),
+      "span_end_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_name": String("Rust"),
+      "abi_raw_name": String("Rust"),
+      "export_name": String("disjoint_abi_swapped_u16_changed_abi"),
+      "name": String("changed_abi"),
+      "new_abi_name": String("C"),
+      "new_abi_raw_name": String("C"),
+      "span_begin_line": Uint64(37),
+      "span_end_line": Uint64(37),
       "span_filename": String("src/lib.rs"),
     },
   ],

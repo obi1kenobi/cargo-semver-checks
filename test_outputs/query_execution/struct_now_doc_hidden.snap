@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1110
 ---
 {
   "./test_crates/inherent_associated_pub_const_missing/": [
@@ -49,6 +50,30 @@ source: src/query.rs
       "span_end_line": Uint64(99),
       "span_filename": String("src/lib.rs"),
       "struct_name": String("NewlyHidden"),
+    },
+  ],
+  "./test_crates/method_abi_disjoint_impls/": [
+    {
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("OwnerHidden"),
+      ]),
+      "span_begin_line": Uint64(348),
+      "span_end_line": Uint64(348),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("OwnerHidden"),
+    },
+  ],
+  "./test_crates/method_export_disjoint_impls/": [
+    {
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("OwnerHidden"),
+      ]),
+      "span_begin_line": Uint64(311),
+      "span_end_line": Uint64(311),
+      "span_filename": String("src/lib.rs"),
+      "struct_name": String("OwnerHidden"),
     },
   ],
   "./test_crates/struct_now_doc_hidden/": [

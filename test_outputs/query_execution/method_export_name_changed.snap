@@ -1,12 +1,102 @@
 ---
 source: src/query.rs
+assertion_line: 1110
 ---
 {
+  "./test_crates/method_export_disjoint_impls/": [
+    {
+      "export_name": String("disjoint_renamed_old"),
+      "method_name": String("exported"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("Renamed"),
+      ]),
+      "span_begin_line": Uint64(9),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("disjoint_removed_old"),
+      "method_name": String("exported"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("Removed"),
+      ]),
+      "span_begin_line": Uint64(26),
+      "span_end_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("disjoint_both_u8_old"),
+      "method_name": String("exported"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("BothChanged"),
+      ]),
+      "span_begin_line": Uint64(42),
+      "span_end_line": Uint64(44),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("disjoint_both_u16_old"),
+      "method_name": String("exported"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("BothChanged"),
+      ]),
+      "span_begin_line": Uint64(48),
+      "span_end_line": Uint64(50),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("disjoint_moved"),
+      "method_name": String("exported"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("MovedElsewhere"),
+      ]),
+      "span_begin_line": Uint64(87),
+      "span_end_line": Uint64(89),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("disjoint_removed_method"),
+      "method_name": String("exported"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("RemovedOriginal"),
+      ]),
+      "span_begin_line": Uint64(193),
+      "span_end_line": Uint64(195),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("disjoint_trait_changed_old"),
+      "method_name": String("exported"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("TraitChanged"),
+      ]),
+      "span_begin_line": Uint64(240),
+      "span_end_line": Uint64(242),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "export_name": String("disjoint_trait_shadowed_old"),
+      "method_name": String("exported"),
+      "path": List([
+        String("method_export_disjoint_impls"),
+        String("TraitShadowed"),
+      ]),
+      "span_begin_line": Uint64(262),
+      "span_end_line": Uint64(264),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
   "./test_crates/method_export_name_changed/": [
     {
       "export_name": String("method_export_name_changed_old"),
       "method_name": String("export_name_changed"),
-      "new_export_name": String("method_export_name_changed_new"),
       "path": List([
         String("method_export_name_changed"),
         String("PublicStruct"),
@@ -18,7 +108,6 @@ source: src/query.rs
     {
       "export_name": String("no_mangle_changed_to_other_export_name"),
       "method_name": String("no_mangle_changed_to_other_export_name"),
-      "new_export_name": String("no_mangle_changed_to_other_export_name_new"),
       "path": List([
         String("method_export_name_changed"),
         String("PublicStruct"),
@@ -30,7 +119,6 @@ source: src/query.rs
     {
       "export_name": String("export_name_changed_to_other_no_mangle_old"),
       "method_name": String("export_name_changed_to_other_no_mangle"),
-      "new_export_name": String("export_name_changed_to_other_no_mangle"),
       "path": List([
         String("method_export_name_changed"),
         String("PublicStruct"),
@@ -42,37 +130,34 @@ source: src/query.rs
     {
       "export_name": String("no_mangle_removed"),
       "method_name": String("no_mangle_removed"),
-      "new_export_name": Null,
       "path": List([
         String("method_export_name_changed"),
         String("PublicStruct"),
       ]),
-      "span_begin_line": Uint64(15),
-      "span_end_line": Uint64(15),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
       "span_filename": String("src/lib.rs"),
     },
     {
       "export_name": String("export_name_removed"),
       "method_name": String("export_name_removed"),
-      "new_export_name": Null,
       "path": List([
         String("method_export_name_changed"),
         String("PublicStruct"),
       ]),
-      "span_begin_line": Uint64(17),
-      "span_end_line": Uint64(17),
+      "span_begin_line": Uint64(19),
+      "span_end_line": Uint64(19),
       "span_filename": String("src/lib.rs"),
     },
     {
       "export_name": String("export_name_moved"),
       "method_name": String("export_name_moved_1"),
-      "new_export_name": Null,
       "path": List([
         String("method_export_name_changed"),
         String("PublicStruct"),
       ]),
-      "span_begin_line": Uint64(22),
-      "span_end_line": Uint64(22),
+      "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(25),
       "span_filename": String("src/lib.rs"),
     },
   ],
