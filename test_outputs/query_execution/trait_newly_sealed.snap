@@ -187,6 +187,19 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/trait_method_with_default_added/": [
+    {
+      "name": String("BecomesSealed"),
+      "path": List([
+        String("trait_method_with_default_added"),
+        String("BecomesSealed"),
+      ]),
+      "span_begin_line": Uint64(38),
+      "span_end_line": Uint64(42),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_newly_sealed/": [
     {
       "name": String("TraitBecomesSealed"),

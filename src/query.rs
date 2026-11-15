@@ -1947,6 +1947,7 @@ add_lints!(
     trait_method_return_value_added,
     trait_method_unsafe_added,
     trait_method_unsafe_removed,
+    trait_method_with_default_added,
     trait_mismatched_generic_lifetimes,
     trait_missing,
     trait_must_use_added,
