@@ -56,8 +56,7 @@ SemverQuery(
         "public": "public",
         "true": true,
     },
-    error_message: r#"A public function is no longer variadic.
-Downstream code relying on its previous signature may no longer compile."#,
+    error_message: "A public function is no longer variadic. Downstream code relying on its previous signature may no longer compile.",
     per_result_error_template: Some(
         r#"{{join "::" path}} is no longer variadic in {{span_filename}}:{{span_begin_line}}"#,
     ),
