@@ -184,3 +184,33 @@ let _: unsafe extern "C" fn(
     ...
 ) -> _ = method_variadic_disjoint_impls::ReexportedLosesVariadic::call;
 """
+
+[["./test_crates/method_variadic_trait_visibility/"]]
+filename = "src/lib.rs"
+begin_line = 28
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    ...
+) -> _ = method_variadic_trait_visibility::PublicReplacement::private_variadic;
+"""
+
+[["./test_crates/method_variadic_trait_visibility/"]]
+filename = "src/lib.rs"
+begin_line = 86
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    ...
+) -> _ = method_variadic_trait_visibility::PreludeTraits::clone;
+"""
+
+[["./test_crates/method_variadic_trait_visibility/"]]
+filename = "src/lib.rs"
+begin_line = 92
+hint = """
+let _: unsafe extern "C" fn(
+    _,
+    ...
+) -> _ = method_variadic_trait_visibility::PreludeTraits::as_ref;
+"""

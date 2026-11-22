@@ -236,4 +236,45 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/method_variadic_trait_visibility/": [
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("private_variadic"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("method_variadic_trait_visibility"),
+        String("PublicReplacement"),
+      ]),
+      "span_begin_line": Uint64(28),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("clone"),
+      "parameter_names": List([
+        String("self"),
+      ]),
+      "path": List([
+        String("method_variadic_trait_visibility"),
+        String("PreludeTraits"),
+      ]),
+      "span_begin_line": Uint64(86),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("as_ref"),
+      "parameter_names": List([
+        String("self"),
+      ]),
+      "path": List([
+        String("method_variadic_trait_visibility"),
+        String("PreludeTraits"),
+      ]),
+      "span_begin_line": Uint64(92),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }

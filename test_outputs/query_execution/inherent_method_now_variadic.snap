@@ -233,4 +233,19 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/method_variadic_trait_visibility/": [
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("private_fixed"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("method_variadic_trait_visibility"),
+        String("PublicReplacement"),
+      ]),
+      "span_begin_line": Uint64(29),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }
