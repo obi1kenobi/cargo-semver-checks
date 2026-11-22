@@ -52,4 +52,42 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/method_const_disjoint_impls/": [
+    {
+      "method_name": String("value"),
+      "name": String("Exact"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_const_disjoint_impls"),
+        String("Exact"),
+      ]),
+      "span_begin_line": Uint64(6),
+      "span_end_line": Uint64(8),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("value"),
+      "name": String("TraitShadowed"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_const_disjoint_impls"),
+        String("TraitShadowed"),
+      ]),
+      "span_begin_line": Uint64(111),
+      "span_end_line": Uint64(113),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "method_name": String("Changed"),
+      "name": String("DotLookup"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("method_const_disjoint_impls"),
+        String("DotLookup"),
+      ]),
+      "span_begin_line": Uint64(166),
+      "span_end_line": Uint64(168),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }
