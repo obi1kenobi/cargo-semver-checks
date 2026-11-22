@@ -33,9 +33,9 @@ impl Swapped<u16> {
     pub fn const_count<const N: usize, const M: usize>() {}
 }
 
-// Only the u8 methods change. Their old generic argument order and counts
-// disappear entirely, so report their losses once each. The unchanged u16
-// declarations must not be identified as the methods that changed.
+// Only the u8 methods change. Report their type and const argument count changes.
+// TODO: Report both reordered positions on u8 once impl targets can be matched.
+// The u16 methods retain their original generic arguments.
 pub struct Converged<T>(pub T);
 impl Converged<u8> {
     pub fn reorder<T, const N: usize>() {}
@@ -48,8 +48,8 @@ impl Converged<u16> {
     pub fn const_count<const N: usize, const M: usize>() {}
 }
 
-// Both methods exchange their type and const arguments. Report each old
-// declaration once per reordered position, rather than every pairing of methods.
+// Both the u8 and u16 methods exchange their type and const arguments.
+// TODO: Report both reordered positions on each impl once impl targets can be matched.
 pub struct BothChanged<T>(pub T);
 impl BothChanged<u8> {
     pub fn reorder<T, const N: usize>() {}
@@ -58,10 +58,10 @@ impl BothChanged<u16> {
     pub fn reorder<T, const N: usize>() {}
 }
 
-// The u8 method stops accepting a type at position 1, and no method retains it.
-// Report that loss without attributing the change to the unchanged u16 method.
-// Position 2 still accepts a const on u16, although that cannot preserve u8 calls.
-// TODO: Report the u8 const-position change once impl targets can be matched.
+// The first two arguments of `DistinctOrders::<u8>::reorder::<i32, 1, 2, i64>()`
+// exchange positions. The u16 method still accepts a const at position 2,
+// but explicit calls on u8 now require a type there.
+// TODO: Report both reordered positions on u8 once impl targets can be matched.
 pub struct DistinctOrders<T>(pub T);
 impl DistinctOrders<u8> {
     pub fn reorder<T, const N: usize, const M: usize, U>() {}
@@ -237,8 +237,8 @@ impl SyntheticCountChanged {
     pub fn add_impl_trait<T, const N: usize, U>(_: ()) {}
 }
 
-// This unrelated method cannot affect the generic arguments accepted by
-// the reordered Converged methods on u8 and u16.
+// This unrelated method accepts no generic arguments. It cannot preserve
+// the old argument order of `Converged::<u8>::reorder`.
 impl Converged<u32> {
     pub fn unrelated() {}
 }
@@ -258,10 +258,10 @@ impl OriginalOrder for HiddenTraitPreserved<u8> {
     fn reorder<T, const N: usize>() {}
 }
 
-// Explicit type and const arguments exchange positions on u8.
-// The trait's `reorder` already uses the new order and cannot preserve the old call.
-// Report both reordered positions while ignoring the added `impl Trait`
-// parameter when counting the method's explicitly supplied type arguments.
+// Explicit type and const arguments exchange positions on u8 even for calls
+// passing () in both versions. The new `impl Send` parameter adds no explicit
+// type argument, and the trait function takes no value argument.
+// TODO: Report both reordered positions on u8 once impl targets can be matched.
 pub struct GenericSyntheticReordered<T>(pub T);
 impl GenericSyntheticReordered<u8> {
     pub fn reorder<T, const N: usize>(_: ()) {}
@@ -339,5 +339,51 @@ impl HiddenChangedShadow {
     pub fn reorder<T, const N: usize>() {}
 }
 impl Reordered for HiddenChangedShadow {
+    fn reorder<const N: usize, T>() {}
+}
+
+// The u8 method disappears. The surviving u16 method already used the opposite order.
+pub struct RemovedOriginal<T>(pub T);
+impl RemovedOriginal<u8> {
+    pub fn reorder<T, const N: usize>() {}
+}
+impl RemovedOriginal<u16> {
+    pub fn reorder<const N: usize, T>() {}
+}
+
+// Each version has a single method named `reorder`, on a different instantiation.
+pub struct ReplacedImpl<T>(pub T);
+impl ReplacedImpl<u8> {
+    pub fn reorder<T, const N: usize>() {}
+}
+
+// The old method requires a nondefault type argument. Removing that parameter
+// makes the old receiver type impossible to name, regardless of method argument order.
+pub struct LosesParameter<T = u8>(core::marker::PhantomData<T>);
+impl LosesParameter<u16> {
+    pub fn reorder<T, const N: usize>(&self) {}
+}
+
+// The new method requires a nondefault const argument. A receiver of type
+// `GainsParameter` loses the method with either argument order.
+pub struct GainsParameter;
+impl GainsParameter {
+    pub fn reorder<T, const N: usize>(&self) {}
+}
+
+// Two traits supply the reordered function after the inherent declaration disappears.
+// Report each reordered position once and identify both current declarations.
+pub struct TwoTraitReplacements;
+impl TwoTraitReplacements {
+    pub fn reorder<T, const N: usize>() {}
+}
+
+pub trait AlsoReordered {
+    fn reorder<const M: usize, U>();
+}
+impl AlsoReordered for TwoTraitReplacements {
+    fn reorder<const M: usize, U>() {}
+}
+impl Reordered for TwoTraitReplacements {
     fn reorder<const N: usize, T>() {}
 }
