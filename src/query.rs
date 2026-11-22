@@ -1512,6 +1512,12 @@ mod tests {
                 !semver_query.error_message.contains(['\n', '\r']),
                 "error message for {query_name} must not contain hard line breaks"
             );
+            if let Some(template) = semver_query.per_result_error_template {
+                assert!(
+                    !template.contains(['\n', '\r']),
+                    "per-result error template for {query_name} must not contain hard line breaks"
+                );
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 ---
 source: src/query.rs
+assertion_line: 1110
 ---
 {
   "./test_crates/method_const_disjoint_impls/": [
@@ -18,6 +19,26 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(137),
       "span_end_line": Uint64(137),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_generic_disjoint_impls/": [
+    {
+      "name": String("LosesParameter"),
+      "new_allowed_consts": List([]),
+      "new_allowed_type_count": Uint64(0),
+      "old_allowed_consts": List([
+        String("T"),
+      ]),
+      "old_allowed_type_count": Uint64(1),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_generic_disjoint_impls"),
+        String("LosesParameter"),
+      ]),
+      "span_begin_line": Uint64(356),
+      "span_end_line": Uint64(356),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
