@@ -97,8 +97,7 @@ source: src/query.rs
       "path": List([
         String("pub_static_missing"),
         String("my_module"),
-        String("my_module_nested"),
-        String("PUB_STATIC_IN_NESTED_MODULE_WILL_RE_EXPORT_CONST"),
+        String("PUB_STATIC_IN_MODULE_WILL_RE_EXPORT_CONST"),
       ]),
       "span_begin_line": Uint64(10),
       "span_end_line": Uint64(10),
@@ -109,7 +108,8 @@ source: src/query.rs
       "path": List([
         String("pub_static_missing"),
         String("my_module"),
-        String("PUB_STATIC_IN_MODULE_WILL_RE_EXPORT_CONST"),
+        String("my_module_nested"),
+        String("PUB_STATIC_IN_NESTED_MODULE_WILL_RE_EXPORT_CONST"),
       ]),
       "span_begin_line": Uint64(10),
       "span_end_line": Uint64(10),

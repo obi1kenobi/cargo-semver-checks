@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-assertion_line: 1110
 ---
 {
   "./test_crates/inherent_method_generics_reordered/": [
@@ -113,33 +112,6 @@ assertion_line: 1110
       ]),
     },
     {
-      "const_name": String("N"),
-      "current_span_begin_line": List([
-        Uint64(14),
-      ]),
-      "current_span_end_line": List([
-        Uint64(14),
-      ]),
-      "current_span_filename": List([
-        String("src/lib.rs"),
-      ]),
-      "method_name": String("two_each_two_changed"),
-      "method_visibility": String("public"),
-      "path": List([
-        String("inherent_method_generics_reordered"),
-        String("Foo"),
-      ]),
-      "position": Uint64(2),
-      "required_const_count": Uint64(2),
-      "required_type_count": Uint64(2),
-      "span_begin_line": Uint64(14),
-      "span_end_line": Uint64(14),
-      "span_filename": String("src/lib.rs"),
-      "type_name": List([
-        String("T"),
-      ]),
-    },
-    {
       "const_name": String("M"),
       "current_span_begin_line": List([
         Uint64(14),
@@ -164,6 +136,33 @@ assertion_line: 1110
       "span_filename": String("src/lib.rs"),
       "type_name": List([
         String("U"),
+      ]),
+    },
+    {
+      "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(14),
+      ]),
+      "current_span_end_line": List([
+        Uint64(14),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "method_name": String("two_each_two_changed"),
+      "method_visibility": String("public"),
+      "path": List([
+        String("inherent_method_generics_reordered"),
+        String("Foo"),
+      ]),
+      "position": Uint64(2),
+      "required_const_count": Uint64(2),
+      "required_type_count": Uint64(2),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
       ]),
     },
   ],

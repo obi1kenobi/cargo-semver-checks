@@ -153,17 +153,6 @@ source: src/query.rs
       "parameter_names": List([]),
       "path": List([
         String("inherent_method_no_longer_variadic"),
-        String("Generic"),
-      ]),
-      "span_begin_line": Uint64(109),
-      "span_filename": String("src/lib.rs"),
-    },
-    {
-      "abi_raw_name": String("C"),
-      "method_name": String("associated"),
-      "parameter_names": List([]),
-      "path": List([
-        String("inherent_method_no_longer_variadic"),
         String("MovedToDefaultTrait"),
       ]),
       "span_begin_line": Uint64(129),
@@ -202,15 +191,48 @@ source: src/query.rs
       "span_begin_line": Uint64(193),
       "span_filename": String("src/lib.rs"),
     },
+  ],
+  "./test_crates/method_variadic_disjoint_impls/": [
     {
       "abi_raw_name": String("C"),
-      "method_name": String("associated"),
-      "parameter_names": List([]),
-      "path": List([
-        String("inherent_method_no_longer_variadic"),
-        String("ChangedInherentWithHiddenOverload"),
+      "method_name": String("call"),
+      "parameter_names": List([
+        String("_"),
+        String("_"),
       ]),
-      "span_begin_line": Uint64(206),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("PrivateLosesVariadic"),
+      ]),
+      "span_begin_line": Uint64(97),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("call"),
+      "parameter_names": List([
+        String("_"),
+        String("_"),
+      ]),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("LosesVariadic"),
+      ]),
+      "span_begin_line": Uint64(114),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("call"),
+      "parameter_names": List([
+        String("_"),
+        String("_"),
+      ]),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("ReexportedLosesVariadic"),
+      ]),
+      "span_begin_line": Uint64(114),
       "span_filename": String("src/lib.rs"),
     },
   ],

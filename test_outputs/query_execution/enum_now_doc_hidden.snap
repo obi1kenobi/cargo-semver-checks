@@ -98,7 +98,7 @@ source: src/query.rs
       "enum_name": String("ReplacedPaths"),
       "path": List([
         String("enum_variant_field_hidden_with_reexport"),
-        String("ReplacedPaths"),
+        String("OldAlias"),
       ]),
       "span_begin_line": Uint64(20),
       "span_end_line": Uint64(26),
@@ -108,7 +108,7 @@ source: src/query.rs
       "enum_name": String("ReplacedPaths"),
       "path": List([
         String("enum_variant_field_hidden_with_reexport"),
-        String("OldAlias"),
+        String("ReplacedPaths"),
       ]),
       "span_begin_line": Uint64(20),
       "span_end_line": Uint64(26),

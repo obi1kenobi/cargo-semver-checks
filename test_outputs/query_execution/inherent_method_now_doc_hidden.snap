@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-assertion_line: 1110
 ---
 {
   "./test_crates/inherent_method_no_longer_variadic/": [
@@ -279,6 +278,34 @@ assertion_line: 1110
       ]),
       "span_begin_line": Uint64(245),
       "span_end_line": Uint64(245),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_variadic_disjoint_impls/": [
+    {
+      "method_name": String("call"),
+      "method_visibility": String("public"),
+      "name": String("HiddenBecomesVariadic"),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("HiddenBecomesVariadic"),
+      ]),
+      "span_begin_line": Uint64(130),
+      "span_end_line": Uint64(130),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("call"),
+      "method_visibility": String("public"),
+      "name": String("HiddenLosesVariadic"),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("HiddenLosesVariadic"),
+      ]),
+      "span_begin_line": Uint64(136),
+      "span_end_line": Uint64(136),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
