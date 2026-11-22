@@ -118,7 +118,6 @@ source: src/query.rs
       "name": String("PubUseRemovedTrait"),
       "path": List([
         String("trait_missing"),
-        String("my_pub_mod"),
         String("PubUseRemovedTrait"),
       ]),
       "span_begin_line": Uint64(8),
@@ -130,6 +129,7 @@ source: src/query.rs
       "name": String("PubUseRemovedTrait"),
       "path": List([
         String("trait_missing"),
+        String("my_pub_mod"),
         String("PubUseRemovedTrait"),
       ]),
       "span_begin_line": Uint64(8),
@@ -176,7 +176,6 @@ source: src/query.rs
       "name": String("PubUseRemovedTrait"),
       "path": List([
         String("trait_missing_with_major_bump"),
-        String("my_pub_mod"),
         String("PubUseRemovedTrait"),
       ]),
       "span_begin_line": Uint64(8),
@@ -188,6 +187,7 @@ source: src/query.rs
       "name": String("PubUseRemovedTrait"),
       "path": List([
         String("trait_missing_with_major_bump"),
+        String("my_pub_mod"),
         String("PubUseRemovedTrait"),
       ]),
       "span_begin_line": Uint64(8),

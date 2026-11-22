@@ -102,7 +102,7 @@ impl NewlyHidden {
     pub unsafe extern "C" fn associated(_: ...) {}
 }
 
-// A generic owner with a single impl should still be reported.
+// TODO: Report this change once we can identify unrestricted inherent impls.
 pub struct Generic<T>(core::marker::PhantomData<T>);
 
 impl<T> Generic<T> {
@@ -187,8 +187,8 @@ pub trait HiddenMatchingTrait {
     unsafe extern "C" fn associated() {}
 }
 
-// Use a separate default method so this case and MovedToDefaultTrait have distinct
-// source spans, keeping snapshot ordering deterministic.
+// This trait supplies the public replacement for `MovedToHiddenMatchingTrait::associated`.
+// Only the doc-hidden trait method retains the old signature.
 pub trait VariadicTraitForHiddenMatch {
     unsafe extern "C" fn associated(_: ...) {}
 }
@@ -199,7 +199,7 @@ impl HiddenMatchingTrait for MovedToHiddenMatchingTrait {}
 
 impl VariadicTraitForHiddenMatch for MovedToHiddenMatchingTrait {}
 
-// A hidden overload in a disjoint impl cannot preserve the changed public method.
+// TODO: Report the change on `u8` once we can match its impl. The hidden `u16` method is unchanged.
 pub struct ChangedInherentWithHiddenOverload<T>(core::marker::PhantomData<T>);
 
 impl ChangedInherentWithHiddenOverload<u8> {

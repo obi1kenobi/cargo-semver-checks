@@ -23,6 +23,26 @@ assertion_line: 1110
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_variadic_disjoint_impls/": [
+    {
+      "name": String("LosesParameter"),
+      "new_allowed_const_count": Uint64(0),
+      "new_allowed_consts": List([]),
+      "old_allowed_const_count": Uint64(1),
+      "old_allowed_consts": List([
+        String("N"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("LosesParameter"),
+      ]),
+      "span_begin_line": Uint64(83),
+      "span_end_line": Uint64(83),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/type_allows_fewer_const_generic_params/": [
     {
       "name": String("Example"),

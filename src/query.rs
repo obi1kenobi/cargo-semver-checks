@@ -808,25 +808,12 @@ mod tests {
 
     type TestOutput = BTreeMap<String, Vec<BTreeMap<String, FieldValue>>>;
 
-    #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+    #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
     #[non_exhaustive]
     struct WitnessOutput {
         filename: String,
         begin_line: usize,
         hint: String,
-    }
-
-    impl PartialOrd for WitnessOutput {
-        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-
-    /// Sorts by span (filename, begin_line)
-    impl Ord for WitnessOutput {
-        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-            (&self.filename, self.begin_line).cmp(&(&other.filename, other.begin_line))
-        }
     }
 
     fn pretty_format_output_difference(
@@ -1047,12 +1034,12 @@ mod tests {
         let key_func = |elem: &BTreeMap<String, FieldValue>| {
             // Queries should either:
             // - define `span_filename` and `span_begin_line` values where the lint is being raised,
-            //   which will then define a total order of results for that query on that crate.
+            //   to order results by source location, or
             // - define explicit ordering keys, canonically named `ordering_key`,
             //   `ordering_key1`, `ordering_key2`, etc., even though any output name
             //   with the `ordering_key` prefix works in practice. Those keys form a
             //   composite ordering key by being sorted lexicographically by name,
-            //   then compared lexicographically by their string values, or
+            //   then compared lexicographically by their string values.
             if elem.contains_key("ordering_key") {
                 let mut ordering_key_names: Vec<_> = elem
                     .keys()
@@ -1096,8 +1083,13 @@ mod tests {
                 }
             }
         };
-        for value in query_execution_results.values_mut() {
-            value.sort_unstable_by_key(key_func);
+        for rows in query_execution_results.values_mut() {
+            // Re-exports can produce distinct rows at the same span. Use the full row
+            // to break ties so both paths appear in a consistent order in the snapshot.
+            rows.sort_by_cached_key(|row| {
+                let contents = ron::to_string(row).expect("failed to serialize query result");
+                (key_func(row), contents)
+            });
         }
 
         insta::with_settings!(
