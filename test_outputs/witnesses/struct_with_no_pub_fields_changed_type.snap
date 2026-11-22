@@ -22,6 +22,16 @@ filename = "src/item_type_changed_inherent_method_must_use_removed.rs"
 begin_line = 99
 hint = "matches!(value, inherent_method_must_use_removed::item_type_changed_inherent_method_must_use_removed::StructToUnionWithMustUseMethods {..});"
 
+[["./test_crates/method_const_disjoint_impls/"]]
+filename = "src/lib.rs"
+begin_line = 127
+hint = "matches!(value, method_const_disjoint_impls::OwnerKindChanged {..});"
+
+[["./test_crates/method_return_unit_disjoint_impls/"]]
+filename = "src/lib.rs"
+begin_line = 63
+hint = "matches!(value, method_return_unit_disjoint_impls::OwnerKindChanged {..});"
+
 [["./test_crates/struct_becomes_enum/"]]
 filename = "src/lib.rs"
 begin_line = 47

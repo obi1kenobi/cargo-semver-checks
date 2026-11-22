@@ -20,6 +20,16 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
+                        # Removing `Reader<u8>::get` while `Reader<u16>::get` keeps returning `()`
+                        # would look like a change in the return type of the removed method.
+                        # TODO: Include generic owners once we can match impl targets.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
+                        # TODO: Decide whether `#[doc(hidden)]` on an inherent impl
+                        # affects the public API status of its methods.
                         inherent_impl {
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
@@ -28,6 +38,10 @@ SemverQuery(
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
                                 return_value {
+                                    # TODO: Resolve unit-valued aliases and associated type projections.
+                                    # Even on a nongeneric owner, changing `fn get() -> Unit` or
+                                    # `fn get() -> <T as Trait>::Output` to `fn get()` can trigger
+                                    # this lint when the old return type already resolved to `()`.
                                     is_unit @filter(op: "!=", value: ["$true"])
                                 }
 
@@ -51,6 +65,12 @@ SemverQuery(
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
                         }
+
+                        # The current owner must also be nongeneric. A current method could
+                        # apply only to a new parameterization of the type.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
 
                         inherent_impl {
                             method {
@@ -77,6 +97,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
+        "zero": 0,
     },
     error_message: "A publicly-visible method that used to return a value now returns `()`.",
     per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
