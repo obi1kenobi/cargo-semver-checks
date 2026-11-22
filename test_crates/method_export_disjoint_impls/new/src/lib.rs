@@ -1,8 +1,8 @@
 #![no_std]
 
 // Renaming the u8 export removes the old symbol and breaks downstream linking.
-// Report its baseline declaration once; the unchanged u16 export is neither
-// a replacement nor a reason to duplicate that report.
+// The u16 method keeps its own export name in both releases.
+// TODO: Report the change on u8 once impl targets can be matched.
 pub struct Renamed<T>(pub T);
 impl Renamed<u8> {
     #[unsafe(export_name = "disjoint_renamed_new")]
@@ -17,9 +17,9 @@ impl Renamed<u16> {
     }
 }
 
-// Removing the u8 export attribute removes its fixed symbol while the Rust
-// method remains callable. Downstream linking against that symbol breaks;
-// the unchanged u16 export must not be diagnosed as its replacement.
+// Removing the u8 export attribute breaks linking against its old symbol.
+// The Rust method remains callable and the u16 export keeps its name.
+// TODO: Report the attribute removal on u8 once impl targets can be matched.
 pub struct Removed<T>(pub T);
 impl Removed<u8> {
     pub extern "C" fn exported() -> u32 {
@@ -33,8 +33,8 @@ impl Removed<u16> {
     }
 }
 
-// Both old symbols disappear. Report the loss of each old declaration's
-// export once, rather than every possible pairing of old and current methods.
+// Both methods change export names.
+// TODO: Report both renames on their own declarations once impl targets can be matched.
 pub struct BothChanged<T>(pub T);
 impl BothChanged<u8> {
     #[unsafe(export_name = "disjoint_both_u8_new")]
@@ -83,9 +83,9 @@ impl Added<u16> {
     }
 }
 
-// The u8 symbol moves to a differently named method, which preserves global
-// symbol availability but changes the public method's export mapping. Report
-// the old mapping without attributing the change to the unchanged u16 method.
+// The u8 symbol moves to a differently named method. The symbol still links,
+// but the original method has lost its export name.
+// TODO: Report that loss on u8 once impl targets can be matched.
 pub struct MovedElsewhere<T>(pub T);
 impl MovedElsewhere<u8> {
     pub extern "C" fn exported() -> u32 {
@@ -192,8 +192,8 @@ impl ExcludedSources<u32> {
     }
 }
 
-// Removing the u8 method removes its fixed symbol. Report that lost mapping
-// at its old declaration, without claiming that the surviving u16 method changed.
+// Removing the u8 method removes its fixed symbol.
+// The surviving u16 method keeps its export name.
 pub struct RemovedOriginal<T>(pub T);
 impl RemovedOriginal<u16> {
     #[unsafe(export_name = "disjoint_removed_method_unchanged")]
@@ -228,8 +228,8 @@ impl Exported for TraitPreserved<u8> {
 }
 
 // With `Exported` in scope, calls on u8 move to the existing trait impl.
-// Its new symbol differs from the old inherent export, so linking against the old symbol breaks.
-// The trait therefore cannot preserve that mapping, even though the Rust call still works.
+// Linking against the old inherent symbol breaks, but no surviving inherent method
+// changes its export name.
 pub struct TraitChanged<T, U = ()>(pub T, pub U);
 impl TraitChanged<u16> {
     #[unsafe(export_name = "disjoint_trait_changed_unchanged")]
@@ -285,9 +285,9 @@ impl SymbolSpelling<u16> {
     }
 }
 
-// Differently named private and hidden methods must not suppress the report
-// that `Renamed<u8>::exported` lost its export name.
-// The visibility exclusion applies only to methods named `exported`.
+// The u8 owner has a second impl whose hidden and private methods have
+// different names from `exported`. Once we can match the impls on u8,
+// `exported` should still be reported at the declaration whose export name changed.
 impl Renamed<u8> {
     fn private_unrelated() {}
     #[doc(hidden)]
