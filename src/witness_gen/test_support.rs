@@ -68,14 +68,16 @@ pub(super) fn make_local_manifest(
         .unwrap_or_default();
     write_file(
         &manifest_path,
-        &format!(
-            "\
+        format!(
+            r#"
 [package]
 name = {package_name}
-version = \"1.2.3\"
-edition = \"2024\"
-{lib_section}{manifest_extra}"
-        ),
+version = "1.2.3"
+edition = "2024"
+{lib_section}{manifest_extra}"#
+        )
+        .strip_prefix('\n')
+        .expect("expected a newline after the opening quotes"),
     );
     write_file(&crate_dir.join("src/lib.rs"), lib_body);
     Manifest::parse(manifest_path).expect("failed to parse generated manifest")
@@ -112,7 +114,7 @@ pub(super) fn make_query_result(path: &[&str]) -> BTreeMap<Arc<str>, FieldValue>
 
 pub(super) fn make_semver_query(purpose: WitnessPurpose) -> SemverQuery {
     SemverQuery::from_ron_str(&format!(
-        r#"
+        r##"
         (
             id: "witness_test",
             human_readable_name: "witness test",
@@ -124,10 +126,10 @@ pub(super) fn make_semver_query(purpose: WitnessPurpose) -> SemverQuery {
             witness: Some((
                 purpose: {purpose:?},
                 hint_template: "hint",
-                witness_template: Some("pub fn witness() {{ {{{{join \"::\" path}}}}(); }}"),
+                witness_template: Some(r#"pub fn witness() {{ {{{{join "::" path}}}}(); }}"#),
             )),
         )
-        "#
+        "##
     ))
     .expect("failed to parse test query")
 }

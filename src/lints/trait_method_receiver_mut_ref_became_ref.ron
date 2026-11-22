@@ -67,6 +67,6 @@ SemverQuery(
         "true": true,
     },
     error_message: "A method in an unsealed trait now takes &self instead of &mut self, breaking downstream implementations.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes &{{receiver_kind}}, not &mut {{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} now takes &{{receiver_kind}}, not &mut {{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

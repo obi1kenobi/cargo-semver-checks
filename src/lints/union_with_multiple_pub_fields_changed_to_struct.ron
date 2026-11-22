@@ -52,6 +52,6 @@ SemverQuery(
         "true": true,
     },
     error_message: "A public union with multiple public API fields was replaced by a struct, breaking overlapping field semantics.",
-    per_result_error_template: Some("union {{join \"::\" path}} with multiple public API fields became a struct in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"union {{join "::" path}} with multiple public API fields became a struct in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

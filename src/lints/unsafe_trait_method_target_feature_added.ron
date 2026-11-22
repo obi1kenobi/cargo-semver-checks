@@ -77,6 +77,6 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A trait method newly requires CPU target features to be enabled.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} requires {{join \", \" feature}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} requires {{join ", " feature}} in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

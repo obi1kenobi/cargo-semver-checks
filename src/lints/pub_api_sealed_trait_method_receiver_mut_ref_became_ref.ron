@@ -67,6 +67,6 @@ SemverQuery(
         "true": true,
     },
     error_message: "A method in a public API sealed trait now takes &self instead of &mut self. This isn't a SemVer-major change, but downstream implementers (if any) will still be broken.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes &{{receiver_kind}}, not &mut {{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} now takes &{{receiver_kind}}, not &mut {{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

@@ -56,5 +56,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A non-sealed trait associated constant lost its default value, which breaks downstream implementations of the trait",
-    per_result_error_template: Some("trait constant {{join \"::\" path}}::{{associated_constant}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait constant {{join "::" path}}::{{associated_constant}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

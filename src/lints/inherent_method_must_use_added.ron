@@ -82,5 +82,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "An inherent method is now #[must_use]. Downstream crates that did not use its return value will get a compiler lint.",
-    per_result_error_template: Some("method {{join \"::\" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"method {{join "::" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"#),
 )

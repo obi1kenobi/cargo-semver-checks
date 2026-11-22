@@ -58,5 +58,5 @@ SemverQuery(
         "non_exhaustive": "#[non_exhaustive]",
     },
     error_message: "A new exhaustive pub struct was added. Future fields added to this struct will cause a breaking change. Consider adding #[non_exhaustive] to the struct if you plan to add new fields in the future.",
-    per_result_error_template: Some("struct {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"struct {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

@@ -48,5 +48,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A publicly-visible static became `unsafe`, so using it now requires an `unsafe` block.",
-    per_result_error_template: Some("static {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"static {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

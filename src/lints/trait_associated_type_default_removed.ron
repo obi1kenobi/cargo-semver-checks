@@ -56,5 +56,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A non-sealed trait associated type lost its default value, which breaks downstream implementations of the trait",
-    per_result_error_template: Some("trait type {{join \"::\" path}}::{{associated_type}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait type {{join "::" path}}::{{associated_type}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

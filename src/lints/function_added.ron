@@ -44,5 +44,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A new pub function has been added. Removing or modifying it later would be a breaking change.",
-    per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"function {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

@@ -801,7 +801,7 @@ fn lockfile_path_if_present(
 }
 
 fn shell_quote(value: &str) -> String {
-    let escaped = value.replace('\'', "'\"'\"'");
+    let escaped = value.replace('\'', r#"'"'"'"#);
     format!("'{escaped}'")
 }
 

@@ -68,5 +68,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A type's associated constant is now #[deprecated]. Downstream crates will get a compiler warning when using it.",
-    per_result_error_template: Some("associated constant {{join \"::\" path}}::{{associated_constant}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"associated constant {{join "::" path}}::{{associated_constant}} in {{span_filename}}:{{span_begin_line}}"#),
 )

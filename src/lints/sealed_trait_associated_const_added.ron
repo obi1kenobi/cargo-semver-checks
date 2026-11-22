@@ -60,5 +60,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A sealed public trait added a new associated constant.",
-    per_result_error_template: Some("trait constant {{join \"::\" path}}::{{associated_constant}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait constant {{join "::" path}}::{{associated_constant}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

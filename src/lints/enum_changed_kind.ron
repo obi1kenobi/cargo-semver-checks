@@ -48,7 +48,7 @@ SemverQuery(
         "true": true,
     },
     error_message: "A public enum has been replaced by a different kind of item at the same path, which breaks code that relied on the enum's variants and representation.",
-    per_result_error_template: Some("enum {{join \"::\" path}} became {{lowercase new_kind}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"enum {{join "::" path}} became {{lowercase new_kind}} in {{span_filename}}:{{span_begin_line}}"#),
     // TODO: Witness idea:
     // - if the enum has at least one variant, generate a match on a value of that enum.
     // - if the enum has no variants and is not non-exhaustive, match on Option<Enum> with only None.

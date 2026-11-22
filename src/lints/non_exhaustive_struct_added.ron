@@ -58,5 +58,5 @@ SemverQuery(
         "non_exhaustive": "#[non_exhaustive]",
     },
     error_message: "A new #[non_exhaustive] pub struct was added. It cannot be constructed using a struct literal outside of its defining crate, and pattern matching will require a wildcard.",
-    per_result_error_template: Some("struct {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"struct {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

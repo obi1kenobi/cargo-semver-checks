@@ -58,5 +58,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A publicly-visible trait cannot be imported by its prior path. A `pub use` may have been removed, or the trait itself may have been renamed or removed entirely.",
-    per_result_error_template: Some("trait {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait {{join "::" path}}, previously in file {{span_filename}}:{{span_begin_line}}"#),
 )
