@@ -46,9 +46,9 @@ impl Partial<u16> {
     pub fn removed(&self) {}
 }
 
-// Only the u8 methods change, and their old receiver forms disappear entirely.
-// Report each old u8 declaration once. The unchanged u16 methods must neither
-// duplicate diagnostics nor be identified as the changed declarations.
+// Only the u8 methods change. The u16 methods already had the new receivers.
+// TODO: Report the four changes once we can match each u8 method to its current
+// declaration. In RemovedOriginal the u8 methods disappear instead.
 pub struct Converged<T>(pub T);
 impl Converged<u8> {
     pub fn to_mut(&mut self) {}
@@ -63,8 +63,8 @@ impl Converged<u16> {
     pub fn different_kind(self: Box<Self>) {}
 }
 
-// Both methods now require a mutable borrow. Report both baseline declarations,
-// rather than every possible pairing of two old and two current methods.
+// Both methods now require a mutable borrow.
+// TODO: Report each change once we can match its impl across versions.
 pub struct BothChanged<T>(pub T);
 impl BothChanged<u8> {
     pub fn read(&mut self) {}
@@ -88,9 +88,9 @@ impl MixedDestinations<u16> {
     pub fn mut_to_owned(&self) {}
 }
 
-// Calls on &DifferentKinds<u8> break when that method starts requiring a Box.
-// No current method accepts Self, so report the baseline receiver's loss without
-// claiming that the unchanged Rc method is its replacement.
+// Calls on &DifferentKinds<u8> break when its method starts requiring a Box.
+// TODO: Report the change to Box<Self> once we can distinguish the u8 method
+// from the unchanged u16 method that takes Rc<Self>.
 pub struct DifferentKinds<T>(pub T);
 impl DifferentKinds<u8> {
     pub fn read(self: Box<Self>) {}
@@ -259,4 +259,51 @@ pub struct DifferentKindBorrowing;
 impl DifferentKindBorrowing {
     pub fn ref_to_mut_box(self: &mut Box<Self>) {}
     pub fn mut_to_owned_box(self: Box<Self>) {}
+}
+
+// Calls on RemovedOriginal<u8> lose their methods. Each u16 method keeps its receiver.
+// TODO: Report the u8 removals once impl targets can be matched.
+pub struct RemovedOriginal<T>(pub T);
+impl RemovedOriginal<u16> {
+    pub fn to_mut(&mut self) {}
+    pub fn ref_to_owned(self) {}
+    pub fn mut_to_owned(self) {}
+    pub fn different_kind(self: Box<Self>) {}
+}
+
+// Each name appears once per version. The u8 methods disappear and the u16 methods
+// are new, so no caller sees a receiver change on the same instantiation.
+pub struct ReplacedImpl<T>(pub T);
+impl ReplacedImpl<u16> {
+    pub fn to_mut(&mut self) {}
+    pub fn ref_to_owned(self) {}
+    pub fn mut_to_owned(self) {}
+    pub fn different_kind(self: Box<Self>) {}
+}
+
+// The old methods require LosesParameter<u16>. Callers using the default type
+// argument u8 gain these names when LosesParameter loses its parameter.
+pub struct LosesParameter(core::marker::PhantomData<u8>);
+impl LosesParameter {
+    pub fn to_mut(&mut self) {}
+    pub fn ref_to_owned(self) {}
+    pub fn mut_to_owned(self) {}
+    pub fn different_kind(self: Box<Self>) {}
+}
+
+// With the default const argument 0, the old calls lose their methods.
+// Only GainsParameter<1> provides the new methods.
+pub struct GainsParameter<const N: usize = 0>;
+impl GainsParameter<1> {
+    pub fn to_mut(&mut self) {}
+    pub fn ref_to_owned(self) {}
+    pub fn mut_to_owned(self) {}
+    pub fn different_kind(self: Box<Self>) {}
+}
+
+// BorrowedBox::read(&boxed) still compiles by deref coercion. Its function pointer
+// changes from fn(&Box<BorrowedBox>) to fn(&BorrowedBox).
+pub struct BorrowedBox;
+impl BorrowedBox {
+    pub fn read(&self) {}
 }
