@@ -1,7 +1,7 @@
 SemverQuery(
     id: "method_export_name_changed",
     human_readable_name: "method's export name has changed or been removed",
-    description: "A public inherent method's export name assigned via #[no_mangle] or #[export_name = \"name\"] has changed or been removed.",
+    description: r#"A public inherent method's export name assigned via #[no_mangle] or #[export_name = "name"] has changed or been removed."#,
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/abi.html#the-no_mangle-attribute"),
@@ -80,6 +80,6 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A public inherent method's export name changed or was removed. Downstream code that uses the old symbol may fail to link or call a different function.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} {{#if new_export_name}}changed its export name from {{export_name}} to {{new_export_name}}{{else}}no longer exports symbol {{export_name}}{{/if}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} {{#if new_export_name}}changed its export name from {{export_name}} to {{new_export_name}}{{else}}no longer exports symbol {{export_name}}{{/if}} in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

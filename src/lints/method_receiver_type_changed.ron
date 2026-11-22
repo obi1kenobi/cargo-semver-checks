@@ -93,6 +93,6 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A method's receiver changed to a different type.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes {{#if current_receiver_by_reference }}&{{/if}}{{#if current_receiver_by_mut_reference }}&mut {{/if}}{{current_receiver_kind}}, not {{#if baseline_receiver_by_reference }}&{{/if}}{{#if baseline_receiver_by_mut_reference }}&mut {{/if}}{{baseline_receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} now takes {{#if current_receiver_by_reference }}&{{/if}}{{#if current_receiver_by_mut_reference }}&mut {{/if}}{{current_receiver_kind}}, not {{#if baseline_receiver_by_reference }}&{{/if}}{{#if baseline_receiver_by_mut_reference }}&mut {{/if}}{{baseline_receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

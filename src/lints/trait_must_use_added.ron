@@ -64,5 +64,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A trait is now #[must_use]. Downstream crates that called a function returning an impl trait or dyn trait of this trait will get a compiler lint.",
-    per_result_error_template: Some("trait {{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait {{join "::" path}} in {{span_filename}}:{{span_begin_line}}"#),
 )

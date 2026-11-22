@@ -62,5 +62,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A trait method is now #[deprecated]. Downstream crates will get a compiler warning when using this method.",
-    per_result_error_template: Some("method {{method_name}} in trait {{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"method {{method_name}} in trait {{join "::" path}} in {{span_filename}}:{{span_begin_line}}"#),
 )

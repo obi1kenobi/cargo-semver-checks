@@ -48,7 +48,7 @@ SemverQuery(
         "true": true,
     },
     error_message: "A public union was replaced by a different kind of item at the same path, which breaks field access and layout assumptions.",
-    per_result_error_template: Some("union {{join \"::\" path}} became {{lowercase new_kind}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"union {{join "::" path}} became {{lowercase new_kind}} in {{span_filename}}:{{span_begin_line}}"#),
     // Witness ideas:
     // - traits are not a concrete type, so functions with a parameter of the union type would break
     // - enums have very sophisticated representation rules, so it'd be very difficult bordering on

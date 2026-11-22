@@ -89,6 +89,6 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A method's receiver changed from an immutable reference to a mutable one.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes &mut {{receiver_kind}}, not &{{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} now takes &mut {{receiver_kind}}, not &{{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

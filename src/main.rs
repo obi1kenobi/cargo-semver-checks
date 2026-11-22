@@ -685,7 +685,7 @@ impl From<CheckRelease> for cargo_semver_checks::Check {
 
         // Treat --features="" as a no-op like cargo does
         let trim_features = |features: &mut Vec<String>| {
-            features.retain(|feature| !(feature.is_empty() || feature == "\"\""));
+            features.retain(|feature| !(feature.is_empty() || feature == r#""""#));
         };
         trim_features(&mut current_features);
         trim_features(&mut baseline_features);
@@ -800,8 +800,8 @@ fn features_empty_string_is_no_op() {
 
     let empty_features = CheckRelease {
         features: vec![String::new()],
-        current_features: vec![String::new(), "\"\"".to_string()],
-        baseline_features: vec!["\"\"".to_string()],
+        current_features: vec![String::new(), r#""""#.to_string()],
+        baseline_features: vec![r#""""#.to_string()],
         ..no_features.clone()
     };
 

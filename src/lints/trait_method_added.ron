@@ -57,5 +57,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A non-sealed public trait added a new method without a default implementation, which breaks downstream implementations of the trait",
-    per_result_error_template: Some("trait method {{join \"::\" path}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait method {{join "::" path}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

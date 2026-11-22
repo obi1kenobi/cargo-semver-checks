@@ -49,5 +49,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A formerly-unsafe public trait became safe, so it is no longer allowed to be implemented with an `unsafe impl` block.",
-    per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

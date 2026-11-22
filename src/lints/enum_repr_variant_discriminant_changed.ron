@@ -81,7 +81,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "repr": "repr",
-        "repr_regex": "[ui](\\d+|size)",
+        "repr_regex": r"[ui](\d+|size)",
         "true": true,
     },
     error_message: "An enum variant has changed its discriminant value. The enum has a defined primitive representation, so this breaks downstream code that used the discriminant value via an unsafe pointer cast.",

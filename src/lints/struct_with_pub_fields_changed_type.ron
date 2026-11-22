@@ -66,5 +66,5 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
         "zero": 0,
     },
     error_message: "A struct with pub fields became an enum or union, breaking accesses to its public fields.",
-    per_result_error_template: Some("struct {{join \"::\" path}} became {{lowercase current_typename}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"struct {{join "::" path}} became {{lowercase current_typename}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

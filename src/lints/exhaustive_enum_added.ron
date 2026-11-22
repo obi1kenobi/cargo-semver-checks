@@ -46,5 +46,5 @@ SemverQuery(
         "non_exhaustive": "#[non_exhaustive]",
     },
     error_message: "A new exhaustive pub enum was added. Future variants added to this enum will cause a breaking change. Consider adding #[non_exhaustive] to the enum if you plan to add new variants in the future.",
-    per_result_error_template: Some("enum {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"enum {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

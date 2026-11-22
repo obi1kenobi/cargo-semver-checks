@@ -57,5 +57,5 @@ SemverQuery(
         "public": "public",
     },
     error_message: "A publicly-visible trait method became `unsafe`, so implementing it now requires an `unsafe` qualifier and calling it now requires an `unsafe` block.",
-    per_result_error_template: Some("trait method <{{join \"::\" path}}>::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait method <{{join "::" path}}>::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

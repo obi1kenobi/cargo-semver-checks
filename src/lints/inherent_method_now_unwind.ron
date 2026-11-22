@@ -94,5 +94,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A public inherent method now uses an unwind-capable ABI. Uses of its previous function pointer type may no longer compile.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"#),
 )

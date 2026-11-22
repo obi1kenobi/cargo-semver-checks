@@ -43,5 +43,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A new pub union has been added. Removing or modifying it later would be a breaking change.",
-    per_result_error_template: Some("union {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"union {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

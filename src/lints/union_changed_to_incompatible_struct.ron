@@ -92,7 +92,7 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A public union with a single public API field was replaced by a struct that cannot be constructed using only that field. Downstream code that constructed the union using a literal will break.",
-    per_result_error_template: Some("{{join \"::\" path}} cannot be constructed from {{field_name}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}} cannot be constructed from {{field_name}} in {{span_filename}}:{{span_begin_line}}"#),
     // Constructing the union with a literal uses only that one field.
     // The same is not possible unless the replacement struct is exhaustive and
     // also only has that one field. The witness is the struct literal construction.

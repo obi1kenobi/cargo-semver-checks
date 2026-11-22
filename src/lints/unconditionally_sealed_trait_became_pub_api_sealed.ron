@@ -49,6 +49,6 @@ SemverQuery(
         "true": true,
     },
     error_message: "An unconditionally sealed trait has become sealed only at the public API level, allowing all downstream crates to implement it via non-public API, bypassing SemVer guarantees.",
-    per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

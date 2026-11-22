@@ -46,7 +46,7 @@ SemverQuery(
         "true": true,
     },
     error_message: "A pub static was replaced by a #[doc(hidden)] const with the same path. This removes the item from the crate's public API. Also, a const denotes a value rather than a memory location, so downstream code that takes the item's raw address will no longer compile.",
-    per_result_error_template: Some("{{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
     witness: (
         hint_template: r#"let _ = &raw const {{join "::" path}};"#,
     ),

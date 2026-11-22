@@ -46,5 +46,5 @@ SemverQuery(
         "non_exhaustive": "#[non_exhaustive]",
     },
     error_message: "A new #[non_exhaustive] pub enum was added. Pattern-matching on it outside of its crate must include a wildcard pattern like `_`, or it will fail to compile.",
-    per_result_error_template: Some("enum {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"enum {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

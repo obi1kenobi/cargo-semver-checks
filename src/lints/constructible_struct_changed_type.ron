@@ -73,5 +73,5 @@ More info: https://github.com/obi1kenobi/cargo-semver-checks/issues/297
         "zero": 0,
     },
     error_message: "A struct became an enum or union, and is no longer publicly constructible with a struct literal.",
-    per_result_error_template: Some("struct {{join \"::\" path}} became {{lowercase current_typename}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"struct {{join "::" path}} became {{lowercase current_typename}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

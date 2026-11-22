@@ -55,5 +55,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A non-sealed trait added one or more supertraits, which breaks downstream implementations of the trait",
-    per_result_error_template: Some("trait {{join \"::\" path}} gained {{supertrait}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait {{join "::" path}} gained {{supertrait}} in file {{span_filename}}:{{span_begin_line}}"#),
 )
