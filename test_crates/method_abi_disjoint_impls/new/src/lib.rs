@@ -41,9 +41,9 @@ impl Swapped<u16> {
     pub extern "C-unwind" fn no_longer_unwind() {}
 }
 
-// Only the u8 methods change, and their old ABI contracts disappear entirely.
-// Report each old u8 declaration once. The unchanged u16 methods must neither
-// duplicate diagnostics nor be identified as the declarations that changed.
+// Only the u8 methods change ABI. Each now matches its unchanged u16 sibling.
+// Removing the u8 methods instead would also leave the u16 ABIs available.
+// TODO: Report the three changes on u8 once impl targets can be matched.
 pub struct Converged<T>(pub T);
 impl Converged<u8> {
     pub extern "Rust" fn changed_abi() {}
@@ -56,8 +56,8 @@ impl Converged<u16> {
     pub extern "C" fn no_longer_unwind() {}
 }
 
-// Both methods with each name change ABI. Report each old declaration once,
-// rather than every possible pairing of old and current declarations.
+// Both impls change each method's ABI.
+// TODO: Report each change on its own declaration once impl targets can be matched.
 pub struct BothChanged<T>(pub T);
 impl BothChanged<u8> {
     pub extern "Rust" fn changed_abi() {}
@@ -70,9 +70,9 @@ impl BothChanged<u16> {
     pub extern "C" fn no_longer_unwind() {}
 }
 
-// The u8 methods lose their old ABI contracts. The unchanged u16 methods use system ABIs,
-// so matching unwind flags must not count as preserving the u8 methods' old C ABI contracts.
-// Report the u8 ABI losses without attributing them to the unchanged u16 methods.
+// Only the u8 methods change ABI. The u16 methods keep their system ABIs.
+// TODO: Report the changes on u8 once impl targets can be matched, even when
+// the unchanged u16 method has the same unwind behavior as the old u8 method.
 pub struct ThirdAbi<T>(pub T);
 impl ThirdAbi<u8> {
     pub extern "Rust" fn changed_abi() {}
@@ -298,9 +298,9 @@ impl AsyncAbi {
     pub async extern "C" fn no_longer_unwind() {}
 }
 
-// Removing the u8 methods loses their ABI contracts altogether. The remaining
-// u16 methods keep their existing ABIs, so report the lost baseline capabilities
-// without describing those surviving declarations as having changed.
+// Removing the u8 methods breaks assignments such as
+// `let _: extern "C" fn() = RemovedOriginal::<u8>::now_unwind;`.
+// The u16 methods keep their ABIs and must not trigger an ABI or unwind report.
 pub struct RemovedOriginal<T>(pub T);
 impl RemovedOriginal<u16> {
     pub extern "Rust" fn changed_abi() {}
@@ -308,11 +308,11 @@ impl RemovedOriginal<u16> {
     pub extern "C" fn no_longer_unwind() {}
 }
 
-// With `ChangedAbi` in scope, calls on u8 fall back to that trait
-// when the inherent functions disappear.
-// That trait's different ABI contracts cannot preserve the old pointer assignments.
-// Report the lost baseline capabilities, without identifying the unchanged
-// u16 inherent functions or trait functions as their replacements.
+// With `ChangedAbi` in scope, calls on u8 resolve to the trait functions.
+// For example, `TraitChanged::<u8>::now_unwind` now resolves to an
+// `extern "C-unwind"` function. Assigning it to an `extern "C" fn()` fails.
+// The u16 inherent functions keep their original ABIs, so none of the surviving
+// inherent functions should trigger an ABI or unwind report.
 pub struct TraitChanged<T, U = ()>(pub T, pub U);
 impl TraitChanged<u16> {
     pub extern "Rust" fn changed_abi() {}
@@ -325,8 +325,8 @@ impl ChangedAbi for TraitChanged<u8> {
     extern "C" fn no_longer_unwind() {}
 }
 
-// These unrelated methods leave the public u8 ABI losses on Converged detectable.
-// An impl with no relevant method cannot make that method's availability ambiguous.
+// Once we can match the impls on u8, the ABI changes above should be reported
+// even though this separate impl contains hidden and private methods.
 impl Converged<u8> {
     fn private_unrelated() {}
     #[doc(hidden)]
@@ -383,11 +383,11 @@ impl RenamedMethod {
     pub extern "C" fn renamed_no_longer_unwind() {}
 }
 
-// This method changes its normalized ABI name as well as its unwind contract.
-// Report only the ABI-name change; the unwind lints require the same ABI family.
+// Gaining or losing unwind capability across ABI families should trigger only the ABI-name lint.
 pub struct DifferentAbi;
 impl DifferentAbi {
     pub extern "system" fn changed() {}
+    pub extern "system-unwind" fn gains_unwind_with_abi_change() {}
 }
 
 // Replacing the struct with an enum changes the owner kind and its methods' ABIs.
@@ -397,4 +397,48 @@ impl OwnerKindChanged {
     pub extern "Rust" fn changed_abi() {}
     pub extern "C-unwind" fn now_unwind() {}
     pub extern "C" fn no_longer_unwind() {}
+}
+
+// Both u8 methods change from the C ABI family to the system ABI family.
+// Neither changes its unwind behavior. The u16 methods keep their ABIs.
+// TODO: Report the two ABI-name changes once we can match impl targets.
+pub struct ChangesAbiFamily<T>(pub T);
+impl ChangesAbiFamily<u8> {
+    pub extern "system" fn read() {}
+    pub extern "system-unwind" fn write() {}
+}
+impl ChangesAbiFamily<u16> {
+    pub extern "C-unwind" fn read() {}
+    pub extern "C" fn write() {}
+}
+
+// The new methods exist only on GainsParameter<1>. With `type Old = GainsParameter;`,
+// `Old::exported()` now selects the default instantiation and loses the method.
+pub struct GainsParameter<const N: usize = 0>;
+impl GainsParameter<1> {
+    #[unsafe(export_name = "disjoint_gains_parameter_new")]
+    pub extern "system" fn exported() {}
+    pub extern "C-unwind" fn gains_unwind() {}
+    pub extern "C" fn loses_unwind() {}
+}
+
+// The old methods exist only on LosesParameter<1>. Removing the const parameter
+// makes that type unavailable regardless of the new methods' ABIs or exports.
+pub struct LosesParameter;
+impl LosesParameter {
+    #[unsafe(export_name = "disjoint_loses_parameter_new")]
+    pub extern "system" fn exported() {}
+    pub extern "C-unwind" fn gains_unwind() {}
+    pub extern "C" fn loses_unwind() {}
+}
+
+// Each method exists on only one instantiation in each release.
+// Replacing the methods on u8 with different methods on u16 breaks the u8
+// calls, but no surviving method changes ABI, unwind behavior, or export name.
+pub struct MovedMethods<T>(pub T);
+impl MovedMethods<u16> {
+    #[unsafe(export_name = "disjoint_moved_methods_new")]
+    pub extern "system" fn exported() {}
+    pub extern "C-unwind" fn gains_unwind() {}
+    pub extern "C" fn loses_unwind() {}
 }
