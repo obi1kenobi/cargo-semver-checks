@@ -66,6 +66,38 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_const_disjoint_impls/": [
+    {
+      "current_typename": String("Enum"),
+      "name": String("OwnerKindChanged"),
+      "path": List([
+        String("method_const_disjoint_impls"),
+        String("OwnerKindChanged"),
+      ]),
+      "span_begin_line": Uint64(127),
+      "span_end_line": Uint64(129),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_return_unit_disjoint_impls/": [
+    {
+      "current_typename": String("Enum"),
+      "name": String("OwnerKindChanged"),
+      "path": List([
+        String("method_return_unit_disjoint_impls"),
+        String("OwnerKindChanged"),
+      ]),
+      "span_begin_line": Uint64(63),
+      "span_end_line": Uint64(65),
+      "span_filename": String("src/lib.rs"),
+      "struct_type": String("plain"),
+      "struct_typename": String("Struct"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/struct_becomes_enum/": [
     {
       "current_typename": String("Enum"),

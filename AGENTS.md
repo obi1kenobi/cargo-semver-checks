@@ -47,6 +47,13 @@ whenever possible.
 Always prefer `.expect()` and similar methods over `.unwrap()`, making sure to add a descriptive
 but concise message that describes the problem.
 
+## Assumptions about Rust input
+
+Code and lint queries may assume that each impl's bounds can be satisfied.
+For example, if `Never` is a trait with no implementations,
+`impl S where for<'a> &'a (): Never {}` is out of scope.
+An impl such as `impl<T: Copy> Reader<T>` is in scope for the type arguments that satisfy its bounds.
+
 ## Helpful scripts
 
 - `scripts/make_new_lint.sh <lint-name>` will create a new lint file, register the lint, create a corresponding test crate, and a stub snapshot test file.

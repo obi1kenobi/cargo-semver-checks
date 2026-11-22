@@ -2,6 +2,21 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/method_const_disjoint_impls/": [
+    {
+      "method_name": String("Changed"),
+      "name": String("DotLookup"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("method_const_disjoint_impls"),
+        String("DotLookup"),
+      ]),
+      "receiver_kind": String("Self"),
+      "span_begin_line": Uint64(164),
+      "span_end_line": Uint64(166),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
   "./test_crates/method_receiver_changes/": [
     {
       "method_name": String("self_ref_to_refmut"),
@@ -81,6 +96,21 @@ source: src/query.rs
       "receiver_kind": String("Self"),
       "span_begin_line": Uint64(226),
       "span_end_line": Uint64(226),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/method_return_unit_disjoint_impls/": [
+    {
+      "method_name": String("Changed"),
+      "name": String("DotLookup"),
+      "owner_type": String("Enum"),
+      "path": List([
+        String("method_return_unit_disjoint_impls"),
+        String("DotLookup"),
+      ]),
+      "receiver_kind": String("Self"),
+      "span_begin_line": Uint64(123),
+      "span_end_line": Uint64(125),
       "span_filename": String("src/lib.rs"),
     },
   ],
