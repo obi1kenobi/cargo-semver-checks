@@ -20,6 +20,14 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
+                        # If `Reader<u8>::read` disappears while `Reader<u16>::read` keeps a different
+                        # receiver, matching by name would report a change to the removed method.
+                        # TODO: Include generic owners once we can match impl targets.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
@@ -29,12 +37,6 @@ SemverQuery(
                                 receiver {
                                     by_mut_reference @filter(op: "=", value: ["$true"])
                                     receiver_kind: kind @tag @output
-                                }
-
-                                span_: span @optional {
-                                    filename @output
-                                    begin_line @output
-                                    end_line @output
                                 }
                             }
                         }
@@ -52,47 +54,13 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The current owner must also be nongeneric. A current method could
+                        # apply only to a new parameterization of the type.
                         generic_parameter @fold
                                           @transform(op: "count")
-                                          @tag(name: "owner_generic_count")
+                                          @filter(op: "=", value: ["$zero"])
 
-                        # A `Reader<bool>::get` may move to a trait that preserves its calls while
-                        # an unrelated inherent `Reader<u8>::get` remains. Without impl targets,
-                        # we could mistake this for a receiver change to `Reader<bool>::get`.
-                        #
-                        # Conservatively, we include trait alternatives for generic owners.
-                        # For a nongeneric owner, moving `get` entirely to a trait leaves no
-                        # inherent candidate below; a remaining inherent `get` is unambiguous.
-                        # Include private and doc-hidden methods too: the original method
-                        # may have changed only its visibility, not its receiver.
-                        impl @fold @transform(op: "count") @tag(name: "candidate_count") {
-                            # Zero for inherent impls, one for trait impls: this admits traits
-                            # only when the owner has at least one generic parameter.
-                            implemented_trait @fold
-                                              @transform(op: "count")
-                                              @filter(op: "<=", value: ["%owner_generic_count"])
-
-                            method {
-                                name @filter(op: "=", value: ["%method_name"])
-                            }
-                        }
-
-                        # Report an old method whose receiver is a mutable reference only if
-                        # at least one same-named inherent method exists in the new version
-                        # and all such methods are public API and take the previously borrowed type
-                        # by value. This includes cases where some methods already took that type
-                        # by value. Otherwise, omit the report even if a method in one impl did change.
-                        #
-                        # For a type with generic parameters, any current trait impl with a function
-                        # of this name also suppresses the report, even if that function could not
-                        # preserve calls to the old method. This deliberately accepts missed receiver
-                        # changes to avoid misreporting an inherent method's move to a trait.
-                        #
-                        # TODO: Match impl targets to detect changes with mixed candidates.
-                        inherent_impl @fold
-                                      @transform(op: "count")
-                                      @filter(op: ">", value: ["$zero"])
-                                      @filter(op: "=", value: ["%candidate_count"]) {
+                        inherent_impl {
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
@@ -101,6 +69,12 @@ SemverQuery(
                                 receiver {
                                     by_value @filter(op: "=", value: ["$true"])
                                     kind @filter(op: "=", value: ["%receiver_kind"])
+                                }
+
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
                                 }
                             }
                         }
@@ -115,6 +89,6 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A method's receiver changed from a mutable reference to an owned value. Ownership is transferred as part of the call, which is a breaking change.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes {{receiver_kind}}, not &mut {{receiver_kind}}; previously in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes {{receiver_kind}}, not &mut {{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"),
     witness: None,
 )

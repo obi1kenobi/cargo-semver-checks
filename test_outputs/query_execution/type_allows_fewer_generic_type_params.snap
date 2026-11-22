@@ -22,6 +22,26 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_receiver_disjoint_impls/": [
+    {
+      "name": String("LosesParameter"),
+      "new_allowed_consts": List([]),
+      "new_allowed_type_count": Uint64(0),
+      "old_allowed_consts": List([
+        String("T"),
+      ]),
+      "old_allowed_type_count": Uint64(1),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_receiver_disjoint_impls"),
+        String("LosesParameter"),
+      ]),
+      "span_begin_line": Uint64(286),
+      "span_end_line": Uint64(286),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/method_return_unit_disjoint_impls/": [
     {
       "name": String("LosesParameter"),
