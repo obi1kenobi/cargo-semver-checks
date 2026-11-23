@@ -342,4 +342,21 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_attribute_disjoint_impls/": [
+    {
+      "method_name": String("check"),
+      "method_visibility": String("public"),
+      "name": String("Control"),
+      "new_attr": String("#[must_use]"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_attribute_disjoint_impls"),
+        String("Control"),
+      ]),
+      "span_begin_line": Uint64(160),
+      "span_end_line": Uint64(162),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }

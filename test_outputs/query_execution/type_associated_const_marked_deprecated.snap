@@ -2,6 +2,20 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/method_attribute_disjoint_impls/": [
+    {
+      "associated_constant": String("DEFAULT"),
+      "name": String("Control"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_attribute_disjoint_impls"),
+        String("Control"),
+      ]),
+      "span_begin_line": Uint64(172),
+      "span_end_line": Uint64(172),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
   "./test_crates/type_associated_const_marked_deprecated/": [
     {
       "associated_constant": String("CONST_TO_DEPRECATED"),

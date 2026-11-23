@@ -185,6 +185,21 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_attribute_disjoint_impls/": [
+    {
+      "method_name": String("reset"),
+      "method_visibility": String("public"),
+      "name": String("Control"),
+      "path": List([
+        String("method_attribute_disjoint_impls"),
+        String("Control"),
+      ]),
+      "span_begin_line": Uint64(158),
+      "span_end_line": Uint64(158),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/method_export_disjoint_impls/": [
     {
       "method_name": String("exported"),
