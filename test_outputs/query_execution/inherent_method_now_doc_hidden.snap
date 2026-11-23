@@ -282,6 +282,21 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_receiver_removal/": [
+    {
+      "method_name": String("hidden"),
+      "method_visibility": String("public"),
+      "name": String("Lookup"),
+      "path": List([
+        String("method_receiver_removal"),
+        String("Lookup"),
+      ]),
+      "span_begin_line": Uint64(49),
+      "span_end_line": Uint64(49),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/method_variadic_disjoint_impls/": [
     {
       "method_name": String("call"),
