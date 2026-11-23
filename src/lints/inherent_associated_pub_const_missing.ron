@@ -59,6 +59,12 @@ SemverQuery(
 
                             implemented_trait {
                                 trait {
+                                    # A private trait cannot provide the constant to downstream callers.
+                                    # A glob import can bring a `pub` trait into scope through `pub use Trait as _`,
+                                    # which the adapter omits from importable paths. Assume a `pub` trait
+                                    # can still provide the constant even if it has no public API path by name.
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+
                                     associated_constant {
                                         name @filter(op: "=", value: ["%associated_constant"])
                                     }
