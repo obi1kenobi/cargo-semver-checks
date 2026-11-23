@@ -158,6 +158,73 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_arity_disjoint_impls/": [
+    {
+      "current_parameter_count": List([
+        Uint64(1),
+        Uint64(2),
+      ]),
+      "found_receiver": List([
+        Uint64(1),
+        Uint64(1),
+      ]),
+      "has_receiver": Uint64(1),
+      "method_name": String("call"),
+      "method_visibility": String("public"),
+      "name": String("DotCall"),
+      "non_matching_span_begin_line": List([
+        Uint64(39),
+        Uint64(43),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(39),
+        Uint64(43),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+        String("src/lib.rs"),
+      ]),
+      "old_parameter_count": Uint64(0),
+      "path": List([
+        String("method_arity_disjoint_impls"),
+        String("DotCall"),
+      ]),
+      "span_begin_line": Uint64(48),
+      "span_end_line": Uint64(48),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "current_parameter_count": List([
+        Uint64(0),
+      ]),
+      "found_receiver": List([
+        Uint64(0),
+      ]),
+      "has_receiver": Uint64(0),
+      "method_name": String("call"),
+      "method_visibility": String("public"),
+      "name": String("QualifiedCall"),
+      "non_matching_span_begin_line": List([
+        Uint64(47),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(47),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_parameter_count": Uint64(1),
+      "path": List([
+        String("method_arity_disjoint_impls"),
+        String("QualifiedCall"),
+      ]),
+      "span_begin_line": Uint64(58),
+      "span_end_line": Uint64(58),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/parameter_count_changed/": [
     {
       "current_parameter_count": List([

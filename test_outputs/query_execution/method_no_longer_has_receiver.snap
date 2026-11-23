@@ -29,6 +29,33 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/method_arity_disjoint_impls/": [
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("loses_receiver"),
+      "name": String("DotCall"),
+      "non_matching_span_begin_line": List([
+        Uint64(56),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(56),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_arity_disjoint_impls"),
+        String("DotCall"),
+      ]),
+      "span_begin_line": Uint64(49),
+      "span_end_line": Uint64(49),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
   "./test_crates/method_receiver_changes/": [
     {
       "baseline_receiver_by_mut_reference": Boolean(false),
