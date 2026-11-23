@@ -112,5 +112,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "An inherent impl's associated public constant is removed or renamed",
-    per_result_error_template: Some("{{name}}::{{associated_constant}}, previously at {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{associated_constant}}, previously at {{span_filename}}:{{span_begin_line}}"#),
 )
