@@ -165,3 +165,40 @@ impl DotLookup {
         8
     }
 }
+
+pub struct Reader<T>(pub T);
+
+impl Reader<u8> {
+    pub const fn partial(&self) {}
+    pub const fn converged(&self) {}
+    pub const fn both_changed(&self) {}
+
+    pub const fn removed(&self) {}
+    pub const fn hidden(&self) {}
+    pub const fn private(&self) {}
+    pub const fn moved(&self) {}
+}
+
+impl Reader<u16> {
+    pub const fn partial(&self) {}
+    pub fn converged(&self) {}
+    pub const fn both_changed(&self) {}
+
+    pub fn removed(&self) {}
+    pub fn hidden(&self) {}
+    pub fn private(&self) {}
+}
+
+impl LosesParameter<u16> {
+    pub const fn read() {}
+}
+
+impl GainsParameter {
+    pub const fn read() {}
+}
+
+impl Exact {
+    pub const fn identity<T>(x: T) -> T {
+        x
+    }
+}

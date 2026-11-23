@@ -167,3 +167,53 @@ impl DotLookup {
         8
     }
 }
+
+pub struct Reader<T>(pub T);
+
+impl Reader<u8> {
+    // `const _: () = Reader(0u8).converged();` now fails, but the same call still works at runtime.
+    // TODO: Report all three const removals on u8 and `both_changed` on u16 once we can match impls.
+    pub fn partial(&self) {}
+    pub fn converged(&self) {}
+    pub fn both_changed(&self) {}
+
+    // Both methods leave the public API while keeping `const`.
+    // A downstream const call to `hidden` still compiles.
+    #[doc(hidden)]
+    pub const fn hidden(&self) {}
+    const fn private(&self) {}
+}
+
+impl Reader<u16> {
+    pub const fn partial(&self) {}
+    pub fn converged(&self) {}
+    pub fn both_changed(&self) {}
+
+    // Unlike `converged`, `removed` disappeared on u8 even for runtime calls.
+    // All three u16 methods were already non-const.
+    pub fn removed(&self) {}
+    pub fn hidden(&self) {}
+    pub fn private(&self) {}
+
+    // The only `moved` declaration was on u8. This one is new on u16.
+    pub fn moved(&self) {}
+}
+
+// The old type `LosesParameter<u16>` can no longer be named.
+impl LosesParameter {
+    pub fn read() {}
+}
+
+// Given `type Old = GainsParameter;`, even a runtime call to `Old::read()`
+// fails because the new function exists only on the nondefault instantiation.
+impl GainsParameter<1> {
+    pub fn read() {}
+}
+
+// Report the loss of `const` for `const N: u8 = Exact::identity(1);`.
+// Only the method is generic, so the call still identifies the same declaration.
+impl Exact {
+    pub fn identity<T>(x: T) -> T {
+        x
+    }
+}
