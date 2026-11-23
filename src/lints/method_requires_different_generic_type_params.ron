@@ -21,6 +21,14 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
+                        # If `Reader<u8>::read` disappears while `Reader<u16>::read` keeps a different
+                        # number of type parameters, matching by name would report a change to the removed method.
+                        # TODO: Include generic owners once we can match impl targets.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
@@ -60,6 +68,12 @@ SemverQuery(
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
                         }
+
+                        # The current owner must also be nongeneric. A current method could apply
+                        # only to an instantiation that did not have the old method.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
 
                         # We use "impl" instead of "inherent_impl" here because moving
                         # an inherently-implemented method to a trait is not necessarily
