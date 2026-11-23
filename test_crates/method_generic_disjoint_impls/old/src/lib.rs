@@ -33,9 +33,9 @@ impl Swapped<u16> {
     pub fn const_count<const N: usize, const M: usize>() {}
 }
 
-// Only the u8 methods change. Report their type and const argument count changes.
-// TODO: Report both reordered positions on u8 once impl targets can be matched.
-// The u16 methods retain their original generic arguments.
+// Only the u8 methods change. Calls such as `Converged::<u8>::type_count::<i32>()`
+// and `Converged::<u8>::const_count::<1>()` now need a second generic argument.
+// TODO: Report both count changes and both reordered positions on u8 once we can match impl targets.
 pub struct Converged<T>(pub T);
 impl Converged<u8> {
     pub fn reorder<T, const N: usize>() {}
@@ -386,4 +386,49 @@ impl AlsoReordered for TwoTraitReplacements {
 }
 impl Reordered for TwoTraitReplacements {
     fn reorder<const N: usize, T>() {}
+}
+
+// Removing `read` on u8 breaks `RemovedOriginal::<u8>::read::<i32, 1>()`.
+// The surviving u16 method already took four generic arguments.
+impl RemovedOriginal<u8> {
+    pub fn read<T, const N: usize>() {}
+}
+impl RemovedOriginal<u16> {
+    pub fn read<T, const N: usize, U, const M: usize>() {}
+}
+
+// The u8 method leaves the documented API. `HiddenOriginal::<u8>::read::<i32, 1>()`
+// still compiles, and the u16 method keeps its four generic arguments.
+impl HiddenOriginal<u8> {
+    pub fn read<T, const N: usize>() {}
+}
+impl HiddenOriginal<u16> {
+    pub fn read<T, const N: usize, U, const M: usize>() {}
+}
+
+// Making the u8 method private breaks `PrivateOriginal::<u8>::read::<i32, 1>()`.
+// The public method on u16 keeps its four generic arguments.
+impl PrivateOriginal<u8> {
+    pub fn read<T, const N: usize>() {}
+}
+impl PrivateOriginal<u16> {
+    pub fn read<T, const N: usize, U, const M: usize>() {}
+}
+
+// Each version has a single `read`. Moving it to u16 makes `ReplacedImpl::<u8>::read`
+// unavailable regardless of how many generic arguments the caller supplies.
+impl ReplacedImpl<u8> {
+    pub fn read<T, const N: usize>() {}
+}
+
+// A caller with `x: &LosesParameter<u16>` can no longer name the receiver
+// of `x.read::<i32, 1>()` after the type parameter is removed.
+impl LosesParameter<u16> {
+    pub fn read<T, const N: usize>(&self) {}
+}
+
+// A caller with `x: &GainsParameter` loses `x.read::<i32, 1>()` because
+// the new method requires a receiver with the nondefault const argument 1.
+impl GainsParameter {
+    pub fn read<T, const N: usize>(&self) {}
 }
