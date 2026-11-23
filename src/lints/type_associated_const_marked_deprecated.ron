@@ -20,6 +20,14 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
+                        # If `Reader<u8>::MAX` disappears while `Reader<u16>::MAX` stays deprecated,
+                        # matching by name would report that the removed constant became deprecated.
+                        # TODO: Include generic owners once we can match impl targets.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             public_api_eligible @filter(op: "=", value: ["$true"])
 
@@ -49,6 +57,12 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The baseline owner must also be nongeneric. Removing its generic parameters
+                        # can eliminate the instantiation that provided the old constant.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             public_api_eligible @filter(op: "=", value: ["$true"])
 
@@ -66,6 +80,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
+        "zero": 0,
     },
     error_message: "A type's associated constant is now #[deprecated]. Downstream crates will get a compiler warning when using it.",
     per_result_error_template: Some(r#"associated constant {{join "::" path}}::{{associated_constant}} in {{span_filename}}:{{span_begin_line}}"#),
