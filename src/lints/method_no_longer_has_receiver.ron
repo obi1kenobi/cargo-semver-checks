@@ -20,6 +20,14 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
+                        # If `Reader<u8>::read` disappears while `Reader<u16>::read` stays receiverless,
+                        # matching by name would report a receiver loss on the removed method.
+                        # TODO: Include generic owners once we can match impl targets.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
@@ -44,7 +52,8 @@ SemverQuery(
                 }
             }
             current {
-                item {
+                # Collect the receiverless functions in one report for this baseline method and public path.
+                item @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                     ... on ImplOwner {
                         __typename @filter(op: "=", value: ["%owner_type"])
                         visibility_limit @filter(op: "=", value: ["$public"])
@@ -55,6 +64,15 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The current owner must also be nongeneric. A new associated function
+                        # could apply only to an instantiation that did not have the old method.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
+                        # An in-scope trait can preserve `value.method()` even when the same-named
+                        # inherent function no longer takes a receiver.
+                        #
                         # We use "impl" instead of "inherent_impl" here because moving
                         # an inherently-implemented method to a trait is not necessarily
                         # a breaking change, so we don't want to report it.
@@ -78,9 +96,20 @@ SemverQuery(
                             }
                         }
 
+                        # A public inherent constant shadows a same-named trait function in
+                        # `Owner::method`, even if the constant is doc-hidden.
+                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            associated_constant {
+                                name @filter(op: "=", value: ["%method_name"])
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                            }
+                        }
+
                         # To distinguish loss of the receiver from removal, require an accessible
                         # same-named function without a receiver and report where it is declared.
-                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                        impl {
+                            candidate_impl_id: id @tag
+
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
@@ -108,6 +137,16 @@ SemverQuery(
                                         public_api @filter(op: "=", value: ["$true"])
                                     }
                                 }
+                            }
+                        }
+
+                        # A public inherent method takes precedence in `Owner::method`, even
+                        # when it is doc-hidden. If one exists, only its own impl can supply the function.
+                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            id @filter(op: "!=", value: ["%candidate_impl_id"])
+                            method {
+                                name @filter(op: "=", value: ["%method_name"])
+                                visibility_limit @filter(op: "=", value: ["$public"])
                             }
                         }
                     }
