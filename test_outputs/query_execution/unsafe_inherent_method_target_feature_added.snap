@@ -37,5 +37,22 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "currently_unsafe": Boolean(true),
+      "feature_names": List([
+        String("avx"),
+      ]),
+      "method_name": String("legacy"),
+      "method_visibility": String("public"),
+      "name": String("A"),
+      "path": List([
+        String("unsafe_inherent_method_target_feature_added"),
+        String("A"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_end_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
 }
