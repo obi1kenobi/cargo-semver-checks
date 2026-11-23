@@ -361,4 +361,33 @@ source: src/query.rs
       ]),
     },
   ],
+  "./test_crates/method_generic_reorder_trait_visibility/": [
+    {
+      "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(22),
+      ]),
+      "current_span_end_line": List([
+        Uint64(22),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "method_name": String("reordered"),
+      "method_visibility": String("public"),
+      "path": List([
+        String("method_generic_reorder_trait_visibility"),
+        String("Owner"),
+      ]),
+      "position": Uint64(2),
+      "required_const_count": Uint64(1),
+      "required_type_count": Uint64(1),
+      "span_begin_line": Uint64(45),
+      "span_end_line": Uint64(45),
+      "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
+    },
+  ],
 }

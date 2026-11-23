@@ -52,4 +52,18 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/inherent_trait_visibility/": [
+    {
+      "associated_constant": String("LIMIT"),
+      "name": String("Removed"),
+      "path": List([
+        String("inherent_trait_visibility"),
+        String("Removed"),
+      ]),
+      "span_begin_line": Uint64(71),
+      "span_end_line": Uint64(71),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }

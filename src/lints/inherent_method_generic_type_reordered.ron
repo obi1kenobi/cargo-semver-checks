@@ -75,6 +75,7 @@ SemverQuery(
                 item @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        owner_crate_id: crate_id @tag
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -129,6 +130,21 @@ SemverQuery(
                                     end_line @output
                                 }
                             }
+
+                            # Either the trait is defined in another crate (where we assume it's public API),
+                            # or it has a public API path in this crate.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "=", value: ["$zero"]) {
+                                trait {
+                                    crate_id @filter(op: "=", value: ["%owner_crate_id"])
+                                    importable_path @fold
+                                                    @transform(op: "count")
+                                                    @filter(op: "=", value: ["$zero"]) {
+                                        public_api @filter(op: "=", value: ["$true"])
+                                    }
+                                }
+                            }
                         }
 
                         # A public inherent function shadows every trait function with the same name
@@ -152,6 +168,16 @@ SemverQuery(
                             implemented_trait @fold
                                               @transform(op: "count")
                                               @filter(op: "=", value: ["%candidate_trait_count"])
+
+                            # Exclude a private trait when its declaration is available.
+                            # A glob import can bring a `pub` trait into scope through `pub use Trait as _`,
+                            # which the adapter omits from importable paths. Assume a `pub` trait
+                            # can preserve the old argument kind at this position even without a named public API path.
+                            implemented_trait @optional {
+                                trait @optional {
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+                                }
+                            }
 
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])

@@ -45,32 +45,19 @@ SemverQuery(
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
+                        owner_crate_id: crate_id @tag
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # At least one same-named method must agree with the old method on whether it takes a receiver.
+                        # Otherwise, removal or a receiver change alone could look like a change in arity.
+                        #
                         # We use "impl" instead of "inherent_impl" here because moving
                         # an inherently-implemented method to a trait is not necessarily
-                        # a breaking change, but changing the parameter count is.
-                        #
-                        # Method names are not unique on an ImplOwner! It's perfectly valid to have
-                        # both an inherent method `foo()` as well as a trait-provided method
-                        # `<Self as Bar>::foo()` at the same time. Whenever possible, rustc
-                        # attempts to "do the right thing" and dispatch to the correct one.
-                        #
-                        # Because of the above, this check has to be written as
-                        # "there is no method with the correct name and number of arguments"
-                        # rather than the (incorrect!) alternative
-                        # "the named method does not have the correct number of arguments."
-                        #
-                        # The above by itself is still not enough: say if the method was removed,
-                        # that still makes the "there is no method ..." statement true.
-                        # So we add an additional clause demanding that a method by that name
-                        # with appropriate visibility actually exists.
-                        #
-                        # An analogous quirk exists in the `method_no_longer_has_receiver` lint.
+                        # a breaking change, so we don't want to report it.
                         impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
@@ -79,7 +66,24 @@ SemverQuery(
 
                                 receiver @fold @transform(op: "count") @filter(op: "=", value: ["%has_receiver"])
                             }
+
+                            # Either the trait is defined in another crate (where we assume it's public API),
+                            # or it has a public API path in this crate.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "=", value: ["$zero"]) {
+                                trait {
+                                    crate_id @filter(op: "=", value: ["%owner_crate_id"])
+                                    importable_path @fold
+                                                    @transform(op: "count")
+                                                    @filter(op: "=", value: ["$zero"]) {
+                                        public_api @filter(op: "=", value: ["$true"])
+                                    }
+                                }
+                            }
                         }
+
+                        # A same-named trait method can still accept the old number of arguments.
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
@@ -92,10 +96,19 @@ SemverQuery(
                                     name @filter(op: "!=", value: ["$self"])
                                 }
                             }
+
+                            # Exclude a private trait when its declaration is available.
+                            # A glob import can bring a `pub` trait into scope through `pub use Trait as _`,
+                            # which the adapter omits from importable paths. Even without a named public API path,
+                            # a method on that trait could still accept the old number of arguments.
+                            implemented_trait @optional {
+                                trait @optional {
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+                                }
+                            }
                         }
 
-                        # Get the non-matching methods by that name so we can report them
-                        # in the lint error message.
+                        # Collect the parameter counts and spans of the methods we can cite.
                         impl @fold {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
@@ -112,6 +125,21 @@ SemverQuery(
                                     filename @output
                                     begin_line @output
                                     end_line @output
+                                }
+                            }
+
+                            # As above, cite a trait method only if the trait is defined in another crate
+                            # or has a public API path in this crate.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "=", value: ["$zero"]) {
+                                trait {
+                                    crate_id @filter(op: "=", value: ["%owner_crate_id"])
+                                    importable_path @fold
+                                                    @transform(op: "count")
+                                                    @filter(op: "=", value: ["$zero"]) {
+                                        public_api @filter(op: "=", value: ["$true"])
+                                    }
                                 }
                             }
                         }

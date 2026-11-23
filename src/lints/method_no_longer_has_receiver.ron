@@ -48,40 +48,16 @@ SemverQuery(
                     ... on ImplOwner {
                         __typename @filter(op: "=", value: ["%owner_type"])
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        owner_crate_id: crate_id @tag
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # We use "impl" instead of "inherent_impl" here because
-                        # turning a method into an associated function is not necessarily
-                        # a breaking change: an in-scope trait (e.g. from a prelude)
-                        # could provide the *method* form after the original inherent method
-                        # becomes an associated function (i.e. no longer has a receiver).
-                        #
-                        # Method names are not unique on an ImplOwner! It's perfectly valid to have
-                        # both an inherent method `foo()` as well as a trait-provided method
-                        # `<Self as Bar>::foo()` at the same time.
-                        #
-                        # Because of the above, this check has to be written as
-                        # "there is no method with that name that takes a receiver"
-                        # rather than the (incorrect!) alternative
-                        # "the named method does not take a receiver."
-                        #
-                        # The above by itself is still not enough: say if the method was removed,
-                        # that still makes the "there is no method ..." statement true.
-                        # So we add an additional clause demanding that a method by that name
-                        # with appropriate visibility actually exists.
-                        #
-                        # An analogous quirk exists in the `method_parameter_count_changed` lint.
-                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
-                            method {
-                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
-                                name @filter(op: "=", value: ["%method_name"])
-                                public_api_eligible @filter(op: "=", value: ["$true"])
-                            }
-                        }
+                        # We use "impl" instead of "inherent_impl" here because moving
+                        # an inherently-implemented method to a trait is not necessarily
+                        # a breaking change, so we don't want to report it.
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
@@ -90,11 +66,21 @@ SemverQuery(
 
                                 receiver @fold @transform(op: "count") @filter(op: ">", value: ["$zero"])
                             }
+
+                            # Exclude a private trait when its declaration is available.
+                            # A glob import can bring a `pub` trait into scope through `pub use Trait as _`,
+                            # which the adapter omits from importable paths. Assume a `pub` trait
+                            # can still offer a method with a receiver even if it has no public API path by name.
+                            implemented_trait @optional {
+                                trait @optional {
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+                                }
+                            }
                         }
 
-                        # Get the non-matching methods by that name so we can report them
-                        # in the lint error message.
-                        impl @fold {
+                        # To distinguish loss of the receiver from removal, require an accessible
+                        # same-named function without a receiver and report where it is declared.
+                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
@@ -106,6 +92,21 @@ SemverQuery(
                                     filename @output
                                     begin_line @output
                                     end_line @output
+                                }
+                            }
+
+                            # Either the trait is defined in another crate (where we assume it's public API),
+                            # or it has a public API path in this crate.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "=", value: ["$zero"]) {
+                                trait {
+                                    crate_id @filter(op: "=", value: ["%owner_crate_id"])
+                                    importable_path @fold
+                                                    @transform(op: "count")
+                                                    @filter(op: "=", value: ["$zero"]) {
+                                        public_api @filter(op: "=", value: ["$true"])
+                                    }
                                 }
                             }
                         }

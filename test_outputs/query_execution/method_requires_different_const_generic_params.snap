@@ -1,8 +1,41 @@
 ---
 source: src/query.rs
-assertion_line: 1110
 ---
 {
+  "./test_crates/inherent_trait_visibility/": [
+    {
+      "method_name": String("read"),
+      "method_visibility": String("public"),
+      "name": String("Changed"),
+      "new_required_const_count": List([
+        Uint64(2),
+      ]),
+      "new_required_consts": List([
+        List([
+          String("N"),
+          String("M"),
+        ]),
+      ]),
+      "non_matching_span_begin_line": List([
+        Uint64(15),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_required_const_count": Uint64(1),
+      "old_required_consts": List([
+        String("N"),
+      ]),
+      "path": List([
+        String("inherent_trait_visibility"),
+        String("Changed"),
+      ]),
+      "span_begin_line": Uint64(81),
+      "span_end_line": Uint64(81),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/method_generic_disjoint_impls/": [
     {
       "method_name": String("const_count"),

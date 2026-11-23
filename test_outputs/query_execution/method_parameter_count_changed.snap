@@ -126,6 +126,38 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/inherent_trait_visibility/": [
+    {
+      "current_parameter_count": List([
+        Uint64(2),
+      ]),
+      "found_receiver": List([
+        Uint64(1),
+      ]),
+      "has_receiver": Uint64(1),
+      "method_name": String("read"),
+      "method_visibility": String("public"),
+      "name": String("Changed"),
+      "non_matching_span_begin_line": List([
+        Uint64(15),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(15),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "old_parameter_count": Uint64(1),
+      "path": List([
+        String("inherent_trait_visibility"),
+        String("Changed"),
+      ]),
+      "span_begin_line": Uint64(81),
+      "span_end_line": Uint64(81),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/parameter_count_changed/": [
     {
       "current_parameter_count": List([
