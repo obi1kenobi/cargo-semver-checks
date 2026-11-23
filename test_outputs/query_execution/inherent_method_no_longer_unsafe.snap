@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-assertion_line: 1073
 ---
 {
   "./test_crates/inherent_method_no_longer_unsafe/": [
@@ -64,6 +63,50 @@ assertion_line: 1073
         String("Bar"),
       ]),
       "span_begin_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_variadic_trait_visibility/": [
+    {
+      "method_name": String("clone"),
+      "method_visibility": String("public"),
+      "name": String("PreludeTraits"),
+      "non_matching_span_begin_line": List([
+        Uint64(86),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(88),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("method_variadic_trait_visibility"),
+        String("PreludeTraits"),
+      ]),
+      "span_begin_line": Uint64(82),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("as_ref"),
+      "method_visibility": String("public"),
+      "name": String("PreludeTraits"),
+      "non_matching_span_begin_line": List([
+        Uint64(92),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(94),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("method_variadic_trait_visibility"),
+        String("PreludeTraits"),
+      ]),
+      "span_begin_line": Uint64(86),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
