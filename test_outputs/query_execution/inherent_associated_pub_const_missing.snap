@@ -51,6 +51,54 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "associated_constant": String("MAX"),
+      "name": String("Limits"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("Limits"),
+      ]),
+      "span_begin_line": Uint64(131),
+      "span_end_line": Uint64(131),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("DEFAULT"),
+      "name": String("Limits"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("Limits"),
+      ]),
+      "span_begin_line": Uint64(132),
+      "span_end_line": Uint64(132),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("STEP"),
+      "name": String("LimitsWithTrait"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("LimitsWithTrait"),
+      ]),
+      "span_begin_line": Uint64(162),
+      "span_end_line": Uint64(162),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_constant": String("INDEX"),
+      "name": String("HiddenFallback"),
+      "path": List([
+        String("inherent_associated_pub_const_missing"),
+        String("HiddenFallback"),
+      ]),
+      "span_begin_line": Uint64(173),
+      "span_end_line": Uint64(173),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
   "./test_crates/inherent_trait_visibility/": [
     {
