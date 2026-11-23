@@ -49,6 +49,10 @@ SemverQuery(
                         inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             associated_constant {
                                 name @filter(op: "=", value: ["%associated_constant"])
+
+                                # A `pub` constant that gains `#[doc(hidden)]` has its own lint.
+                                # Requiring public API eligibility here would also report its removal.
+                                visibility_limit @filter(op: "=", value: ["$public"])
                             }
                         }
 
@@ -69,6 +73,32 @@ SemverQuery(
                                         name @filter(op: "=", value: ["%associated_constant"])
                                     }
                                 }
+                            }
+                        }
+
+                        # Rustdoc can omit a dependency's trait declaration
+                        # while still listing constants defined in the impl.
+                        # When we have cross-crate queries, this block won't be necessary.
+                        # Rustdoc may inline the trait impl and show the overridden constant there,
+                        # which is what this block checks for.
+                        #
+                        # If `impl Minimum for Limits` defines `MIN`, downstream callers
+                        # with the public trait `Minimum` in scope can still use `Limits::MIN`
+                        # after the inherent constant becomes private.
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            # An inherited default appears only in the trait declaration,
+                            # so matching it requires the declaration check above.
+                            associated_constant {
+                                name @filter(op: "=", value: ["%associated_constant"])
+                            }
+
+                            implemented_trait {
+                                # Require a missing declaration so the visibility check above
+                                # governs known traits. An impl of a private trait can also
+                                # define a matching constant, which would otherwise hide a removal.
+                                trait @fold @transform(op: "count") @filter(op: "=", value: ["$zero"])
                             }
                         }
                     }

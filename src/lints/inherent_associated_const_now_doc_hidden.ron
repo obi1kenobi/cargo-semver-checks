@@ -49,6 +49,7 @@ SemverQuery(
                         inherent_impl {
                             associated_constant {
                                 name @filter(op: "=", value: ["%associated_constant"])
+                                visibility_limit @filter(op: "=", value: ["$public"])
                                 public_api_eligible @filter(op: "!=", value: ["$true"])
                             }
                         }
