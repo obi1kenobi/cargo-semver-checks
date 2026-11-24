@@ -26,6 +26,18 @@ source: src/query.rs
       "trait_name": String("PubTraitB"),
     },
   ],
+  "./test_crates/trait_method_with_default_added/": [
+    {
+      "path": List([
+        String("trait_method_with_default_added"),
+        String("NewlyHiddenAlias"),
+      ]),
+      "span_begin_line": Uint64(91),
+      "span_end_line": Uint64(97),
+      "span_filename": String("src/lib.rs"),
+      "trait_name": String("Reexported"),
+    },
+  ],
   "./test_crates/trait_now_doc_hidden/": [
     {
       "path": List([

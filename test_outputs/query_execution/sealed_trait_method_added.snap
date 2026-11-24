@@ -105,4 +105,39 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/trait_method_with_default_added/": [
+    {
+      "method_name": String("added"),
+      "path": List([
+        String("trait_method_with_default_added"),
+        String("SealedTrait"),
+      ]),
+      "span_begin_line": Uint64(52),
+      "span_end_line": Uint64(52),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("added"),
+      "path": List([
+        String("trait_method_with_default_added"),
+        String("PublicApiSealed"),
+      ]),
+      "span_begin_line": Uint64(63),
+      "span_end_line": Uint64(63),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("added"),
+      "path": List([
+        String("trait_method_with_default_added"),
+        String("BecomesUnsealed"),
+      ]),
+      "span_begin_line": Uint64(71),
+      "span_end_line": Uint64(71),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }

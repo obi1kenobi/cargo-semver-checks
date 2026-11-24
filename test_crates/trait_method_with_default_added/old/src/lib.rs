@@ -1,0 +1,73 @@
+#![no_std]
+
+mod sealed {
+    pub(crate) trait Sealed {}
+}
+
+// Not sealed and not dyn-compatible. The new methods with a default implementation, with and
+// without a receiver, should be reported. The new method without a default implementation
+// and the new #[doc(hidden)] method should not.
+pub trait NotDynCompatible {
+    fn make_me_non_dyn_compatible() -> Self;
+}
+
+// Not sealed, and the new method keeps it dyn-compatible. The new method should be reported,
+// but the existing method gaining a default implementation should not.
+pub trait DynCompatible {
+    fn existing(&self);
+}
+
+// Dyn-compatible, but the new generic method makes it no longer dyn-compatible.
+// The new method should be reported, and `trait_no_longer_dyn_compatible` also reports the trait.
+pub trait BecomesNonDynCompatible {
+    fn method(&self);
+}
+
+// Not sealed in the baseline, so the new method should be reported
+// even though the trait becomes sealed.
+pub trait BecomesSealed {
+    fn method(&self);
+}
+
+// Sealed: `sealed_trait_method_added` reports the new method,
+// so this lint should not report it.
+pub trait SealedTrait: sealed::Sealed {
+    fn method(&self);
+}
+
+// Sealed from the public API's point of view because of the #[doc(hidden)] associated type:
+// `sealed_trait_method_added` reports the new method, so this lint should not report it.
+pub trait PublicApiSealed {
+    #[doc(hidden)]
+    type Hidden;
+
+    fn method(&self);
+}
+
+// Sealed in the baseline, so this lint should not report the new method
+// even though the trait stops being sealed.
+pub trait BecomesUnsealed: sealed::Sealed {
+    fn method(&self);
+}
+
+// Not public API, so this lint should not report it.
+#[doc(hidden)]
+pub trait HiddenTrait {
+    fn method(&self);
+}
+
+mod private {
+    // Not importable from outside the crate, so this lint should not report it.
+    pub trait PrivateTrait {
+        fn method(&self);
+    }
+}
+
+pub trait Reexported {
+    #[doc(hidden)]
+    fn previously_hidden(&self) {}
+}
+
+#[doc(hidden)]
+pub use Reexported as NewlyVisibleAlias;
+pub use Reexported as NewlyHiddenAlias;
