@@ -422,5 +422,16 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },
+    {
+      "method_name": String("added"),
+      "path": List([
+        String("trait_method_with_default_added"),
+        String("Reexported"),
+      ]),
+      "span_begin_line": Uint64(96),
+      "span_end_line": Uint64(96),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
   ],
 }

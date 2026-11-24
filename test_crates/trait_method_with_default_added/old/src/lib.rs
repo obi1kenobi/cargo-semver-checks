@@ -62,3 +62,12 @@ mod private {
         fn method(&self);
     }
 }
+
+pub trait Reexported {
+    #[doc(hidden)]
+    fn previously_hidden(&self) {}
+}
+
+#[doc(hidden)]
+pub use Reexported as NewlyVisibleAlias;
+pub use Reexported as NewlyHiddenAlias;

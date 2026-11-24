@@ -87,3 +87,15 @@ mod private {
         fn added(&self) {}
     }
 }
+
+pub trait Reexported {
+    // Unhiding an existing method should not report a method addition.
+    fn previously_hidden(&self) {}
+
+    // Only Reexported::added should be reported. Each alias is hidden in one version.
+    fn added(&self) {}
+}
+
+pub use Reexported as NewlyVisibleAlias;
+#[doc(hidden)]
+pub use Reexported as NewlyHiddenAlias;
