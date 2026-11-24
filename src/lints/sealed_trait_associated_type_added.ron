@@ -38,9 +38,8 @@ SemverQuery(
                         # If the baseline trait wasn't sealed, downstream crates may have implemented it,
                         # and `trait_associated_type_added` reports types without a default value.
                         public_api_sealed @filter(op: "=", value: ["$true"])
-                        # If the baseline trait was dyn-compatible, downstream code may have used it as
-                        # `dyn Trait`, which stops compiling because it must now specify the new type.
-                        dyn_compatible @filter(op: "!=", value: ["$true"])
+                        # This lint doesn't check dyn-compatibility: if the new type makes the trait
+                        # no longer dyn-compatible, `trait_no_longer_dyn_compatible` reports that too.
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
@@ -61,5 +60,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A sealed public trait added a new associated type.",
-    per_result_error_template: Some("trait associated type {{join \"::\" path}}::{{associated_type}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{associated_type}} in file {{span_filename}}:{{span_begin_line}}"#),
 )
