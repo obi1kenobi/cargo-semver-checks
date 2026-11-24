@@ -19,6 +19,14 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
+                        # If `Reader<u8>::MAX` disappears while `Reader<u16>::MAX` stays hidden,
+                        # matching by name would report that the removed constant gained `#[doc(hidden)]`.
+                        # TODO: Include generic owners once we can match impl targets.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             public_api_eligible @filter(op: "=", value: ["$true"])
 
@@ -46,9 +54,16 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The current owner must also be nongeneric. Its constant could apply only
+                        # to an instantiation that did not have the old constant.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             associated_constant {
                                 name @filter(op: "=", value: ["%associated_constant"])
+                                visibility_limit @filter(op: "=", value: ["$public"])
                                 public_api_eligible @filter(op: "!=", value: ["$true"])
                             }
                         }
@@ -60,6 +75,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
+        "zero": 0,
     },
     error_message: "An inherent impl's associated const is now #[doc(hidden)], which removes it from the crate's public API",
     per_result_error_template: Some("{{name}}::{{associated_constant}}, previously at {{span_filename}}:{{span_begin_line}}"),

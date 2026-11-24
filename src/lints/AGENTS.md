@@ -20,7 +20,8 @@ When deciding what reference link to use, follow this order:
 3. If there is an issue on [the `cargo-semver-checks` issue tracker](https://github.com/obi1kenobi/cargo-semver-checks/issues), or a public writeup from a reputable source (such as on https://predr.ag/blog/ ) that explains the breakage or explains another reason the lint is desirable, use that.
 4. Otherwise, set `reference_link` to `None`.
 
-Strings that contain Handlebars helpers or newlines should use raw string syntax (`r#"..."#`).
+Use raw strings for multiline text. For single-line strings or ones that contain Handlebars helpers,
+prefer raw strings when they avoid escaping double quotes or backslashes.
 
 After these metadata fields, produce the remaining fields in the following order: `query`, `arguments`, `error_message`, `per_error_result_template`, `witness`.
 

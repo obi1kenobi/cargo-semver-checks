@@ -52,6 +52,17 @@ SemverQuery(
                         # a breaking change, so we don't want to report it.
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            # Exclude a private trait when its declaration is available.
+                            # A glob import can bring a `pub` trait into scope through `pub use Trait as _`,
+                            # which the adapter omits from importable paths. Assume a `pub` trait
+                            # can still provide the method even if it has no public API path by name.
+                            implemented_trait @optional {
+                                trait @optional {
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+                                }
+                            }
+
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
@@ -69,5 +80,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A publicly-visible method or associated fn is no longer available under its prior name. It may have been renamed or removed entirely.",
-    per_result_error_template: Some("{{name}}::{{method_name}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}}, previously in file {{span_filename}}:{{span_begin_line}}"#),
 )

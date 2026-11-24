@@ -1,7 +1,7 @@
 SemverQuery(
     id: "method_export_name_changed",
-    human_readable_name: "method no longer has its previous ABI export name",
-    description: "A public inherent method no longer has its previous export name assigned via #[no_mangle] or #[export_name].",
+    human_readable_name: "method's export name has changed or been removed",
+    description: r#"A public inherent method's export name assigned via #[no_mangle] or #[export_name = "name"] has changed or been removed."#,
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/abi.html#the-no_mangle-attribute"),
@@ -18,50 +18,27 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
+                        # Removing a method on one while a same-named method on the other survives
+                        # can look like a change to the removed method's export name.
+                        # TODO: Include generic owners once we can match impl targets.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
-                                method_name: name @output @tag
-
-                                export_name @output @tag @filter(op: "is_not_null")
-
-                                span_: span @optional {
-                                    filename @output
-                                    begin_line @output
-                                    end_line @output
-                                }
+                                export_name @output  @filter(op: "is_not_null") @tag
+                                method_name: name @tag @output
                             }
                         }
                     }
                 }
             }
             current {
-                # This lint checks the association between a public inherent method and its exported symbol.
-                # Moving the symbol to a differently named function does not preserve that association.
-                #
-                # `Reader<bool>::get` and `Reader<u8>::get` need not have the same export name.
-                # Without knowing which parameterizations each impl applies to,
-                # we cannot identify which current method replaces an old one.
-                # Report the loss of the old method-to-symbol association only when all three conditions hold:
-                # 1. A public API inherent function has the old method's name
-                #    and a different export name or no export name.
-                # 2. No same-named inherent function exports the old symbol;
-                #    on generic owners, no same-named trait function exports it either.
-                # 3. On generic owners, every same-named inherent function is public API.
-                #
-                # If a method's export name changes or is removed
-                # while a same-named method in another impl exports the old symbol,
-                # this lint will not report the change.
-                # The adapter associates each impl with its owning type,
-                # but does not distinguish different parameterizations of that type.
-                # We therefore cannot tell whether the original method kept its export name
-                # or the symbol moved to a same-named method on another parameterization.
-                # TODO: Match impl targets to detect changes to individual impls.
-                #
-                # Fold current candidates to report each baseline method once at its old span,
-                # without assigning the change to an unrelated current declaration.
-                item @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
+                item {
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
 
@@ -70,75 +47,26 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # Count the owner's parameters: `impl Reader<bool>` has none of its own,
-                        # but methods on generic `Reader<T>` still need the conservative checks below.
+                        # A current method could exist only on a new parameterization of the owner.
                         generic_parameter @fold
                                           @transform(op: "count")
-                                          @tag(name: "owner_generic_count")
+                                          @filter(op: "=", value: ["$zero"])
 
-                        # 1. A public API inherent function has the old method's name
-                        #    and a different export name or no export name.
-                        #
-                        # This candidate may already have had its present export name.
-                        # The remaining conditions establish the loss of the old method's export name.
                         inherent_impl {
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
-                                name @filter(op: "=", value: ["%method_name"])
 
-                                export_name @filter(op: "!=", value: ["%export_name"])
-                            }
-                        }
+                                new_export_name: export_name
+                                    @filter(op: "!=", value: ["%export_name"])
+                                    @output
 
-                        # 2. No same-named inherent function exports the old symbol;
-                        #    on generic owners, no same-named trait function exports it either.
-                        #
-                        # A nongeneric owner's inherent function takes precedence over trait functions
-                        # in `Owner::method` calls. On generic owners, `Reader<bool>::get` may move
-                        # to a trait while an unrelated inherent `Reader<u8>::get` remains.
-                        #
-                        # Conservatively include private and doc-hidden alternatives,
-                        # accepting missed changes when they cannot actually preserve the old symbol association.
-                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            # Zero for inherent impls, one for trait impls: include traits only
-                            # when the owner has at least one generic parameter.
-                            implemented_trait @fold
-                                              @transform(op: "count")
-                                              @filter(op: "<=", value: ["%owner_generic_count"])
-
-                            method {
-                                name @filter(op: "=", value: ["%method_name"])
-
-                                export_name @filter(op: "=", value: ["%export_name"])
-                            }
-                        }
-
-                        # 3. On generic owners, every same-named inherent function is public API.
-                        #
-                        # A private or doc-hidden method could be the old method leaving public API,
-                        # even if its export name changed too. Omit the report in that ambiguous case.
-                        inherent_impl @fold
-                                      @transform(op: "count")
-                                      @filter(op: "=", value: ["$zero"]) {
-                            # Inherent impls have count zero, so apply this only to generic owners.
-                            implemented_trait @fold
-                                              @transform(op: "count")
-                                              @filter(op: "<", value: ["%owner_generic_count"])
-
-                            # An impl violates the rule only if it contains this name
-                            # but has no such function in the public API.
-                            method @fold
-                                   @transform(op: "count")
-                                   @filter(op: ">", value: ["$zero"]) {
-                                name @filter(op: "=", value: ["%method_name"])
-                            }
-                            method @fold
-                                   @transform(op: "count")
-                                   @filter(op: "=", value: ["$zero"]) {
-                                visibility_limit @filter(op: "=", value: ["$public"])
-                                public_api_eligible @filter(op: "=", value: ["$true"])
-                                name @filter(op: "=", value: ["%method_name"])
+                                span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
                             }
                         }
                     }
@@ -151,7 +79,7 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "A public inherent method no longer has its previous ABI export name. Its public API and exported symbol no longer refer to the same function.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} no longer has ABI export name {{export_name}}; previously in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "A public inherent method's export name changed or was removed. Downstream code that uses the old symbol may fail to link or call a different function.",
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} {{#if new_export_name}}changed its export name from {{export_name}} to {{new_export_name}}{{else}}no longer exports symbol {{export_name}}{{/if}} in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

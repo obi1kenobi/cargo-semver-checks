@@ -48,6 +48,6 @@ SemverQuery(
         "true": true,
     },
     error_message: "A publicly-visible trait became sealed, so downstream crates are no longer able to implement it",
-    per_result_error_template: Some("trait {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"trait {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
 
 )

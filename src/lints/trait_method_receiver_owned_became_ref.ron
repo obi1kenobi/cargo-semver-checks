@@ -65,7 +65,7 @@ SemverQuery(
         "true": true,
     },
     error_message: "A trait method now takes &self instead of taking ownership. This breaks calls that use fully-qualified syntax, as well as any downstream implementations of the trait.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} now takes &{{receiver_kind}} instead of {{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} now takes &{{receiver_kind}} instead of {{receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"#),
     // `value.method()` would work;
     // the breakage is `Trait::method(value)` which has to be `Trait::method(&value)`
     witness: None,

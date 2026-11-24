@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-assertion_line: 1110
 ---
 {
   "./test_crates/inherent_method_const_removed/": [
@@ -145,6 +144,60 @@ assertion_line: 1110
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/inherent_trait_visibility/": [
+    {
+      "method_name": String("read"),
+      "method_visibility": String("public"),
+      "name": String("Removed"),
+      "path": List([
+        String("inherent_trait_visibility"),
+        String("Removed"),
+      ]),
+      "span_begin_line": Uint64(65),
+      "span_end_line": Uint64(65),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("seek"),
+      "method_visibility": String("public"),
+      "name": String("Removed"),
+      "path": List([
+        String("inherent_trait_visibility"),
+        String("Removed"),
+      ]),
+      "span_begin_line": Uint64(66),
+      "span_end_line": Uint64(66),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("reset"),
+      "method_visibility": String("public"),
+      "name": String("Removed"),
+      "path": List([
+        String("inherent_trait_visibility"),
+        String("Removed"),
+      ]),
+      "span_begin_line": Uint64(67),
+      "span_end_line": Uint64(67),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("limit"),
+      "method_visibility": String("public"),
+      "name": String("Removed"),
+      "path": List([
+        String("inherent_trait_visibility"),
+        String("Removed"),
+      ]),
+      "span_begin_line": Uint64(68),
+      "span_end_line": Uint64(70),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/method_abi_disjoint_impls/": [
     {
       "method_name": String("changed_abi"),
@@ -197,6 +250,49 @@ assertion_line: 1110
       ]),
       "span_begin_line": Uint64(355),
       "span_end_line": Uint64(357),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_generic_reorder_trait_visibility/": [
+    {
+      "method_name": String("only_private"),
+      "method_visibility": String("public"),
+      "name": String("Owner"),
+      "path": List([
+        String("method_generic_reorder_trait_visibility"),
+        String("Owner"),
+      ]),
+      "span_begin_line": Uint64(42),
+      "span_end_line": Uint64(42),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_variadic_trait_visibility/": [
+    {
+      "method_name": String("private_variadic"),
+      "method_visibility": String("public"),
+      "name": String("NoNamedReplacement"),
+      "path": List([
+        String("method_variadic_trait_visibility"),
+        String("NoNamedReplacement"),
+      ]),
+      "span_begin_line": Uint64(51),
+      "span_end_line": Uint64(51),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("private_fixed"),
+      "method_visibility": String("public"),
+      "name": String("NoNamedReplacement"),
+      "path": List([
+        String("method_variadic_trait_visibility"),
+        String("NoNamedReplacement"),
+      ]),
+      "span_begin_line": Uint64(52),
+      "span_end_line": Uint64(52),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

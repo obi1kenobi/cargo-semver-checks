@@ -18,16 +18,22 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # A method removed from `Reader<u8>` and a different method on `Reader<u16>`
+                        # can look like one method whose type and const parameters exchanged positions.
+                        # TODO: Include generic owners once we can match impl targets across releases.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
                                 method_name: name @output @tag
                                 public_api_eligible @filter(op: "=", value: ["$true"])
 
-                                # Count the type and const parameters that can be supplied in a turbofish.
-                                # Changes to these counts belong to the generic-count lints.
-                                # An argument-position `impl Trait` adds a synthetic type parameter
-                                # that cannot be supplied this way, so exclude it from the count.
+                                # The generic-count lints handle changes in the number of explicit
+                                # type or const arguments. An argument written as `impl Trait`
+                                # introduces a synthetic type parameter that callers cannot supply.
                                 generic_parameter @fold
                                                   @transform(op: "count")
                                                   @tag(name: "required_const_count")
@@ -64,51 +70,28 @@ SemverQuery(
                 }
             }
             current {
-                # `Reader<bool>::get` and `Reader<u8>::get` may accept different generic parameter orders.
-                # We cannot match impl targets across versions, so comparing them by name
-                # can report a reorder even when the API is unchanged.
-                #
-                # For each old type parameter, find a same-named public API function
-                # with the same explicit type- and const-param counts and a const at that position.
-                # Call this function the candidate. It may be inherent or provided by a trait;
-                # the owner may be generic or nongeneric.
-                # Apply these four exclusions to functions with the same name:
-                # 1. Reject if a public inherent function retains a type at this position;
-                #    for a trait candidate, also consider trait functions.
-                # 2. On generic owners, reject if any trait function retains a type here,
-                #    even for an inherent candidate.
-                # 3. On generic owners, reject if any inherent function is outside public API
-                #    or has different explicit parameter counts.
-                # 4. Reject a trait candidate if any public inherent function has this name,
-                #    regardless of its parameter order or counts.
-                #
-                # Checks 1 and 4 account for Rust's lookup rules.
-                # Checks 2 and 3 add conservative exclusions because impl targets cannot be matched.
-                # To avoid false positives, all four may suppress real reorderings
-                # even when another function's parameters, visibility, or impl target prevent the old call.
-                #
-                # TODO: Match impl targets to detect changes to individual impls.
-                #
-                # Fold surviving candidates to report each old parameter once at the old method's span,
-                # without attributing the change to a particular current impl.
+                # Several traits may provide the new parameter order. Report the old position
+                # once and point to each matching declaration.
                 item @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
+                        owner_crate_id: crate_id @tag
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The ambiguity checks below depend on whether the owner is generic.
-                        # `impl Reader<bool>` declares no generic parameters, but `Reader<T>` is generic.
+                        # A type that gains a generic parameter can gain a same-named method
+                        # that applies only to a new instantiation.
                         generic_parameter @fold
                                           @transform(op: "count")
-                                          @tag(name: "owner_generic_count")
+                                          @filter(op: "=", value: ["$zero"])
 
-                        # Include trait functions that may be called after the inherent function disappears.
+                        # A trait may provide the function after its inherent declaration is removed.
+                        # TODO: Distinguish a trait implemented for `Owner` from one implemented
+                        # for `&Owner`. Only the former supplies the associated function on `Owner`.
                         impl {
-                            # Distinguish inherent candidates (zero traits) from trait candidates (one).
                             implemented_trait @fold
                                               @transform(op: "count")
                                               @tag(name: "candidate_trait_count")
@@ -136,23 +119,65 @@ SemverQuery(
 
                                 generic_parameter {
                                     ... on GenericConstParameter {
+                                        const_name: name @output
                                         position @filter(op: "=", value: ["%position"])
+                                    }
+                                }
+
+                                current_span_: span @optional {
+                                    filename @output
+                                    begin_line @output
+                                    end_line @output
+                                }
+                            }
+
+                            # Either the trait is defined in another crate (where we assume it's public API),
+                            # or it has a public API path in this crate.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "=", value: ["$zero"]) {
+                                trait {
+                                    crate_id @filter(op: "=", value: ["%owner_crate_id"])
+                                    importable_path @fold
+                                                    @transform(op: "count")
+                                                    @filter(op: "=", value: ["$zero"]) {
+                                        public_api @filter(op: "=", value: ["$true"])
                                     }
                                 }
                             }
                         }
 
-                        # 1. Reject if a public inherent function retains a type at this position;
-                        #    for a trait candidate, also consider trait functions.
-                        #
-                        # Rust gives an applicable public inherent function precedence over traits
-                        # in `Owner::method::<...>()` calls. An unchanged trait function cannot
-                        # preserve a call to that inherent function.
-                        # Public functions remain callable when doc-hidden, including trait implementations.
+                        # A public inherent function shadows every trait function with the same name
+                        # in `Owner::method()`, even when the inherent function is doc-hidden.
+                        # An inherent candidate has zero implemented traits, a trait candidate one.
+                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "<", value: ["%candidate_trait_count"])
+
+                            method {
+                                visibility_limit @filter(op: "=", value: ["$public"])
+                                name @filter(op: "=", value: ["%method_name"])
+                            }
+                        }
+
+                        # If a trait supplies the function, another trait can still accept the old
+                        # argument kind at this position, even if its method is doc-hidden.
+                        # An inherent candidate takes precedence over those trait functions.
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             implemented_trait @fold
                                               @transform(op: "count")
-                                              @filter(op: "<=", value: ["%candidate_trait_count"])
+                                              @filter(op: "=", value: ["%candidate_trait_count"])
+
+                            # Exclude a private trait when its declaration is available.
+                            # A glob import can bring a `pub` trait into scope through `pub use Trait as _`,
+                            # which the adapter omits from importable paths. Assume a `pub` trait
+                            # can preserve the old argument kind at this position even without a named public API path.
+                            implemented_trait @optional {
+                                trait @optional {
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+                                }
+                            }
 
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
@@ -163,101 +188,6 @@ SemverQuery(
                                         position @filter(op: "=", value: ["%position"])
                                     }
                                 }
-                            }
-                        }
-
-                        # 2. On generic owners, reject if any trait function retains a type here,
-                        #    even for an inherent candidate.
-                        #
-                        # `Reader<bool>::get` may move to a trait with the old parameter order,
-                        # while an unchanged inherent `Reader<u8>::get` has the new order.
-                        # The trait may preserve calls on `Reader<bool>` despite the inherent candidate.
-                        # Include inaccessible and doc-hidden traits too, accepting missed changes.
-                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
-                            # A trait impl has count one: admit it only for an owner
-                            # with at least one generic parameter, and exclude inherent impls.
-                            implemented_trait @fold
-                                              @transform(op: "count")
-                                              @filter(op: ">", value: ["$zero"])
-                                              @filter(op: "<=", value: ["%owner_generic_count"])
-
-                            method {
-                                name @filter(op: "=", value: ["%method_name"])
-
-                                generic_parameter {
-                                    ... on GenericTypeParameter {
-                                        position @filter(op: "=", value: ["%position"])
-                                    }
-                                }
-                            }
-                        }
-
-                        # 3. On generic owners, reject if any inherent function is outside public API
-                        #    or has different explicit parameter counts.
-                        #
-                        # If `Reader<bool>::get` becomes private, doc-hidden, or changes its counts,
-                        # an unchanged `Reader<u8>::get` must not be treated as its reordered replacement.
-                        # Exclude these cases even when the first function also has the new order.
-                        # A nongeneric owner has no distinct type arguments to confuse.
-                        inherent_impl @fold
-                                      @transform(op: "count")
-                                      @filter(op: "=", value: ["$zero"]) {
-                            # Inherent impls have zero traits, so this check applies only
-                            # when the owner has at least one generic parameter.
-                            implemented_trait @fold
-                                              @transform(op: "count")
-                                              @filter(op: "<", value: ["%owner_generic_count"])
-
-                            # The two folds find an impl with this name but no matching public API function.
-                            # Ignore impl blocks that contain only unrelated functions.
-                            method @fold
-                                   @transform(op: "count")
-                                   @filter(op: ">", value: ["$zero"]) {
-                                name @filter(op: "=", value: ["%method_name"])
-                            }
-                            method @fold
-                                   @transform(op: "count")
-                                   @filter(op: "=", value: ["$zero"]) {
-                                visibility_limit @filter(op: "=", value: ["$public"])
-                                name @filter(op: "=", value: ["%method_name"])
-                                public_api_eligible @filter(op: "=", value: ["$true"])
-
-                                generic_parameter @fold
-                                                  @transform(op: "count")
-                                                  @filter(op: "=", value: ["%required_const_count"]) {
-                                    ... on GenericConstParameter {
-                                        name
-                                    }
-                                }
-                                generic_parameter @fold
-                                                  @transform(op: "count")
-                                                  @filter(op: "=", value: ["%required_type_count"]) {
-                                    ... on GenericTypeParameter {
-                                        synthetic @filter(op: "!=", value: ["$true"])
-                                        name
-                                    }
-                                }
-                            }
-                        }
-
-                        # 4. Reject a trait candidate if any public inherent function has this name,
-                        #    regardless of its parameter order or counts.
-                        #
-                        # Rust gives an applicable public inherent function precedence over traits,
-                        # regardless of its parameter order or doc-hidden status.
-                        # Private inherent functions do not block trait fallback for downstream callers.
-                        # For generic owners, we conservatively assume the inherent function could apply.
-                        inherent_impl @fold
-                                      @transform(op: "count")
-                                      @filter(op: "=", value: ["$zero"]) {
-                            # Zero is less than the candidate's count only for a trait candidate.
-                            implemented_trait @fold
-                                              @transform(op: "count")
-                                              @filter(op: "<", value: ["%candidate_trait_count"])
-
-                            method {
-                                visibility_limit @filter(op: "=", value: ["$public"])
-                                name @filter(op: "=", value: ["%method_name"])
                             }
                         }
                     }
@@ -271,7 +201,7 @@ SemverQuery(
         "true": true,
         "zero": 0,
     },
-    error_message: "An inherent method no longer accepts a type argument at a previous generic parameter position. Calls supplying the old generic arguments may no longer compile.",
-    per_result_error_template: Some("method {{join \"::\" path}}::{{method_name}} no longer accepts a type argument in the position of {{type_name}}; previously in {{span_filename}}:{{span_begin_line}}"),
+    error_message: "An inherent method's signature now requires a const generic parameter where a generic type previously stood. Uses of this method that supplied that generic type will be broken since a const generic is now required instead.",
+    per_result_error_template: Some(r#"method {{join "::" path}}::{{method_name}} used to expect type {{type_name}} in the place of {{#each const_name}}{{#unless @first}} or {{/unless}}const {{this}}{{#if (lookup ../current_span_filename @index)}} in {{lookup ../current_span_filename @index}}:{{lookup ../current_span_begin_line @index}}{{/if}}{{/each}}"#),
     witness: None,
 )

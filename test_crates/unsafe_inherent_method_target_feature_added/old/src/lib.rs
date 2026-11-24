@@ -10,4 +10,11 @@ impl A {
     pub unsafe fn becomes_safe() {}
 
     pub fn safe() {}
+
+    #[doc(hidden)]
+    pub unsafe fn revealed() {}
+
+    #[doc(hidden)]
+    #[deprecated]
+    pub unsafe fn legacy() {}
 }

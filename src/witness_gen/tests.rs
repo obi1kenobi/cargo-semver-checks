@@ -16,12 +16,12 @@ use super::{
 fn dependency_blocks_toggle_between_script_variants() {
     let baseline = DependencyProfile {
         lines: vec![String::from(
-            "upstream_dep = { package = \"upstream-dep\", version = \"=1.2.3\" }",
+            r#"upstream_dep = { package = "upstream-dep", version = "=1.2.3" }"#,
         )],
     };
     let current = DependencyProfile {
         lines: vec![String::from(
-            "upstream_dep = { package = \"upstream-dep\", path = \"/tmp/current-upstream\" }",
+            r#"upstream_dep = { package = "upstream-dep", path = "/tmp/current-upstream" }"#,
         )],
     };
     let scripts =
@@ -30,18 +30,18 @@ fn dependency_blocks_toggle_between_script_variants() {
     assert!(
         scripts
             .witness_rs
-            .contains("upstream_dep = { package = \"upstream-dep\", version = \"=1.2.3\" }")
+            .contains(r#"upstream_dep = { package = "upstream-dep", version = "=1.2.3" }"#)
     );
     assert!(scripts.witness_rs.contains(
-        "# upstream_dep = { package = \"upstream-dep\", path = \"/tmp/current-upstream\" }"
+        r#"# upstream_dep = { package = "upstream-dep", path = "/tmp/current-upstream" }"#
     ));
     assert!(
         scripts
             .current_rs
-            .contains("# upstream_dep = { package = \"upstream-dep\", version = \"=1.2.3\" }")
+            .contains(r#"# upstream_dep = { package = "upstream-dep", version = "=1.2.3" }"#)
     );
     assert!(scripts.current_rs.contains(
-        "upstream_dep = { package = \"upstream-dep\", path = \"/tmp/current-upstream\" }"
+        r#"upstream_dep = { package = "upstream-dep", path = "/tmp/current-upstream" }"#
     ));
 }
 
@@ -80,13 +80,13 @@ fn exact_version_and_local_path_dependencies_render_correctly() {
         .next()
         .expect("missing registry dependency line");
 
-    assert!(registry_line.contains("version = \"=1.2.3\""));
+    assert!(registry_line.contains(r#"version = "=1.2.3""#));
     assert!(registry_line.contains("default-features = false"));
-    assert!(registry_line.contains("features = [\"witness_feature\"]"));
+    assert!(registry_line.contains(r#"features = ["witness_feature"]"#));
     assert!(local_line.contains("path = "));
-    assert!(local_line.contains("package = \"demo-package\""));
+    assert!(local_line.contains(r#"package = "demo-package""#));
     assert!(local_line.contains("default-features = false"));
-    assert!(local_line.contains("features = [\"witness_feature\"]"));
+    assert!(local_line.contains(r#"features = ["witness_feature"]"#));
 }
 
 #[test]
@@ -122,7 +122,12 @@ fn feature_gated_witness_preserves_selected_features() {
         "demo-package",
         Some("renamed_lib"),
         manifest_extra,
-        "#[cfg(feature = \"witness_feature\")]\npub fn removed() {}\n",
+        r#"
+#[cfg(feature = "witness_feature")]
+pub fn removed() {}
+"#
+        .strip_prefix('\n')
+        .expect("expected a newline after the opening quotes"),
     );
     let current_manifest = make_local_manifest(
         &temp_dir,
@@ -276,12 +281,14 @@ fn maybe_write_script_lockfiles_only_writes_when_supported() {
 
     write_file(
         &artifact_dir.join("dep/Cargo.toml"),
-        "\
+        r#"
 [package]
-name = \"witness_dep\"
-version = \"0.1.0\"
-edition = \"2024\"
-",
+name = "witness_dep"
+version = "0.1.0"
+edition = "2024"
+"#
+        .strip_prefix('\n')
+        .expect("expected a newline after the opening quotes"),
     );
     write_file(
         &artifact_dir.join("dep/src/lib.rs"),
@@ -291,33 +298,37 @@ pub fn reachable() {}
     );
     write_file(
         &artifact_dir.join("baseline.rs"),
-        "\
+        r#"
 #!/usr/bin/env -S cargo +nightly -Zscript
 ---
-package.edition = \"2024\"
+package.edition = "2024"
 
 [dependencies]
-witness_dep = { path = \"dep\" }
+witness_dep = { path = "dep" }
 ---
 fn main() {
     witness_dep::reachable();
 }
-",
+"#
+        .strip_prefix('\n')
+        .expect("expected a newline after the opening quotes"),
     );
     write_file(
         &artifact_dir.join("current.rs"),
-        "\
+        r#"
 #!/usr/bin/env -S cargo +nightly -Zscript
 ---
-package.edition = \"2024\"
+package.edition = "2024"
 
 [dependencies]
-witness_dep = { path = \"dep\" }
+witness_dep = { path = "dep" }
 ---
 fn main() {
     witness_dep::reachable();
 }
-",
+"#
+        .strip_prefix('\n')
+        .expect("expected a newline after the opening quotes"),
     );
 
     let wrote_lockfiles = maybe_write_script_lockfiles(&artifact_dir)
@@ -344,10 +355,10 @@ fn execute_script_caps_warnings_even_when_rustflags_deny_them() {
     fs::create_dir_all(&artifact_dir).expect("failed to create warning-script artifact dir");
     write_file(
         &artifact_dir.join("script.rs"),
-        "\
+        r#"
 #!/usr/bin/env -S cargo +nightly -Zscript
 ---
-package.edition = \"2024\"
+package.edition = "2024"
 ---
 #![allow(warnings)]
 
@@ -355,7 +366,9 @@ package.edition = \"2024\"
 fn main() {
     let unused = 0;
 }
-",
+"#
+        .strip_prefix('\n')
+        .expect("expected a newline after the opening quotes"),
     );
 
     for rustflags in [None, Some("-Dwarnings".to_owned())] {
@@ -399,12 +412,14 @@ fn execute_script_caps_dependency_warnings_even_when_rustflags_deny_them() {
     fs::create_dir_all(&dependency_dir).expect("failed to create warning-dependency dir");
     write_file(
         &dependency_dir.join("Cargo.toml"),
-        "\
+        r#"
 [package]
-name = \"warning_dependency\"
-version = \"0.1.0\"
-edition = \"2024\"
-",
+name = "warning_dependency"
+version = "0.1.0"
+edition = "2024"
+"#
+        .strip_prefix('\n')
+        .expect("expected a newline after the opening quotes"),
     );
     write_file(
         &dependency_dir.join("src/lib.rs"),
@@ -418,20 +433,22 @@ pub fn dependency_warning() {
     fs::create_dir_all(&artifact_dir).expect("failed to create warning-dependency artifact dir");
     write_file(
         &artifact_dir.join("script.rs"),
-        "\
+        r#"
 #!/usr/bin/env -S cargo +nightly -Zscript
 ---
-package.edition = \"2024\"
+package.edition = "2024"
 
 [dependencies]
-warning_dependency = { path = \"warning-dependency\" }
+warning_dependency = { path = "warning-dependency" }
 ---
 #![allow(warnings)]
 
 fn main() {
     warning_dependency::dependency_warning();
 }
-",
+"#
+        .strip_prefix('\n')
+        .expect("expected a newline after the opening quotes"),
     );
 
     for rustflags in [None, Some("-Dwarnings".to_owned())] {
@@ -502,7 +519,7 @@ fn consistency_check_mismatch_retains_artifacts_without_suppressing_lint() {
     assert_eq!(finalized.len(), 1);
     let manifest = fs::read_to_string(finalized[0].join("manifest.toml"))
         .expect("failed to read retained artifact manifest");
-    assert!(manifest.contains("status = \"consistency_check_mismatch\""));
+    assert!(manifest.contains(r#"status = "consistency_check_mismatch""#));
     assert!(manifest.contains("not_confirmed_by_witness = 0"));
     assert!(manifest.contains("consistency_check_mismatches = 1"));
     assert!(
@@ -534,7 +551,7 @@ fn required_witness_not_confirmed_suppresses_lint_and_retains_artifacts() {
         .expect("failed to finalize retained witness artifacts");
     let manifest = fs::read_to_string(finalized[0].join("manifest.toml"))
         .expect("failed to read retained artifact manifest");
-    assert!(manifest.contains("status = \"not_confirmed_by_witness\""));
+    assert!(manifest.contains(r#"status = "not_confirmed_by_witness""#));
     assert!(manifest.contains("not_confirmed_by_witness = 1"));
     let query_result_manifest = fs::read_to_string(
         finalized[0].join("artifacts/demo_package/witness_test/0/query-result.toml"),
@@ -574,7 +591,7 @@ fn required_witness_error_retains_artifacts_and_marks_error() {
         .expect("failed to finalize retained witness artifacts");
     let manifest = fs::read_to_string(finalized[0].join("manifest.toml"))
         .expect("failed to read retained artifact manifest");
-    assert!(manifest.contains("status = \"required_witness_error\""));
+    assert!(manifest.contains(r#"status = "required_witness_error""#));
     assert!(manifest.contains("required_witness_errors = 1"));
 }
 
@@ -758,8 +775,8 @@ version = 4
     );
     assert!(baseline_reproduction_command.contains("--target 'wasm32-unknown-unknown'"));
     assert!(baseline_reproduction_command.contains(concat!(
-        "--config 'resolver.lockfile-path=\"",
-        "artifacts/demo_package/witness_test/0/baseline-lockfile/Cargo.lock\"'"
+        r#"--config 'resolver.lockfile-path=""#,
+        r#"artifacts/demo_package/witness_test/0/baseline-lockfile/Cargo.lock"'"#
     )));
     assert!(baseline_reproduction_command.contains("--locked"));
 }

@@ -1,6 +1,5 @@
 ---
 source: src/query.rs
-assertion_line: 1110
 ---
 {
   "./test_crates/inherent_method_no_longer_variadic/": [
@@ -186,6 +185,21 @@ assertion_line: 1110
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_attribute_disjoint_impls/": [
+    {
+      "method_name": String("reset"),
+      "method_visibility": String("public"),
+      "name": String("Control"),
+      "path": List([
+        String("method_attribute_disjoint_impls"),
+        String("Control"),
+      ]),
+      "span_begin_line": Uint64(158),
+      "span_end_line": Uint64(158),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/method_export_disjoint_impls/": [
     {
       "method_name": String("exported"),
@@ -279,6 +293,49 @@ assertion_line: 1110
       ]),
       "span_begin_line": Uint64(245),
       "span_end_line": Uint64(245),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_receiver_removal/": [
+    {
+      "method_name": String("hidden"),
+      "method_visibility": String("public"),
+      "name": String("Lookup"),
+      "path": List([
+        String("method_receiver_removal"),
+        String("Lookup"),
+      ]),
+      "span_begin_line": Uint64(49),
+      "span_end_line": Uint64(49),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_variadic_disjoint_impls/": [
+    {
+      "method_name": String("call"),
+      "method_visibility": String("public"),
+      "name": String("HiddenBecomesVariadic"),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("HiddenBecomesVariadic"),
+      ]),
+      "span_begin_line": Uint64(130),
+      "span_end_line": Uint64(130),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "method_name": String("call"),
+      "method_visibility": String("public"),
+      "name": String("HiddenLosesVariadic"),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("HiddenLosesVariadic"),
+      ]),
+      "span_begin_line": Uint64(136),
+      "span_end_line": Uint64(136),
       "span_filename": String("src/lib.rs"),
       "visibility_limit": String("public"),
     },

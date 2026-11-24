@@ -73,5 +73,5 @@ SemverQuery(
         "union": "Union",
     },
     error_message: "A publicly-visible union cannot be imported by its prior path. A `pub use` may have been removed, or the union itself may have been renamed or removed entirely.",
-    per_result_error_template: Some("union {{join \"::\" path}}, previously in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"union {{join "::" path}}, previously in file {{span_filename}}:{{span_begin_line}}"#),
 )

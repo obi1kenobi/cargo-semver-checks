@@ -42,4 +42,46 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/inherent_trait_visibility/": [
+    {
+      "method_name": String("limit"),
+      "method_visibility": String("public"),
+      "name": String("Changed"),
+      "non_matching_span_begin_line": List([
+        Uint64(17),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("inherent_trait_visibility"),
+        String("Changed"),
+      ]),
+      "span_begin_line": Uint64(83),
+      "span_end_line": Uint64(85),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_const_disjoint_impls/": [
+    {
+      "method_name": String("identity"),
+      "method_visibility": String("public"),
+      "name": String("Exact"),
+      "non_matching_span_begin_line": List([
+        Uint64(216),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "path": List([
+        String("method_const_disjoint_impls"),
+        String("Exact"),
+      ]),
+      "span_begin_line": Uint64(201),
+      "span_end_line": Uint64(203),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }

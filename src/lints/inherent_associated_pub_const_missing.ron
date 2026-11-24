@@ -49,6 +49,10 @@ SemverQuery(
                         inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             associated_constant {
                                 name @filter(op: "=", value: ["%associated_constant"])
+
+                                # A `pub` constant that gains `#[doc(hidden)]` has its own lint.
+                                # Requiring public API eligibility here would also report its removal.
+                                visibility_limit @filter(op: "=", value: ["$public"])
                             }
                         }
 
@@ -59,10 +63,42 @@ SemverQuery(
 
                             implemented_trait {
                                 trait {
+                                    # A private trait cannot provide the constant to downstream callers.
+                                    # A glob import can bring a `pub` trait into scope through `pub use Trait as _`,
+                                    # which the adapter omits from importable paths. Assume a `pub` trait
+                                    # can still provide the constant even if it has no public API path by name.
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+
                                     associated_constant {
                                         name @filter(op: "=", value: ["%associated_constant"])
                                     }
                                 }
+                            }
+                        }
+
+                        # Rustdoc can omit a dependency's trait declaration
+                        # while still listing constants defined in the impl.
+                        # When we have cross-crate queries, this block won't be necessary.
+                        # Rustdoc may inline the trait impl and show the overridden constant there,
+                        # which is what this block checks for.
+                        #
+                        # If `impl Minimum for Limits` defines `MIN`, downstream callers
+                        # with the public trait `Minimum` in scope can still use `Limits::MIN`
+                        # after the inherent constant becomes private.
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            public_api_eligible @filter(op: "=", value: ["$true"])
+
+                            # An inherited default appears only in the trait declaration,
+                            # so matching it requires the declaration check above.
+                            associated_constant {
+                                name @filter(op: "=", value: ["%associated_constant"])
+                            }
+
+                            implemented_trait {
+                                # Require a missing declaration so the visibility check above
+                                # governs known traits. An impl of a private trait can also
+                                # define a matching constant, which would otherwise hide a removal.
+                                trait @fold @transform(op: "count") @filter(op: "=", value: ["$zero"])
                             }
                         }
                     }
@@ -76,5 +112,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "An inherent impl's associated public constant is removed or renamed",
-    per_result_error_template: Some("{{name}}::{{associated_constant}}, previously at {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{associated_constant}}, previously at {{span_filename}}:{{span_begin_line}}"#),
 )

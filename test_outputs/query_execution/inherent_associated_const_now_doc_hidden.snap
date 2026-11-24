@@ -37,4 +37,17 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/method_attribute_disjoint_impls/": [
+    {
+      "associated_constant": String("LIMIT"),
+      "name": String("Control"),
+      "path": List([
+        String("method_attribute_disjoint_impls"),
+        String("Control"),
+      ]),
+      "span_begin_line": Uint64(160),
+      "span_end_line": Uint64(160),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }

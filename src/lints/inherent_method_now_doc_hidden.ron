@@ -18,6 +18,14 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
+                        # If `Reader<u8>::read` disappears while `Reader<u16>::read` stays hidden,
+                        # matching by name would report that the removed method gained `#[doc(hidden)]`.
+                        # TODO: Include generic owners once we can match impl targets.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
@@ -45,24 +53,17 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The current owner must also be nongeneric. Its method could apply only
+                        # to an instantiation that did not have the old method.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
                                 public_api_eligible @filter(op: "!=", value: ["$true"])
-                            }
-                        }
-
-                        # Disjoint generic impls can have methods with the same name.
-                        # A hidden method does not establish that the public method was hidden
-                        # if a same-name method is still public API: it might be the original.
-                        inherent_impl @fold
-                                      @transform(op: "count")
-                                      @filter(op: "=", value: ["$zero"]) {
-                            method {
-                                visibility_limit @filter(op: "=", value: ["$public"])
-                                name @filter(op: "=", value: ["%method_name"])
-                                public_api_eligible @filter(op: "=", value: ["$true"])
                             }
                         }
                     }

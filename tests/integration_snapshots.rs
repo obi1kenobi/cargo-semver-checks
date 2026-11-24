@@ -81,10 +81,7 @@ fn bugreport() {
 
         // this should be serialized TOML
         settings.add_filter(
-            "Cargo build configuration:\\n\
-            --------------------------\\n\
-            [\\s\\S]*\\n\
-            Please file an issue",
+            r"Cargo build configuration:\n--------------------------\n[\s\S]*\nPlease file an issue",
             "Cargo build configuration:\n\
             --------------------------\n\
             [CARGO_BUILD_TOML]\n\

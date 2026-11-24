@@ -58,7 +58,7 @@ SemverQuery(
     arguments: {
         "public": "public",
         "repr": "repr",
-        "repr_regex": "[ui](\\d+|size)",
+        "repr_regex": r"[ui](\d+|size)",
         "true": true,
         "zero": 0,
     },

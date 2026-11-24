@@ -106,14 +106,6 @@ let _: unsafe extern "C" fn(
 
 [["./test_crates/inherent_method_now_variadic/"]]
 filename = "src/lib.rs"
-begin_line = 109
-hint = """
-let _: unsafe extern "C" fn(
-) -> _ = inherent_method_now_variadic::Generic::associated;
-"""
-
-[["./test_crates/inherent_method_now_variadic/"]]
-filename = "src/lib.rs"
 begin_line = 125
 hint = """
 let _: unsafe extern "C" fn(
@@ -144,10 +136,38 @@ let _: unsafe extern "C" fn(
 ) -> _ = inherent_method_now_variadic::MovedToHiddenMatchingTrait::associated;
 """
 
-[["./test_crates/inherent_method_now_variadic/"]]
+[["./test_crates/method_variadic_disjoint_impls/"]]
 filename = "src/lib.rs"
-begin_line = 206
+begin_line = 92
+hint = """
+let _: unsafe extern "C-unwind" fn(
+    _
+) -> _ = method_variadic_disjoint_impls::PrivateBecomesVariadic::call;
+"""
+
+[["./test_crates/method_variadic_disjoint_impls/"]]
+filename = "src/lib.rs"
+begin_line = 107
+hint = """
+let _: unsafe extern "C-unwind" fn(
+    _
+) -> _ = method_variadic_disjoint_impls::BecomesVariadic::call;
+"""
+
+[["./test_crates/method_variadic_disjoint_impls/"]]
+filename = "src/lib.rs"
+begin_line = 107
+hint = """
+let _: unsafe extern "C-unwind" fn(
+    _
+) -> _ = method_variadic_disjoint_impls::ReexportedBecomesVariadic::call;
+"""
+
+[["./test_crates/method_variadic_trait_visibility/"]]
+filename = "src/lib.rs"
+begin_line = 29
 hint = """
 let _: unsafe extern "C" fn(
-) -> _ = inherent_method_now_variadic::ChangedInherentWithHiddenOverload::associated;
+    _
+) -> _ = method_variadic_trait_visibility::PublicReplacement::private_fixed;
 """

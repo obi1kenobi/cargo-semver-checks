@@ -66,6 +66,6 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A trait method has lost its receiver. Now it can only be invoked as an associated function, instead of as a method on a value.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} no longer takes {{#if baseline_receiver_by_reference }}&{{/if}}{{#if baseline_receiver_by_mut_reference }}&mut {{/if}}{{baseline_receiver_kind}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} no longer takes {{#if baseline_receiver_by_reference }}&{{/if}}{{#if baseline_receiver_by_mut_reference }}&mut {{/if}}{{baseline_receiver_kind}} in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )

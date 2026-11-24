@@ -15,21 +15,26 @@ SemverQuery(
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         owner_type: __typename @tag
+                        owner_crate_id: crate_id @tag
 
                         importable_path {
                             path @tag @output
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # A method moved to a trait can still be called through its owner.
-                        impl {
-                            # An inherent impl implements zero traits; a trait impl implements one.
-                            # Record the candidate's kind so the suppression check below can
-                            # respect inherent methods taking precedence over trait methods.
-                            implemented_trait @fold
-                                              @transform(op: "count")
-                                              @tag(name: "candidate_trait_count")
+                        # Removing a fixed-arity `Reader<u8>::read` can look like it became
+                        # variadic if a variadic `Reader<u16>::read` survives. The adapter
+                        # cannot distinguish the type arguments of those impls.
+                        # TODO: Include generic owners once we can match impl targets.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
 
+                        # There's a method that is variadic.
+                        #
+                        # We use `impl` not `inherent_impl` because a method moved to a trait
+                        # can still be called through its owner.
+                        impl {
                             method {
                                 visibility_limit
                                     @filter(op: "one_of", value: ["$public_or_default"])
@@ -42,39 +47,34 @@ SemverQuery(
                                     begin_line @output
                                 }
                             }
-                        }
 
-                        # Disjoint generic impls and traits can have methods with the same name.
-                        # Do not report a change if a method with the baseline
-                        # variadicness still exists: it might be the original method.
-                        impl @fold
-                             @transform(op: "count")
-                             @filter(op: "=", value: ["$zero"]) {
-                            # For an inherent candidate (0), only inherent methods can suppress
-                            # the report: a trait method cannot preserve an inherent call that
-                            # now resolves to a changed signature. For a trait candidate (1),
-                            # either kind of method may preserve the baseline API.
+                            # An inherent impl implements zero traits and a trait impl implements one.
+                            # Use that count below to check whether an inherent method shadows a trait method.
                             implemented_trait @fold
                                               @transform(op: "count")
-                                              @filter(op: "<=", value: ["%candidate_trait_count"])
+                                              @tag(name: "candidate_trait_count")
 
-                            method {
-                                visibility_limit
-                                    @filter(op: "one_of", value: ["$public_or_default"])
-                                name @filter(op: "=", value: ["%method_name"])
-                                public_api_eligible @filter(op: "=", value: ["$true"])
-                                c_variadic @filter(op: "!=", value: ["$true"])
+                            # Either the trait is defined in another crate (where we assume it's public API),
+                            # or it has a public API path in this crate.
+                            #
+                            # Non-public API traits cannot be used to provide a matching method.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "=", value: ["$zero"]) {
+                                trait {
+                                    crate_id @filter(op: "=", value: ["%owner_crate_id"])
+                                    importable_path @fold
+                                                    @transform(op: "count")
+                                                    @filter(op: "=", value: ["$zero"]) {
+                                        public_api @filter(op: "=", value: ["$true"])
+                                    }
+                                }
                             }
                         }
 
-                        # If an inherent method merely becomes doc-hidden, it still shadows
-                        # trait methods. Report that API loss via inherent_method_now_doc_hidden,
-                        # without attributing a variadic change to an unrelated trait method.
-                        inherent_impl @fold
-                                      @transform(op: "count")
-                                      @filter(op: "=", value: ["$zero"]) {
-                            # An inherent impl's trait count is zero, so this exclusion applies
-                            # only to trait candidates (1), never to inherent candidates (0).
+                        # In `Owner::method` lookup, a public inherent method shadows trait methods
+                        # with the same name, even when the inherent method is doc-hidden.
+                        inherent_impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             implemented_trait @fold
                                               @transform(op: "count")
                                               @filter(op: "<", value: ["%candidate_trait_count"])
@@ -82,7 +82,31 @@ SemverQuery(
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
-                                public_api_eligible @filter(op: "!=", value: ["$true"])
+                            }
+                        }
+
+                        # If the method wasn't inherent (inherent takes precedence over trait methods;
+                        # checked via `candidate_trait_count`), then ensure there's no other trait
+                        # that could have offered a matching method with a fixed-arity signature.
+                        impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "=", value: ["%candidate_trait_count"])
+
+                            # Exclude a private trait when its declaration is available.
+                            # A glob import can bring a `pub` trait into scope through `pub use Trait as _`,
+                            # which the adapter omits from importable paths. Assume a `pub` trait
+                            # can preserve the old signature even if it has no public API path by name.
+                            implemented_trait @optional {
+                                trait @optional {
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+                                }
+                            }
+
+                            method {
+                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
+                                name @filter(op: "=", value: ["%method_name"])
+                                public_api_eligible @filter(op: "=", value: ["$true"])
                                 c_variadic @filter(op: "!=", value: ["$true"])
                             }
                         }
@@ -100,6 +124,13 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The baseline owner must also be nongeneric. Its fixed-arity method
+                        # could have applied only to one instantiation of the old type.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
+                        # The method was previously inherent and non-variadic.
                         inherent_impl {
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])

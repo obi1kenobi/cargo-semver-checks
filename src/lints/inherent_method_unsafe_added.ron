@@ -18,6 +18,14 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
+                        # If a safe method on u8 disappears while its unsafe sibling on u16 remains,
+                        # matching by name would report that the removed method became unsafe.
+                        # TODO: Include generic owners once we can match impl targets.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         inherent_impl {
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output
@@ -39,31 +47,22 @@ SemverQuery(
                     ... on ImplOwner {
                         visibility_limit @filter(op: "=", value: ["$public"])
                         name @output
+                        owner_crate_id: crate_id @tag
 
                         importable_path {
                             path @filter(op: "=", value: ["%path"])
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
+                        # The current owner must also be nongeneric. A new unsafe method could apply
+                        # only to an instantiation that did not have the old safe method.
+                        generic_parameter @fold
+                                          @transform(op: "count")
+                                          @filter(op: "=", value: ["$zero"])
+
                         # We use "impl" instead of "inherent_impl" here because moving
                         # an inherently-implemented method to a trait is not necessarily
                         # a breaking change, so we don't want to report it.
-                        #
-                        # We look for "zero matching safe methods" rather than
-                        # "methods that are unsafe" (incorrect!) since multiple methods with
-                        # the same name are allowed to exist on the same type (e.g. via traits).
-                        #
-                        # The above by itself is still not enough: say if the method was removed,
-                        # that still makes the "there is no method ..." statement true.
-                        # So we add an additional clause demanding that a method by that name
-                        # with appropriate visibility actually exists.
-                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
-                            method {
-                                visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
-                                name @filter(op: "=", value: ["%method_name"])
-                                public_api_eligible @filter(op: "=", value: ["$true"])
-                            }
-                        }
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
@@ -71,11 +70,21 @@ SemverQuery(
                                 unsafe @filter(op: "!=", value: ["$true"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
                             }
+
+                            # Exclude a private trait when its declaration is available.
+                            # A glob import can bring a `pub` trait into scope through `pub use Trait as _`,
+                            # which the adapter omits from importable paths. Assume a `pub` trait
+                            # can still offer a safe method even if it has no public API path by name.
+                            implemented_trait @optional {
+                                trait @optional {
+                                    visibility_limit @filter(op: "=", value: ["$public"])
+                                }
+                            }
                         }
 
-                        # Get the non-matching methods by that name so we can report them
-                        # in the lint error message.
-                        impl @fold {
+                        # To distinguish this change from removal, require an accessible unsafe method
+                        # with the same name and report where it is declared.
+                        impl @fold @transform(op: "count") @filter(op: ">", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])
                                 name @filter(op: "=", value: ["%method_name"])
@@ -86,6 +95,21 @@ SemverQuery(
                                     filename @output
                                     begin_line @output
                                     end_line @output
+                                }
+                            }
+
+                            # Either the trait is defined in another crate (where we assume it's public API),
+                            # or it has a public API path in this crate.
+                            implemented_trait @fold
+                                              @transform(op: "count")
+                                              @filter(op: "=", value: ["$zero"]) {
+                                trait {
+                                    crate_id @filter(op: "=", value: ["%owner_crate_id"])
+                                    importable_path @fold
+                                                    @transform(op: "count")
+                                                    @filter(op: "=", value: ["$zero"]) {
+                                        public_api @filter(op: "=", value: ["$true"])
+                                    }
                                 }
                             }
                         }

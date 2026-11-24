@@ -1,7 +1,7 @@
 SemverQuery(
     id: "function_export_name_changed",
     human_readable_name: "function's export name has changed or been removed",
-    description: "A function's ABI name with #[no_mangle] or #[export_name = \"name\"] has changed or been removed",
+    description: r#"A function's ABI name with #[no_mangle] or #[export_name = "name"] has changed or been removed"#,
     required_update: Major,
     lint_level: Deny,
     reference_link: Some("https://doc.rust-lang.org/reference/abi.html#the-no_mangle-attribute"),
@@ -47,5 +47,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A function that was accessible both via the ABI and via the public API is no longer accessible via the same ABI symbol name. The behavior of the public API and ABI has diverged.",
-    per_result_error_template: Some("function {{join \"::\" path}} no longer has ABI name {{export_name}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"function {{join "::" path}} no longer has ABI name {{export_name}} in {{span_filename}}:{{span_begin_line}}"#),
 )

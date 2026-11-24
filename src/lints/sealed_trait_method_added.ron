@@ -60,5 +60,5 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A sealed public trait added a new method.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

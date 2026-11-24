@@ -45,12 +45,12 @@ hint = "let _ = &raw const pub_static_missing::PUB_STATIC_IN_GLOBAL_WILL_BE_CONS
 [["./test_crates/pub_static_missing/"]]
 filename = "src/lib.rs"
 begin_line = 10
-hint = "let _ = &raw const pub_static_missing::my_module::my_module_nested::PUB_STATIC_IN_NESTED_MODULE_WILL_RE_EXPORT_CONST;"
+hint = "let _ = &raw const pub_static_missing::my_module::PUB_STATIC_IN_MODULE_WILL_RE_EXPORT_CONST;"
 
 [["./test_crates/pub_static_missing/"]]
 filename = "src/lib.rs"
 begin_line = 10
-hint = "let _ = &raw const pub_static_missing::my_module::PUB_STATIC_IN_MODULE_WILL_RE_EXPORT_CONST;"
+hint = "let _ = &raw const pub_static_missing::my_module::my_module_nested::PUB_STATIC_IN_NESTED_MODULE_WILL_RE_EXPORT_CONST;"
 
 [["./test_crates/pub_static_missing/"]]
 filename = "src/lib.rs"

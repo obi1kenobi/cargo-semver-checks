@@ -68,5 +68,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A public trait method lost its unwind-capable ABI. Any unwinding across the trait method boundary would now be undefined behavior.",
-    per_result_error_template: Some("{{join \"::\" path}}::{{method_name}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"#),
 )

@@ -48,7 +48,7 @@ SemverQuery(
         "true": true,
     },
     error_message: "A publicly-visible function became `unsafe`, so calling it now requires an `unsafe` block.",
-    per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"function {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
     witness: (
         hint_template: r#"let witness = {{join "::" path}}(...);"#,
     ),

@@ -18,4 +18,16 @@ impl A {
     // Breaking change, but for a different lint.
     #[target_feature(enable = "avx")]
     pub fn safe() {}
+
+    // The old method was hidden. Exposing it with an AVX requirement does not
+    // impose a new precondition on callers of the supported public API.
+    #[target_feature(enable = "avx")]
+    pub unsafe fn revealed() {}
+
+    // Hidden, deprecated methods still belong to the supported public API.
+    // Report the new AVX precondition on callers of A::legacy().
+    #[doc(hidden)]
+    #[deprecated]
+    #[target_feature(enable = "avx")]
+    pub unsafe fn legacy() {}
 }

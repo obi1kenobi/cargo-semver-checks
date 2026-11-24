@@ -48,5 +48,5 @@ SemverQuery(
         "true": true,
     },
     error_message: "A pub function has newly become `const`, allowing it to be used in a `const` context. Removing `const` later is a breaking change as it would prevent such usage.",
-    per_result_error_template: Some("function {{join \"::\" path}} in file {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"function {{join "::" path}} in file {{span_filename}}:{{span_begin_line}}"#),
 )

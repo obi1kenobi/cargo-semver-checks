@@ -64,21 +64,6 @@ source: src/query.rs
       "type_name": String("U"),
     },
     {
-      "const_name": String("N"),
-      "name": String("TwoEachTwoChanged"),
-      "path": List([
-        String("trait_generics_reordered"),
-        String("TwoEachTwoChanged"),
-      ]),
-      "position": Uint64(1),
-      "required_const_count": Uint64(2),
-      "required_type_count": Uint64(2),
-      "span_begin_line": Uint64(11),
-      "span_end_line": Uint64(11),
-      "span_filename": String("src/lib.rs"),
-      "type_name": String("T"),
-    },
-    {
       "const_name": String("M"),
       "name": String("TwoEachTwoChanged"),
       "path": List([
@@ -92,6 +77,21 @@ source: src/query.rs
       "span_end_line": Uint64(11),
       "span_filename": String("src/lib.rs"),
       "type_name": String("U"),
+    },
+    {
+      "const_name": String("N"),
+      "name": String("TwoEachTwoChanged"),
+      "path": List([
+        String("trait_generics_reordered"),
+        String("TwoEachTwoChanged"),
+      ]),
+      "position": Uint64(1),
+      "required_const_count": Uint64(2),
+      "required_type_count": Uint64(2),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "type_name": String("T"),
     },
   ],
 }

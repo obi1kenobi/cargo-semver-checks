@@ -2,6 +2,60 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/inherent_trait_visibility/": [
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("seek"),
+      "name": String("Changed"),
+      "non_matching_span_begin_line": List([
+        Uint64(16),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(16),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("inherent_trait_visibility"),
+        String("Changed"),
+      ]),
+      "span_begin_line": Uint64(82),
+      "span_end_line": Uint64(82),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/method_arity_disjoint_impls/": [
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("loses_receiver"),
+      "name": String("DotCall"),
+      "non_matching_span_begin_line": List([
+        Uint64(56),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(56),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_arity_disjoint_impls"),
+        String("DotCall"),
+      ]),
+      "span_begin_line": Uint64(49),
+      "span_end_line": Uint64(49),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
   "./test_crates/method_receiver_changes/": [
     {
       "baseline_receiver_by_mut_reference": Boolean(false),
@@ -51,6 +105,86 @@ source: src/query.rs
       ]),
       "span_begin_line": Uint64(114),
       "span_end_line": Uint64(116),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/method_receiver_removal/": [
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("changed"),
+      "name": String("Lookup"),
+      "non_matching_span_begin_line": List([
+        Uint64(60),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(60),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_receiver_removal"),
+        String("Lookup"),
+      ]),
+      "span_begin_line": Uint64(48),
+      "span_end_line": Uint64(48),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("from_trait"),
+      "name": String("Lookup"),
+      "non_matching_span_begin_line": List([
+        Uint64(43),
+        Uint64(50),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(43),
+        Uint64(50),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+        String("src/lib.rs"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_receiver_removal"),
+        String("Lookup"),
+      ]),
+      "span_begin_line": Uint64(50),
+      "span_end_line": Uint64(50),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "baseline_receiver_by_mut_reference": Boolean(false),
+      "baseline_receiver_by_reference": Boolean(true),
+      "baseline_receiver_by_value": Boolean(false),
+      "baseline_receiver_kind": String("Self"),
+      "method_name": String("private_const"),
+      "name": String("Lookup"),
+      "non_matching_span_begin_line": List([
+        Uint64(46),
+      ]),
+      "non_matching_span_end_line": List([
+        Uint64(46),
+      ]),
+      "non_matching_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_receiver_removal"),
+        String("Lookup"),
+      ]),
+      "span_begin_line": Uint64(53),
+      "span_end_line": Uint64(53),
       "span_filename": String("src/lib.rs"),
     },
   ],

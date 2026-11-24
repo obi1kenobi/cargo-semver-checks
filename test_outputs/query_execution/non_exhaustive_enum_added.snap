@@ -14,6 +14,30 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/method_const_disjoint_impls/": [
+    {
+      "name": String("OwnerKindChanged"),
+      "path": List([
+        String("method_const_disjoint_impls"),
+        String("OwnerKindChanged"),
+      ]),
+      "span_begin_line": Uint64(127),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_return_unit_disjoint_impls/": [
+    {
+      "name": String("OwnerKindChanged"),
+      "path": List([
+        String("method_return_unit_disjoint_impls"),
+        String("OwnerKindChanged"),
+      ]),
+      "span_begin_line": Uint64(63),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/non_exhaustive_enum_added/": [
     {
       "name": String("NonExhaustiveEnum"),

@@ -1,11 +1,19 @@
 ---
 source: src/query.rs
-assertion_line: 1110
 ---
 {
   "./test_crates/inherent_method_generics_reordered/": [
     {
       "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(6),
+      ]),
+      "current_span_end_line": List([
+        Uint64(6),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "method_name": String("one_each_type_first"),
       "method_visibility": String("public"),
       "path": List([
@@ -18,9 +26,21 @@ assertion_line: 1110
       "span_begin_line": Uint64(6),
       "span_end_line": Uint64(6),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
     {
       "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(8),
+      ]),
+      "current_span_end_line": List([
+        Uint64(8),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "method_name": String("one_each_const_first"),
       "method_visibility": String("public"),
       "path": List([
@@ -33,9 +53,21 @@ assertion_line: 1110
       "span_begin_line": Uint64(8),
       "span_end_line": Uint64(8),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
     {
       "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(10),
+      ]),
+      "current_span_end_line": List([
+        Uint64(10),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "method_name": String("lifetime_ignored"),
       "method_visibility": String("public"),
       "path": List([
@@ -48,9 +80,21 @@ assertion_line: 1110
       "span_begin_line": Uint64(10),
       "span_end_line": Uint64(10),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
     {
       "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(12),
+      ]),
+      "current_span_end_line": List([
+        Uint64(12),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "method_name": String("two_each_but_one_changed"),
       "method_visibility": String("public"),
       "path": List([
@@ -63,24 +107,21 @@ assertion_line: 1110
       "span_begin_line": Uint64(12),
       "span_end_line": Uint64(12),
       "span_filename": String("src/lib.rs"),
-    },
-    {
-      "const_name": String("N"),
-      "method_name": String("two_each_two_changed"),
-      "method_visibility": String("public"),
-      "path": List([
-        String("inherent_method_generics_reordered"),
-        String("Foo"),
+      "type_name": List([
+        String("U"),
       ]),
-      "position": Uint64(2),
-      "required_const_count": Uint64(2),
-      "required_type_count": Uint64(2),
-      "span_begin_line": Uint64(14),
-      "span_end_line": Uint64(14),
-      "span_filename": String("src/lib.rs"),
     },
     {
       "const_name": String("M"),
+      "current_span_begin_line": List([
+        Uint64(14),
+      ]),
+      "current_span_end_line": List([
+        Uint64(14),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "method_name": String("two_each_two_changed"),
       "method_visibility": String("public"),
       "path": List([
@@ -93,56 +134,50 @@ assertion_line: 1110
       "span_begin_line": Uint64(14),
       "span_end_line": Uint64(14),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("U"),
+      ]),
+    },
+    {
+      "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(14),
+      ]),
+      "current_span_end_line": List([
+        Uint64(14),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "method_name": String("two_each_two_changed"),
+      "method_visibility": String("public"),
+      "path": List([
+        String("inherent_method_generics_reordered"),
+        String("Foo"),
+      ]),
+      "position": Uint64(2),
+      "required_const_count": Uint64(2),
+      "required_type_count": Uint64(2),
+      "span_begin_line": Uint64(14),
+      "span_end_line": Uint64(14),
+      "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
   ],
   "./test_crates/method_generic_disjoint_impls/": [
     {
       "const_name": String("N"),
-      "method_name": String("reorder"),
-      "method_visibility": String("public"),
-      "path": List([
-        String("method_generic_disjoint_impls"),
-        String("Converged"),
+      "current_span_begin_line": List([
+        Uint64(162),
       ]),
-      "position": Uint64(2),
-      "required_const_count": Uint64(1),
-      "required_type_count": Uint64(1),
-      "span_begin_line": Uint64(41),
-      "span_end_line": Uint64(41),
-      "span_filename": String("src/lib.rs"),
-    },
-    {
-      "const_name": String("N"),
-      "method_name": String("reorder"),
-      "method_visibility": String("public"),
-      "path": List([
-        String("method_generic_disjoint_impls"),
-        String("BothChanged"),
+      "current_span_end_line": List([
+        Uint64(162),
       ]),
-      "position": Uint64(2),
-      "required_const_count": Uint64(1),
-      "required_type_count": Uint64(1),
-      "span_begin_line": Uint64(55),
-      "span_end_line": Uint64(55),
-      "span_filename": String("src/lib.rs"),
-    },
-    {
-      "const_name": String("N"),
-      "method_name": String("reorder"),
-      "method_visibility": String("public"),
-      "path": List([
-        String("method_generic_disjoint_impls"),
-        String("BothChanged"),
+      "current_span_filename": List([
+        String("src/lib.rs"),
       ]),
-      "position": Uint64(2),
-      "required_const_count": Uint64(1),
-      "required_type_count": Uint64(1),
-      "span_begin_line": Uint64(58),
-      "span_end_line": Uint64(58),
-      "span_filename": String("src/lib.rs"),
-    },
-    {
-      "const_name": String("N"),
       "method_name": String("reorder"),
       "method_visibility": String("public"),
       "path": List([
@@ -155,9 +190,21 @@ assertion_line: 1110
       "span_begin_line": Uint64(159),
       "span_end_line": Uint64(159),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
     {
       "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(173),
+      ]),
+      "current_span_end_line": List([
+        Uint64(173),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "method_name": String("reorder"),
       "method_visibility": String("public"),
       "path": List([
@@ -170,9 +217,21 @@ assertion_line: 1110
       "span_begin_line": Uint64(170),
       "span_end_line": Uint64(170),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
     {
       "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(183),
+      ]),
+      "current_span_end_line": List([
+        Uint64(183),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "method_name": String("reorder"),
       "method_visibility": String("public"),
       "path": List([
@@ -185,9 +244,21 @@ assertion_line: 1110
       "span_begin_line": Uint64(180),
       "span_end_line": Uint64(180),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
     {
       "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(205),
+      ]),
+      "current_span_end_line": List([
+        Uint64(205),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "method_name": String("reorder"),
       "method_visibility": String("public"),
       "path": List([
@@ -200,9 +271,21 @@ assertion_line: 1110
       "span_begin_line": Uint64(198),
       "span_end_line": Uint64(198),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
     {
       "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(231),
+      ]),
+      "current_span_end_line": List([
+        Uint64(231),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "method_name": String("remove_impl_trait"),
       "method_visibility": String("public"),
       "path": List([
@@ -215,9 +298,21 @@ assertion_line: 1110
       "span_begin_line": Uint64(227),
       "span_end_line": Uint64(227),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
     {
       "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(232),
+      ]),
+      "current_span_end_line": List([
+        Uint64(232),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
       "method_name": String("add_impl_trait"),
       "method_visibility": String("public"),
       "path": List([
@@ -230,21 +325,69 @@ assertion_line: 1110
       "span_begin_line": Uint64(228),
       "span_end_line": Uint64(228),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
     {
       "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(376),
+        Uint64(379),
+      ]),
+      "current_span_end_line": List([
+        Uint64(376),
+        Uint64(379),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+        String("src/lib.rs"),
+      ]),
       "method_name": String("reorder"),
       "method_visibility": String("public"),
       "path": List([
         String("method_generic_disjoint_impls"),
-        String("GenericSyntheticReordered"),
+        String("TwoTraitReplacements"),
       ]),
       "position": Uint64(2),
       "required_const_count": Uint64(1),
       "required_type_count": Uint64(1),
-      "span_begin_line": Uint64(267),
-      "span_end_line": Uint64(267),
+      "span_begin_line": Uint64(378),
+      "span_end_line": Uint64(378),
       "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("U"),
+        String("T"),
+      ]),
+    },
+  ],
+  "./test_crates/method_generic_reorder_trait_visibility/": [
+    {
+      "const_name": String("N"),
+      "current_span_begin_line": List([
+        Uint64(22),
+      ]),
+      "current_span_end_line": List([
+        Uint64(22),
+      ]),
+      "current_span_filename": List([
+        String("src/lib.rs"),
+      ]),
+      "method_name": String("reordered"),
+      "method_visibility": String("public"),
+      "path": List([
+        String("method_generic_reorder_trait_visibility"),
+        String("Owner"),
+      ]),
+      "position": Uint64(2),
+      "required_const_count": Uint64(1),
+      "required_type_count": Uint64(1),
+      "span_begin_line": Uint64(45),
+      "span_end_line": Uint64(45),
+      "span_filename": String("src/lib.rs"),
+      "type_name": List([
+        String("T"),
+      ]),
     },
   ],
 }

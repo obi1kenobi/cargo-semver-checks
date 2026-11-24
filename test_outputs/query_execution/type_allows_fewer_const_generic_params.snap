@@ -2,6 +2,146 @@
 source: src/query.rs
 ---
 {
+  "./test_crates/method_abi_disjoint_impls/": [
+    {
+      "name": String("LosesParameter"),
+      "new_allowed_const_count": Uint64(0),
+      "new_allowed_consts": List([]),
+      "old_allowed_const_count": Uint64(1),
+      "old_allowed_consts": List([
+        String("N"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_abi_disjoint_impls"),
+        String("LosesParameter"),
+      ]),
+      "span_begin_line": Uint64(427),
+      "span_end_line": Uint64(427),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_arity_disjoint_impls/": [
+    {
+      "name": String("LosesParameter"),
+      "new_allowed_const_count": Uint64(0),
+      "new_allowed_consts": List([]),
+      "old_allowed_const_count": Uint64(1),
+      "old_allowed_consts": List([
+        String("N"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_arity_disjoint_impls"),
+        String("LosesParameter"),
+      ]),
+      "span_begin_line": Uint64(74),
+      "span_end_line": Uint64(74),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_attribute_disjoint_impls/": [
+    {
+      "name": String("LosesParameter"),
+      "new_allowed_const_count": Uint64(0),
+      "new_allowed_consts": List([]),
+      "old_allowed_const_count": Uint64(1),
+      "old_allowed_consts": List([
+        String("N"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_attribute_disjoint_impls"),
+        String("LosesParameter"),
+      ]),
+      "span_begin_line": Uint64(135),
+      "span_end_line": Uint64(135),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_receiver_removal/": [
+    {
+      "name": String("LosesParameter"),
+      "new_allowed_const_count": Uint64(0),
+      "new_allowed_consts": List([]),
+      "old_allowed_const_count": Uint64(1),
+      "old_allowed_consts": List([
+        String("N"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_receiver_removal"),
+        String("LosesParameter"),
+      ]),
+      "span_begin_line": Uint64(35),
+      "span_end_line": Uint64(35),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_safety_disjoint_impls/": [
+    {
+      "name": String("LosesParameter"),
+      "new_allowed_const_count": Uint64(0),
+      "new_allowed_consts": List([]),
+      "old_allowed_const_count": Uint64(1),
+      "old_allowed_consts": List([
+        String("N"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_safety_disjoint_impls"),
+        String("LosesParameter"),
+      ]),
+      "span_begin_line": Uint64(63),
+      "span_end_line": Uint64(63),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_target_feature_disjoint_impls/": [
+    {
+      "name": String("LosesParameter"),
+      "new_allowed_const_count": Uint64(0),
+      "new_allowed_consts": List([]),
+      "old_allowed_const_count": Uint64(1),
+      "old_allowed_consts": List([
+        String("N"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_target_feature_disjoint_impls"),
+        String("LosesParameter"),
+      ]),
+      "span_begin_line": Uint64(5),
+      "span_end_line": Uint64(5),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/method_variadic_disjoint_impls/": [
+    {
+      "name": String("LosesParameter"),
+      "new_allowed_const_count": Uint64(0),
+      "new_allowed_consts": List([]),
+      "old_allowed_const_count": Uint64(1),
+      "old_allowed_consts": List([
+        String("N"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("LosesParameter"),
+      ]),
+      "span_begin_line": Uint64(83),
+      "span_end_line": Uint64(83),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/type_allows_fewer_const_generic_params/": [
     {
       "name": String("Example"),

@@ -153,17 +153,6 @@ source: src/query.rs
       "parameter_names": List([]),
       "path": List([
         String("inherent_method_now_variadic"),
-        String("Generic"),
-      ]),
-      "span_begin_line": Uint64(109),
-      "span_filename": String("src/lib.rs"),
-    },
-    {
-      "abi_raw_name": String("C"),
-      "method_name": String("associated"),
-      "parameter_names": List([]),
-      "path": List([
-        String("inherent_method_now_variadic"),
         String("MovedToDefaultTrait"),
       ]),
       "span_begin_line": Uint64(125),
@@ -202,15 +191,60 @@ source: src/query.rs
       "span_begin_line": Uint64(193),
       "span_filename": String("src/lib.rs"),
     },
+  ],
+  "./test_crates/method_variadic_disjoint_impls/": [
+    {
+      "abi_raw_name": String("C-unwind"),
+      "method_name": String("call"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("PrivateBecomesVariadic"),
+      ]),
+      "span_begin_line": Uint64(92),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C-unwind"),
+      "method_name": String("call"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("BecomesVariadic"),
+      ]),
+      "span_begin_line": Uint64(107),
+      "span_filename": String("src/lib.rs"),
+    },
+    {
+      "abi_raw_name": String("C-unwind"),
+      "method_name": String("call"),
+      "parameter_names": List([
+        String("_"),
+      ]),
+      "path": List([
+        String("method_variadic_disjoint_impls"),
+        String("ReexportedBecomesVariadic"),
+      ]),
+      "span_begin_line": Uint64(107),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
+  "./test_crates/method_variadic_trait_visibility/": [
     {
       "abi_raw_name": String("C"),
-      "method_name": String("associated"),
-      "parameter_names": List([]),
-      "path": List([
-        String("inherent_method_now_variadic"),
-        String("ChangedInherentWithHiddenOverload"),
+      "method_name": String("private_fixed"),
+      "parameter_names": List([
+        String("_"),
       ]),
-      "span_begin_line": Uint64(206),
+      "path": List([
+        String("method_variadic_trait_visibility"),
+        String("PublicReplacement"),
+      ]),
+      "span_begin_line": Uint64(29),
       "span_filename": String("src/lib.rs"),
     },
   ],

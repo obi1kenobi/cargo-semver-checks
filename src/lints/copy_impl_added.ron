@@ -71,6 +71,6 @@ SemverQuery(
         "zero": 0,
     },
     error_message: "A public type now implements Copy, causing non-move closures to capture it by reference instead of moving it.",
-    per_result_error_template: Some("{{join \"::\" path}} in {{span_filename}}:{{span_begin_line}}"),
+    per_result_error_template: Some(r#"{{join "::" path}} in {{span_filename}}:{{span_begin_line}}"#),
     witness: None,
 )
