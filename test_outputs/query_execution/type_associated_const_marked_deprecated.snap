@@ -135,4 +135,18 @@ source: src/query.rs
       "span_filename": String("src/unions.rs"),
     },
   ],
+  "./test_crates/unrestricted_inherent_impls/": [
+    {
+      "associated_constant": String("DEPRECATE"),
+      "name": String("Reader"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("unrestricted_inherent_impls"),
+        String("Reader"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }

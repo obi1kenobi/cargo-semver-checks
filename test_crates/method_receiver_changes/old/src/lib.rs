@@ -243,3 +243,23 @@ impl HiddenEnumMethods {
         let _ = self;
     }
 }
+
+pub struct EqualLifetimes<'a: 'b, 'b: 'a>(pub &'a (), pub &'b ());
+
+impl<'a: 'b, 'b: 'a> EqualLifetimes<'a, 'b> {
+    pub fn read(self: &EqualLifetimes<'b, 'a>) {}
+}
+
+pub trait Identity {
+    type This;
+}
+
+impl<T> Identity for T {
+    type This = T;
+}
+
+pub struct ProjectedReceiver<T>(pub T);
+
+impl<T> ProjectedReceiver<T> {
+    pub fn read(self: &<Self as Identity>::This) {}
+}

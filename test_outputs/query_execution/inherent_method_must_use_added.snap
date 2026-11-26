@@ -359,4 +359,21 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/unrestricted_inherent_impls/": [
+    {
+      "method_name": String("add_must_use"),
+      "method_visibility": String("public"),
+      "name": String("Reader"),
+      "new_attr": String("#[must_use]"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("unrestricted_inherent_impls"),
+        String("Reader"),
+      ]),
+      "span_begin_line": Uint64(20),
+      "span_end_line": Uint64(22),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
 }

@@ -17,6 +17,21 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/unrestricted_inherent_impls/": [
+    {
+      "method_name": String("safe_more_features"),
+      "method_visibility": String("public"),
+      "name": String("Reader"),
+      "new_feature": String("avx2"),
+      "path": List([
+        String("unrestricted_inherent_impls"),
+        String("Reader"),
+      ]),
+      "span_begin_line": Uint64(52),
+      "span_end_line": Uint64(52),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
   "./test_crates/unsafe_inherent_method_requires_more_target_features/": [
     {
       "method_name": String("safe_method"),

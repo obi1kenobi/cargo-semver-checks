@@ -22,6 +22,26 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/unrestricted_inherent_impls/": [
+    {
+      "method_name": String("safe_feature_added"),
+      "method_visibility": String("public"),
+      "name": String("Reader"),
+      "new_required_feature_count": Uint64(1),
+      "new_target_feature": List([
+        String("avx"),
+      ]),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("unrestricted_inherent_impls"),
+        String("Reader"),
+      ]),
+      "span_begin_line": Uint64(46),
+      "span_end_line": Uint64(46),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/unsafe_inherent_method_target_feature_added/": [
     {
       "method_name": String("safe"),

@@ -18,15 +18,13 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
-                        # Removing a method on one while a same-named method on the other survives
-                        # can look like a change to the removed method's export name.
-                        # TODO: Include generic owners once we can match impl targets.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            # Require both impls to cover every instantiation of their respective owners.
+                            # Removing a method on `Reader<u8>` while a same-named method on `Reader<u16>` survives
+                            # can look like a change to the removed method's export name.
+                            # TODO: Match restricted impl targets across releases.
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
@@ -47,12 +45,9 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # A current method could exist only on a new parameterization of the owner.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
@@ -77,7 +72,6 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
-        "zero": 0,
     },
     error_message: "A public inherent method's export name changed or was removed. Downstream code that uses the old symbol may fail to link or call a different function.",
     per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} {{#if new_export_name}}changed its export name from {{export_name}} to {{new_export_name}}{{else}}no longer exports symbol {{export_name}}{{/if}} in {{span_filename}}:{{span_begin_line}}"#),

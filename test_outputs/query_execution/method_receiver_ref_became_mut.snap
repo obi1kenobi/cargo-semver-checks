@@ -75,4 +75,19 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/unrestricted_inherent_impls/": [
+    {
+      "method_name": String("to_mut"),
+      "name": String("Reader"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("unrestricted_inherent_impls"),
+        String("Reader"),
+      ]),
+      "receiver_kind": String("Self"),
+      "span_begin_line": Uint64(30),
+      "span_end_line": Uint64(30),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }

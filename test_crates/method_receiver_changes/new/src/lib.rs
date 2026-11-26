@@ -235,3 +235,27 @@ impl HiddenEnumMethods {
     #[doc(hidden)]
     pub fn method_to_assoc_fn() {}
 }
+
+pub struct EqualLifetimes<'a: 'b, 'b: 'a>(pub &'a (), pub &'b ());
+
+impl<'a: 'b, 'b: 'a> EqualLifetimes<'a, 'b> {
+    // False positive. The baseline receiver `&EqualLifetimes<'b, 'a>` has the
+    // same type as `&Self` because each lifetime outlives the other.
+    pub fn read(&self) {}
+}
+
+pub trait Identity {
+    type This;
+}
+
+impl<T> Identity for T {
+    type This = T;
+}
+
+pub struct ProjectedReceiver<T>(pub T);
+
+impl<T> ProjectedReceiver<T> {
+    // False positive. The blanket `Identity` impl sets `This` to the implementing
+    // type, so the baseline receiver `&<Self as Identity>::This` is `&Self`.
+    pub fn read(&self) {}
+}

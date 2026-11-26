@@ -20,15 +20,13 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
-                        # If `Reader<u8>::read` disappears while `Reader<u16>::read` stays deprecated,
-                        # matching by name would report that the removed method became deprecated.
-                        # TODO: Include generic owners once we can match impl targets.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            # Require both impls to cover every instantiation of their respective owners.
+                            # If `Reader<u8>::read` disappears while `Reader<u16>::read` stays deprecated,
+                            # matching by name would report that the removed method became deprecated.
+                            # TODO: Match restricted impl targets across releases.
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             public_api_eligible @filter(op: "=", value: ["$true"])
 
                             method {
@@ -57,13 +55,9 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The baseline owner must also be nongeneric. Removing its generic parameters
-                        # can eliminate the instantiation that provided the old method.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             public_api_eligible @filter(op: "=", value: ["$true"])
 
                             method {
@@ -80,7 +74,6 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
-        "zero": 0,
     },
     error_message: "A type method is now #[deprecated]. Downstream crates will get a compiler warning when using this method.",
     per_result_error_template: Some(r#"method {{join "::" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"#),
