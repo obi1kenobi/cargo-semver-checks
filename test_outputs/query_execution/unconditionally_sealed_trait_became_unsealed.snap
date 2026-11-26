@@ -41,6 +41,19 @@ source: src/query.rs
       "visibility_limit": String("public"),
     },
   ],
+  "./test_crates/trait_associated_type_with_default_added/": [
+    {
+      "name": String("BecomesUnsealed"),
+      "path": List([
+        String("trait_associated_type_with_default_added"),
+        String("BecomesUnsealed"),
+      ]),
+      "span_begin_line": Uint64(67),
+      "span_end_line": Uint64(71),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
   "./test_crates/trait_method_added/": [
     {
       "name": String("WillGainMethodWithoutDefaultAndLoseSeal"),
