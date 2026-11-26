@@ -13,6 +13,16 @@ source: src/query.rs
       "span_filename": String("src/lib.rs"),
       "trait_name": String("BecomesHidden"),
     },
+    {
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("NewlyHiddenAlias"),
+      ]),
+      "span_begin_line": Uint64(116),
+      "span_end_line": Uint64(124),
+      "span_filename": String("src/lib.rs"),
+      "trait_name": String("Reexported"),
+    },
   ],
   "./test_crates/trait_associated_const_now_doc_hidden/": [
     {

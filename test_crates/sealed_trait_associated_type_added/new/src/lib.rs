@@ -112,3 +112,17 @@ mod private {
         fn make_me_non_dyn_compatible() -> Self;
     }
 }
+
+pub trait Reexported: sealed::Sealed {
+    // Unhiding an existing type should not report a type addition.
+    type PreviouslyHidden;
+
+    // Only Reexported::Added should be reported. Each alias is hidden in one version.
+    type Added;
+
+    fn make_me_non_dyn_compatible() -> Self;
+}
+
+pub use Reexported as NewlyVisibleAlias;
+#[doc(hidden)]
+pub use Reexported as NewlyHiddenAlias;

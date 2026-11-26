@@ -81,3 +81,14 @@ mod private {
         fn make_me_non_dyn_compatible() -> Self;
     }
 }
+
+pub trait Reexported: sealed::Sealed {
+    #[doc(hidden)]
+    type PreviouslyHidden;
+
+    fn make_me_non_dyn_compatible() -> Self;
+}
+
+#[doc(hidden)]
+pub use Reexported as NewlyVisibleAlias;
+pub use Reexported as NewlyHiddenAlias;
