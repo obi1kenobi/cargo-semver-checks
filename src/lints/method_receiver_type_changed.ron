@@ -20,15 +20,13 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
-                        # If `Reader<u8>::read` disappears while `Reader<u16>::read` keeps a different
-                        # receiver, matching by name would report a change to the removed method.
-                        # TODO: Include generic owners once we can match impl targets.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            # Require both impls to cover every instantiation of their respective owners.
+                            # If `Reader<u8>::read` disappears while `Reader<u16>::read` keeps a different
+                            # receiver, matching by name would report a change to the removed method.
+                            # TODO: Match restricted impl targets across releases.
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
@@ -56,13 +54,9 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The current owner must also be nongeneric. A current method could
-                        # apply only to a new parameterization of the type.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
@@ -90,9 +84,13 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
-        "zero": 0,
     },
     error_message: "A method's receiver changed to a different type.",
     per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} now takes {{#if current_receiver_by_reference }}&{{/if}}{{#if current_receiver_by_mut_reference }}&mut {{/if}}{{current_receiver_kind}}, not {{#if baseline_receiver_by_reference }}&{{/if}}{{#if baseline_receiver_by_mut_reference }}&mut {{/if}}{{baseline_receiver_kind}}, in {{span_filename}}:{{span_begin_line}}"#),
+    // TODO: Report only when a generated downstream witness compiles against the baseline
+    // and fails against the current version because of the receiver change. The query can
+    // see different `receiver.kind` values for the same type. Swapping `'a` and `'b`
+    // preserves the type when `'a: 'b` and `'b: 'a`, and an associated type projection
+    // can resolve to `Self`.
     witness: None,
 )

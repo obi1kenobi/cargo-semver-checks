@@ -49,4 +49,20 @@ assertion_line: 1110
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/unrestricted_inherent_impls/": [
+    {
+      "abi_raw_name": String("C"),
+      "method_name": String("allow_unwind"),
+      "name": String("Reader"),
+      "new_abi_raw_name": String("C-unwind"),
+      "owner_type": String("Struct"),
+      "path": List([
+        String("unrestricted_inherent_impls"),
+        String("Reader"),
+      ]),
+      "span_begin_line": Uint64(39),
+      "span_end_line": Uint64(39),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }

@@ -20,15 +20,13 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
-                        # Removing a method on one while a same-named method on the other survives
-                        # can look like a change to the removed method's unwind behavior.
-                        # TODO: Include generic owners once we can match impl targets.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            # Require both impls to cover every instantiation of their respective owners.
+                            # Removing a method on `Reader<u8>` while a same-named method on `Reader<u16>` survives
+                            # can look like a change to the removed method's unwind behavior.
+                            # TODO: Match restricted impl targets across releases.
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 public_api_eligible @filter(op: "=", value: ["$true"])
@@ -61,13 +59,9 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # A baseline method could have existed only on a parameterization
-                        # that is absent from the current release.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
@@ -91,7 +85,6 @@ SemverQuery(
         // Use both constants to require known unwind settings.
         "true": true,
         "false": false,
-        "zero": 0,
     },
     error_message: "A public inherent method now uses an unwind-capable ABI. Uses of its previous function pointer type may no longer compile.",
     per_result_error_template: Some(r#"{{join "::" path}}::{{method_name}} changed ABI from {{abi_raw_name}} to {{new_abi_raw_name}} in {{span_filename}}:{{span_begin_line}}"#),

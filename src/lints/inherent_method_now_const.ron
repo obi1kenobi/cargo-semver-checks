@@ -19,17 +19,15 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
-                        # Removing a non-const method on one and adding a `const` method on the other
-                        # would look like the same method becoming `const`.
-                        # TODO: Include generic owners once we can match impl targets.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         # TODO: Decide whether `#[doc(hidden)]` on an inherent impl
                         # affects the public API status of its methods.
                         inherent_impl {
+                            # Require both impls to cover every instantiation of their respective owners.
+                            # Removing a non-const method on `Reader<u8>` and adding a `const` method
+                            # on `Reader<u16>` would look like the same method becoming `const`.
+                            # TODO: Match restricted impl targets across releases.
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 method_name: name @output @tag
@@ -54,13 +52,9 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The current owner must also be nongeneric. A current method could
-                        # apply only to a new parameterization of the type.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             method {
                                 visibility_limit @filter(op: "=", value: ["$public"])
                                 name @filter(op: "=", value: ["%method_name"])
@@ -83,7 +77,6 @@ SemverQuery(
     arguments: {
         "public": "public",
         "true": true,
-        "zero": 0,
     },
     error_message: "A public method in a public type's inherent impl has newly become `const`, allowing it to be used in a `const` context. Removing `const` later would be a breaking change.",
     per_result_error_template: Some(r#"method {{join "::" path}}::{{method_name}} in {{span_filename}}:{{span_begin_line}}"#),

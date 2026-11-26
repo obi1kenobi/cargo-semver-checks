@@ -20,15 +20,13 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # The adapter cannot distinguish `impl Reader<u8>` from `impl Reader<u16>`.
-                        # If the method on u8 disappears, the same-named method on u16 may
-                        # already have the target feature we would report as new.
-                        # TODO: Include generic owners once we can match impl targets.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            # Require both impls to cover every instantiation of their respective owners.
+                            # If the method on `Reader<u8>` disappears, the same-named method on `Reader<u16>` may
+                            # already have the target feature we would report as new.
+                            # TODO: Match restricted impl targets across releases.
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             method {
                                 method_visibility: visibility_limit @filter(op: "=", value: ["$public"]) @output @tag
                                 method_name: name @output @tag
@@ -67,13 +65,9 @@ SemverQuery(
                             public_api @filter(op: "=", value: ["$true"])
                         }
 
-                        # If `Reader<T>` becomes `Reader`, a method defined only on `Reader<u8>`
-                        # could disappear while a new method takes its name.
-                        generic_parameter @fold
-                                          @transform(op: "count")
-                                          @filter(op: "=", value: ["$zero"])
-
                         inherent_impl {
+                            applies_to_all_owner_instantiations @filter(op: "=", value: ["$true"])
+
                             method {
                                 visibility_limit @filter(op: "=", value: ["%method_visibility"])
                                 name @filter(op: "=", value: ["%method_name"])

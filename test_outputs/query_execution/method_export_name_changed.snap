@@ -91,4 +91,18 @@ assertion_line: 1110
       "span_filename": String("src/lib.rs"),
     },
   ],
+  "./test_crates/unrestricted_inherent_impls/": [
+    {
+      "export_name": String("unrestricted_inherent_impls_old_symbol"),
+      "method_name": String("symbol"),
+      "new_export_name": String("unrestricted_inherent_impls_new_symbol"),
+      "path": List([
+        String("unrestricted_inherent_impls"),
+        String("Exported"),
+      ]),
+      "span_begin_line": Uint64(74),
+      "span_end_line": Uint64(74),
+      "span_filename": String("src/lib.rs"),
+    },
+  ],
 }
