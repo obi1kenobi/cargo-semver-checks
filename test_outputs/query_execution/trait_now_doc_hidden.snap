@@ -26,6 +26,28 @@ source: src/query.rs
       "trait_name": String("PubTraitB"),
     },
   ],
+  "./test_crates/trait_associated_type_with_default_added/": [
+    {
+      "path": List([
+        String("trait_associated_type_with_default_added"),
+        String("BecomesHidden"),
+      ]),
+      "span_begin_line": Uint64(84),
+      "span_end_line": Uint64(88),
+      "span_filename": String("src/lib.rs"),
+      "trait_name": String("BecomesHidden"),
+    },
+    {
+      "path": List([
+        String("trait_associated_type_with_default_added"),
+        String("NewlyHiddenAlias"),
+      ]),
+      "span_begin_line": Uint64(107),
+      "span_end_line": Uint64(115),
+      "span_filename": String("src/lib.rs"),
+      "trait_name": String("Reexported"),
+    },
+  ],
   "./test_crates/trait_method_with_default_added/": [
     {
       "path": List([
