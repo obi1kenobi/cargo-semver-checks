@@ -822,7 +822,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e35d6e78f4cebb90e51d543db8fe41528851d6deeef6ef21ebd4bfdc1e784776"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2859,7 +2859,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2916,7 +2916,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -3329,7 +3329,7 @@ dependencies = [
  "getrandom 0.4.3",
  "once_cell",
  "rustix",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -3557,9 +3557,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "57.1.4"
+version = "57.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b697ecdf1c849b72200a67bc2588821bc45aa126f2366565d7c9e55851df3df8"
+checksum = "d449284704e86d5ecdba229748b1cdfdbf9d269e835737b9d3c1f82b8c2ea0af"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3572,9 +3572,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "60.0.4"
+version = "60.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a69fb0ff2f9d15177f84ff809e8f98545c1c27cb0018a356b5dc58f7f3082384"
+checksum = "eaaa06781b4e89ea4fa250f9f0f8be18fb909fd0812340b90e2a200be10ac061"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3587,9 +3587,9 @@ dependencies = [
 
 [[package]]
 name = "trustfall-rustdoc-adapter"
-version = "61.0.4"
+version = "61.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78a15ba1e159e9f3157256661b0731b31b13a4d9f9722677733c606f5b61217f"
+checksum = "6fec6cde618d30d1214621338f9fe02fe35d5a6431d9c71f07c0810057a5903b"
 dependencies = [
  "cargo_metadata",
  "cargo_toml",
@@ -3640,9 +3640,9 @@ dependencies = [
  "serde_json",
  "thiserror",
  "trustfall",
- "trustfall-rustdoc-adapter 57.1.4",
- "trustfall-rustdoc-adapter 60.0.4",
- "trustfall-rustdoc-adapter 61.0.4",
+ "trustfall-rustdoc-adapter 57.1.5",
+ "trustfall-rustdoc-adapter 60.0.5",
+ "trustfall-rustdoc-adapter 61.0.5",
  "trustfall_core",
 ]
 
@@ -3905,7 +3905,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
