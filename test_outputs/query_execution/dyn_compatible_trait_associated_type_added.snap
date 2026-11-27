@@ -1,0 +1,73 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/dyn_compatible_trait_associated_type_added/": [
+    {
+      "associated_type": String("AddedWithoutDefault"),
+      "path": List([
+        String("dyn_compatible_trait_associated_type_added"),
+        String("DynCompatible"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("AddedWithDefault"),
+      "path": List([
+        String("dyn_compatible_trait_associated_type_added"),
+        String("DynCompatible"),
+      ]),
+      "span_begin_line": Uint64(13),
+      "span_end_line": Uint64(13),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Added"),
+      "path": List([
+        String("dyn_compatible_trait_associated_type_added"),
+        String("SealedDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(21),
+      "span_end_line": Uint64(21),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("AddedHidden"),
+      "path": List([
+        String("dyn_compatible_trait_associated_type_added"),
+        String("SealedDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(23),
+      "span_end_line": Uint64(23),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Added"),
+      "path": List([
+        String("dyn_compatible_trait_associated_type_added"),
+        String("ExistingAssociatedType"),
+      ]),
+      "span_begin_line": Uint64(32),
+      "span_end_line": Uint64(32),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Added"),
+      "path": List([
+        String("dyn_compatible_trait_associated_type_added"),
+        String("SelfSizedAssociatedType"),
+      ]),
+      "span_begin_line": Uint64(41),
+      "span_end_line": Uint64(43),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}

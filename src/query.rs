@@ -1736,6 +1736,7 @@ add_lints!(
     derive_helper_attr_removed,
     derive_proc_macro_missing,
     derive_trait_impl_removed,
+    dyn_compatible_trait_associated_type_added,
     enum_changed_kind,
     enum_discriminants_undefined_drop,
     enum_discriminants_undefined_non_exhaustive_variant,
