@@ -1,0 +1,141 @@
+---
+source: src/query.rs
+---
+{
+  "./test_crates/sealed_trait_associated_type_added/": [
+    {
+      "associated_type": String("AddedWithoutDefault"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("SealedNotDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(11),
+      "span_end_line": Uint64(11),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("AddedWithDefault"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("SealedNotDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(12),
+      "span_end_line": Uint64(12),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Added"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("PublicApiSealedNotDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(25),
+      "span_end_line": Uint64(25),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Added"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("BecomesUnsealed"),
+      ]),
+      "span_begin_line": Uint64(33),
+      "span_end_line": Uint64(33),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Added"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("BecomesDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(41),
+      "span_end_line": Uint64(41),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Added"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("SealedDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(51),
+      "span_end_line": Uint64(51),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Added"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("BecomesNonDynCompatible"),
+      ]),
+      "span_begin_line": Uint64(77),
+      "span_end_line": Uint64(77),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Added"),
+      "path": List([
+        String("sealed_trait_associated_type_added"),
+        String("Reexported"),
+      ]),
+      "span_begin_line": Uint64(121),
+      "span_end_line": Uint64(121),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+  "./test_crates/trait_associated_type_added/": [
+    {
+      "associated_type": String("Bar"),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainTypeWithoutDefaultSealed"),
+      ]),
+      "span_begin_line": Uint64(16),
+      "span_end_line": Uint64(16),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Bar"),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainTypeWithDefaultSealed"),
+      ]),
+      "span_begin_line": Uint64(34),
+      "span_end_line": Uint64(34),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Two"),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("WillGainAnotherTypeWithoutDefaultSealed"),
+      ]),
+      "span_begin_line": Uint64(48),
+      "span_end_line": Uint64(48),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+    {
+      "associated_type": String("Bar"),
+      "path": List([
+        String("trait_associated_type_added"),
+        String("PublicAPISealed"),
+      ]),
+      "span_begin_line": Uint64(77),
+      "span_end_line": Uint64(77),
+      "span_filename": String("src/lib.rs"),
+      "visibility_limit": String("public"),
+    },
+  ],
+}
