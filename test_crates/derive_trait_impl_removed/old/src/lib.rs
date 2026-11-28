@@ -16,3 +16,10 @@ pub struct EqFoo;
 
 #[derive(PartialEq, Eq)]
 pub struct ManualEqFoo;
+
+pub trait Debug {}
+
+// Mark the local `Debug` impl as a custom derive would.
+// For `DebugFoo`, the lint should report only the loss of `core::fmt::Debug`.
+#[automatically_derived]
+impl Debug for DebugFoo {}
