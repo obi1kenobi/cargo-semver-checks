@@ -71,6 +71,10 @@ SemverQuery(
                         # We use "impl" instead of "inherent_impl" here because moving
                         # an inherently-implemented method to a trait is not necessarily
                         # a breaking change, so we don't want to report it.
+                        #
+                        # TODO: Exclude `core::ops::Drop::drop` from both `impl` folds below.
+                        # Rust forbids explicit destructor calls. Counting `Drop::drop` can hide
+                        # a parameter count change to an inherent `drop` or make its removal look like one.
                         impl @fold @transform(op: "count") @filter(op: "=", value: ["$zero"]) {
                             method {
                                 visibility_limit @filter(op: "one_of", value: ["$public_or_default"])

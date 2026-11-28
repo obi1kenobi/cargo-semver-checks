@@ -18,3 +18,5 @@ pub struct EqFoo;
 pub struct ManualEqFoo;
 
 impl Eq for ManualEqFoo {}
+
+pub trait Debug {}

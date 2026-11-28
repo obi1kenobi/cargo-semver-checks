@@ -23,7 +23,7 @@ SemverQuery(
                         impl {
                             negative @filter(op: "!=", value: ["$true"])
 
-                            # This is how we know the trait is built-in and used to be derived.
+                            # This is how we know the trait used to be derived.
                             # https://doc.rust-lang.org/reference/attributes/derive.html#the-automatically_derived-attribute
                             attrs @filter(op: "contains", value: ["$derived"])
 
@@ -35,10 +35,13 @@ SemverQuery(
                                     visibility_limit @filter(op: "=", value: ["$public"])
 
                                     canonical_path {
-                                        # Filtering fixes https://github.com/obi1kenobi/cargo-semver-checks/issues/175
-                                        # In short, StructuralEq is a rustc internal use only unstable trait, so it's safe to skip it.
-
-                                        trait_path: path @filter(op: "!=", value: ["$structural_eq"]) @output @tag
+                                        # Match canonical paths of traits supported by stable built-in derives.
+                                        # `#[automatically_derived]` also appears on impls emitted by custom derives
+                                        # and on compiler-generated impls of `StructuralPartialEq`.
+                                        trait_path: path
+                                            @filter(op: "one_of", value: ["$builtin_derive_trait_paths"])
+                                            @output
+                                            @tag
                                     }
                                 }
                             }
@@ -91,7 +94,17 @@ SemverQuery(
         "public": "public",
         "zero": 0,
         "true": true,
-        "structural_eq": ["core", "marker", "StructuralEq"],
+        "builtin_derive_trait_paths": [
+            ["core", "clone", "Clone"],
+            ["core", "marker", "Copy"],
+            ["core", "fmt", "Debug"],
+            ["core", "default", "Default"],
+            ["core", "cmp", "Eq"],
+            ["core", "hash", "Hash"],
+            ["core", "cmp", "Ord"],
+            ["core", "cmp", "PartialEq"],
+            ["core", "cmp", "PartialOrd"],
+        ],
     },
     error_message: "A public type has stopped deriving one or more traits. This can break downstream code that depends on those types implementing those traits.",
     per_result_error_template: Some("type {{name}} no longer derives {{trait_name}}, in {{span_filename}}:{{span_begin_line}}"),
